@@ -1,0 +1,73 @@
+version: "3.8"
+
+services:
+  catalog:
+    image: catalog:latest
+    volumes:
+      - logs:/var/log/apache2
+      - solr:/usr/local/vufind/solr/vufind
+    networks:
+      - proxy
+    depends_on:
+      - db
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        max_replicas_per_node: 1
+      restart_policy:
+        window: 15s
+      labels:
+        - "traefik.enable=true"
+        # HTTP Configuration
+        - "traefik.http.routers.msul-http-router.entrypoints=msul-http-ent"
+        - "traefik.http.routers.msul-http-router.rule=\
+            Host(`ddas.devel.lib.msu.edu`)"
+        - "traefik.http.middlewares.msul-http-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.msul-http-redirect.redirectscheme.permanent=true"
+        - "traefik.http.middlewares.msul-fix-prefix.replacepathregex.regex=^/(vufind/)?(.*)"
+        - "traefik.http.middlewares.msul-fix-prefix.replacepathregex.replacement=/vufind/$$2"
+        - "traefik.http.routers.msul-http-router.middlewares=msul-fix-prefix"
+        #- "traefik.http.middlewares.msul-add-prefix.addprefix.prefix=/vufind"
+        #- "traefik.http.routers.msul-http-router.middlewares=msul-add-prefix"
+        - "traefik.http.routers.msul-http-router.service=msul-http-app"
+        - "traefik.http.services.msul-http-app.loadbalancer.server.port=80"
+        # Solr
+        - "traefik.http.routers.msul-solr-router.entrypoints=msul-http-ent"
+        - "traefik.http.routers.msul-solr-router.rule=\
+            Host(`ddas.devel.lib.msu.edu`) && PathPrefix(`/solr`)"
+        - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
+        - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
+
+  db:
+    image: mysql:5.7 # TODO update this to later version of mariadb
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+        - ./db:/docker-entrypoint-initdb.d
+        - db:/var/lib/mysql
+    environment:
+      TZ: America/Detroit
+      MYSQL_ROOT_PASSWORD: 12345
+      MYSQL_DATABASE: vufind
+      MYSQL_USER: vufind
+      MYSQL_PASSWORD: vufind
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        max_replicas_per_node: 1
+      restart_policy:
+        window: 15s
+
+networks:
+  default:
+    name: catalog_default
+    driver: overlay
+  proxy:
+    name: msul_default
+    external: true
+
+volumes:
+  db:
+  solr:
+  logs:

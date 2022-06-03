@@ -1,0 +1,65 @@
+version: "3.8"
+
+services:
+  traefik:
+    image: traefik:v2.6
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik:/etc/traefik
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+      - target: 443
+        published: 443
+        protocol: tcp
+    command:  "sh -c 'install -d -m 700 /etc/traefik/acme/;
+      exec traefik
+        --providers.docker
+        --providers.docker.swarmMode=true
+        --providers.docker.exposedByDefault=false
+        --entrypoints.msul-http-ent.address=:80
+        --entrypoints.msul-https-ent.address=:443
+        --log
+        --log.level=DEBUG
+        --accesslog
+        --entrypoints.msul-health-ent.address=127.0.0.1:8081
+        --ping
+        --ping.entrypoint=msul-health-ent
+        --global.checknewversion=false
+        --global.sendanonymoususage=false
+        --certificatesresolvers.msul-letsencrypt.acme.email=LIB.DL.DDaS@msu.edu
+        --certificatesresolvers.msul-letsencrypt.acme.storage=/etc/traefik/acme/acme.json
+        --certificatesresolvers.msul-letsencrypt.acme.httpchallenge=true
+        --certificatesresolvers.msul-letsencrypt.acme.httpchallenge.entrypoint=msul-http-ent
+        --certificatesresolvers.msul-letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+      '"
+    healthcheck:
+      test: >
+        traefik healthcheck \
+          --entrypoints.msul-health-ent.address=127.0.0.1:8081 \
+          --ping \
+          --ping.entrypoint=msul-health-ent
+      interval: 15s
+      timeout: 5s
+      retries: 1
+      start_period: 20s
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        max_replicas_per_node: 1
+      restart_policy:
+        window: 15s
+
+networks:
+  default:
+    name: msul_default
+    driver: overlay
+    ipam:
+      config:
+        - subnet: 192.168.0.0/24
+
+volumes:
+  traefik:
+    driver: local
