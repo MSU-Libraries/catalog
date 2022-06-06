@@ -8,8 +8,7 @@ services:
       - solr:/usr/local/vufind/solr/vufind
     networks:
       - proxy
-    depends_on:
-      - db
+      - internal
     deploy:
       mode: replicated
       replicas: 1
@@ -40,17 +39,20 @@ services:
         - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
 
   db:
-    image: mysql:5.7 # TODO update this to later version of mariadb
-    command: --default-authentication-plugin=mysql_native_password
+    image: bitnami/mariadb:10.6
     volumes:
-        - ./db:/docker-entrypoint-initdb.d
-        - db:/var/lib/mysql
+      - ./db:/docker-entrypoint-initdb.d
+      - db:/bitnami/mariadb
     environment:
       TZ: America/Detroit
-      MYSQL_ROOT_PASSWORD: 12345
-      MYSQL_DATABASE: vufind
-      MYSQL_USER: vufind
-      MYSQL_PASSWORD: vufind
+      MARIADB_ROOT_PASSWORD: 12345
+      MARIADB_DATABASE: vufind
+      MARIADB_USER: vufind
+      MARIADB_PASSWORD: vufind
+      MARIADB_SKIP_TEST_DB: "yes"
+      MARIADB_EXTRA_FLAGS: --old_passwords=OFF --default-authentication-plugin=mysql_native_password --secure_auth=ON
+    networks:
+      - internal
     deploy:
       mode: replicated
       replicas: 1
@@ -60,9 +62,7 @@ services:
         window: 15s
 
 networks:
-  default:
-    name: catalog_default
-    driver: overlay
+  internal:
   proxy:
     name: msul_default
     external: true

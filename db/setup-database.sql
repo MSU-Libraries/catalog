@@ -1,3 +1,7 @@
+/*
+ Initial v8.0.4 Database
+*/
+
 USE vufind;
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;

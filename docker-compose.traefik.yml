@@ -18,6 +18,7 @@ services:
         --providers.docker
         --providers.docker.swarmMode=true
         --providers.docker.exposedByDefault=false
+        --providers.docker.network=msul_default
         --entrypoints.msul-http-ent.address=:80
         --entrypoints.msul-https-ent.address=:443
         --log
