@@ -38,6 +38,7 @@ ARG FOLIO_PASS
 ARG FOLIO_TENANT
 ARG FOLIO_REC_ID
 ARG FOLIO_CANCEL_ID
+ARG OAI_URL
 ARG EMAIL
 ARG MAIL_HOST
 ARG MAIL_PORT
@@ -52,6 +53,7 @@ ENV DEBUG=$DEBUG \
     FOLIO_TENANT=$FOLIO_TENANT \
     FOLIO_REC_ID=$FOLIO_REC_ID \
     FOLIO_CANCEL_ID=$FOLIO_CANCEL_ID \
+    OAI_URL=$OAI_URL \
     EMAIL=$EMAIL \
     MAIL_HOST=$MAIL_HOST \
     MAIL_PORT=$MAIL_PORT \
@@ -73,7 +75,8 @@ WORKDIR /usr/local/vufind
 
 # Replace environment variables in template ini files
 RUN envsubst < local/config/vufind/Folio.template.ini > local/config/vufind/Folio.ini && \
-    envsubst < local/config/vufind/config.template.ini > local/config/vufind/config.ini
+    envsubst < local/config/vufind/config.template.ini > local/config/vufind/config.ini && \
+    envsubst < local/harvest/oai.template.ini > local/harvest/oai.ini
 
 # Enable debug mode
 RUN if [ "$DEBUG" = 1 ] ; \
