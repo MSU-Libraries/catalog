@@ -4,10 +4,15 @@ Public custom catalog implementation using Vufind
 
 
 ## Running
-To run this application using Docker swarm:
+First run only requires bootstrapping Solr:
+```
+docker stack deploy -c docker-compose.solr-cloud-bootstrap.yml solr
+```
 
+To run this application using Docker swarm:
 ```
 docker stack deploy -c docker-compose.traefik.yml traefik
+docker stack deploy -c docker-compose.solr-cloud.yml solr
 docker stack deploy -c docker-compose.yml catalog
 ```
 

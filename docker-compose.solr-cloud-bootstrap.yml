@@ -1,0 +1,137 @@
+---
+x-solr-envs: &solr_envs
+  SOLR_ENABLE_CLOUD_MODE: "yes"
+  SOLR_NUMBER_OF_NODES: 3
+  SOLR_ZK_HOSTS: zk1:2181,zk2:2181,zk3:2181
+
+x-zookeeper-envs: &zookeeper_envs
+  ALLOW_ANONYMOUS_LOGIN: "yes"
+  ZOO_SERVERS: zk1:2888:3888::1 zk2:2888:3888::2 zk3:2888:3888::3
+  ZOO_LISTEN_ALLIPS_ENABLED: "yes"
+  ZOO_4LW_COMMANDS_WHITELIST: srvr,mntr,conf,ruok
+
+# SETUP INSTRUCTIONS
+# - Be certain to set permissions for volume subdirectorires (user 1001)
+#   - bitnami/solr/
+
+version: "3.8"
+services:
+  solr1:
+    image: bitnami/solr:8
+    volumes:
+      - bitnami1:/bitnami
+    networks:
+      - proxy
+      - internal
+    environment:
+      SOLR_CLOUD_BOOTSTRAP: "yes"
+      SOLR_HOST: solr1
+      <<: *solr_envs
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        window: 15s
+      # E.g. docker node update --label-add nodeid=1
+      #placement:
+      #  constraints:
+      #    - nodeid=1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.msul-solr-router.entrypoints=msul-http-ent"
+        - "traefik.http.routers.msul-solr-router.rule=\
+            Host(`ddas.devel.lib.msu.edu`) && PathPrefix(`/solr`)"
+        - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
+        - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
+
+  solr2:
+    image: bitnami/solr:8
+    volumes:
+      - bitnami2:/bitnami
+    networks:
+      - proxy
+      - internal
+    environment:
+      SOLR_HOST: solr2
+      <<: *solr_envs
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        window: 15s
+
+  solr3:
+    image: bitnami/solr:8
+    volumes:
+      - bitnami3:/bitnami
+    networks:
+      - proxy
+      - internal
+    environment:
+      SOLR_HOST: solr3
+      <<: *solr_envs
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        window: 15s
+
+  zk1:
+    image: 'bitnami/zookeeper:3.8'
+    volumes:
+      - bitnami1:/bitnami
+    environment:
+      ZOO_SERVER_ID: 1
+      <<: *zookeeper_envs
+    networks:
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        window: 15s
+      # E.g. docker node update --label-add nodeid=1
+      #placement:
+      #  constraints:
+      #    - nodeid=1
+
+  zk2:
+    image: 'bitnami/zookeeper:3.8'
+    volumes:
+      - bitnami2:/bitnami
+    environment:
+      ZOO_SERVER_ID: 2
+      <<: *zookeeper_envs
+    networks:
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        window: 15s
+
+  zk3:
+    image: 'bitnami/zookeeper:3.8'
+    volumes:
+      - bitnami3:/bitnami
+    environment:
+      ZOO_SERVER_ID: 3
+      <<: *zookeeper_envs
+    networks:
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        window: 15s
+
+networks:
+  internal:
+  proxy:
+    name: msul_default
+    external: true
+
+volumes:
+  bitnami1:
+  bitnami2:
+  bitnami3:

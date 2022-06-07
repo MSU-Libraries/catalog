@@ -5,7 +5,7 @@ services:
     image: catalog:latest
     volumes:
       - logs:/var/log/apache2
-      - solr:/usr/local/vufind/solr/vufind
+      - vufind_solr:/usr/local/vufind/solr/vufind
     networks:
       - proxy
       - internal
@@ -42,7 +42,7 @@ services:
     image: bitnami/mariadb:10.6
     volumes:
       - ./db:/docker-entrypoint-initdb.d
-      - db:/bitnami/mariadb
+      - bitnami:/bitnami/mariadb
     environment:
       TZ: America/Detroit
       MARIADB_ROOT_PASSWORD: 12345
@@ -69,5 +69,6 @@ networks:
 
 volumes:
   db:
-  solr:
+  vufind_solr:
+  bitnami:
   logs:
