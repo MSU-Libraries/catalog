@@ -9,14 +9,6 @@ x-solr-deploy: &solr_deploy
   replicas: 1
   restart_policy:
     window: 15s
-  labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.msul-solr-router.entrypoints=msul-http-ent"
-    # TODO need better restrictions before deployment outside devel
-    - "traefik.http.routers.msul-solr-router.rule=\
-        Host(`ddas.devel.lib.msu.edu`) && PathPrefix(`/solr`)"
-    - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
-    - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
 
 x-zookeeper-envs: &zookeeper_envs
   ALLOW_ANONYMOUS_LOGIN: "yes"
@@ -35,7 +27,6 @@ services:
     volumes:
       - bitnami1:/bitnami
     networks:
-      - proxy
       - internal
     environment:
       SOLR_HOST: solr1
@@ -46,32 +37,39 @@ services:
       #placement:
       #  constraints:
       #    - nodeid=1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.services.msul-solr1-app.loadbalancer.server.port=8983"
 
   solr2:
     image: bitnami/solr:8
     volumes:
       - bitnami2:/bitnami
     networks:
-      - proxy
       - internal
     environment:
       SOLR_HOST: solr2
       <<: *solr_envs
     deploy:
       <<: *solr_deploy
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.services.msul-solr2-app.loadbalancer.server.port=8983"
 
   solr3:
     image: bitnami/solr:8
     volumes:
       - bitnami3:/bitnami
     networks:
-      - proxy
       - internal
     environment:
       SOLR_HOST: solr3
       <<: *solr_envs
     deploy:
       <<: *solr_deploy
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.services.msul-solr3-app.loadbalancer.server.port=8983"
 
   zk1:
     image: 'bitnami/zookeeper:3.8'
@@ -87,7 +85,8 @@ services:
       replicas: 1
       restart_policy:
         window: 15s
-      # E.g. docker node update --label-add nodeid=1
+      # TODO -- docker node update --label-add nodeid=1 to add support for which service
+      # to run on which node
       #placement:
       #  constraints:
       #    - nodeid=1
@@ -124,8 +123,7 @@ services:
 
 networks:
   internal:
-  proxy:
-    name: msul_default
+    name: internal
     external: true
 
 volumes:

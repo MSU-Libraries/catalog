@@ -1,0 +1,32 @@
+http:
+  routers:
+    solr-router:
+      service: solr
+      rule: "PathPrefix(`/solr`)"
+      entrypoints: msul-solr-ent
+  services:
+    solr:
+      weighted:
+        services:
+        - name: msul-solr1-app@docker
+          weight: 1
+        - name: msul-solr2-app@docker
+          weight: 1
+        - name: msul-solr3-app@docker
+          weight: 1
+tcp:
+  routers:
+    mariadb-router:
+      service: mariadb
+      rule: "HostSNI(`*`)"
+      entrypoints: msul-db-ent
+  services:
+    mariadb:
+      weighted:
+        services:
+        - name: msul-galera1-app@docker
+          weight: 1
+        - name: msul-galera2-app@docker
+          weight: 1
+        - name: msul-galera3-app@docker
+          weight: 1

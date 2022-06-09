@@ -1,0 +1,68 @@
+---
+version: "3.8"
+
+services:
+  # Load balancer for internal services. E.g. solr, mariadb
+  lb:
+    image: traefik:v2.7
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # TODO -- Long term move this elsewhere. Build custom image and add?
+      - /opt/catalog/traefik-internal:/etc/traefik_providers:ro
+    ports:
+      - target: 3306
+        published: 3306
+        protocol: tcp
+      - target: 8983
+        published: 8983
+        protocol: tcp
+      - target: 8080
+        published: 8080
+        protocol: tcp
+    networks:
+      - internal
+    command:
+      - --providers.docker
+      - --providers.docker.swarmMode=true
+      - --providers.docker.exposedByDefault=false
+      - --providers.docker.network=internal
+      # TODO -- add restriction to solr entrypoint in solr.yml
+      - --providers.file.directory=/etc/traefik_providers
+      - --providers.file.watch=true
+      - --entrypoints.msul-db-ent.address=:3306
+      - --entrypoints.msul-solr-ent.address=:8983
+      - --entrypoints.msul-dashboard-ent.address=:8080
+      - --log
+      - --log.level=DEBUG
+      - --accesslog
+      - --entrypoints.msul-health-ent.address=127.0.0.1:8081
+      - --ping
+      - --ping.entrypoint=msul-health-ent
+      - --global.checknewversion=false
+      - --global.sendanonymoususage=false
+      - --api.dashboard=true
+    healthcheck:
+      test: >
+        traefik healthcheck \
+          --entrypoints.msul-health-ent.address=127.0.0.1:8081 \
+          --ping \
+          --ping.entrypoint=msul-health-ent
+      interval: 15s
+      timeout: 5s
+      retries: 1
+      start_period: 20s
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        max_replicas_per_node: 1
+      restart_policy:
+        window: 15s
+
+networks:
+  internal:
+    name: internal
+    driver: overlay
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24

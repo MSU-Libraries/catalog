@@ -1,3 +1,4 @@
+---
 version: "3.8"
 
 services:
@@ -7,7 +8,7 @@ services:
       - logs:/var/log/apache2
       - vufind_solr:/usr/local/vufind/solr/vufind
     networks:
-      - proxy
+      - public
       - internal
     deploy:
       mode: replicated
@@ -16,6 +17,8 @@ services:
         max_replicas_per_node: 1
       restart_policy:
         window: 15s
+      update_config:
+        order: start-first
       labels:
         - "traefik.enable=true"
         # HTTP Configuration
@@ -38,37 +41,14 @@ services:
         - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
         - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
 
-  db:
-    image: bitnami/mariadb:10.6
-    volumes:
-      - ./db:/docker-entrypoint-initdb.d
-      - bitnami:/bitnami/mariadb
-    environment:
-      TZ: America/Detroit
-      MARIADB_ROOT_PASSWORD: 12345
-      MARIADB_DATABASE: vufind
-      MARIADB_USER: vufind
-      MARIADB_PASSWORD: vufind
-      MARIADB_SKIP_TEST_DB: "yes"
-      MARIADB_EXTRA_FLAGS: --old_passwords=OFF --default-authentication-plugin=mysql_native_password --secure_auth=ON
-    networks:
-      - internal
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        max_replicas_per_node: 1
-      restart_policy:
-        window: 15s
-
 networks:
   internal:
-  proxy:
-    name: msul_default
+    name: internal
+    external: true
+  public:
+    name: public
     external: true
 
 volumes:
-  db:
   vufind_solr:
-  bitnami:
   logs:

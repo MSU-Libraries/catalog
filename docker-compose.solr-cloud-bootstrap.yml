@@ -10,6 +10,12 @@ x-zookeeper-envs: &zookeeper_envs
   ZOO_LISTEN_ALLIPS_ENABLED: "yes"
   ZOO_4LW_COMMANDS_WHITELIST: srvr,mntr,conf,ruok
 
+x-solr-deploy: &solr_deploy
+  mode: replicated
+  replicas: 1
+  restart_policy:
+    window: 15s
+
 # SETUP INSTRUCTIONS
 # - Be certain to set permissions for volume subdirectorires (user 1001)
 #   - bitnami/solr/
@@ -21,35 +27,23 @@ services:
     volumes:
       - bitnami1:/bitnami
     networks:
-      - proxy
       - internal
     environment:
       SOLR_CLOUD_BOOTSTRAP: "yes"
       SOLR_HOST: solr1
       <<: *solr_envs
     deploy:
-      mode: replicated
-      replicas: 1
-      restart_policy:
-        window: 15s
+      <<: *solr_deploy
       # E.g. docker node update --label-add nodeid=1
       #placement:
       #  constraints:
       #    - nodeid=1
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.msul-solr-router.entrypoints=msul-http-ent"
-        - "traefik.http.routers.msul-solr-router.rule=\
-            Host(`ddas.devel.lib.msu.edu`) && PathPrefix(`/solr`)"
-        - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
-        - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
 
   solr2:
     image: bitnami/solr:8
     volumes:
       - bitnami2:/bitnami
     networks:
-      - proxy
       - internal
     environment:
       SOLR_HOST: solr2
@@ -65,7 +59,6 @@ services:
     volumes:
       - bitnami3:/bitnami
     networks:
-      - proxy
       - internal
     environment:
       SOLR_HOST: solr3
@@ -127,8 +120,7 @@ services:
 
 networks:
   internal:
-  proxy:
-    name: msul_default
+    name: internal
     external: true
 
 volumes:

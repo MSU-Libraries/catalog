@@ -1,0 +1,42 @@
+---
+x-mariadb-envs: &mariadb_envs
+  TZ: America/Detroit
+  MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://galera1,galera2,galera3
+  MARIADB_ROOT_PASSWORD: 12345
+  MARIADB_GALERA_MARIABACKUP_PASSWORD: 123456
+  MARIADB_DATABASE: vufind
+  MARIADB_USER: vufind
+  MARIADB_PASSWORD: vufind
+  MARIADB_SKIP_TEST_DB: "yes"
+  MARIADB_EXTRA_FLAGS: --old_passwords=OFF --default-authentication-plugin=mysql_native_password --secure_auth=ON
+
+version: "3.8"
+services:
+  galera1:
+    image: bitnami/mariadb-galera:10.6
+    networks:
+      - internal
+    environment:
+      SHUTDOWN_DELAY: 1
+      <<: *mariadb_envs
+    volumes:
+      - bitnami1:/bitnami
+    stop_grace_period: 60s
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        window: 60s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.tcp.services.msul-galera1-app.loadbalancer.server.port=3306"
+
+networks:
+  internal:
+    name: internal
+    external: true
+
+volumes:
+  bitnami1:
+  bitnami2:
+  bitnami3:
