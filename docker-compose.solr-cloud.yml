@@ -6,9 +6,18 @@ x-solr-envs: &solr_envs
 
 x-solr-deploy: &solr_deploy
   mode: replicated
-  replicas: 1
+  replicas: 3
   restart_policy:
     window: 15s
+  placement:
+        max_replicas_per_node: 1
+  labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.msul-solr-router.entrypoints=msul-solr-ent"
+    - "traefik.http.routers.msul-solr-router.rule=\
+        Host(`ddas.devel.lib.msu.edu`) && PathPrefix(`/solr`)"
+    - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
+    - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
 
 x-zookeeper-envs: &zookeeper_envs
   ALLOW_ANONYMOUS_LOGIN: "yes"
@@ -22,14 +31,14 @@ x-zookeeper-envs: &zookeeper_envs
 
 version: "3.8"
 services:
-  solr1:
+  solr:
     image: bitnami/solr:8
     volumes:
       - bitnami1:/bitnami
     networks:
       - internal
     environment:
-      SOLR_HOST: solr1
+      SOLR_HOST: solr{{.Task.Slot}}
       <<: *solr_envs
     deploy:
       <<: *solr_deploy
@@ -37,39 +46,6 @@ services:
       #placement:
       #  constraints:
       #    - nodeid=1
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.services.msul-solr1-app.loadbalancer.server.port=8983"
-
-  solr2:
-    image: bitnami/solr:8
-    volumes:
-      - bitnami2:/bitnami
-    networks:
-      - internal
-    environment:
-      SOLR_HOST: solr2
-      <<: *solr_envs
-    deploy:
-      <<: *solr_deploy
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.services.msul-solr2-app.loadbalancer.server.port=8983"
-
-  solr3:
-    image: bitnami/solr:8
-    volumes:
-      - bitnami3:/bitnami
-    networks:
-      - internal
-    environment:
-      SOLR_HOST: solr3
-      <<: *solr_envs
-    deploy:
-      <<: *solr_deploy
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.services.msul-solr3-app.loadbalancer.server.port=8983"
 
   zk1:
     image: 'bitnami/zookeeper:3.8'

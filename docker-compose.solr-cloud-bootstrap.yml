@@ -15,6 +15,15 @@ x-solr-deploy: &solr_deploy
   replicas: 1
   restart_policy:
     window: 15s
+  placement:
+        max_replicas_per_node: 1
+  labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.msul-solr-router.entrypoints=msul-solr-ent"
+    - "traefik.http.routers.msul-solr-router.rule=\
+        Host(`ddas.devel.lib.msu.edu`) && PathPrefix(`/solr`)"
+    - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
+    - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
 
 # SETUP INSTRUCTIONS
 # - Be certain to set permissions for volume subdirectorires (user 1001)
@@ -22,7 +31,7 @@ x-solr-deploy: &solr_deploy
 
 version: "3.8"
 services:
-  solr1:
+  solr:
     image: bitnami/solr:8
     volumes:
       - bitnami1:/bitnami
@@ -30,7 +39,7 @@ services:
       - internal
     environment:
       SOLR_CLOUD_BOOTSTRAP: "yes"
-      SOLR_HOST: solr1
+      SOLR_HOST: solr{{.Task.Slot}}
       <<: *solr_envs
     deploy:
       <<: *solr_deploy
@@ -38,36 +47,6 @@ services:
       #placement:
       #  constraints:
       #    - nodeid=1
-
-  solr2:
-    image: bitnami/solr:8
-    volumes:
-      - bitnami2:/bitnami
-    networks:
-      - internal
-    environment:
-      SOLR_HOST: solr2
-      <<: *solr_envs
-    deploy:
-      mode: replicated
-      replicas: 1
-      restart_policy:
-        window: 15s
-
-  solr3:
-    image: bitnami/solr:8
-    volumes:
-      - bitnami3:/bitnami
-    networks:
-      - internal
-    environment:
-      SOLR_HOST: solr3
-      <<: *solr_envs
-    deploy:
-      mode: replicated
-      replicas: 1
-      restart_policy:
-        window: 15s
 
   zk1:
     image: 'bitnami/zookeeper:3.8'

@@ -58,6 +58,13 @@ services:
         max_replicas_per_node: 1
       restart_policy:
         window: 15s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.msul-dashboard-router.entrypoints=msul-dashboard-ent"
+        - "traefik.http.routers.msul-dashboard-router.rule=\
+            PathPrefix(`/dashboard`) && PathPrefix(`/api`)"
+        - "traefik.http.routers.msul-dashboard-router.service=api@internal"
+        - "traefik.http.services.msul-dashboard-app.loadbalancer.server.port=9999"
 
 networks:
   internal:

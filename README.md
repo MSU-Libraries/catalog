@@ -1,4 +1,4 @@
-# catalog
+# Catalog
 
 Public custom catalog implementation using Vufind
 
