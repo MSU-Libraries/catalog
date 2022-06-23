@@ -5,3 +5,4 @@ setup and configure the containerized Vufind.
 
 ## Getting Started
 * [First Time Setup](/catalog/first-time-setup)
+* [Harvesting](/catalog/harvesting)
