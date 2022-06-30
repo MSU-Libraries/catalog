@@ -6,7 +6,6 @@ services:
     image: catalog:latest
     volumes:
       - logs:/var/log/apache2
-      - vufind_solr:/usr/local/vufind/solr/vufind
     networks:
       - public
       - internal
@@ -34,12 +33,6 @@ services:
         #- "traefik.http.routers.msul-http-router.middlewares=msul-add-prefix"
         - "traefik.http.routers.msul-http-router.service=msul-http-app"
         - "traefik.http.services.msul-http-app.loadbalancer.server.port=80"
-        # Solr
-        #- "traefik.http.routers.msul-solr-router.entrypoints=msul-http-ent"
-        #- "traefik.http.routers.msul-solr-router.rule=\
-        #    Host(`ddas.devel.lib.msu.edu`) && PathPrefix(`/solr`)"
-        #- "traefik.http.routers.msul-solr-router.service=msul-solr-app"
-        #- "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
 
 networks:
   internal:
@@ -50,5 +43,4 @@ networks:
     external: true
 
 volumes:
-  vufind_solr:
   logs:

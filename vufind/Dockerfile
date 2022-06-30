@@ -16,7 +16,7 @@ ENV JAVA_HOME=/usr/lib/jvm/default-java
 
 # Perform updates
 RUN apt update && \
-    apt install wget vim lsof apache2 xml-twig-tools -y
+    apt install wget vim lsof apache2 xml-twig-tools curl -y
 
 # Setup Timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
@@ -44,7 +44,7 @@ ARG MAIL_HOST
 ARG MAIL_PORT
 ARG MAIL_USERNAME
 ARG MAIL_PASSWORD
-ARG SOLR_URL=http://localhost:8983/solr
+ARG SOLR_URL=http://solr:8983/solr
 
 ENV DEBUG=$DEBUG \
     FOLIO_URL=$FOLIO_URL \
@@ -94,6 +94,5 @@ RUN echo export JAVA_HOME="$JAVA_HOME" > /etc/profile.d/vufind.sh && \
     echo export VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR"  >> /etc/profile.d/vufind.sh
 
 EXPOSE 80
-EXPOSE 8983
 
 CMD /run.sh

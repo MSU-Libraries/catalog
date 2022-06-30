@@ -10,7 +10,7 @@ x-solr-deploy: &solr_deploy
   restart_policy:
     window: 15s
   placement:
-        max_replicas_per_node: 1
+    max_replicas_per_node: 1
   labels:
     - "traefik.enable=true"
     - "traefik.http.routers.msul-solr-router.entrypoints=msul-solr-ent"
@@ -32,7 +32,7 @@ x-zookeeper-envs: &zookeeper_envs
 version: "3.8"
 services:
   solr:
-    image: bitnami/solr:8
+    image: msulsolr:latest
     volumes:
       - bitnami1:/bitnami
     networks:

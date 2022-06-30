@@ -32,11 +32,12 @@ x-solr-deploy: &solr_deploy
 version: "3.8"
 services:
   solr:
-    image: bitnami/solr:8
+    image: msulsolr:latest
     volumes:
       - bitnami1:/bitnami
     networks:
       - internal
+    hostname: solr{{.Task.Slot}}
     environment:
       SOLR_CLOUD_BOOTSTRAP: "yes"
       SOLR_HOST: solr{{.Task.Slot}}
