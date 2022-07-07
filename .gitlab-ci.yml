@@ -24,25 +24,25 @@ Build Image:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - docker pull registry.gitlab.msu.edu/msu-libraries/devops/catalog:latest || true
-    - | 
-        docker build \
-        --build-arg DEBUG=false \
-        --build-arg FOLIO_URL=$FOLIO_URL \
-        --build-arg FOLIO_USER=$FOLIO_USER \
-        --build-arg FOLIO_PASS=$FOLIO_PASS \
-        --build-arg FOLIO_TENANT=$FOLIO_TENANT \
-        --build-arg FOLIO_REC_ID=$FOLIO_REC_ID \
-        --build-arg FOLIO_CANCEL_ID=$FOLIO_CANCEL_ID \
-        --build-arg OAI_URL=$OAI_URL \
-        --build-arg EMAIL=$EMAIL \
-        --build-arg MAIL_HOST=localhost \
-        --build-arg MAIL_PORT=25 \
-        --build-arg MAIL_USERNAME= \
-        --build-arg MAIL_PASSWORD= \
-        --build-arg SOLR_URL=http://solr:8983/solr
-        --tag $LATEST \
-        --tag $CURR \
-        --cache-from $LATEST \
+    - > 
+        docker build 
+        --build-arg DEBUG=false 
+        --build-arg FOLIO_URL=$FOLIO_URL 
+        --build-arg FOLIO_USER=$FOLIO_USER 
+        --build-arg FOLIO_PASS=$FOLIO_PASS 
+        --build-arg FOLIO_TENANT=$FOLIO_TENANT 
+        --build-arg FOLIO_REC_ID=$FOLIO_REC_ID 
+        --build-arg FOLIO_CANCEL_ID=$FOLIO_CANCEL_ID 
+        --build-arg OAI_URL=$OAI_URL 
+        --build-arg EMAIL=$EMAIL 
+        --build-arg MAIL_HOST=localhost 
+        --build-arg MAIL_PORT=25 
+        --build-arg MAIL_USERNAME= 
+        --build-arg MAIL_PASSWORD= 
+        --build-arg SOLR_URL=http://solr:8983/solr 
+        --tag $LATEST 
+        --tag $CURR 
+        --cache-from $LATEST 
         vufind/
     - docker push $LATEST
     - docker push $CURR
