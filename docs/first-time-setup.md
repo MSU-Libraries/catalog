@@ -91,3 +91,8 @@ following permissions within FOLIO:
 * Settings (OAI-PMH): Can view and edit settings
 * Users: Can view fees/fines and loans
 * Users: Can view user profile
+
+## For GitLab Users: Creating a CI/CD Token
+Create a new [access token](https://gitlab.msu.edu/help/user/project/settings/project_access_tokens)
+that has `read_registry` privileges to the repository and create a new CI/CD variable with the
+resulting key value.

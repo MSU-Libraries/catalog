@@ -1,0 +1,126 @@
+stages:
+  #TODO - Testing and Linting
+  - Build
+  - Deploy
+  - Tag
+  - Release
+
+variables:
+  DEPLOY_HOST: catalog-a.aws.lib.msu.edu
+  COMPOSE_PATH: /home/deploy/
+
+Build Image:
+  stage: Build
+  tags:
+    - msul-docker
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+      changes:
+        - vufind/*
+  variables:
+    LATEST: registry.gitlab.msu.edu/msu-libraries/devops/catalog:latest
+    CURR: registry.gitlab.msu.edu/msu-libraries/devops/catalog:$CI_COMMIT_SHORT_SHA
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker pull registry.gitlab.msu.edu/msu-libraries/devops/catalog:latest || true
+    - | 
+        docker build \
+        --build-arg DEBUG=false \
+        --build-arg FOLIO_URL=$FOLIO_URL \
+        --build-arg FOLIO_USER=$FOLIO_USER \
+        --build-arg FOLIO_PASS=$FOLIO_PASS \
+        --build-arg FOLIO_TENANT=$FOLIO_TENANT \
+        --build-arg FOLIO_REC_ID=$FOLIO_REC_ID \
+        --build-arg FOLIO_CANCEL_ID=$FOLIO_CANCEL_ID \
+        --build-arg OAI_URL=$OAI_URL \
+        --build-arg EMAIL=$EMAIL \
+        --build-arg MAIL_HOST=localhost \
+        --build-arg MAIL_PORT=25 \
+        --build-arg MAIL_USERNAME= \
+        --build-arg MAIL_PASSWORD= \
+        --build-arg SOLR_URL=http://solr:8983/solr
+        --tag $LATEST \
+        --tag $CURR \
+        --cache-from $LATEST \
+        vufind/
+    - docker push $LATEST
+    - docker push $CURR
+
+Deploy Compose Files:
+  stage: Deploy
+  extends: .setup_ssh_template
+  tags:
+    - msul-docker
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+  script:
+    # Copy all of the docker-compose files to the server
+    - scp docker-compose* $DEPLOY_HOST:$COMPOSE_PATH
+
+Deploy Traefik:
+  stage: Deploy
+  extends: .setup_ssh_template
+  tags:
+    - msul-docker
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH || '
+      changes:
+        - docker-compose.traefik*
+  script:
+    - ssh deploy@$DEPLOY_HOST docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-internal.yml traefik-internal
+    - ssh deploy@$DEPLOY_HOST docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public
+
+.setup_ssh_template
+  before_script:
+    # Setup SSH access to one of the servers
+    - eval $( ssh-agent -s )
+    - echo "$DEPLOY_PRIVATE_KEY" | base64 -d | ssh-add -
+    - install -d -m 700 ~/.ssh/
+    - ( umask 022; touch ~/.ssh/known_hosts )
+    - ssh-keyscan .lib.msu.edu >> ~/.ssh/known_hosts
+
+#Tag Release:
+#  stage: Tag
+#  tags:
+#    - msul-docker
+#  rules:
+#    - if: '$CI_COMMIT_TAG'
+#      when: never
+#    - if: '$CI_COMMIT_REF_NAME == "master"'
+#  script:
+#    - rm -rf clone/ || true
+#    - git clone https://gitlab-ci-token:$RW_CICD_TOKEN@gitlab.msu.edu/msu-libraries/devops/catalog.git clone/
+#    - cd clone/ # doing this to avoid runner cache
+#    - major_ver=$(date +'%y.%-m')
+#    - latest_patch=$(git tag -l $major_ver* --sort=-v:refname | head -n 1 | cut -d'.' -f 3)
+#    - "[ -z $latest_patch ] && cur_patch=-1 || cur_patch=$latest_patch"
+#    - patch_ver=$(($cur_patch+1))
+#    - TAG=$major_ver.$patch_ver
+#    - echo "TAG=$TAG" > ../variables.env
+#    - echo "Tagging new release with $TAG"
+#    - git tag $TAG
+#    - git push origin --tags
+#  artifacts:
+#    reports:
+#      dotenv: variables.env
+#
+#GitHub Release:
+#  stage: Release
+#  tags:
+#    - msul-docker
+#  when: manual
+#  rules:
+#    - if: '$CI_COMMIT_TAG'
+#      when: never
+#    - if: '$CI_COMMIT_REF_NAME == "master"'
+#  needs:
+#    - job: Tag Release
+#      artifacts: true
+#  script:
+#    - rm -rf catalog.git
+#    - git clone --mirror git@gitlab.msu.edu:msu-libraries/devops/catalog.git
+#    - cd catalog.git
+#    - git push --force --mirror git@github.com:MSU-Libraries/catalog.git
+#    - echo "{\"tag_name\":\"${TAG}\", \"target_commitish\":\"${CI_COMMIT_SHA}\"}" > data.json
+#    - "curl -X POST -H 'Accept: application/vnd.github.v3+json' -u $GITHUB_USER_TOKEN https://api.github.com/repos/MSU-Libraries/catalog/releases -d '@data.json'"
