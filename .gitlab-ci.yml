@@ -56,7 +56,7 @@ Deploy Compose Files:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
   script:
     # Copy all of the docker-compose files to the server
-    - scp docker-compose* $DEPLOY_HOST:$COMPOSE_PATH
+    - scp docker-compose* deploy@$DEPLOY_HOST:$COMPOSE_PATH
 
 Deploy Traefik:
   stage: Deploy
