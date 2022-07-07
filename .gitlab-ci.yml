@@ -78,7 +78,7 @@ Deploy Traefik:
     - echo "$DEPLOY_PRIVATE_KEY" | base64 -d | ssh-add -
     - install -d -m 700 ~/.ssh/
     - ( umask 022; touch ~/.ssh/known_hosts )
-    - ssh-keyscan .lib.msu.edu >> ~/.ssh/known_hosts
+    - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
 
 #Tag Release:
 #  stage: Tag
