@@ -64,14 +64,14 @@ Deploy Traefik:
   tags:
     - msul-docker
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH || '
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
       changes:
         - docker-compose.traefik*
   script:
     - ssh deploy@$DEPLOY_HOST docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-internal.yml traefik-internal
     - ssh deploy@$DEPLOY_HOST docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public
 
-.setup_ssh_template
+.setup_ssh_template:
   before_script:
     # Setup SSH access to one of the servers
     - eval $( ssh-agent -s )
