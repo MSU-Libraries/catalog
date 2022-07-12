@@ -60,7 +60,7 @@ services:
         window: 15s
       placement:
         constraints:
-          - nodeid=1
+          - "node.labels.nodeid==1"
 
   zk2:
     image: 'bitnami/zookeeper:3.8'
@@ -78,7 +78,7 @@ services:
         window: 15s
       placement:
         constraints:
-          - nodeid=2
+          - "node.labels.nodeid==2"
 
   zk3:
     image: 'bitnami/zookeeper:3.8'
@@ -96,7 +96,7 @@ services:
         window: 15s
       placement:
         constraints:
-          - nodeid=3
+          - "node.labels.nodeid==3"
 
 networks:
   internal:

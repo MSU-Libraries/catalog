@@ -29,7 +29,7 @@ services:
         window: 60s
       placement:
         constraints:
-          - nodeid==2
+          - "node.labels.nodeid==2"
       labels:
         - "traefik.enable=true"
         - "traefik.tcp.services.msul-galera2-app.loadbalancer.server.port=3306"
