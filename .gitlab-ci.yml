@@ -1,6 +1,7 @@
 # TODO 
 # - change how we do deploy so it doesn't involve downtime during deploy (currently using scale)
 #   maybe we should replace :latest in compoase file with commit sha and create those tags?
+# - how to handle bootstrap steps
 stages:
   #TODO - Testing and Linting
   - Build
@@ -113,10 +114,9 @@ Deploy Database:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml mariadb; sleep 5;
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera1.yml mariadb;
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera2.yml mariadb;
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera3.yml mariadb;
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera1.yml mariadb;
       docker service scale mariadb_galera1=0; sleep 5;
       docker service scale mariadb_galera1=1; sleep 5;
       docker service scale mariadb_galera2=0; sleep 5;
