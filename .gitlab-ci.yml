@@ -84,6 +84,7 @@ Deploy Traefik:
         - docker-compose.traefik*
   needs:
     - Build Internal Traefik Image
+    - Deploy Compose Files
   script:
     # TODO change how we do this so it doesn't involve downtime during deploy
     - >
@@ -91,8 +92,8 @@ Deploy Traefik:
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
       docker pull registry.gitlab.msu.edu/msu-libraries/devops/catalog/traefik-internal:latest;
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml traefik-internal;
-      docker service scale traefik-internal-lb=0; sleep 5;
-      docker service scale traefik-internal-lb=1;"
+      docker service scale traefik-internal_lb=0; sleep 5;
+      docker service scale traefik-internal_lb=1;"
 
 .setup_ssh_template:
   before_script:
