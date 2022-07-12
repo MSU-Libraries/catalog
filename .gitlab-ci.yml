@@ -1,3 +1,6 @@
+# TODO 
+# - change how we do deploy so it doesn't involve downtime during deploy (currently using scale)
+#   maybe we should replace :latest in compoase file with commit sha and create those tags?
 stages:
   #TODO - Testing and Linting
   - Build
@@ -63,7 +66,7 @@ Build Vufind Image:
     - docker push $CURR
 
 Deploy Compose Files:
-  stage: Deploy
+  stage: Build
   extends: .setup_ssh_template
   tags:
     - msul-docker
@@ -90,10 +93,35 @@ Deploy Traefik:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker pull registry.gitlab.msu.edu/msu-libraries/devops/catalog/traefik-internal:latest;
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml traefik-internal;
       docker service scale traefik-internal_lb=0; sleep 5;
       docker service scale traefik-internal_lb=1;"
+
+Deploy Database:
+  stage: Deploy
+  extends: .setup_ssh_template
+  tags:
+    - msul-docker
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+      changes:
+        - docker-compose.mariadb*
+  needs:
+    - Build DB Image
+    - Deploy Compose Files
+  script:
+    - >
+      ssh deploy@$DEPLOY_HOST
+      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera1.yml mariadb;
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera2.yml mariadb;
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera3.yml mariadb;
+      docker service scale maraidb_galera1=0; sleep 5;
+      docker service scale mariadb_galera1=1; sleep 5;
+      docker service scale maraidb_galera2=0; sleep 5;
+      docker service scale mariadb_galera2=1; sleep 5;
+      docker service scale maraidb_galera3=0; sleep 5;
+      docker service scale mariadb_galera3=1; sleep 5;"
 
 .setup_ssh_template:
   before_script:
