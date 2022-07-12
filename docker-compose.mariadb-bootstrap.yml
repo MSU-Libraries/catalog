@@ -33,12 +33,10 @@ services:
         window: 60s
       placement:
         constraints:
-          - nodeid=1
+          - nodeid==1
       labels:
         - "traefik.enable=true"
         - "traefik.tcp.services.msul-galera1-app.loadbalancer.server.port=3306"
-      # TODO -- docker node update --label-add nodeid=1 to add support for which service
-      # to run on which node
 
 networks:
   internal:
