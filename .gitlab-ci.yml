@@ -1,9 +1,8 @@
 # TODO 
-# - change how we do deploy so it doesn't involve downtime during deploy (currently using scale)
+# - change how we do deploy so it doesn't involve downtime during deploy (using scale vs update)
 #   maybe we should replace :latest in compoase file with commit sha and create those tags?
 # - how to handle bootstrap steps
 stages:
-  #TODO - Testing and Linting
   - Build
   - Deploy
   - Tag
@@ -86,17 +85,57 @@ Deploy Traefik:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
       changes:
         - docker-compose.traefik*
+        - traefik-internal/*
   needs:
     - Build Internal Traefik Image
     - Deploy Compose Files
   script:
-    # TODO change how we do this so it doesn't involve downtime during deploy
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml traefik-internal;
-      docker service scale traefik-internal_lb=0; sleep 5;
-      docker service scale traefik-internal_lb=1;"
+      docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/traefik-internal:latest traefik-internal;
+      docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public;"
+
+Deploy Solr:
+  stage: Deploy
+  extends: .setup_ssh_template
+  tags:
+    - msul-docker
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+      changes:
+        - docker-compose.solr*
+        - solr/*
+  needs:
+    - Build Solr Image
+    - Deploy Compose Files
+  script:
+    - >
+      ssh deploy@$DEPLOY_HOST
+      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml solr;
+      docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:latest solr_solr"
+
+Deploy Vufind:
+  stage: Deploy
+  extends: .setup_ssh_template
+  tags:
+    - msul-docker
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+      changes:
+        - docker-compose.yml
+        - vufind/*
+  needs:
+    - Build Vufind Image
+    - Deploy Compose Files
+  script:
+    - >
+      ssh deploy@$DEPLOY_HOST
+      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml catalog;
+      docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog:latest catalog_catalog"
 
 Deploy Database:
   stage: Deploy
@@ -117,12 +156,9 @@ Deploy Database:
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera1.yml mariadb;
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera2.yml mariadb;
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera3.yml mariadb;
-      docker service scale mariadb_galera1=0; sleep 5;
-      docker service scale mariadb_galera1=1; sleep 5;
-      docker service scale mariadb_galera2=0; sleep 5;
-      docker service scale mariadb_galera2=1; sleep 5;
-      docker service scale mariadb_galera3=0; sleep 5;
-      docker service scale mariadb_galera3=1; sleep 5;"
+      docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:latest mariadb_galera1; sleep 5;
+      docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:latest mariadb_galera2; sleep 5;
+      docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:latest mariadb_galera3; sleep 5;"
 
 .setup_ssh_template:
   before_script:
