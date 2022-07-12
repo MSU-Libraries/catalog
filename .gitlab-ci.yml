@@ -36,8 +36,8 @@ Build Vufind Image:
       changes:
         - vufind/*
   variables:
-    LATEST: registry.gitlab.msu.edu/msu-libraries/devops/catalog:latest
-    CURR: registry.gitlab.msu.edu/msu-libraries/devops/catalog:$CI_COMMIT_SHORT_SHA
+    LATEST: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
+    CURR: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:$CI_COMMIT_SHORT_SHA
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
@@ -135,7 +135,7 @@ Deploy Vufind:
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml catalog;
-      docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog:latest catalog_catalog"
+      docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest catalog_catalog"
 
 Deploy Database:
   stage: Deploy

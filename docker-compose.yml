@@ -3,7 +3,7 @@ version: "3.8"
 
 services:
   catalog:
-    image: catalog:latest
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest 
     volumes:
       - logs:/var/log/apache2
     networks:
