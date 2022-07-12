@@ -113,15 +113,15 @@ Deploy Database:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml mariadb;
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml mariadb; sleep 5;
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera2.yml mariadb;
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera3.yml mariadb;
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera1.yml mariadb;
-      docker service scale maraidb_galera1=0; sleep 5;
+      docker service scale mariadb_galera1=0; sleep 5;
       docker service scale mariadb_galera1=1; sleep 5;
-      docker service scale maraidb_galera2=0; sleep 5;
+      docker service scale mariadb_galera2=0; sleep 5;
       docker service scale mariadb_galera2=1; sleep 5;
-      docker service scale maraidb_galera3=0; sleep 5;
+      docker service scale mariadb_galera3=0; sleep 5;
       docker service scale mariadb_galera3=1; sleep 5;"
 
 .setup_ssh_template:
