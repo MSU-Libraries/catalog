@@ -15,7 +15,8 @@ x-solr-deploy: &solr_deploy
     - "traefik.enable=true"
     - "traefik.http.routers.msul-solr-router.entrypoints=msul-solr-ent"
     - "traefik.http.routers.msul-solr-router.rule=\
-        Host(`ddas.devel.lib.msu.edu`) && PathPrefix(`/solr`)"
+        Host(`catalog-a.aws.lib.msu.edu`, `catalog-b.aws.lib.msu.edu`, `catalog-c.aws.lib.msu.edu`)\
+        && PathPrefix(`/solr`)"
     - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
     - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
 
@@ -32,9 +33,9 @@ x-zookeeper-envs: &zookeeper_envs
 version: "3.8"
 services:
   solr:
-    image: msulsolr:latest
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:latest
     volumes:
-      - bitnami1:/bitnami
+      - bitnami:/bitnami
     networks:
       - internal
     environment:
@@ -42,15 +43,11 @@ services:
       <<: *solr_envs
     deploy:
       <<: *solr_deploy
-      # E.g. docker node update --label-add nodeid=1
-      #placement:
-      #  constraints:
-      #    - nodeid=1
 
   zk1:
     image: 'bitnami/zookeeper:3.8'
     volumes:
-      - bitnami1:/bitnami
+      - bitnami:/bitnami
     environment:
       ZOO_SERVER_ID: 1
       <<: *zookeeper_envs
@@ -61,16 +58,14 @@ services:
       replicas: 1
       restart_policy:
         window: 15s
-      # TODO -- docker node update --label-add nodeid=1 to add support for which service
-      # to run on which node
-      #placement:
-      #  constraints:
-      #    - nodeid=1
+      placement:
+        constraints:
+          - nodeid=1
 
   zk2:
     image: 'bitnami/zookeeper:3.8'
     volumes:
-      - bitnami2:/bitnami
+      - bitnami:/bitnami
     environment:
       ZOO_SERVER_ID: 2
       <<: *zookeeper_envs
@@ -81,11 +76,14 @@ services:
       replicas: 1
       restart_policy:
         window: 15s
+      placement:
+        constraints:
+          - nodeid=2
 
   zk3:
     image: 'bitnami/zookeeper:3.8'
     volumes:
-      - bitnami3:/bitnami
+      - bitnami:/bitnami
     environment:
       ZOO_SERVER_ID: 3
       <<: *zookeeper_envs
@@ -96,6 +94,9 @@ services:
       replicas: 1
       restart_policy:
         window: 15s
+      placement:
+        constraints:
+          - nodeid=3
 
 networks:
   internal:
@@ -103,6 +104,6 @@ networks:
     external: true
 
 volumes:
-  bitnami1:
-  bitnami2:
-  bitnami3:
+  bitnami:
+    external: true
+    name: catalog_bitnami

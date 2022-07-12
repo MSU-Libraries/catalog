@@ -23,7 +23,7 @@ services:
         # HTTP Configuration
         - "traefik.http.routers.msul-http-router.entrypoints=msul-http-ent"
         - "traefik.http.routers.msul-http-router.rule=\
-            Host(`ddas.devel.lib.msu.edu`)"
+            Host(`catalog-a.aws.lib.msu.edu`, `catalog-b.aws.lib.msu.edu`, `catalog-c.aws.lib.msu.edu`)"
         - "traefik.http.middlewares.msul-http-redirect.redirectscheme.scheme=https"
         - "traefik.http.middlewares.msul-http-redirect.redirectscheme.permanent=true"
         - "traefik.http.middlewares.msul-fix-prefix.replacepathregex.regex=^/(vufind/)?(.*)"

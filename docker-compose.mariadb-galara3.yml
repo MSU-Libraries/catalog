@@ -13,20 +13,23 @@ x-mariadb-envs: &mariadb_envs
 version: "3.8"
 services:
   galera3:
-    image: bitnami/mariadb-galera:10.6
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:latest
     networks:
       - internal
     environment:
       SHUTDOWN_DELAY: 9
       <<: *mariadb_envs
     volumes:
-      - bitnami3:/bitnami
+      - bitnami:/bitnami
     stop_grace_period: 60s
     deploy:
       mode: replicated
       replicas: 1
       restart_policy:
         window: 60s
+      placement:
+        constraints:
+          - nodeid=3
       labels:
         - "traefik.enable=true"
         - "traefik.tcp.services.msul-galera3-app.loadbalancer.server.port=3306"
@@ -37,6 +40,6 @@ networks:
     external: true
 
 volumes:
-  bitnami1:
-  bitnami2:
-  bitnami3:
+  bitnami:
+    external: true
+    name: catalog_bitnami

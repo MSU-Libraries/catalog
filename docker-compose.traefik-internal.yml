@@ -4,11 +4,9 @@ version: "3.8"
 services:
   # Load balancer for internal services. E.g. solr, mariadb
   lb:
-    image: traefik:v2.7
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/traefik-internal:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # TODO -- Long term move this elsewhere. Build custom image and add?
-      - /opt/catalog/traefik-internal:/etc/traefik_providers:ro
     ports:
       - target: 3306
         published: 3306
@@ -58,6 +56,8 @@ services:
         max_replicas_per_node: 1
       restart_policy:
         window: 15s
+      update_config:
+        order: start-first
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.msul-dashboard-router.entrypoints=msul-dashboard-ent"

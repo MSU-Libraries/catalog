@@ -13,7 +13,7 @@ x-mariadb-envs: &mariadb_envs
 version: "3.8"
 services:
   galera1:
-    image: bitnami/mariadb-galera:10.6
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:latest
     networks:
       - internal
     environment:
@@ -24,24 +24,21 @@ services:
       MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP: "yes"
       <<: *mariadb_envs
     volumes:
-      - bitnami1:/bitnami
-      # TODO -- This will only work if the repo is cloned on all nodes
-      - /opt/catalog/db:/docker-entrypoint-initdb.d
+      - bitnami:/bitnami
     stop_grace_period: 60s
     deploy:
       mode: replicated
       replicas: 1
       restart_policy:
         window: 60s
+      placement:
+        constraints:
+          - nodeid=1
       labels:
         - "traefik.enable=true"
         - "traefik.tcp.services.msul-galera1-app.loadbalancer.server.port=3306"
       # TODO -- docker node update --label-add nodeid=1 to add support for which service
       # to run on which node
-      #placement:
-      #  constraints:
-      #    - nodeid=1
-
 
 networks:
   internal:
@@ -49,9 +46,6 @@ networks:
     external: true
 
 volumes:
-  bitnami1:
-    # TODO -- eventually these will be external and only be 1 shared bitnami volume
-    #external: true
-    #name: catalog_bitnami1
-  bitnami2:
-  bitnami3:
+  bitnami:
+    external: true
+    name: catalog_bitnami
