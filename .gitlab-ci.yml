@@ -82,6 +82,8 @@ Deploy Traefik:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
       changes:
         - docker-compose.traefik*
+  needs:
+    - Build Internal Traefik Image
   script:
     # TODO change how we do this so it doesn't involve downtime during deploy
     - >
@@ -110,8 +112,8 @@ Deploy Traefik:
       changes:
         - $COMPONENT/*
   variables:
-    LATEST: registry.gitlab.msu.edu/msu-libraries/devops/$COMPONENT:latest
-    CURR: registry.gitlab.msu.edu/msu-libraries/devops/$COMPONENT:$CI_COMMIT_SHORT_SHA
+    LATEST: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:latest
+    CURR: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:$CI_COMMIT_SHORT_SHA
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
