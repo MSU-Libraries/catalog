@@ -29,7 +29,7 @@ services:
         # HTTP Configuration
         - "traefik.http.routers.http-router.entrypoints=msul-http-ent"
         - "traefik.http.routers.http-router.rule=\
-            Host(`catalog-a.aws.su.edu`, `catalog-b.aws.lib.msu.edu`, `catalog-c.aws.lib.msu.edu`)"
+            Host(`catalog-a.aws.msu.edu`, `catalog-b.aws.lib.msu.edu`, `catalog-c.aws.lib.msu.edu`)"
         - "traefik.http.routers.http-router.middlewares=http-redirect"
         - "traefik.http.routers.http-router.service=http-app"
         - "traefik.http.services.http-app.loadbalancer.server.port=80"
