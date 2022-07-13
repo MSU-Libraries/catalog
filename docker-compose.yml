@@ -25,11 +25,10 @@ services:
         - "traefik.http.routers.msul-http-router.rule=\
             Host(`catalog-a.aws.lib.msu.edu`, `catalog-b.aws.lib.msu.edu`, `catalog-c.aws.lib.msu.edu`)"
         - "traefik.http.middlewares.msul-http-redirect.redirectscheme.scheme=https"
-        - "traefik.http.middlewares.msul-allowed-ips.ipwhitelist.sourcerange=35.8.220.0/22"
         - "traefik.http.middlewares.msul-http-redirect.redirectscheme.permanent=true"
         - "traefik.http.middlewares.msul-fix-prefix.replacepathregex.regex=^/(vufind/)?(.*)"
         - "traefik.http.middlewares.msul-fix-prefix.replacepathregex.replacement=/vufind/$$2"
-        - "traefik.http.routers.msul-http-router.middlewares=msul-fix-prefix,msul-allowed-ips"
+        - "traefik.http.routers.msul-http-router.middlewares=msul-fix-prefix"
         - "traefik.http.routers.msul-http-router.service=msul-http-app"
         - "traefik.http.services.msul-http-app.loadbalancer.server.port=80"
 
