@@ -194,7 +194,7 @@ Deploy Database:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
       changes:
         - $COMPONENT/*
-        - docker-compose.*$COMPOENT*
+        - docker-compose.*$COMPONENT*
   variables:
     LATEST: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:latest
     CURR: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:$CI_COMMIT_SHORT_SHA
