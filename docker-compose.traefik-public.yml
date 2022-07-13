@@ -13,9 +13,11 @@ services:
       - target: 80
         published: 80
         protocol: tcp
+        mode: host # TODO can remove when we remove IP restriction
       - target: 443
         published: 443
         protocol: tcp
+        mode: host # TODO can remove when we remove IP restriction
     command:  "sh -c 'install -d -m 700 /etc/traefik/acme/;
       exec traefik
         --providers.docker
