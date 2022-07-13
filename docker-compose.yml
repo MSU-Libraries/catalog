@@ -20,17 +20,26 @@ services:
         order: start-first
       labels:
         - "traefik.enable=true"
+        # Redirect Middleware
+        - "traefik.http.middlewares.http-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.http-redirect.redirectscheme.permanent=true"
+        # Middleware to add /vufind to path
+        - "traefik.http.middlewares.fix-prefix.replacepathregex.regex=^/(vufind/)?(.*)"
+        - "traefik.http.middlewares.fix-prefix.replacepathregex.replacement=/vufind/$$2"
         # HTTP Configuration
-        - "traefik.http.routers.msul-http-router.entrypoints=msul-http-ent"
-        - "traefik.http.routers.msul-http-router.rule=\
+        - "traefik.http.routers.http-router.entrypoints=msul-http-ent"
+        - "traefik.http.routers.http-router.rule=\
+            Host(`catalog-a.aws.su.edu`, `catalog-b.aws.lib.msu.edu`, `catalog-c.aws.lib.msu.edu`)"
+        - "traefik.http.routers.http-router.middlewares=http-redirect"
+        - "traefik.http.routers.http-router.service=http-app"
+        - "traefik.http.services.http-app.loadbalancer.server.port=80"
+        # HTTPS Configuration
+        - "traefik.http.routers.https-router.entrypoints=msul-https-ent"
+        - "traefik.http.routers.https-router.rule=\
             Host(`catalog-a.aws.lib.msu.edu`, `catalog-b.aws.lib.msu.edu`, `catalog-c.aws.lib.msu.edu`)"
-        - "traefik.http.middlewares.msul-http-redirect.redirectscheme.scheme=https"
-        - "traefik.http.middlewares.msul-http-redirect.redirectscheme.permanent=true"
-        - "traefik.http.middlewares.msul-fix-prefix.replacepathregex.regex=^/(vufind/)?(.*)"
-        - "traefik.http.middlewares.msul-fix-prefix.replacepathregex.replacement=/vufind/$$2"
-        - "traefik.http.routers.msul-http-router.middlewares=msul-fix-prefix"
-        - "traefik.http.routers.msul-http-router.service=msul-http-app"
-        - "traefik.http.services.msul-http-app.loadbalancer.server.port=80"
+        - "traefik.http.routers.https-router.middlewares=fix-prefix"
+        - "traefik.http.routers.https-router.service=https-app"
+        - "traefik.http.services.https-app.loadbalancer.server.port=80"
 
 networks:
   internal:

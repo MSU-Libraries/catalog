@@ -35,6 +35,7 @@ Build Vufind Image:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
       changes:
         - vufind/*
+        - docker-compose.yml
   variables:
     LATEST: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
     CURR: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:$CI_COMMIT_SHORT_SHA

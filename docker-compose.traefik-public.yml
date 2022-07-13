@@ -25,7 +25,7 @@ services:
         --entrypoints.msul-http-ent.address=:80
         --entrypoints.msul-https-ent.address=:443
         --log
-        --log.level=WARN
+        --log.level=DEBUG
         --accesslog
         --entrypoints.msul-health-ent.address=127.0.0.1:8081
         --ping
