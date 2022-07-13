@@ -95,7 +95,7 @@ Deploy Internal Traefik:
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml traefik-internal;
-      docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/traefik-internal:latest traefik-internal;"
+      docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/traefik-internal:latest traefik-internal_lb;"
 
 Deploy Public Traefik:
   stage: Deploy
