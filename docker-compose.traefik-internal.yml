@@ -28,23 +28,23 @@ services:
       - --providers.file.directory=/etc/traefik_providers
       - --providers.file.watch=true
       - --entrypoints.msul-db-ent.address=:3306
-      - --entrypoints.msul-solr-ent.address=:8983
-      - --entrypoints.msul-dashboard-ent.address=:8080
+      #- --entrypoints.msul-solr-ent.address=:8983
+      # - --entrypoints.msul-dashboard-ent.address=:8080
       - --log
-      - --log.level=DEBUG
+      - --log.level=WARN
       - --accesslog
-      - --entrypoints.msul-health-ent.address=127.0.0.1:8081
+      - --entrypoints.health-ent.address=127.0.0.1:8081
       - --ping
-      - --ping.entrypoint=msul-health-ent
+      - --ping.entrypoint=health-ent
       - --global.checknewversion=false
       - --global.sendanonymoususage=false
       - --api.dashboard=true
     healthcheck:
       test: >
         traefik healthcheck \
-          --entrypoints.msul-health-ent.address=127.0.0.1:8081 \
+          --entrypoints.health-ent.address=127.0.0.1:8081 \
           --ping \
-          --ping.entrypoint=msul-health-ent
+          --ping.entrypoint=health-ent
       interval: 15s
       timeout: 5s
       retries: 1
@@ -58,13 +58,13 @@ services:
         window: 15s
       update_config:
         order: start-first
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.msul-dashboard-router.entrypoints=msul-dashboard-ent"
-        - "traefik.http.routers.msul-dashboard-router.rule=\
-            PathPrefix(`/dashboard`) && PathPrefix(`/api`)"
-        - "traefik.http.routers.msul-dashboard-router.service=api@internal"
-        - "traefik.http.services.msul-dashboard-app.loadbalancer.server.port=9999"
+#      labels:
+#        - "traefik.enable=true"
+#        - "traefik.http.routers.msul-dashboard-router.entrypoints=msul-dashboard-ent"
+#        - "traefik.http.routers.msul-dashboard-router.rule=\
+#            PathPrefix(`/dashboard`) && PathPrefix(`/api`)"
+#        - "traefik.http.routers.msul-dashboard-router.service=api@internal"
+#        - "traefik.http.services.msul-dashboard-app.loadbalancer.server.port=9999"
 
 networks:
   internal:

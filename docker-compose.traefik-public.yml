@@ -25,11 +25,11 @@ services:
         --entrypoints.msul-http-ent.address=:80
         --entrypoints.msul-https-ent.address=:443
         --log
-        --log.level=DEBUG
+        --log.level=WARN
         --accesslog
-        --entrypoints.msul-health-ent.address=127.0.0.1:8081
+        --entrypoints.health-ent.address=127.0.0.1:8081
         --ping
-        --ping.entrypoint=msul-health-ent
+        --ping.entrypoint=health-ent
         --global.checknewversion=false
         --global.sendanonymoususage=false
         --certificatesresolvers.msul-letsencrypt.acme.email=LIB.DL.DDaS@msu.edu
@@ -41,9 +41,9 @@ services:
     healthcheck:
       test: >
         traefik healthcheck \
-          --entrypoints.msul-health-ent.address=127.0.0.1:8081 \
+          --entrypoints.health-ent.address=127.0.0.1:8081 \
           --ping \
-          --ping.entrypoint=msul-health-ent
+          --ping.entrypoint=health-ent
       interval: 15s
       timeout: 5s
       retries: 1
