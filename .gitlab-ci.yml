@@ -29,6 +29,8 @@ Build Internal Traefik Image:
   variables:
      COMPONENT: traefik-internal
   extends: .build_template
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
 
 Build Vufind Image:
   stage: Build
