@@ -125,6 +125,7 @@ Bootstrap Stacks:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
   needs:
     - Deploy Compose Files
+    - Deploy Internal Traefik
   script:
     - >
       ssh deploy@$DEPLOY_HOST
