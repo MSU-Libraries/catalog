@@ -45,5 +45,3 @@ networks:
 
 volumes:
   bitnami:
-    external: true
-    name: catalog_bitnami

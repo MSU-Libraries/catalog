@@ -107,5 +107,5 @@ networks:
 
 volumes:
   bitnami:
-    external: true
-    name: catalog_bitnami
+    #external: true
+    #name: catalog_bitnami

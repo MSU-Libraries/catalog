@@ -124,6 +124,8 @@ Bootstrap Stacks:
   needs:
     - Deploy Compose Files
     - Deploy Internal Traefik
+    - Build Solr Image
+    - Build DB Image
   script:
     - >
       ssh deploy@$DEPLOY_HOST
