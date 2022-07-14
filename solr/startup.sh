@@ -4,6 +4,13 @@ COLLEX_CONFIGS=/solr_confs/
 
 # Give Zookeeper time to startup
 sleep 15;
+
+# Perform solr "bootstrap" steps
+if solr zk ls /solr -z $SOLR_ZK_HOSTS; then;
+    echo "Bootstrapping by creating /solr root"
+    solr zk mkroot /solr -z $SOLR_ZK_HOSTS
+fi;
+
 for COLL_DIR in ${COLLEX_CONFIGS}*
 do
     COLL=$(basename $COLL_DIR)

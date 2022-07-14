@@ -2,12 +2,17 @@ FROM bitnami/solr:8
 
 ENV VUFIND_VERSION=8.0.4
 ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=America/Detroit
 
 USER root
 
 # Perform updates
 RUN apt update && \
     apt install wget vim -y
+
+# Setup Timezone
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
 
 # Get solr configs
 # TODO copy the jar files as well
