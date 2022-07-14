@@ -117,6 +117,7 @@ Deploy Public Traefik:
 
 Bootstrap Stacks:
   stage: Bootstrap
+  extends: .setup_ssh_template
   tags:
     - msul-docker
   rules:
