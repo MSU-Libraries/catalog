@@ -6,10 +6,10 @@ COLLEX_CONFIGS=/solr_confs/
 sleep 15;
 
 # Perform solr "bootstrap" steps
-if solr zk ls /solr -z $SOLR_ZK_HOSTS; then;
+if ! solr zk ls /solr -z $SOLR_ZK_HOSTS; then
     echo "Bootstrapping by creating /solr root"
     solr zk mkroot /solr -z $SOLR_ZK_HOSTS
-fi;
+fi
 
 for COLL_DIR in ${COLLEX_CONFIGS}*
 do
@@ -18,7 +18,7 @@ do
         # Add configuration files
         solr zk upconfig -confname $COLL -confdir $COLL_DIR/conf -z $SOLR_ZK_HOSTS/solr
         echo "Created config set for $COLL with files from $COLL_DIR/conf"
-    fi;
+    fi
 done
 
 # Call base image CMD
