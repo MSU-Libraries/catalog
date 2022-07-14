@@ -25,6 +25,11 @@ Build Solr Image:
      COMPONENT: solr
   extends: .build_template
 
+Build ZK Image:
+  variables:
+     COMPONENT: zk
+  extends: .build_template
+
 Build Internal Traefik Image:
   variables:
      COMPONENT: traefik-internal
@@ -146,8 +151,10 @@ Deploy Solr:
         - solr/*
         - docker-compose.yml
         - vufind/*
+        - zk/*
   needs:
     - Build Solr Image
+    - Build ZK Image
     - Bootstrap Stacks
     - Deploy Compose Files
     - Deploy Internal Traefik
@@ -167,6 +174,7 @@ Update Solr:
       changes:
         - docker-compose.solr*
         - solr/*
+        - zk/*
   needs:
     - Deploy Solr
   script:

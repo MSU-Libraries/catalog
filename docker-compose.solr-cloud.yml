@@ -45,9 +45,9 @@ services:
       <<: *solr_deploy
 
   zk1:
-    image: 'bitnami/zookeeper:3.8'
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:latest
     volumes:
-      - bitnami:/bitnami
+      - zk-bitnami:/bitnami
     environment:
       ZOO_SERVER_ID: 1
       <<: *zookeeper_envs
@@ -63,9 +63,9 @@ services:
           - "node.labels.nodeid==1"
 
   zk2:
-    image: 'bitnami/zookeeper:3.8'
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:latest
     volumes:
-      - bitnami:/bitnami
+      - zk-bitnami:/bitnami
     environment:
       ZOO_SERVER_ID: 2
       <<: *zookeeper_envs
@@ -81,9 +81,9 @@ services:
           - "node.labels.nodeid==2"
 
   zk3:
-    image: 'bitnami/zookeeper:3.8'
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:latest
     volumes:
-      - bitnami:/bitnami
+      - zk-bitnami:/bitnami
     environment:
       ZOO_SERVER_ID: 3
       <<: *zookeeper_envs
@@ -105,5 +105,4 @@ networks:
 
 volumes:
   bitnami:
-    #external: true
-    #name: catalog_bitnami
+  zk-bitnami:
