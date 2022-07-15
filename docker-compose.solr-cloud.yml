@@ -11,8 +11,6 @@ x-solr-deploy: &solr_deploy
     window: 15s
   placement:
     max_replicas_per_node: 1
-    constraints:
-      - "node.labels.nodeid=={{.Task.Slot}}"
   labels:
     - "traefik.enable=true"
     - "traefik.http.routers.msul-solr-router.entrypoints=msul-http-ent"

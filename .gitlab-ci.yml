@@ -234,12 +234,16 @@ Deploy Vufind:
       changes:
         - docker-compose.yml
         - vufind/*
+        - docker-compose.solr*
+        - solr/*
+        - zk/*
   needs:
     - Deploy Public Traefik
     - Deploy Internal Traefik
     - Build Vufind Image
     - Deploy DB
     - Deploy Solr
+    - Update Solr
     - Deploy Compose Files
   script:
     - >
