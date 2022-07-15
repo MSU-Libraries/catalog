@@ -25,7 +25,6 @@ RUN mkdir /solr_confs && \
     cp -r /opt/bitnami/solr/contrib/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/ && \
     cp -r /opt/bitnami/solr/contrib/analysis-extras/lucene-libs/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/
 
-COPY entrypoint.sh /entrypoint.sh
 COPY startup.sh /startup.sh
 
 USER 1001

@@ -133,6 +133,7 @@ Bootstrap Stacks:
     - Deploy Compose Files
     - Deploy Internal Traefik
     - Build DB Image
+    - Build Solr Image
   script:
     - >
       ssh deploy@$DEPLOY_HOST
