@@ -69,7 +69,7 @@ RUN echo "ServerName catalog.lib.msu.edu" >> /etc/apache2/sites-available/000-de
 
 # Add file customizations
 COPY local/ /usr/local/vufind/local
-COPY run.sh /run.sh
+COPY startup.sh /startup.sh
 
 WORKDIR /usr/local/vufind
 
@@ -95,4 +95,4 @@ RUN echo export JAVA_HOME="$JAVA_HOME" > /etc/profile.d/vufind.sh && \
 
 EXPOSE 80
 
-CMD /run.sh
+CMD /startup.sh

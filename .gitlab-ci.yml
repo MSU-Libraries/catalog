@@ -129,14 +129,12 @@ Bootstrap Stacks:
   needs:
     - Deploy Compose Files
     - Deploy Internal Traefik
-    - Build Solr Image
     - Build DB Image
   script:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker stack ps maraidb || docker stack deploy -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml mariadb;
-      docker stack ps solr || docker stack deploy -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml solr"
+      docker stack ps maraidb || docker stack deploy -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml mariadb;"
   
 
 Deploy Solr:

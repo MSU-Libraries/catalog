@@ -11,14 +11,16 @@ x-solr-deploy: &solr_deploy
     window: 15s
   placement:
     max_replicas_per_node: 1
-#  labels:
-#    - "traefik.enable=true"
-#    - "traefik.http.routers.msul-solr-router.entrypoints=msul-solr-ent"
-#    - "traefik.http.routers.msul-solr-router.rule=\
-#        Host(`catalog-a.aws.lib.msu.edu`, `catalog-b.aws.lib.msu.edu`, `catalog-c.aws.lib.msu.edu`)\
-#        && PathPrefix(`/solr`)"
-#    - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
-#    - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
+    constraints:
+      - "node.labels.nodeid=={{.Task.Slot}}"
+  labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.msul-solr-router.entrypoints=msul-http-ent"
+    - "traefik.http.routers.msul-solr-router.rule=\
+        Host(`catalog-a.aws.lib.msu.edu`, `catalog-b.aws.lib.msu.edu`, `catalog-c.aws.lib.msu.edu`)\
+        && PathPrefix(`/solr`)"
+    - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
+    - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
 
 x-zookeeper-envs: &zookeeper_envs
   ALLOW_ANONYMOUS_LOGIN: "yes"
@@ -26,16 +28,13 @@ x-zookeeper-envs: &zookeeper_envs
   ZOO_LISTEN_ALLIPS_ENABLED: "yes"
   ZOO_4LW_COMMANDS_WHITELIST: srvr,mntr,conf,ruok
 
-# SETUP INSTRUCTIONS
-# - Be certain to set permissions for volume subdirectorires (user 1001)
-#   - bitnami/solr/
-
 version: "3.8"
 services:
   solr:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:latest
     volumes:
       - bitnami:/bitnami
+    hostname: solr{{.Task.Slot}}
     networks:
       - internal
     environment:
@@ -48,6 +47,7 @@ services:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:latest
     volumes:
       - zk-bitnami:/bitnami
+    #hostname: zk{{.Task.Slot}}
     environment:
       ZOO_SERVER_ID: 1
       <<: *zookeeper_envs

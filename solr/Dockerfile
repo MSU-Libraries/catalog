@@ -24,12 +24,14 @@ RUN mkdir /solr_confs && \
     rm -rf /vufind-${VUFIND_VERSION} && \
     mv /solr_confs/jars /opt/bitnami/solr/server/solr/jars && \
     mkdir -p /opt/bitnami/solr/server/vendor/contrib/analysis-extras/ && \
-    ln -s  /opt/bitnami/solr/contrib/analysis-extras/lib/ /opt/bitnami/solr/server/vendor/contrib/analysis-extras/ && \
-    ln -s  /opt/bitnami/solr/contrib/analysis-extras/lucene-libs/ /opt/bitnami/solr/server/vendor/contrib/analysis-extras/
+    ln -s /opt/bitnami/solr/contrib/analysis-extras/lib/ /opt/bitnami/solr/server/vendor/contrib/analysis-extras/ && \
+    ln -s /opt/bitnami/solr/contrib/analysis-extras/lucene-libs/ /opt/bitnami/solr/server/vendor/contrib/analysis-extras/
 
+COPY entrypoint.sh /entrypoint.sh
 COPY startup.sh /startup.sh
 
 USER 1001
 
 # Run start-up script
 CMD /startup.sh
+ENTRYPOINT /entrypoint.sh
