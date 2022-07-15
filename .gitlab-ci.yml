@@ -44,6 +44,9 @@ Build Vufind Image:
       changes:
         - vufind/*
         - docker-compose.yml
+        - docker-compose.solr*
+        - solr/*
+        - zk/*
   variables:
     LATEST: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
     CURR: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:$CI_COMMIT_SHORT_SHA
@@ -192,6 +195,9 @@ Deploy DB:
         - docker-compose.mariadb*
         - docker-compose.yml
         - vufind/*
+        - docker-compose.solr*
+        - solr/*
+        - zk/*
   needs:
     - Build DB Image
     - Bootstrap Stacks
