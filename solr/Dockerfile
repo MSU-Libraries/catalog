@@ -34,4 +34,4 @@ USER 1001
 
 # Run start-up script
 ENTRYPOINT /entrypoint.sh
-CMD /startup.sh
+CMD /startup.sh /opt/bitnami/scripts/solr/run.sh

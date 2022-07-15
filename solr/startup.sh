@@ -22,4 +22,5 @@ do
 done
 
 # Call base image CMD
-/opt/bitnami/scripts/solr/run.sh
+exec "$@"
+# /opt/bitnami/scripts/solr/run.sh
