@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# THIS FILE ONLY FOR DEBUGGING - SAFE TO REMOVE
+
 # shellcheck disable=SC1091
 
 set -o errexit
