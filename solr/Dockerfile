@@ -33,5 +33,5 @@ COPY startup.sh /startup.sh
 USER 1001
 
 # Run start-up script
-ENTRYPOINT /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh", "/startup.sh", "/opt/bitnami/scripts/solr/run.sh"]
 CMD ["/startup.sh", "/opt/bitnami/scripts/solr/run.sh"]
