@@ -21,17 +21,16 @@ RUN mkdir /solr_confs && \
     tar -xf v${VUFIND_VERSION}.tar.gz  && \
     cp -r /vufind-${VUFIND_VERSION}/solr/vufind/* /solr_confs && \
     rm v${VUFIND_VERSION}.tar.gz && \
-    rm -rf /vufind-${VUFIND_VERSION}
+    rm -rf /vufind-${VUFIND_VERSION} && \
+    cp -r /opt/bitnami/solr/contrib/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/ && \
+    cp -r /opt/bitnami/solr/contrib/analysis-extras/lucene-libs/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/
 
 COPY entrypoint.sh /entrypoint.sh
 COPY startup.sh /startup.sh
 
 USER 1001
 
-RUN cp -r /solr_confs/jars /opt/bitnami/solr/server/solr/jars && \
-    mkdir -p /opt/bitnami/solr/server/vendor/contrib/analysis-extras/ && \
-    ln -s /opt/bitnami/solr/contrib/analysis-extras/lib/ /opt/bitnami/solr/server/vendor/contrib/analysis-extras/ && \
-    ln -s /opt/bitnami/solr/contrib/analysis-extras/lucene-libs/ /opt/bitnami/solr/server/vendor/contrib/analysis-extras/
+RUN cp -r /solr_confs/jars /opt/bitnami/solr/server/solr/jars
 
 # Run start-up script
 CMD ["/startup.sh", "/opt/bitnami/scripts/solr/run.sh"]

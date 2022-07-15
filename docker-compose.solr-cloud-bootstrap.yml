@@ -50,6 +50,7 @@ services:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:latest
     volumes:
       - zk-bitnami:/bitnami
+    #hostname: zk{{.Task.Slot}}
     environment:
       ZOO_SERVER_ID: 1
       <<: *zookeeper_envs
