@@ -33,5 +33,5 @@ COPY startup.sh /startup.sh
 USER 1001
 
 # Run start-up script
-CMD /startup.sh
 ENTRYPOINT /entrypoint.sh
+CMD /startup.sh
