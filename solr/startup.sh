@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "CALLED /startup.sh"
+echo "ARGS: $*"
+
 COLLEX_CONFIGS=/solr_confs/
 
 # Give Zookeeper time to startup

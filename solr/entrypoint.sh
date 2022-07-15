@@ -8,6 +8,9 @@ set -o nounset
 set -o pipefail
 set -o xtrace # Uncomment this line for debugging purposes
 
+echo "CALLED /entrypoint.sh"
+echo "ARGS: $*"
+
 # Load libraries
 . /opt/bitnami/scripts/libbitnami.sh
 . /opt/bitnami/scripts/liblog.sh
