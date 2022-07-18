@@ -140,6 +140,8 @@ Scan Internal Traefik Image:
 .scan_template:
   stage: test
   extends: container_scanning
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
   variables:
     DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:latest
     GIT_STRATEGY: fetch
