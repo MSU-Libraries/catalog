@@ -1,7 +1,3 @@
-# TODO 
-# - change how we do deploy so it doesn't involve downtime during deploy (using scale vs update)
-#   maybe we should replace :latest in compose file with commit sha and create those tags?
-#       (or save that for multiple env ticket?)
 stages:
   - Build
   - test
@@ -75,7 +71,7 @@ Bootstrap Stacks:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker stack ps mariadb || docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml mariadb;
+      docker stack ps mariadb || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml mariadb && sleep 30);
       docker stack ps solr || docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml solr"
 
 Deploy Solr:
