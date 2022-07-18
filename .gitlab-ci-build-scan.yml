@@ -67,7 +67,6 @@ Build Vufind Image:
 
 container_scanning:
   stage: test
-  extends: container_scanning
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
       changes:
