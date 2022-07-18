@@ -11,13 +11,13 @@ services:
       - internal
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 3
       placement:
         max_replicas_per_node: 1
       restart_policy:
         window: 15s
       update_config:
-        order: start-first
+        parallelism: 1
       labels:
         - "traefik.enable=true"
         # Redirect Middleware
