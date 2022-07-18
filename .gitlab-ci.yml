@@ -201,7 +201,7 @@ GitHub Release:
     - job: Tag Release
       artifacts: true
   before_script:
-    - apk add git
+    - apk add git curl
   script:
     - rm -rf catalog.git
     - git clone --mirror https://RW_CICD_TOKEN:glpat-wZpCt5UQ4NFnHBvzyn7r@gitlab.msu.edu/msu-libraries/devops/catalog.git
