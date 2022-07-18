@@ -65,8 +65,8 @@ Build Vufind Image:
 ############# Scan ###############
 # https://docs.gitlab.com/ee/user/application_security/container_scanning/
 
-Scan Vufind Image:
-  stage: Scan
+container_scanning:
+  stage: test
   extends: container_scanning
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
@@ -84,7 +84,6 @@ Scan Vufind Image:
     DOCKERFILE_PATH: vufind/Dockerfile
 
 Scan Solr Image:
-  stage: Scan
   extends: .scan_template
   needs:
     - Build Solr Image
@@ -92,7 +91,6 @@ Scan Solr Image:
     COMPONENT: solr
 
 Scan DB Image:
-  stage: Scan
   extends: .scan_template
   needs:
     - Build DB Image
@@ -100,7 +98,6 @@ Scan DB Image:
     COMPONENT: db
 
 Scan ZK Image:
-  stage: Scan
   extends: .scan_template
   needs:
     - Build ZK Image
@@ -108,7 +105,6 @@ Scan ZK Image:
     COMPONENT: zk
 
 Scan Internal Traefik Image:
-  stage: Scan
   extends: .scan_template
   needs:
     - Build Internal Traefik Image
@@ -143,7 +139,7 @@ Scan Internal Traefik Image:
     - docker push $CURR
 
 .scan_template:
-  stage: Scan
+  stage: test
   extends: container_scanning
   variables:
     DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:latest

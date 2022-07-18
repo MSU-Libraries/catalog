@@ -4,7 +4,7 @@
 #       (or save that for multiple env ticket?)
 stages:
   - Build
-  - Scan
+  - test
   - Traefik
   - Bootstrap
   - Deploy
