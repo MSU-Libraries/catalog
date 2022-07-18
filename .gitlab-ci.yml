@@ -262,8 +262,11 @@ Deploy Vufind:
 
 # https://docs.gitlab.com/ee/user/application_security/container_scanning/
 container_scanning:
+  needs:
+    - Build Vufind Image
   variables:
     CS_DEFAULT_BRANCH_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
+    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
 
 ############# Templates ###############
 
