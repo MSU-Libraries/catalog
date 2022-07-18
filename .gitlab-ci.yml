@@ -262,6 +262,14 @@ Deploy Vufind:
 
 # https://docs.gitlab.com/ee/user/application_security/container_scanning/
 container_scanning:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+      changes:
+        - vufind/*
+        - docker-compose.yml
+        - docker-compose.solr*
+        - solr/*
+        - zk/*
   needs:
     - Build Vufind Image
   variables:
