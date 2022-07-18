@@ -169,7 +169,7 @@ Tag Release:
   tags:
     - msul-docker
   rules:
-    - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+    - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
       when: manual
   before_script:
     - apk add git
@@ -195,7 +195,7 @@ GitHub Release:
   tags:
     - msul-docker
   rules:
-    - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+    - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
       when: manual
   needs:
     - job: Tag Release
