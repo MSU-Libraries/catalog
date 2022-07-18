@@ -66,7 +66,6 @@ Build Vufind Image:
 # https://docs.gitlab.com/ee/user/application_security/container_scanning/
 
 container_scanning:
-  stage: test
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
       changes:
@@ -138,7 +137,6 @@ Scan Internal Traefik Image:
     - docker push $CURR
 
 .scan_template:
-  stage: test
   extends: container_scanning
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
@@ -149,3 +147,4 @@ Scan Internal Traefik Image:
 
 include:
   - template: Security/Container-Scanning.gitlab-ci.yml
+  - template: Security/License-Scanning.gitlab-ci.yml
