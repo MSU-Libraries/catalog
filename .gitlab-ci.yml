@@ -261,7 +261,8 @@ Deploy Vufind:
       docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest catalog_catalog"
 
 # https://docs.gitlab.com/ee/user/application_security/container_scanning/
-container_scanning:
+Scan Vufind Image:
+  extends: container_scanning
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
       changes:
@@ -273,10 +274,26 @@ container_scanning:
   needs:
     - Build Vufind Image
   variables:
-    CS_DEFAULT_BRANCH_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
     DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
     GIT_STRATEGY: fetch
     DOCKERFILE_PATH: vufind/Dockerfile
+
+Scan Solr Image:
+  extends: container_scanning
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+      changes:
+        - vufind/*
+        - docker-compose.yml
+        - docker-compose.solr*
+        - solr/*
+        - zk/*
+  needs:
+    - Build Solr Image
+  variables:
+    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:latest
+    GIT_STRATEGY: fetch
+    DOCKERFILE_PATH: solr/Dockerfile
 
 ############# Templates ###############
 
@@ -362,3 +379,4 @@ container_scanning:
 
 include:
   - template: Security/Container-Scanning.gitlab-ci.yml
+  - template: Security/License-Scanning.gitlab-ci.yml
