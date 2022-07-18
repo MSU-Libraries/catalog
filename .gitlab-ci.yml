@@ -275,6 +275,8 @@ container_scanning:
   variables:
     CS_DEFAULT_BRANCH_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
     DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
+    GIT_STRATEGY: fetch
+    DOCKERFILE_PATH: vufind/Dockerfile
 
 ############# Templates ###############
 
