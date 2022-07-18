@@ -1,7 +1,7 @@
 # TODO 
 # - change how we do deploy so it doesn't involve downtime during deploy (using scale vs update)
-#   maybe we should replace :latest in compoase file with commit sha and create those tags?
-# - how to handle bootstrap steps
+#   maybe we should replace :latest in compose file with commit sha and create those tags?
+#       (or save that for multiple env ticket?)
 stages:
   - Build
   - test
@@ -260,6 +260,11 @@ Deploy Vufind:
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml catalog;
       docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest catalog_catalog"
 
+# https://docs.gitlab.com/ee/user/application_security/container_scanning/
+container_scanning:
+  variables:
+    CS_DEFAULT_BRANCH_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
+
 ############# Templates ###############
 
 .setup_ssh_template:
@@ -343,4 +348,4 @@ Deploy Vufind:
 #
 
 include:
-  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Container-Scanning.gitlab-ci.yml

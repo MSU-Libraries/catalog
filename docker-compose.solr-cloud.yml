@@ -4,6 +4,12 @@ x-solr-envs: &solr_envs
   SOLR_NUMBER_OF_NODES: 3
   SOLR_ZK_HOSTS: zk1:2181,zk2:2181,zk3:2181
 
+x-zookeeper-envs: &zookeeper_envs
+  ALLOW_ANONYMOUS_LOGIN: "yes"
+  ZOO_SERVERS: zk1:2888:3888::1 zk2:2888:3888::2 zk3:2888:3888::3
+  ZOO_LISTEN_ALLIPS_ENABLED: "yes"
+  ZOO_4LW_COMMANDS_WHITELIST: srvr,mntr,conf,ruok,stat
+
 x-solr-deploy: &solr_deploy
   mode: replicated
   replicas: 3
@@ -19,12 +25,6 @@ x-solr-deploy: &solr_deploy
         && PathPrefix(`/solr`)"
     - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
     - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
-
-x-zookeeper-envs: &zookeeper_envs
-  ALLOW_ANONYMOUS_LOGIN: "yes"
-  ZOO_SERVERS: zk1:2888:3888::1 zk2:2888:3888::2 zk3:2888:3888::3
-  ZOO_LISTEN_ALLIPS_ENABLED: "yes"
-  ZOO_4LW_COMMANDS_WHITELIST: srvr,mntr,conf,ruok,stat
 
 version: "3.8"
 services:

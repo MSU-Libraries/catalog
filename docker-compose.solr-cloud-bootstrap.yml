@@ -26,10 +26,6 @@ x-solr-deploy: &solr_deploy
     - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
     - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
 
-# SETUP INSTRUCTIONS
-# - Be certain to set permissions for volume subdirectorires (user 1001)
-#   - bitnami/solr/
-
 version: "3.8"
 services:
   solr:
