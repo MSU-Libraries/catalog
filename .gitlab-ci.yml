@@ -40,8 +40,7 @@ Deploy Internal Traefik:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml traefik-internal;
-      docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/traefik-internal:latest traefik-internal_lb;"
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml traefik-internal;"
 
 Deploy Public Traefik:
   stage: Traefik
@@ -76,7 +75,7 @@ Bootstrap Stacks:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker stack ps maraidb || docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml mariadb;
+      docker stack ps mariadb || docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml mariadb;
       docker stack ps solr || docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml solr"
 
 Deploy Solr:
@@ -103,25 +102,6 @@ Deploy Solr:
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml solr"
-
-Update Solr:
-  stage: Deploy
-  extends: .setup_ssh_template
-  tags:
-    - msul-docker
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
-      changes:
-        - docker-compose.solr*
-        - solr/*
-        - zk/*
-  needs:
-    - Deploy Solr
-  script:
-    - >
-      ssh deploy@$DEPLOY_HOST
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:latest solr_solr"
 
 Deploy DB:
   stage: Deploy
@@ -150,25 +130,6 @@ Deploy DB:
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera3.yml mariadb; sleep 10;
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera1.yml mariadb"
 
-Update DB:
-  stage: Deploy
-  extends: .setup_ssh_template
-  tags:
-    - msul-docker
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
-      changes:
-        - docker-compose.mariadb*
-  needs:
-    - Deploy DB
-  script:
-    - >
-      ssh deploy@$DEPLOY_HOST
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:latest mariadb_galera1; sleep 5;
-      docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:latest mariadb_galera2; sleep 5;
-      docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:latest mariadb_galera3; sleep 5;"
-
 Deploy Vufind:
   stage: Deploy
   extends: .setup_ssh_template
@@ -188,7 +149,6 @@ Deploy Vufind:
     - Build Vufind Image
     - Deploy DB
     - Deploy Solr
-    - Update Solr
     - Deploy Compose Files
   script:
     - >
