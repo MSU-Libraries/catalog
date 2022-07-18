@@ -1,0 +1,154 @@
+############# Build ###############
+
+Build DB Image:
+  variables:
+     COMPONENT: db
+  extends: .build_template
+
+Build Solr Image:
+  variables:
+     COMPONENT: solr
+  extends: .build_template
+
+Build ZK Image:
+  variables:
+     COMPONENT: zk
+  extends: .build_template
+
+Build Internal Traefik Image:
+  variables:
+     COMPONENT: traefik-internal
+  extends: .build_template
+
+Build Vufind Image:
+  stage: Build
+  tags:
+    - msul-docker
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+      changes:
+        - vufind/*
+        - docker-compose.yml
+        - docker-compose.solr*
+        - solr/*
+        - zk/*
+  variables:
+    LATEST: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
+    CURR: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:$CI_COMMIT_SHORT_SHA
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker pull $LATEST || true
+    - > 
+        docker build 
+        --build-arg DEBUG=false 
+        --build-arg FOLIO_URL=$FOLIO_URL 
+        --build-arg FOLIO_USER=$FOLIO_USER 
+        --build-arg FOLIO_PASS=$FOLIO_PASS 
+        --build-arg FOLIO_TENANT=$FOLIO_TENANT 
+        --build-arg FOLIO_REC_ID=$FOLIO_REC_ID 
+        --build-arg FOLIO_CANCEL_ID=$FOLIO_CANCEL_ID 
+        --build-arg OAI_URL=$OAI_URL 
+        --build-arg EMAIL=$EMAIL 
+        --build-arg MAIL_HOST=localhost 
+        --build-arg MAIL_PORT=25 
+        --build-arg MAIL_USERNAME= 
+        --build-arg MAIL_PASSWORD= 
+        --build-arg SOLR_URL=http://solr:8983/solr 
+        --tag $LATEST 
+        --tag $CURR 
+        --cache-from $LATEST 
+        vufind/
+    - docker push $LATEST
+    - docker push $CURR
+
+############# Scan ###############
+# https://docs.gitlab.com/ee/user/application_security/container_scanning/
+
+Scan Vufind Image:
+  stage: Scan
+  extends: container_scanning
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+      changes:
+        - vufind/*
+        - docker-compose.yml
+        - docker-compose.solr*
+        - solr/*
+        - zk/*
+  needs:
+    - Build Vufind Image
+  variables:
+    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
+    GIT_STRATEGY: fetch
+    DOCKERFILE_PATH: vufind/Dockerfile
+
+Scan Solr Image:
+  stage: Scan
+  extends: .scan_template
+  needs:
+    - Build Solr Image
+  variables:
+    COMPONENT: solr
+
+Scan DB Image:
+  stage: Scan
+  extends: .scan_template
+  needs:
+    - Build DB Image
+  variables:
+    COMPONENT: db
+
+Scan ZK Image:
+  stage: Scan
+  extends: .scan_template
+  needs:
+    - Build ZK Image
+  variables:
+    COMPONENT: zk
+
+Scan Internal Traefik Image:
+  stage: Scan
+  extends: .scan_template
+  needs:
+    - Build Internal Traefik Image
+  variables:
+    COMPONENT: traefik-internal
+
+############# Templates ###############
+
+.build_template:
+  stage: Build
+  tags:
+    - msul-shared
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+      #changes:
+      #  - $COMPONENT/*
+      #  - docker-compose.*$COMPONENT*
+  variables:
+    LATEST: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:latest
+    CURR: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:$CI_COMMIT_SHORT_SHA
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker pull $LATEST || true
+    - > 
+        docker build 
+        --tag $LATEST 
+        --tag $CURR 
+        --cache-from $LATEST 
+        $COMPONENT/
+    - docker push $LATEST
+    - docker push $CURR
+
+.scan_template:
+  stage: Scan
+  extends: container_scanning
+  variables:
+    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:latest
+    GIT_STRATEGY: fetch
+    DOCKERFILE_PATH: $COMPONENT/Dockerfile
+
+include:
+  - template: Security/Container-Scanning.gitlab-ci.yml

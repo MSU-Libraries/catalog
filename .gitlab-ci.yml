@@ -4,7 +4,7 @@
 #       (or save that for multiple env ticket?)
 stages:
   - Build
-  - test
+  - Scan
   - Traefik
   - Bootstrap
   - Deploy
@@ -14,68 +14,6 @@ stages:
 variables:
   DEPLOY_HOST: catalog-a.aws.lib.msu.edu
   COMPOSE_PATH: /home/deploy/
-
-Build DB Image:
-  variables:
-     COMPONENT: db
-  extends: .build_template
-
-Build Solr Image:
-  variables:
-     COMPONENT: solr
-  extends: .build_template
-
-Build ZK Image:
-  variables:
-     COMPONENT: zk
-  extends: .build_template
-
-Build Internal Traefik Image:
-  variables:
-     COMPONENT: traefik-internal
-  extends: .build_template
-
-Build Vufind Image:
-  stage: Build
-  tags:
-    - msul-docker
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
-      changes:
-        - vufind/*
-        - docker-compose.yml
-        - docker-compose.solr*
-        - solr/*
-        - zk/*
-  variables:
-    LATEST: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
-    CURR: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:$CI_COMMIT_SHORT_SHA
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-  script:
-    - docker pull $LATEST || true
-    - > 
-        docker build 
-        --build-arg DEBUG=false 
-        --build-arg FOLIO_URL=$FOLIO_URL 
-        --build-arg FOLIO_USER=$FOLIO_USER 
-        --build-arg FOLIO_PASS=$FOLIO_PASS 
-        --build-arg FOLIO_TENANT=$FOLIO_TENANT 
-        --build-arg FOLIO_REC_ID=$FOLIO_REC_ID 
-        --build-arg FOLIO_CANCEL_ID=$FOLIO_CANCEL_ID 
-        --build-arg OAI_URL=$OAI_URL 
-        --build-arg EMAIL=$EMAIL 
-        --build-arg MAIL_HOST=localhost 
-        --build-arg MAIL_PORT=25 
-        --build-arg MAIL_USERNAME= 
-        --build-arg MAIL_PASSWORD= 
-        --build-arg SOLR_URL=http://solr:8983/solr 
-        --tag $LATEST 
-        --tag $CURR 
-        --cache-from $LATEST 
-        vufind/
-    - docker push $LATEST
-    - docker push $CURR
 
 Deploy Compose Files:
   stage: Build
@@ -140,7 +78,6 @@ Bootstrap Stacks:
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
       docker stack ps maraidb || docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml mariadb;
       docker stack ps solr || docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml solr"
-  
 
 Deploy Solr:
   stage: Deploy
@@ -260,41 +197,6 @@ Deploy Vufind:
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml catalog;
       docker service update --image registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest catalog_catalog"
 
-# https://docs.gitlab.com/ee/user/application_security/container_scanning/
-Scan Vufind Image:
-  extends: container_scanning
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
-      changes:
-        - vufind/*
-        - docker-compose.yml
-        - docker-compose.solr*
-        - solr/*
-        - zk/*
-  needs:
-    - Build Vufind Image
-  variables:
-    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
-    GIT_STRATEGY: fetch
-    DOCKERFILE_PATH: vufind/Dockerfile
-
-Scan Solr Image:
-  extends: container_scanning
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
-      changes:
-        - vufind/*
-        - docker-compose.yml
-        - docker-compose.solr*
-        - solr/*
-        - zk/*
-  needs:
-    - Build Solr Image
-  variables:
-    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:latest
-    GIT_STRATEGY: fetch
-    DOCKERFILE_PATH: solr/Dockerfile
-
 ############# Templates ###############
 
 .setup_ssh_template:
@@ -306,30 +208,6 @@ Scan Solr Image:
     - ( umask 022; touch ~/.ssh/known_hosts )
     - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
 
-.build_template:
-  stage: Build
-  tags:
-    - msul-shared
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
-      #changes:
-      #  - $COMPONENT/*
-      #  - docker-compose.*$COMPONENT*
-  variables:
-    LATEST: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:latest
-    CURR: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:$CI_COMMIT_SHORT_SHA
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-  script:
-    - docker pull $LATEST || true
-    - > 
-        docker build 
-        --tag $LATEST 
-        --tag $CURR 
-        --cache-from $LATEST 
-        $COMPONENT/
-    - docker push $LATEST
-    - docker push $CURR
 
 #Tag Release:
 #  stage: Tag
@@ -378,5 +256,4 @@ Scan Solr Image:
 #
 
 include:
-  - template: Security/Container-Scanning.gitlab-ci.yml
-  - template: Security/License-Scanning.gitlab-ci.yml
+  - '.gitlab-ci-build-scan.yml'
