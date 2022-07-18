@@ -126,8 +126,8 @@ Deploy DB:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera2.yml mariadb; sleep 10;
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera3.yml mariadb; sleep 10;
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera2.yml mariadb; sleep 30;
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera3.yml mariadb; sleep 30;
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera1.yml mariadb"
 
 Deploy Vufind:
