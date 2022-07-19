@@ -72,7 +72,7 @@ Bootstrap Stacks:
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
       docker stack ps mariadb || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml mariadb && sleep 30);
-      docker stack ps solr || docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml solr"
+      docker stack ps solr || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml solr && sleep 30)"
 
 Deploy Solr:
   stage: Deploy
@@ -210,7 +210,7 @@ GitHub Release:
     - echo "{\"tag_name\":\"${TAG}\", \"target_commitish\":\"${CI_COMMIT_SHA}\"}" > data.json
     - "curl -X POST -H 'Accept: application/vnd.github.v3+json' -u $GITHUB_USER_TOKEN https://api.github.com/repos/MSU-Libraries/catalog/releases -d '@data.json'"
     # Update the GitHub Pages branch used
-    - sleep 30 # Needs time to propagate the changes first or this next step will fail
+    - sleep 45 # Needs time to propagate the changes first or this next step will fail
     - echo "{\"source\":{\"path\":\"/\", \"branch\":\"gh-pages\"}" > data.json
     - "curl -X POST -H 'Accept: application/vnd.github.v3+json' -u $GITHUB_USER_TOKEN https://api.github.com/repos/MSU-Libraries/catalog/pages -d '@data.json'"
 

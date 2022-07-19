@@ -43,6 +43,19 @@ services:
         - "traefik.http.routers.https-router.service=https-app"
         - "traefik.http.services.https-app.loadbalancer.server.port=80"
 
+  harvest:
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
+    command: cron -f
+    volumes:
+      - /mnt/shared:/mnt/shared
+    networks:
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        window: 15s
+
 networks:
   internal:
     name: internal

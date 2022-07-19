@@ -1,0 +1,5 @@
+# Trigger full harvest
+0 1	1 * *	root    /harvest.sh --full
+
+# Trigger incremental harvests
+#TODO

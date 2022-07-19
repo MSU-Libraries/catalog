@@ -16,5 +16,5 @@ mv *oai*.xml unmerged/
 ## Importing into Vufind
 ```bash
 cd /usr/local/vufind/harvest
-./batch-import-march.sh folio
+./batch-import-marc.sh folio
 ```
