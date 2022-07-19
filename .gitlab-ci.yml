@@ -204,7 +204,7 @@ GitHub Release:
     - apk add git curl
   script:
     - rm -rf catalog.git
-    - git clone --mirror https://RW_CICD_TOKEN:glpat-wZpCt5UQ4NFnHBvzyn7r@gitlab.msu.edu/msu-libraries/devops/catalog.git
+    - git clone --mirror https://RW_CICD_TOKEN:$RW_CICD_TOKEN@gitlab.msu.edu/msu-libraries/devops/catalog.git
     - cd catalog.git
     - git push --force --mirror https://$GITHUB_USER_TOKEN@github.com/MSU-Libraries/catalog.git
     - echo "{\"tag_name\":\"${TAG}\", \"target_commitish\":\"${CI_COMMIT_SHA}\"}" > data.json
