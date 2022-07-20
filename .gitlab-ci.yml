@@ -72,7 +72,7 @@ Bootstrap Stacks:
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
       docker stack ps mariadb || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml mariadb && sleep 30);
-      docker stack ps solr || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml solr && sleep 30)"
+      docker stack ps solr || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml solr && sleep 90)"
 
 Deploy Solr:
   stage: Deploy

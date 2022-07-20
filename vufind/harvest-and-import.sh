@@ -1,8 +1,5 @@
 #!/bin/bash
 
-VUFIND_HARVEST_DIR=/usr/local/vufind/local/harvest/folio
-OAI_HARVEST_DIR=${}
-
 # Script help text
 runhelp() {
     echo ""
@@ -10,36 +7,37 @@ runhelp() {
     echo "       and import that data into Vufind's Solr."
     echo ""
     echo "Examples: "
-    echo "   /harvest-and-import.sh"
-    echo "     Do an update harvest with changes made since"
-    echo "     the last run, copy it to the shared location,"
+    echo "   /harvest-and-import.sh --oai-harvest --filter 10 --copy-harvest --batch-import"
+    echo "     Do an update harvest with changes made in the last"
+    echo "     10 minutes, recopy all harvest to the shared location,"
     echo "     and import that data"
-    echo "   /harvest-and-import.sh -i -f"
+    echo "   /harvest-and-import.sh --copy-harvest --batch-import"
     echo "     Run only a full import of data that has already been"
     echo "     harvested and saved to the shared location"
-    echo "   /harvest-and-import.sh -h"
-    echo "     Run only an update harvest with changes made"
-    echo "     since the last run and copy it to the shared location"
+    echo "   /harvest-and-import.sh -o -f 5"
+    echo "     Run only an update harvest with changes made in the last"
+    echo "     5 minutes and copy it to the shared location"
     echo ""
     echo "FLAGS:"
-    echo "  -o|--harvest-oai"
-    echo "      Run the OAI harvest into OAI_HARVEST_DIR"
-    echo "  -i|--import"
+    echo "  -o|--oai-harvest"
+    echo "      Run an OAI harvest into SHARED_HARVEST_DIR."
+    echo "  -f|--full"
+    echo "      Forces a reset of SHARED_HARVEST_DIR, resulting"
+    echo "      in a full harvest. Must be used with --oai-harvest."
+    echo "  -b|--batch-import"
     echo "      Run VuFind batch import on files in VUFIND_HARVEST_DIR"
-    echo "  -c|--copy-harvest"
-    echo "      Copy OAI files from OAI_HARVEST_DIR to"
-    echo "      the VUFIND_HARVEST_DIR."
-    echo "  -t|--full-harvest"
-    echo "      When running the OAI harvest, do a complete"
-    echo "      harvest instead of just an update harvest,"
-    echo "      which would normally only pull changes since"
-    echo "      the last run"
+    echo "  -y|--yes"
+    echo "      Assume a 'yes' answer to all prompts and run the"
+    echo "      command non-interactively."
+    echo "  -d|--vufind-harvest-dir DIR"
+    echo "      Full path to the vufind harvest directory"
+    echo "      Default: /usr/local/vufind/local/harvest/folio"
+    echo "  -s|--shared-harvest-dir DIR"
+    echo "      Full path to the shared storage location for harvested OAI files"
+    echo "      Default: /mnt/shared/oai"
     echo "  -v|--verbose"
     echo "      Show verbose output"
     echo ""
-    echo "Exptected Environment variables:"
-    echo "  SHARED_HARVEST_DIR"
-    echo "      Full path to the location of the harvested XML files"
 }
 
 if [[ -z "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
@@ -50,6 +48,12 @@ fi
 # Set defaults
 default_args() {
     declare -g -A ARGS
+    ARGS[OAI_HARVEST]=0
+    ARGS[FULL]=0
+    ARGS[YES]=0
+    ARGS[BATCH_IMPORT]=0
+    ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/folio
+    ARGS[SHARED_HARVEST_DIR]=/mnt/shared/oai
     ARGS[VERBOSE]=0
 }
 
@@ -58,6 +62,34 @@ parse_args() {
     # Parse flag arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
+        -o|--oai-harvest)
+            ARGS[OAI_HARVEST]=1
+            shift;;
+        -f|--full)
+            ARGS[FULL]=1
+            shift;;
+        -y|--yes)
+            ARGS[YES]=1
+            shift;;
+        -b|--batch-import)
+            ARGS[BATCH_IMPORT]=1
+            shift;;
+        -d|--vufind-harvest-dir)
+            ARGS[VUFIND_HARVEST_DIR]=$( readlink -f "$2" )
+            RC=$?
+            if [[ "$RC" -ne 0 || ! -d "${ARGS[VUFIND_HARVEST_DIR]}" ]]; then
+                echo "ERROR: -d|--vufind-harvest-dir path does not exist: $2"
+                exit 1
+            fi
+            shift; shift ;;
+        -s|--shared-harvest-dir)
+            ARGS[SHARED_HARVEST_DIR]=$( readlink -f "$2" )
+            RC=$?
+            if [[ "$RC" -ne 0 || ! -d "${ARGS[SHARED_HARVEST_DIR]}" ]]; then
+                echo "ERROR: -s|--shared-harvest-dir path does not exist: $2"
+                exit 1
+            fi
+            shift; shift ;;
         -v|--verbose)
             ARGS[VERBOSE]=1
             shift;;
@@ -66,7 +98,7 @@ parse_args() {
             exit 1
         esac
     done
-
+}
 
 # Print message if verbose is enabled
 verbose() {
@@ -76,9 +108,137 @@ verbose() {
     fi
 }
 
+prompt_yes() {
+    if [[ "${ARGS[YES]}" -ne 1 ]]; then
+        read -r -p "$1 (y/N) " RESP
+        case $RESP in
+            [Yy])
+                return;;
+            *)
+                echo "Exiting..."
+                exit;;
+        esac
+    fi
+}
+
+# Print the last modified time as epoch seconds, or 0 if not a valid/accessible file
+last_modified() {
+    if [[ ! -f "$1" ]]; then
+        echo "0"
+    else
+        stat --format=%Y "$1"
+    fi
+}
+
+archive_shared_xml() {
+    if ! ls "${ARGS[SHARED_HARVEST_DIR]}"/combined_*.xml > /dev/null 2>&1; then
+        return
+    fi
+    verbose "Archiving previous XML files"
+    ARCHIVE_TS=$(date +%Y%m%d_%H%M%S)
+    mkdir -p "${ARGS[SHARED_HARVEST_DIR]}/archives"
+    if tar -C "${ARGS[SHARED_HARVEST_DIR]}/" -czvf "${ARGS[SHARED_HARVEST_DIR]}/archives/archive_${ARCHIVE_TS}.tar.gz" ./combined_*.xml; then
+        # remove uncompressed files
+        rm "${ARGS[SHARED_HARVEST_DIR]}"/*.xml
+    else
+        echo "ERROR: Could not compress previous harvest files in ${ARGS[SHARED_HARVEST_DIR]}"
+        exit 1
+    fi
+}
+
+oai_harvest_combiner() {
+    if [[ "${#COMBINE_FILES[@]}" -eq 0 ]]; then
+        return
+    fi
+    COMBINE_TS=$(date +%Y%m%d_%H%M%S)
+    xml_grep --wrap collection --cond "marc:record" "${COMBINE_FILES[@]}" > "${ARGS[VUFIND_HARVEST_DIR]}/combined_${COMBINE_TS}.xml"
+    rm "${COMBINE_FILES[@]}"
+    COMBINE_FILES=()
+}
+
+# Perform an OAI harvest
+oai_harvest() {
+    verbose "Checking harvest state"
+
+    # Copy last_harvest from SHARED_HARVEST_DIR if it exists and is newer (except if --full)
+    SHARED_LAST_HARVEST="${ARGS[SHARED_HARVEST_DIR]}/last_harvest.txt"
+    VUFIND_LAST_HARVEST="${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt"
+    SHARED_LAST_MODIFIED=$( last_modified "$SHARED_LAST_HARVEST" )
+    VUFIND_LAST_MODIFIED=$( last_modified "$VUFIND_LAST_HARVEST" )
+    if [[ "$SHARED_LAST_MODIFIED" -gt "$VUFIND_LAST_MODIFIED" && "${ARGS[FULL]}" -ne 1 ]]; then
+        verbose "Restoring $SHARED_LAST_HARVEST"
+        cp --preserve=timestamps "$SHARED_LAST_HARVEST" "$VUFIND_LAST_HARVEST"
+    fi
+
+    verbose "Starting OAI harvest"
+
+    # Validate the the shared storage location is writable
+    if ! [ -w "${ARGS[SHARED_HARVEST_DIR]}" ] ; then
+        echo "ERROR: Shared storage location is not writable: ${ARGS[SHARED_HARVEST_DIR]}"
+        exit 1
+    fi
+
+    # If this is a full harvest, archive the previous XML files in the shared location
+    if [[ ! -f "${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt" || "${ARGS[FULL]}" -eq 1 ]]; then
+        archive_shared_xml
+    fi
+
+    php /usr/local/vufind/harvest/harvest_oai.php
+
+    verbose "Completed OAI harvest"
+
+    # Combine XML files for faster import
+    verbose "Combining harvested XML files"
+    declare -g -a COMBINE_FILES=()
+    while read -r FILE; do
+        COMBINE_FILES+=("$FILE")
+        if [[ "${#COMBINE_FILES[@]}" -ge 100 ]]; then
+            oai_harvest_combiner
+        fi
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}" -name '*_oai_*.xml')
+    oai_harvest_combiner
+
+    verbose "Copying combined XML to shared dir"
+    cp --preserve=timestamps "${ARGS[VUFIND_HARVEST_DIR]}"/combined_*.xml "${ARGS[SHARED_HARVEST_DIR]}/"
+
+    verbose "Copying last_harvest.txt to shared dir"
+    cp --preserve=timestamps "${ARGS[VUFIND_HARVEST_DIR]}"/last_harvest.txt "${ARGS[SHARED_HARVEST_DIR]}/"
+}
+
+# Copy XML files back from shared dir to VuFind dir
+copyback_from_shared() {
+    prompt_yes "Proceed to copy XML and last_harvest.txt from ${ARGS[SHARED_HARVEST_DIR]} to ${ARGS[VUFIND_HARVEST_DIR]}?"
+
+    verbose "Copying combined XML from shared dir to VuFind"
+    cp --preserve=timestamps "${ARGS[SHARED_HARVEST_DIR]}"/combined_*.xml "${ARGS[VUFIND_HARVEST_DIR]}/"
+
+    verbose "Copying last_harvest.txt from shared dir to VuFind"
+    cp --preserve=timestamps "${ARGS[SHARED_HARVEST_DIR]}"/last_harvest.txt "${ARGS[VUFIND_HARVEST_DIR]}/"
+}
+
+# Perform VuFind batch import of OAI records
+batch_import() {
+    verbose "Starting batch import"
+    
+    /usr/local/vufind/harvest/batch-import-marc.sh folio
+
+    verbose "Completed batch import"
+}
+
 # Main logic for the script
 main() {
+    verbose "Starting processing..."
 
+    if [[ "${ARGS[OAI_HARVEST]}" -eq 1 ]]; then
+        oai_harvest
+    else 
+        copyback_from_shared
+    fi
+    if [[ "${ARGS[BATCH_IMPORT]}" -eq 1 ]]; then
+        batch_import
+    fi
+
+    verbose "All processing complete!"
 }
 
 # Parse and start running

@@ -1,5 +1,5 @@
 # Trigger full harvest
-0 1	1 * *	root    /harvest.sh --full
+0 1	1 * *	root    /harvest-and-import.sh --oai-harvest --copy-harvest --batch-import
 
 # Trigger incremental harvests
 #TODO
