@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO Feature: add flag to delete records from biblio Solr collection before import
+
 # Script help text
 runhelp() {
     echo ""
@@ -28,9 +30,13 @@ runhelp() {
     echo "      in a full harvest. Must be used with --oai-harvest."
     echo "  -b|--batch-import"
     echo "      Run VuFind batch import on files in VUFIND_HARVEST_DIR"
-    echo "  -y|--yes"
-    echo "      Assume a 'yes' answer to all prompts and run the"
-    echo "      command non-interactively."
+    echo "  -c|--copy-shared"
+    echo "      Copy XML from SHARED_HARVEST_DIR back to VUFIND_HARVEST_DIR."
+    echo "      Only usable when NOT running a harvest."
+    # Currently Unused
+    # echo "  -y|--yes"
+    # echo "      Assume a 'yes' answer to all prompts and run the"
+    # echo "      command non-interactively."
     echo "  -d|--vufind-harvest-dir DIR"
     echo "      Full path to the vufind harvest directory"
     echo "      Default: /usr/local/vufind/local/harvest/folio"
@@ -53,6 +59,7 @@ default_args() {
     ARGS[OAI_HARVEST]=0
     ARGS[FULL]=0
     ARGS[YES]=0
+    ARGS[COPY_SHARED]=0
     ARGS[BATCH_IMPORT]=0
     ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/folio
     ARGS[SHARED_HARVEST_DIR]=/mnt/shared/oai
@@ -69,6 +76,9 @@ parse_args() {
             shift;;
         -f|--full)
             ARGS[FULL]=1
+            shift;;
+        -c|--copy-shared)
+            ARGS[COPY_SHARED]=1
             shift;;
         -y|--yes)
             ARGS[YES]=1
@@ -141,13 +151,15 @@ archive_shared_xml() {
     verbose "Archiving previous XML files"
     ARCHIVE_TS=$(date +%Y%m%d_%H%M%S)
     mkdir -p "${ARGS[SHARED_HARVEST_DIR]}/archives"
-    if tar -C "${ARGS[SHARED_HARVEST_DIR]}/" -czvf "${ARGS[SHARED_HARVEST_DIR]}/archives/archive_${ARCHIVE_TS}.tar.gz" ./combined_*.xml; then
+    pushd "${ARGS[SHARED_HARVEST_DIR]}/" > /dev/null 2>&1 || exit 1
+    if tar -czvf "${ARGS[SHARED_HARVEST_DIR]}/archives/archive_${ARCHIVE_TS}.tar.gz" ./combined_*.xml; then
         # remove uncompressed files
         rm "${ARGS[SHARED_HARVEST_DIR]}"/*.xml
     else
         echo "ERROR: Could not compress previous harvest files in ${ARGS[SHARED_HARVEST_DIR]}"
         exit 1
     fi
+    popd > /dev/null 2>&1 || exit 1
 }
 
 oai_harvest_combiner() {
@@ -208,13 +220,16 @@ oai_harvest() {
     verbose "Copying combined XML to shared dir"
     cp --preserve=timestamps "${ARGS[VUFIND_HARVEST_DIR]}"/combined_*.xml "${ARGS[SHARED_HARVEST_DIR]}/"
 
-    verbose "Copying last_harvest.txt to shared dir"
-    cp --preserve=timestamps "${ARGS[VUFIND_HARVEST_DIR]}"/last_harvest.txt "${ARGS[SHARED_HARVEST_DIR]}/"
+    LAST_HARVEST="${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt"
+    if [[ -f "${LAST_HARVEST}" ]]; then
+        verbose "Copying last_harvest.txt to shared dir"
+        cp --preserve=timestamps "${LAST_HARVEST}" "${ARGS[SHARED_HARVEST_DIR]}/"
+    fi
 }
 
 # Copy XML files back from shared dir to VuFind dir
 copyback_from_shared() {
-    prompt_yes "Proceed to copy XML and last_harvest.txt from ${ARGS[SHARED_HARVEST_DIR]} to ${ARGS[VUFIND_HARVEST_DIR]}?"
+    #prompt_yes "Proceed to copy XML and last_harvest.txt from ${ARGS[SHARED_HARVEST_DIR]} to ${ARGS[VUFIND_HARVEST_DIR]}?"
 
     verbose "Copying combined XML from shared dir to VuFind"
     cp --preserve=timestamps "${ARGS[SHARED_HARVEST_DIR]}"/combined_*.xml "${ARGS[VUFIND_HARVEST_DIR]}/"
@@ -241,7 +256,7 @@ main() {
 
     if [[ "${ARGS[OAI_HARVEST]}" -eq 1 ]]; then
         oai_harvest
-    else 
+    elif [[ "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
         copyback_from_shared
     fi
     if [[ "${ARGS[BATCH_IMPORT]}" -eq 1 ]]; then
