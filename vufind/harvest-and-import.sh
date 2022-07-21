@@ -104,7 +104,7 @@ parse_args() {
 
 # Print message if verbose is enabled
 verbose() {
-    LOG_TS=$(date +%Y%m%d %H%M%S)
+    LOG_TS=$(date +%Y-%m-%d\ %H:%M:%S)
     MSG="[${LOG_TS}] $1"
     if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
         echo "${MSG}"

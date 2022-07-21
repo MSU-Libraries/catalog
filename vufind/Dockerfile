@@ -70,6 +70,7 @@ RUN echo "ServerName catalog.lib.msu.edu" >> /etc/apache2/sites-available/000-de
 # Add file customizations
 COPY local/ /usr/local/vufind/local
 COPY startup.sh /startup.sh
+COPY harvest-and-import.sh /harvest-and-import.sh
 COPY cron.d/ /etc/cron.d/
 
 WORKDIR /usr/local/vufind
