@@ -7,16 +7,18 @@ runhelp() {
     echo "       and import that data into Vufind's Solr."
     echo ""
     echo "Examples: "
-    echo "   /harvest-and-import.sh --oai-harvest --filter 10 --copy-harvest --batch-import"
-    echo "     Do an update harvest with changes made in the last"
-    echo "     10 minutes, recopy all harvest to the shared location,"
-    echo "     and import that data"
-    echo "   /harvest-and-import.sh --copy-harvest --batch-import"
+    echo "   /harvest-and-import.sh --oai-harvest --full --batch-import"
+    echo "     Do a full harvest from scratch and import that data"
+    echo "   /harvest-and-import.sh --oai-harvest --batch-import"
+    echo "     Do an update harvest with changes made since the"
+    echo "     last run, and import that data"
+    echo "   /harvest-and-import.sh --batch-import"
     echo "     Run only a full import of data that has already been"
-    echo "     harvested and saved to the shared location"
-    echo "   /harvest-and-import.sh -o -f 5"
-    echo "     Run only an update harvest with changes made in the last"
-    echo "     5 minutes and copy it to the shared location"
+    echo "     harvested and saved to the shared location. Will prompt"
+    echo "     before copying data to VuFind unless --yes flag is passed"
+    echo "   /harvest-and-import.sh -o"
+    echo "     Only run the OAI harvest, but do not proceed to import"
+    echo "     the data into VuFind"
     echo ""
     echo "FLAGS:"
     echo "  -o|--oai-harvest"
@@ -102,10 +104,12 @@ parse_args() {
 
 # Print message if verbose is enabled
 verbose() {
-    MSG="$1"
+    LOG_TS=$(date +%Y%m%d %H%M%S)
+    MSG="[${LOG_TS}] $1"
     if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
         echo "${MSG}"
     fi
+    echo "${MSG}" >> "$LOG_FILE"
 }
 
 prompt_yes() {
@@ -151,7 +155,10 @@ oai_harvest_combiner() {
         return
     fi
     COMBINE_TS=$(date +%Y%m%d_%H%M%S)
-    xml_grep --wrap collection --cond "marc:record" "${COMBINE_FILES[@]}" > "${ARGS[VUFIND_HARVEST_DIR]}/combined_${COMBINE_TS}.xml"
+    COMBINE_TARGET="combined_${COMBINE_TS}.xml"
+    verbose "Combining ${#COMBINE_FILES[@]} into ${COMBINE_TARGET}"
+    xml_grep --wrap collection --cond "marc:record" "${COMBINE_FILES[@]}" > "${ARGS[VUFIND_HARVEST_DIR]}/${COMBINE_TARGET}"
+    verbose "Done combining ${COMBINE_TARGET}"
     rm "${COMBINE_FILES[@]}"
     COMBINE_FILES=()
 }
@@ -227,6 +234,9 @@ batch_import() {
 
 # Main logic for the script
 main() {
+    declare -g LOG_FILE
+    LOG_FILE=$(mktemp)
+    verbose "Logging to ${LOG_FILE}"
     verbose "Starting processing..."
 
     if [[ "${ARGS[OAI_HARVEST]}" -eq 1 ]]; then
