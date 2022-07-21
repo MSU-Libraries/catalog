@@ -67,9 +67,6 @@ RUN echo "ServerName catalog.lib.msu.edu" >> /etc/apache2/sites-available/000-de
     echo "ErrorLog /proc/self/fd/2" >> /etc/apache2/sites-enabled/000-default.conf && \
     echo "CustomLog /proc/self/fd/1 combined" >> /etc/apache2/sites-enabled/000-default.conf
 
-# Remove core config files that prevent local overrides
-RUN rm import/marc_local.properties
-
 # Add file customizations
 COPY local/ /usr/local/vufind/local
 COPY startup.sh /startup.sh
@@ -77,6 +74,9 @@ COPY harvest-and-import.sh /harvest-and-import.sh
 COPY cron.d/ /etc/cron.d/
 
 WORKDIR /usr/local/vufind
+
+# Remove core config files that prevent local overrides
+RUN rm import/marc_local.properties
 
 # Replace environment variables in template ini files
 RUN envsubst < local/config/vufind/Folio.template.ini > local/config/vufind/Folio.ini && \
