@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # TODO Feature: add flag to delete records from biblio Solr collection before import
+# curl http://solr:8983/solr/biblio/update -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
+# curl http://solr:8983/solr/biblio/update -H "Content-type: text/xml" --data-binary '<commit />'
 
 # Script help text
 runhelp() {
