@@ -73,6 +73,8 @@ COPY startup.sh /startup.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
 COPY cron.d/ /etc/cron.d/
 
+RUN chmod -R o-w /etc/cron.d/
+
 WORKDIR /usr/local/vufind
 
 # Remove core config files that prevent local overrides
