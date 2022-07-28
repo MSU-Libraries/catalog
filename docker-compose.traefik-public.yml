@@ -36,7 +36,6 @@ services:
         --certificatesresolvers.msul-letsencrypt.acme.storage=/etc/traefik/acme/acme.json
         --certificatesresolvers.msul-letsencrypt.acme.httpchallenge=true
         --certificatesresolvers.msul-letsencrypt.acme.httpchallenge.entrypoint=msul-http-ent
-        --certificatesresolvers.msul-letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
       '"
     healthcheck:
       test: >
