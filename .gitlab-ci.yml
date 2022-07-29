@@ -221,6 +221,7 @@ Remove Environment:
       artifacts: true
     - Deploy Vufind
   script:
+    # TODO call terraform to remove the DNS names
     - >
       ssh deploy@$DEPLOY_HOST
       "docker stack rm $STACK_NAME-solr &&
