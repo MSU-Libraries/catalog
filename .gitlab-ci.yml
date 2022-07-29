@@ -1,69 +1,118 @@
 stages:
+  - Prepare
   - Build
-  - test
+# Commenting out the scanning stage for now since the Bitnami images trigger a lot of results.
+# We'll add this back in when we have time to sift through all of them.
+#  - test
   - Traefik
   - Bootstrap
   - Deploy
+  - Cleanup
   - Tag
   - Release
 
 variables:
   DEPLOY_HOST: catalog-a.aws.lib.msu.edu
-  COMPOSE_PATH: /home/deploy/
+  COMPOSE_PATH: /home/deploy/$CI_COMMIT_BRANCH
+
+Set Stack Name:
+  stage: Prepare
+  script:
+    - |
+      STACK_NAME=
+      if [[ $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH ]]; then
+          STACK_NAME="catalog-beta"
+      elif [[ "${CI_COMMIT_BRANCH}" == "devel-"* || "${CI_COMMIT_BRANCH}" == "review-"* ]]; then
+          STACK_NAME="${CI_COMMIT_BRANCH}"
+      fi
+      echo "STACK_NAME=\"${STACK_NAME}\"" > build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+
+Create DNS:
+  stage: Prepare
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+  script:
+    - echo "TODO - run terraform to create DNS for $STACK_NAME"
 
 Deploy Compose Files:
   stage: Build
-  extends: .setup_ssh_template
-  tags:
-    - msul-docker
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
-  # TODO deploy into separate locations for each stack? sub-dir perhaps?
+  extends: .stack_template
+  needs:
+    - job: Set Stack Name
+      artifacts: true
   script:
-    - scp docker-compose* deploy@$DEPLOY_HOST:$COMPOSE_PATH
+    # Install yq
+    - apk add wget
+    - wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O ./yq
+    - chmod +x ./yq
+    # Modify the image tag from :latest -> $CI_COMMIT_SHORT_SHA
+    - ./yq -i ".services.catalog.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" < docker-compose.yml
+    - ./yq -i ".services.harvest.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" < docker-compose.yml
+    - ./yq -i ".services.lb.image=\"$CI_REGISTRY_IMAGE/traefik-internal:$CI_COMMIT_SHORT_SHA\"" < docker-compose.traefik-internal.yml
+    - ./yq -i ".services.galera1.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" < docker-compose.mariadb-bootstrap.yml
+    - ./yq -i ".services.galera1.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" < docker-compose.mariadb-galera1.yml
+    - ./yq -i ".services.galera2.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" < docker-compose.mariadb-galera2.yml
+    - ./yq -i ".services.galera3.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" < docker-compose.mariadb-galera3.yml
+    - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud-bootstrap.yml
+    - ./yq -i ".services.zk1.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud-bootstrap.yml
+    - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud-bootstrap.yml
+    - ./yq -i ".services.zk3.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud-bootstrap.yml
+    - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud.yml
+    - ./yq -i ".services.zk1.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud.yml
+    - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud.yml
+    - ./yq -i ".services.zk3.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud.yml
+    # Modify the name of internal network to include $STACK_NAME
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.traefik-internal.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.mariadb-bootstrap.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.mariadb-galera1.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.mariadb-galera2.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.mariadb-galera3.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.solr-cloud-bootstrap.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.solr-cloud.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.yml
+    # Copy the updated compose files to the server
+    - ssh deploy@$DEPLOY_HOST mkdir -p $COMPOSE_PATH
+    - scp docker-compose* deploy@$DEPLOY_HOST:$COMPOSE_PATH/
 
 Deploy Internal Traefik:
   stage: Traefik
-  extends: .setup_ssh_template
-  tags:
-    - msul-docker
-  rules:
-    # Always deploy traefik
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+  extends: .stack_template
   needs:
+    - job: Set Stack Name
+      artifacts: true
     - Build Internal Traefik Image
     - Deploy Compose Files
   script:
     - >
       ssh deploy@$DEPLOY_HOST
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml traefik-internal;"
+      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml $STACK_NAME-traefik-internal"
 
 Deploy Public Traefik:
   stage: Traefik
-  extends: .setup_ssh_template
-  tags:
-    - msul-docker
+  extends: .stack_template
   rules:
-    # Always deploy traefik
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
   needs:
+    - job: Set Stack Name
+      artifacts: true
     - Deploy Compose Files
   script:
     - >
       ssh deploy@$DEPLOY_HOST
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public;"
+      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
+      docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public"
 
 Bootstrap Stacks:
   stage: Bootstrap
-  extends: .setup_ssh_template
-  tags:
-    - msul-docker
-  rules:
-    # Always check if bootstrapping is needed
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+  extends: .stack_template
   needs:
+    - job: Set Stack Name
+      artifacts: true
     - Deploy Compose Files
     - Deploy Internal Traefik
     - Build DB Image
@@ -71,17 +120,15 @@ Bootstrap Stacks:
   script:
     - >
       ssh deploy@$DEPLOY_HOST
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker stack ps mariadb || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml mariadb && sleep 30);
-      docker stack ps solr || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml solr && sleep 90)"
+      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
+      (docker stack ps ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml ${STACK_NAME}-mariadb && sleep 30)) &&
+      (docker stack ps ${STACK_NAME}-solr || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml ${STACK_NAME}-solr && sleep 90))"
 
 Deploy Solr:
   stage: Deploy
-  extends: .setup_ssh_template
-  tags:
-    - msul-docker
+  extends: .stack_template
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $STACK_NAME != ""'
       changes:
         - docker-compose.solr*
         - solr/*
@@ -89,6 +136,8 @@ Deploy Solr:
         - vufind/*
         - zk/*
   needs:
+    - job: Set Stack Name
+      artifacts: true
     - Build Solr Image
     - Build ZK Image
     - Bootstrap Stacks
@@ -97,16 +146,14 @@ Deploy Solr:
   script:
     - >
       ssh deploy@$DEPLOY_HOST
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml solr"
+      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr"
 
 Deploy DB:
   stage: Deploy
-  extends: .setup_ssh_template
-  tags:
-    - msul-docker
+  extends: .stack_template
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $STACK_NAME != ""'
       changes:
         - docker-compose.mariadb*
         - docker-compose.yml
@@ -115,6 +162,8 @@ Deploy DB:
         - solr/*
         - zk/*
   needs:
+    - job: Set Stack Name
+      artifacts: true
     - Build DB Image
     - Bootstrap Stacks
     - Deploy Compose Files
@@ -122,18 +171,19 @@ Deploy DB:
   script:
     - >
       ssh deploy@$DEPLOY_HOST
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera2.yml mariadb; sleep 30;
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera3.yml mariadb; sleep 30;
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera1.yml mariadb"
+      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera2.yml ${STACK_NAME}-mariadb && sleep 30 &&
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera3.yml ${STACK_NAME}-mariadb && sleep 30 &&
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera1.yml ${STACK_NAME}-mariadb"
 
 Deploy Vufind:
   stage: Deploy
-  extends: .setup_ssh_template
-  tags:
-    - msul-docker
+  extends: .stack_template
+  environment:
+    name: $STACK_NAME
+    url: https://$STACK_NAME.aws.lib.msu.edu
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $STACK_NAME != ""'
       changes:
         - docker-compose.yml
         - vufind/*
@@ -141,6 +191,8 @@ Deploy Vufind:
         - solr/*
         - zk/*
   needs:
+    - job: Set Stack Name
+      artifacts: true
     - Deploy Public Traefik
     - Deploy Internal Traefik
     - Build Vufind Image
@@ -150,71 +202,49 @@ Deploy Vufind:
   script:
     - >
       ssh deploy@$DEPLOY_HOST
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY;
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml catalog"
+      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME"
+
+Remove Environment:
+  stage: Cleanup
+  extends: .stack_template
+  rules:
+    - if: '$CI_DEFAULT_BRANCH != $CI_COMMIT_BRANCH && $STACK_NAME != ""'
+      when: manual
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Deploy Vufind
+  script:
+    - >
+      ssh deploy@$DEPLOY_HOST
+      "docker stack rm $STACK_NAME-solr &&
+      docker stack rm $STACK_NAME-maridb &&
+      docker stack rm $STACK_NAME &&
+      docker stack rm $STACK_NAME-traefik-internal &&
+      rm -rf $COMPOSE_PATH/$CI_COMMIT_BRANCH &&
+      docker system prune --volumes -a -f"
 
 ############# Templates ###############
 
-.setup_ssh_template:
-  before_script:
-    # Setup SSH access to one of the servers
-    - eval $( ssh-agent -s )
-    - echo "$DEPLOY_PRIVATE_KEY" | base64 -d | ssh-add -
-    - install -d -m 700 ~/.ssh/
-    - ( umask 022; touch ~/.ssh/known_hosts )
-    - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
-
-
-Tag Release:
-  stage: Tag
+.stack_template:
   tags:
-    - msul-docker
+    - msul-shared
+  extends: .setup_ssh
+  variables:
+    ENCODED_PRIVATE_KEY: $DEPLOY_PRIVATE_KEY
+    SERVER: $DEPLOY_HOST
   rules:
-    - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
-      when: manual
-  before_script:
-    - apk add git
-  script:
-    - rm -rf clone/ || true
-    - git clone https://gitlab-ci-token:$RW_CICD_TOKEN@gitlab.msu.edu/msu-libraries/devops/catalog.git clone/
-    - cd clone/ # doing this to avoid runner cache
-    - major_ver=$(date +'%y.%-m')
-    - latest_patch=$(git tag -l $major_ver* --sort=-v:refname | head -n 1 | cut -d'.' -f 3)
-    - "[ -z $latest_patch ] && cur_patch=-1 || cur_patch=$latest_patch"
-    - patch_ver=$(($cur_patch+1))
-    - TAG=$major_ver.$patch_ver
-    - echo "TAG=$TAG" > ../variables.env
-    - echo "Tagging new release with $TAG"
-    - git tag $TAG
-    - git push origin --tags
-  artifacts:
-    reports:
-      dotenv: variables.env
-
-GitHub Release:
-  stage: Release
-  tags:
-    - msul-docker
-  rules:
-    - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
-      when: manual
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $STACK_NAME != ""'
   needs:
-    - job: Tag Release
+    - job: Set Stack Name
       artifacts: true
-  before_script:
-    - apk add git curl
-  script:
-    - rm -rf catalog.git
-    - git clone --mirror https://RW_CICD_TOKEN:$RW_CICD_TOKEN@gitlab.msu.edu/msu-libraries/devops/catalog.git
-    - cd catalog.git
-    - git push --force --mirror https://$GITHUB_USER_TOKEN@github.com/MSU-Libraries/catalog.git
-    - echo "{\"tag_name\":\"${TAG}\", \"target_commitish\":\"${CI_COMMIT_SHA}\"}" > data.json
-    - "curl -X POST -H 'Accept: application/vnd.github.v3+json' -u $GITHUB_USER_TOKEN https://api.github.com/repos/MSU-Libraries/catalog/releases -d '@data.json'"
-    # Update the GitHub Pages branch used
-    - sleep 45 # Needs time to propagate the changes first or this next step will fail
-    - echo "{\"source\":{\"path\":\"/\", \"branch\":\"gh-pages\"}" > data.json
-    - "curl -X POST -H 'Accept: application/vnd.github.v3+json' -u $GITHUB_USER_TOKEN https://api.github.com/repos/MSU-Libraries/catalog/pages -d '@data.json'"
-
+    - Deploy Compose Files
 
 include:
-  - '.gitlab-ci-build-scan.yml'
+  - project: 'msu-libraries/ci-cd/ci-cd'
+    ref: main
+    file: '/templates/SSH.gitlab-ci.yml'
+  - 'templates/Build.gitlab-ci.yml'
+  - 'templates/Scan.gitlab-ci.yml'
+  - 'templates/Release.gitlab-ci.yml'

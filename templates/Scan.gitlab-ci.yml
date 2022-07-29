@@ -1,0 +1,61 @@
+############# Scan ###############
+# https://docs.gitlab.com/ee/user/application_security/container_scanning/
+
+container_scanning:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+      changes:
+        - vufind/*
+        - docker-compose.yml
+        - docker-compose.solr*
+        - solr/*
+        - zk/*
+  needs:
+    - Build Vufind Image
+  variables:
+    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
+    GIT_STRATEGY: fetch
+    DOCKERFILE_PATH: vufind/Dockerfile
+
+Scan Solr Image:
+  extends: .scan_template
+  needs:
+    - Build Solr Image
+  variables:
+    COMPONENT: solr
+
+Scan DB Image:
+  extends: .scan_template
+  needs:
+    - Build DB Image
+  variables:
+    COMPONENT: db
+
+Scan ZK Image:
+  extends: .scan_template
+  needs:
+    - Build ZK Image
+  variables:
+    COMPONENT: zk
+
+Scan Internal Traefik Image:
+  extends: .scan_template
+  needs:
+    - Build Internal Traefik Image
+  variables:
+    COMPONENT: traefik-internal
+
+############# Templates ###############
+
+.scan_template:
+  extends: container_scanning
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+  variables:
+    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:latest
+    GIT_STRATEGY: fetch
+    DOCKERFILE_PATH: $COMPONENT/Dockerfile
+
+include:
+  - template: Security/Container-Scanning.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml

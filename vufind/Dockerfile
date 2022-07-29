@@ -1,6 +1,7 @@
 FROM ubuntu:22.04
 
 ENV TZ=America/Detroit
+# TODO upgrade to latest version
 ENV VUFIND_VERSION=8.0.4
 ENV MYSQL_ROOT_PASSWORD=12345
 

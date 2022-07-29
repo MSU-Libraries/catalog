@@ -4,6 +4,8 @@
 # curl http://solr:8983/solr/biblio/update -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
 # curl http://solr:8983/solr/biblio/update -H "Content-type: text/xml" --data-binary '<commit />'
 
+# TODO Feature: add flag to limit number of records imported
+
 # Script help text
 runhelp() {
     echo ""

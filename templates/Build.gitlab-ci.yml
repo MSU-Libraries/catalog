@@ -33,8 +33,8 @@ Build Vufind Image:
         - solr/*
         - zk/*
   variables:
-    LATEST: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
-    CURR: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:$CI_COMMIT_SHORT_SHA
+    LATEST: $CI_REGISTRY_IMAGE/vufind:latest
+    CURR: $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
@@ -55,59 +55,15 @@ Build Vufind Image:
         --build-arg MAIL_USERNAME= 
         --build-arg MAIL_PASSWORD= 
         --build-arg SOLR_URL=http://solr:8983/solr 
-        --tag $LATEST 
         --tag $CURR 
         --cache-from $LATEST 
         vufind/
-    - docker push $LATEST
     - docker push $CURR
-
-############# Scan ###############
-# https://docs.gitlab.com/ee/user/application_security/container_scanning/
-
-container_scanning:
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
-      changes:
-        - vufind/*
-        - docker-compose.yml
-        - docker-compose.solr*
-        - solr/*
-        - zk/*
-  needs:
-    - Build Vufind Image
-  variables:
-    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
-    GIT_STRATEGY: fetch
-    DOCKERFILE_PATH: vufind/Dockerfile
-
-Scan Solr Image:
-  extends: .scan_template
-  needs:
-    - Build Solr Image
-  variables:
-    COMPONENT: solr
-
-Scan DB Image:
-  extends: .scan_template
-  needs:
-    - Build DB Image
-  variables:
-    COMPONENT: db
-
-Scan ZK Image:
-  extends: .scan_template
-  needs:
-    - Build ZK Image
-  variables:
-    COMPONENT: zk
-
-Scan Internal Traefik Image:
-  extends: .scan_template
-  needs:
-    - Build Internal Traefik Image
-  variables:
-    COMPONENT: traefik-internal
+    - |
+      if [[ $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH ]]; then
+        docker tag $CURR $LATEST
+        docker push $LATEST
+      fi
 
 ############# Templates ###############
 
@@ -118,30 +74,20 @@ Scan Internal Traefik Image:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
   variables:
-    LATEST: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:latest
-    CURR: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:$CI_COMMIT_SHORT_SHA
+    LATEST: $CI_REGISTRY_IMAGE/$COMPONENT:latest
+    CURR: $CI_REGISTRY_IMAGE/$COMPONENT:$CI_COMMIT_SHORT_SHA
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - docker pull $LATEST || true
     - > 
         docker build 
-        --tag $LATEST 
         --tag $CURR 
         --cache-from $LATEST 
         $COMPONENT/
-    - docker push $LATEST
     - docker push $CURR
-
-.scan_template:
-  extends: container_scanning
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
-  variables:
-    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:latest
-    GIT_STRATEGY: fetch
-    DOCKERFILE_PATH: $COMPONENT/Dockerfile
-
-include:
-  - template: Security/Container-Scanning.gitlab-ci.yml
-  - template: Security/Secret-Detection.gitlab-ci.yml
+    - |
+      if [[ $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH ]]; then
+        docker tag $CURR $LATEST
+        docker push $LATEST
+      fi

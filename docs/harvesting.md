@@ -1,5 +1,13 @@
 # Harvesting
-These are the commands should be run within the vufind Docker container.
+These are the commands should be run within the `vufind` or `harvest` Docker container.
+
+The preferred method is to use the included wrapper script with this repository.
+The [harvest-and-import.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/harvest-and-import.sh)
+script can run either, or both, the harvest and import of data from FOLIO to Vufind. Use the `--help` flag
+to get information on how to run that script.
+
+But should you choose to run the commands included directly with Vufind, below is documentation on how to
+do that.
 
 ## Harvesting from Folio
 ```bash

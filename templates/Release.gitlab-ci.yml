@@ -1,0 +1,51 @@
+############# Release ###############
+
+Tag Release:
+  stage: Tag
+  tags:
+    - msul-shared
+  rules:
+    - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
+      when: manual
+  before_script:
+    - apk add git
+  script:
+    - rm -rf clone/ || true
+    - git clone https://gitlab-ci-token:$RW_CICD_TOKEN@gitlab.msu.edu/msu-libraries/devops/catalog.git clone/
+    - cd clone/ # doing this to avoid runner cache
+    - major_ver=$(date +'%y.%-m')
+    - latest_patch=$(git tag -l $major_ver* --sort=-v:refname | head -n 1 | cut -d'.' -f 3)
+    - "[ -z $latest_patch ] && cur_patch=-1 || cur_patch=$latest_patch"
+    - patch_ver=$(($cur_patch+1))
+    - TAG=$major_ver.$patch_ver
+    - echo "TAG=$TAG" > ../variables.env
+    - echo "Tagging new release with $TAG"
+    - git tag $TAG
+    - git push origin --tags
+  artifacts:
+    reports:
+      dotenv: variables.env
+
+GitHub Release:
+  stage: Release
+  tags:
+    - msul-shared
+  rules:
+    - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
+      when: manual
+  needs:
+    - job: Tag Release
+      artifacts: true
+  before_script:
+    - apk add git curl
+  script:
+    - rm -rf catalog.git
+    - git clone --mirror https://RW_CICD_TOKEN:$RW_CICD_TOKEN@gitlab.msu.edu/msu-libraries/devops/catalog.git
+    - cd catalog.git
+    - git push --force --mirror https://$GITHUB_USER_TOKEN@github.com/MSU-Libraries/catalog.git
+    - echo "{\"tag_name\":\"${TAG}\", \"target_commitish\":\"${CI_COMMIT_SHA}\"}" > data.json
+    - "curl -X POST -H 'Accept: application/vnd.github.v3+json' -u $GITHUB_USER_TOKEN https://api.github.com/repos/MSU-Libraries/catalog/releases -d '@data.json'"
+    # Update the GitHub Pages branch used
+    - sleep 45 # Needs time to propagate the changes first or this next step will fail
+    - echo "{\"source\":{\"path\":\"/\", \"branch\":\"gh-pages\"}" > data.json
+    - "curl -X POST -H 'Accept: application/vnd.github.v3+json' -u $GITHUB_USER_TOKEN https://api.github.com/repos/MSU-Libraries/catalog/pages -d '@data.json'"

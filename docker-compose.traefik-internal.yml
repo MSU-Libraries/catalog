@@ -2,7 +2,7 @@
 version: "3.8"
 
 services:
-  # Load balancer for internal services. E.g. solr, mariadb
+  # Load balancer for internal services. E.g. mariadb
   lb:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/traefik-internal:latest
     volumes:
@@ -11,12 +11,6 @@ services:
       - target: 3306
         published: 3306
         protocol: tcp
-      - target: 8983
-        published: 8983
-        protocol: tcp
-      - target: 8080
-        published: 8080
-        protocol: tcp
     networks:
       - internal
     command:
@@ -24,12 +18,9 @@ services:
       - --providers.docker.swarmMode=true
       - --providers.docker.exposedByDefault=false
       - --providers.docker.network=internal
-      # TODO -- add restriction to solr entrypoint in solr.yml
       - --providers.file.directory=/etc/traefik_providers
       - --providers.file.watch=true
       - --entrypoints.msul-db-ent.address=:3306
-      #- --entrypoints.msul-solr-ent.address=:8983
-      # - --entrypoints.msul-dashboard-ent.address=:8080
       - --log
       - --log.level=WARN
       - --accesslog
