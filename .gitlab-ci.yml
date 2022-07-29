@@ -67,6 +67,7 @@ Deploy Compose Files:
     - ./yq -i ".services.zk3.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
     # Modify the name of internal network to include $STACK_NAME
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.traefik-internal.yml
+    - ./yq -i ".services.lb.command[0]=\"--providers.docker.network=${STACK_NAME}-internal\"" docker-compose.traefik-internal.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-bootstrap.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera1.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera2.yml

@@ -7,17 +7,14 @@ services:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/traefik-internal:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-#    ports:
-#      - target: 3306
-#        published: 3306
-#        protocol: tcp
     networks:
       - internal
     command:
+      # This flag must be first for the CI/CD to replace the network name correctly
+      - --providers.docker.network=internal
       - --providers.docker
       - --providers.docker.swarmMode=true
       - --providers.docker.exposedByDefault=false
-      - --providers.docker.network=internal
       - --providers.file.directory=/etc/traefik_providers
       - --providers.file.watch=true
       - --entrypoints.msul-db-ent.address=:3306
@@ -61,6 +58,3 @@ networks:
   internal:
     name: internal
     driver: overlay
-#    ipam:
-#      config:
-#        - subnet: 192.168.1.0/24
