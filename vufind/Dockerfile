@@ -77,7 +77,7 @@ COPY harvest-and-import.sh /harvest-and-import.sh
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
 RUN chmod -R o-w /etc/cron.d/ && \
-    sed -i "/imklog/d" /tmp/rsyslog.conf
+    sed -i "/imklog/d" /etc/rsyslog.conf
 
 WORKDIR /usr/local/vufind
 
