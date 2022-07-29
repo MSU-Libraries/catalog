@@ -21,22 +21,9 @@ services:
       - --log
       - --log.level=WARN
       - --accesslog
-      - --entrypoints.health-ent.address=127.0.0.1:8081
-      - --ping
-      - --ping.entrypoint=health-ent
       - --global.checknewversion=false
       - --global.sendanonymoususage=false
       - --api.dashboard=true
-    healthcheck:
-      test: >
-        traefik healthcheck
-          --entrypoints.health-ent.address=127.0.0.1:8081
-          --ping
-          --ping.entrypoint=health-ent
-      interval: 15s
-      timeout: 5s
-      retries: 1
-      start_period: 20s
     deploy:
       mode: replicated
       replicas: 1
