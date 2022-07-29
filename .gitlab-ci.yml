@@ -25,7 +25,7 @@ Set Stack Name:
       elif [[ "${CI_COMMIT_BRANCH}" == "devel-"* || "${CI_COMMIT_BRANCH}" == "review-"* ]]; then
           STACK_NAME="${CI_COMMIT_BRANCH}"
       fi
-      echo "STACK_NAME=\"${STACK_NAME}\"" > build.env
+      echo "STACK_NAME=${STACK_NAME}" > build.env
   artifacts:
     reports:
       dotenv: build.env
