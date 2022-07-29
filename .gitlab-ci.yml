@@ -76,7 +76,7 @@ Deploy Compose Files:
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.solr-cloud.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.yml
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
-    - sed -i "/^$$/d" docker-compose.traefik-internal.yml
+    - sed -i "/^$/d" docker-compose.traefik-internal.yml
     # Copy the updated compose files to the server
     - ssh deploy@$DEPLOY_HOST mkdir -p $COMPOSE_PATH
     - scp docker-compose* deploy@$DEPLOY_HOST:$COMPOSE_PATH/
