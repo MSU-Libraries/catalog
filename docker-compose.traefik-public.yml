@@ -16,27 +16,28 @@ services:
       - target: 443
         published: 443
         protocol: tcp
-    command:  "sh -c 'install -d -m 700 /etc/traefik/acme/;
-      exec traefik
-        --providers.docker
-        --providers.docker.swarmMode=true
-        --providers.docker.exposedByDefault=false
-        --providers.docker.network=public
-        --entrypoints.msul-http-ent.address=:80
-        --entrypoints.msul-https-ent.address=:443
-        --log
-        --log.level=WARN
-        --accesslog
-        --entrypoints.health-ent.address=127.0.0.1:8081
-        --ping
-        --ping.entrypoint=health-ent
-        --global.checknewversion=false
-        --global.sendanonymoususage=false
-        --certificatesresolvers.msul-letsencrypt.acme.email=LIB.DL.DDaS@msu.edu
-        --certificatesresolvers.msul-letsencrypt.acme.storage=/etc/traefik/acme/acme.json
-        --certificatesresolvers.msul-letsencrypt.acme.httpchallenge=true
-        --certificatesresolvers.msul-letsencrypt.acme.httpchallenge.entrypoint=msul-http-ent
-      '"
+    #--providers.docker.defaultrule=Host\\(`{{ index .Labels \"com.docker.swarm.service.name\" }}.lib.msu.edu`\\)
+    #command:  "sh -c 'install -d -m 700 /etc/traefik/acme/;
+    command:
+      - "--providers.docker"
+      - "--providers.docker.swarmMode=true"
+      - "--providers.docker.exposedByDefault=false"
+      - "--providers.docker.network=public"
+      - '--providers.docker.defaultRule=Host(`{{ index .Labels "com.docker.stack.namespace" | trimSuffix "_" }}.lib.msu.edu`)'
+      - "--entrypoints.msul-http-ent.address=:80"
+      - "--entrypoints.msul-https-ent.address=:443"
+      - "--log"
+      - "--log.level=WARN"
+      - "--accesslog"
+      - "--entrypoints.health-ent.address=127.0.0.1:8081"
+      - "--ping"
+      - "--ping.entrypoint=health-ent"
+      - "--global.checknewversion=false"
+      - "--global.sendanonymoususage=false"
+      - "--certificatesresolvers.msul-letsencrypt.acme.email=LIB.DL.DDaS@msu.edu"
+      - "--certificatesresolvers.msul-letsencrypt.acme.storage=/etc/traefik/acme.json"
+      - "--certificatesresolvers.msul-letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.msul-letsencrypt.acme.httpchallenge.entrypoint=msul-http-ent"
     healthcheck:
       test: >
         traefik healthcheck \

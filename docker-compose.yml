@@ -28,8 +28,8 @@ services:
         - "traefik.http.middlewares.fix-prefix.replacepathregex.replacement=/vufind/$$2"
         # HTTP Configuration
         - "traefik.http.routers.http-router.entrypoints=msul-http-ent"
-        - "traefik.http.routers.http-router.rule=\
-            Host(`catalog.aws.lib.msu.edu`, `catalog-beta.lib.msu.edu`)"
+        #- "traefik.http.routers.http-router.rule=\
+        #  Host(`{{ index .Labels \"com.docker.stack.namespace\" }}.lib.msu.edu`)"
         - "traefik.http.routers.http-router.middlewares=http-redirect"
         - "traefik.http.routers.http-router.service=http-app"
         - "traefik.http.services.http-app.loadbalancer.server.port=80"
@@ -37,8 +37,8 @@ services:
         - "traefik.http.routers.https-router.tls=true"
         - "traefik.http.routers.https-router.tls.certresolver=msul-letsencrypt"
         - "traefik.http.routers.https-router.entrypoints=msul-https-ent"
-        - "traefik.http.routers.https-router.rule=\
-            Host(`catalog.aws.lib.msu.edu`, `catalog-beta.lib.msu.edu`)"
+        #- "traefik.http.routers.https-router.rule=\
+        #  Host(`{{ index .Labels \"com.docker.stack.namespace\" }}.lib.msu.edu`)"
         - "traefik.http.routers.https-router.middlewares=fix-prefix"
         - "traefik.http.routers.https-router.service=https-app"
         - "traefik.http.services.https-app.loadbalancer.server.port=80"

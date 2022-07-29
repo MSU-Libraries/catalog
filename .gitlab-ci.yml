@@ -18,6 +18,7 @@ Deploy Compose Files:
     - msul-docker
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+  # TODO deploy into separate locations for each stack? sub-dir perhaps?
   script:
     - scp docker-compose* deploy@$DEPLOY_HOST:$COMPOSE_PATH
 
