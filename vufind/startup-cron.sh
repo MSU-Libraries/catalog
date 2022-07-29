@@ -2,6 +2,7 @@
 
 mkdir -p /mnt/shared/harvest_folio/
 mv /usr/local/vufind/local/harvest/folio/ /tmp/
-ln -s /mnt/shared/harvest_folio/ /usr/local/vufind/local/harvest/folio/
+ln -s /mnt/shared/harvest_folio/ /usr/local/vufind/local/harvest/folio
 
+rsyslogd
 cron -f -L 4

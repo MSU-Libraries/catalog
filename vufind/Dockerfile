@@ -17,7 +17,7 @@ ENV JAVA_HOME=/usr/lib/jvm/default-java
 
 # Perform updates
 RUN apt update && \
-    apt install wget vim lsof apache2 xml-twig-tools curl cron -y
+    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog -y
 
 # Setup Timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
@@ -71,10 +71,13 @@ RUN echo "ServerName catalog.lib.msu.edu" >> /etc/apache2/sites-available/000-de
 # Add file customizations
 COPY local/ /usr/local/vufind/local
 COPY startup.sh /startup.sh
+COPY startup-cron.sh /startup-cron.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
-COPY cron.d/ /etc/cron.d/
 
-RUN chmod -R o-w /etc/cron.d/
+# Setup cron and logging for cron
+COPY cron.d/ /etc/cron.d/
+RUN chmod -R o-w /etc/cron.d/ && \
+    sed -i "/imklog/d" /tmp/rsyslog.conf
 
 WORKDIR /usr/local/vufind
 

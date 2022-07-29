@@ -45,7 +45,7 @@ services:
 
   harvest:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
-    command: cron -f -L 4
+    command: /startup-cron.sh
     volumes:
       - /mnt/shared:/mnt/shared
     networks:
