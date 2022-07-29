@@ -180,8 +180,9 @@ Deploy Vufind:
   stage: Deploy
   extends: .stack_template
   environment:
-    name: $STACK_NAME
-    url: https://$STACK_NAME.aws.lib.msu.edu
+    name: $CI_COMMIT_BRANCH
+    #url: https://$STACK_NAME.aws.lib.msu.edu
+    on_stop: Remove Environment
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $STACK_NAME != ""'
       changes:
@@ -208,6 +209,10 @@ Deploy Vufind:
 Remove Environment:
   stage: Cleanup
   extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH
+    #url: https://$STACK_NAME.aws.lib.msu.edu
+    action: stop
   rules:
     - if: '$CI_DEFAULT_BRANCH != $CI_COMMIT_BRANCH && $STACK_NAME != ""'
       when: manual

@@ -7,10 +7,10 @@ services:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/traefik-internal:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    ports:
-      - target: 3306
-        published: 3306
-        protocol: tcp
+#    ports:
+#      - target: 3306
+#        published: 3306
+#        protocol: tcp
     networks:
       - internal
     command:
