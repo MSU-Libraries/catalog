@@ -50,30 +50,30 @@ Deploy Compose Files:
     - wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O ./yq
     - chmod +x ./yq
     # Modify the image tag from :latest -> $CI_COMMIT_SHORT_SHA
-    - ./yq -i ".services.catalog.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" < docker-compose.yml
-    - ./yq -i ".services.harvest.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" < docker-compose.yml
-    - ./yq -i ".services.lb.image=\"$CI_REGISTRY_IMAGE/traefik-internal:$CI_COMMIT_SHORT_SHA\"" < docker-compose.traefik-internal.yml
-    - ./yq -i ".services.galera1.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" < docker-compose.mariadb-bootstrap.yml
-    - ./yq -i ".services.galera1.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" < docker-compose.mariadb-galera1.yml
-    - ./yq -i ".services.galera2.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" < docker-compose.mariadb-galera2.yml
-    - ./yq -i ".services.galera3.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" < docker-compose.mariadb-galera3.yml
-    - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud-bootstrap.yml
-    - ./yq -i ".services.zk1.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud-bootstrap.yml
-    - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud-bootstrap.yml
-    - ./yq -i ".services.zk3.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud-bootstrap.yml
-    - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud.yml
-    - ./yq -i ".services.zk1.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud.yml
-    - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud.yml
-    - ./yq -i ".services.zk3.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" < docker-compose.solr-cloud.yml
+    - ./yq -i ".services.catalog.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
+    - ./yq -i ".services.harvest.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
+    - ./yq -i ".services.lb.image=\"$CI_REGISTRY_IMAGE/traefik-internal:$CI_COMMIT_SHORT_SHA\"" docker-compose.traefik-internal.yml
+    - ./yq -i ".services.galera1.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-bootstrap.yml
+    - ./yq -i ".services.galera1.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-galera1.yml
+    - ./yq -i ".services.galera2.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-galera2.yml
+    - ./yq -i ".services.galera3.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-galera3.yml
+    - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
+    - ./yq -i ".services.zk1.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
+    - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
+    - ./yq -i ".services.zk3.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
+    - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".services.zk1.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".services.zk3.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
     # Modify the name of internal network to include $STACK_NAME
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.traefik-internal.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.mariadb-bootstrap.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.mariadb-galera1.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.mariadb-galera2.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.mariadb-galera3.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.solr-cloud-bootstrap.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.solr-cloud.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" < docker-compose.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.traefik-internal.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-bootstrap.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera1.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera2.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera3.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.solr-cloud-bootstrap.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.yml
     # Copy the updated compose files to the server
     - ssh deploy@$DEPLOY_HOST mkdir -p $COMPOSE_PATH
     - scp docker-compose* deploy@$DEPLOY_HOST:$COMPOSE_PATH/
