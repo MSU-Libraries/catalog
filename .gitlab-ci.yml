@@ -246,5 +246,5 @@ include:
     ref: main
     file: '/templates/SSH.gitlab-ci.yml'
   - 'templates/Build.gitlab-ci.yml'
-  - 'templates/Scan.gitlab-ci.yml'
+#  - 'templates/Scan.gitlab-ci.yml'
   - 'templates/Release.gitlab-ci.yml'
