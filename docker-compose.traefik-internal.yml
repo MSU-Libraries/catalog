@@ -29,9 +29,9 @@ services:
       - --api.dashboard=true
     healthcheck:
       test: >
-        traefik healthcheck \
-          --entrypoints.health-ent.address=127.0.0.1:8081 \
-          --ping \
+        traefik healthcheck
+          --entrypoints.health-ent.address=127.0.0.1:8081
+          --ping
           --ping.entrypoint=health-ent
       interval: 15s
       timeout: 5s
