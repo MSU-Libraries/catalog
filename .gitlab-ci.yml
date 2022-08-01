@@ -46,7 +46,7 @@ Deploy Compose Files:
       artifacts: true
   script:
     # Install yq, enbsubst, and sponge
-    - apk add wget gettext-base moreutils
+    - apk add wget gettext moreutils
     - wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O ./yq
     - chmod +x ./yq
     # Modify the image tag from :latest -> $CI_COMMIT_SHORT_SHA
