@@ -98,8 +98,6 @@ Deploy Internal Traefik:
 Deploy Public Traefik:
   stage: Traefik
   extends: .stack_template
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
   needs:
     - job: Set Stack Name
       artifacts: true
