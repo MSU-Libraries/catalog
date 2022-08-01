@@ -43,6 +43,9 @@ when you are done with it
     of that stack. Developers can then later commit the changes on the host server
     from the shared mount location if they want to preserve those changes.
 
+## Pipeline Stages & Jobs
+TODO document various stages and jobs
+
 ## Variables
 At this time, the following variables need to be defined in the
 project's CI/CD settings to be available to the pipeline. While it is ok for variables to be

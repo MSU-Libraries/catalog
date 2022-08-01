@@ -7,3 +7,6 @@ setup and configure the containerized Vufind.
 * [First Time Setup](/catalog/first-time-setup)
 * [Harvesting](/catalog/harvesting)
 * [CI/CD](/catalog/CICD)
+
+# TODO add description of what each stack does
+# TODO list technologies used (i.e. describe the overall architecture)
