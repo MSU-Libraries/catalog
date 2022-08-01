@@ -55,6 +55,16 @@ services:
         parallelism: 1
       restart_policy:
         window: 15s
+      labels:
+        - "traefik.enable=true"
+        # Redirect Middleware
+        - "traefik.http.middlewares.http-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.http-redirect.redirectscheme.permanent=true"
+        # Middleware to add /vufind to path
+        - "traefik.http.middlewares.fix-prefix.replacepathregex.regex=^/(vufind/)?(.*)"
+        - "traefik.http.middlewares.fix-prefix.replacepathregex.replacement=/vufind/$$2"
+
+
 
 networks:
   public:
