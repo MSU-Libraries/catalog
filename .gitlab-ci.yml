@@ -138,6 +138,8 @@ Deploy Solr:
         - docker-compose.yml
         - vufind/*
         - zk/*
+        - .gitlab-ci.yml
+        - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -164,6 +166,8 @@ Deploy DB:
         - docker-compose.solr*
         - solr/*
         - zk/*
+        - .gitlab-ci.yml
+        - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -194,6 +198,8 @@ Deploy Vufind:
         - docker-compose.solr*
         - solr/*
         - zk/*
+        - .gitlab-ci.yml
+        - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
