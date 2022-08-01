@@ -75,6 +75,11 @@ Deploy Compose Files:
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.solr-cloud-bootstrap.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.solr-cloud.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.yml
+    # Add $STACK_NAME to galera service name
+    - ./yq -i ".services.galera1.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera1-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-boostrap.yml
+    - ./yq -i ".services.galera1.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera1-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera1.yml
+    - ./yq -i ".services.galera2.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera2-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera2.yml
+    - ./yq -i ".services.galera3.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera3-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera3.yml
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
     - sed -i "/^$/d" docker-compose.traefik-internal.yml
     # Copy the updated compose files to the server
@@ -93,7 +98,7 @@ Deploy Internal Traefik:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml $STACK_NAME-traefik-internal"
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml $STACK_NAME-traefik-internal && sleep 10"
 
 Deploy Public Traefik:
   stage: Traefik
@@ -106,7 +111,7 @@ Deploy Public Traefik:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public"
+      docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public && sleep 10"
 
 Bootstrap Stacks:
   stage: Bootstrap
@@ -211,7 +216,7 @@ Deploy Vufind:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME"
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME-catalog"
 
 Remove Environment:
   stage: Cleanup
@@ -233,7 +238,7 @@ Remove Environment:
       ssh deploy@$DEPLOY_HOST
       "docker stack rm $STACK_NAME-solr &&
       docker stack rm $STACK_NAME-maridb &&
-      docker stack rm $STACK_NAME &&
+      docker stack rm $STACK_NAME-catalog &&
       docker stack rm $STACK_NAME-traefik-internal &&
       rm -rf $COMPOSE_PATH/$CI_COMMIT_BRANCH &&
       docker system prune --volumes -a -f"

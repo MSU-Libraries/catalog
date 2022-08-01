@@ -45,7 +45,9 @@ when you are done with it
 
 ## Variables
 At this time, the following variables need to be defined in the
-project's CI/CD settings to be available to the pipeline.
+project's CI/CD settings to be available to the pipeline. While it is ok for variables to be
+marked as `masked`, they can not be marked as `protected`; otherwise they will not be
+available in the `devel-` and `review-` pipelines.
 
 
 * `DEPLOY_PRIVATE_KEY`: The `base64` encoded private ssh key to the deploy server

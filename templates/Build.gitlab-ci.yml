@@ -19,6 +19,10 @@ Build Internal Traefik Image:
   variables:
      COMPONENT: traefik-internal
   extends: .build_template
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    # Replace Name in providers file
+    - sed -i 's/msul-galera/${STACK_NAME}-msul-galera/g' $COMPONENT/providers/internal.yml
 
 Build Vufind Image:
   stage: Build
