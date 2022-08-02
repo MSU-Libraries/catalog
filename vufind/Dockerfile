@@ -76,7 +76,7 @@ COPY harvest-and-import.sh /harvest-and-import.sh
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
-RUN chmod -R o-w /etc/cron.d/ && \
+RUN chmod -R g-w,o-w /etc/cron.d/ && \
     sed -i "/imklog/d" /etc/rsyslog.conf
 
 WORKDIR /usr/local/vufind
@@ -100,9 +100,9 @@ RUN if [ "$DEBUG" = 1 ] ; \
 RUN sed -i "/getStatus/s/1/${FOLIO_REC_ID}/g" ${VUFIND_HOME}/module/VuFind/src/VuFind/ILS/Connection.php
 
 # Set required environment variables
-RUN echo export JAVA_HOME="$JAVA_HOME" > /etc/profile.d/vufind.sh && \
-    echo export VUFIND_HOME="$VUFIND_HOME"  >> /etc/profile.d/vufind.sh && \
-    echo export VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR"  >> /etc/profile.d/vufind.sh
+RUN echo JAVA_HOME="$JAVA_HOME" >> /etc/environment && \
+    echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
+    echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR"  >> /etc/environment
 
 EXPOSE 80
 
