@@ -153,6 +153,7 @@ Deploy Solr:
         - zk/*
         - .gitlab-ci.yml
         - templates/*
+  needs:
     - job: Set Stack Name
       artifacts: true
     - Build Solr Image
