@@ -4,8 +4,6 @@
 # curl http://solr:8983/solr/biblio/update -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
 # curl http://solr:8983/solr/biblio/update -H "Content-type: text/xml" --data-binary '<commit />'
 
-# TODO Feature: add flag to limit number of records imported
-
 # Script help text
 runhelp() {
     echo ""
@@ -41,6 +39,11 @@ runhelp() {
     # echo "  -y|--yes"
     # echo "      Assume a 'yes' answer to all prompts and run the"
     # echo "      command non-interactively."
+    echo "  -l|--limit FILES_COUNT"
+    echo "      Limit the number of files imported during batch import."
+    echo "      For copy-shared, this will limit files copied."
+    echo "      Without copy-shared, this is done by DELETING any files"
+    echo "      exceeding this limit from the VUFIND_HARVEST_DIR."
     echo "  -d|--vufind-harvest-dir DIR"
     echo "      Full path to the vufind harvest directory"
     echo "      Default: /usr/local/vufind/local/harvest/folio"
@@ -65,6 +68,7 @@ default_args() {
     ARGS[YES]=0
     ARGS[COPY_SHARED]=0
     ARGS[BATCH_IMPORT]=0
+    ARGS[LIMIT]=
     ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/folio
     ARGS[SHARED_HARVEST_DIR]=/mnt/shared/oai
     ARGS[VERBOSE]=0
@@ -90,6 +94,13 @@ parse_args() {
         -b|--batch-import)
             ARGS[BATCH_IMPORT]=1
             shift;;
+        -l|--limit)
+            ARGS[LIMIT]="$2"
+            if [[ ! "${ARGS[LIMIT]}" -gt 0 ]]; then
+                echo "ERROR: -l|--limit only accept positive integers"
+                exit 1
+            fi
+            shift; shift ;;
         -d|--vufind-harvest-dir)
             ARGS[VUFIND_HARVEST_DIR]=$( readlink -f "$2" )
             RC=$?
@@ -218,7 +229,7 @@ oai_harvest() {
         if [[ "${#COMBINE_FILES[@]}" -ge 100 ]]; then
             oai_harvest_combiner
         fi
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}" -name '*_oai_*.xml')
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -name '*_oai_*.xml')
     oai_harvest_combiner
 
     verbose "Copying combined XML to shared dir"
@@ -235,8 +246,19 @@ oai_harvest() {
 copyback_from_shared() {
     #prompt_yes "Proceed to copy XML and last_harvest.txt from ${ARGS[SHARED_HARVEST_DIR]} to ${ARGS[VUFIND_HARVEST_DIR]}?"
 
+    # Clear out any exising xml files before copying back from shared storage
+    rm -f "${ARGS[VUFIND_HARVEST_DIR]}/combined_"*.xml
+
     verbose "Copying combined XML from shared dir to VuFind"
-    cp --preserve=timestamps "${ARGS[SHARED_HARVEST_DIR]}"/combined_*.xml "${ARGS[VUFIND_HARVEST_DIR]}/"
+    COPIED_COUNT=0
+    while read -r FILE; do
+        cp --preserve=timestamps "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/"
+        (( COPIED_COUNT += 1 ))
+        if [[ -n "${ARGS[LIMIT]}" && "${COPIED_COUNT}" -ge "${ARGS[LIMIT]}" ]]; then
+            # If limit is set, only copy the provided limit of xml files over to the VUFIND_HARVEST_DIR
+            break
+        fi
+    done < <(find "${ARGS[SHARED_HARVEST_DIR]}" -mindepth 1 -maxdepth 1 -name 'combined_*.xml')
 
     verbose "Copying last_harvest.txt from shared dir to VuFind"
     cp --preserve=timestamps "${ARGS[SHARED_HARVEST_DIR]}"/last_harvest.txt "${ARGS[VUFIND_HARVEST_DIR]}/"
@@ -245,6 +267,17 @@ copyback_from_shared() {
 # Perform VuFind batch import of OAI records
 batch_import() {
     verbose "Starting batch import"
+
+    if [[ -n "${ARGS[LIMIT]}" ]]; then
+        # Delete excess files beyond the provided limit from the VUFIND_HARVEST_DIR prior to import
+        FOUND_COUNT=0
+        while read -r FILE; do
+            (( FOUND_COUNT += 1 ))
+            if [[ "${FOUND_COUNT}" -gt "${ARGS[LIMIT]}" ]]; then
+                rm "$FILE"
+            fi
+        done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name 'combined_*.xml')
+    fi
     
     /usr/local/vufind/harvest/batch-import-marc.sh folio
 
