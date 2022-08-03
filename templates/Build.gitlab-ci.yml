@@ -15,6 +15,11 @@ Build ZK Image:
      COMPONENT: zk
   extends: .build_template
 
+Build Ansible Image:
+  variables:
+     COMPONENT: ansible
+  extends: .build_template
+
 Build Internal Traefik Image:
   variables:
      COMPONENT: traefik-internal

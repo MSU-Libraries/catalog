@@ -52,7 +52,8 @@ project's CI/CD settings to be available to the pipeline. While it is ok for var
 marked as `masked`, they can not be marked as `protected`; otherwise they will not be
 available in the `devel-` and `review-` pipelines.
 
-
+* `AWS_KEY`: The AWS access key to use when provisioning the DNS CNAME records
+* `AWS_SECRET`: The AWS secret for the `AWS_KEY` uses when provisioning the DNS CNAME records
 * `DEPLOY_PRIVATE_KEY`: The `base64` encoded private ssh key to the deploy server
 * `EMAIL`: Email address set in Vufind's configs 
 * `FOLIO_CANCEL_ID`: The FOLIO cancelation ID to use when canceling an order. Vufind uses
