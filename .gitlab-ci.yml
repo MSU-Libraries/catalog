@@ -45,6 +45,7 @@ Create DNS:
     # Replace STACK_NAME in env/prod/main.tf and create host file in provision-dns-playbook
     - cat dns-terraform/env/prod/main.tf | envsubst | sponge dns-terraform/env/prod/main.tf
     - cat dns-terraform/env/prod/main.tf
+    - echo $HOME
     # Run playbook
     - ansible-playbook provision-dns-playbook/provision.yml
     # Give time for DNS to propogate

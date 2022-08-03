@@ -1,12 +1,12 @@
 ---
 - name: Create AWS config directory
   file:
-    path: "~/.aws"
+    path: "/root/.aws"
     state: directory
 
 - name: Create AWS credential file
   copy:
-    dest: "~/.aws/credentials"
+    dest: "/root/.aws/credentials"
     content: "{{ aws_credential_template }}"
 
 - name: Provision DNS CNAME
