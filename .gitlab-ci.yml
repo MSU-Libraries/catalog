@@ -39,7 +39,7 @@ Create DNS:
     - echo "TODO - run terraform to create DNS for $STACK_NAME"
     # TODO add .aws credentials
     # TODO envsubst STACK_NAME in env/prod/main.tf
-    # TODO run terraform init, apply 
+    # TODO run terraform init, apply via a playbook
 
 Deploy Compose Files:
   stage: Build
