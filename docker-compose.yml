@@ -9,6 +9,8 @@ services:
     networks:
       - public
       - internal
+    volumes:
+      - /mnt/shared:/mnt/shared:ro
     deploy:
       mode: replicated
       replicas: 3
