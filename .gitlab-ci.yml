@@ -109,7 +109,7 @@ Deploy Internal Traefik:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml $STACK_NAME-traefik-internal && sleep 10"
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml $STACK_NAME-traefik-internal && sleep 15"
 
 Deploy Public Traefik:
   stage: Traefik
@@ -122,7 +122,7 @@ Deploy Public Traefik:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public && sleep 10"
+      docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public && sleep 15"
 
 Bootstrap Stacks:
   stage: Bootstrap
