@@ -37,7 +37,8 @@ Create DNS:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Build Ansible # TODO we can remove this after we have one :latest tag available
+    # TODO we can remove this after we have one :latest tag available
+    - Build Ansible Image
   script:
     # Add .aws credentials
     - cat provision-dns-playbook/variables.yml | envsubst | sponge provision-dns-playbook/variables.yml
