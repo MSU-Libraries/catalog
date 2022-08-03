@@ -34,6 +34,8 @@ Create DNS:
   stage: Prepare
   extends: .stack_template
   image: $CI_REGISTRY_IMAGE/ansible:latest
+  rules:
+    - if: '$CI_DEFAULT_BRANCH != $CI_COMMIT_BRANCH && $STACK_NAME != ""'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -230,8 +232,9 @@ Deploy Vufind:
     - Deploy DB
     - Deploy Solr
     - Deploy Compose Files
-    - Create DNS
   script:
+    # If this is a non-prod instance, give the new DNS records time to propogate
+    - if [ "${STACK_NAME}" != "catalog-beta" ]; then sleep 30; fi
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
