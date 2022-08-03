@@ -44,7 +44,7 @@ Create DNS:
     - cat provision-dns-playbook/variables.yml | envsubst | sponge provision-dns-playbook/variables.yml
     # Replace STACK_NAME in env/prod/main.tf and create host file in provision-dns-playbook
     - cat dns-terraform/env/prod/main.tf | envsubst | sponge dns-terraform/env/prod/main.tf
-    - echo ${STACK_NAME} > provision-dns-playbook/hosts
+    - cat dns-terraform/env/prod/main.tf | envsubst | sponge dns-terraform/env/prod/main.tf
     # Run playbook
     - ansible-playbook provision-dns-playbook/provision.yml
     # Give time for DNS to propogate
@@ -260,7 +260,7 @@ Remove Environment:
     - cat provision-dns-playbook/variables.yml | envsubst | sponge provision-dns-playbook/variables.yml
     # Replace STACK_NAME in env/prod/main.tf and create host file in provision-dns-playbook
     - cat dns-terraform/env/prod/main.tf | envsubst | sponge dns-terraform/env/prod/main.tf
-    - echo ${STACK_NAME} > provision-dns-playbook/hosts
+    - cat dns-terraform/env/prod/main.tf
     # Run playbook
     - ansible-playbook provision-dns-playbook/decommission.yml
     - >
