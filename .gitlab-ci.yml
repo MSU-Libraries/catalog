@@ -80,7 +80,8 @@ Deploy Compose Files:
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.solr-cloud.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.yml
     # Add labels for host rule if stack name is catalog-beta
-    - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".services.catalog.deploy.labels += [\"traefik.http.routers.http-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\",\"traefik.http.routers.https-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\"]" docker-compose.yml; fi
+    - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.catalog-beta-http-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\"" docker-compose.yml; fi
+    - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.catalog-beta-https-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\"" docker-compose.yml; fi
     # Add $STACK_NAME to galera service name
     - ./yq -i ".services.galera1.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera1-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-bootstrap.yml
     - ./yq -i ".services.galera1.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera1-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera1.yml
