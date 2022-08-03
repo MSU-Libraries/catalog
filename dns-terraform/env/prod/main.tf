@@ -10,6 +10,7 @@ module "dns" {
   source = "../../module/dns"
   instance_name = "${STACK_NAME}"
   arecord = "catalog.aws.lib.msu.edu"
+  aws_region = "us-east-2"
 }
 
 output "instance-dns-record" {
