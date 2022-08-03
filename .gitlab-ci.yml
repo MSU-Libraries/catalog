@@ -241,6 +241,7 @@ Deploy Vufind:
     # If this is a non-prod instance, load some records
     - >
       if [ "${STACK_NAME}" != "catalog-beta" ]; then 
+        sleep 15;
         ssh deploy@$DEPLOY_HOST "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -v"; 
       fi
 
@@ -268,11 +269,11 @@ Remove Environment:
     - ansible-playbook provision-dns-playbook/decommission.yml
     - >
       ssh deploy@$DEPLOY_HOST
-      "docker stack rm $STACK_NAME-solr &&
-      docker stack rm $STACK_NAME-maridb &&
-      docker stack rm $STACK_NAME-catalog &&
-      docker stack rm $STACK_NAME-traefik-internal &&
-      rm -rf $COMPOSE_PATH/$CI_COMMIT_BRANCH &&
+      "docker stack rm $STACK_NAME-solr;
+      docker stack rm $STACK_NAME-maridb;
+      docker stack rm $STACK_NAME-catalog;
+      docker stack rm $STACK_NAME-traefik-internal;
+      rm -rf $COMPOSE_PATH/$CI_COMMIT_BRANCH;
       docker system prune --volumes -a -f"
 
 ############# Templates ###############
