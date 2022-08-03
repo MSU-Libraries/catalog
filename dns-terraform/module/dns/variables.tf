@@ -7,3 +7,8 @@ variable "arecord" {
   description = "A record to link the CNAME DNS entry to"
   type = string
 }
+
+variable "aws_region" {
+  description = "AWS region to connect to by default"
+  type = string
+}
