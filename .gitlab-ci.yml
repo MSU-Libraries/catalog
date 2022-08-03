@@ -238,6 +238,11 @@ Deploy Vufind:
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME-catalog"
+    # If this is a non-prod instance, load some records
+    - >
+      if [ "${STACK_NAME}" != "catalog-beta" ]; then 
+        ssh deploy@$DEPLOY_HOST "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -v"; 
+      fi
 
 Remove Environment:
   stage: Cleanup
