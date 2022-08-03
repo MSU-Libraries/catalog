@@ -21,7 +21,7 @@ services:
       - "--providers.docker.swarmMode=true"
       - "--providers.docker.exposedByDefault=false"
       - "--providers.docker.network=public"
-      - '--providers.docker.defaultRule=Host(`{{ index .Labels "com.docker.stack.namespace" | trimSuffix "_" }}.lib.msu.edu`)'
+      - '--providers.docker.defaultRule=Host(`{{ index .Labels "com.docker.stack.namespace" | trimSuffix "-catalog" }}.aws.lib.msu.edu`)'
       - "--entrypoints.msul-http-ent.address=:80"
       - "--entrypoints.msul-https-ent.address=:443"
       - "--log"
@@ -55,6 +55,16 @@ services:
         parallelism: 1
       restart_policy:
         window: 15s
+      labels:
+        - "traefik.enable=true"
+        # Redirect Middleware
+        - "traefik.http.middlewares.http-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.http-redirect.redirectscheme.permanent=true"
+        # Middleware to add /vufind to path
+        - "traefik.http.middlewares.fix-prefix.replacepathregex.regex=^/(vufind/)?(.*)"
+        - "traefik.http.middlewares.fix-prefix.replacepathregex.replacement=/vufind/$$2"
+
+
 
 networks:
   public:

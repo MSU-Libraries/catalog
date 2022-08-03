@@ -19,22 +19,31 @@ Build Internal Traefik Image:
   variables:
      COMPONENT: traefik-internal
   extends: .build_template
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    # Replace Name in providers file
+    - sed -i "s/msul-galera/${STACK_NAME}-msul-galera/g" $COMPONENT/providers/internal.yml
 
 Build Vufind Image:
   stage: Build
   tags:
     - msul-docker
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $STACK_NAME != ""'
       changes:
         - vufind/*
         - docker-compose.yml
         - docker-compose.solr*
         - solr/*
         - zk/*
+        - .gitlab-ci.yml
+        - templates/*
   variables:
     LATEST: $CI_REGISTRY_IMAGE/vufind:latest
     CURR: $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA
+  needs:
+    - job: Set Stack Name
+      artifacts: true
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
@@ -72,12 +81,15 @@ Build Vufind Image:
   tags:
     - msul-shared
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $STACK_NAME != ""'
   variables:
     LATEST: $CI_REGISTRY_IMAGE/$COMPONENT:latest
     CURR: $CI_REGISTRY_IMAGE/$COMPONENT:$CI_COMMIT_SHORT_SHA
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  needs:
+    - job: Set Stack Name
+      artifacts: true
   script:
     - docker pull $LATEST || true
     - > 

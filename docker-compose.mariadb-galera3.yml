@@ -33,8 +33,8 @@ services:
         constraints:
           - "node.labels.nodeid==3"
       labels:
-        - "traefik.enable=true"
         - "traefik.tcp.services.msul-galera3-app.loadbalancer.server.port=3306"
+        - "traefik.enable=true"
 
 networks:
   internal:

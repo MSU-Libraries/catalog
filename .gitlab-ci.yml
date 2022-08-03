@@ -37,6 +37,9 @@ Create DNS:
       artifacts: true
   script:
     - echo "TODO - run terraform to create DNS for $STACK_NAME"
+    # TODO add .aws credentials
+    # TODO envsubst STACK_NAME in env/prod/main.tf
+    # TODO run terraform init, apply via a playbook
 
 Deploy Compose Files:
   stage: Build
@@ -45,8 +48,8 @@ Deploy Compose Files:
     - job: Set Stack Name
       artifacts: true
   script:
-    # Install yq
-    - apk add wget
+    # Install yq, enbsubst, and sponge
+    - apk add wget gettext moreutils
     - wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O ./yq
     - chmod +x ./yq
     # Modify the image tag from :latest -> $CI_COMMIT_SHORT_SHA
@@ -71,10 +74,22 @@ Deploy Compose Files:
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-bootstrap.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera1.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera2.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera2.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera3.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.solr-cloud-bootstrap.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.solr-cloud.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.yml
+    # Add labels for host rule if stack name is catalog-beta
+    - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".services.catalog.deploy.labels += [\"traefik.http.routers.http-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\",\"traefik.http.routers.https-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\"]" docker-compose.yml; fi
+    # Add $STACK_NAME to galera service name
+    - ./yq -i ".services.galera1.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera1-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-bootstrap.yml
+    - ./yq -i ".services.galera1.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera1-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera1.yml
+    - ./yq -i ".services.galera2.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera2-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera2.yml
+    - ./yq -i ".services.galera3.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera3-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera3.yml
+    # Remove the harvest service if the stack name is NOT catalog-beta
+    - if [ "${STACK_NAME}" != "catalog-beta" ]; then ./yq -i "del(.services.harvest)" docker-compose.yml; fi
+    # Replace $STACK_NAME in main compose file
+    - cat docker-compose.yml | envsubst | sponge docker-compose.yml
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
     - sed -i "/^$/d" docker-compose.traefik-internal.yml
     # Copy the updated compose files to the server
@@ -93,13 +108,11 @@ Deploy Internal Traefik:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml $STACK_NAME-traefik-internal"
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml $STACK_NAME-traefik-internal && sleep 10"
 
 Deploy Public Traefik:
   stage: Traefik
   extends: .stack_template
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -108,7 +121,7 @@ Deploy Public Traefik:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public"
+      docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public && sleep 10"
 
 Bootstrap Stacks:
   stage: Bootstrap
@@ -138,6 +151,8 @@ Deploy Solr:
         - docker-compose.yml
         - vufind/*
         - zk/*
+        - .gitlab-ci.yml
+        - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -164,6 +179,8 @@ Deploy DB:
         - docker-compose.solr*
         - solr/*
         - zk/*
+        - .gitlab-ci.yml
+        - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -194,6 +211,8 @@ Deploy Vufind:
         - docker-compose.solr*
         - solr/*
         - zk/*
+        - .gitlab-ci.yml
+        - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -207,7 +226,7 @@ Deploy Vufind:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME"
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME-catalog"
 
 Remove Environment:
   stage: Cleanup
@@ -229,7 +248,7 @@ Remove Environment:
       ssh deploy@$DEPLOY_HOST
       "docker stack rm $STACK_NAME-solr &&
       docker stack rm $STACK_NAME-maridb &&
-      docker stack rm $STACK_NAME &&
+      docker stack rm $STACK_NAME-catalog &&
       docker stack rm $STACK_NAME-traefik-internal &&
       rm -rf $COMPOSE_PATH/$CI_COMMIT_BRANCH &&
       docker system prune --volumes -a -f"
