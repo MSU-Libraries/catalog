@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# TODO Feature: add flag to delete records from biblio Solr collection before import
-# curl http://solr:8983/solr/biblio/update -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
-# curl http://solr:8983/solr/biblio/update -H "Content-type: text/xml" --data-binary '<commit />'
+SOLR_URL="http://solr:8983/solr"
 
 # Script help text
 runhelp() {
@@ -50,6 +48,8 @@ runhelp() {
     echo "  -s|--shared-harvest-dir DIR"
     echo "      Full path to the shared storage location for harvested OAI files"
     echo "      Default: /mnt/shared/oai"
+    echo "  -r|--reset-solr"
+    echo "      Clear out the biblio Solr collection prior to importing"
     echo "  -v|--verbose"
     echo "      Show verbose output"
     echo ""
@@ -71,6 +71,7 @@ default_args() {
     ARGS[LIMIT]=
     ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/folio
     ARGS[SHARED_HARVEST_DIR]=/mnt/shared/oai
+    ARGS[RESET_SOLR]=0
     ARGS[VERBOSE]=0
 }
 
@@ -117,6 +118,9 @@ parse_args() {
                 exit 1
             fi
             shift; shift ;;
+        -r|--reset-solr)
+            ARGS[RESET_SOLR]=1
+            shift;;
         -v|--verbose)
             ARGS[VERBOSE]=1
             shift;;
@@ -188,6 +192,17 @@ oai_harvest_combiner() {
     verbose "Done combining ${COMBINE_TARGET}"
     rm "${COMBINE_FILES[@]}"
     COMBINE_FILES=()
+}
+
+# Reset the biblio Solr collection by clearing all records
+reset_solr() {
+    if [[ "${ARGS[RESET_SOLR]}" -eq 0 ]]; then
+        return
+    fi
+    verbose "Clearing the biblio Solr index"
+    curl ${SOLR_URL}/biblio/update -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
+    curl ${SOLR_URL}/biblio/update -H "Content-type: text/xml" --data-binary '<commit />'
+    verbose "Done clearing the Solr index"
 }
 
 # Perform an OAI harvest
@@ -295,6 +310,9 @@ main() {
         oai_harvest
     elif [[ "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
         copyback_from_shared
+    fi
+    if [[ "${ARGS[RESET_SOLR]}" -eq 1 ]]; then
+        reset_solr
     fi
     if [[ "${ARGS[BATCH_IMPORT]}" -eq 1 ]]; then
         batch_import
