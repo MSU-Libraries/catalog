@@ -270,10 +270,10 @@ Remove Environment:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker stack rm $STACK_NAME-solr;
-      docker stack rm $STACK_NAME-maridb;
+      docker stack rm $STACK_NAME-mariadb;
       docker stack rm $STACK_NAME-catalog;
       docker stack rm $STACK_NAME-traefik-internal;
-      rm -rf $COMPOSE_PATH/$CI_COMMIT_BRANCH;
+      rm -rf $COMPOSE_PATH;
       docker system prune --volumes -a -f"
 
 ############# Templates ###############

@@ -92,7 +92,12 @@ following permissions within FOLIO:
 * Users: Can view fees/fines and loans
 * Users: Can view user profile
 
-## For GitLab Users: Creating a CI/CD Token
+## For GitLab Users
+### Creating a CI/CD Token
 Create a new [access token](https://gitlab.msu.edu/help/user/project/settings/project_access_tokens)
 that has `read_registry` privileges to the repository and create a new CI/CD variable with the
-resulting key value.
+resulting key value (`REGISTRY_ACCESS_TOKEN`).
+
+### Create CI/CD Variables
+There are a number of variables that are required for the CI/CD pipeline to run. Refer to the
+[CI/CD variables section](CICD.md#variables) for details.

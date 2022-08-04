@@ -22,4 +22,7 @@ plugins:
 nav:
 - Welcome: index.md
 - Getting Started:
+    - Technical Overview: tech-overview.md
     - First Time Setup: first-time-setup.md
+    - Harvesting: harvesting.md
+    - CI/CD: CICD.md
