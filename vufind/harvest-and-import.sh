@@ -172,15 +172,11 @@ archive_shared_xml() {
     mkdir -p "${ARGS[SHARED_HARVEST_DIR]}/archives"
     pushd "${ARGS[SHARED_HARVEST_DIR]}/" > /dev/null 2>&1 || exit 1
     ARCHIVE_FILE="${ARGS[SHARED_HARVEST_DIR]}/archives/archive_${ARCHIVE_TS}.tar.gz"
-    if tar -czvf "$ARCHIVE_FILE" ./combined_*.xml; then
-        # remove uncompressed files
-        rm "${ARGS[SHARED_HARVEST_DIR]}"/*.xml
-
-        # Append last_harvest, if exists
-        if [[ -f ./last_harvest.txt ]]; then
-            tar -Azvf "$ARCHIVE_FILE" ./last_harvest.txt
-            rm ./last_harvest.txt
-        fi
+    # Archive all combined xml files and the full_harvest file, if it exists
+    if tar -czvf "$ARCHIVE_FILE" ./combined_*.xml $( compgen -G ./full_harvest.txt* ); then
+        # remove archived files
+        rm ./*.xml
+        rm -f ./full_harvest.txt
     else
         echo "ERROR: Could not compress previous harvest files in ${ARGS[SHARED_HARVEST_DIR]}"
         exit 1
