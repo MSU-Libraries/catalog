@@ -39,7 +39,7 @@ services:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
     command: /startup-cron.sh
     volumes:
-      - /mnt/shared:/mnt/shared
+      - /mnt/shared:/mnt/shared:rw
     networks:
       - internal
     deploy:

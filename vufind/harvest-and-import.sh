@@ -175,7 +175,7 @@ archive_shared_xml() {
     # Archive all combined xml files and the full_harvest file, if it exists
     if tar -czvf "$ARCHIVE_FILE" ./combined_*.xml $( compgen -G ./full_harvest.txt* ); then
         # remove archived files
-        rm ./*.xml
+        rm ./combined_*.xml
         rm -f ./full_harvest.txt
     else
         echo "ERROR: Could not compress previous harvest files in ${ARGS[SHARED_HARVEST_DIR]}"
@@ -192,8 +192,9 @@ oai_harvest_combiner() {
     COMBINE_TARGET="combined_${COMBINE_TS}.xml"
     verbose "Combining ${#COMBINE_FILES[@]} into ${COMBINE_TARGET}"
     xml_grep --wrap collection --cond "marc:record" "${COMBINE_FILES[@]}" > "${ARGS[VUFIND_HARVEST_DIR]}/${COMBINE_TARGET}"
-    verbose "Done combining ${COMBINE_TARGET}"
-    rm "${COMBINE_FILES[@]}"
+    verbose "Done combining ${COMBINE_TARGET}; removing pre-combined files..."
+    rm -v "${COMBINE_FILES[@]}"
+    verbose "Done removing ${#COMBINE_FILES[@]} files."
     COMBINE_FILES=()
 }
 
@@ -247,7 +248,7 @@ oai_harvest() {
         if [[ "${#COMBINE_FILES[@]}" -ge 100 ]]; then
             oai_harvest_combiner
         fi
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -name '*_oai_*.xml')
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_oai_*.xml')
     oai_harvest_combiner
 
     verbose "Copying combined XML to shared dir"
