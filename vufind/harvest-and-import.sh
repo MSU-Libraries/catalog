@@ -164,10 +164,11 @@ last_modified() {
 }
 
 archive_shared_xml() {
-    if ! ls "${ARGS[SHARED_HARVEST_DIR]}"/combined_*.xml > /dev/null 2>&1; then
+    verbose "Checking for previous harvest files"
+    if ! ls "${ARGS[SHARED_HARVEST_DIR]}"/combined_*.xml >/dev/null 2>&1 && [[ ! -f "${ARGS[SHARED_HARVEST_DIR]}/last_harvest.txt" ]]; then
+        verbose "No previous harvest files found"
         return
     fi
-    verbose "Checking for previous harvest files"
     ARCHIVE_TS=$(date +%Y%m%d_%H%M%S)
     mkdir -p "${ARGS[SHARED_HARVEST_DIR]}/archives"
     ARCHIVE_FILE="${ARGS[SHARED_HARVEST_DIR]}/archives/archive_${ARCHIVE_TS}.tar.gz"
@@ -229,8 +230,6 @@ oai_harvest() {
         cp --preserve=timestamps "$SHARED_LAST_HARVEST" "$VUFIND_LAST_HARVEST"
     fi
 
-    verbose "Starting OAI harvest"
-
     # Validate the the shared storage location is writable
     if ! [ -w "${ARGS[SHARED_HARVEST_DIR]}" ] ; then
         echo "ERROR: Shared storage location is not writable: ${ARGS[SHARED_HARVEST_DIR]}"
@@ -241,6 +240,8 @@ oai_harvest() {
     if [[ ! -f "${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt" || "${ARGS[FULL]}" -eq 1 ]]; then
         archive_shared_xml
     fi
+
+    verbose "Starting OAI harvest"
 
     php /usr/local/vufind/harvest/harvest_oai.php
 
