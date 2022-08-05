@@ -239,6 +239,7 @@ oai_harvest() {
     # If this is a full harvest, archive the previous XML files in the shared location
     if [[ ! -f "${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt" || "${ARGS[FULL]}" -eq 1 ]]; then
         archive_shared_xml
+        rm -f "${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt"
     fi
 
     verbose "Starting OAI harvest"
