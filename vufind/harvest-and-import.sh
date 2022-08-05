@@ -167,19 +167,25 @@ archive_shared_xml() {
     if ! ls "${ARGS[SHARED_HARVEST_DIR]}"/combined_*.xml > /dev/null 2>&1; then
         return
     fi
-    verbose "Archiving previous XML files"
+    verbose "Checking for previous harvest files"
     ARCHIVE_TS=$(date +%Y%m%d_%H%M%S)
     mkdir -p "${ARGS[SHARED_HARVEST_DIR]}/archives"
-    pushd "${ARGS[SHARED_HARVEST_DIR]}/" > /dev/null 2>&1 || exit 1
     ARCHIVE_FILE="${ARGS[SHARED_HARVEST_DIR]}/archives/archive_${ARCHIVE_TS}.tar.gz"
-    # Archive all combined xml files and the full_harvest file, if it exists
-    if tar -czvf "$ARCHIVE_FILE" ./combined_*.xml $( compgen -G ./full_harvest.txt* ); then
-        # remove archived files
-        rm ./combined_*.xml
-        rm -f ./full_harvest.txt
-    else
-        echo "ERROR: Could not compress previous harvest files in ${ARGS[SHARED_HARVEST_DIR]}"
-        exit 1
+    pushd "${ARGS[SHARED_HARVEST_DIR]}/" > /dev/null 2>&1 || exit 1
+    declare -a ARCHIVE_LIST
+    while read -r FILE; do
+        ARCHIVE_LIST+=("$FILE")
+    done < <(find ./ -mindepth 1 -maxdepth 1 -name 'combined_*.xml' -o -name 'last_harvest.txt')
+    # Archive all combined xml files and the last_harvest file, if it exists
+    if [[ "${#ARCHIVE_LIST[@]}" -gt 0 ]]; then
+        verbose "Archiving previous harvest files"
+        if tar -czvf "$ARCHIVE_FILE" "${ARCHIVE_LIST[@]}"; then
+            # remove archived files
+            rm "${ARCHIVE_LIST[@]}"
+        else
+            echo "ERROR: Could not archive previous harvest files into ${ARCHIVE_FILE}"
+            exit 1
+        fi
     fi
     popd > /dev/null 2>&1 || exit 1
 }
