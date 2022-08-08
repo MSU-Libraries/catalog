@@ -22,6 +22,7 @@ services:
       - "--providers.docker.exposedByDefault=false"
       - "--providers.docker.network=public"
       - >
+        --providers.docker.defaultRule=
         {{- $namespace_list := index .Labels "com.docker.stack.namespace" | splitList "-" -}}
         {{- $stackname_list := slice $namespace_list 0 (sub (len $namespace_list) 2) -}}
         {{- $stackname := join "-" $stackname_list -}}
@@ -30,8 +31,8 @@ services:
         {{- if eq $servicename "solr" -}}
             {{- $pathmatch := "/solr" --}
         {{- end -}}
-        --providers.docker.defaultRule=Host(`{{ $stackname }}.aws.lib.msu.edu`)
-          && PathPrefix(`{{ $pathmatch }}`)"
+        Host(`{{ $stackname }}.aws.lib.msu.edu`)
+          && PathPrefix(`{{ $pathmatch }}`)
       - "--entrypoints.msul-http-ent.address=:80"
       - "--entrypoints.msul-https-ent.address=:443"
       - "--log"
