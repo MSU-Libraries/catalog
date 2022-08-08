@@ -129,8 +129,7 @@ Deploy Public Traefik:
   script:
     - >
       ssh deploy@$DEPLOY_HOST
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public && sleep 15"
+      "docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public && sleep 15"
 
 Bootstrap Stacks:
   stage: Bootstrap

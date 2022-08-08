@@ -35,14 +35,6 @@ Build Vufind Image:
     - msul-docker
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $STACK_NAME != ""'
-      changes:
-        - vufind/*
-        - docker-compose.yml
-        - docker-compose.solr*
-        - solr/*
-        - zk/*
-        - .gitlab-ci.yml
-        - templates/*
   variables:
     LATEST: $CI_REGISTRY_IMAGE/vufind:latest
     CURR: $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA
