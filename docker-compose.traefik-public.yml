@@ -21,18 +21,20 @@ services:
       - "--providers.docker.swarmMode=true"
       - "--providers.docker.exposedByDefault=false"
       - "--providers.docker.network=public"
-      - >
-        --providers.docker.defaultRule=
-        {{- $namespace_list := index .Labels "com.docker.stack.namespace" | splitList "-" -}}
-        {{- $stackname_list := slice $namespace_list 0 (sub (len $namespace_list) 2) -}}
-        {{- $stackname := join "-" $stackname_list -}}
-        {{- $servicename := last $namespace_list -}}
-        {{- $pathmatch := "/" -}}
-        {{- if eq $servicename "solr" -}}
-            {{- $pathmatch := "/solr" --}
-        {{- end -}}
-        Host(`{{ $stackname }}.aws.lib.msu.edu`)
-          && PathPrefix(`{{ $pathmatch }}`)
+      - '--providers.docker.defaultRule=Host(`{{ index .Labels "com.docker.stack.namespace" | trimSuffix "-catalog" }}.aws.
+lib.msu.edu`)'
+      #- >
+      #  --providers.docker.defaultRule=
+      #  {{- $namespace_list := index .Labels "com.docker.stack.namespace" | splitList "-" -}}
+      #  {{- $stackname_list := slice $namespace_list 0 (sub (len $namespace_list) 2) -}}
+      #  {{- $stackname := join "-" $stackname_list -}}
+      #  {{- $servicename := last $namespace_list -}}
+      #  {{- $pathmatch := "/" -}}
+      #  {{- if eq $servicename "solr" -}}
+      #      {{- $pathmatch := "/solr" --}
+      #  {{- end -}}
+      #  Host(`{{ $stackname }}.aws.lib.msu.edu`)
+      #    && PathPrefix(`{{ $pathmatch }}`)
       - "--entrypoints.msul-http-ent.address=:80"
       - "--entrypoints.msul-https-ent.address=:443"
       - "--log"
