@@ -61,7 +61,7 @@ Deploy Compose Files:
     - wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O ./yq
     - chmod +x ./yq
     # Add basicauth password for restricted resources
-    - ./yq -i ".services.traefik.deploy.labels[2]=\"traefik.http.middlewares.restrict-auth.basicauth.users=$$(base64 -d $BASICAUTH_FOR_RESOURCES)\"" docker-compose.traefik-public.yml
+    - ./yq -i ".services.traefik.deploy.labels[2]=\"traefik.http.middlewares.restrict-auth.basicauth.users=$BASICAUTH_FOR_RESOURCES\"" docker-compose.traefik-public.yml
     # Modify the image tag from :latest -> $CI_COMMIT_SHORT_SHA
     - ./yq -i ".services.catalog.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
     - ./yq -i ".services.harvest.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
