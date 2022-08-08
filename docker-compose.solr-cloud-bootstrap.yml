@@ -38,6 +38,7 @@ services:
       - bitnami:/bitnami
     hostname: solr{{.Task.Slot}}
     networks:
+      - public
       - internal
     environment:
       SOLR_CLOUD_BOOTSTRAP: "yes"
@@ -110,6 +111,9 @@ services:
 networks:
   internal:
     name: internal
+    external: true
+  public:
+    name: public
     external: true
 
 volumes:

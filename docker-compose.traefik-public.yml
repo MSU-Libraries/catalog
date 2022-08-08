@@ -75,8 +75,6 @@ services:
         - "traefik.http.middlewares.fix-prefix.replacepathregex.regex=^/(vufind/)?(.*)"
         - "traefik.http.middlewares.fix-prefix.replacepathregex.replacement=/vufind/$$2"
 
-
-
 networks:
   public:
     name: public

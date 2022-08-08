@@ -94,6 +94,7 @@ services:
       ZOO_SERVER_ID: 3
       <<: *zookeeper_envs
     networks:
+      - public
       - internal
     deploy:
       mode: replicated
@@ -109,6 +110,9 @@ services:
 networks:
   internal:
     name: internal
+    external: true
+  public:
+    name: public
     external: true
 
 volumes:
