@@ -21,11 +21,12 @@ x-solr-deploy: &solr_deploy
     delay: 10s
   placement:
     max_replicas_per_node: 1
+  labels:
     - "traefik.enable=true"
     - "traefik.http.routers.msul-solr-router.entrypoints=msul-http-ent"
-#    - "traefik.http.routers.msul-solr-router.rule=\
-#        Host(`catalog.aws.lib.msu.edu`, `catalog-beta.lib.msu.edu`)\
-#        && PathPrefix(`/solr`)"
+    #- "traefik.http.routers.msul-solr-router.rule=\
+    #    Host(`catalog.aws.lib.msu.edu`, `catalog-beta.lib.msu.edu`)\
+    #    && PathPrefix(`/solr`)"
     - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
     - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
 
