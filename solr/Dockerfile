@@ -14,11 +14,19 @@ RUN apt update && \
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
 
-# Get solr configs
+# Get solr configs and prepare for alphabetical browsing
 RUN mkdir /solr_confs && \
     wget https://github.com/vufind-org/vufind/archive/refs/tags/v${VUFIND_VERSION}.tar.gz && \
     tar -xf v${VUFIND_VERSION}.tar.gz  && \
     cp -r /vufind-${VUFIND_VERSION}/solr/vufind/* /solr_confs && \
+    sed '475 i <str name="authCoreName">authority_shard1_replica_n4</str>' /solr_confs/biblio/conf/solrconfig.xml && \
+    mkdir /solr_confs/alphabetical_browse && \
+    chown 1001 /solr_confs/alphabetical_browse && \
+    cp /vufind-${VUFIND_VERSION}/index-alphabetic-browse.sh /solr_confs/ && \
+    chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
+    mkdir /solr_confs/import && \
+    cp /vufind-${VUFIND_VERSION}/import/browse-indexing.jar /solr_confs/import/ && \
+    ln -s /opt/bitnami/solr /vendor && \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION} && \
     cp -r /opt/bitnami/solr/contrib/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/ && \
