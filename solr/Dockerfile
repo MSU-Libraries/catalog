@@ -20,13 +20,12 @@ RUN mkdir /solr_confs && \
     tar -xf v${VUFIND_VERSION}.tar.gz  && \
     cp -r /vufind-${VUFIND_VERSION}/solr/vufind/* /solr_confs && \
     sed -i '475 i <str name="authCoreName">authority_shard1_replica_n4</str>' /solr_confs/biblio/conf/solrconfig.xml && \
-    mkdir /solr_confs/alphabetical_browse && \
-    chown 1001 /solr_confs/alphabetical_browse && \
     cp /vufind-${VUFIND_VERSION}/index-alphabetic-browse.sh /solr_confs/ && \
     chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
     mkdir /solr_confs/import && \
+    chown 1001 /solr_confs/import && \
     cp /vufind-${VUFIND_VERSION}/import/browse-indexing.jar /solr_confs/import/ && \
-    ln -s /opt/bitnami/solr /vendor && \
+    ln -s /opt/bitnami/solr /bitnami/solr/server/vendor && \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION} && \
     cp -r /opt/bitnami/solr/contrib/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/ && \
