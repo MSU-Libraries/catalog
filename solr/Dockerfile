@@ -19,7 +19,7 @@ RUN mkdir /solr_confs && \
     wget https://github.com/vufind-org/vufind/archive/refs/tags/v${VUFIND_VERSION}.tar.gz && \
     tar -xf v${VUFIND_VERSION}.tar.gz  && \
     cp -r /vufind-${VUFIND_VERSION}/solr/vufind/* /solr_confs && \
-    sed '475 i <str name="authCoreName">authority_shard1_replica_n4</str>' /solr_confs/biblio/conf/solrconfig.xml && \
+    sed -i '475 i <str name="authCoreName">authority_shard1_replica_n4</str>' /solr_confs/biblio/conf/solrconfig.xml && \
     mkdir /solr_confs/alphabetical_browse && \
     chown 1001 /solr_confs/alphabetical_browse && \
     cp /vufind-${VUFIND_VERSION}/index-alphabetic-browse.sh /solr_confs/ && \
