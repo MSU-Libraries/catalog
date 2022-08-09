@@ -19,7 +19,6 @@ RUN mkdir /solr_confs && \
     wget https://github.com/vufind-org/vufind/archive/refs/tags/v${VUFIND_VERSION}.tar.gz && \
     tar -xf v${VUFIND_VERSION}.tar.gz  && \
     cp -r /vufind-${VUFIND_VERSION}/solr/vufind/* /solr_confs && \
-    sed -i '475 i <str name="authCoreName">authority_shard1_replica_n4</str>' /solr_confs/biblio/conf/solrconfig.xml && \
     cp /vufind-${VUFIND_VERSION}/index-alphabetic-browse.sh /solr_confs/ && \
     chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
     mkdir /solr_confs/import && \
@@ -38,6 +37,8 @@ COPY startup.sh /startup.sh
 USER 1001
 
 RUN cp -r /solr_confs/jars /opt/bitnami/solr/server/solr/jars
+
+COPY browse-handler.jar /opt/bitnami/solr/server/solr/jars/browse-handler.jar
 
 # Run start-up script
 CMD ["/startup.sh", "/opt/bitnami/scripts/solr/run.sh"]
