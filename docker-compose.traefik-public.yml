@@ -38,7 +38,7 @@ lib.msu.edu`)'
       - "--entrypoints.msul-http-ent.address=:80"
       - "--entrypoints.msul-https-ent.address=:443"
       - "--log"
-      - "--log.level=INFO"
+      - "--log.level=ERROR"
       - "--accesslog"
       - "--api.dashboard=true"
       - "--entrypoints.health-ent.address=127.0.0.1:8081"
