@@ -100,7 +100,7 @@ Build Vufind Image:
     - > 
         docker build 
         --tag $CURR 
-        --cache-from $LATEST 
+        --no-cache 
         $COMPONENT/
     - docker push $CURR
     - |
