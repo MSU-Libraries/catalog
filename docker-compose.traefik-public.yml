@@ -84,13 +84,13 @@ lib.msu.edu`)'
         - "traefik.http.routers.dashboard-http-router.entrypoints=msul-http-ent"
         - "traefik.http.routers.dashboard-http-router.middlewares=http-redirect"
         - "traefik.http.routers.dashboard-http-router.rule=\
-            PathPrefix(`/dashboard`) && PathPrefix(`/api`)"
+            PathPrefix(`/dashboard`) || PathPrefix(`/api`)"
         - "traefik.http.routers.dashboard-http-router.service=api@internal"
         # Traefik Dashboard HTTPS
         - "traefik.http.routers.dashboard-https-router.entrypoints=msul-https-ent"
         - "traefik.http.routers.dashboard-https-router.middlewares=restrict-auth"
         - "traefik.http.routers.dashboard-https-router.rule=\
-            PathPrefix(`/dashboard`) && PathPrefix(`/api`)"
+            PathPrefix(`/dashboard`) || PathPrefix(`/api`)"
         - "traefik.http.routers.dashboard-https-router.service=api@internal"
 
 networks:
