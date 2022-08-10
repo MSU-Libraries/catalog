@@ -24,9 +24,9 @@ RUN mkdir /solr_confs && \
     mkdir /solr_confs/import && \
     chown 1001 /solr_confs/import && \
     cp /vufind-${VUFIND_VERSION}/import/browse-indexing.jar /solr_confs/import/ && \
-    mkdir -p /bitnami/solr/server && \
-    chown 1001 /bitnami/solr/server && \
-    ln -s /opt/bitnami/solr /bitnami/solr/server/vendor && \
+    #mkdir -p /bitnami/solr/server && \
+    #chown 1001 /bitnami/solr/server && \
+    #ln -s /opt/bitnami/solr /bitnami/solr/server/vendor && \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION} && \
     cp -r /opt/bitnami/solr/contrib/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/ && \
