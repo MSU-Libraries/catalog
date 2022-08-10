@@ -21,12 +21,26 @@ services:
       - "--providers.docker.swarmMode=true"
       - "--providers.docker.exposedByDefault=false"
       - "--providers.docker.network=public"
-      - '--providers.docker.defaultRule=Host(`{{ index .Labels "com.docker.stack.namespace" | trimSuffix "-catalog" }}.aws.lib.msu.edu`)'
+      - '--providers.docker.defaultRule=Host(`{{ index .Labels "com.docker.stack.namespace" | trimSuffix "-catalog" }}.aws.
+lib.msu.edu`)'
+      #- >
+      #  --providers.docker.defaultRule=
+      #  {{- $namespace_list := index .Labels "com.docker.stack.namespace" | splitList "-" -}}
+      #  {{- $stackname_list := slice $namespace_list 0 (sub (len $namespace_list) 2) -}}
+      #  {{- $stackname := join "-" $stackname_list -}}
+      #  {{- $servicename := last $namespace_list -}}
+      #  {{- $pathmatch := "/" -}}
+      #  {{- if eq $servicename "solr" -}}
+      #      {{- $pathmatch := "/solr" --}
+      #  {{- end -}}
+      #  Host(`{{ $stackname }}.aws.lib.msu.edu`)
+      #    && PathPrefix(`{{ $pathmatch }}`)
       - "--entrypoints.msul-http-ent.address=:80"
       - "--entrypoints.msul-https-ent.address=:443"
       - "--log"
       - "--log.level=ERROR"
       - "--accesslog"
+      - "--api.dashboard=true"
       - "--entrypoints.health-ent.address=127.0.0.1:8081"
       - "--ping"
       - "--ping.entrypoint=health-ent"
@@ -58,14 +72,26 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.services.traefik-public-traefik.loadbalancer.server.port=9999"
+        # BasicAuth Middleware for restricted resources (MUST be 3rd entry in labels for CI replace to work)
+        - "traefik.http.middlewares.restrict-auth.basicauth.users="
         # Redirect Middleware
         - "traefik.http.middlewares.http-redirect.redirectscheme.scheme=https"
         - "traefik.http.middlewares.http-redirect.redirectscheme.permanent=true"
         # Middleware to add /vufind to path
         - "traefik.http.middlewares.fix-prefix.replacepathregex.regex=^/(vufind/)?(.*)"
         - "traefik.http.middlewares.fix-prefix.replacepathregex.replacement=/vufind/$$2"
-
-
+        # Traefik Dashboard HTTP
+        - "traefik.http.routers.dashboard-http-router.entrypoints=msul-http-ent"
+        - "traefik.http.routers.dashboard-http-router.middlewares=http-redirect"
+        - "traefik.http.routers.dashboard-http-router.rule=\
+            PathPrefix(`/dashboard`) && PathPrefix(`/api`)"
+        - "traefik.http.routers.dashboard-http-router.service=api@internal"
+        # Traefik Dashboard HTTPS
+        - "traefik.http.routers.dashboard-https-router.entrypoints=msul-https-ent"
+        - "traefik.http.routers.dashboard-https-router.middlewares=restrict-auth"
+        - "traefik.http.routers.dashboard-https-router.rule=\
+            PathPrefix(`/dashboard`) && PathPrefix(`/api`)"
+        - "traefik.http.routers.dashboard-https-router.service=api@internal"
 
 networks:
   public:

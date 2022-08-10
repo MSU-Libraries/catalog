@@ -60,6 +60,8 @@ Deploy Compose Files:
     - apk add wget gettext moreutils
     - wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O ./yq
     - chmod +x ./yq
+    # Add basicauth password for restricted resources
+    - ./yq -i ".services.traefik.deploy.labels[2]=\"traefik.http.middlewares.restrict-auth.basicauth.users=$BASICAUTH_FOR_RESOURCES\"" docker-compose.traefik-public.yml
     # Modify the image tag from :latest -> $CI_COMMIT_SHORT_SHA
     - ./yq -i ".services.catalog.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
     - ./yq -i ".services.harvest.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
@@ -101,6 +103,7 @@ Deploy Compose Files:
     - cat docker-compose.yml | envsubst | sponge docker-compose.yml
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
     - sed -i "/^$/d" docker-compose.traefik-internal.yml
+    - sed -i "/^$/d" docker-compose.traefik-public.yml
     # Copy the updated compose files to the server
     - ssh deploy@$DEPLOY_HOST mkdir -p $COMPOSE_PATH
     - scp docker-compose* deploy@$DEPLOY_HOST:$COMPOSE_PATH/
@@ -129,8 +132,7 @@ Deploy Public Traefik:
   script:
     - >
       ssh deploy@$DEPLOY_HOST
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public && sleep 15"
+      "docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public && sleep 15"
 
 Bootstrap Stacks:
   stage: Bootstrap
@@ -242,7 +244,7 @@ Deploy Vufind:
     - >
       if [ "${STACK_NAME}" != "catalog-beta" ]; then 
         sleep 15;
-        ssh deploy@$DEPLOY_HOST "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -v"; 
+        ssh deploy@$DEPLOY_HOST "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -v -r"; 
       fi
 
 Remove Environment:
@@ -270,10 +272,10 @@ Remove Environment:
     - >
       ssh deploy@$DEPLOY_HOST
       "docker stack rm $STACK_NAME-solr;
-      docker stack rm $STACK_NAME-maridb;
+      docker stack rm $STACK_NAME-mariadb;
       docker stack rm $STACK_NAME-catalog;
       docker stack rm $STACK_NAME-traefik-internal;
-      rm -rf $COMPOSE_PATH/$CI_COMMIT_BRANCH;
+      rm -rf $COMPOSE_PATH;
       docker system prune --volumes -a -f"
 
 ############# Templates ###############

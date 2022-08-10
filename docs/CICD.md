@@ -44,7 +44,47 @@ when you are done with it
     from the shared mount location if they want to preserve those changes.
 
 ## Pipeline Stages & Jobs
-TODO document various stages and jobs
+### Prepare
+**branches**: `main`, `devel-`*, and `review-`*  
+* Will set the `STACK_NAME` variable that is used throughout the pipeline, which is essentially
+the branch name unless the branch does not start with `devel-`, `review-` or is `main`
+* Will make updates to the docker compose files and copy them to the AWS servers. The updates include
+changing the image tag from `:latest` to the current commit sha and modifying services based on
+the `STACK_NAME`
+* Will call the playbook that creates a DNS record for devel and review environments if necessary
+
+### Build
+**branches**: `main`, `devel-`*, and `review-`*  
+* Builds all of the images in this repository, tagging them with `latest` only if it the `main` branch
+
+### Traefik
+**branches**: `main`, `devel-`*, and `review-`*  
+* Deploy both the public traefik (which handles routing of public traffic to the different enviornments
+hosted on the swarm) and the internal traefik (which handles load balancing of the MariaDB Galera services
+within the indivudual environment)
+
+### Bootstrap
+**branches**: `main`, `devel-`*, and `review-`*  
+* Will bootstrap the `solr` and `mariadb` stacks if they have not already been (i.e. this is the first time
+running this job for this branch)
+
+### Deploy
+**branches**: `main`, `devel-`*, and `review-`*  
+* Deploys the `catalog`, `solr`, and `mariadb` stacks. If this is a devel or review environment, it will
+import a single marc file into the vunfind instance as test data
+
+### Cleanup
+**branches**: `devel-`* and `review-`*  
+* Removes the stacks and runs the playbook to remove the DNS record created for the environment
+
+### Tag
+**branches**: `main`  
+* Creates a release tag for the current commit
+
+### Release 
+**branches**: `main`  
+* Pushes the latest changes to Github and publishes the Github Pages onces the Github Action
+job should have completed that compiles the docs
 
 ## Variables
 At this time, the following variables need to be defined in the

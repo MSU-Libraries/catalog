@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# TODO Feature: add flag to delete records from biblio Solr collection before import
-# curl http://solr:8983/solr/biblio/update -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
-# curl http://solr:8983/solr/biblio/update -H "Content-type: text/xml" --data-binary '<commit />'
+SOLR_URL="http://solr:8983/solr"
 
 # Script help text
 runhelp() {
@@ -50,6 +48,8 @@ runhelp() {
     echo "  -s|--shared-harvest-dir DIR"
     echo "      Full path to the shared storage location for harvested OAI files"
     echo "      Default: /mnt/shared/oai"
+    echo "  -r|--reset-solr"
+    echo "      Clear out the biblio Solr collection prior to importing"
     echo "  -v|--verbose"
     echo "      Show verbose output"
     echo ""
@@ -71,6 +71,7 @@ default_args() {
     ARGS[LIMIT]=
     ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/folio
     ARGS[SHARED_HARVEST_DIR]=/mnt/shared/oai
+    ARGS[RESET_SOLR]=0
     ARGS[VERBOSE]=0
 }
 
@@ -117,6 +118,9 @@ parse_args() {
                 exit 1
             fi
             shift; shift ;;
+        -r|--reset-solr)
+            ARGS[RESET_SOLR]=1
+            shift;;
         -v|--verbose)
             ARGS[VERBOSE]=1
             shift;;
@@ -160,19 +164,29 @@ last_modified() {
 }
 
 archive_shared_xml() {
-    if ! ls "${ARGS[SHARED_HARVEST_DIR]}"/combined_*.xml > /dev/null 2>&1; then
+    verbose "Checking for previous harvest files"
+    if ! ls "${ARGS[SHARED_HARVEST_DIR]}"/combined_*.xml >/dev/null 2>&1 && [[ ! -f "${ARGS[SHARED_HARVEST_DIR]}/last_harvest.txt" ]]; then
+        verbose "No previous harvest files found"
         return
     fi
-    verbose "Archiving previous XML files"
     ARCHIVE_TS=$(date +%Y%m%d_%H%M%S)
     mkdir -p "${ARGS[SHARED_HARVEST_DIR]}/archives"
+    ARCHIVE_FILE="${ARGS[SHARED_HARVEST_DIR]}/archives/archive_${ARCHIVE_TS}.tar.gz"
     pushd "${ARGS[SHARED_HARVEST_DIR]}/" > /dev/null 2>&1 || exit 1
-    if tar -czvf "${ARGS[SHARED_HARVEST_DIR]}/archives/archive_${ARCHIVE_TS}.tar.gz" ./combined_*.xml; then
-        # remove uncompressed files
-        rm "${ARGS[SHARED_HARVEST_DIR]}"/*.xml
-    else
-        echo "ERROR: Could not compress previous harvest files in ${ARGS[SHARED_HARVEST_DIR]}"
-        exit 1
+    declare -a ARCHIVE_LIST
+    while read -r FILE; do
+        ARCHIVE_LIST+=("$FILE")
+    done < <(find ./ -mindepth 1 -maxdepth 1 -name 'combined_*.xml' -o -name 'last_harvest.txt')
+    # Archive all combined xml files and the last_harvest file, if it exists
+    if [[ "${#ARCHIVE_LIST[@]}" -gt 0 ]]; then
+        verbose "Archiving previous harvest files"
+        if tar -czvf "$ARCHIVE_FILE" "${ARCHIVE_LIST[@]}"; then
+            # remove archived files
+            rm "${ARCHIVE_LIST[@]}"
+        else
+            echo "ERROR: Could not archive previous harvest files into ${ARCHIVE_FILE}"
+            exit 1
+        fi
     fi
     popd > /dev/null 2>&1 || exit 1
 }
@@ -185,9 +199,21 @@ oai_harvest_combiner() {
     COMBINE_TARGET="combined_${COMBINE_TS}.xml"
     verbose "Combining ${#COMBINE_FILES[@]} into ${COMBINE_TARGET}"
     xml_grep --wrap collection --cond "marc:record" "${COMBINE_FILES[@]}" > "${ARGS[VUFIND_HARVEST_DIR]}/${COMBINE_TARGET}"
-    verbose "Done combining ${COMBINE_TARGET}"
-    rm "${COMBINE_FILES[@]}"
+    verbose "Done combining ${COMBINE_TARGET}; removing pre-combined files..."
+    rm -v "${COMBINE_FILES[@]}"
+    verbose "Done removing ${#COMBINE_FILES[@]} files."
     COMBINE_FILES=()
+}
+
+# Reset the biblio Solr collection by clearing all records
+reset_solr() {
+    if [[ "${ARGS[RESET_SOLR]}" -eq 0 ]]; then
+        return
+    fi
+    verbose "Clearing the biblio Solr index"
+    curl ${SOLR_URL}/biblio/update -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
+    curl ${SOLR_URL}/biblio/update -H "Content-type: text/xml" --data-binary '<commit />'
+    verbose "Done clearing the Solr index"
 }
 
 # Perform an OAI harvest
@@ -204,8 +230,6 @@ oai_harvest() {
         cp --preserve=timestamps "$SHARED_LAST_HARVEST" "$VUFIND_LAST_HARVEST"
     fi
 
-    verbose "Starting OAI harvest"
-
     # Validate the the shared storage location is writable
     if ! [ -w "${ARGS[SHARED_HARVEST_DIR]}" ] ; then
         echo "ERROR: Shared storage location is not writable: ${ARGS[SHARED_HARVEST_DIR]}"
@@ -215,7 +239,10 @@ oai_harvest() {
     # If this is a full harvest, archive the previous XML files in the shared location
     if [[ ! -f "${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt" || "${ARGS[FULL]}" -eq 1 ]]; then
         archive_shared_xml
+        rm -f "${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt"
     fi
+
+    verbose "Starting OAI harvest"
 
     php /usr/local/vufind/harvest/harvest_oai.php
 
@@ -229,7 +256,7 @@ oai_harvest() {
         if [[ "${#COMBINE_FILES[@]}" -ge 100 ]]; then
             oai_harvest_combiner
         fi
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -name '*_oai_*.xml')
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_oai_*.xml')
     oai_harvest_combiner
 
     verbose "Copying combined XML to shared dir"
@@ -295,6 +322,9 @@ main() {
         oai_harvest
     elif [[ "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
         copyback_from_shared
+    fi
+    if [[ "${ARGS[RESET_SOLR]}" -eq 1 ]]; then
+        reset_solr
     fi
     if [[ "${ARGS[BATCH_IMPORT]}" -eq 1 ]]; then
         batch_import
