@@ -244,7 +244,7 @@ Deploy Vufind:
     - >
       if [ "${STACK_NAME}" != "catalog-beta" ]; then 
         sleep 15;
-        ssh deploy@$DEPLOY_HOST "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -v -r"; 
+        ssh deploy@$DEPLOY_HOST "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -v -r >/dev/null 2>&1"; 
       fi
 
 Remove Environment:
