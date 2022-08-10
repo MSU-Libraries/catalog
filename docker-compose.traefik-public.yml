@@ -21,8 +21,7 @@ services:
       - "--providers.docker.swarmMode=true"
       - "--providers.docker.exposedByDefault=false"
       - "--providers.docker.network=public"
-      - '--providers.docker.defaultRule=Host(`{{ index .Labels "com.docker.stack.namespace" | trimSuffix "-catalog" }}.aws.
-lib.msu.edu`)'
+      - '--providers.docker.defaultRule=Host(`{{ index .Labels "com.docker.stack.namespace" | trimSuffix "-catalog" }}.aws.lib.msu.edu`)'
       #- >
       #  --providers.docker.defaultRule=
       #  {{- $namespace_list := index .Labels "com.docker.stack.namespace" | splitList "-" -}}
