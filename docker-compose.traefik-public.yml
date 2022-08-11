@@ -92,7 +92,7 @@ services:
         - "traefik.http.routers.dashboard-https-router.tls=true"
         - "traefik.http.routers.dashboard-https-router.tls.certresolver=msul-letsencrypt"
         - "traefik.http.routers.dashboard-https-router.rule=\
-            PathPrefix(`/dashboard`) || PathPrefix(`/api`)"
+            PathPrefix(`/dashboard`) || PathPrefix(`/api`) || PathPrefix(`/debug`)"
         - "traefik.http.routers.dashboard-https-router.service=api@internal"
 
 networks:
