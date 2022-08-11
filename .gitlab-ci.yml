@@ -175,7 +175,7 @@ Deploy Solr:
         - docker-compose.solr*
         - solr/*
         - docker-compose.yml
-        - vufind/*
+        - vufind/**/*
         - zk/*
         - .gitlab-ci.yml
         - templates/*
@@ -201,10 +201,11 @@ Deploy DB:
       changes:
         - docker-compose.mariadb*
         - docker-compose.yml
-        - vufind/*
+        - vufind/**/*
         - docker-compose.solr*
         - solr/*
         - zk/*
+        - db/**/*
         - .gitlab-ci.yml
         - templates/*
   needs:

@@ -24,7 +24,8 @@ runhelp() {
     echo ""
     echo "FLAGS:"
     echo "  -o|--oai-harvest"
-    echo "      Run an OAI harvest into SHARED_HARVEST_DIR."
+    echo "      Run an OAI harvest into SHARED_HARVEST_DIR. Will attempt"
+    echo "      to resume from last harvest state unless -f flag given"
     echo "  -f|--full"
     echo "      Forces a reset of SHARED_HARVEST_DIR, resulting"
     echo "      in a full harvest. Must be used with --oai-harvest."
@@ -237,10 +238,11 @@ oai_harvest() {
     fi
 
     # If this is a full harvest, archive the previous XML files in the shared location
-    if [[ ! -f "${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt" || "${ARGS[FULL]}" -eq 1 ]]; then
+    if [[ "${ARGS[FULL]}" -eq 1 ]]; then
         archive_shared_xml
         rm -f "${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt"
         rm -f "${ARGS[VUFIND_HARVEST_DIR]}/harvest.log"
+        rm -f "${ARGS[VUFIND_HARVEST_DIR]}/last_state.txt"
     fi
 
     verbose "Starting OAI harvest"

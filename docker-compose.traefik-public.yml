@@ -3,7 +3,7 @@ version: "3.8"
 
 services:
   traefik:
-    image: traefik:v2.6
+    image: traefik:v2.8
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik:/etc/traefik
@@ -40,6 +40,7 @@ services:
       - "--log.level=ERROR"
       - "--accesslog"
       - "--api.dashboard=true"
+      - "--api.debug=true"
       - "--entrypoints.health-ent.address=127.0.0.1:8081"
       - "--ping"
       - "--ping.entrypoint=health-ent"
