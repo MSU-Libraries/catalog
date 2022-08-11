@@ -28,6 +28,15 @@ x-solr-deploy: &solr_deploy
     - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
     - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
     - "traefik.http.routers.msul-solr-router.rule=Host(`catalog.aws.lib.msu.edu`) && PathPrefix(`/solr`)"
+    # NEW
+    - "traefik.http.routers.devel-solr-msul-solr-router.middlewares=http-redirect"
+    - "traefik.http.routers.devel-solr-https-msul-solr-router.entrypoints=msul-https-ent"
+    - "traefik.http.routers.devel-solr-https-msul-solr-router.service=devel-solr-https-msul-solr-app"
+    - "traefik.http.routers.devel-solr-https-msul-solr-router.middlewares=restrict-auth"
+    - "traefik.http.routers.devel-solr-https-msul-solr-router.rule=Host(`devel-solr.aws.lib.msu.edu`) && PathPrefix(`/solr`)"
+    - "traefik.http.routers.devel-solr-https-msul-solr-router.tls=true"
+    - "traefik.http.routers.devel-solr-https-msul-solr-router.tls.certresolver=msul-letsencrypt"
+    - "traefik.http.services.devel-solr-https-msul-solr-app.loadbalancer.server.port=8983"
 
 version: "3.8"
 services:
@@ -37,6 +46,7 @@ services:
       - bitnami:/bitnami
     hostname: solr{{.Task.Slot}}
     networks:
+      - public
       - internal
     environment:
       SOLR_HOST: solr{{.Task.Slot}}
@@ -93,7 +103,6 @@ services:
       ZOO_SERVER_ID: 3
       <<: *zookeeper_envs
     networks:
-      - public
       - internal
     deploy:
       mode: replicated
