@@ -88,6 +88,8 @@ services:
         # Traefik Dashboard HTTPS
         - "traefik.http.routers.dashboard-https-router.entrypoints=msul-https-ent"
         - "traefik.http.routers.dashboard-https-router.middlewares=restrict-auth"
+        - "traefik.http.routers.dashboard-https-router.tls=true"
+        - "traefik.http.routers.dashboard-https-router.tls.certresolver=msul-letsencrypt"
         - "traefik.http.routers.dashboard-https-router.rule=\
             PathPrefix(`/dashboard`) || PathPrefix(`/api`)"
         - "traefik.http.routers.dashboard-https-router.service=api@internal"

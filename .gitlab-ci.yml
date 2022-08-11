@@ -97,6 +97,19 @@ Deploy Compose Files:
     - ./yq -i ".services.galera1.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera1-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera1.yml
     - ./yq -i ".services.galera2.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera2-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera2.yml
     - ./yq -i ".services.galera3.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera3-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera3.yml
+    # Add $STACK_NAME to solr traefik labels
+    - ./yq -i ".x-solr-deploy.labels[1] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.entrypoints=msul-http-ent\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".x-solr-deploy.labels[2] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.service=${STACK_NAME}-msul-solr-app\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".x-solr-deploy.labels[3] =\"traefik.http.services.${STACK_NAME}-msul-solr-app.loadbalancer.server.port=8983\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".x-solr-deploy.labels[4] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".x-solr-deploy.labels[5] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.middlewares=http-redirect\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".x-solr-deploy.labels[6] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.entrypoints=msul-https-ent\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".x-solr-deploy.labels[7] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.service=${STACK_NAME}-https-msul-solr-app\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".x-solr-deploy.labels[8] =\"traefik.http.services.${STACK_NAME}-https-msul-solr-app.loadbalancer.server.port=8983\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".x-solr-deploy.labels[9] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.middlewares=restrict-auth\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".x-solr-deploy.labels[10] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".x-solr-deploy.labels[11] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls=true\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".x-solr-deploy.labels[12] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.certresolver=msul-letsencrypt\"" docker-compose.solr-cloud.yml
     # Remove the harvest service if the stack name is NOT catalog-beta
     - if [ "${STACK_NAME}" != "catalog-beta" ]; then ./yq -i "del(.services.harvest)" docker-compose.yml; fi
     # Replace $STACK_NAME in main compose file
@@ -234,8 +247,6 @@ Deploy Vufind:
     - Deploy Solr
     - Deploy Compose Files
   script:
-    # If this is a non-prod instance, give the new DNS records time to propogate
-    - if [ "${STACK_NAME}" != "catalog-beta" ]; then sleep 30; fi
     - >
       ssh deploy@$DEPLOY_HOST
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
