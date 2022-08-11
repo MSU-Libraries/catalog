@@ -218,7 +218,7 @@ Deploy Vufind:
     - if: '$CI_PIPELINE_SOURCE == "schedule" || $STACK_NAME != ""'
       changes:
         - docker-compose.yml
-        - vufind/*
+        - vufind/**/*
         - docker-compose.solr*
         - solr/*
         - zk/*

@@ -176,7 +176,7 @@ archive_shared_xml() {
     declare -a ARCHIVE_LIST
     while read -r FILE; do
         ARCHIVE_LIST+=("$FILE")
-    done < <(find ./ -mindepth 1 -maxdepth 1 -name 'combined_*.xml' -o -name 'last_harvest.txt')
+    done < <(find ./ -mindepth 1 -maxdepth 1 -name 'combined_*.xml' -o -name 'last_harvest.txt' -o -name 'harvest.log')
     # Archive all combined xml files and the last_harvest file, if it exists
     if [[ "${#ARCHIVE_LIST[@]}" -gt 0 ]]; then
         verbose "Archiving previous harvest files"
@@ -240,6 +240,7 @@ oai_harvest() {
     if [[ ! -f "${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt" || "${ARGS[FULL]}" -eq 1 ]]; then
         archive_shared_xml
         rm -f "${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt"
+        rm -f "${ARGS[VUFIND_HARVEST_DIR]}/harvest.log"
     fi
 
     verbose "Starting OAI harvest"
@@ -262,6 +263,11 @@ oai_harvest() {
     verbose "Copying combined XML to shared dir"
     cp --preserve=timestamps "${ARGS[VUFIND_HARVEST_DIR]}"/combined_*.xml "${ARGS[SHARED_HARVEST_DIR]}/"
 
+    HARVEST_LOG="${ARGS[VUFIND_HARVEST_DIR]}/harvest.log"
+    if [[ -f "${HARVEST_LOG}" ]]; then
+        verbose "Copying harvest.log to shared dir"
+        cp --preserve=timestamps "${HARVEST_LOG}" "${ARGS[SHARED_HARVEST_DIR]}/"
+    fi
     LAST_HARVEST="${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt"
     if [[ -f "${LAST_HARVEST}" ]]; then
         verbose "Copying last_harvest.txt to shared dir"
