@@ -40,7 +40,7 @@ services:
       - "--log.level=ERROR"
       - "--accesslog"
       - "--api.dashboard=true"
-      - "--api.debug=true"
+      #- "--api.debug=true"     # Enable this line to use Traefik's /debug
       - "--entrypoints.health-ent.address=127.0.0.1:8081"
       - "--ping"
       - "--ping.entrypoint=health-ent"
