@@ -12,11 +12,15 @@ stages:
   - Release
 
 variables:
-  DEPLOY_HOST: catalog-a.aws.lib.msu.edu
+  DEPLOY_HOST_A: catalog-a.aws.lib.msu.edu
+  DEPLOY_HOST_B: catalog-b.aws.lib.msu.edu
+  DEPLOY_HOST_C: catalog-c.aws.lib.msu.edu
   COMPOSE_PATH: /home/deploy/$CI_COMMIT_BRANCH
 
 Set Stack Name:
   stage: Prepare
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_PIPELINE_SOURCE == "schedule"'
   script:
     - |
       STACK_NAME=
@@ -35,7 +39,7 @@ Create DNS:
   extends: .stack_template
   image: $CI_REGISTRY_IMAGE/ansible:latest
   rules:
-    - if: '$CI_DEFAULT_BRANCH != $CI_COMMIT_BRANCH && $STACK_NAME != ""'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -52,6 +56,8 @@ Create DNS:
 Deploy Compose Files:
   stage: Prepare
   extends: .stack_template
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_PIPELINE_SOURCE == "schedule"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -120,8 +126,8 @@ Deploy Compose Files:
     - sed -i "/^$/d" docker-compose.traefik-internal.yml
     - sed -i "/^$/d" docker-compose.traefik-public.yml
     # Copy the updated compose files to the server
-    - ssh deploy@$DEPLOY_HOST mkdir -p $COMPOSE_PATH
-    - scp docker-compose* deploy@$DEPLOY_HOST:$COMPOSE_PATH/
+    - ssh deploy@$DEPLOY_HOST_A mkdir -p $COMPOSE_PATH
+    - scp docker-compose* deploy@$DEPLOY_HOST_A:$COMPOSE_PATH/
 
 Deploy Internal Traefik:
   stage: Traefik
@@ -133,7 +139,7 @@ Deploy Internal Traefik:
     - Deploy Compose Files
   script:
     - >
-      ssh deploy@$DEPLOY_HOST
+      ssh deploy@$DEPLOY_HOST_A
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml $STACK_NAME-traefik-internal && sleep 15"
 
@@ -146,7 +152,7 @@ Deploy Public Traefik:
     - Deploy Compose Files
   script:
     - >
-      ssh deploy@$DEPLOY_HOST
+      ssh deploy@$DEPLOY_HOST_A
       "docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public && sleep 15"
 
 Bootstrap Stacks:
@@ -161,7 +167,7 @@ Bootstrap Stacks:
     - Build Solr Image
   script:
     - >
-      ssh deploy@$DEPLOY_HOST
+      ssh deploy@$DEPLOY_HOST_A
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
       (docker stack ps ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml ${STACK_NAME}-mariadb && sleep 30)) &&
       (docker volume ls | grep -q ${STACK_NAME}-solr || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml ${STACK_NAME}-solr && sleep 90))"
@@ -170,7 +176,7 @@ Deploy Solr:
   stage: Deploy
   extends: .stack_template
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $STACK_NAME != ""'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule"'
       changes:
         - docker-compose.solr*
         - solr/*
@@ -189,7 +195,7 @@ Deploy Solr:
     - Deploy Internal Traefik
   script:
     - >
-      ssh deploy@$DEPLOY_HOST
+      ssh deploy@$DEPLOY_HOST_A
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr"
 
@@ -197,7 +203,7 @@ Deploy DB:
   stage: Deploy
   extends: .stack_template
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $STACK_NAME != ""'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule"'
       changes:
         - docker-compose.mariadb*
         - docker-compose.yml
@@ -217,7 +223,7 @@ Deploy DB:
     - Deploy Internal Traefik
   script:
     - >
-      ssh deploy@$DEPLOY_HOST
+      ssh deploy@$DEPLOY_HOST_A
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera2.yml ${STACK_NAME}-mariadb && sleep 30 &&
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera3.yml ${STACK_NAME}-mariadb && sleep 30 &&
@@ -228,10 +234,10 @@ Deploy Vufind:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH
-    #url: https://$STACK_NAME.aws.lib.msu.edu
+    url: $URL
     on_stop: Remove Environment
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $STACK_NAME != ""'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule"'
       changes:
         - docker-compose.yml
         - vufind/**/*
@@ -251,15 +257,23 @@ Deploy Vufind:
     - Deploy Compose Files
   script:
     - >
-      ssh deploy@$DEPLOY_HOST
+      ssh deploy@$DEPLOY_HOST_A
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME-catalog"
     # If this is a non-prod instance, load some records
     - >
       if [ "${STACK_NAME}" != "catalog-beta" ]; then 
         sleep 15;
-        ssh deploy@$DEPLOY_HOST "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -v -r >/dev/null 2>&1"; 
+        ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -v -r >/dev/null 2>&1"; 
+        URL="https://${STACK_NAME}.aws.lib.msu.edu"
+      else
+        URL="https://catalog-beta.lib.msu.edu"
       fi
+    # Report the environemnt URL to GitLab
+    - echo "URL=$URL" >> deploy.env
+  artifacts:
+    reports:
+      dotenv: deploy.env
 
 Remove Environment:
   stage: Cleanup
@@ -267,10 +281,9 @@ Remove Environment:
   image: $CI_REGISTRY_IMAGE/ansible:latest
   environment:
     name: $CI_COMMIT_BRANCH
-    #url: https://$STACK_NAME.aws.lib.msu.edu
     action: stop
   rules:
-    - if: '$CI_DEFAULT_BRANCH != $CI_COMMIT_BRANCH && $STACK_NAME != ""'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
       when: manual
   needs:
     - job: Set Stack Name
@@ -284,13 +297,18 @@ Remove Environment:
     # Run playbook
     - ansible-playbook provision-dns-playbook/decommission.yml
     - >
-      ssh deploy@$DEPLOY_HOST
+      ssh deploy@$DEPLOY_HOST_A
       "docker stack rm $STACK_NAME-solr;
       docker stack rm $STACK_NAME-mariadb;
       docker stack rm $STACK_NAME-catalog;
       docker stack rm $STACK_NAME-traefik-internal;
       rm -rf $COMPOSE_PATH;
+      sleep 15;
       docker system prune --volumes -a -f"
+    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
+    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
+    - ssh deploy@$DEPLOY_HOST_B "docker system prune --volumes -a -f"
+    - ssh deploy@$DEPLOY_HOST_C "docker system prune --volumes -a -f"
 
 ############# Templates ###############
 
@@ -300,9 +318,9 @@ Remove Environment:
   extends: .setup_ssh
   variables:
     ENCODED_PRIVATE_KEY: $DEPLOY_PRIVATE_KEY
-    SERVER: $DEPLOY_HOST
+    SERVER: $DEPLOY_HOST_A
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $STACK_NAME != ""'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_PIPELINE_SOURCE == "schedule"'
   needs:
     - job: Set Stack Name
       artifacts: true
