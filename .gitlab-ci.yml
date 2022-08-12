@@ -172,14 +172,14 @@ Deploy Solr:
   extends: .stack_template
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule"'
-      changes:
-        - docker-compose.solr*
-        - solr/*
-        - docker-compose.yml
-        - vufind/**/*
-        - zk/*
-        - .gitlab-ci.yml
-        - templates/*
+    #  changes:
+    #    - docker-compose.solr*
+    #    - solr/*
+    #    - docker-compose.yml
+    #    - vufind/**/*
+    #    - zk/*
+    #    - .gitlab-ci.yml
+    #    - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -199,16 +199,16 @@ Deploy DB:
   extends: .stack_template
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule"'
-      changes:
-        - docker-compose.mariadb*
-        - docker-compose.yml
-        - vufind/**/*
-        - docker-compose.solr*
-        - solr/*
-        - zk/*
-        - db/**/*
-        - .gitlab-ci.yml
-        - templates/*
+    #  changes:
+    #    - docker-compose.mariadb*
+    #    - docker-compose.yml
+    #    - vufind/**/*
+    #    - docker-compose.solr*
+    #    - solr/*
+    #    - zk/*
+    #    - db/**/*
+    #    - .gitlab-ci.yml
+    #    - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
