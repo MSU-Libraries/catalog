@@ -1,0 +1,51 @@
+---
+x-mariadb-envs: &mariadb_envs
+  TZ: America/Detroit
+  MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://galera1,galera2,galera3
+  MARIADB_ROOT_PASSWORD: 12345
+  MARIADB_GALERA_MARIABACKUP_PASSWORD: 123456
+  MARIADB_DATABASE: vufind
+  MARIADB_USER: vufind
+  MARIADB_PASSWORD: vufind
+  MARIADB_SKIP_TEST_DB: "yes"
+  MARIADB_CHARACTER_SET: utf8mb4
+  MARIADB_COLLATE: utf8mb4_unicode_ci
+  MARIADB_EXTRA_FLAGS: --old_passwords=OFF --default-authentication-plugin=mysql_native_password --secure_auth=ON
+
+version: "3.8"
+services:
+  galera:
+    #image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:latest
+    image: galeradb:latest
+    hostname: galera{{.Task.Slot}}
+    networks:
+      - internal
+    environment:
+      GALERA_HOST: galera{{.Task.Slot}}
+      # This flag is required when cold-starting the cluster
+      MARIADB_GALERA_CLUSTER_BOOTSTRAP: "yes"
+      # This flag is only needed when starting cluster from node where grastate.dat has "safe_to_bootstrap: 0"
+      MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP: "yes"
+      <<: *mariadb_envs
+    volumes:
+      - db-bitnami:/bitnami
+    stop_signal: SIGWINCH
+    stop_grace_period: 60s
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        window: 60s
+      update_config:
+        parallelism: 1
+        delay: 60s
+      placement:
+        max_replicas_per_node: 1
+
+networks:
+  internal:
+#    name: internal
+#    external: true
+
+volumes:
+  db-bitnami:
