@@ -26,3 +26,4 @@ nav:
     - First Time Setup: first-time-setup.md
     - Harvesting: harvesting.md
     - CI/CD: CICD.md
+    - Troubleshooting: troubleshooting.md
