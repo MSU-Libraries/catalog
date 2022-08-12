@@ -164,7 +164,7 @@ Bootstrap Stacks:
     - >
       ssh deploy@$DEPLOY_HOST_A
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      (docker stack ps ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud-bootstrap.yml ${STACK_NAME}-mariadb && sleep 30)) &&
+      (docker volume ls | grep -q ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud-bootstrap.yml ${STACK_NAME}-mariadb && sleep 30)) &&
       (docker volume ls | grep -q ${STACK_NAME}-solr || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml ${STACK_NAME}-solr && sleep 90))"
 
 Deploy Solr:
