@@ -19,6 +19,8 @@ variables:
 
 Set Stack Name:
   stage: Prepare
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_PIPELINE_SOURCE == "schedule"'
   script:
     - |
       STACK_NAME=
