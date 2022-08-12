@@ -115,7 +115,6 @@ galera_slow_startup() {
             break
         elif will_bootstrap; then
             verbose "No nodes online, but I am set to bootstrap."
-            export MARIADB_GALERA_CLUSTER_ADDRESS="gcomm://"
             break
         else
             verbose "No nodes online and I cannot bootstrap. Another node must do the bootstrap."
@@ -124,8 +123,13 @@ galera_slow_startup() {
     done
 
     # Start Galera as a background process so we can listen for the shutdown signal
-    verbose "Starting service..."
-    /opt/bitnami/scripts/mariadb-galera/run.sh &
+    if [[ "$MARIADB_GALERA_CLUSTER_BOOTSTRAP" == "yes" ]]; then
+        verbose "Starting service as a bootstrap node..."
+        MARIADB_GALERA_CLUSTER_ADDRESS="gcomm://" /opt/bitnami/scripts/mariadb-galera/run.sh &
+    else
+        verbose "Starting service as a joining node..."
+        /opt/bitnami/scripts/mariadb-galera/run.sh &
+    fi
     GALERA_PID=$!
 
     while true; do
