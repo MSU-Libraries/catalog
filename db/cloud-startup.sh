@@ -76,6 +76,7 @@ will_bootstrap() {
     if [[ "$WILL_BOOTSTRAP" -eq 0 ]]; then
         verbose "detected safe_to_bootstrap: 1 (setting MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes)"
         export MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes
+        export MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP=yes
     fi
     if [[ "$MARIADB_GALERA_CLUSTER_BOOTSTRAP" == "yes" ]]; then
         verbose "detected new bootstrap: MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes"
