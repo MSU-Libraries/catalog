@@ -43,8 +43,8 @@ services:
 
 networks:
   internal:
-#    name: internal
-#    external: true
+    name: internal
+    external: true
 
 volumes:
   db-bitnami:

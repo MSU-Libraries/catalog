@@ -72,10 +72,10 @@ Deploy Compose Files:
     - ./yq -i ".services.catalog.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
     - ./yq -i ".services.harvest.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
     - ./yq -i ".services.lb.image=\"$CI_REGISTRY_IMAGE/traefik-internal:$CI_COMMIT_SHORT_SHA\"" docker-compose.traefik-internal.yml
-    - ./yq -i ".services.galera1.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-bootstrap.yml
-    - ./yq -i ".services.galera1.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-galera1.yml
-    - ./yq -i ".services.galera2.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-galera2.yml
-    - ./yq -i ".services.galera3.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-galera3.yml
+    - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-bootstrap.yml
+    - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud.yml
+    - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-single.yml
+    - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-force.yml
     - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
     - ./yq -i ".services.zk1.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
     - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
@@ -88,21 +88,16 @@ Deploy Compose Files:
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.traefik-internal.yml
     - ./yq -i ".services.lb.command[0]=\"--providers.docker.network=${STACK_NAME}-internal\"" docker-compose.traefik-internal.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-bootstrap.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera1.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera2.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera2.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera3.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-cloud-bootstrap.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-cloud.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-cloud-single.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-cloud-force.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.solr-cloud-bootstrap.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.solr-cloud.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.yml
     # Add labels for host rule if stack name is catalog-beta
     - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.catalog-beta-http-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\"" docker-compose.yml; fi
     - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.catalog-beta-https-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\"" docker-compose.yml; fi
-    # Add $STACK_NAME to galera service name
-    - ./yq -i ".services.galera1.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera1-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-bootstrap.yml
-    - ./yq -i ".services.galera1.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera1-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera1.yml
-    - ./yq -i ".services.galera2.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera2-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera2.yml
-    - ./yq -i ".services.galera3.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera3-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera3.yml
     # Add $STACK_NAME to solr traefik labels
     - ./yq -i ".x-solr-deploy.labels[1] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.entrypoints=msul-http-ent\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[2] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.service=${STACK_NAME}-msul-solr-app\"" docker-compose.solr-cloud.yml
@@ -236,14 +231,6 @@ Deploy Vufind:
     on_stop: Remove Environment
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule"'
-      changes:
-        - docker-compose.yml
-        - vufind/**/*
-        - docker-compose.solr*
-        - solr/*
-        - zk/*
-        - .gitlab-ci.yml
-        - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
