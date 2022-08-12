@@ -76,7 +76,6 @@ will_bootstrap() {
     if [[ "$WILL_BOOTSTRAP" -eq 0 ]]; then
         verbose "detected safe_to_bootstrap: 1 (setting MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes)"
         export MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes
-        export MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP=yes
     fi
     if [[ "$MARIADB_GALERA_CLUSTER_BOOTSTRAP" == "yes" ]]; then
         verbose "detected new bootstrap: MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes"
@@ -126,7 +125,7 @@ galera_slow_startup() {
     # Start Galera as a background process so we can listen for the shutdown signal
     if [[ "$MARIADB_GALERA_CLUSTER_BOOTSTRAP" == "yes" ]]; then
         verbose "Starting service as a bootstrap node..."
-        MARIADB_GALERA_CLUSTER_ADDRESS="gcomm://" /opt/bitnami/scripts/mariadb-galera/run.sh &
+        MARIADB_GALERA_CLUSTER_ADDRESS="gcomm://" /opt/bitnami/scripts/mariadb-galera/run.sh --wsrep-new-cluster &
     else
         verbose "Starting service as a joining node..."
         /opt/bitnami/scripts/mariadb-galera/run.sh &
