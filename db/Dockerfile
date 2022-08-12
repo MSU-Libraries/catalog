@@ -9,6 +9,7 @@ USER 1001
 ADD ./entrypoint/ /docker-entrypoint-initdb.d
 COPY ./cloud-entrypoint.sh /cloud-entrypoint.sh
 COPY ./cloud-startup.sh /cloud-startup.sh
+COPY ./run.sh /opt/bitnami/scripts/mariadb-galera/run.sh
 
 ENTRYPOINT [ "/cloud-entrypoint.sh" ]
 CMD [ "/cloud-startup.sh" ]
