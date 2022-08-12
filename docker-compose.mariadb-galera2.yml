@@ -22,6 +22,11 @@ services:
     volumes:
       - bitnami:/bitnami
     stop_grace_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     deploy:
       mode: replicated
       replicas: 1

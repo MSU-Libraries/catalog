@@ -24,6 +24,11 @@ services:
       - --global.checknewversion=false
       - --global.sendanonymoususage=false
       - --api.dashboard=true
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     deploy:
       mode: replicated
       replicas: 1

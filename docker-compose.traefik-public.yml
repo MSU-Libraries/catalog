@@ -60,6 +60,11 @@ services:
       timeout: 5s
       retries: 1
       start_period: 20s
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     deploy:
       mode: replicated
       replicas: 1

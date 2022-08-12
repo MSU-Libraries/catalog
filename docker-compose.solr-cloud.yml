@@ -48,6 +48,11 @@ services:
     networks:
       - public
       - internal
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     environment:
       SOLR_HOST: solr{{.Task.Slot}}
       <<: *solr_envs
@@ -64,6 +69,11 @@ services:
       <<: *zookeeper_envs
     networks:
       - internal
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     deploy:
       mode: replicated
       replicas: 1
@@ -84,6 +94,11 @@ services:
       <<: *zookeeper_envs
     networks:
       - internal
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     deploy:
       mode: replicated
       replicas: 1
@@ -104,6 +119,11 @@ services:
       <<: *zookeeper_envs
     networks:
       - internal
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     deploy:
       mode: replicated
       replicas: 1
