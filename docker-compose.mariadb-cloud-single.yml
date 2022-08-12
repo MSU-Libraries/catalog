@@ -15,8 +15,7 @@ x-mariadb-envs: &mariadb_envs
 version: "3.8"
 services:
   galera:
-    #image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:latest
-    image: galeradb:latest
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:latest
     hostname: galera{{.Task.Slot}}
     networks:
       - internal
