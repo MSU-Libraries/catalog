@@ -52,6 +52,8 @@ Create DNS:
 Deploy Compose Files:
   stage: Prepare
   extends: .stack_template
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $STACK_NAME != ""'
   needs:
     - job: Set Stack Name
       artifacts: true
