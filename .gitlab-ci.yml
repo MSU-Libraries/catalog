@@ -244,7 +244,7 @@ Deploy Vufind:
         IMPORT_ATTEMPTS=0
         CAT_CONTAINER=
         while [[ "$IMPORT_ATTEMPTS" -le 5 ]]; do
-            CAT_CONTAINER=$(docker ps -q -f name=${STACK_NAME}-catalog_catalog)
+            CAT_CONTAINER=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog")
             if [[ -n "$CAT_CONTAINER" ]]; then
                 break
             fi

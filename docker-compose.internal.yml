@@ -8,13 +8,20 @@ services:
     command: sleep inf
     networks:
       - internal
+    healthcheck:
+      test: >
+        GATEWAY_IP=$( ip addr show eth0 | grep "^\s\+inet" | awk '{ print $2 }' | sed 's/\d\+\/24/2/' )
+        ping -W1 -c1 "${GATEWAY_IP}" 1>/dev/null 2>&1
+      interval: 30s
+      timeout: 5s
+      retries: 1
+      start_period: 20s
     deploy:
       mode: replicated
       replicas: 1
       restart_policy:
         window: 15s
-      # TODO can we do a network health check here somehow?
-  
+
 # Internal network used by backend stacks (e.g. Solr, MariaDB)
 networks:
   internal:
