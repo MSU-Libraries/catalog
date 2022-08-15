@@ -13,6 +13,21 @@ x-mariadb-envs: &mariadb_envs
   MARIADB_EXTRA_FLAGS: --old_passwords=OFF --default-authentication-plugin=mysql_native_password --secure_auth=ON
 
 version: "3.8"
+
+######### WARNING ########
+# Before force bootstrapping a node, ensure it was the last node to be stopped.
+# This will require you to manually inspect SQL files to find the node which
+# has file with the most recent "last modified" date on them.
+#
+# Once identified, manually set the deploy constraints "node.labels.nodeid==N"
+# where N is the host node containing the most recent files.
+# Only then should increment max_replicas_per_node to 1 and attempt
+# to force bootstrap the cluster.
+#
+# As an additional precaution, you may want to make backups of all the
+# MariaDB volumes data prior to proceeding.
+######### WARNING ########
+
 services:
   galera:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:latest
@@ -39,7 +54,11 @@ services:
         parallelism: 1
         delay: 60s
       placement:
-        max_replicas_per_node: 1
+        constraints:
+          # Update N to be the Docker Swarm node number with most recent SQL file changes
+          - "node.labels.nodeid==N"
+        # Increment to 1 when you are ready to deploy (make backups of volumes beforehand!)
+        max_replicas_per_node: 0
 
 networks:
   internal:

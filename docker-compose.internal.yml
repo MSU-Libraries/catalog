@@ -1,0 +1,8 @@
+---
+version: "3.8"
+
+# Internal network used by backend stacks (e.g. Solr, MariaDB)
+networks:
+  internal:
+    name: internal
+    driver: overlay

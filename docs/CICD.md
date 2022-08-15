@@ -10,15 +10,15 @@ the cluster, auto-provisioning DNS CNAMES as part of the pipeline.
 ## Pipeline
 
 * branch: `main`,  
-  stack prefix: `catalog-beta` (`catalog-beta`, `catalog-beta-traefik-internal`, `catalog-beta-solr`, `catalog-beta-mariadb`),  
+  stack prefix: `catalog-beta` (`catalog-beta`, `catalog-beta-internal`, `catalog-beta-solr`, `catalog-beta-mariadb`),  
   url: https://catalog-beta.aws.lib.msu.edu (local DNS https://catalog-beta.lib.msu.edu)
 
 * branch: `review-some-feature`,  
-  stack prefix: `review-some-feature` (`review-some-feature`, `review-some-feature-traefik-internal`, `review-some-feature-solr`, `review-some-feature-mariadb`),  
+  stack prefix: `review-some-feature` (`review-some-feature`, `review-some-feature-internal`, `review-some-feature-solr`, `review-some-feature-mariadb`),  
   url: https://review-some-feature.aws.lib.msu.edu 
 
 * branch: `devel-some-feature`,  
-  stack prefix: `devel-some-feature` (`devel-some-feature`, `devel-some-feature-traefik-internal`, `devel-some-feature-solr`, `devel-some-feature-mariadb`),  
+  stack prefix: `devel-some-feature` (`devel-some-feature`, `devel-some-feature-internal`, `devel-some-feature-solr`, `devel-some-feature-mariadb`),  
   url: https://devel-some-feature.aws.lib.msu.edu 
 
 * branch: `nothing-special`  
@@ -27,7 +27,7 @@ the cluster, auto-provisioning DNS CNAMES as part of the pipeline.
 
 !!! note
 
-    The `traefik-public` stack is shared by all of the stacks because it
+    The `traefik` stack is shared by all of the stacks because it
     controls routing public requests to the relavent stack based on the host name.
     branch: wip-code, no url
 
@@ -37,6 +37,7 @@ when you are done with it
 * Only a subset of the harvest records will be imported
 
 !!! info
+    TODO - This feature is comming soon!
     To allow for development on the containers created by the `devel-`* stacks,
     a volume is mounted on the hosted in `/mnt/shared/vufind/[branch]` and will
     contain the files stored in `/usr/local/vufind/local` on the `vufind` container
@@ -57,10 +58,10 @@ the `STACK_NAME`
 **branches**: `main`, `devel-`*, and `review-`*  
 * Builds all of the images in this repository, tagging them with `latest` only if it the `main` branch
 
-### Traefik
+### Networking
 **branches**: `main`, `devel-`*, and `review-`*  
-* Deploy both the public traefik (which handles routing of public traffic to the different enviornments
-hosted on the swarm) and the internal traefik (which handles load balancing of the MariaDB Galera services
+* Deploy both the traefik (which handles routing of public traffic to the different enviornments
+hosted on the swarm) and the internal network used by the MariaDB Galera services
 within the indivudual environment)
 
 ### Bootstrap
@@ -94,6 +95,8 @@ available in the `devel-` and `review-` pipelines.
 
 * `AWS_KEY`: The AWS access key to use when provisioning the DNS CNAME records
 * `AWS_SECRET`: The AWS secret for the `AWS_KEY` uses when provisioning the DNS CNAME records
+* `BASICAUTH_FOR_RESOURCES`: Bcrypt password hash[^1] for basic authentication to internal
+resources such as Solr and the Traefik dashboard
 * `DEPLOY_PRIVATE_KEY`: The `base64` encoded private ssh key to the deploy server
 * `EMAIL`: Email address set in Vufind's configs 
 * `FOLIO_CANCEL_ID`: The FOLIO cancelation ID to use when canceling an order. Vufind uses
@@ -104,4 +107,10 @@ available in the `devel-` and `review-` pipelines.
 * `FOLIO_USER`: Application user used by Vufind for ILS calls 
 * `GITHUB_USER_TOKEN`: Token used to publish releases to GitHub repository 
 * `OAI_URL`: URL for making OAI calls to FOLIO when harvesting (can include API Token) 
-* `REGISTRY_ACCESS_TOKEN`: Read-only registry access token used by deploy user 
+* `REGISTRY_ACCESS_TOKEN`: Read-only registry access token used by deploy user
+* `RW_CICD_TOKEN`: Read-Write access token to this repository used to create release tags 
+
+[^1]: 
+    There are many ways to generate this password hash, such as online generators or command
+    line tools (like `htpasswd` in the `apache-utils` package). For Traefik performance
+    reasons, we recommend you use a brcypt cost value of 8.

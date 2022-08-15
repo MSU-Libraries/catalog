@@ -37,7 +37,7 @@ otherwise Traefik will use a significant amount of CPU load and
 cause pages to load extremely slow.
 
 * To debug performance issues in Traefik, you can enable debug
-mode by adding to the public-traefik service: `--api.debug=true`.
+mode by adding to the traefik service: `--api.debug=true`.
 This enables all of the [debug endpoints](https://doc.traefik.io/traefik/operations/api/#debug).
 
 ```

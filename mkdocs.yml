@@ -9,6 +9,7 @@ theme:
     - navigation.instant
 
 markdown_extensions:
+- footnotes
 - admonition
 - pymdownx.highlight:
     anchor_linenums: true

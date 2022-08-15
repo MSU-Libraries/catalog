@@ -4,7 +4,7 @@ stages:
 # Commenting out the scanning stage for now since the Bitnami images trigger a lot of results.
 # We'll add this back in when we have time to sift through all of them.
 #  - test
-  - Traefik
+  - Networking
   - Bootstrap
   - Deploy
   - Cleanup
@@ -67,14 +67,12 @@ Deploy Compose Files:
     - wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O ./yq
     - chmod +x ./yq
     # Add basicauth password for restricted resources
-    - ./yq -i ".services.traefik.deploy.labels[2]=\"traefik.http.middlewares.restrict-auth.basicauth.users=$BASICAUTH_FOR_RESOURCES\"" docker-compose.traefik-public.yml
+    - ./yq -i ".services.traefik.deploy.labels[2]=\"traefik.http.middlewares.restrict-auth.basicauth.users=$BASICAUTH_FOR_RESOURCES\"" docker-compose.traefik.yml
     # Modify the image tag from :latest -> $CI_COMMIT_SHORT_SHA
     - ./yq -i ".services.catalog.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
     - ./yq -i ".services.harvest.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
-    - ./yq -i ".services.lb.image=\"$CI_REGISTRY_IMAGE/traefik-internal:$CI_COMMIT_SHORT_SHA\"" docker-compose.traefik-internal.yml
     - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-bootstrap.yml
     - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud.yml
-    - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-single.yml
     - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-force.yml
     - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
     - ./yq -i ".services.zk1.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
@@ -85,12 +83,9 @@ Deploy Compose Files:
     - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
     - ./yq -i ".services.zk3.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
     # Modify the name of internal network to include $STACK_NAME
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.traefik-internal.yml
-    - ./yq -i ".services.lb.command[0]=\"--providers.docker.network=${STACK_NAME}-internal\"" docker-compose.traefik-internal.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-bootstrap.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.internal.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-cloud-bootstrap.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-cloud.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-cloud-single.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-cloud-force.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.solr-cloud-bootstrap.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.solr-cloud.yml
@@ -118,28 +113,26 @@ Deploy Compose Files:
     # Replace $STACK_NAME in main compose file
     - cat docker-compose.yml | envsubst | sponge docker-compose.yml
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
-    - sed -i "/^$/d" docker-compose.traefik-internal.yml
-    - sed -i "/^$/d" docker-compose.traefik-public.yml
+    - sed -i "/^$/d" docker-compose.traefik.yml
     # Copy the updated compose files to the server
     - ssh deploy@$DEPLOY_HOST_A mkdir -p $COMPOSE_PATH
     - scp docker-compose* deploy@$DEPLOY_HOST_A:$COMPOSE_PATH/
 
-Deploy Internal Traefik:
-  stage: Traefik
+Deploy Internal Network:
+  stage: Networking
   extends: .stack_template
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Build Internal Traefik Image
     - Deploy Compose Files
   script:
     - >
       ssh deploy@$DEPLOY_HOST_A
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml $STACK_NAME-traefik-internal && sleep 15"
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.internal.yml $STACK_NAME-internal && sleep 15"
 
-Deploy Public Traefik:
-  stage: Traefik
+Deploy Traefik:
+  stage: Networking
   extends: .stack_template
   needs:
     - job: Set Stack Name
@@ -157,7 +150,7 @@ Bootstrap Stacks:
     - job: Set Stack Name
       artifacts: true
     - Deploy Compose Files
-    - Deploy Internal Traefik
+    - Deploy Internal Network
     - Build DB Image
     - Build Solr Image
   script:
@@ -187,7 +180,8 @@ Deploy Solr:
     - Build ZK Image
     - Bootstrap Stacks
     - Deploy Compose Files
-    - Deploy Internal Traefik
+    - Deploy Internal Network
+    - Deploy Traefik
   script:
     - >
       ssh deploy@$DEPLOY_HOST_A
@@ -215,7 +209,7 @@ Deploy DB:
     - Build DB Image
     - Bootstrap Stacks
     - Deploy Compose Files
-    - Deploy Internal Traefik
+    - Deploy Internal Network
   script:
     - >
       ssh deploy@$DEPLOY_HOST_A
@@ -234,8 +228,8 @@ Deploy Vufind:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Deploy Public Traefik
-    - Deploy Internal Traefik
+    - Deploy Traefik
+    - Deploy Internal Network
     - Build Vufind Image
     - Deploy DB
     - Deploy Solr
@@ -286,7 +280,7 @@ Remove Environment:
       "docker stack rm $STACK_NAME-solr;
       docker stack rm $STACK_NAME-mariadb;
       docker stack rm $STACK_NAME-catalog;
-      docker stack rm $STACK_NAME-traefik-internal;
+      docker stack rm $STACK_NAME-internal;
       rm -rf $COMPOSE_PATH;
       sleep 15;
       docker system prune --volumes -a -f"
