@@ -251,7 +251,7 @@ Deploy Vufind:
             fi
             echo "Catalog container not online. Waiting...";
             sleep 5;
-            (( IMPORT_ATTEMPTS += 1));
+            IMPORT_ATTEMPTS=$((IMPORT_ATTEMPTS+1));
         done
         echo "Running harvest-and-import.sh now";
         ssh deploy@$DEPLOY_HOST_A "docker exec ${CAT_CONTAINER} /harvest-and-import.sh -c -l 1 -b -v -r >/dev/null 2>&1";
