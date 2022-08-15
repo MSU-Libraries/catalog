@@ -244,8 +244,9 @@ Deploy Vufind:
         IMPORT_ATTEMPTS=0;
         CAT_CONTAINER=;
         while [[ "$IMPORT_ATTEMPTS" -le 5 ]]; do
-            CAT_CONTAINER=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog");
-            if [[ -n "$CAT_CONTAINER" ]]; then
+            TARGET_IMAGE=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}')");
+            if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
+                CAT_CONTAINER=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog");
                 break;
             fi
             echo "Catalog container not online. Waiting...";
