@@ -114,6 +114,7 @@ Deploy Compose Files:
     - cat docker-compose.yml | envsubst | sponge docker-compose.yml
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
     - sed -i "/^$/d" docker-compose.traefik.yml
+    - sed -i "/^$/d" docker-compose.internal.yml
     # Copy the updated compose files to the server
     - ssh deploy@$DEPLOY_HOST_A mkdir -p $COMPOSE_PATH
     - scp docker-compose* deploy@$DEPLOY_HOST_A:$COMPOSE_PATH/
