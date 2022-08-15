@@ -140,7 +140,7 @@ Deploy Traefik:
   script:
     - >
       ssh deploy@$DEPLOY_HOST_A
-      "docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik-public.yml traefik-public && sleep 15"
+      "docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik.yml traefik && sleep 15"
 
 Bootstrap Stacks:
   stage: Bootstrap
