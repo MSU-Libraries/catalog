@@ -240,9 +240,21 @@ Deploy Vufind:
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME-catalog"
     # If this is a non-prod instance, load some records
     - >
-      if [ "${STACK_NAME}" != "catalog-beta" ]; then 
-        sleep 15;
-        ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -v -r >/dev/null 2>&1"; 
+      if [ "${STACK_NAME}" != "catalog-beta" ]; then
+        IMPORT_ATTEMPTS=0
+        CAT_CONTAINER=
+        while [[ "$IMPORT_ATTEMPTS" -le 5 ]]; do
+            CAT_CONTAINER=$(docker ps -q -f name=${STACK_NAME}-catalog_catalog)
+            if [[ -n "$CAT_CONTAINER" ]]; then
+                break
+            fi
+            echo "Catalog container not online. Waiting..."
+            sleep 5
+            (( IMPORT_ATTEMPTS += 1))
+        done
+        echo "Running harvest-and-import.sh now"
+        ssh deploy@$DEPLOY_HOST_A "docker exec ${CAT_CONTAINER} /harvest-and-import.sh -c -l 1 -b -v -r >/dev/null 2>&1";
+        echo "Import completed with exit code $?"
         URL="https://${STACK_NAME}.aws.lib.msu.edu"
       else
         URL="https://catalog-beta.lib.msu.edu"
