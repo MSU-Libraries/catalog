@@ -1,6 +1,20 @@
 ---
 version: "3.8"
-
+services:
+  # Stack deploys require a network be used by at least 1 service
+  # or Swarm will skip creating that network. Hence this service.
+  health:
+    image: alpine:latest
+    command: sleep inf
+    networks:
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        window: 15s
+      # TODO can we do a network health check here somehow?
+  
 # Internal network used by backend stacks (e.g. Solr, MariaDB)
 networks:
   internal:
