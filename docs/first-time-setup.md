@@ -45,20 +45,20 @@ During the first time you are bring up the stack, you will need
 to run these first to bootstrap Solr and MariaDB:
 ```bash
 docker stack deploy -c docker-compose.solr-cloud-bootstrap.yml solr
-docker stack deploy -c docker-compose.mariadb-bootstrap.yml mariadb
+docker stack deploy -c docker-compose.mariadb-cloud-bootstrap.yml mariadb
 ```
 
 Subsequently you will run these commands (during the inital deploy
 and whenever you need to deploy updates):
 ```bash
-# Traefik stack to handle internal and public networking
-docker stack deploy -c docker-compose.traefik-public.yml traefik-public
-docker stack deploy -c docker-compose.traefik-internal.yml traefik-internal
+# Traefik stack to handle networking
+docker stack deploy -c docker-compose.traefik.yml traefik
+
+# Internal network for galera cluster
+docker stack deploy -c docker-compose.internal.yml internal
 
 # The rest of the MariaDB galera cluster
-docker stack deploy -c docker-compose.mariadb-galera2.yml mariadb
-docker stack deploy -c docker-compose.mariadb-galera3.yml mariadb
-docker stack deploy -c docker-compose.mariadb-galera1.yml mariadb
+docker stack deploy -c docker-compose.mariadb-cloud.yml mariadb
 
 # The rest of the Solr cloud stack
 docker stack deploy -c docker-compose.solr-cloud.yml solr
@@ -66,13 +66,6 @@ docker stack deploy -c docker-compose.solr-cloud.yml solr
 # The vufind stack
 docker stack deploy -c docker-compose.yml catalog
 ```
-
-!!! warning "Warning"
-    The MariaDB galera cluster will not be able to come back up automatically
-    if all of it's services are brought down at the same time (because none of
-    the services will be able to set `safe_to_bootstrap` in their
-    `mariadb/data/grastate.dat` file). Because of this, it is important to
-    bring down the services one at a time when updating them to avoid that sitation.
 
 ## Creating a FOLIO user
 In order for Vufind to connect to FOLIO to make API calls, it

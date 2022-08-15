@@ -4,7 +4,7 @@ stages:
 # Commenting out the scanning stage for now since the Bitnami images trigger a lot of results.
 # We'll add this back in when we have time to sift through all of them.
 #  - test
-  - Traefik
+  - Networking
   - Bootstrap
   - Deploy
   - Cleanup
@@ -67,15 +67,13 @@ Deploy Compose Files:
     - wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O ./yq
     - chmod +x ./yq
     # Add basicauth password for restricted resources
-    - ./yq -i ".services.traefik.deploy.labels[2]=\"traefik.http.middlewares.restrict-auth.basicauth.users=$BASICAUTH_FOR_RESOURCES\"" docker-compose.traefik-public.yml
+    - ./yq -i ".services.traefik.deploy.labels[2]=\"traefik.http.middlewares.restrict-auth.basicauth.users=$BASICAUTH_FOR_RESOURCES\"" docker-compose.traefik.yml
     # Modify the image tag from :latest -> $CI_COMMIT_SHORT_SHA
     - ./yq -i ".services.catalog.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
     - ./yq -i ".services.harvest.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
-    - ./yq -i ".services.lb.image=\"$CI_REGISTRY_IMAGE/traefik-internal:$CI_COMMIT_SHORT_SHA\"" docker-compose.traefik-internal.yml
-    - ./yq -i ".services.galera1.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-bootstrap.yml
-    - ./yq -i ".services.galera1.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-galera1.yml
-    - ./yq -i ".services.galera2.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-galera2.yml
-    - ./yq -i ".services.galera3.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-galera3.yml
+    - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-bootstrap.yml
+    - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud.yml
+    - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-force.yml
     - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
     - ./yq -i ".services.zk1.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
     - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
@@ -85,24 +83,16 @@ Deploy Compose Files:
     - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
     - ./yq -i ".services.zk3.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
     # Modify the name of internal network to include $STACK_NAME
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.traefik-internal.yml
-    - ./yq -i ".services.lb.command[0]=\"--providers.docker.network=${STACK_NAME}-internal\"" docker-compose.traefik-internal.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-bootstrap.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera1.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera2.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera2.yml
-    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-galera3.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.internal.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-cloud-bootstrap.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-cloud.yml
+    - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-cloud-force.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.solr-cloud-bootstrap.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.solr-cloud.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.yml
     # Add labels for host rule if stack name is catalog-beta
     - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.catalog-beta-http-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\"" docker-compose.yml; fi
     - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.catalog-beta-https-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\"" docker-compose.yml; fi
-    # Add $STACK_NAME to galera service name
-    - ./yq -i ".services.galera1.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera1-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-bootstrap.yml
-    - ./yq -i ".services.galera1.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera1-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera1.yml
-    - ./yq -i ".services.galera2.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera2-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera2.yml
-    - ./yq -i ".services.galera3.deploy.labels[0]=\"traefik.tcp.services.${STACK_NAME}-msul-galera3-app.loadbalancer.server.port=3306\"" docker-compose.mariadb-galera3.yml
     # Add $STACK_NAME to solr traefik labels
     - ./yq -i ".x-solr-deploy.labels[1] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.entrypoints=msul-http-ent\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[2] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.service=${STACK_NAME}-msul-solr-app\"" docker-compose.solr-cloud.yml
@@ -123,28 +113,25 @@ Deploy Compose Files:
     # Replace $STACK_NAME in main compose file
     - cat docker-compose.yml | envsubst | sponge docker-compose.yml
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
-    - sed -i "/^$/d" docker-compose.traefik-internal.yml
-    - sed -i "/^$/d" docker-compose.traefik-public.yml
+    - sed -i "/^$/d" docker-compose.traefik.yml
     # Copy the updated compose files to the server
     - ssh deploy@$DEPLOY_HOST_A mkdir -p $COMPOSE_PATH
     - scp docker-compose* deploy@$DEPLOY_HOST_A:$COMPOSE_PATH/
 
-Deploy Internal Traefik:
-  stage: Traefik
+Deploy Internal Network:
+  stage: Networking
   extends: .stack_template
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Build Internal Traefik Image
     - Deploy Compose Files
   script:
     - >
       ssh deploy@$DEPLOY_HOST_A
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.traefik-internal.yml $STACK_NAME-traefik-internal && sleep 15"
+      "docker stack deploy -c $COMPOSE_PATH/docker-compose.internal.yml $STACK_NAME-internal && sleep 15"
 
-Deploy Public Traefik:
-  stage: Traefik
+Deploy Traefik:
+  stage: Networking
   extends: .stack_template
   needs:
     - job: Set Stack Name
@@ -162,14 +149,14 @@ Bootstrap Stacks:
     - job: Set Stack Name
       artifacts: true
     - Deploy Compose Files
-    - Deploy Internal Traefik
+    - Deploy Internal Network
     - Build DB Image
     - Build Solr Image
   script:
     - >
       ssh deploy@$DEPLOY_HOST_A
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      (docker stack ps ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-bootstrap.yml ${STACK_NAME}-mariadb && sleep 30)) &&
+      (docker volume ls | grep -q ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud-bootstrap.yml ${STACK_NAME}-mariadb && sleep 30)) &&
       (docker volume ls | grep -q ${STACK_NAME}-solr || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml ${STACK_NAME}-solr && sleep 90))"
 
 Deploy Solr:
@@ -177,14 +164,14 @@ Deploy Solr:
   extends: .stack_template
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule"'
-      changes:
-        - docker-compose.solr*
-        - solr/*
-        - docker-compose.yml
-        - vufind/**/*
-        - zk/*
-        - .gitlab-ci.yml
-        - templates/*
+    #  changes:
+    #    - docker-compose.solr*
+    #    - solr/*
+    #    - docker-compose.yml
+    #    - vufind/**/*
+    #    - zk/*
+    #    - .gitlab-ci.yml
+    #    - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -192,7 +179,8 @@ Deploy Solr:
     - Build ZK Image
     - Bootstrap Stacks
     - Deploy Compose Files
-    - Deploy Internal Traefik
+    - Deploy Internal Network
+    - Deploy Traefik
   script:
     - >
       ssh deploy@$DEPLOY_HOST_A
@@ -204,30 +192,28 @@ Deploy DB:
   extends: .stack_template
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule"'
-      changes:
-        - docker-compose.mariadb*
-        - docker-compose.yml
-        - vufind/**/*
-        - docker-compose.solr*
-        - solr/*
-        - zk/*
-        - db/**/*
-        - .gitlab-ci.yml
-        - templates/*
+    #  changes:
+    #    - docker-compose.mariadb*
+    #    - docker-compose.yml
+    #    - vufind/**/*
+    #    - docker-compose.solr*
+    #    - solr/*
+    #    - zk/*
+    #    - db/**/*
+    #    - .gitlab-ci.yml
+    #    - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
     - Build DB Image
     - Bootstrap Stacks
     - Deploy Compose Files
-    - Deploy Internal Traefik
+    - Deploy Internal Network
   script:
     - >
       ssh deploy@$DEPLOY_HOST_A
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera2.yml ${STACK_NAME}-mariadb && sleep 30 &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera3.yml ${STACK_NAME}-mariadb && sleep 30 &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-galera1.yml ${STACK_NAME}-mariadb"
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud.yml ${STACK_NAME}-mariadb && sleep 45"
 
 Deploy Vufind:
   stage: Deploy
@@ -238,19 +224,11 @@ Deploy Vufind:
     on_stop: Remove Environment
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule"'
-      changes:
-        - docker-compose.yml
-        - vufind/**/*
-        - docker-compose.solr*
-        - solr/*
-        - zk/*
-        - .gitlab-ci.yml
-        - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Deploy Public Traefik
-    - Deploy Internal Traefik
+    - Deploy Traefik
+    - Deploy Internal Network
     - Build Vufind Image
     - Deploy DB
     - Deploy Solr
@@ -262,12 +240,24 @@ Deploy Vufind:
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME-catalog"
     # If this is a non-prod instance, load some records
     - >
-      if [ "${STACK_NAME}" != "catalog-beta" ]; then 
-        sleep 15;
-        ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -v -r >/dev/null 2>&1"; 
-        URL="https://${STACK_NAME}.aws.lib.msu.edu"
+      if [ "${STACK_NAME}" != "catalog-beta" ]; then
+        IMPORT_ATTEMPTS=0;
+        CAT_CONTAINER=;
+        while [[ "$IMPORT_ATTEMPTS" -le 5 ]]; do
+            CAT_CONTAINER=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog");
+            if [[ -n "$CAT_CONTAINER" ]]; then
+                break;
+            fi
+            echo "Catalog container not online. Waiting...";
+            sleep 5;
+            (( IMPORT_ATTEMPTS += 1));
+        done
+        echo "Running harvest-and-import.sh now";
+        ssh deploy@$DEPLOY_HOST_A "docker exec ${CAT_CONTAINER} /harvest-and-import.sh -c -l 1 -b -v -r >/dev/null 2>&1";
+        echo "Import completed with exit code $?";
+        URL="https://${STACK_NAME}.aws.lib.msu.edu";
       else
-        URL="https://catalog-beta.lib.msu.edu"
+        URL="https://catalog-beta.lib.msu.edu";
       fi
     # Report the environemnt URL to GitLab
     - echo "URL=$URL" >> deploy.env
@@ -301,7 +291,7 @@ Remove Environment:
       "docker stack rm $STACK_NAME-solr;
       docker stack rm $STACK_NAME-mariadb;
       docker stack rm $STACK_NAME-catalog;
-      docker stack rm $STACK_NAME-traefik-internal;
+      docker stack rm $STACK_NAME-internal;
       rm -rf $COMPOSE_PATH;
       sleep 15;
       docker system prune --volumes -a -f"

@@ -8,42 +8,34 @@ x-mariadb-envs: &mariadb_envs
   MARIADB_USER: vufind
   MARIADB_PASSWORD: vufind
   MARIADB_SKIP_TEST_DB: "yes"
+  MARIADB_CHARACTER_SET: utf8mb4
+  MARIADB_COLLATE: utf8mb4_unicode_ci
   MARIADB_EXTRA_FLAGS: --old_passwords=OFF --default-authentication-plugin=mysql_native_password --secure_auth=ON
 
 version: "3.8"
 services:
-  galera1:
+  galera:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:latest
+    hostname: galera{{.Task.Slot}}
     networks:
       - internal
     environment:
-      SHUTDOWN_DELAY: 1
-      # This flag is required when cold-starting the cluster
-      MARIADB_GALERA_CLUSTER_BOOTSTRAP: "yes"
-      # This flag is only needed when starting cluster from node where grastate.dat has "safe_to_bootstrap: 0"
-      MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP: "yes"
+      GALERA_HOST: galera{{.Task.Slot}}
       <<: *mariadb_envs
     volumes:
-      - bitnami:/bitnami
+      - db-bitnami:/bitnami
+    stop_signal: SIGWINCH
     stop_grace_period: 60s
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "5"
-        max-size: "10m"
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 3
       restart_policy:
         window: 60s
       update_config:
         parallelism: 1
+        delay: 60s
       placement:
-        constraints:
-          - "node.labels.nodeid==1"
-      labels:
-        - "traefik.tcp.services.msul-galera1-app.loadbalancer.server.port=3306"
-        - "traefik.enable=true"
+        max_replicas_per_node: 1
 
 networks:
   internal:
@@ -51,4 +43,4 @@ networks:
     external: true
 
 volumes:
-  bitnami:
+  db-bitnami:

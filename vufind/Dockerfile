@@ -17,7 +17,7 @@ ENV JAVA_HOME=/usr/lib/jvm/default-java
 
 # Perform updates
 RUN apt update && \
-    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog -y
+    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop -y
 
 # Setup Timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \

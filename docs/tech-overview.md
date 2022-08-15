@@ -21,7 +21,7 @@ just traditional Solr, distributing index data accross multiple nodes
 * **MariaDB Galera**:  A synchronous database cluster providing higher availability and more
 fault tolerance  
 * **Traefik**: Use to route traffic externally to the appropriate vufind container; and
-also used for an internal network to load balance the MariaDB containers  
+also used for an internal network of the MariaDB service
 * **LetsEncypt**: Provides automatically provissioned SSL certificates based on settings in
 our Docker swarm configuration file  
 * **GitLab CI/CD**:  The key tool our tool belt that allows us to define highly customized
@@ -41,13 +41,10 @@ a read-only access key to the registry to pull from
     **zk2**: Runs ZooKeeper on the second node of the cluster  
     **zk3**: Runs ZooKeeper on the third node of the cluster
 * **mariadb**:  
-    **galera1**: Runs MariaDB on the first node of the cluster and is the one in charge of bootstrapping
-when the stack is first initialized  
-    **galera2**: Runs MariaDB on the second node of the cluster  
-    **galera3**: Runs MariaDB on the third node of the cluster  
-* **traefik-internal**:  
-    **lb**: Runs Traefik and handles load balancing requests to the three MariaDB `galera` services  
-* **traefik-public**:  
+    **galera**: Runs MariaDB Galera with 3 replicas, one on each node on in the cluster
+* **internal**:  
+    **[None]**: Creates only the internal network used by the `galera` service  
+* **traefik**:  
     **traefik**:  Runs Traefik and handles external traffic and routes it to the appropriate `catalog` service
 depending on the host name of the request (since multiple environments run in separate stacks on the same Docker
 swarm)  
