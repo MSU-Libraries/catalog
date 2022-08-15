@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Ensure SolrCloud is available prior to creating Collections
+
+SOLR_CLUSTER_SIZE=$(curl -s "http://solr:8983/solr/admin/collections?action=clusterstatus" | jq ".cluster.live_nodes | length")
+while [[ "$SOLR_CLUSTER_SIZE" -lt 1 ]]; do
+    echo "No Solr nodes online yet. Waiting..."
+    sleep 5
+done
+
 # Create Solr collections
 COLLS=("authority" "biblio" "reserves" "website")
 for COLL in "${COLLS[@]}"
