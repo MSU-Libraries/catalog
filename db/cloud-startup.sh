@@ -169,7 +169,7 @@ galera_slow_shutdown() {
         # If shutting down from bootstrap, provide extra time in-case the stack is
         # converting from bootstrap to cluster and nodes need time to join.
         verbose "Delay shutdown from bootstrap, letting potential new nodes join first."
-        sleep 40
+        sleep 60
         # TODO shorter sleep delay
         # TODO loop checking safe_to_bootstrap: 1; okay to continue if matches, or if timeout happens
     fi
