@@ -160,7 +160,7 @@ galera_slow_shutdown() {
     if [[ "$SELF_NUMBER" -eq "${NODES_ONLINE[0]}" ]]; then
         if [[ "${#NODES_ONLINE[@]}" -gt 1 ]]; then
             verbose "I am lowest online node; resting to allow other nodes to shutdown first."
-            sleep 50
+            sleep 60
             # TODO loop checking safe_to_bootstrap: 1; okay to continue if matches, or if timeout happens
         else
             verbose "I am the ONLY node, so I'm safe to shutdown immediately."
@@ -169,7 +169,7 @@ galera_slow_shutdown() {
         # If shutting down from bootstrap, provide extra time in-case the stack is
         # converting from bootstrap to cluster and nodes need time to join.
         verbose "Delay shutdown from bootstrap, letting potential new nodes join first."
-        sleep 50
+        sleep 60
         # TODO loop checking safe_to_bootstrap: 1; okay to continue if matches, or if timeout happens
     fi
 
