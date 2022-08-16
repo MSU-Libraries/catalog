@@ -71,8 +71,8 @@ running this job for this branch)
 
 ### Deploy
 **branches**: `main`, `devel-`*, and `review-`*  
-* Deploys the `catalog`, `solr`, and `mariadb` stacks. If this is a devel or review environment, it will
-import a single marc file into the vunfind instance as test data
+* Deploys the `catalog`, `solr`, `swarm-cron`, and `mariadb` stacks. If this is a devel or review environment, it will
+import a single marc file into the vufind instance as test data
 
 ### Cleanup
 **branches**: `devel-`* and `review-`*  

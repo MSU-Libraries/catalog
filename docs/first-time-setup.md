@@ -65,6 +65,9 @@ docker stack deploy -c docker-compose.solr-cloud.yml solr
 
 # The vufind stack
 docker stack deploy -c docker-compose.yml catalog
+
+# Deploy the swarm cron stack
+docker stack deploy -c docker-comoose.swarm-cron.yml swarm-cron
 ```
 
 ## Creating a FOLIO user
