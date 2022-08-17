@@ -1,0 +1,39 @@
+@import "bootstrap"; /* Include bootstrap theme's less base */
+
+
+/* ------ Layout ------ */
+header {
+  background:#18453b url('https://lib.msu.edu/sites/all/themes/msul_omega/images/msul_header_main.png') no-repeat;
+  background-size:cover;
+  height:10.5rem;
+  margin-bottom:5rem;
+  .container.navbar {
+    background:none;
+      .navbar-header {
+        a, &:hover, &:active, &:visited, &:focus {
+        color:#fff;
+        text-decoration:none;
+        }
+        .navbar-msubrand {
+          margin:1rem 0 2rem 0.25rem;
+        }
+        .navbar-brand {
+          font-size:2.25rem;
+          font-weight:500;
+          text-transform:uppercase;
+          letter-spacing:0.1rem;
+        }
+      }
+      .navbar-collapse {
+        nav {
+          a, &:visited {
+            color:#fff;
+            &:hover, &:active, &:focus {
+              color:#18453b;
+            }
+          }
+        }
+      }
+  }
+}
+
