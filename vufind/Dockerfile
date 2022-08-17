@@ -17,7 +17,7 @@ ENV JAVA_HOME=/usr/lib/jvm/default-java
 
 # Perform updates
 RUN apt update && \
-    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop -y
+    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils gettext-base -y
 
 # Setup Timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
@@ -46,6 +46,10 @@ ARG MAIL_PORT
 ARG MAIL_USERNAME
 ARG MAIL_PASSWORD
 ARG SOLR_URL=http://solr:8983/solr
+ARG EDS_USER
+ARG EDS_PASS
+ARG EDS_PROFILE
+ARG EDS_ORG
 
 ENV DEBUG=$DEBUG \
     FOLIO_URL=$FOLIO_URL \
@@ -60,7 +64,11 @@ ENV DEBUG=$DEBUG \
     MAIL_PORT=$MAIL_PORT \
     MAIL_USERNAME=$MAIL_USERNAME \
     MAIL_PASSWORD=$MAIL_PASSWORD \
-    SOLR_URL=$SOLR_URL
+    SOLR_URL=$SOLR_URL \
+    EDS_USER=$EDS_USER \
+    EDS_PASS=$EDS_PASS \
+    EDS_PROFILE=$EDS_PROFILE \
+    EDS_ORG=$EDS_ORG
 
 # Setup Apache
 RUN echo "ServerName catalog.lib.msu.edu" >> /etc/apache2/sites-available/000-default.conf && \
@@ -88,7 +96,8 @@ RUN rm import/marc_local.properties
 # Replace environment variables in template ini files
 RUN envsubst < local/config/vufind/Folio.template.ini > local/config/vufind/Folio.ini && \
     envsubst < local/config/vufind/config.template.ini > local/config/vufind/config.ini && \
-    envsubst < local/harvest/oai.template.ini > local/harvest/oai.ini
+    envsubst < local/harvest/oai.template.ini > local/harvest/oai.ini && \
+    cat local/config/vufind/EDS.ini | envsubst | sponge local/config/vufind/EDS.ini
 
 # Enable debug mode
 RUN if [ "$DEBUG" = 1 ] ; \
