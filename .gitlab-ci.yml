@@ -64,7 +64,7 @@ Deploy Compose Files:
   script:
     # Install yq, enbsubst, and sponge
     - apk add wget gettext moreutils
-    - wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O ./yq
+    - "wget --header=\"Authorization: token $GITHUB_USER_TOKEN\" https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O ./yq"
     - chmod +x ./yq
     # Add basicauth password for restricted resources
     - ./yq -i ".services.traefik.deploy.labels[2]=\"traefik.http.middlewares.restrict-auth.basicauth.users=$BASICAUTH_FOR_RESOURCES\"" docker-compose.traefik.yml
@@ -165,14 +165,6 @@ Deploy Solr:
   extends: .stack_template
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule"'
-    #  changes:
-    #    - docker-compose.solr*
-    #    - solr/*
-    #    - docker-compose.yml
-    #    - vufind/**/*
-    #    - zk/*
-    #    - .gitlab-ci.yml
-    #    - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -201,16 +193,6 @@ Deploy DB:
   extends: .stack_template
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule"'
-    #  changes:
-    #    - docker-compose.mariadb*
-    #    - docker-compose.yml
-    #    - vufind/**/*
-    #    - docker-compose.solr*
-    #    - solr/*
-    #    - zk/*
-    #    - db/**/*
-    #    - .gitlab-ci.yml
-    #    - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -252,14 +234,15 @@ Deploy Vufind:
       if [ "${STACK_NAME}" != "catalog-beta" ]; then
         IMPORT_ATTEMPTS=0;
         CAT_CONTAINER=;
-        while [[ "$IMPORT_ATTEMPTS" -le 5 ]]; do
+        sleep 15;
+        while [[ "$IMPORT_ATTEMPTS" -le 20 ]]; do
             TARGET_IMAGE=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}'");
             if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
                 CAT_CONTAINER=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog");
                 break;
             fi
             echo "Catalog container not online. Waiting...";
-            sleep 5;
+            sleep 10;
             IMPORT_ATTEMPTS=$((IMPORT_ATTEMPTS+1));
         done
         echo "Running harvest-and-import.sh now";

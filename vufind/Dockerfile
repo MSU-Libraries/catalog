@@ -10,26 +10,29 @@ ENV VUFIND_LOCAL_DIR=/usr/local/vufind/local
 ENV VUFIND_HOME=/usr/local/vufind
 ENV JAVA_HOME=/usr/lib/jvm/default-java
 
-# VuFind cache directory can't stay the default (/usr/local/vufind/local/cache) because we want to mount the repository
-# at /usr/local/vufind on container startup. The volume mount process would set the complete folder tree to user/group
-# "root", which finally would prevent the Apache from accessing it.
-#ENV VUFIND_CACHE_DIR /tmp/vufind_cache
-
-# Perform updates
-RUN apt update && \
-    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop -y
-
-# Setup Timezone
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
-    echo $TZ > /etc/timezone
-
-# Get the package
-RUN wget https://github.com/vufind-org/vufind/releases/download/v${VUFIND_VERSION}/vufind_${VUFIND_VERSION}.deb
-
-# Install the package
-RUN service apache2 restart && \
+RUN \
+    # Perform updates
+    apt update && \
+    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils mysql-client default-jre -y && \
+    # Setup Timezone
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone && \
+    # Get the package
+    wget https://github.com/vufind-org/vufind/releases/download/v${VUFIND_VERSION}/vufind_${VUFIND_VERSION}.deb && \
+    # Install the package
+    service apache2 restart && \
     apt install ./vufind_${VUFIND_VERSION}.deb -y && \
-    apt clean
+    apt clean && \
+    rm vufind_${VUFIND_VERSION}.deb && \
+    # Remove unused dependencies after Vufind is installed
+    apt remove build-essential mysql-server default-jdk java-compiler -y && \
+    apt autoremove -y && \
+    mv /usr/local/vufind/solr /tmp && \
+    mkdir -p /usr/local/vufind/solr/vendor/dist && \
+    mkdir -p /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
+    mv /tmp/solr/vendor/dist/solrj-lib /usr/local/vufind/solr/vendor/dist && \
+    mv /tmp/solr/vendor/contrib/analysis-extras/lib /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
+    rm -rf /tmp/solr
 
 # Build Arguments
 ARG DEBUG=false
@@ -46,6 +49,10 @@ ARG MAIL_PORT
 ARG MAIL_USERNAME
 ARG MAIL_PASSWORD
 ARG SOLR_URL=http://solr:8983/solr
+ARG EDS_USER
+ARG EDS_PASS
+ARG EDS_PROFILE
+ARG EDS_ORG
 
 ENV DEBUG=$DEBUG \
     FOLIO_URL=$FOLIO_URL \
@@ -60,7 +67,11 @@ ENV DEBUG=$DEBUG \
     MAIL_PORT=$MAIL_PORT \
     MAIL_USERNAME=$MAIL_USERNAME \
     MAIL_PASSWORD=$MAIL_PASSWORD \
-    SOLR_URL=$SOLR_URL
+    SOLR_URL=$SOLR_URL \
+    EDS_USER=$EDS_USER \
+    EDS_PASS=$EDS_PASS \
+    EDS_PROFILE=$EDS_PROFILE \
+    EDS_ORG=$EDS_ORG
 
 # Setup Apache
 RUN echo "ServerName catalog.lib.msu.edu" >> /etc/apache2/sites-available/000-default.conf && \
@@ -82,26 +93,24 @@ RUN chmod -R g-w,o-w /etc/cron.d/ && \
 
 WORKDIR /usr/local/vufind
 
-# Remove core config files that prevent local overrides
-RUN rm import/marc_local.properties
-
-# Replace environment variables in template ini files
-RUN envsubst < local/config/vufind/Folio.template.ini > local/config/vufind/Folio.ini && \
-    envsubst < local/config/vufind/config.template.ini > local/config/vufind/config.ini && \
-    envsubst < local/harvest/oai.template.ini > local/harvest/oai.ini
-
-# Enable debug mode
-RUN if [ "$DEBUG" = 1 ] ; \
-    then sed -i "/SetEnv VUFIND_ENV development/s/#//g" ${VUFIND_LOCAL_DIR}/httpd-vufind.conf; fi
-
-# TODO: Hopefully can fix this in the Folio driver.
-# Had to change the id from 1 to a real id in folio to get the getIlsStatus call working.
-# We could override this function in the driver to switch the call it makes to something less
-# dependent on an ID.
-RUN sed -i "/getStatus/s/1/${FOLIO_REC_ID}/g" ${VUFIND_HOME}/module/VuFind/src/VuFind/ILS/Connection.php
-
-# Set required environment variables
-RUN echo JAVA_HOME="$JAVA_HOME" >> /etc/environment && \
+RUN \
+    # Remove core config files that prevent local overrides
+    rm import/marc_local.properties && \
+    # Replace environment variables in template ini files
+    cat local/config/vufind/config.ini | envsubst | sponge local/config/vufind/config.ini && \
+    cat local/config/vufind/Folio.ini | envsubst | sponge local/config/vufind/Folio.ini && \
+    cat local/config/vufind/EDS.ini | envsubst | sponge local/config/vufind/EDS.ini && \
+    cat local/harvest/oai.ini | envsubst | sponge local/harvest/oai.ini && \
+    # Enable debug mode
+    if [ "$DEBUG" = 1 ] ; \
+    then sed -i "/SetEnv VUFIND_ENV development/s/#//g" ${VUFIND_LOCAL_DIR}/httpd-vufind.conf; fi && \
+    # TODO: Hopefully can fix this in the Folio driver.
+    # Had to change the id from 1 to a real id in folio to get the getIlsStatus call working.
+    # We could override this function in the driver to switch the call it makes to something less
+    # dependent on an ID.
+    sed -i "/getStatus/s/1/${FOLIO_REC_ID}/g" ${VUFIND_HOME}/module/VuFind/src/VuFind/ILS/Connection.php && \
+    # Set required environment variables
+    echo JAVA_HOME="$JAVA_HOME" >> /etc/environment && \
     echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
     echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR"  >> /etc/environment
 
