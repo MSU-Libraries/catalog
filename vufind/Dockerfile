@@ -21,11 +21,11 @@ RUN \
     wget https://github.com/vufind-org/vufind/releases/download/v${VUFIND_VERSION}/vufind_${VUFIND_VERSION}.deb && \
     # Install the package
     service apache2 restart && \
-    apt install ./vufind_${VUFIND_VERSION}.deb java-compiler- -y && \
+    apt install ./vufind_${VUFIND_VERSION}.deb -y && \
     apt clean && \
     rm vufind_${VUFIND_VERSION}.deb && \
     # Remove unused dependencies after Vufind is installed
-    apt remove build-essential mysql-server default-jdk -y && \
+    apt remove build-essential mysql-server default-jdk java-compiler -y && \
     apt autoremove -y && \
     mv /usr/local/vufind/solr /tmp && \
     mkdir -p /usr/local/vufind/solr/vendor/dist && \
