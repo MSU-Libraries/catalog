@@ -98,6 +98,10 @@ available in the `devel-` and `review-` pipelines.
 * `BASICAUTH_FOR_RESOURCES`: Bcrypt password hash[^1] for basic authentication to internal
 resources such as Solr and the Traefik dashboard
 * `DEPLOY_PRIVATE_KEY`: The `base64` encoded private ssh key to the deploy server
+* `EDS_ORG`: Organization ID for the EDS API
+* `EDS_PASS`: Password for the `EDS_USER` username
+* `EDS_PROFILE`: Profile name for EDS
+* `EDS_USER`: Username for the EDS API
 * `EMAIL`: Email address set in Vufind's configs 
 * `FOLIO_CANCEL_ID`: The FOLIO cancelation ID to use when canceling an order. Vufind uses
 * `FOLIO_PASS`: Password for the `FOLIO_USER` application user used by Vufind
