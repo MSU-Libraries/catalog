@@ -20,14 +20,18 @@ RUN \
     # Get the package
     wget https://github.com/vufind-org/vufind/releases/download/v${VUFIND_VERSION}/vufind_${VUFIND_VERSION}.deb && \
     # Install the package
-    service apache2 restart && \
-    apt install ./vufind_${VUFIND_VERSION}.deb -y && \
+    apt install ./vufind_${VUFIND_VERSION}.deb default-jdk- java-compiler- -y && \
     apt clean && \
     rm vufind_${VUFIND_VERSION}.deb && \
     # Remove unused dependencies after Vufind is installed
-    apt remove build-essential gcc mysql-server default-jdk -y && \
+    apt remove build-essential mysql-server -y && \
     apt autoremove -y && \
-    rm -rf /usr/local/vufind/solr
+    mv /usr/local/vufind/solr /tmp && \
+    mkdir -p /usr/local/vufind/solr/vendor/dist && \
+    mkdir -p /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
+    mv /tmp/solr/vendor/dist/solrj-lib /usr/local/vufind/solr/vendor/dist && \
+    mv /tmp/solr/vendor/contrib/analysis-extras/lib /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
+    rm -rf /tmp/solr
 
 # Build Arguments
 ARG DEBUG=false

@@ -25,7 +25,6 @@ services:
         window: 15s
       update_config:
         parallelism: 1
-        order: start-first
       labels:
         - "traefik.enable=true"
         # HTTP Configuration
