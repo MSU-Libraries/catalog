@@ -13,7 +13,9 @@ ENV JAVA_HOME=/usr/lib/jvm/default-java
 RUN \
     # Perform updates
     apt update && \
-    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils mysql-client default-jre -y && \
+    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils mysql-client \
+        default-jre-headless apache2 libapache2-mod-php php-pear php php-curl php-gd php-intl php-json \
+        php-ldap php-mbstring php-mysql php-soap php-xml -y && \
     # Setup Timezone
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
@@ -21,11 +23,12 @@ RUN \
     wget https://github.com/vufind-org/vufind/releases/download/v${VUFIND_VERSION}/vufind_${VUFIND_VERSION}.deb && \
     # Install the package
     service apache2 restart && \
-    apt install ./vufind_${VUFIND_VERSION}.deb -y && \
+    dpkg -i --ignore-depends=default-jdk,java-compiler,mysql-server,virtual-mysql-server-core,php-dev \
+        ./vufind_${VUFIND_VERSION}.deb && \
     apt clean && \
     rm vufind_${VUFIND_VERSION}.deb && \
     # Remove unused dependencies after Vufind is installed
-    apt remove build-essential mysql-server default-jdk java-compiler -y && \
+    apt remove build-essential -y && \
     apt autoremove -y && \
     mv /usr/local/vufind/solr /tmp && \
     mkdir -p /usr/local/vufind/solr/vendor/dist && \
