@@ -13,7 +13,10 @@ ENV JAVA_HOME=/usr/lib/jvm/default-java
 RUN \
     # Perform updates
     apt update && \
-    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils mysql-client default-jre -y && \
+    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils gettext-base \
+        # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
+        mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl php-gd php-intl \
+        php-json php-ldap php-mbstring php-mysql php-soap php-xml -y && \
     # Setup Timezone
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
@@ -21,16 +24,15 @@ RUN \
     wget https://github.com/vufind-org/vufind/releases/download/v${VUFIND_VERSION}/vufind_${VUFIND_VERSION}.deb && \
     # Install the package
     service apache2 restart && \
-    apt install ./vufind_${VUFIND_VERSION}.deb -y && \
+    dpkg -i --ignore-depends=php-dev,default-jdk,java-compiler,mysql-server,virtual-mysql-server-core \
+        ./vufind_${VUFIND_VERSION}.deb && \
     apt clean && \
     rm vufind_${VUFIND_VERSION}.deb && \
     # Remove unused dependencies after Vufind is installed
-    apt remove build-essential mysql-server default-jdk java-compiler -y && \
-    apt autoremove -y && \
     mv /usr/local/vufind/solr /tmp && \
     mkdir -p /usr/local/vufind/solr/vendor/dist && \
     mkdir -p /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
-    mv /tmp/solr/vendor/dist/solrj-lib /usr/local/vufind/solr/vendor/dist && \
+    mv /tmp/solr/vendor/dist/solr* /usr/local/vufind/solr/vendor/dist/ && \
     mv /tmp/solr/vendor/contrib/analysis-extras/lib /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
     rm -rf /tmp/solr
 
@@ -97,10 +99,10 @@ RUN \
     # Remove core config files that prevent local overrides
     rm import/marc_local.properties && \
     # Replace environment variables in template ini files
-    cat local/config/vufind/config.ini | envsubst | sponge local/config/vufind/config.ini && \
-    cat local/config/vufind/Folio.ini | envsubst | sponge local/config/vufind/Folio.ini && \
-    cat local/config/vufind/EDS.ini | envsubst | sponge local/config/vufind/EDS.ini && \
-    cat local/harvest/oai.ini | envsubst | sponge local/harvest/oai.ini && \
+    envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.ini && \
+    envsubst < local/config/vufind/Folio.ini | sponge local/config/vufind/Folio.ini && \
+    envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
+    envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
     # Enable debug mode
     if [ "$DEBUG" = 1 ] ; \
     then sed -i "/SetEnv VUFIND_ENV development/s/#//g" ${VUFIND_LOCAL_DIR}/httpd-vufind.conf; fi && \
