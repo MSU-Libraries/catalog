@@ -98,10 +98,10 @@ RUN \
     # Remove core config files that prevent local overrides
     rm import/marc_local.properties && \
     # Replace environment variables in template ini files
-    cat local/config/vufind/config.ini | envsubst | sponge local/config/vufind/config.ini && \
-    cat local/config/vufind/Folio.ini | envsubst | sponge local/config/vufind/Folio.ini && \
-    cat local/config/vufind/EDS.ini | envsubst | sponge local/config/vufind/EDS.ini && \
-    cat local/harvest/oai.ini | envsubst | sponge local/harvest/oai.ini && \
+    envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.ini && \
+    envsubst < local/config/vufind/Folio.ini | sponge local/config/vufind/Folio.ini && \
+    envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
+    envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
     # Enable debug mode
     if [ "$DEBUG" = 1 ] ; \
     then sed -i "/SetEnv VUFIND_ENV development/s/#//g" ${VUFIND_LOCAL_DIR}/httpd-vufind.conf; fi && \
