@@ -259,7 +259,7 @@ Deploy Vufind:
                 break;
             fi
             echo "Catalog container not online. Waiting...";
-            sleep 5;
+            sleep 6;
             IMPORT_ATTEMPTS=$((IMPORT_ATTEMPTS+1));
         done
         echo "Running harvest-and-import.sh now";

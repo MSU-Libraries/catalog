@@ -52,7 +52,7 @@ Build Vufind Image:
         --build-arg MAIL_USERNAME= 
         --build-arg MAIL_PASSWORD= 
         --build-arg SOLR_URL=http://solr:8983/solr 
-        --build-arg EDS_USER=$EDS_USR
+        --build-arg EDS_USER=$EDS_USER
         --build-arg EDS_PASS=$EDS_PASS
         --build-arg EDS_PROFILE=$EDS_PROFILE
         --build-arg EDS_ORG=$EDS_ORG
