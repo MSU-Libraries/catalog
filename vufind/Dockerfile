@@ -94,10 +94,10 @@ WORKDIR /usr/local/vufind
 RUN rm import/marc_local.properties
 
 # Replace environment variables in template ini files
-RUN envsubst < local/config/vufind/Folio.template.ini > local/config/vufind/Folio.ini && \
-    envsubst < local/config/vufind/config.template.ini > local/config/vufind/config.ini && \
-    envsubst < local/harvest/oai.template.ini > local/harvest/oai.ini && \
-    cat local/config/vufind/EDS.ini | envsubst | sponge local/config/vufind/EDS.ini
+RUN cat local/config/vufind/config.ini | envsubst | sponge local/config/vufind/config.ini && \
+    cat local/config/vufind/Folio.ini | envsubst | sponge local/config/vufind/Folio.ini && \
+    cat local/config/vufind/EDS.ini | envsubst | sponge local/config/vufind/EDS.ini && \
+    cat local/harvest/oai.ini | envsubst | sponge local/harvest/oai.ini
 
 # Enable debug mode
 RUN if [ "$DEBUG" = 1 ] ; \

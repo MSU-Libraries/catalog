@@ -165,14 +165,6 @@ Deploy Solr:
   extends: .stack_template
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule"'
-    #  changes:
-    #    - docker-compose.solr*
-    #    - solr/*
-    #    - docker-compose.yml
-    #    - vufind/**/*
-    #    - zk/*
-    #    - .gitlab-ci.yml
-    #    - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -201,16 +193,6 @@ Deploy DB:
   extends: .stack_template
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule"'
-    #  changes:
-    #    - docker-compose.mariadb*
-    #    - docker-compose.yml
-    #    - vufind/**/*
-    #    - docker-compose.solr*
-    #    - solr/*
-    #    - zk/*
-    #    - db/**/*
-    #    - .gitlab-ci.yml
-    #    - templates/*
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -252,6 +234,7 @@ Deploy Vufind:
       if [ "${STACK_NAME}" != "catalog-beta" ]; then
         IMPORT_ATTEMPTS=0;
         CAT_CONTAINER=;
+        sleep 10;
         while [[ "$IMPORT_ATTEMPTS" -le 5 ]]; do
             TARGET_IMAGE=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}'");
             if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
@@ -259,7 +242,7 @@ Deploy Vufind:
                 break;
             fi
             echo "Catalog container not online. Waiting...";
-            sleep 6;
+            sleep 10;
             IMPORT_ATTEMPTS=$((IMPORT_ATTEMPTS+1));
         done
         echo "Running harvest-and-import.sh now";
