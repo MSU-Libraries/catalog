@@ -13,7 +13,7 @@ ENV JAVA_HOME=/usr/lib/jvm/default-java
 RUN \
     # Perform updates
     apt update && \
-    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils -y && \
+    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils mysql-client default-jre -y && \
     # Setup Timezone
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
@@ -22,7 +22,12 @@ RUN \
     # Install the package
     service apache2 restart && \
     apt install ./vufind_${VUFIND_VERSION}.deb -y && \
-    apt clean
+    apt clean && \
+    rm vufind_${VUFIND_VERSION}.deb && \
+    # Remove unused dependencies after Vufind is installed
+    apt remove build-essential gcc mysql-server default-jdk -y && \
+    apt autoremove -y && \
+    rm -rf /usr/local/vufind/solr
 
 # Build Arguments
 ARG DEBUG=false

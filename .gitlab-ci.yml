@@ -64,7 +64,7 @@ Deploy Compose Files:
   script:
     # Install yq, enbsubst, and sponge
     - apk add wget gettext moreutils
-    - wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O ./yq
+    - wget --header="Authorization: token $GITHUB_USER_TOKEN" https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O ./yq
     - chmod +x ./yq
     # Add basicauth password for restricted resources
     - ./yq -i ".services.traefik.deploy.labels[2]=\"traefik.http.middlewares.restrict-auth.basicauth.users=$BASICAUTH_FOR_RESOURCES\"" docker-compose.traefik.yml
