@@ -31,7 +31,7 @@ RUN \
     mv /usr/local/vufind/solr /tmp && \
     mkdir -p /usr/local/vufind/solr/vendor/dist && \
     mkdir -p /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
-    mv /tmp/solr/vendor/dist/solrj-lib /usr/local/vufind/solr/vendor/dist && \
+    mv /tmp/solr/vendor/dist/solr* /usr/local/vufind/solr/vendor/dist/ && \
     mv /tmp/solr/vendor/contrib/analysis-extras/lib /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
     rm -rf /tmp/solr
 
