@@ -13,7 +13,7 @@ ENV JAVA_HOME=/usr/lib/jvm/default-java
 RUN \
     # Perform updates
     apt update && \
-    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils mysql-client default-jre -y && \
+    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils mysql-client default-jre-headless -y && \
     # Setup Timezone
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
