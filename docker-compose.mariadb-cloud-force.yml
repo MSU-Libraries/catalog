@@ -44,15 +44,15 @@ services:
     volumes:
       - db-bitnami:/bitnami
     stop_signal: SIGWINCH
-    stop_grace_period: 60s
+    stop_grace_period: 70s
     deploy:
       mode: replicated
       replicas: 1
       restart_policy:
-        window: 60s
+        window: 70s
       update_config:
         parallelism: 1
-        delay: 60s
+        delay: 90s
       placement:
         constraints:
           # Update N to be the Docker Swarm node number with most recent SQL file changes
