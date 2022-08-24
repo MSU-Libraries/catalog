@@ -13,10 +13,11 @@ ENV JAVA_HOME=/usr/lib/jvm/default-java
 RUN \
     # Perform updates
     apt update && \
-    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils gettext-base \
+    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
+        gettext-base locales \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
-        mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl php-gd php-intl \
-        php-json php-ldap php-mbstring php-mysql php-soap php-xml -y && \
+        mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl \
+        php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml -y && \
     # Setup Timezone
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
