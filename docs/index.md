@@ -8,4 +8,5 @@ setup and configure the containerized Vufind.
 * [First Time Setup](first-time-setup.md)
 * [Harvesting](harvesting.md)
 * [CI/CD](CICD.md)
+* [Upgrading](upgrading.md)
 * [Troubleshooting](troubleshooting.md)
