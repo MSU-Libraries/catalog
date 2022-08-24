@@ -310,9 +310,9 @@ Remove Environment:
     - Deploy Compose Files
 
 include:
-  - project: 'msu-libraries/ci-cd/ci-cd'
+  - project: 'msu-libraries/public/cicd-templates'
     ref: main
-    file: '/templates/SSH.gitlab-ci.yml'
+    file: 'SSH.gitlab-ci.yml'
   - 'templates/Build.gitlab-ci.yml'
 #  - 'templates/Scan.gitlab-ci.yml'
   - 'templates/Release.gitlab-ci.yml'

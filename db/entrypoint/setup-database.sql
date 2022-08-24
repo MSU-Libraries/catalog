@@ -1,5 +1,5 @@
 /*
- Initial v8.0.4 Database
+ Initial v8.1 Database
 */
 
 USE vufind;

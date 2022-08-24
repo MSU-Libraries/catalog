@@ -1,6 +1,6 @@
 FROM bitnami/solr:8
 
-ENV VUFIND_VERSION=8.0.4
+ENV VUFIND_VERSION=8.1
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Detroit
 
