@@ -1,3 +1,0 @@
-# Trigger harvest start
-#0 1	* * *	root    /usr/bin/flock -n /tmp/harvest.lock /harvest-and-import.sh --oai-harvest --batch-import
-
