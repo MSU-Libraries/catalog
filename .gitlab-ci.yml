@@ -70,7 +70,7 @@ Deploy Compose Files:
     - ./yq -i ".services.traefik.deploy.labels[2]=\"traefik.http.middlewares.restrict-auth.basicauth.users=$BASICAUTH_FOR_RESOURCES\"" docker-compose.traefik.yml
     # Modify the image tag from :latest -> $CI_COMMIT_SHORT_SHA
     - ./yq -i ".services.catalog.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
-    - ./yq -i ".services.harvest.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
+    - ./yq -i ".services.cron.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
     - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-bootstrap.yml
     - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud.yml
     - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-force.yml
@@ -108,8 +108,8 @@ Deploy Compose Files:
     - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".x-solr-deploy.labels[10] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
     - ./yq -i ".x-solr-deploy.labels[11] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls=true\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[12] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.certresolver=msul-letsencrypt\"" docker-compose.solr-cloud.yml
-    # Remove the harvest service if the stack name is NOT catalog-beta
-    - if [ "${STACK_NAME}" != "catalog-beta" ]; then ./yq -i "del(.services.harvest)" docker-compose.yml; fi
+    # Remove the cron service if the stack name is NOT catalog-beta
+    - if [ "${STACK_NAME}" != "catalog-beta" ]; then ./yq -i "del(.services.cron)" docker-compose.yml; fi
     # Replace $STACK_NAME in main compose file
     - cat docker-compose.yml | envsubst | sponge docker-compose.yml
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
