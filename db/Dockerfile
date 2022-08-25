@@ -4,15 +4,15 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update && \
     apt install netcat-openbsd wget -y
-USER 1001
 
 ARG VUFIND_VERSION
 
 # Get the create-database SQL for the version of Vufind
-RUN mkdir /docker-entrypoint-initdb.d && \
-    wget https://raw.githubusercontent.com/vufind-org/vufind/v${VUFIND_VERSION}/module/VuFind/sql/mysql.sql \
-    /docker-entrypoint-initdb.d/vufind.sql && \
+RUN wget -O /docker-entrypoint-initdb.d/vufind.sql \
+    https://raw.githubusercontent.com/vufind-org/vufind/v${VUFIND_VERSION}/module/VuFind/sql/mysql.sql && \
     sed -i '1s/^/use vufind;\n/' /docker-entrypoint-initdb.d/vufind.sql
+
+USER 1001
 
 COPY ./cloud-entrypoint.sh /cloud-entrypoint.sh
 COPY ./cloud-startup.sh /cloud-startup.sh
