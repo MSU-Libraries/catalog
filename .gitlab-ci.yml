@@ -12,6 +12,7 @@ stages:
   - Release
 
 variables:
+  VUFIND_VERSION: 8.1
   DEPLOY_HOST_A: catalog-a.aws.lib.msu.edu
   DEPLOY_HOST_B: catalog-b.aws.lib.msu.edu
   DEPLOY_HOST_C: catalog-c.aws.lib.msu.edu
@@ -257,6 +258,36 @@ Deploy Vufind:
   artifacts:
     reports:
       dotenv: deploy.env
+
+Vufind Upgrade:
+  stage: Deploy
+  extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Deploy Vufind
+  script:
+    - >
+        CAT_CONTAINER=;
+        sleep 15;
+        while [[ "$CHECK_ATTEMPTS" -le 20 ]]; do
+            TARGET_IMAGE=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}'");
+            if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
+                CAT_CONTAINER=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog");
+                break;
+            fi
+            echo "Catalog container not online. Waiting...";
+            sleep 10;
+            CHECK_ATTEMPTS=$((CHECK_ATTEMPTS+1));
+        done
+        # TODO -- backup of database before running upgrade (can use what we implement in PC-74)
+        echo "Running Vufind upgrade now";
+        curl https://${CI_ENVIRONMENT_URL}/vufind/Upgrade/GetSourceVersion' \
+        --data-raw 'sourceversion=${VUFIND_VERSION}&skip%5B%5D=config';
+        echo "Upgrade complete with exit code $?";
+  
 
 Remove Environment:
   stage: Cleanup

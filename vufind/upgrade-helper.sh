@@ -108,6 +108,13 @@ compare_db() {
     fi
 }
 
+compare_solr() {
+    verbose "Comparing Solr changes made in release ${ARGS[RELEASE]}"
+    
+    if git -C "${ARGS[REPO_PATH]}" diff HEAD:solr/ "${ARGS[RELEASE]}":solr/ 2> /dev/null; then
+        SUMMARY+=("Solr changes detected in solr/. Full re-import detected to apply new index")
+    fi
+}
 compare_local() {
     verbose "Comparing changes made in ${ARGS[REPO_PATH]}/local/$1 in release ${ARGS[RELEASE]}"
 

@@ -1,6 +1,5 @@
 FROM bitnami/solr:8
 
-ENV VUFIND_VERSION=8.1
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Detroit
 
@@ -14,6 +13,8 @@ RUN apt update && \
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
 
+ARG VUFIND_VERSION
+
 # Get solr configs and prepare for alphabetical browsing
 RUN mkdir /solr_confs && \
     wget https://github.com/vufind-org/vufind/archive/refs/tags/v${VUFIND_VERSION}.tar.gz && \
@@ -24,9 +25,6 @@ RUN mkdir /solr_confs && \
     mkdir /solr_confs/import && \
     chown 1001 /solr_confs/import && \
     cp /vufind-${VUFIND_VERSION}/import/browse-indexing.jar /solr_confs/import/ && \
-    #mkdir -p /bitnami/solr/server && \
-    #chown 1001 /bitnami/solr/server && \
-    #ln -s /opt/bitnami/solr /bitnami/solr/server/vendor && \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION} && \
     cp -r /opt/bitnami/solr/contrib/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/ && \
