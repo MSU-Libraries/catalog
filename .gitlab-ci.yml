@@ -12,7 +12,7 @@ stages:
   - Release
 
 variables:
-  VUFIND_VERSION: 8.1
+  VUFIND_VERSION: "8.1"
   DEPLOY_HOST_A: catalog-a.aws.lib.msu.edu
   DEPLOY_HOST_B: catalog-b.aws.lib.msu.edu
   DEPLOY_HOST_C: catalog-c.aws.lib.msu.edu
