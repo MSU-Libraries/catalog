@@ -13,6 +13,8 @@
 #     Example:
 #       /path/to/my_cron_job.sh 2>&1 | pee "logger -t MY_CRON" "cat"
 #   - This sends the command output to both the rsyslog (and thus Docker) as well as stdout for email notification.
+#   - To suppress output sending email notification, except in case the script fails:
+#       chronic mispipe "/path/to/my_cron_job.sh 2>&1" "pee 'logger -t MY_CRON' 'cat'"
 #
 
 # Trigger harvest start
