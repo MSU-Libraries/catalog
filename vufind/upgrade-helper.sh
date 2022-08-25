@@ -89,9 +89,10 @@ verbose() {
 main() {
     compare_local
     compare_db
+    compare_solr
 
     echo "--- Summary of Changes ---"
-    echo "Files changes in release ${ARGS[RELEASE]}"
+    echo "Files changed in release ${ARGS[RELEASE]}"
     for i in "${SUMMARY[@]}"; do echo "${i}"; done
     echo "--- Done ---"
 }
@@ -99,20 +100,16 @@ main() {
 compare_db() {
     verbose "Comparing database changes made in release ${ARGS[RELEASE]}"
 
-    if ! git -C "${ARGS[REPO_PATH]}" diff HEAD:module/VuFind/sql/mysql.sql "${ARGS[RELEASE]}":module/VuFind/sql/mysql.sql; then
-        SUMMARY+=("catalog/db/entrypoint/setup-database.sql -->  ${ARGS[RELEASE]}:module/VuFind/sql/mysql.sql")
-    fi
-
-    if git -C "${ARGS[REPO_PATH]}" show "${ARGS[RELEASE]}":module/VuFind/sql/migrations/pgsql/${ARGS[RELEASE]#v} 2> /dev/null; then
-        SUMMARY+=("Database changes found in: ${ARGS[RELEASE]}:module/VuFind/sql/migrations/pgsql/${ARGS[RELEASE]#v}")
+    if ! git -C "${ARGS[REPO_PATH]}" diff HEAD:module/VuFind/sql/mysql.sql --exit-code "${ARGS[RELEASE]}":module/VuFind/sql/mysql.sql; then
+        SUMMARY+=("Database changes detected in ${ARGS[RELEASE]}:module/VuFind/sql/mysql.sql. Will be applied during build and deploy jobs in pipeline.")
     fi
 }
 
 compare_solr() {
     verbose "Comparing Solr changes made in release ${ARGS[RELEASE]}"
     
-    if git -C "${ARGS[REPO_PATH]}" diff HEAD:solr/ "${ARGS[RELEASE]}":solr/ 2> /dev/null; then
-        SUMMARY+=("Solr changes detected in solr/. Full re-import detected to apply new index")
+    if ! git -C "${ARGS[REPO_PATH]}" diff --quiet HEAD:solr/ "${ARGS[RELEASE]}":solr/; then
+        SUMMARY+=("Solr changes detected in ${ARGS[RELEASE]}:solr/. Full re-import detected to apply new index")
     fi
 }
 compare_local() {
