@@ -1,0 +1,22 @@
+##########################################
+# Logging & Notification for Cron Jobs
+##########################################
+#
+# To log output of a job to Docker logs:
+# - Output of command must be passed to the `logger` command. You may optionally tag (-t) the message.
+# - To log stdout AND stderr, you will need to redirect stderr to stdout by appending `2>&1` to the command.
+#
+# To receive email notification of job output, output must be sent to stdout.
+# - Without the logging to Docker method above, this is the default.
+# - When using Docker logging method, you will need to duplicate the output.
+#   - This can be done via pipe into `pee` and passing both the `logger` and `cat` commands.
+#     Example:
+#       /path/to/my_cron_job.sh 2>&1 | pee "logger -t MY_CRON" "cat"
+#   - This sends the command output to both the rsyslog (and thus Docker) as well as stdout for email notification.
+#   - To suppress output sending email notification, except in case the script fails:
+#       chronic mispipe "/path/to/my_cron_job.sh 2>&1" "pee 'logger -t MY_CRON' 'cat'"
+#
+
+# Trigger harvest start
+#*/2 *	* * *	root    /usr/bin/flock -n /tmp/harvest.lock /harvest-and-import.sh --oai-harvest --batch-import
+

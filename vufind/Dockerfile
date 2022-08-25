@@ -91,7 +91,9 @@ COPY harvest-and-import.sh /harvest-and-import.sh
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
 RUN chmod -R g-w,o-w /etc/cron.d/ && \
-    sed -i "/imklog/d" /etc/rsyslog.conf
+    sed -i "/imklog/d" /etc/rsyslog.conf && \
+    sed -i "/PrivDrop/d" /etc/rsyslog.conf && \
+    echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf
 
 WORKDIR /usr/local/vufind
 
