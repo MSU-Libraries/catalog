@@ -270,13 +270,13 @@ Vufind Upgrade:
     - Deploy Vufind
   script:
     - >
-        CAT_CONTAINER=;
         CHECK_ATTEMPTS=0;
+        echo "Checking to see if catalog container is online...";
         sleep 15;
         while [[ "$CHECK_ATTEMPTS" -le 20 ]]; do
             TARGET_IMAGE=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}'");
             if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
-                CAT_CONTAINER=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog");
+                echo "Container online with new image!";
                 break;
             fi
             echo "Catalog container not online. Waiting...";
