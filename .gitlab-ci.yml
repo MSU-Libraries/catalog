@@ -13,6 +13,8 @@ stages:
 
 variables:
   VUFIND_VERSION: "8.1"
+  # Used during upgrade, which needs to know previous version
+  PREV_VUFIND_VERSION: "8.0.4"
   DEPLOY_HOST_A: catalog-a.aws.lib.msu.edu
   DEPLOY_HOST_B: catalog-b.aws.lib.msu.edu
   DEPLOY_HOST_C: catalog-c.aws.lib.msu.edu
@@ -275,7 +277,7 @@ Vufind Upgrade:
             oldval=$2;
             newval=$3;
             container=$(ssh deploy@$server "docker ps -q -f name=${STACK_NAME}-catalog_catalog");
-            ssh deploy@$server "docker exec $container sed -i 's/autoConfigure = $oldval/    autoConfigure = $newval/g' local/config/vufind/config.ini";
+            ssh deploy@$server "docker exec $container sed -i 's/autoConfigure = $oldval/autoConfigure = $newval/g' local/config/vufind/config.ini";
         }
         catalogwait() {
             host=$1;
@@ -304,7 +306,7 @@ Vufind Upgrade:
         setconfig $DEPLOY_HOST_B "false" "true";
         setconfig $DEPLOY_HOST_C "false" "true";
         echo "Running Vufind upgrade now against ${URL}";
-        curl "${URL}/vufind/Upgrade/GetSourceVersion" --data-raw "sourceversion=${VUFIND_VERSION}&skip%5B%5D=config";
+        curl "${URL}/vufind/Upgrade/GetSourceVersion" --data-raw "sourceversion=${PREV_VUFIND_VERSION}&skip%5B%5D=config";
         echo "Upgrade complete with exit code $?";
         echo "Disabling auto configure";
         setconfig $DEPLOY_HOST_A "true" "false";
