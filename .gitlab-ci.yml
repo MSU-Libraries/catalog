@@ -271,6 +271,7 @@ Vufind Upgrade:
   script:
     - >
         CAT_CONTAINER=;
+        CHECK_ATTEMPTS=0;
         sleep 15;
         while [[ "$CHECK_ATTEMPTS" -le 20 ]]; do
             TARGET_IMAGE=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}'");
