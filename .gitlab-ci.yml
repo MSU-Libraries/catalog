@@ -306,7 +306,7 @@ Vufind Upgrade:
         setconfig $DEPLOY_HOST_B "false" "true";
         setconfig $DEPLOY_HOST_C "false" "true";
         echo "Running Vufind upgrade now against ${URL}";
-        curl "${URL}/vufind/Upgrade/GetSourceVersion" --data-raw "sourceversion=${PREV_VUFIND_VERSION}&skip%5B%5D=config" -L;
+        curl "${URL}/vufind/Upgrade/GetSourceVersion" --data-raw "sourceversion=${PREV_VUFIND_VERSION}&skip%5B%5D=config" -L -O;
         echo "Upgrade complete with exit code $?";
         echo "Disabling auto configure";
         setconfig $DEPLOY_HOST_A "true" "false";
