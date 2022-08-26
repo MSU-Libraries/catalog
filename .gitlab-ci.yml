@@ -262,12 +262,11 @@ Deploy Vufind:
 Vufind Upgrade:
   stage: Deploy
   extends: .stack_template
-  environment:
-    name: $CI_COMMIT_BRANCH
   needs:
     - job: Set Stack Name
       artifacts: true
     - Deploy Vufind
+      artifacts: true
   script:
     # TODO -- backup of database before running upgrade (can use what we implement in PC-74)
     - |
@@ -285,8 +284,8 @@ Vufind Upgrade:
             sleep 10;
             CHECK_ATTEMPTS=$((CHECK_ATTEMPTS+1));
         done
-        echo "Running Vufind upgrade now";
-        curl "https://${CI_ENVIRONMENT_URL}/vufind/Upgrade/GetSourceVersion" --data-raw "sourceversion=${VUFIND_VERSION}&skip%5B%5D=config";
+        echo "Running Vufind upgrade now against ${URL}";
+        curl "https://${URL}/vufind/Upgrade/GetSourceVersion" --data-raw "sourceversion=${VUFIND_VERSION}&skip%5B%5D=config";
         echo "Upgrade complete with exit code $?";
   
 
