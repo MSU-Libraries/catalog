@@ -265,7 +265,7 @@ Vufind Upgrade:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Deploy Vufind
+    - job: Deploy Vufind
       artifacts: true
   script:
     # TODO -- backup of database before running upgrade (can use what we implement in PC-74)
