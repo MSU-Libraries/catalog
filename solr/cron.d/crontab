@@ -1,0 +1,26 @@
+##########################################
+# Logging & Notification for Cron Jobs
+##########################################
+#
+# To log output of a job to Docker logs:
+# - Output of command must be passed to the `logger` command. You may optionally tag (-t) the message.
+# - To log stdout AND stderr, you will need to redirect stderr to stdout by appending `2>&1` to the command.
+#     /path/to/my_cron_job.sh 2>&1 | logger -t MY_CRON
+#
+# To receive email notification of job output, output must be sent to stdout.
+# - If you do not configure logging to Docker using the method above, this is the default result.
+#   - To suppress output, preventing sending email notification, except in case the script fails.
+#       chronic /path/to/my_cron_job.sh
+#
+# - When using the Docker logging method, you will need to duplicate the output.
+#   - This can be done via pipe into `pee` and passing both the `logger` and `cat` commands.
+#       /path/to/my_cron_job.sh 2>&1 | pee "logger -t MY_CRON" "cat"
+#
+#   - This sends the command output to both the rsyslog (and thus Docker) as well as stdout for email notification.
+#   - To suppress output, preventing sending email notification, except in case the script fails.
+#       chronic mispipe "/path/to/my_cron_job.sh 2>&1" "pee 'logger -t MY_CRON' 'cat'"
+#
+
+# Trigger Alphabetical browse update
+#* 1	* * *	root    /alpha-browse.sh 2>&1 | logger -t ALPHA_BROWSE
+

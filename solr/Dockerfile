@@ -7,7 +7,7 @@ USER root
 
 # Perform updates
 RUN apt update && \
-    apt install wget vim -y
+    apt install wget vim rsyslog cron -y
 
 # Setup Timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
@@ -31,12 +31,14 @@ RUN mkdir /solr_confs && \
     cp -r /opt/bitnami/solr/contrib/analysis-extras/lucene-libs/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/
 
 COPY startup.sh /startup.sh
+COPY startup-cron.sh /startup-cron.sh
 
 USER 1001
 
 RUN cp -r /solr_confs/jars /opt/bitnami/solr/server/solr/jars
 
 COPY browse-handler.jar /opt/bitnami/solr/server/solr/jars/browse-handler.jar
+COPY alpha-browse.sh /alpha-browse.sh
 
 # Run start-up script
 CMD ["/startup.sh", "/opt/bitnami/scripts/solr/run.sh"]

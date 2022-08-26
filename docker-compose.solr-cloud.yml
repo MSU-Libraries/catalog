@@ -134,6 +134,24 @@ services:
       placement:
         constraints:
           - "node.labels.nodeid==3"
+  cron:
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:latest
+    command: /startup-cron.sh
+    volumes:
+      - bitnami:/bitnami
+      - /mnt/shared:/mnt/shared:rw
+    networks:
+      - internal
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        window: 15s
 
 networks:
   internal:
