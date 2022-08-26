@@ -271,6 +271,7 @@ Vufind Upgrade:
   script:
     # TODO -- backup of database before running upgrade (can use what we implement in PC-74)
     - |
+        apk add curl || apt install curl -y
         CHECK_ATTEMPTS=0;
         echo "Checking to see if catalog container is online...";
         sleep 15;
