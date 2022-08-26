@@ -8,7 +8,6 @@ stages:
   - Bootstrap
   - Deploy
   - Cleanup
-  - Tag
   - Release
 
 variables:
