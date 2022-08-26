@@ -285,7 +285,7 @@ Vufind Upgrade:
             CHECK_ATTEMPTS=$((CHECK_ATTEMPTS+1));
         done
         echo "Running Vufind upgrade now against ${URL}";
-        curl "https://${URL}/vufind/Upgrade/GetSourceVersion" --data-raw "sourceversion=${VUFIND_VERSION}&skip%5B%5D=config";
+        curl "${URL}/vufind/Upgrade/GetSourceVersion" --data-raw "sourceversion=${VUFIND_VERSION}&skip%5B%5D=config";
         echo "Upgrade complete with exit code $?";
   
 
