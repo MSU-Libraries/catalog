@@ -292,6 +292,8 @@ Vufind Upgrade:
                 attempts=$((attempts+1));
             done
         }
+        ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
+        ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
         catalogwait $DEPLOY_HOST_A
         catalogwait $DEPLOY_HOST_B
         catalogwait $DEPLOY_HOST_C
