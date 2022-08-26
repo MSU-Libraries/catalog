@@ -270,24 +270,43 @@ Vufind Upgrade:
   script:
     # TODO -- backup of database before running upgrade (can use what we implement in PC-74)
     - |
+        setconfig() {
+            server=$1
+            oldval=$2
+            newval=$3
+            ssh deploy@$server "docker exec $(docker ps -q -f name=${STACK_NAME}-catalog_catalog) sed -i 's/autoConfigure = $oldval/    autoConfigure = $newval/g' local/config/vufind/config.ini";
+        }
+        catalogwait() {
+            host=$1
+            attempts=0;
+            echo "Checking to see if catalog container for ${host} is online...";
+            sleep 15;
+            while [[ "$attempts" -le 20 ]]; do
+                target_image=$(ssh deploy@$host "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}'");
+                if [[ "$target_image" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
+                    echo "Container for host ${host} is online with new image!";
+                    break;
+                fi
+                echo "Catalog container not online. Waiting...";
+                sleep 10;
+                attempts=$((attempts+1));
+            done
+        }
+        catalogwait $DEPLOY_HOST_A
+        catalogwait $DEPLOY_HOST_B
+        catalogwait $DEPLOY_HOST_C
         apk add curl || apt install curl -y
-        CHECK_ATTEMPTS=0;
-        echo "Checking to see if catalog container is online...";
-        sleep 15;
-        while [[ "$CHECK_ATTEMPTS" -le 20 ]]; do
-            TARGET_IMAGE=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}'");
-            if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
-                echo "Container online with new image!";
-                break;
-            fi
-            echo "Catalog container not online. Waiting...";
-            sleep 10;
-            CHECK_ATTEMPTS=$((CHECK_ATTEMPTS+1));
-        done
+        echo "Enabling auto configure temporarily";
+        setconfig $DEPLOY_HOST_A "false" "true"
+        setconfig $DEPLOY_HOST_B "false" "true"
+        setconfig $DEPLOY_HOST_C "false" "true"
         echo "Running Vufind upgrade now against ${URL}";
         curl "${URL}/vufind/Upgrade/GetSourceVersion" --data-raw "sourceversion=${VUFIND_VERSION}&skip%5B%5D=config";
         echo "Upgrade complete with exit code $?";
-  
+        echo "Disabling auto configure";
+        setconfig $DEPLOY_HOST_A "true" "false"
+        setconfig $DEPLOY_HOST_B "true" "false"
+        setconfig $DEPLOY_HOST_C "true" "false"
 
 Remove Environment:
   stage: Cleanup
