@@ -269,6 +269,7 @@ Vufind Upgrade:
       artifacts: true
     - Deploy Vufind
   script:
+    # TODO -- backup of database before running upgrade (can use what we implement in PC-74)
     - >
         CHECK_ATTEMPTS=0;
         echo "Checking to see if catalog container is online...";
@@ -283,7 +284,6 @@ Vufind Upgrade:
             sleep 10;
             CHECK_ATTEMPTS=$((CHECK_ATTEMPTS+1));
         done
-        # TODO -- backup of database before running upgrade (can use what we implement in PC-74)
         echo "Running Vufind upgrade now";
         curl https://${CI_ENVIRONMENT_URL}/vufind/Upgrade/GetSourceVersion' \
         --data-raw 'sourceversion=${VUFIND_VERSION}&skip%5B%5D=config';
