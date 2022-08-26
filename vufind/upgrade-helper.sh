@@ -87,14 +87,34 @@ verbose() {
 }
 
 main() {
+    compare_theme
     compare_local
     compare_db
     compare_solr
 
-    echo "--- Summary of Changes ---"
-    echo "Files changed in release ${ARGS[RELEASE]}"
+    echo ""
+    echo "-----------------------------------------------------------------------------------------"
+    echo ""
+    echo "Target Release: ${ARGS[RELEASE]}"
+    echo "Source Release Repo Path: ${ARGS[REPO_PATH]}"
+    echo ""
+    echo "Summary of Changes:"
     for i in "${SUMMARY[@]}"; do echo "${i}"; done
-    echo "--- Done ---"
+    echo ""
+    echo "Steps:"
+    echo "1. Apply updates in the local directory with the changes detected in the core files"
+    echo "   where appropriate."
+    echo "2. Apply updates to the theme with changes detected in the core bootstrap 3 theme"
+    echo "   where appropriate."
+    echo "3. The prior output will tell you if database changes were detected. If they were,"
+    echo "   you will want to ensure you have a backup of the database before performing the"
+    echo "   upgrade."
+    echo "4. The prior output will also identify if Solr changes were detected. Depending on the"
+    echo "   change (you can inspect the changes yourself or just always assume to be safe), you"
+    echo "   will need to re-index / re-import your data into Solr in order to get the updated index."
+    echo "3. Reference https://msu-libraries.github.io/catalog/upgrading/ for further"
+    echo "   documentation on how to perform an upgrade."
+    echo ""
 }
 
 compare_db() {
@@ -112,26 +132,40 @@ compare_solr() {
         SUMMARY+=("Solr changes detected in ${ARGS[RELEASE]}:solr/. Full re-import detected to apply new index")
     fi
 }
-compare_local() {
-    verbose "Comparing changes made in ${ARGS[REPO_PATH]}/local/$1 in release ${ARGS[RELEASE]}"
 
-    for current in "${ARGS[REPO_PATH]}"/local"${1}"/*
+compare_theme(){
+    verbose "Checking for changes to bootstrap3 theme in ${ARGS[RELEASE]}"
+    
+    while read -r file; do
+        # See if we overrode that file in our theme and will need to apply the updates to it
+        if [ -f themes/msul/"$file" ]; then
+            SUMMARY+=("${file} --> ${ARGS[RELEASE]}:themes/bootstrap3/$file")
+            # Don't print the diff for any compiled files since those are not helpful at all
+            if [[ ! "$file" =~ "compiled" ]]; then
+                git -C "${ARGS[REPO_PATH]}" diff HEAD:themes/bootstrap3/$file "${ARGS[RELEASE]}":themes/bootstrap3/$file
+            fi
+        fi
+    done < <(git -C "${ARGS[REPO_PATH]}" diff --name-only HEAD:themes/bootstrap3 "${ARGS[RELEASE]}":themes/bootstrap3) 
+}
+
+compare_local() {
+    verbose "Comparing changes made in local directory: /${1#/} to release ${ARGS[RELEASE]}"
+
+    for current in local/"${1}"/*
     do
         orig="${current}"
-        current="${current/.template/}"
         current="${current/_local/}"
-        local coreEquivalent=${ARGS[REPO_PATH]}${current#${ARGS[REPO_PATH]}/local}
-        verbose "Comparing ${current} to ${coreEquivalent}"
+        local coreEquivalent=${ARGS[REPO_PATH]}/${current#local/}
+        verbose "Comparing ${current/\/\//\/} to ${coreEquivalent/\/\//\/}"
         if [ -d "$current" ]
         then
-          verbose "Calling function again for $current"
-          compare_local "${current#${ARGS[REPO_PATH]}/local}"
+          compare_local "${current#local/}"
         else
           if [ -f "$coreEquivalent" ]
           then
-            local repoPath="${current#${ARGS[REPO_PATH]}/local}"
+            local repoPath="${current#local/}"
             repoPath=${repoPath:1}
-            SUMMARY+=("${orig} -->  ${ARGS[RELEASE]}:${repoPath}")
+            SUMMARY+=("${orig/\/\//\/} -->  ${ARGS[RELEASE]}:${repoPath}")
             git -C "${ARGS[REPO_PATH]}" diff HEAD:"$repoPath" "${ARGS[RELEASE]}":"$repoPath"
           fi
         fi
