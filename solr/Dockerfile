@@ -14,9 +14,6 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
 
 ARG VUFIND_VERSION
-ARG NODE
-
-ENV NODE=$NODE
 
 # Get solr configs and prepare for alphabetical browsing
 RUN mkdir /solr_confs && \
@@ -38,8 +35,7 @@ COPY cron.d/ /etc/cron.d/
 RUN chmod -R g-w,o-w /etc/cron.d/ && \
     sed -i "/imklog/d" /etc/rsyslog.conf && \
     sed -i "/PrivDrop/d" /etc/rsyslog.conf && \
-    echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf && \
-    envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
+    echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf
 
 COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
