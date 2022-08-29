@@ -74,7 +74,8 @@ will_bootstrap() {
     grastate_safe_to_bootstrap
     WILL_BOOTSTRAP=$?
     if [[ "$WILL_BOOTSTRAP" -eq 0 ]]; then
-        verbose "Detected safe_to_bootstrap: 1"
+        verbose "Detected safe_to_bootstrap: 1 (setting MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes)"
+        export MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes
     fi
     if [[ "$MARIADB_GALERA_CLUSTER_BOOTSTRAP" == "yes" ]]; then
         verbose "Detected new bootstrap: MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes"
