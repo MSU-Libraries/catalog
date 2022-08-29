@@ -152,9 +152,14 @@ services:
       NODE: "{{.Task.Slot}}"
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 3
       restart_policy:
         window: 15s
+      update_config:
+        parallelism: 1
+        delay: 10s
+      placement:
+        max_replicas_per_node: 1
 
 networks:
   internal:

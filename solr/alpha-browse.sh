@@ -138,6 +138,7 @@ copy_from_shared() {
         rebuild_databases
         return $?
     else
+        verbose "Identified existing database files that can be used; starting copy."
         # Otherwise, we can use those files
         # TODO we shouldn't remove the existing db files first right? Solr will just replace the
         # "in use" files with the updated one on-acceess as needed?
@@ -153,12 +154,13 @@ main() {
     verbose "Starting processing..."
 
     if [[ "${ARGS[FORCE]}" -eq 1 ]]; then
-        success=rebuild_databases
+        success=$(rebuild_databases)
     else
-        success=copy_from_shared
+        success=$(copy_from_shared)
     fi
 
     if [[ $success -eq 0 ]]; then
+        verbose "Databases have been updated; ensuring shared storage is updated as well."
         copy_to_shared
     fi
 
