@@ -46,6 +46,12 @@ default_args() {
 
 # Parse command arguments
 parse_args() {
+    # Check environment variable
+    if [[ -z $SOLR_HOME ]]; then
+        echo "ERROR: SOLR_HOME not set in the environment"
+        exit 1
+    fi
+
     # Parse flag arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -98,22 +104,36 @@ rebuild_databases() {
 }
 
 copy_to_shared() {
-    # TODO check the names of the files we want to copy. was it the *updated or *ready? 
+    # TODO check the names of the files we want to copy. was it the *updated or *ready?
     # or the ones that match neither of those?
-    verbose "Copying database files from: /bitnami/solr/server/solr/alphabetical_browse*-updated to ${ARGS[SHARED_PATH]}"
+    verbose "Copying database files from: /bitnami/solr/server/solr/alphabetical_browse/*-updated to ${ARGS[SHARED_PATH]}"
 
-    cp /bitnami/solr/server/solr/alphabetical_browse*-updated ${ARGS[SHARED_PATH]}/
+    cp /bitnami/solr/server/solr/alphabetical_browse/*-updated ${ARGS[SHARED_PATH]}/
 }
 
 # Remove all files from the shared storage alphabetical browse folder
 remove_from_shared() {
+    verbose "Removing all db files from ${ARGS[SHARED_PATH]}"
     rm ${ARGS[SHARED_PATH]}/*.db*
 }
 
 copy_from_shared() {
-    # TODO check if exists
-    # TODO check age
-    # TODO copy
+    verbose "Determining if there are files we can/should copy from the shared location"
+
+    # Convert hours to minutes
+    mins=$(( ARGS[MAX_AGE_HOURS] * 60 ))
+
+    # Check if files exists with a age within the max
+    if [[ "${ARGS[FORCE]}" -eq 1 || -z $(find ${ARGS[SHARED_PATH]}/ -type f -mmin ${mins}) ]]; then
+        verbose "No files found within the shared path that are within a max age of ${ARGS[MAX_AGE_HOURS]} hour(s).\
+        or the force flag was provided to bypass this check."
+        rebuild_databases
+    else
+        # Otherwise, we can use those files
+        # TODO we shouldn't remove the existing db files first right? Solr will just replace the
+        # "in use" files with the updated one on-acceess as needed?
+        cp ${ARGS[SHARED_PATH]}/* /bitnami/solr/server/solr/alphabetical_browse/
+    fi
 }
 
 main() {
@@ -124,6 +144,8 @@ main() {
 
     if [[ "${ARGS[FORCE]}" -eq 1 ]]; then
         rebuild_databases
+    else
+        copy_from_shared
     fi
 
     copy_to_shared
@@ -135,4 +157,3 @@ main() {
 default_args
 parse_args "$@"
 main
-

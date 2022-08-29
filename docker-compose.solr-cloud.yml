@@ -147,6 +147,9 @@ services:
       options:
         max-file: "5"
         max-size: "10m"
+    environment:
+      SOLR_HOME: /bitnami/solr/server/solr
+      NODE: {{.Task.Slot}}
     deploy:
       mode: replicated
       replicas: 1

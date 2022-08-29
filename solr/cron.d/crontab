@@ -22,5 +22,4 @@
 #
 
 # Trigger Alphabetical browse update
-#* 1	* * *	root    /alpha-browse.sh 2>&1 | logger -t ALPHA_BROWSE
-
+${NODE} */3	* * *	root    /alpha-browse.sh 2>&1 | logger -t ALPHA_BROWSE

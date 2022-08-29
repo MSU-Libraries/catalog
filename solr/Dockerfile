@@ -7,13 +7,16 @@ USER root
 
 # Perform updates
 RUN apt update && \
-    apt install wget vim rsyslog cron -y
+    apt install wget vim rsyslog cron moreutils gettext-base -y
 
 # Setup Timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
 
 ARG VUFIND_VERSION
+ARG NODE
+
+ENV NODE=$NODE
 
 # Get solr configs and prepare for alphabetical browsing
 RUN mkdir /solr_confs && \
@@ -39,6 +42,14 @@ RUN cp -r /solr_confs/jars /opt/bitnami/solr/server/solr/jars
 
 COPY browse-handler.jar /opt/bitnami/solr/server/solr/jars/browse-handler.jar
 COPY alpha-browse.sh /alpha-browse.sh
+
+# Setup cron and logging for cron
+COPY cron.d/ /etc/cron.d/
+RUN chmod -R g-w,o-w /etc/cron.d/ && \
+    sed -i "/imklog/d" /etc/rsyslog.conf && \
+    sed -i "/PrivDrop/d" /etc/rsyslog.conf && \
+    echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf && \
+    envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
 
 # Run start-up script
 CMD ["/startup.sh", "/opt/bitnami/scripts/solr/run.sh"]
