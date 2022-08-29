@@ -38,7 +38,7 @@ fi
 # Set defaults
 default_args() {
     declare -g -A ARGS
-    ARGS[SHARED_PATH]=/mnt/shared/oai
+    ARGS[SHARED_PATH]=/mnt/shared/alpha-browse
     ARGS[MAX_AGE_HOURS]=2
     ARGS[FORCE]=0
     ARGS[VERBOSE]=0
@@ -92,7 +92,9 @@ rebuild_databases() {
     verbose "Running database rebuild script..."
 
     # Create required symlink if it doesn't already exist
-    ln -s /opt/bitnami/solr /bitnami/solr/server/vendor
+    if [[ ! -h /bitnami/solr/server/vendor ]]; then
+        ln -s /opt/bitnami/solr /bitnami/solr/server/vendor
+    fi
 
     if ! SOLR_HOME=/bitnami/solr/server/solr /solr_confs/index-alphabetic-browse.sh; then
         verbose "Error occured while running index-alphabetic-browse.sh script!"
@@ -125,7 +127,7 @@ remove_from_shared() {
 # Copy database files from shared storage if possible,
 # otherwise call the rebuild function
 copy_from_shared() {
-    verbose "Determining if there are files we can/should copy from the shared location"
+    verbose "Determining if there are files we can copy from the shared location"
 
     # Convert hours to minutes
     mins=$(( ARGS[MAX_AGE_HOURS] * 60 ))
@@ -154,9 +156,11 @@ main() {
     verbose "Starting processing..."
 
     if [[ "${ARGS[FORCE]}" -eq 1 ]]; then
-        success=$(rebuild_databases)
+        rebuild_databases
+        sucess=$?
     else
-        success=$(copy_from_shared)
+        copy_from_shared
+        sucess=$?
     fi
 
     if [[ $success -eq 0 ]]; then
