@@ -171,6 +171,7 @@ archive_shared_xml() {
         return
     fi
     ARCHIVE_TS=$(date +%Y%m%d_%H%M%S)
+    # TODO move archives outside of the SHARED_HARVEST_DIR (e.g. to /mnt/shared/oai_archives/)
     mkdir -p "${ARGS[SHARED_HARVEST_DIR]}/archives"
     ARCHIVE_FILE="${ARGS[SHARED_HARVEST_DIR]}/archives/archive_${ARCHIVE_TS}.tar.gz"
     pushd "${ARGS[SHARED_HARVEST_DIR]}/" > /dev/null 2>&1 || exit 1
@@ -243,10 +244,12 @@ oai_harvest() {
         rm -f "${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt"
         rm -f "${ARGS[VUFIND_HARVEST_DIR]}/harvest.log"
         rm -f "${ARGS[VUFIND_HARVEST_DIR]}/last_state.txt"
+        #TODO remove old XML files from VUFIND_HARVEST_DIR
     fi
 
     verbose "Starting OAI harvest"
 
+    # TODO catch failures, log them, pause a bit, then attempt to resume (max retries?)
     php /usr/local/vufind/harvest/harvest_oai.php
 
     verbose "Completed OAI harvest"
@@ -263,6 +266,7 @@ oai_harvest() {
     oai_harvest_combiner
 
     verbose "Copying combined XML to shared dir"
+    # TODO much faster to use rsync, especially with full harvests
     cp --preserve=timestamps "${ARGS[VUFIND_HARVEST_DIR]}"/combined_*.xml "${ARGS[SHARED_HARVEST_DIR]}/"
 
     HARVEST_LOG="${ARGS[VUFIND_HARVEST_DIR]}/harvest.log"
