@@ -1,7 +1,7 @@
 ############# Release ###############
 
 Tag Release:
-  stage: Tag
+  stage: Release
   tags:
     - msul-shared
   rules:
@@ -32,7 +32,6 @@ GitHub Release:
     - msul-shared
   rules:
     - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
-      when: manual
   needs:
     - job: Tag Release
       artifacts: true

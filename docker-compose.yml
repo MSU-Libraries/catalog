@@ -40,7 +40,7 @@ services:
         - "traefik.http.routers.${STACK_NAME}-https-router.service=${STACK_NAME}-https-app"
         - "traefik.http.services.${STACK_NAME}-https-app.loadbalancer.server.port=80"
 
-  harvest:
+  cron:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
     command: /startup-cron.sh
     volumes:

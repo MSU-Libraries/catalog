@@ -8,10 +8,12 @@ stages:
   - Bootstrap
   - Deploy
   - Cleanup
-  - Tag
   - Release
 
 variables:
+  VUFIND_VERSION: "8.1"
+  # Used during upgrade, which needs to know previous version
+  PREV_VUFIND_VERSION: "8.0.4"
   DEPLOY_HOST_A: catalog-a.aws.lib.msu.edu
   DEPLOY_HOST_B: catalog-b.aws.lib.msu.edu
   DEPLOY_HOST_C: catalog-c.aws.lib.msu.edu
@@ -70,7 +72,7 @@ Deploy Compose Files:
     - ./yq -i ".services.traefik.deploy.labels[2]=\"traefik.http.middlewares.restrict-auth.basicauth.users=$BASICAUTH_FOR_RESOURCES\"" docker-compose.traefik.yml
     # Modify the image tag from :latest -> $CI_COMMIT_SHORT_SHA
     - ./yq -i ".services.catalog.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
-    - ./yq -i ".services.harvest.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
+    - ./yq -i ".services.cron.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
     - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-bootstrap.yml
     - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud.yml
     - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-force.yml
@@ -108,8 +110,8 @@ Deploy Compose Files:
     - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".x-solr-deploy.labels[10] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
     - ./yq -i ".x-solr-deploy.labels[11] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls=true\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[12] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.certresolver=msul-letsencrypt\"" docker-compose.solr-cloud.yml
-    # Remove the harvest service if the stack name is NOT catalog-beta
-    - if [ "${STACK_NAME}" != "catalog-beta" ]; then ./yq -i "del(.services.harvest)" docker-compose.yml; fi
+    # Remove the cron service if the stack name is NOT catalog-beta
+    - if [ "${STACK_NAME}" != "catalog-beta" ]; then ./yq -i "del(.services.cron)" docker-compose.yml; fi
     # Replace $STACK_NAME in main compose file
     - cat docker-compose.yml | envsubst | sponge docker-compose.yml
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
@@ -258,6 +260,58 @@ Deploy Vufind:
     reports:
       dotenv: deploy.env
 
+Vufind Upgrade:
+  stage: Deploy
+  extends: .stack_template
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - job: Deploy Vufind
+      artifacts: true
+  script:
+    # TODO -- backup of database before running upgrade (can use what we implement in PC-74)
+    - |
+        setconfig() {
+            server=$1;
+            oldval=$2;
+            newval=$3;
+            container=$(ssh deploy@$server "docker ps -q -f name=${STACK_NAME}-catalog_catalog");
+            ssh deploy@$server "docker exec $container sed -i 's/autoConfigure = $oldval/autoConfigure = $newval/g' local/config/vufind/config.ini";
+        }
+        catalogwait() {
+            host=$1;
+            attempts=0;
+            echo "Checking to see if catalog container for ${host} is online...";
+            sleep 15;
+            while [[ "$attempts" -le 20 ]]; do
+                target_image=$(ssh deploy@$host "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}'");
+                if [[ "$target_image" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
+                    echo "Container for host ${host} is online with new image!";
+                    break;
+                fi
+                echo "Catalog container not online. Waiting...";
+                sleep 10;
+                attempts=$((attempts+1));
+            done
+        }
+        ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts;
+        ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
+        catalogwait $DEPLOY_HOST_A;
+        catalogwait $DEPLOY_HOST_B;
+        catalogwait $DEPLOY_HOST_C;
+        apk add curl || apt install curl -y;
+        echo "Enabling auto configure temporarily";
+        setconfig $DEPLOY_HOST_A "false" "true";
+        setconfig $DEPLOY_HOST_B "false" "true";
+        setconfig $DEPLOY_HOST_C "false" "true";
+        echo "Running Vufind upgrade now against ${URL}";
+        curl "${URL}/vufind/Upgrade/GetSourceVersion" --data-raw "sourceversion=${PREV_VUFIND_VERSION}&skip%5B%5D=config" -L -O;
+        echo "Upgrade complete with exit code $?";
+        echo "Disabling auto configure";
+        setconfig $DEPLOY_HOST_A "true" "false";
+        setconfig $DEPLOY_HOST_B "true" "false";
+        setconfig $DEPLOY_HOST_C "true" "false";
+
 Remove Environment:
   stage: Cleanup
   extends: .stack_template
@@ -310,9 +364,9 @@ Remove Environment:
     - Deploy Compose Files
 
 include:
-  - project: 'msu-libraries/ci-cd/ci-cd'
+  - project: 'msu-libraries/public/cicd-templates'
     ref: main
-    file: '/templates/SSH.gitlab-ci.yml'
+    file: 'SSH.gitlab-ci.yml'
   - 'templates/Build.gitlab-ci.yml'
 #  - 'templates/Scan.gitlab-ci.yml'
   - 'templates/Release.gitlab-ci.yml'

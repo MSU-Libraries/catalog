@@ -1,22 +1,23 @@
 FROM ubuntu:22.04
 
 ENV TZ=America/Detroit
-# TODO upgrade to latest version
-ENV VUFIND_VERSION=8.0.4
 ENV MYSQL_ROOT_PASSWORD=12345
-
 ENV DEBIAN_FRONTEND=noninteractive
 ENV VUFIND_LOCAL_DIR=/usr/local/vufind/local
 ENV VUFIND_HOME=/usr/local/vufind
 ENV JAVA_HOME=/usr/lib/jvm/default-java
 
+ARG VUFIND_VERSION
+ENV VUFIND_VERSION=$VUFIND_VERSION
+
 RUN \
     # Perform updates
     apt update && \
-    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils gettext-base \
+    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
+        gettext-base locales \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
-        mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl php-gd php-intl \
-        php-json php-ldap php-mbstring php-mysql php-soap php-xml -y && \
+        mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl \
+        php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml -y && \
     # Setup Timezone
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
@@ -108,11 +109,6 @@ RUN \
     # Enable debug mode
     if [ "$DEBUG" = 1 ] ; \
     then sed -i "/SetEnv VUFIND_ENV development/s/#//g" ${VUFIND_LOCAL_DIR}/httpd-vufind.conf; fi && \
-    # TODO: Hopefully can fix this in the Folio driver.
-    # Had to change the id from 1 to a real id in folio to get the getIlsStatus call working.
-    # We could override this function in the driver to switch the call it makes to something less
-    # dependent on an ID.
-    sed -i "/getStatus/s/1/${FOLIO_REC_ID}/g" ${VUFIND_HOME}/module/VuFind/src/VuFind/ILS/Connection.php && \
     # Set required environment variables
     echo JAVA_HOME="$JAVA_HOME" >> /etc/environment && \
     echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
