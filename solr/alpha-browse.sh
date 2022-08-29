@@ -46,12 +46,6 @@ default_args() {
 
 # Parse command arguments
 parse_args() {
-    # Check environment variable
-    if [[ -z $SOLR_HOME ]]; then
-        echo "ERROR: SOLR_HOME not set in the environment"
-        exit 1
-    fi
-
     # Parse flag arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -93,16 +87,23 @@ verbose() {
     echo "${MSG}" >> "$LOG_FILE"
 }
 
+# Call the rebuild script to generate new database files
 rebuild_databases() {
     verbose "Running database rebuild script..."
 
+    # Create required symlink if it doesn't already exist
+    ln -s /opt/bitnami/solr /bitnami/solr/server/vendor
+
     if ! SOLR_HOME=/bitnami/solr/server/solr /solr_confs/index-alphabetic-browse.sh; then
         verbose "Error occured while running index-alphabetic-browse.sh script!"
+        return 1
+    else
+        verbose "Rebuild complete"
+        return 0
     fi
-
-    verbose "Rebuild complete"
 }
 
+# Copy all database files to the shared storage
 copy_to_shared() {
     # TODO check the names of the files we want to copy. was it the *updated or *ready?
     # or the ones that match neither of those?
@@ -113,10 +114,16 @@ copy_to_shared() {
 
 # Remove all files from the shared storage alphabetical browse folder
 remove_from_shared() {
-    verbose "Removing all db files from ${ARGS[SHARED_PATH]}"
-    rm ${ARGS[SHARED_PATH]}/*.db*
+    verbose "Cleaning up old db files from ${ARGS[SHARED_PATH]} (with age > ${ARGS[MAX_AGE_HOURS]} hour(s))."
+
+    # Convert hours to minutes
+    mins=$(( ARGS[MAX_AGE_HOURS] * 60 ))
+
+    find ${ARGS[SHARED_PATH]} -type f -mmin +${mins} -name "*.db*" -delete
 }
 
+# Copy database files from shared storage if possible,
+# otherwise call the rebuild function
 copy_from_shared() {
     verbose "Determining if there are files we can/should copy from the shared location"
 
@@ -125,14 +132,17 @@ copy_from_shared() {
 
     # Check if files exists with a age within the max
     if [[ "${ARGS[FORCE]}" -eq 1 || -z $(find ${ARGS[SHARED_PATH]}/ -type f -mmin ${mins}) ]]; then
-        verbose "No files found within the shared path that are within a max age of ${ARGS[MAX_AGE_HOURS]} hour(s).\
-        or the force flag was provided to bypass this check."
+        verbose "No files found within the shared path that are within a max age of ${ARGS[MAX_AGE_HOURS]} hour(s)." \
+        "or the force flag was provided to bypass this check."
+        remove_from_shared
         rebuild_databases
+        return $?
     else
         # Otherwise, we can use those files
         # TODO we shouldn't remove the existing db files first right? Solr will just replace the
         # "in use" files with the updated one on-acceess as needed?
         cp ${ARGS[SHARED_PATH]}/* /bitnami/solr/server/solr/alphabetical_browse/
+        return $?
     fi
 }
 
@@ -143,12 +153,14 @@ main() {
     verbose "Starting processing..."
 
     if [[ "${ARGS[FORCE]}" -eq 1 ]]; then
-        rebuild_databases
+        success=rebuild_databases
     else
-        copy_from_shared
+        success=copy_from_shared
     fi
 
-    copy_to_shared
+    if [[ $success -eq 0 ]]; then
+        copy_to_shared
+    fi
 
     verbose "All processing complete!"
 }
