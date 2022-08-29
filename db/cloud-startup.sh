@@ -44,7 +44,7 @@ update_node_ips() {
 galera_node_online() {
     nc -zw1 "$1" 3306 2> /dev/null
     RC=$?
-    verbose "scanned ${1} - return code: $RC"
+    verbose "Scanned ${1} - return code: $RC"
     return $RC
 }
 
@@ -65,7 +65,7 @@ grastate_safe_to_bootstrap() {
         grep -q "safe_to_bootstrap: 1" "$GALERA_STATE_FILE"
         SAFE=$?
     else
-        verbose "there is no grastate.dat file"
+        verbose "There is no grastate.dat file"
     fi
     return $SAFE
 }
@@ -74,18 +74,31 @@ will_bootstrap() {
     grastate_safe_to_bootstrap
     WILL_BOOTSTRAP=$?
     if [[ "$WILL_BOOTSTRAP" -eq 0 ]]; then
-        verbose "detected safe_to_bootstrap: 1 (setting MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes)"
-        export MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes
+        verbose "Detected safe_to_bootstrap: 1"
     fi
     if [[ "$MARIADB_GALERA_CLUSTER_BOOTSTRAP" == "yes" ]]; then
-        verbose "detected new bootstrap: MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes"
+        verbose "Detected new bootstrap: MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes"
         WILL_BOOTSTRAP=0
     fi
     if [[ "$MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP" == "yes" ]]; then
-        verbose "detected forced bootsrap: MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP=yes"
+        verbose "Detected forced bootsrap: MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP=yes"
         WILL_BOOTSTRAP=0
     fi
     return $WILL_BOOTSTRAP
+}
+
+###############################
+## Wait for local safe_to_bootstrap: 1 in grastate.dat up to a limit
+##  $1 -> The maximum time to wait in seconds (should be divisible by 5)
+wait_for_grastate_safe_to_bootstrap() {
+    local MAX_SLEEP="$1"
+    local CUR_SLEEP=0
+    while ! grastate_safe_to_bootstrap && [[ "$CUR_SLEEP" -le "$MAX_SLEEP" ]]; do
+        sleep 5
+        (( CUR_SLEEP += 5 ))
+        verbose "Wating for safe_to_bootstrap: 1"
+    done
+    verbose "Wait limit exceeded (${MAX_SLEEP} secs); proceeding while not safe to bootstrap."
 }
 
 scan_for_online_nodes() {
@@ -160,18 +173,10 @@ galera_slow_shutdown() {
     if [[ "$SELF_NUMBER" -eq "${NODES_ONLINE[0]}" ]]; then
         if [[ "${#NODES_ONLINE[@]}" -gt 1 ]]; then
             verbose "I am lowest online node; resting to allow other nodes to shutdown first."
-            sleep 60
-            # TODO loop checking safe_to_bootstrap: 1; okay to continue if matches, or if timeout happens
+            wait_for_grastate_safe_to_bootstrap 70
         else
             verbose "I am the ONLY node, so I'm safe to shutdown immediately."
         fi
-    elif [[ "$MARIADB_GALERA_CLUSTER_BOOTSTRAP" == "yes" ]]; then
-        # If shutting down from bootstrap, provide extra time in-case the stack is
-        # converting from bootstrap to cluster and nodes need time to join.
-        verbose "Delay shutdown from bootstrap, letting potential new nodes join first."
-        sleep 60
-        # TODO shorter sleep delay
-        # TODO loop checking safe_to_bootstrap: 1; okay to continue if matches, or if timeout happens
     fi
 
     # As this might NOT be a global stop for all nodes, there is no need to re-scan to confirm.
