@@ -30,7 +30,7 @@ runhelp() {
     echo ""
 }
 
-if [[ -z "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+if [[ $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
     runhelp
     exit 0
 fi
@@ -111,7 +111,7 @@ copy_to_shared() {
     # or the ones that match neither of those?
     verbose "Copying database files from: /bitnami/solr/server/solr/alphabetical_browse/*-updated to ${ARGS[SHARED_PATH]}"
 
-    cp /bitnami/solr/server/solr/alphabetical_browse/*-updated ${ARGS[SHARED_PATH]}/
+    cp -p /bitnami/solr/server/solr/alphabetical_browse/*-updated ${ARGS[SHARED_PATH]}/
 }
 
 # Remove all files from the shared storage alphabetical browse folder
@@ -133,10 +133,9 @@ copy_from_shared() {
     mins=$(( ARGS[MAX_AGE_HOURS] * 60 ))
 
     # Check if files exists with a age within the max
-    if [[ "${ARGS[FORCE]}" -eq 1 || -z $(find ${ARGS[SHARED_PATH]}/ -type f -mmin ${mins}) ]]; then
+    if [[ "${ARGS[FORCE]}" -eq 1 || -z $(find ${ARGS[SHARED_PATH]}/ -type f -mmin -${mins}) ]]; then
         verbose "No files found within the shared path that are within a max age of ${ARGS[MAX_AGE_HOURS]} hour(s)." \
         "or the force flag was provided to bypass this check."
-        remove_from_shared
         rebuild_databases
         return $?
     else
@@ -144,7 +143,8 @@ copy_from_shared() {
         # Otherwise, we can use those files
         # TODO we shouldn't remove the existing db files first right? Solr will just replace the
         # "in use" files with the updated one on-acceess as needed?
-        cp ${ARGS[SHARED_PATH]}/* /bitnami/solr/server/solr/alphabetical_browse/
+        cp -p ${ARGS[SHARED_PATH]}/* /bitnami/solr/server/solr/alphabetical_browse/
+        chown 1001 /bitnami/solr/server/solr/alphabetical_browse/*
         return $?
     fi
 }
@@ -165,6 +165,7 @@ main() {
 
     if [[ $success -eq 0 ]]; then
         verbose "Databases have been updated; ensuring shared storage is updated as well."
+        remove_from_shared
         copy_to_shared
     fi
 
