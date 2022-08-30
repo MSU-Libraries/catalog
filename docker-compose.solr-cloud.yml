@@ -150,6 +150,7 @@ services:
         max-size: "10m"
     environment:
       NODE: "{{.Task.Slot}}"
+      STACK_NAME: "catalog-beta"
     deploy:
       mode: replicated
       replicas: 3

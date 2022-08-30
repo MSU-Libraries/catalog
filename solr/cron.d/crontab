@@ -22,4 +22,4 @@
 #
 
 # Trigger Alphabetical browse update
-${NODE} */3	* * *	root    /alpha-browse.sh -v 2>&1 | logger -t ALPHA_BROWSE
+0 ${NODE}	* * *	root    /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME} 2>&1 | logger -t ALPHA_BROWSE
