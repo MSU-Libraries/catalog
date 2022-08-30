@@ -62,8 +62,8 @@ parse_args() {
         -p|--shared-path)
             ARGS[SHARED_PATH]=$( readlink -f "$2" )
             RC=$?
-            if [[ "$RC" -ne 0 || ! -d "${ARGS[SHARED_PATH]}" ]]; then
-                echo "ERROR: -p|--shared-path path does not exist: $2"
+            if [[ "$RC" -ne 0 ]]; then
+                echo "ERROR: -p|--shared-path path is not valid: $2"
                 exit 1
             fi
             shift; shift ;;
