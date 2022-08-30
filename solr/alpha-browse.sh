@@ -96,7 +96,7 @@ rebuild_databases() {
         ln -s /opt/bitnami/solr /bitnami/solr/server/vendor
     fi
 
-    if ! SOLR_HOME=/bitnami/solr/server/solr /solr_confs/index-alphabetic-browse.sh; then
+    if ! JAVA_HOME=/opt/bitnami/java SOLR_HOME=/bitnami/solr/server/solr /solr_confs/index-alphabetic-browse.sh; then
         verbose "Error occured while running index-alphabetic-browse.sh script!"
         return 1
     else
