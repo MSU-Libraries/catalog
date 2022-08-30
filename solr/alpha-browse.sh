@@ -107,11 +107,9 @@ rebuild_databases() {
 
 # Copy all database files to the shared storage
 copy_to_shared() {
-    # TODO check the names of the files we want to copy. was it the *updated or *ready?
-    # or the ones that match neither of those?
-    verbose "Copying database files from: /bitnami/solr/server/solr/alphabetical_browse/*-updated to ${ARGS[SHARED_PATH]}"
+    verbose "Copying database files from: /bitnami/solr/server/solr/alphabetical_browse/*db-* to ${ARGS[SHARED_PATH]}"
 
-    cp -p /bitnami/solr/server/solr/alphabetical_browse/*-updated ${ARGS[SHARED_PATH]}/
+    cp -p /bitnami/solr/server/solr/alphabetical_browse/*db-* ${ARGS[SHARED_PATH]}/
 }
 
 # Remove all files from the shared storage alphabetical browse folder
@@ -141,8 +139,6 @@ copy_from_shared() {
     else
         verbose "Identified existing database files that can be used; starting copy."
         # Otherwise, we can use those files
-        # TODO we shouldn't remove the existing db files first right? Solr will just replace the
-        # "in use" files with the updated one on-acceess as needed?
         cp -p ${ARGS[SHARED_PATH]}/* /bitnami/solr/server/solr/alphabetical_browse/
         chown 1001 /bitnami/solr/server/solr/alphabetical_browse/*
         return $?
