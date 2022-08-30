@@ -134,13 +134,11 @@ copy_from_shared() {
 
     # Check if a lock file is present and wait for a max amount of time
     # to see if the the rebuild finishes
-    max_iter=10
-    cur_iter=0
-    while flock -n ${ARGS[SHARED_PATH]}/rebuild_lock sleep 0 && [[ $max_iter -le $cur_iter ]]; do
-        sleep 300 # 5 minutes
-        verbose "Waiting for rebuild lock to be released... (attempt $cur_iter/$max_iter)"
-        (( cur_iter += 1 ))
-    done
+    verbose "Ensuring no other nodes are running a rebuild..."
+    if flock -w 1800 ${ARGS[SHARED_PATH]}/rebuild_lock sleep 0; then
+        verbose "ERROR: Could not aquire lock; another rebuild is still in progress"
+        exit 1
+    fi
 
     # Check if files exists with a age within the max
     if flock -n ${ARGS[SHARED_PATH]}/rebuild_lock sleep 0 && [[ "${ARGS[FORCE]}" -eq 1 || -z $(find ${ARGS[SHARED_PATH]}/ -type f -mmin -${mins} ! -name "*lock" ) ]]; then
@@ -170,13 +168,9 @@ main() {
     # Ensure the directory exists on the shared path
     mkdir -p ${ARGS[SHARED_PATH]}
 
-    if [[ "${ARGS[FORCE]}" -eq 1 ]]; then
-        rebuild_databases
-        success=$?
-    else
-        copy_from_shared
-        success=$?
-    fi
+    # Perform copy or rebuild as necessary
+    copy_from_shared
+    success=$?
 
     if [[ $success -eq 0 ]]; then
         verbose "Databases have been updated; ensuring shared storage is updated as well."
