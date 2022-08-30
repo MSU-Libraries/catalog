@@ -151,6 +151,10 @@ main() {
     verbose "Logging to ${LOG_FILE}"
     verbose "Starting processing..."
 
+    # Ensure the directory exists on the volume
+    mkdir -p /bitnami/solr/server/solr/alphabetical_browse
+    chown 1001 /bitnami/solr/server/solr/alphabetical_browse
+
     if [[ "${ARGS[FORCE]}" -eq 1 ]]; then
         rebuild_databases
         sucess=$?
