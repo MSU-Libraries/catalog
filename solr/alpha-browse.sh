@@ -96,7 +96,7 @@ rebuild_databases() {
         ln -s /opt/bitnami/solr /bitnami/solr/server/vendor
     fi
 
-    if ! flock -n ${ARGS[SHARED_PATH]}/rebuild_lock JAVA_HOME=/opt/bitnami/java SOLR_HOME=/bitnami/solr/server/solr /solr_confs/index-alphabetic-browse.sh; then
+    if ! JAVA_HOME=/opt/bitnami/java SOLR_HOME=/bitnami/solr/server/solr flock -n ${ARGS[SHARED_PATH]}/rebuild_lock /solr_confs/index-alphabetic-browse.sh; then
         verbose "Error occured while running index-alphabetic-browse.sh script!"
         result=1
     else
@@ -121,7 +121,7 @@ remove_from_shared() {
     # Convert hours to minutes
     mins=$(( ARGS[MAX_AGE_HOURS] * 60 ))
 
-    find ${ARGS[SHARED_PATH]} -type f -mmin +${mins} -name "*.db*" -delete
+    find ${ARGS[SHARED_PATH]} -type f -mmin +${mins} -name "*.db*" ! -name "*lock" -delete
 }
 
 # Copy database files from shared storage if possible,
@@ -143,7 +143,7 @@ copy_from_shared() {
     done
 
     # Check if files exists with a age within the max
-    if ! flock -n ${ARGS[SHARED_PATH]}/rebuild_lock sleep 0 && [[ "${ARGS[FORCE]}" -eq 1 || -z $(find ${ARGS[SHARED_PATH]}/ -type f -mmin -${mins}) ]]; then
+    if flock -n ${ARGS[SHARED_PATH]}/rebuild_lock sleep 0 && [[ "${ARGS[FORCE]}" -eq 1 || -z $(find ${ARGS[SHARED_PATH]}/ -type f -mmin -${mins} ! -name "*lock" ) ]]; then
         verbose "No files found within the shared path that are within a max age of ${ARGS[MAX_AGE_HOURS]} hour(s)." \
         "or the force flag was provided to bypass this check."
         rebuild_databases
