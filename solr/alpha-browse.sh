@@ -18,7 +18,7 @@ runhelp() {
     echo ""
     echo "FLAGS:"
     echo "  -p|--shared-path PATH"
-    echo "     Path to the already cloned Vufind repository. Default: /mnt/shared/alpha-browse"
+    echo "     Path to the already cloned VuFind repository. Default: /mnt/shared/alpha-browse"
     echo "  -a|--max-age-hours"
     echo "      Max age (difference between current timestamp and created timestamp) in hours"
     echo "      of the database files to determine if it will use the existing files or build"
@@ -135,7 +135,7 @@ copy_from_shared() {
     # Check if a lock file is present and wait for a max amount of time
     # to see if the the rebuild finishes
     verbose "Ensuring no other nodes are running a rebuild..."
-    if flock -w 1800 ${ARGS[SHARED_PATH]}/rebuild_lock sleep 0; then
+    if ! flock -w 1800 ${ARGS[SHARED_PATH]}/rebuild_lock sleep 0; then
         verbose "ERROR: Could not aquire lock; another rebuild is still in progress"
         exit 1
     fi
