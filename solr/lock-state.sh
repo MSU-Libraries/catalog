@@ -98,7 +98,7 @@ main() {
 
     # If lockfile is not empty, yet exceeds timeout hours since last modified, assume lock timeout and allow fresh lock
     flock $FLOCK_WAIT "${ARGS[LOCKFILE]}" bash <<- SCRIPT
-    STATE=\$(< /tmp/my.lock)
+    STATE=\$(< ${ARGS[LOCKFILE]})
     if [[ -n "\$STATE" && -n \$( find "${ARGS[LOCKFILE]}" -mmin +\$(( ${LOCKFILE_TIMEOUT_HOURS} * 60 )) ) ]]; then
         echo -n > ${ARGS[LOCKFILE]}
         false
@@ -112,7 +112,7 @@ main() {
         verbose "Acquiring lock to unset state..."
         # Decrement copy count if > 1, else clear lockfile contents
         flock $FLOCK_WAIT "${ARGS[LOCKFILE]}" bash <<- SCRIPT
-        STATE=\$(< /tmp/my.lock)
+        STATE=\$(< ${ARGS[LOCKFILE]})
         if [[ "\$STATE" =~ ^[0-9]+$ && "\$STATE" -gt 1 ]]; then
             echo -n \$(( STATE - 1 )) > ${ARGS[LOCKFILE]}
         else
@@ -125,7 +125,7 @@ main() {
         verbose "Acquiring lock to set new state..."
         # Set lockfile value, increment if copy lock, else return false
         flock $FLOCK_WAIT "${ARGS[LOCKFILE]}" bash <<- SCRIPT
-        STATE=\$(< /tmp/my.lock)
+        STATE=\$(< ${ARGS[LOCKFILE]})
         if [[ -z "\$STATE" ]]; then
             echo -n ${ARGS[TARGET_STATE]} > ${ARGS[LOCKFILE]}
         elif [[ "\$STATE" =~ ^[0-9]+$ && "${ARGS[TARGET_STATE]}" == "1" ]]; then
