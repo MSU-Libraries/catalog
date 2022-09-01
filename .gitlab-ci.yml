@@ -345,7 +345,7 @@ Remove Environment:
     # Run playbook
     - ansible-playbook provision-dns-playbook/decommission.yml
     # Remove the alphabetic browse databases
-    - ssh deploy@$DEPLOY_HOST_A "rm -rf /mnt/shared/alpha-browse/${STACK_NAME}"
+    - ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=$STACK_NAME) rm -rf /mnt/shared/alpha-browse/${STACK_NAME}"
     # Cleanup volumes/networks/images/containers
     - >
       ssh deploy@$DEPLOY_HOST_A
