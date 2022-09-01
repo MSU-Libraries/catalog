@@ -66,3 +66,19 @@ for verifying the state that the cloud is in (Cloud -> Nodes) as well as the Zoo
 containers (Cloud -> ZK Status). Additionally you can check the status of the collections
 (Cloud -> Graph) to make sure they are marked as Active. It may also be helpful to use the
 web interface for testing queries in too.
+
+### Fixing Down Solr Replicas
+
+In the event that you find a Solr replica that appears to be stuck in a "down" state despite all efforts to bring it back online, it may be easiest to just discard that replica and recreate it.
+
+This can be accomplished via the `DELETEREPLICA` and `ADDREPLICA` Solr API calls. See [https://solr.apache.org/guide/8_10/replica-management.html](https://solr.apache.org/guide/8_10/replica-management.html).
+
+For example, if one node in a replica is stuck down, you can simply remove the downed replicas and then add a new replica to replace it.
+```
+# Identified one down replicas for `biblio` on solr3 to be removed. We don't have to specify solr3 here, as we're setting `onlyIfDown`.
+curl 'http://solr:8983/solr/admin/collections?action=DELETEREPLICA&collection=biblio&count=1&onlyIfDown=true&shard=shard1'
+# Create a new replica for `biblio` on solr3 to replace the one we removed.
+curl 'http://solr:8983/solr/admin/collections?action=ADDREPLICA&collection=biblio&shard=shard1&node=solr3:8983_solr'
+```
+
+Note, the new replica may take a few minutes to "recover" while it comes up. This is the process where it gets current collection data from the other replicas.
