@@ -1,5 +1,8 @@
 #!/bin/bash
 
+DEFAULT_SHARED_PATH=/mnt/shared/alpha-browse
+DEFAULT_MAX_AGE_HOURS=6
+
 # Script help text
 runhelp() {
     echo ""
@@ -18,11 +21,11 @@ runhelp() {
     echo ""
     echo "FLAGS:"
     echo "  -p|--shared-path PATH"
-    echo "     Path to the already cloned VuFind repository. Default: /mnt/shared/alpha-browse"
+    echo "     Path to the already cloned VuFind repository. Default: ${DEFAULT_SHARED_PATH}"
     echo "  -a|--max-age-hours"
     echo "      Max age (difference between current timestamp and created timestamp) in hours"
     echo "      of the database files to determine if it will use the existing files or build"
-    echo "      new ones. Default: 4"
+    echo "      new ones. Default: ${DEFAULT_MAX_AGE_HOURS}"
     echo "  -f|--force"
     echo "      Rebuild the database files regardless of age"
     echo "  -v|--verbose"
@@ -38,8 +41,8 @@ fi
 # Set defaults
 default_args() {
     declare -g -A ARGS
-    ARGS[SHARED_PATH]=/mnt/shared/alpha-browse
-    ARGS[MAX_AGE_HOURS]=4
+    ARGS[SHARED_PATH]="${DEFAULT_SHARED_PATH}"
+    ARGS[MAX_AGE_HOURS]="${DEFAULT_MAX_AGE_HOURS}"
     ARGS[FORCE]=0
     ARGS[VERBOSE]=0
 }
@@ -90,69 +93,94 @@ verbose() {
 # Call the rebuild script to generate new database files
 rebuild_databases() {
     verbose "Running database rebuild script..."
+    RCODE=0
 
     # Create required symlink if it doesn't already exist
     if [[ ! -h /bitnami/solr/server/vendor ]]; then
         ln -s /opt/bitnami/solr /bitnami/solr/server/vendor
     fi
 
-    if ! JAVA_HOME=/opt/bitnami/java SOLR_HOME=/bitnami/solr/server/solr flock -n ${ARGS[SHARED_PATH]}/rebuild_lock /solr_confs/index-alphabetic-browse.sh; then
+    if ! JAVA_HOME=/opt/bitnami/java SOLR_HOME=/bitnami/solr/server/solr /solr_confs/index-alphabetic-browse.sh; then
         verbose "Error occured while running index-alphabetic-browse.sh script!"
-        result=1
+        RCODE=1
     else
         verbose "Rebuild complete"
-        result=0
     fi
 
-    return $result
+    return $RCODE
 }
 
-# Copy all database files to the shared storage
-copy_to_shared() {
-    verbose "Copying database files from: /bitnami/solr/server/solr/alphabetical_browse/*db-* to ${ARGS[SHARED_PATH]}"
+update_shared() {
+    # Remove all files from the shared storage alphabetical browse folder
+    verbose "Cleaning up old db files from ${ARGS[SHARED_PATH]} (with age > ${ARGS[MAX_AGE_HOURS]} hour(s))."
+    find ${ARGS[SHARED_PATH]} -type f -mmin +$(( ARGS[MAX_AGE_HOURS] * 60 )) -name "*.db*" ! -name "*lock" -delete
 
+    # Copy all database files to the shared storage
+    verbose "Copying database files from: /bitnami/solr/server/solr/alphabetical_browse/*db-* to ${ARGS[SHARED_PATH]}"
     cp -p /bitnami/solr/server/solr/alphabetical_browse/*db-* ${ARGS[SHARED_PATH]}/
 }
 
-# Remove all files from the shared storage alphabetical browse folder
-remove_from_shared() {
-    verbose "Cleaning up old db files from ${ARGS[SHARED_PATH]} (with age > ${ARGS[MAX_AGE_HOURS]} hour(s))."
-
-    # Convert hours to minutes
-    mins=$(( ARGS[MAX_AGE_HOURS] * 60 ))
-
-    find ${ARGS[SHARED_PATH]} -type f -mmin +${mins} -name "*.db*" ! -name "*lock" -delete
+lock_state() {
+    MAX_SLEEP=$(( 6 * 60 * 60 ))
+    CUR_SLEEP=0
+    while ! /lock-state.sh $@; do
+        sleep 5;
+        (( CUR_SLEEP += 5 ))
+        if [[ "$CUR_SLEEP" -gt "$MAX_SLEEP" ]]; then
+            verbose "Could not acquire lock for building (timeout after $MAX_SLEEP seconds)"
+            exit 1
+        fi
+    done
 }
 
-# Copy database files from shared storage if possible,
-# otherwise call the rebuild function
-copy_from_shared() {
-    verbose "Determining if there are files we can copy from the shared location"
+build_browse() {
+    # Acquire building lock
+    lock_state -b
 
-    # Convert hours to minutes
-    mins=$(( ARGS[MAX_AGE_HOURS] * 60 ))
-
-    # Check if a lock file is present and wait for a max amount of time
-    # to see if the the rebuild finishes
-    verbose "Ensuring no other nodes are running a rebuild..."
-    if ! flock -w 1800 ${ARGS[SHARED_PATH]}/rebuild_lock sleep 0; then
-        verbose "ERROR: Could not aquire lock; another rebuild is still in progress"
-        exit 1
-    fi
-
-    # Check if files exists with a age within the max
-    if flock -n ${ARGS[SHARED_PATH]}/rebuild_lock sleep 0 && [[ "${ARGS[FORCE]}" -eq 1 || -z $(find ${ARGS[SHARED_PATH]}/ -type f -mmin -${mins} ! -name "*lock" ) ]]; then
-        verbose "No files found within the shared path that are within a max age of ${ARGS[MAX_AGE_HOURS]} hour(s)." \
-        "or the force flag was provided to bypass this check."
+    # Check if a rebuild is needed
+    RCODE=0
+    verbose "Determining if a fresh build is needed."
+    # Check if any files exist with age within the max
+    if [[ "${ARGS[FORCE]}" -eq 1 || -z $(find "${ARGS[SHARED_PATH]}/" -type f -mmin -$(( ARGS[MAX_AGE_HOURS] * 60 )) ! -name "*lock" ) ]]; then
+        if [[ "${ARGS[FORCE]}" -eq 1 ]]; then
+            verbose "Age check bypassed due to force flag being set."
+        else
+            verbose "No files within the shared path are less than the max age of ${ARGS[MAX_AGE_HOURS]} hour(s) old."
+        fi
+        verbose "Rebuild started..."
         rebuild_databases
-        return $?
-    else
-        verbose "Identified existing database files that can be used; starting copy."
-        # Otherwise, we can use those files
-        cp -p ${ARGS[SHARED_PATH]}/* /bitnami/solr/server/solr/alphabetical_browse/
-        chown 1001 /bitnami/solr/server/solr/alphabetical_browse/*
-        return $?
+        RCODE=$?
+
+        if [[ "$RCODE" -eq 0 ]]; then
+            verbose "Rebuild succeeded. Updating shared storage with new databases."
+            update_shared
+        else
+            verbose "Rebuild failed!"
+        fi
     fi
+
+    # Release building lock
+    lock_state -u
+
+    return $RCODE
+}
+
+copy_to_solr() {
+    RCODE=0
+    # Acquire copying lock
+    lock_state -c
+
+    if [[ -n $(find "${ARGS[SHARED_PATH]}/" -type f -mmin -$(( ARGS[MAX_AGE_HOURS] * 60 )) ! -name "*lock" ) ]]; then
+        verbose "Identified existing database files that can be used; starting copy."
+        cp -p "${ARGS[SHARED_PATH]}/"* /bitnami/solr/server/solr/alphabetical_browse/ && \
+        chown 1001 /bitnami/solr/server/solr/alphabetical_browse/*
+        RCODE=$?
+    fi
+
+    # Release copying lock
+    lock_state -u
+
+    return $RCODE
 }
 
 main() {
@@ -166,17 +194,16 @@ main() {
     chown 1001 /bitnami/solr/server/solr/alphabetical_browse
 
     # Ensure the directory exists on the shared path
-    mkdir -p ${ARGS[SHARED_PATH]}
+    mkdir -p "${ARGS[SHARED_PATH]}"
 
-    # Perform copy or rebuild as necessary
-    copy_from_shared
-    success=$?
+    # All nodes will acquire building lock before checking if they need to perform a build.
+    # If a build is necessary, the build will happen here before releasing lock.
+    # This includes cleaning up old db files and copying new files to shared location.
+    build_browse
 
-    if [[ $success -eq 0 ]]; then
-        verbose "Databases have been updated; ensuring shared storage is updated as well."
-        remove_from_shared
-        copy_to_shared
-    fi
+    # All nodes will acquire copying lock before checking for new DB files in the shared location.
+    # If new files exist, the copy will happen here before releasing the lock.
+    copy_to_solr
 
     verbose "All processing complete!"
 }
