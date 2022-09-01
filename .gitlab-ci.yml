@@ -341,11 +341,11 @@ Remove Environment:
       docker stack rm $STACK_NAME-internal;
       rm -rf $COMPOSE_PATH;
       sleep 15;
-      docker system prune --volumes -a -f"
+      docker system prune --volumes -a -f --filter label=name=$STACK_NAME"
     - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
     - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
-    - ssh deploy@$DEPLOY_HOST_B "docker system prune --volumes -a -f"
-    - ssh deploy@$DEPLOY_HOST_C "docker system prune --volumes -a -f"
+    - ssh deploy@$DEPLOY_HOST_B "docker system prune --volumes -a -f --filter label=name=$STACK_NAME"
+    - ssh deploy@$DEPLOY_HOST_C "docker system prune --volumes -a -f --filter label=name=$STACK_NAME"
 
 ############# Templates ###############
 

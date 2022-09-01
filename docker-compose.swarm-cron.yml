@@ -18,7 +18,7 @@ services:
           - node.role == manager
   prune-nodes:
     image: docker
-    command: ["docker", "system", "prune", "--volumes", "-a", "-f"]
+    command: ["docker", "system", "prune", "-a", "-f"]
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     deploy:
