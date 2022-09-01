@@ -1,7 +1,11 @@
 @import "bootstrap"; /* Include bootstrap theme's less base */
 
-
+body {
+    font-family: 'Gotham SSm A', 'Gotham SSm B', Arial, Helvetica, sans-serif;
+}
 /* ------ Layout ------ */
+
+/* --- Header --- */
 header {
   background:#18453b url('https://lib.msu.edu/sites/all/themes/msul_omega/images/msul_header_main.png') no-repeat;
   background-size:cover;
@@ -37,4 +41,130 @@ header {
       }
   }
 }
+
+/* --- Footer --- */
+footer {
+  .vf-footer {
+      ul {
+        list-style:none;
+        padding-left:0;
+        margin-bottom:8rem;
+      }
+    }
+  .msu-footer { 
+    .col-lg-3 img {
+      margin-bottom:0;
+
+
+
+    }
+  .col-lg-9 {
+      ul {
+        display:block;
+        padding-left:0;
+        line-height:1;
+  
+        margin-bottom:1rem;
+        padding:0;
+          &:first-child {
+             margin-bottom:0.6rem;
+          }
+
+          li {
+            list-style:none;
+            display:inline;
+            line-height:1.2;
+            position:relative;
+              &.small-text {
+                 font-size:.8125rem;
+                  letter-spacing:0.01rem;
+                  color:#000;
+                  font-weight:400
+              }
+              &.bold-text {
+                font-weight:600;
+              }
+              a {
+                 /*font-size:.8125rem;*/
+                font-weight:600;
+                color:#0A875F !important;
+                display:inline-block;
+                text-decoration:none;
+                  &:hover {
+                     text-decoration:underline;
+                  }
+              }
+              span {
+                 margin-left:0.1rem;
+                  margin-right:0.1rem;
+                  display:inline-block
+              }
+
+
+
+
+            
+          }
+      }
+     }
+
+  }
+
+}
+
+
+
+
+/*footer .msu-footer :focus:not(input):not(.cta) {
+ outline:#151a22;
+ outline-style:dashed;
+ outline-width:1px
+}*/
+
+@media (max-width:991.98px) {
+ footer .msu-footer .col-lg-3 img {
+  margin-bottom:30px;
+  max-width:265px
+ }
+}
+@media (max-width:575.98px) {
+ footer .msu-footer .col-lg-3 img {
+  margin-left:auto;
+  margin-right:auto;
+  display:block
+ }
+}
+
+
+@media (max-width:575.98px) {
+ footer .msu-footer ul:first-child {
+  border-bottom:1px dotted #979797;
+  padding-bottom:20px;
+  margin-bottom:15px
+ }
+}
+footer .msu-footer ul:first-child li {
+ list-style:none;
+ padding-bottom:2px;
+ border-bottom:1px dotted #979797
+}
+@media (max-width:575.98px) {
+ footer .msu-footer ul:first-child li {
+  border-bottom:none;
+  display:block;
+  text-align:center
+ }
+ footer .msu-footer ul:first-child li span {
+  display:none
+ }
+  footer .msu-footer ul  {
+text-align:center;
+ }
+}
+
+
+
+
+
+
 
