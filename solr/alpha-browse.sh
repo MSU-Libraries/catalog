@@ -194,6 +194,8 @@ copy_to_solr() {
     # Acquire copying lock
     lock_state -c
 
+    # TODO optimize so that we only copy files if the timestamp is newer
+
     if [[ -n $(find "${ARGS[SHARED_PATH]}/" -type f -mmin -$(( ARGS[MAX_AGE_HOURS] * 60 )) ! -name "*lock" ) ]]; then
         verbose "Identified existing database files that can be used; starting copy."
         cp -p "${ARGS[SHARED_PATH]}/"* /bitnami/solr/server/solr/alphabetical_browse/ && \
