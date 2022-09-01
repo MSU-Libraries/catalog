@@ -1,3 +1,4 @@
+      artifacts: true
 stages:
   - Prepare
   - Build
@@ -303,6 +304,8 @@ Vufind Upgrade:
 Vufind Populate Environment:
   stage: Post-Deploy
   extends: .stack_template
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -310,13 +313,10 @@ Vufind Populate Environment:
   script:
     - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts;
     - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
-    # If this is a non-prod instance, load some records
-    - >
-      if [ "${STACK_NAME}" != "catalog-beta" ]; then
-        echo "Running harvest-and-import.sh now";
-        ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -v -r >/dev/null 2>&1";
-        echo "Import completed with exit code $?";
-      fi
+    # Load some records
+    - echo "Running harvest-and-import.sh now";
+    - ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -v -r >/dev/null 2>&1";
+    - echo "Import completed with exit code $?";
     # Rebuild alphabetic browse databases
     - echo "Running Alphabetic browse database build";
     - ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
