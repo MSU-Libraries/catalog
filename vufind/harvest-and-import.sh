@@ -168,7 +168,7 @@ archive_shared_xml() {
     verbose "Checking for previous harvest files"
     if ! ls "${ARGS[SHARED_HARVEST_DIR]}"/combined_*.xml >/dev/null 2>&1 && [[ ! -f "${ARGS[SHARED_HARVEST_DIR]}/last_harvest.txt" ]]; then
         verbose "No previous harvest files found"
-        return
+        return 0
     fi
     ARCHIVE_TS=$(date +%Y%m%d_%H%M%S)
     # TODO move archives outside of the SHARED_HARVEST_DIR (e.g. to /mnt/shared/oai_archives/)
@@ -241,16 +241,28 @@ oai_harvest() {
     # If this is a full harvest, archive the previous XML files in the shared location
     if [[ "${ARGS[FULL]}" -eq 1 ]]; then
         archive_shared_xml
+        verbose "Clearing harvest directory for new full harvest..."
         rm -f "${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt"
         rm -f "${ARGS[VUFIND_HARVEST_DIR]}/harvest.log"
         rm -f "${ARGS[VUFIND_HARVEST_DIR]}/last_state.txt"
-        #TODO remove old XML files from VUFIND_HARVEST_DIR
+        find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.xml' -delete
     fi
 
     verbose "Starting OAI harvest"
 
-    # TODO catch failures, log them, pause a bit, then attempt to resume (max retries?)
-    php /usr/local/vufind/harvest/harvest_oai.php
+    MAX_FAILURES=10
+    CUR_FAILURES=0
+    while ! php /usr/local/vufind/harvest/harvest_oai.php && [[ "$CUR_FAILURES" -lt "$MAX_FAILURES" ]]; do
+        (( CUR_FAILURES += 1))
+        verbose "Failure from harvest_oai.php (#${CUR_FAILURES})"
+        if [[ "$CUR_FAILURES" -lt "$MAX_FAILURES" ]]; then
+            verbose "Waiting a bit before trying again.."
+            sleep 10
+        else
+            verbose "Too many failures while attempting to harvest! Exiting."
+            exit 1
+        fi
+    done
 
     verbose "Completed OAI harvest"
 
