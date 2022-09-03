@@ -7,6 +7,7 @@ stages:
   - Networking
   - Bootstrap
   - Deploy
+  - Post-Deploy
   - Cleanup
   - Release
 
@@ -81,6 +82,7 @@ Deploy Compose Files:
     - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
     - ./yq -i ".services.zk3.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
     - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".services.cron.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
     - ./yq -i ".services.zk1.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
     - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
     - ./yq -i ".services.zk3.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
@@ -110,6 +112,8 @@ Deploy Compose Files:
     - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".x-solr-deploy.labels[10] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
     - ./yq -i ".x-solr-deploy.labels[11] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls=true\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[12] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.certresolver=msul-letsencrypt\"" docker-compose.solr-cloud.yml
+    # Set the stack name in the solr cron environment variable
+    - ./yq -i ".services.cron.environment[\"STACK_NAME\"]=\"${STACK_NAME}\"" docker-compose.solr-cloud.yml
     # Remove the cron service if the stack name is NOT catalog-beta
     - if [ "${STACK_NAME}" != "catalog-beta" ]; then ./yq -i "del(.services.cron)" docker-compose.yml; fi
     # Replace $STACK_NAME in main compose file
@@ -231,25 +235,9 @@ Deploy Vufind:
       ssh deploy@$DEPLOY_HOST_A
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
       docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME-catalog"
-    # If this is a non-prod instance, load some records
+    # Determine URL
     - >
       if [ "${STACK_NAME}" != "catalog-beta" ]; then
-        IMPORT_ATTEMPTS=0;
-        CAT_CONTAINER=;
-        sleep 15;
-        while [[ "$IMPORT_ATTEMPTS" -le 20 ]]; do
-            TARGET_IMAGE=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}'");
-            if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
-                CAT_CONTAINER=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog");
-                break;
-            fi
-            echo "Catalog container not online. Waiting...";
-            sleep 10;
-            IMPORT_ATTEMPTS=$((IMPORT_ATTEMPTS+1));
-        done
-        echo "Running harvest-and-import.sh now";
-        ssh deploy@$DEPLOY_HOST_A "docker exec ${CAT_CONTAINER} /harvest-and-import.sh -c -l 1 -b -v -r >/dev/null 2>&1";
-        echo "Import completed with exit code $?";
         URL="https://${STACK_NAME}.aws.lib.msu.edu";
       else
         URL="https://catalog-beta.lib.msu.edu";
@@ -261,7 +249,7 @@ Deploy Vufind:
       dotenv: deploy.env
 
 Vufind Upgrade:
-  stage: Deploy
+  stage: Post-Deploy
   extends: .stack_template
   needs:
     - job: Set Stack Name
@@ -312,6 +300,29 @@ Vufind Upgrade:
         setconfig $DEPLOY_HOST_B "true" "false";
         setconfig $DEPLOY_HOST_C "true" "false";
 
+Vufind Populate Environment:
+  stage: Post-Deploy
+  extends: .stack_template
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - job: Vufind Upgrade
+  script:
+    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts;
+    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
+    # Load some records
+    - echo "Running harvest-and-import.sh now";
+    - ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -v -r >/dev/null 2>&1";
+    - echo "Import completed with exit code $?";
+    # Rebuild alphabetic browse databases
+    - echo "Running Alphabetic browse database build";
+    - ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+    - ssh deploy@$DEPLOY_HOST_B "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+    - ssh deploy@$DEPLOY_HOST_C "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+    - echo "Completed alphabetic browse database build";
+
 Remove Environment:
   stage: Cleanup
   extends: .stack_template
@@ -333,6 +344,9 @@ Remove Environment:
     - cat dns-terraform/env/prod/main.tf | envsubst | sponge dns-terraform/env/prod/main.tf
     # Run playbook
     - ansible-playbook provision-dns-playbook/decommission.yml
+    # Remove the alphabetic browse databases
+    - ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=$STACK_NAME-solr_cron) rm -rf /mnt/shared/alpha-browse/${STACK_NAME}"
+    # Cleanup volumes/networks/images/containers
     - >
       ssh deploy@$DEPLOY_HOST_A
       "docker stack rm $STACK_NAME-solr;

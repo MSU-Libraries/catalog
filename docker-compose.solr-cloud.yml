@@ -134,6 +134,33 @@ services:
       placement:
         constraints:
           - "node.labels.nodeid==3"
+  cron:
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:latest
+    command: /startup-cron.sh
+    user: "0"
+    volumes:
+      - bitnami:/bitnami
+      - /mnt/shared:/mnt/shared:rw
+    networks:
+      - internal
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    environment:
+      NODE: "{{.Task.Slot}}"
+      STACK_NAME: "catalog-beta"
+    deploy:
+      mode: replicated
+      replicas: 3
+      restart_policy:
+        window: 15s
+      update_config:
+        parallelism: 1
+        delay: 10s
+      placement:
+        max_replicas_per_node: 1
 
 networks:
   internal:
