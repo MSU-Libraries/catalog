@@ -1,0 +1,4 @@
+# Note: this file must be named my_custom.cnf and placed into /opt/bitnami/mariadb/conf/
+[mysqld]
+wait_timeout        = 345600    # 4 days
+max_connections     = 200
