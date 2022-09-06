@@ -19,6 +19,7 @@ x-solr-deploy: &solr_deploy
   update_config:
     parallelism: 1
     delay: 10s
+    failure_action: rollback
   placement:
     max_replicas_per_node: 1
 
