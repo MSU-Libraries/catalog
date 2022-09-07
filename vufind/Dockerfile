@@ -35,7 +35,10 @@ RUN \
     mkdir -p /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
     mv /tmp/solr/vendor/dist/solr* /usr/local/vufind/solr/vendor/dist/ && \
     mv /tmp/solr/vendor/contrib/analysis-extras/lib /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
-    rm -rf /tmp/solr
+    rm -rf /tmp/solr && \
+    # Check log directory
+    mkdir /var/log/vufind && \
+    chown 33:33 /var/log/vufind
 
 # Build Arguments
 ARG DEBUG=false
@@ -77,10 +80,12 @@ ENV DEBUG=$DEBUG \
     EDS_ORG=$EDS_ORG
 
 # Setup Apache
-RUN echo "ServerName catalog.lib.msu.edu" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "LogLevel warn" >> /etc/apache2/sites-enabled/000-default.conf && \
-    echo "ErrorLog /proc/self/fd/2" >> /etc/apache2/sites-enabled/000-default.conf && \
-    echo "CustomLog /proc/self/fd/1 combined" >> /etc/apache2/sites-enabled/000-default.conf
+RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-default.conf && \
+    echo "<VirtualHost *:80>" >> /etc/apache2/sites-available/000-default.conf && \
+    echo "    LogLevel warn" >> /etc/apache2/sites-enabled/000-default.conf && \
+    echo "    ErrorLog /proc/self/fd/2" >> /etc/apache2/sites-enabled/000-default.conf && \
+    echo "    CustomLog /proc/self/fd/1 combined" >> /etc/apache2/sites-enabled/000-default.conf && \
+    echo "</VirtualHost>" >> /etc/apache2/sites-enabled/000-default.conf
 
 # Add file customizations
 COPY local/ /usr/local/vufind/local
