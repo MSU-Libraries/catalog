@@ -142,6 +142,23 @@ verbose() {
     echo "${MSG}" >> "$LOG_FILE"
 }
 
+#####
+# Start a timed countdown (allowing user to cancel)
+#  $1 => (Optional) String message to display before countdown; default: "Proceeding in:"
+#  $2 => (Optional) Integer number of seconds to countdown from; default: 5
+countdown() {
+    CD_MSG="${1:-Proceeding in:}"
+    CD_CNT="${2:-5}"
+    echo
+    echo -n -e "${CD_MSG}"
+    while [[ "$CD_CNT" -gt 0 ]]; do
+        echo -n " ${CD_CNT}"; sleep 1.1
+        (( CD_CNT -= 1 ))
+    done
+    echo
+    echo
+}
+
 prompt_yes() {
     if [[ "${ARGS[YES]}" -ne 1 ]]; then
         read -r -p "$1 (y/N) " RESP
@@ -181,7 +198,8 @@ archive_shared_xml() {
     done < <(find ./ -mindepth 1 -maxdepth 1 -name 'combined_*.xml' -o -name 'last_harvest.txt' -o -name 'harvest.log')
     # Archive all combined xml files and the last_harvest file, if it exists
     if [[ "${#ARCHIVE_LIST[@]}" -gt 0 ]]; then
-        verbose "Archiving previous harvest files"
+        verbose "Archiving previous harvest files..."
+        countdown
         if tar -czvf "$ARCHIVE_FILE" "${ARCHIVE_LIST[@]}"; then
             # remove archived files
             rm "${ARCHIVE_LIST[@]}"
@@ -212,7 +230,8 @@ reset_solr() {
     if [[ "${ARGS[RESET_SOLR]}" -eq 0 ]]; then
         return
     fi
-    verbose "Clearing the biblio Solr index"
+    verbose "Clearing the biblio Solr index..."
+    countdown
     curl ${SOLR_URL}/biblio/update -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
     curl ${SOLR_URL}/biblio/update -H "Content-type: text/xml" --data-binary '<commit />'
     verbose "Done clearing the Solr index"
@@ -242,13 +261,15 @@ oai_harvest() {
     if [[ "${ARGS[FULL]}" -eq 1 ]]; then
         archive_shared_xml
         verbose "Clearing harvest directory for new full harvest..."
+        countdown
         rm -f "${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt"
         rm -f "${ARGS[VUFIND_HARVEST_DIR]}/harvest.log"
         rm -f "${ARGS[VUFIND_HARVEST_DIR]}/last_state.txt"
         find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.xml' -delete
     fi
 
-    verbose "Starting OAI harvest"
+    verbose "Starting OAI harvest..."
+    countdown
 
     MAX_FAILURES=10
     CUR_FAILURES=0
@@ -267,7 +288,8 @@ oai_harvest() {
     verbose "Completed OAI harvest"
 
     # Combine XML files for faster import
-    verbose "Combining harvested XML files"
+    verbose "Combining harvested XML files..."
+    countdown
     declare -g -a COMBINE_FILES=()
     while read -r FILE; do
         COMBINE_FILES+=("$FILE")
@@ -296,11 +318,12 @@ oai_harvest() {
 # Copy XML files back from shared dir to VuFind dir
 copyback_from_shared() {
     #prompt_yes "Proceed to copy XML and last_harvest.txt from ${ARGS[SHARED_HARVEST_DIR]} to ${ARGS[VUFIND_HARVEST_DIR]}?"
+    verbose "Replacing any VuFind combined XML with files from shared directory..."
+    countdown
 
     # Clear out any exising xml files before copying back from shared storage
     rm -f "${ARGS[VUFIND_HARVEST_DIR]}/combined_"*.xml
 
-    verbose "Copying combined XML from shared dir to VuFind"
     COPIED_COUNT=0
     while read -r FILE; do
         cp --preserve=timestamps "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/"
@@ -317,7 +340,8 @@ copyback_from_shared() {
 
 # Perform VuFind batch import of OAI records
 batch_import() {
-    verbose "Starting batch import"
+    verbose "Starting batch import..."
+    countdown
 
     if [[ -n "${ARGS[LIMIT]}" ]]; then
         # Delete excess files beyond the provided limit from the VUFIND_HARVEST_DIR prior to import
@@ -329,7 +353,7 @@ batch_import() {
             fi
         done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name 'combined_*.xml')
     fi
-    
+
     /usr/local/vufind/harvest/batch-import-marc.sh folio
 
     verbose "Completed batch import"
@@ -340,7 +364,7 @@ main() {
     declare -g LOG_FILE
     LOG_FILE=$(mktemp)
     verbose "Logging to ${LOG_FILE}"
-    verbose "Starting processing..."
+    verbose "Starting processing"
 
     if [[ "${ARGS[OAI_HARVEST]}" -eq 1 ]]; then
         oai_harvest
