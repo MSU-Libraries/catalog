@@ -16,6 +16,7 @@ USER 1001
 
 COPY ./cloud-entrypoint.sh /cloud-entrypoint.sh
 COPY ./cloud-startup.sh /cloud-startup.sh
+COPY ./my_custom.cnf /opt/bitnami/mariadb/conf/
 
 ENTRYPOINT [ "/cloud-entrypoint.sh" ]
 CMD [ "/cloud-startup.sh" ]
