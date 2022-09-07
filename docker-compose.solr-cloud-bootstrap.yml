@@ -18,8 +18,8 @@ x-solr-deploy: &solr_deploy
     window: 15s
   update_config:
     parallelism: 1
-    delay: 10s
     failure_action: rollback
+    delay: 10s
   placement:
     max_replicas_per_node: 1
 
@@ -45,13 +45,13 @@ services:
     deploy:
       <<: *solr_deploy
 
-  zk1:
+  zk:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:latest
     volumes:
       - zk-bitnami:/bitnami
-    #hostname: zk{{.Task.Slot}}
+    hostname: zk{{.Task.Slot}}
     environment:
-      ZOO_SERVER_ID: 1
+      ZOO_SERVER_ID: {{.Task.Slot}}
       <<: *zookeeper_envs
     networks:
       - internal
@@ -62,64 +62,13 @@ services:
         max-size: "10m"
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 3
       update_config:
         parallelism: 1
+        failure_action: rollback
+        delay: 10s
       restart_policy:
         window: 15s
-      placement:
-        constraints:
-          - "node.labels.nodeid==1"
-
-  zk2:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:latest
-    volumes:
-      - zk-bitnami:/bitnami
-    environment:
-      ZOO_SERVER_ID: 2
-      <<: *zookeeper_envs
-    networks:
-      - internal
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "5"
-        max-size: "10m"
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-      restart_policy:
-        window: 15s
-      placement:
-        constraints:
-          - "node.labels.nodeid==2"
-
-  zk3:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:latest
-    volumes:
-      - zk-bitnami:/bitnami
-    environment:
-      ZOO_SERVER_ID: 3
-      <<: *zookeeper_envs
-    networks:
-      - internal
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "5"
-        max-size: "10m"
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-      restart_policy:
-        window: 15s
-      placement:
-        constraints:
-          - "node.labels.nodeid==3"
 
 networks:
   internal:

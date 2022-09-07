@@ -78,14 +78,10 @@ Deploy Compose Files:
     - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud.yml
     - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-force.yml
     - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
-    - ./yq -i ".services.zk1.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
-    - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
-    - ./yq -i ".services.zk3.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
+    - ./yq -i ".services.zk.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
     - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
     - ./yq -i ".services.cron.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
-    - ./yq -i ".services.zk1.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
-    - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
-    - ./yq -i ".services.zk3.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".services.zk.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
     # Modify the name of internal network to include $STACK_NAME
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.internal.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-cloud-bootstrap.yml
