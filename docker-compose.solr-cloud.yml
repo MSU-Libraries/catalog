@@ -66,7 +66,7 @@ services:
       - zk-bitnami:/bitnami
     hostname: zk{{.Task.Slot}}
     environment:
-      ZOO_SERVER_ID: {{.Task.Slot}}
+      ZOO_SERVER_ID: "{{.Task.Slot}}"
       <<: *zookeeper_envs
     networks:
       - internal
