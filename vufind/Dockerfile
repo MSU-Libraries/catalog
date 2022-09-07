@@ -36,9 +36,11 @@ RUN \
     mv /tmp/solr/vendor/dist/solr* /usr/local/vufind/solr/vendor/dist/ && \
     mv /tmp/solr/vendor/contrib/analysis-extras/lib /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
     rm -rf /tmp/solr && \
-    # Check log directory
+    # Create log file and redirect to stdout
     mkdir /var/log/vufind && \
-    chown 33:33 /var/log/vufind
+    touch /var/log/vufind/vufind.log && \
+    chown -R 33:33 /var/log/vufind && \
+    ln -sf /proc/1/fd/1 /var/log/vufind/vufind.log
 
 # Build Arguments
 ARG DEBUG=false
