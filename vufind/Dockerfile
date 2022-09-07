@@ -39,8 +39,7 @@ RUN \
     # Create log file and redirect to stdout
     mkdir /var/log/vufind && \
     touch /var/log/vufind/vufind.log && \
-    chown -R 33:33 /var/log/vufind && \
-    ln -sf /proc/1/fd/1 /var/log/vufind/vufind.log
+    chown -R 33:33 /var/log/vufind
 
 # Build Arguments
 ARG DEBUG=false

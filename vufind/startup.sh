@@ -19,4 +19,4 @@ do
 done
 
 # Start Apache
-apachectl -DFOREGROUND
+tail -f /var/log/vufind/vufind.log & apachectl -DFOREGROUND
