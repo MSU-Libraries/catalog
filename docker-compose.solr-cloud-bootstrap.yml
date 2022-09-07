@@ -68,7 +68,6 @@ services:
       update_config:
         parallelism: 1
         failure_action: rollback
-        delay: 10s
       restart_policy:
         window: 15s
 
