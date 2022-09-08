@@ -29,7 +29,7 @@ services:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:latest
     volumes:
       - bitnami:/bitnami
-    hostname: solr{{.Task.Slot}}
+    hostname: solr{{index .Node.Labels 'nodeid'}}
     networks:
       - public
       - internal
@@ -40,7 +40,7 @@ services:
         max-size: "10m"
     environment:
       SOLR_CLOUD_BOOTSTRAP: "yes"
-      SOLR_HOST: solr{{.Task.Slot}}
+      SOLR_HOST: solr{{index .Node.Labels 'nodeid'}}
       <<: *solr_envs
     deploy:
       <<: *solr_deploy
@@ -49,9 +49,9 @@ services:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:latest
     volumes:
       - zk-bitnami:/bitnami
-    hostname: zk{{.Task.Slot}}
+    hostname: zk{{index .Node.Labels "nodeid"}}
     environment:
-      ZOO_SERVER_ID: "{{.Task.Slot}}"
+      ZOO_SERVER_ID: "{{index .Node.Labels 'nodeid'}}"
       <<: *zookeeper_envs
     networks:
       - internal
