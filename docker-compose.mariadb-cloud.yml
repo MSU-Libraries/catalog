@@ -25,7 +25,7 @@ services:
     volumes:
       - db-bitnami:/bitnami
     stop_signal: SIGWINCH
-    stop_grace_period: 70s
+    stop_grace_period: 80s
     deploy:
       mode: replicated
       replicas: 3
