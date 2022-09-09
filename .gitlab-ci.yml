@@ -184,7 +184,7 @@ Deploy Solr:
     - >
       ssh deploy@$DEPLOY_HOST_A
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr"
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml -c $COMPOSE_PATH/docker-compose.solr-cloud-no-hc.yml ${STACK_NAME}-solr"
 
 Deploy Swarm Cron:
   stage: Deploy
@@ -299,6 +299,19 @@ Vufind Upgrade:
         setconfig $DEPLOY_HOST_A "true" "false";
         setconfig $DEPLOY_HOST_B "true" "false";
         setconfig $DEPLOY_HOST_C "true" "false";
+
+Enable Solr Healthcheck:
+  stage: Post-Deploy
+  extends: .stack_template
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - job: Vufind Upgrade
+  script:
+    - >
+      ssh deploy@$DEPLOY_HOST_A
+      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr"
 
 Vufind Populate Environment:
   stage: Post-Deploy
