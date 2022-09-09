@@ -1,9 +1,7 @@
 stages:
   - Prepare
   - Build
-# Commenting out the scanning stage for now since the Bitnami images trigger a lot of results.
-# We'll add this back in when we have time to sift through all of them.
-#  - test
+  - test
   - Networking
   - Bootstrap
   - Deploy
@@ -350,9 +348,17 @@ Verify Health:
             SERVICE=$1;
             echo "Checking health for ${SERVICE}...";
             for HOST in ${HOSTS}; do
-                echo "ssh deploy@$HOST \"docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE})\"";
-                HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE})");
-                if [[ "${HEALTH}" != "\"healthy\"" ]]; then
+                ATTEMPTS=0;
+                while [[ "$ATTEMPTS" -le 10 ]]; do
+                    HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE})");
+                    if [[ "${HEALTH}" == "\"healthy\"" ]]; then
+                        EC=0;
+                        break;
+                    fi
+                    sleep 10;
+                    ATTEMPTS=$((ATTEMPTS+1));
+                done
+                if [[ $EC -ne 0 ]]; then
                     echo "(${HOST}): ${SERVICE} is not healthy! (actual health: ${HEALTH})";
                     exit 1;
                 fi

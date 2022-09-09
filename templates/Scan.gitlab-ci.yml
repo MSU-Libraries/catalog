@@ -2,14 +2,6 @@
 # https://docs.gitlab.com/ee/user/application_security/container_scanning/
 
 container_scanning:
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
-      changes:
-        - vufind/*
-        - docker-compose.yml
-        - docker-compose.solr*
-        - solr/*
-        - zk/*
   needs:
     - Build Vufind Image
   variables:
@@ -17,33 +9,36 @@ container_scanning:
     GIT_STRATEGY: fetch
     DOCKERFILE_PATH: vufind/Dockerfile
 
-Scan Solr Image:
-  extends: .scan_template
-  needs:
-    - Build Solr Image
-  variables:
-    COMPONENT: solr
-
-Scan DB Image:
-  extends: .scan_template
-  needs:
-    - Build DB Image
-  variables:
-    COMPONENT: db
-
-Scan ZK Image:
-  extends: .scan_template
-  needs:
-    - Build ZK Image
-  variables:
-    COMPONENT: zk
-
-Scan Internal Traefik Image:
-  extends: .scan_template
-  needs:
-    - Build Internal Traefik Image
-  variables:
-    COMPONENT: traefik-internal
+# Commenting out the scanning stage for now since the Bitnami images trigger a lot of results.
+# We'll add this back in when we have time to sift through all of them.
+#
+#Scan Solr Image:
+#  extends: .scan_template
+#  needs:
+#    - Build Solr Image
+#  variables:
+#    COMPONENT: solr
+#
+#Scan DB Image:
+#  extends: .scan_template
+#  needs:
+#    - Build DB Image
+#  variables:
+#    COMPONENT: db
+#
+#Scan ZK Image:
+#  extends: .scan_template
+#  needs:
+#    - Build ZK Image
+#  variables:
+#    COMPONENT: zk
+#
+#Scan Internal Traefik Image:
+#  extends: .scan_template
+#  needs:
+#    - Build Internal Traefik Image
+#  variables:
+#    COMPONENT: traefik-internal
 
 ############# Templates ###############
 
