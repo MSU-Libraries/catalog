@@ -20,6 +20,7 @@ container_scanning:
   variables:
     DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:$CI_COMMIT_SHORT_SHA
     GIT_STRATEGY: fetch
+    SECURE_LOG_LEVEL: warn
     DOCKERFILE_PATH: vufind/Dockerfile
 
 # Commenting out the scanning stage for now since the Bitnami images trigger a lot of results.
