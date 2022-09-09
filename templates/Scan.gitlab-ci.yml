@@ -1,6 +1,19 @@
 ############# Scan ###############
 # https://docs.gitlab.com/ee/user/application_security/container_scanning/
 
+Shellcheck:
+  stage: test
+  image: alpine:latest
+  tags:
+    - msul-shared
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
+  before_script:
+    - apk add shellcheck || apt install shellcheck
+  script:
+    # TODO eventually have this fail the job, but for now it's informational
+    - shellcheck \$(find . -name "*.sh") || exit 0
+
 container_scanning:
   needs:
     - Build Vufind Image
