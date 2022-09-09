@@ -12,7 +12,7 @@ Shellcheck:
     - apk add shellcheck || apt install shellcheck
   script:
     # TODO eventually have this fail the job, but for now it's informational
-    - shellcheck \$(find . -name "*.sh") || exit 0
+    - shellcheck $(find . -name "*.sh") || exit 0
 
 container_scanning:
   needs:

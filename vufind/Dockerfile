@@ -11,11 +11,6 @@ ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
 
 RUN \
-    # Add PPA for vim to get latest version
-    apt update && \
-    apt install software-properties-common -y && \
-    apt update && \
-    add-apt-repository ppa:jonathonf/vim -y && \
     # Perform updates
     apt update && \
     apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
