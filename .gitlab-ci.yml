@@ -367,6 +367,8 @@ Verify Health:
     - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts;
     - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
     - checkhealth mariadb_galera;
+    # Give solr more time before attempting since it takes longer to start cluster
+    - sleep 15;
     - checkhealth solr_solr;
     - checkhealth catalog_catalog;
 
