@@ -350,6 +350,7 @@ Verify Health:
             SERVICE=$1;
             echo "Checking health for ${SERVICE}...";
             for HOST in "${HOSTS}"; do
+                echo "ssh deploy@$HOST \"docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE})\"";
                 HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE})");
                 if [[ "$HEALTH" != "healthy" ]]; then
                     echo "(${HOST}): ${SERVICE} is not healthy!";
