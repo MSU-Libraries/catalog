@@ -12,6 +12,7 @@ ENV VUFIND_VERSION=$VUFIND_VERSION
 
 RUN \
     # Add PPA for vim to get latest version
+    apt update && \
     apt install software-properties-common -y && \
     apt update && \
     add-apt-repository ppa:jonathonf/vim -y && \
