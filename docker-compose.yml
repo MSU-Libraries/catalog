@@ -9,6 +9,8 @@ services:
     networks:
       - public
       - internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - /mnt/shared:/mnt/shared:ro
     logging:
@@ -48,6 +50,8 @@ services:
       - /mnt/shared:/mnt/shared:rw
     networks:
       - internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     logging:
       driver: "json-file"
       options:
