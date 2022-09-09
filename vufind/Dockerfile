@@ -122,4 +122,7 @@ RUN \
 
 EXPOSE 80
 
+HEALTHCHECK --interval=1m --timeout=10s --start-period=60s --retries=6 \
+   CMD curl --fail -s http://localhost:80/vufind || exit 1  
+
 CMD /startup.sh
