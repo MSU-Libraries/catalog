@@ -1,9 +1,7 @@
 stages:
   - Prepare
   - Build
-# Commenting out the scanning stage for now since the Bitnami images trigger a lot of results.
-# We'll add this back in when we have time to sift through all of them.
-#  - test
+  - test
   - Networking
   - Bootstrap
   - Deploy
@@ -184,7 +182,7 @@ Deploy Solr:
     - >
       ssh deploy@$DEPLOY_HOST_A
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr"
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml -c $COMPOSE_PATH/docker-compose.solr-cloud-no-hc.yml ${STACK_NAME}-solr"
 
 Deploy Swarm Cron:
   stage: Deploy
@@ -300,6 +298,19 @@ Vufind Upgrade:
         setconfig $DEPLOY_HOST_B "true" "false";
         setconfig $DEPLOY_HOST_C "true" "false";
 
+Enable Solr Healthcheck:
+  stage: Post-Deploy
+  extends: .stack_template
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - job: Vufind Upgrade
+  script:
+    - >
+      ssh deploy@$DEPLOY_HOST_A
+      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr"
+
 Vufind Populate Environment:
   stage: Post-Deploy
   extends: .stack_template
@@ -322,6 +333,44 @@ Vufind Populate Environment:
     - ssh deploy@$DEPLOY_HOST_B "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
     - ssh deploy@$DEPLOY_HOST_C "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
     - echo "Completed alphabetic browse database build";
+
+Verify Health:
+  stage: Post-Deploy
+  extends: .stack_template
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - job: Enable Solr Healthcheck
+  script:
+    - HOSTS="$DEPLOY_HOST_A $DEPLOY_HOST_B $DEPLOY_HOST_C";
+    - |
+        checkhealth() {
+            SERVICE=$1;
+            echo "Checking health for ${SERVICE}...";
+            for HOST in ${HOSTS}; do
+                ATTEMPTS=0;
+                while [[ "$ATTEMPTS" -le 10 ]]; do
+                    HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE}) || echo \"No Health\"");
+                    if [[ "${HEALTH}" == "\"healthy\"" ]]; then
+                        EC=0;
+                        break;
+                    fi
+                    sleep 10;
+                    ATTEMPTS=$((ATTEMPTS+1));
+                done
+                if [[ $EC -ne 0 ]]; then
+                    echo "(${HOST}): ${SERVICE} is not healthy! (actual health: ${HEALTH})";
+                    exit 1;
+                fi
+            done
+        }
+    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts;
+    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
+    - checkhealth mariadb_galera;
+    # Give solr more time before attempting since it takes longer to start cluster
+    - sleep 15;
+    - checkhealth solr_solr;
+    - checkhealth catalog_catalog;
 
 Remove Environment:
   stage: Cleanup
@@ -382,5 +431,5 @@ include:
     ref: main
     file: 'SSH.gitlab-ci.yml'
   - 'templates/Build.gitlab-ci.yml'
-#  - 'templates/Scan.gitlab-ci.yml'
+  - 'templates/Scan.gitlab-ci.yml'
   - 'templates/Release.gitlab-ci.yml'

@@ -1,61 +1,72 @@
 ############# Scan ###############
 # https://docs.gitlab.com/ee/user/application_security/container_scanning/
 
-container_scanning:
+Shellcheck:
+  stage: test
+  image: alpine:latest
+  tags:
+    - msul-shared
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
-      changes:
-        - vufind/*
-        - docker-compose.yml
-        - docker-compose.solr*
-        - solr/*
-        - zk/*
-  needs:
-    - Build Vufind Image
-  variables:
-    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
-    GIT_STRATEGY: fetch
-    DOCKERFILE_PATH: vufind/Dockerfile
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
+  before_script:
+    - apk add shellcheck || apt install shellcheck
+  script:
+    # TODO eventually have this fail the job, but for now it's informational
+    - shellcheck $(find . -name "*.sh") || exit 0
 
-Scan Solr Image:
-  extends: .scan_template
-  needs:
-    - Build Solr Image
-  variables:
-    COMPONENT: solr
+# Commenting this out since the https://docs.gitlab.com/ee/user/application_security/container_scanning/#vulnerability-allowlisting
+# wasn't being respecting in attempts at storing it at top level or at vufind level
+#container_scanning:
+#  needs:
+#    - Build Vufind Image
+#  variables:
+#    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:$CI_COMMIT_SHORT_SHA
+#    GIT_STRATEGY: fetch
+#    SECURE_LOG_LEVEL: warn
+#    DOCKERFILE_PATH: vufind/Dockerfile
 
-Scan DB Image:
-  extends: .scan_template
-  needs:
-    - Build DB Image
-  variables:
-    COMPONENT: db
-
-Scan ZK Image:
-  extends: .scan_template
-  needs:
-    - Build ZK Image
-  variables:
-    COMPONENT: zk
-
-Scan Internal Traefik Image:
-  extends: .scan_template
-  needs:
-    - Build Internal Traefik Image
-  variables:
-    COMPONENT: traefik-internal
+# Commenting out the scanning stage for now since the Bitnami images trigger a lot of results.
+# We'll add this back in when we have time to sift through all of them.
+#
+#Scan Solr Image:
+#  extends: .scan_template
+#  needs:
+#    - Build Solr Image
+#  variables:
+#    COMPONENT: solr
+#
+#Scan DB Image:
+#  extends: .scan_template
+#  needs:
+#    - Build DB Image
+#  variables:
+#    COMPONENT: db
+#
+#Scan ZK Image:
+#  extends: .scan_template
+#  needs:
+#    - Build ZK Image
+#  variables:
+#    COMPONENT: zk
+#
+#Scan Internal Traefik Image:
+#  extends: .scan_template
+#  needs:
+#    - Build Internal Traefik Image
+#  variables:
+#    COMPONENT: traefik-internal
 
 ############# Templates ###############
 
-.scan_template:
-  extends: container_scanning
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
-  variables:
-    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:latest
-    GIT_STRATEGY: fetch
-    DOCKERFILE_PATH: $COMPONENT/Dockerfile
+#.scan_template:
+#  extends: container_scanning
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+#  variables:
+#    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:latest
+#    GIT_STRATEGY: fetch
+#    DOCKERFILE_PATH: $COMPONENT/Dockerfile
 
 include:
-  - template: Security/Container-Scanning.gitlab-ci.yml
+#  - template: Security/Container-Scanning.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml

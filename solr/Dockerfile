@@ -7,7 +7,7 @@ USER root
 
 # Perform updates
 RUN apt update && \
-    apt install wget vim rsyslog cron moreutils gettext-base -y
+    apt install wget vim rsyslog cron moreutils gettext-base jq -y
 
 # Setup Timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
@@ -39,6 +39,10 @@ RUN chmod -R g-w,o-w /etc/cron.d/ && \
 
 COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
+COPY healthcheck.sh /healthcheck.sh
+
+HEALTHCHECK --interval=1m --timeout=10s --start-period=120s --retries=6 \
+  CMD /healthcheck.sh
 
 USER 1001
 
