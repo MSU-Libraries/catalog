@@ -350,7 +350,7 @@ Verify Health:
             for HOST in ${HOSTS}; do
                 ATTEMPTS=0;
                 while [[ "$ATTEMPTS" -le 10 ]]; do
-                    HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE})");
+                    HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE}) || echo \"No Health\"");
                     if [[ "${HEALTH}" == "\"healthy\"" ]]; then
                         EC=0;
                         break;
@@ -429,5 +429,5 @@ include:
     ref: main
     file: 'SSH.gitlab-ci.yml'
   - 'templates/Build.gitlab-ci.yml'
-#  - 'templates/Scan.gitlab-ci.yml'
+  - 'templates/Scan.gitlab-ci.yml'
   - 'templates/Release.gitlab-ci.yml'
