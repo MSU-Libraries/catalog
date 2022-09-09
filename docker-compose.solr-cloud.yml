@@ -153,7 +153,7 @@ services:
         max-file: "5"
         max-size: "10m"
     healthcheck:
-      disabled: true
+      disable: true
     environment:
       NODE: "{{.Task.Slot}}"
       STACK_NAME: "catalog-beta"

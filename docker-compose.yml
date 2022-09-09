@@ -54,7 +54,7 @@ services:
         max-file: "5"
         max-size: "10m"
     healthcheck:
-      disabled: true
+      disable: true
     deploy:
       mode: replicated
       replicas: 1
