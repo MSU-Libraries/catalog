@@ -41,7 +41,7 @@ COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
 COPY healthcheck.sh /healthcheck.sh
 
-HEALTHCHECK --interval=1m --timeout=10s --start-period=120s --retries=6 \
+HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
   CMD /healthcheck.sh
 
 USER 1001
