@@ -15,9 +15,9 @@ variables:
   VUFIND_VERSION: "8.1"
   # Used during upgrade, which needs to know previous version
   PREV_VUFIND_VERSION: "8.0.4"
-  DEPLOY_HOST_A: catalog-a.aws.lib.msu.edu
-  DEPLOY_HOST_B: catalog-b.aws.lib.msu.edu
-  DEPLOY_HOST_C: catalog-c.aws.lib.msu.edu
+  DEPLOY_HOST_A: catalog-1.aws.lib.msu.edu
+  DEPLOY_HOST_B: catalog-2.aws.lib.msu.edu
+  DEPLOY_HOST_C: catalog-3.aws.lib.msu.edu
   COMPOSE_PATH: /home/deploy/$CI_COMMIT_BRANCH
 
 Set Stack Name:
