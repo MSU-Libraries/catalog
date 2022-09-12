@@ -48,10 +48,8 @@ Build Vufind Image:
         --build-arg FOLIO_CANCEL_ID=$FOLIO_CANCEL_ID 
         --build-arg OAI_URL=$OAI_URL 
         --build-arg EMAIL=$EMAIL 
-        --build-arg MAIL_HOST=localhost 
+        --build-arg MAIL_HOST=host.docker.internal
         --build-arg MAIL_PORT=25 
-        --build-arg MAIL_USERNAME= 
-        --build-arg MAIL_PASSWORD= 
         --build-arg SOLR_URL=http://solr:8983/solr 
         --build-arg EDS_USER=$EDS_USER
         --build-arg EDS_PASS=$EDS_PASS
@@ -60,6 +58,8 @@ Build Vufind Image:
         --tag $CURR 
         --cache-from $LATEST 
         vufind/
+    #    --build-arg MAIL_USERNAME= 
+    #    --build-arg MAIL_PASSWORD= 
     - docker push $CURR
     - |
       if [[ $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH ]]; then
