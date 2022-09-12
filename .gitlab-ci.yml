@@ -13,9 +13,9 @@ variables:
   VUFIND_VERSION: "8.1"
   # Used during upgrade, which needs to know previous version
   PREV_VUFIND_VERSION: "8.0.4"
-  DEPLOY_HOST_A: catalog-a.aws.lib.msu.edu
-  DEPLOY_HOST_B: catalog-b.aws.lib.msu.edu
-  DEPLOY_HOST_C: catalog-c.aws.lib.msu.edu
+  DEPLOY_HOST_A: catalog-1.aws.lib.msu.edu
+  DEPLOY_HOST_B: catalog-2.aws.lib.msu.edu
+  DEPLOY_HOST_C: catalog-3.aws.lib.msu.edu
   COMPOSE_PATH: /home/deploy/$CI_COMMIT_BRANCH
 
 Set Stack Name:
@@ -76,14 +76,10 @@ Deploy Compose Files:
     - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud.yml
     - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-force.yml
     - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
-    - ./yq -i ".services.zk1.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
-    - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
-    - ./yq -i ".services.zk3.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
+    - ./yq -i ".services.zk.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
     - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
     - ./yq -i ".services.cron.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
-    - ./yq -i ".services.zk1.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
-    - ./yq -i ".services.zk2.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
-    - ./yq -i ".services.zk3.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".services.zk.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
     # Modify the name of internal network to include $STACK_NAME
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.internal.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-cloud-bootstrap.yml

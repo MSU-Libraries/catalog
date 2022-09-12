@@ -31,11 +31,11 @@ version: "3.8"
 services:
   galera:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:latest
-    hostname: galera{{.Task.Slot}}
+    hostname: galera{{slice .Node.Hostname 8 9}}
     networks:
       - internal
     environment:
-      GALERA_HOST: galera{{.Task.Slot}}
+      GALERA_HOST: galera{{slice .Node.Hostname 8 9}}
       # This flag is required when cold-starting the cluster
       MARIADB_GALERA_CLUSTER_BOOTSTRAP: "yes"
       # This flag is only needed when starting cluster from node where grastate.dat has "safe_to_bootstrap: 0"
@@ -44,7 +44,7 @@ services:
     volumes:
       - db-bitnami:/bitnami
     stop_signal: SIGWINCH
-    stop_grace_period: 70s
+    stop_grace_period: 80s
     deploy:
       mode: replicated
       replicas: 1

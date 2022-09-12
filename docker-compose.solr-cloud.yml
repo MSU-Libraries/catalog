@@ -45,7 +45,7 @@ services:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:latest
     volumes:
       - bitnami:/bitnami
-    hostname: solr{{.Task.Slot}}
+    hostname: solr{{slice .Node.Hostname 8 9}}
     networks:
       - public
       - internal
@@ -55,18 +55,18 @@ services:
         max-file: "5"
         max-size: "10m"
     environment:
-      SOLR_HOST: solr{{.Task.Slot}}
+      SOLR_HOST: solr{{slice .Node.Hostname 8 9}}
       <<: *solr_envs
     deploy:
       <<: *solr_deploy
 
-  zk1:
+  zk:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:latest
     volumes:
       - zk-bitnami:/bitnami
-    #hostname: zk{{.Task.Slot}}
+    hostname: zk{{slice .Node.Hostname 8 9}}
     environment:
-      ZOO_SERVER_ID: 1
+      ZOO_SERVER_ID: "{{slice .Node.Hostname 8 9}}"
       <<: *zookeeper_envs
     networks:
       - internal
@@ -77,67 +77,13 @@ services:
         max-size: "10m"
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 3
       update_config:
         parallelism: 1
         failure_action: rollback
       restart_policy:
         window: 15s
-      placement:
-        constraints:
-          - "node.labels.nodeid==1"
 
-  zk2:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:latest
-    volumes:
-      - zk-bitnami:/bitnami
-    environment:
-      ZOO_SERVER_ID: 2
-      <<: *zookeeper_envs
-    networks:
-      - internal
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "5"
-        max-size: "10m"
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-        failure_action: rollback
-      restart_policy:
-        window: 15s
-      placement:
-        constraints:
-          - "node.labels.nodeid==2"
-
-  zk3:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:latest
-    volumes:
-      - zk-bitnami:/bitnami
-    environment:
-      ZOO_SERVER_ID: 3
-      <<: *zookeeper_envs
-    networks:
-      - internal
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "5"
-        max-size: "10m"
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-        failure_action: rollback
-      restart_policy:
-        window: 15s
-      placement:
-        constraints:
-          - "node.labels.nodeid==3"
   cron:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:latest
     command: /startup-cron.sh
@@ -155,7 +101,7 @@ services:
     healthcheck:
       disable: true
     environment:
-      NODE: "{{.Task.Slot}}"
+      NODE: "{{slice .Node.Hostname 8 9}}"
       STACK_NAME: "catalog-beta"
     deploy:
       mode: replicated
