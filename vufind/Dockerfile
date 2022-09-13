@@ -6,7 +6,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV VUFIND_LOCAL_DIR=/usr/local/vufind/local
 ENV VUFIND_HOME=/usr/local/vufind
 ENV JAVA_HOME=/usr/lib/jvm/default-java
-ENV VUFIND_LOCAL_MODULES=Catalog
 
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
@@ -59,7 +58,8 @@ ARG EDS_PASS
 ARG EDS_PROFILE
 ARG EDS_ORG
 
-ENV FOLIO_URL=$FOLIO_URL \
+ENV DEBUG=$DEBUG \
+    FOLIO_URL=$FOLIO_URL \
     FOLIO_USER=$FOLIO_USER \
     FOLIO_PASS=$FOLIO_PASS \
     FOLIO_TENANT=$FOLIO_TENANT \
@@ -86,7 +86,6 @@ RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-def
 # Add file customizations
 COPY local/ /usr/local/vufind/local
 COPY themes/msul /usr/local/vufind/themes/msul
-COPY module/Catalog /usr/local/vufind/module/Catalog
 COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
@@ -108,8 +107,6 @@ RUN \
     envsubst < local/config/vufind/Folio.ini | sponge local/config/vufind/Folio.ini && \
     envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
     envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
-    # Enable module
-    sed -i "s/#SetEnv VUFIND_LOCAL_MODULES VuFindLocalTemplate/SetEnv VUFIND_LOCAL_MODULES Catalog/g" ${VUFIND_LOCAL_DIR}/httpd-vufind.conf && \
     # Set required environment variables
     echo JAVA_HOME="$JAVA_HOME" >> /etc/environment && \
     echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
