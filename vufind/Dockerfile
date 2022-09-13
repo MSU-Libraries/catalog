@@ -6,6 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV VUFIND_LOCAL_DIR=/usr/local/vufind/local
 ENV VUFIND_HOME=/usr/local/vufind
 ENV JAVA_HOME=/usr/lib/jvm/default-java
+ENV VUFIND_LOCAL_MODULES=Catalog
 
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
@@ -42,7 +43,6 @@ RUN \
     chown -R 33:33 /var/log/vufind
 
 # Build Arguments
-ARG DEBUG=false
 ARG FOLIO_URL
 ARG FOLIO_USER
 ARG FOLIO_PASS
@@ -53,16 +53,13 @@ ARG OAI_URL
 ARG EMAIL
 ARG MAIL_HOST
 ARG MAIL_PORT
-#ARG MAIL_USERNAME
-#ARG MAIL_PASSWORD
 ARG SOLR_URL=http://solr:8983/solr
 ARG EDS_USER
 ARG EDS_PASS
 ARG EDS_PROFILE
 ARG EDS_ORG
 
-ENV DEBUG=$DEBUG \
-    FOLIO_URL=$FOLIO_URL \
+ENV FOLIO_URL=$FOLIO_URL \
     FOLIO_USER=$FOLIO_USER \
     FOLIO_PASS=$FOLIO_PASS \
     FOLIO_TENANT=$FOLIO_TENANT \
@@ -72,8 +69,6 @@ ENV DEBUG=$DEBUG \
     EMAIL=$EMAIL \
     MAIL_HOST=$MAIL_HOST \
     MAIL_PORT=$MAIL_PORT \
-    #MAIL_USERNAME=$MAIL_USERNAME \
-    #MAIL_PASSWORD=$MAIL_PASSWORD \
     SOLR_URL=$SOLR_URL \
     EDS_USER=$EDS_USER \
     EDS_PASS=$EDS_PASS \
@@ -91,6 +86,7 @@ RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-def
 # Add file customizations
 COPY local/ /usr/local/vufind/local
 COPY themes/msul /usr/local/vufind/themes/msul
+COPY module/Catalog /usr/local/vufind/module/Catalog
 COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
@@ -112,9 +108,8 @@ RUN \
     envsubst < local/config/vufind/Folio.ini | sponge local/config/vufind/Folio.ini && \
     envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
     envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
-    # Enable debug mode
-    if [ "$DEBUG" = 1 ] ; \
-    then sed -i "/SetEnv VUFIND_ENV development/s/#//g" ${VUFIND_LOCAL_DIR}/httpd-vufind.conf; fi && \
+    # Enable module
+    sed -i "s/#SetEnv VUFIND_LOCAL_MODULES VuFindLocalTemplate/SetEnv VUFIND_LOCAL_MODULES Catalog/g" ${VUFIND_LOCAL_DIR}/httpd-vufind.conf && \
     # Set required environment variables
     echo JAVA_HOME="$JAVA_HOME" >> /etc/environment && \
     echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
