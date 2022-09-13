@@ -42,10 +42,11 @@
           <?php endif; ?>
 
           <?php $journalTitle = $this->driver->getContainerTitle(); $summDate = $this->driver->getPublicationDates(); ?>
-          <? $publisherName = $this->driver->getPublisher(); if (!empty($publisherName)): ?>
+          <?php $publisherName = $this->driver->getPublisher(); ?>
           <?php if (!empty($journalTitle)): ?>
             <?=!empty($summAuthor) ? '<br />' : ''?>
-            <?=$this->escapeHtml($publisherName)?>&nbsp;<?=$this->transEsc('Published in')?>
+	    <strong><?=$this->transEsc('Published:')?></strong>
+            <?=$this->escapeHtml($publisherName)?>
             <?php $containerSource = $this->driver->getSourceIdentifier(); ?>
             <?php $containerID = $this->driver->getContainerRecordID(); ?>
             <?php /* TODO: handle highlighting more elegantly here: */?>
@@ -53,7 +54,8 @@
             <?=!empty($summDate) ? ' (' . $this->escapeHtml($summDate[0]) . ')' : ''?>
           <?php elseif (!empty($summDate)): ?>
             <?=!empty($summAuthor) ? '<br />' : ''?>
-            <?=$this->escapeHtml($publisherName)?>&nbsp;<?=$this->transEsc('Published') . ' ' . $this->escapeHtml($summDate[0])?>
+	    <strong><?=$this->transEsc('Published:')?></strong>
+		<?=$this->escapeHtml($publisherName) . ' ' . $this->escapeHtml($summDate[0])?>
           <?php endif; ?>
           <?php $summInCollection = $this->driver->getContainingCollections(); if (!empty($summInCollection)): ?>
             <?php foreach ($summInCollection as $collId => $collText): ?>
@@ -124,6 +126,13 @@
           <?php endif; ?>
         <?php endif; ?>
       </div>
+
+      <?php $physical = $this->driver->getPhysical(); if (!empty($physical)): ?>
+        <div>
+          <b><?=$this->transEsc('Physical Description')?>:</b>
+          <?=$this->escapeHtml($physical)?>
+        </div>
+      <?php endif; ?>
 
       <?php
         // Display an OpenURL link if configured to do so:

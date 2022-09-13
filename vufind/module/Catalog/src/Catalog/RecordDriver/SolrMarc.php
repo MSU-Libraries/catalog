@@ -6,8 +6,12 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 {
     public function getPublisher()
     {
-        return $this->fields['publisher'] ?? [];
+        return is_array($this->fields['publisher']) ? reset($this->fields['publisher']) : $this->fields['publisher'] ?? [];
+    }
+
+    public function getPhysical()
+    {
+        return is_array($this->fields['physical']) ? reset($this->fields['physical']) : $this->fields['physical'] ?? [];
     }
 }
-
 
