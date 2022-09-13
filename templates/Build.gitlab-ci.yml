@@ -58,6 +58,8 @@ Build Vufind Image:
         --build-arg EDS_PASS=$EDS_PASS
         --build-arg EDS_PROFILE=$EDS_PROFILE
         --build-arg EDS_ORG=$EDS_ORG
+        --build-arg RECAPTCHA_SITE_KEY=$RECAPTCHA_SITE_KEY
+        --build-arg RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY
         --tag $CURR 
         --cache-from $LATEST 
         vufind/

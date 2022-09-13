@@ -114,6 +114,8 @@ resources such as Solr and the Traefik dashboard
 * `OAI_URL`: URL for making OAI calls to FOLIO when harvesting (can include API Token) 
 * `REGISTRY_ACCESS_TOKEN`: Read-only registry access token used by deploy user
 * `RW_CICD_TOKEN`: Read-Write access token to this repository used to create release tags 
+* `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation
+* `RECAPTCHA_SECRET_KEY`: Secret key for reCaptcha form validation
 
 [^1]: 
     There are many ways to generate this password hash, such as online generators or command
