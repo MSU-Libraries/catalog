@@ -2,8 +2,9 @@
 return [
     'extends' => 'bootstrap3',
 
-	"less" => array(
-	  "active" => true,
-	  "compiled.less"
+	'less' => array(
+	  'active' => true,
+	  'compiled.less'
 	)
+
 ];

@@ -39,7 +39,6 @@ Build Vufind Image:
     - > 
         docker build 
         --build-arg VUFIND_VERSION=$VUFIND_VERSION
-        --build-arg DEBUG=false 
         --build-arg FOLIO_URL=$FOLIO_URL 
         --build-arg FOLIO_USER=$FOLIO_USER 
         --build-arg FOLIO_PASS=$FOLIO_PASS 
