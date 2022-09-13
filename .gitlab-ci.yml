@@ -252,47 +252,50 @@ Vufind Upgrade:
       artifacts: true
   script:
     # TODO -- backup of database before running upgrade (can use what we implement in PC-74)
+    - HOSTS="$DEPLOY_HOST_A $DEPLOY_HOST_B $DEPLOY_HOST_C";
     - |
         setconfig() {
-            server=$1;
-            oldval=$2;
-            newval=$3;
-            container=$(ssh deploy@$server "docker ps -q -f name=${STACK_NAME}-catalog_catalog");
-            ssh deploy@$server "docker exec $container sed -i 's/autoConfigure = $oldval/autoConfigure = $newval/g' local/config/vufind/config.ini";
+            OLDVAL=$1;
+            NEWVAL=$2;
+            for HOST in ${HOSTS}; do
+                CONTAINER=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-catalog_catalog");
+                ssh deploy@$HOST "docker exec ${CONTAINER} sed -i 's/autoConfigure = $OLDVAL/autoConfigure = $NEWVAL/g' local/config/vufind/config.ini";
+            done
         }
         catalogwait() {
-            host=$1;
-            attempts=0;
-            echo "Checking to see if catalog container for ${host} is online...";
             sleep 15;
-            while [[ "$attempts" -le 20 ]]; do
-                target_image=$(ssh deploy@$host "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}'");
-                if [[ "$target_image" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
-                    echo "Container for host ${host} is online with new image!";
-                    break;
+            for HOST in ${HOSTS}; do
+                echo "Checking to see if catalog container for ${HOST} is online ($CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA)...";
+                ATTEMPTS=0;
+                while [[ "$ATTEMPTS" -le 20 ]]; do
+                    TARGET_IMAGE=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}'");
+                    echo "Container image on ${HOST}: ${TARGET_IMAGE}";
+                    if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
+                        echo "Container for host ${HOST} is online with new image!";
+                        EC=0;
+                        break;
+                    fi
+                    echo "Catalog container not online. Waiting...";
+                    sleep 10;
+                    ATTEMPTS=$((ATTEMPTS+1));
+                done
+                if [[ $EC -ne 0 ]]; then
+                    echo "(${HOST}): Container never came online with new image. Still running ${TARGET_IMAGE}!"
+                    exit 1;
                 fi
-                echo "Catalog container not online. Waiting...";
-                sleep 10;
-                attempts=$((attempts+1));
             done
         }
         ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts;
         ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
-        catalogwait $DEPLOY_HOST_A;
-        catalogwait $DEPLOY_HOST_B;
-        catalogwait $DEPLOY_HOST_C;
+        catalogwait;
         apk add curl || apt install curl -y;
         echo "Enabling auto configure temporarily";
-        setconfig $DEPLOY_HOST_A "false" "true";
-        setconfig $DEPLOY_HOST_B "false" "true";
-        setconfig $DEPLOY_HOST_C "false" "true";
+        setconfig "false" "true";
         echo "Running Vufind upgrade now against ${URL}";
         curl "${URL}/vufind/Upgrade/GetSourceVersion" --data-raw "sourceversion=${PREV_VUFIND_VERSION}&skip%5B%5D=config" -L -O;
         echo "Upgrade complete with exit code $?";
         echo "Disabling auto configure";
-        setconfig $DEPLOY_HOST_A "true" "false";
-        setconfig $DEPLOY_HOST_B "true" "false";
-        setconfig $DEPLOY_HOST_C "true" "false";
+        setconfig "true" "false";
 
 Enable Solr Healthcheck:
   stage: Post-Deploy

@@ -42,7 +42,6 @@ RUN \
     chown -R 33:33 /var/log/vufind
 
 # Build Arguments
-ARG DEBUG=false
 ARG FOLIO_URL
 ARG FOLIO_USER
 ARG FOLIO_PASS
@@ -53,8 +52,6 @@ ARG OAI_URL
 ARG EMAIL
 ARG MAIL_HOST
 ARG MAIL_PORT
-#ARG MAIL_USERNAME
-#ARG MAIL_PASSWORD
 ARG SOLR_URL=http://solr:8983/solr
 ARG EDS_USER
 ARG EDS_PASS
@@ -72,8 +69,6 @@ ENV DEBUG=$DEBUG \
     EMAIL=$EMAIL \
     MAIL_HOST=$MAIL_HOST \
     MAIL_PORT=$MAIL_PORT \
-    #MAIL_USERNAME=$MAIL_USERNAME \
-    #MAIL_PASSWORD=$MAIL_PASSWORD \
     SOLR_URL=$SOLR_URL \
     EDS_USER=$EDS_USER \
     EDS_PASS=$EDS_PASS \
@@ -112,9 +107,6 @@ RUN \
     envsubst < local/config/vufind/Folio.ini | sponge local/config/vufind/Folio.ini && \
     envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
     envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
-    # Enable debug mode
-    if [ "$DEBUG" = 1 ] ; \
-    then sed -i "/SetEnv VUFIND_ENV development/s/#//g" ${VUFIND_LOCAL_DIR}/httpd-vufind.conf; fi && \
     # Set required environment variables
     echo JAVA_HOME="$JAVA_HOME" >> /etc/environment && \
     echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
