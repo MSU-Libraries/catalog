@@ -20,7 +20,9 @@ docker build ./vufind/ -t catalog:latest \
     --build-arg MAIL_PORT=25 \
     --build-arg MAIL_USERNAME= \
     --build-arg MAIL_PASSWORD= \
-    --build-arg SOLR_URL=http://solr:8983/solr
+    --build-arg FEEDBACK_EMAIL=another_email@example.edu \
+    --build-arg RECAPTCHA_SITE_KEY=mysitekey
+    --build-arg RECAPTCHA_SECRET_KEY=mysecretkey
 ```
 
 * `DEBUG`: Enable debug messages to be displayed on the page. Should be set to `true` or `false`
@@ -38,7 +40,10 @@ uses `1` by default
 * `MAIL_PORT`: Port to use for email. Typically `25` is standard
 * `MAIL_USERNAME`: Username to use when authenticating to the `MAIL_HOST` if not `localhost`
 * `MAIL_PASSWORD`: Password for the `MAIL_USERNAME`
+* `FEEDBACK_EMAIL`: Email address to send feedback form response to
 * `SOLR_URL`: The URL that Vufind's Solr instance is accessible on. This setup will use `solr`
+* `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation
+* `RECAPTCHA_SECRET_KEY`: Secret key for reCaptcha form validation
 
 ## To start the application stack
 During the first time you are bring up the stack, you will need

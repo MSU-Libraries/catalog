@@ -49,16 +49,19 @@ Build Vufind Image:
         --build-arg EMAIL=$EMAIL 
         --build-arg MAIL_HOST=host.docker.internal
         --build-arg MAIL_PORT=25 
+        --build-arg MAIL_USERNAME= 
+        --build-arg MAIL_PASSWORD= 
+        --build-arg FEEDBACK_EMAIL=$FEEDBACK_EMAIL 
         --build-arg SOLR_URL=http://solr:8983/solr 
         --build-arg EDS_USER=$EDS_USER
         --build-arg EDS_PASS=$EDS_PASS
         --build-arg EDS_PROFILE=$EDS_PROFILE
         --build-arg EDS_ORG=$EDS_ORG
+        --build-arg RECAPTCHA_SITE_KEY=$RECAPTCHA_SITE_KEY
+        --build-arg RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY
         --tag $CURR 
         --cache-from $LATEST 
         vufind/
-    #    --build-arg MAIL_USERNAME= 
-    #    --build-arg MAIL_PASSWORD= 
     - docker push $CURR
     - |
       if [[ $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH ]]; then

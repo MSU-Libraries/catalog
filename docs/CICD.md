@@ -103,6 +103,7 @@ resources such as Solr and the Traefik dashboard
 * `EDS_PROFILE`: Profile name for EDS
 * `EDS_USER`: Username for the EDS API
 * `EMAIL`: Email address set in Vufind's configs 
+* `FEEDBACK_EMAIL`: Email address for sending feedback form submissions to
 * `FOLIO_CANCEL_ID`: The FOLIO cancelation ID to use when canceling an order. Vufind uses
 * `FOLIO_PASS`: Password for the `FOLIO_USER` application user used by Vufind
 * `FOLIO_REC_ID`: Record ID in FOLIO to search for to verify the tenant is available
@@ -113,6 +114,8 @@ resources such as Solr and the Traefik dashboard
 * `OAI_URL`: URL for making OAI calls to FOLIO when harvesting (can include API Token) 
 * `REGISTRY_ACCESS_TOKEN`: Read-only registry access token used by deploy user
 * `RW_CICD_TOKEN`: Read-Write access token to this repository used to create release tags 
+* `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation
+* `RECAPTCHA_SECRET_KEY`: Secret key for reCaptcha form validation
 
 [^1]: 
     There are many ways to generate this password hash, such as online generators or command
