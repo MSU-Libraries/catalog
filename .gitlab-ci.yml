@@ -263,13 +263,13 @@ Vufind Upgrade:
             done
         }
         catalogwait() {
-            echo "Checking to see if catalog container for ${host} is online ($CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA)...";
             sleep 15;
             for HOST in ${HOSTS}; do
+                echo "Checking to see if catalog container for ${HOST} is online ($CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA)...";
                 ATTEMPTS=0;
                 while [[ "$ATTEMPTS" -le 20 ]]; do
                     TARGET_IMAGE=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}'");
-                    echo "Container image on ${host}: ${TARGET_IMAGE}";
+                    echo "Container image on ${HOST}: ${TARGET_IMAGE}";
                     if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
                         echo "Container for host ${HOST} is online with new image!";
                         EC=0;
