@@ -271,7 +271,7 @@ Vufind Upgrade:
                     TARGET_IMAGE=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}' 2>/dev/null");
                     echo "Container image on ${HOST}: ${TARGET_IMAGE}";
                     if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
-                        echo "Container for host ${HOST} is online with new image!";
+                        echo "$(date +'%m-%d-%Y %T %z') -- Container for host ${HOST} is online with new image!";
                         EC=0;
                         break;
                     fi
@@ -280,7 +280,7 @@ Vufind Upgrade:
                     ATTEMPTS=$((ATTEMPTS+1));
                 done
                 if [[ $EC -ne 0 ]]; then
-                    echo "(${HOST}): Container never came online with new image. Still running ${TARGET_IMAGE}!"
+                    echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): Container never came online with new image. Still running ${TARGET_IMAGE}!"
                     exit 1;
                 fi
             done
@@ -351,7 +351,7 @@ Verify Health:
                 while [[ "$ATTEMPTS" -le 10 ]]; do
                     HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE}) 2>/dev/null || echo \"No Health\"");
                     if [[ "${HEALTH}" == "\"healthy\"" ]]; then
-                        echo "(${HOST}): ${SERVICE} is healthy."
+                        echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} is healthy."
                         EC=0;
                         break;
                     fi
@@ -359,7 +359,7 @@ Verify Health:
                     ATTEMPTS=$((ATTEMPTS+1));
                 done
                 if [[ $EC -ne 0 ]]; then
-                    echo "(${HOST}): ${SERVICE} is not healthy! (actual health: ${HEALTH})";
+                    echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} is not healthy! (actual health: ${HEALTH})";
                     exit 1;
                 fi
             done
@@ -367,10 +367,10 @@ Verify Health:
     - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts;
     - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
     - checkhealth mariadb_galera;
-    # Give solr more time before attempting since it takes longer to start cluster
-    - sleep 15;
-    - checkhealth solr_solr;
     - checkhealth catalog_catalog;
+    # Give solr more time before attempting since it takes longer to start cluster
+    - sleep 30;
+    - checkhealth solr_solr;
 
 Remove Environment:
   stage: Cleanup
