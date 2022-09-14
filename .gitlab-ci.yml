@@ -269,13 +269,13 @@ Vufind Upgrade:
                 ATTEMPTS=0;
                 while [[ "$ATTEMPTS" -le 20 ]]; do
                     TARGET_IMAGE=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}' 2>/dev/null");
-                    echo "Container image on ${HOST}: ${TARGET_IMAGE}";
                     if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
                         echo "$(date +'%m-%d-%Y %T %z') -- Container for host ${HOST} is online with new image!";
                         EC=0;
                         break;
                     fi
                     echo "Catalog container not online. Waiting...";
+                    EC=1;
                     sleep 10;
                     ATTEMPTS=$((ATTEMPTS+1));
                 done
@@ -355,6 +355,7 @@ Verify Health:
                         EC=0;
                         break;
                     fi
+                    EC=1;
                     sleep 10;
                     ATTEMPTS=$((ATTEMPTS+1));
                 done
