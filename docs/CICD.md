@@ -36,15 +36,8 @@ The `devel` and `review` environments will have the following extra characterist
 when you are done with it
 * Only a subset of the harvest records will be imported
 
-!!! info
-    TODO - This feature is comming soon!
-    To allow for development on the containers created by the `devel-`* stacks,
-    a volume is mounted on the hosted in `/mnt/shared/vufind/[branch]` and will
-    contain the files stored in `/usr/local/vufind/local` on the `vufind` container
-    of that stack. Developers can then later commit the changes on the host server
-    from the shared mount location if they want to preserve those changes.
-
 ## Pipeline Stages & Jobs
+
 ### Prepare
 **branches**: `main`, `devel-`*, and `review-`*  
 * Will set the `STACK_NAME` variable that is used throughout the pipeline, which is essentially
@@ -57,6 +50,11 @@ the `STACK_NAME`
 ### Build
 **branches**: `main`, `devel-`*, and `review-`*  
 * Builds all of the images in this repository, tagging them with `latest` only if it the `main` branch
+
+## test
+**branches**: `main`, `devel-`*, and `review-`*  
+* Runs templates included with GitLab CI/CD to scan for secrets used in committed code
+* Runs `shellcheck` on all bash scripts in the repository
 
 ### Networking
 **branches**: `main`, `devel-`*, and `review-`*  
@@ -74,16 +72,19 @@ running this job for this branch)
 * Deploys the `catalog`, `solr`, `swarm-cron`, and `mariadb` stacks. If this is a devel or review environment, it will
 import a single marc file into the vufind instance as test data
 
+### Post-Deploy
+**branches**: `main`, `devel-`*, and `review-`*  
+* Runs VuFind version upgrades, if applicable
+* If it is a `devel-` or `review-` branch, it will populate the environment with sample data
+* Evaluate the health of the services on all nodes
+
 ### Cleanup
 **branches**: `devel-`* and `review-`*  
 * Removes the stacks and runs the playbook to remove the DNS record created for the environment
 
-### Tag
-**branches**: `main`  
-* Creates a release tag for the current commit
-
 ### Release 
 **branches**: `main`  
+* Creates a release tag for the current commit
 * Pushes the latest changes to Github and publishes the Github Pages onces the Github Action
 job should have completed that compiles the docs
 
@@ -112,10 +113,10 @@ resources such as Solr and the Traefik dashboard
 * `FOLIO_USER`: Application user used by Vufind for ILS calls 
 * `GITHUB_USER_TOKEN`: Token used to publish releases to GitHub repository 
 * `OAI_URL`: URL for making OAI calls to FOLIO when harvesting (can include API Token) 
-* `REGISTRY_ACCESS_TOKEN`: Read-only registry access token used by deploy user
-* `RW_CICD_TOKEN`: Read-Write access token to this repository used to create release tags 
 * `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation
 * `RECAPTCHA_SECRET_KEY`: Secret key for reCaptcha form validation
+* `REGISTRY_ACCESS_TOKEN`: Read-only registry access token used by deploy user
+* `RW_CICD_TOKEN`: Read-Write access token to this repository used to create release tags 
 
 [^1]: 
     There are many ways to generate this password hash, such as online generators or command

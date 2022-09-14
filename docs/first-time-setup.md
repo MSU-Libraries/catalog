@@ -7,7 +7,7 @@ the build arguments in more detail.
 
 ```bash
 docker build ./vufind/ -t catalog:latest \
-    --build-arg DEBUG=true \
+    --build-arg VUFIND_VERSION=8.1.0
     --build-arg FOLIO_URL=https://okapi-url.example.edu \
     --build-arg FOLIO_USER=vufind \
     --build-arg FOLIO_PASS=vufind_pass \
@@ -20,12 +20,17 @@ docker build ./vufind/ -t catalog:latest \
     --build-arg MAIL_PORT=25 \
     --build-arg MAIL_USERNAME= \
     --build-arg MAIL_PASSWORD= \
+    --build-arg SOLR_URL=http://solr:8983/solr
+    --build-arg EDS_USER=eds
+    --build-arg EDS_PASS=123
+    --build-arg EDS_PROFILE=profile.edu.id
+    --build-arg EDS_ORG=eds.org
     --build-arg FEEDBACK_EMAIL=another_email@example.edu \
     --build-arg RECAPTCHA_SITE_KEY=mysitekey
     --build-arg RECAPTCHA_SECRET_KEY=mysecretkey
 ```
 
-* `DEBUG`: Enable debug messages to be displayed on the page. Should be set to `true` or `false`
+* `VUFIND_VERSION`: The version of VuFind to install 
 * `FOLIO_URL`: The URL of the OKAPI endpoint for your FOLIO instance
 * `FOLIO_USER`: The username in FOLIO that vufind can use to connect with
 * `FOLIO_PASS`: The password for the provided `FOLIO_USER`
@@ -42,6 +47,10 @@ uses `1` by default
 * `MAIL_PASSWORD`: Password for the `MAIL_USERNAME`
 * `FEEDBACK_EMAIL`: Email address to send feedback form response to
 * `SOLR_URL`: The URL that Vufind's Solr instance is accessible on. This setup will use `solr`
+* `EDS_USER`: Username for the EBSCO Discovery Service API
+* `EDS_PASS`: Password for the `EDS_USER` account
+* `EDS_PROFILE`: Profile ID for the EDS API
+* `EDS_ORG`: Organization ID to use with the EDS API
 * `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation
 * `RECAPTCHA_SECRET_KEY`: Secret key for reCaptcha form validation
 
