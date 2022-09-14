@@ -34,16 +34,17 @@ a read-only access key to the registry to pull from
 ## Docker Swarm Stacks and Services
 * **catalog**:  
     **catalog**: Runs Vufind with Apache in the foreground  
-    **harvest**: Runs cron in the foreground to handle periodic harvests, using the same Vufind image  
+    **cron**: A single replica service using the `catalog` service's image to run automated jobs
+    such as the periodic harvest and import of data from FOLIO  
 * **solr**:  
     **solr**: Has 3 replicas, one on each node in the cluster, running SolrCloud  
-    **zk1**: Runs ZooKeeper on the first node of the cluster  
-    **zk2**: Runs ZooKeeper on the second node of the cluster  
-    **zk3**: Runs ZooKeeper on the third node of the cluster
+    **zk**: Runs 3 ZooKeeper replicas, one on each node of the cluster  
+    **cron**: A 3-replica service that runs automated jobs using the SolrCloud image on each node in the cluster.
+    Currently the only job being run is to update the alphabetical browse Solr databases.  
 * **mariadb**:  
     **galera**: Runs MariaDB Galera with 3 replicas, one on each node on in the cluster
 * **internal**:  
-    **[None]**: Creates only the internal network used by the `galera` service  
+    **health**: Creates only the internal network used by the `galera` service  
 * **traefik**:  
     **traefik**:  Runs Traefik and handles external traffic and routes it to the appropriate `catalog` service
 depending on the host name of the request (since multiple environments run in separate stacks on the same Docker
