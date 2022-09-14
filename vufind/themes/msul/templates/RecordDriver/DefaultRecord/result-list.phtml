@@ -43,6 +43,7 @@
 
           <?php $journalTitle = $this->driver->getContainerTitle(); $summDate = $this->driver->getPublicationDates(); ?>
           <?php $publisherName = $this->driver->getPublisher(); ?>
+          <?php is_array($publisherName) ? $publisherName = implode(", ", $publisherName) ?>
           <?php if (!empty($journalTitle)): ?>
             <?=!empty($summAuthor) ? '<br />' : ''?>
 	    <strong><?=$this->transEsc('Published:')?></strong>
@@ -128,6 +129,7 @@
       </div>
 
       <?php $physical = $this->driver->getPhysical(); if (!empty($physical)): ?>
+        <?php is_array($physical) ? $physical = implode(", ", $physical) ?>
         <div>
           <b><?=$this->transEsc('Physical Description')?>:</b>
           <?=$this->escapeHtml($physical)?>
