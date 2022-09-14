@@ -351,6 +351,7 @@ Verify Health:
                 while [[ "$ATTEMPTS" -le 10 ]]; do
                     HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE}) || echo \"No Health\"");
                     if [[ "${HEALTH}" == "\"healthy\"" ]]; then
+                        echo "(${HOST}): ${SERVICE} is healthy."
                         EC=0;
                         break;
                     fi
