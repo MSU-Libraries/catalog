@@ -268,7 +268,7 @@ Vufind Upgrade:
                 echo "Checking to see if catalog container for ${HOST} is online ($CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA)...";
                 ATTEMPTS=0;
                 while [[ "$ATTEMPTS" -le 20 ]]; do
-                    TARGET_IMAGE=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}'");
+                    TARGET_IMAGE=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}' 2>/dev/null");
                     echo "Container image on ${HOST}: ${TARGET_IMAGE}";
                     if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
                         echo "Container for host ${HOST} is online with new image!";
@@ -349,7 +349,7 @@ Verify Health:
             for HOST in ${HOSTS}; do
                 ATTEMPTS=0;
                 while [[ "$ATTEMPTS" -le 10 ]]; do
-                    HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE}) || echo \"No Health\"");
+                    HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE}) 2>/dev/null || echo \"No Health\"");
                     if [[ "${HEALTH}" == "\"healthy\"" ]]; then
                         echo "(${HOST}): ${SERVICE} is healthy."
                         EC=0;
