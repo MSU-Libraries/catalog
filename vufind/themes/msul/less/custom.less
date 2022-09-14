@@ -1,9 +1,13 @@
 @import "bootstrap"; /* Include bootstrap theme's less base */
+@import "vendor/bootstrap/variables";
+@import "components/variables";
+@import "components/sidebar";
 
 body {
     font-family: 'Gotham SSm A', 'Gotham SSm B', Arial, Helvetica, sans-serif;
 }
 /* ------ Layout ------ */
+
 
 /* --- Header --- */
 header {
@@ -162,8 +166,15 @@ text-align:center;
  }
 }
 
+/* --- Main Content --- */
 
+  // Main content and sidebar widths and float
 
+  @media (min-width: 768px) {
+    .mainbody.right {
+      border-left: 1px solid @list-group-border;
+    }
+  }
 
 
 
