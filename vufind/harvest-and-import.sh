@@ -16,8 +16,7 @@ runhelp() {
     echo "     last run, and import that data"
     echo "   /harvest-and-import.sh --batch-import"
     echo "     Run only a full import of data that has already been"
-    echo "     harvested and saved to the shared location. Will prompt"
-    echo "     before copying data to VuFind unless --yes flag is passed"
+    echo "     harvested and saved to the shared location."
     echo "   /harvest-and-import.sh -o"
     echo "     Only run the OAI harvest, but do not proceed to import"
     echo "     the data into VuFind"
@@ -34,10 +33,6 @@ runhelp() {
     echo "  -c|--copy-shared"
     echo "      Copy XML from SHARED_HARVEST_DIR back to VUFIND_HARVEST_DIR."
     echo "      Only usable when NOT running a harvest."
-    # Currently Unused
-    # echo "  -y|--yes"
-    # echo "      Assume a 'yes' answer to all prompts and run the"
-    # echo "      command non-interactively."
     echo "  -l|--limit FILES_COUNT"
     echo "      Limit the number of files imported during batch import."
     echo "      For copy-shared, this will limit files copied."
@@ -66,7 +61,6 @@ default_args() {
     declare -g -A ARGS
     ARGS[OAI_HARVEST]=0
     ARGS[FULL]=0
-    ARGS[YES]=0
     ARGS[COPY_SHARED]=0
     ARGS[BATCH_IMPORT]=0
     ARGS[LIMIT]=
@@ -89,9 +83,6 @@ parse_args() {
             shift;;
         -c|--copy-shared)
             ARGS[COPY_SHARED]=1
-            shift;;
-        -y|--yes)
-            ARGS[YES]=1
             shift;;
         -b|--batch-import)
             ARGS[BATCH_IMPORT]=1
@@ -157,19 +148,6 @@ countdown() {
     done
     echo
     echo
-}
-
-prompt_yes() {
-    if [[ "${ARGS[YES]}" -ne 1 ]]; then
-        read -r -p "$1 (y/N) " RESP
-        case $RESP in
-            [Yy])
-                return;;
-            *)
-                echo "Exiting..."
-                exit;;
-        esac
-    fi
 }
 
 # Print the last modified time as epoch seconds, or 0 if not a valid/accessible file
@@ -317,7 +295,6 @@ oai_harvest() {
 
 # Copy XML files back from shared dir to VuFind dir
 copyback_from_shared() {
-    #prompt_yes "Proceed to copy XML and last_harvest.txt from ${ARGS[SHARED_HARVEST_DIR]} to ${ARGS[VUFIND_HARVEST_DIR]}?"
     verbose "Replacing any VuFind combined XML with files from shared directory..."
     countdown
 
