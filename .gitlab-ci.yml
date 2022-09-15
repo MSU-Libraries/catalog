@@ -178,7 +178,7 @@ Deploy Solr:
     - >
       ssh deploy@$DEPLOY_HOST_A
       "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml -c $COMPOSE_PATH/docker-compose.solr-cloud-no-hc.yml ${STACK_NAME}-solr"
+      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr"
 
 Deploy Swarm Cron:
   stage: Deploy
@@ -297,19 +297,6 @@ Vufind Upgrade:
         echo "Disabling auto configure";
         setconfig "true" "false";
 
-Enable Solr Healthcheck:
-  stage: Post-Deploy
-  extends: .stack_template
-  needs:
-    - job: Set Stack Name
-      artifacts: true
-    - job: Vufind Upgrade
-  script:
-    - >
-      ssh deploy@$DEPLOY_HOST_A
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr"
-
 Vufind Populate Environment:
   stage: Post-Deploy
   extends: .stack_template
@@ -339,7 +326,6 @@ Verify Health:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - job: Enable Solr Healthcheck
   script:
     - HOSTS="$DEPLOY_HOST_A $DEPLOY_HOST_B $DEPLOY_HOST_C";
     - |
@@ -370,7 +356,7 @@ Verify Health:
     - checkhealth mariadb_galera;
     - checkhealth catalog_catalog;
     # Give solr more time before attempting since it takes longer to start cluster
-    - sleep 30;
+    - sleep 10;
     - checkhealth solr_solr;
 
 Remove Environment:

@@ -4,9 +4,6 @@
 #
 # This script will verify the following things and either exit with 1 or 0:
 #  * The node is online
-#  * All 4 of the collections exist
-#  * All collections have a health of "GREEN"
-#  * Verify the state of the shards for the node
 #  * Verify the state of the replicas for the node
 
 EXIT_CODE=0
@@ -24,13 +21,6 @@ fi
 MATCHED=$( echo "${CLUSTER_STATUS}" | jq ".cluster.live_nodes[]" | grep ${HOSTNAME})
 if [[ ${MATCHED} = ${HOSTNAME}* ]]; then
     echo "ERROR: ${HOSTNAME} not found in list of live nodes in cluster!"
-    EXIT_CODE=1
-fi
-
-# Validate all collections exist
-COLLECTION_COUNT=$( echo "${CLUSTER_STATUS}" | jq ".cluster.collections | length")
-if [ "${COLLECTION_COUNT}" != "4" ]; then
-    echo "ERROR: (${HOSTNAME}) Expect 4 collections, found ${COLLECTION_COUNT}!"
     EXIT_CODE=1
 fi
 
