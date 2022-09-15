@@ -40,7 +40,7 @@ RUN chmod -R g-w,o-w /etc/cron.d/ && \
 COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
 COPY healthcheck.sh /healthcheck.sh
-COPY clusterhealth.sh /cluterhealth.sh
+COPY clusterhealth.sh /clusterhealth.sh
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
   CMD /healthcheck.sh
