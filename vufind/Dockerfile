@@ -15,7 +15,7 @@ RUN \
     # Perform updates
     apt update && \
     apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
-        gettext-base locales \
+        gettext-base locales msmtp-mta \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl \
         php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml -y && \
@@ -101,6 +101,8 @@ COPY module/Catalog /usr/local/vufind/module/Catalog
 COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
+COPY msmtp/aliases /etc/aliases
+COPY msmtp/msmtprc /etc/msmtprc
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
@@ -119,6 +121,7 @@ RUN \
     envsubst < local/config/vufind/Folio.ini | sponge local/config/vufind/Folio.ini && \
     envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
     envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
+    envsubst < /etc/aliases | sponge /etc/aliases && \
     # Enable module
     sed -i "s/#SetEnv VUFIND_LOCAL_MODULES VuFindLocalTemplate/SetEnv VUFIND_LOCAL_MODULES Catalog/g" ${VUFIND_LOCAL_DIR}/httpd-vufind.conf && \
     # Set required environment variables
