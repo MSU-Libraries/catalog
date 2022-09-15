@@ -106,6 +106,14 @@
         </div>
       <?php endif; ?>
 
+      <?php $physical = $this->driver->getPhysical(); if (!empty($physical)): ?>
+        <?php if (is_array($physical)): $physical = implode(", ", $physical); endif; ?>
+        <div>
+          <b><?=$this->transEsc('Physical Description')?>:</b>
+          <?=$this->escapeHtml($physical)?>
+        </div>
+      <?php endif; ?>
+
       <?php if ($this->driver->tryMethod('getWorkKeys') && $this->searchOptions($this->driver->getSourceIdentifier())->getVersionsAction()): ?>
         <div class="record-versions ajax"></div>
       <?php endif; ?>
@@ -128,13 +136,6 @@
         <?php endif; ?>
       </div>
 
-      <?php $physical = $this->driver->getPhysical(); if (!empty($physical)): ?>
-        <?php if (is_array($physical)): $physical = implode(", ", $physical); endif; ?>
-        <div>
-          <b><?=$this->transEsc('Physical Description')?>:</b>
-          <?=$this->escapeHtml($physical)?>
-        </div>
-      <?php endif; ?>
 
       <?php
         // Display an OpenURL link if configured to do so:
