@@ -170,11 +170,24 @@ text-align:center;
 
   // Main content and sidebar widths and float
 
-  @media (min-width: 768px) {
-    .mainbody.right {
-      border-left: 1px solid @list-group-border;
-    }
-  }
+.container {
+  width: 100%;
+  max-width: 1280px;
+  position:relative;
+}
+
+
+
+@media (min-width: 768px) {
+.search {
+  left:25%;
+  width:75%;
+  height:auto;
+  position:absolute;
+}
+}
+
+
 
 label {
   color: @msugreen;
@@ -187,9 +200,7 @@ label {
   font-size: x-large;
   color:@eggplant;
 }
-#searchForm{
-  margin-left:20rem;
-}
-#search-sidebar {
- margin-top:-10rem;
-}
+
+
+
+
