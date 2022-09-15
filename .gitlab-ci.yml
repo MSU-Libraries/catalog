@@ -311,7 +311,7 @@ Vufind Populate Environment:
     - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
     # Load some records
     - echo "Running harvest-and-import.sh now";
-    - ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -v -r >/dev/null 2>&1";
+    - ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -r >/dev/null 2>&1";
     - echo "Import completed with exit code $?";
     # Rebuild alphabetic browse databases
     - echo "Running Alphabetic browse database build";
@@ -326,6 +326,7 @@ Verify Health:
   needs:
     - job: Set Stack Name
       artifacts: true
+    - job: Vufind Upgrade
   script:
     - HOSTS="$DEPLOY_HOST_A $DEPLOY_HOST_B $DEPLOY_HOST_C";
     - |

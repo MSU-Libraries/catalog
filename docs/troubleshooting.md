@@ -8,8 +8,11 @@ specifics we've found helpful.
 * The first spot to check for errors is the Docker service logs which
 contain both Apache error and access logs (these logs can help identify
 critical issues such as the innability to connect to the database) as well
-as Vufind's application logs.
-To view service logs: `docker service logs -f [STACK_NAME]-catalog_catalog`.
+as Vufind's application logs. To view service logs:
+
+```bash
+docker service logs -f ${STACK_NAME}-catalog_catalog
+```
 
 * To enable debug messages to be printed to the service logs,
 update the `file` setting under the `[Logging]` section
