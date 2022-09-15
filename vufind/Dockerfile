@@ -122,6 +122,7 @@ RUN \
     envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
     envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
     envsubst < /etc/aliases | sponge /etc/aliases && \
+    envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab && \
     # Enable module
     sed -i "s/#SetEnv VUFIND_LOCAL_MODULES VuFindLocalTemplate/SetEnv VUFIND_LOCAL_MODULES Catalog/g" ${VUFIND_LOCAL_DIR}/httpd-vufind.conf && \
     # Set required environment variables

@@ -21,6 +21,8 @@
 #       chronic mispipe "/path/to/my_cron_job.sh 2>&1" "pee 'logger -t MY_CRON' 'cat'"
 #
 
+MAILTO=$EMAIL
+
 # Trigger harvest start
 #*/2 *	* * *	root    /usr/bin/flock -n /tmp/harvest.lock /harvest-and-import.sh --oai-harvest --batch-import
 
