@@ -11,7 +11,7 @@ body {
 
 /* --- Header --- */
 header {
-  background:#18453b url('https://lib.msu.edu/sites/all/themes/msul_omega/images/msul_header_main.png') no-repeat;
+  background:#18453b url('/vufind/themes/msul/images/newHeader.jpg') no-repeat;
   background-size:cover;
   height:10.5rem;
   margin-bottom:5rem;
@@ -170,31 +170,39 @@ text-align:center;
 
   // Main content and sidebar widths and float
 
+
 .container {
   width: 100%;
-  max-width: 1280px;
-  position:relative;
-}
+  max-width: 1500px;
+  .mainbody {
+    .top-facets {
+      margin-top:8rem;
+      margin-bottom:2rem;
+    }
+  }
 
+}
 
 
 @media (min-width: 768px) {
-.search {
-  left:25%;
-  width:75%;
-  height:auto;
-  position:absolute;
-}
-}
+  .mainbody {
+    .top-facets {
+      margin-top:2rem !important;
+    }
+  }
+  }
+
+
+
+
+
 
 
 
 label {
   color: @msugreen;
 }
-.breadcrumbs {
-  margin-top:10rem;
-}
+
 .search-term {
   font-weight: 500;
   font-size: x-large;
