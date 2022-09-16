@@ -49,11 +49,11 @@ services:
       mode: replicated
       replicas: 1
       restart_policy:
-        window: 70s
+        window: 90s
       update_config:
         parallelism: 1
         failure_action: rollback
-        delay: 90s
+        delay: 150s
       placement:
         constraints:
           # Update N to be the Docker Swarm node number with most recent SQL file changes

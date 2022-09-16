@@ -158,8 +158,8 @@ lock_state() {
 }
 
 build_browse() {
-    # Acquire building lock
-    lock_state -b
+    verbose "Acquiring build lock."
+    lock_state -b -l "${ARGS[SHARED_PATH]}/rebuild_lock"
 
     # Check if a rebuild is needed
     RCODE=0
@@ -183,16 +183,16 @@ build_browse() {
         fi
     fi
 
-    # Release building lock
-    lock_state -u
+    verbose "Releasing build lock."
+    lock_state -u -l "${ARGS[SHARED_PATH]}/rebuild_lock"
 
     return $RCODE
 }
 
 copy_to_solr() {
     RCODE=0
-    # Acquire copying lock
-    lock_state -c
+    verbose "Acquiring copy lock."
+    lock_state -c -l "${ARGS[SHARED_PATH]}/rebuild_lock"
 
     # TODO optimize so that we only copy files if the timestamp is newer
 
@@ -203,8 +203,8 @@ copy_to_solr() {
         RCODE=$?
     fi
 
-    # Release copying lock
-    lock_state -u
+    verbose "Releasing copy lock."
+    lock_state -u -l "${ARGS[SHARED_PATH]}/rebuild_lock"
 
     return $RCODE
 }

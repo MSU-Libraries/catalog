@@ -1,0 +1,7 @@
+# Email aliases file
+# Multiple addresses supported, comma separated
+
+root: $EMAIL
+
+# Send all other users to default
+default: $EMAIL
