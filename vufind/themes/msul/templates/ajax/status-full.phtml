@@ -22,7 +22,7 @@ foreach ($this->statusItems as $item) {
   </span>
   at
   <span class="fullLocation">
-    <?php $locationText = $this->transEscWithPrefix('location_', $selected['location']); ?>
+    <?php $locationText = $this->transEscWithPrefix('location_', explode(" - ", $selected['location'])[0]); ?>
     <?php if ($selected['locationhref'] ?? false): ?>
       <a href="<?=$selected['locationhref']?>" target="_blank"><?=$locationText?></a>
     <?php else: ?>
