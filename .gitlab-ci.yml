@@ -335,7 +335,7 @@ Verify Health:
             echo "Checking health for ${SERVICE}...";
             for HOST in ${HOSTS}; do
                 ATTEMPTS=0;
-                while [[ "$ATTEMPTS" -le 10 ]]; do
+                while [[ "$ATTEMPTS" -le 15 ]]; do
                     HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE}) 2>/dev/null || echo \"No Health\"");
                     if [[ "${HEALTH}" == "\"healthy\"" ]]; then
                         echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} is healthy."
@@ -392,11 +392,11 @@ Remove Environment:
       docker stack rm $STACK_NAME-internal;
       rm -rf $COMPOSE_PATH;
       sleep 15;
-      docker system prune --volumes -a -f --filter label=name=$STACK_NAME"
+      docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -r docker volume rm"
     - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
     - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
-    - ssh deploy@$DEPLOY_HOST_B "docker system prune --volumes -a -f --filter label=name=$STACK_NAME"
-    - ssh deploy@$DEPLOY_HOST_C "docker system prune --volumes -a -f --filter label=name=$STACK_NAME"
+    - ssh deploy@$DEPLOY_HOST_B "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -r docker volume rm"
+    - ssh deploy@$DEPLOY_HOST_C "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -r docker volume rm"
 
 ############# Templates ###############
 
