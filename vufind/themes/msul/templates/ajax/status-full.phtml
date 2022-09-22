@@ -13,39 +13,37 @@ foreach ($this->statusItems as $item) {
   <?php $status = $selected['status']; ?>
   <?php $location = $selected['location']; ?>
   <?php $callnumber = $selected['callnumber']; ?>
-  <div>
-    <strong>Holdings:</strong>
-    <span class="fullAvailability">
-      <?php if ($selected['availability']): ?>
-        <strong class="text-success"><?=($selected['reserve'] == 'Y') ? $this->transEsc("On Reserve") : $this->transEsc("Available")?></strong>
-      <?php elseif ($status == 'Restricted'): ?>
-        <strong class="text-warning"><?=$this->transEsc($status)?></strong>
+  <strong>Holdings:</strong>
+  <span class="fullAvailability">
+    <?php if ($selected['availability']): ?>
+      <strong class="text-success"><?=($selected['reserve'] == 'Y') ? $this->transEsc("On Reserve") : $this->transEsc("Available")?></strong>
+    <?php elseif ($status == 'Restricted'): ?>
+      <strong class="text-warning"><?=$this->transEsc($status)?></strong>
+    <?php else: ?>
+      <strong class="text-danger"><?=$this->transEsc($status)?></strong>
+    <?php endif; ?>
+  </span>
+  <?php if ($location != ''): ?>
+    at
+    <span class="fullLocation">
+      <?php $locationText = $this->transEscWithPrefix('location_', explode(" - ", $location)[0]); ?>
+      <?php if ($selected['locationhref'] ?? false): ?>
+        <a href="<?=$selected['locationhref']?>" target="_blank"><?=$locationText?></a>
       <?php else: ?>
-        <strong class="text-danger"><?=$this->transEsc($status)?></strong>
+        <?=$locationText?>
       <?php endif; ?>
     </span>
-    <?php if ($location != ''): ?>
-      at
-      <span class="fullLocation">
-        <?php $locationText = $this->transEscWithPrefix('location_', explode(" - ", $location)[0]); ?>
-        <?php if ($selected['locationhref'] ?? false): ?>
-          <a href="<?=$selected['locationhref']?>" target="_blank"><?=$locationText?></a>
-        <?php else: ?>
-          <?=$locationText?>
-        <?php endif; ?>
-      </span>
-    <?php endif; ?>
-    <?php if ($callnumber != ''): ?>
-      ; CN
-      <span class="fullCallnumber">
-        <?php if ($this->callnumberHandler): ?>
-          <a href="<?=$this->url('alphabrowse-home') ?>?source=<?=$this->escapeHtmlAttr($this->callnumberHandler) ?>&amp;from=<?=$this->escapeHtmlAttr($callnumber) ?>"><?=$this->escapeHtml($callNumPrefix)?><?=$this->escapeHtml($callnumber)?></a>
-        <?php else: ?>
-          <?=$this->escapeHtml($callNumPrefix)?><?=$this->escapeHtml($callnumber)?>
-        <?php endif; ?>
-      </span>
-    <?php endif; ?>
-  </div>
+  <?php endif; ?>
+  <?php if ($callnumber != ''): ?>
+    ; CN
+    <span class="fullCallnumber">
+      <?php if ($this->callnumberHandler): ?>
+        <a href="<?=$this->url('alphabrowse-home') ?>?source=<?=$this->escapeHtmlAttr($this->callnumberHandler) ?>&amp;from=<?=$this->escapeHtmlAttr($callnumber) ?>"><?=$this->escapeHtml($callNumPrefix)?><?=$this->escapeHtml($callnumber)?></a>
+      <?php else: ?>
+        <?=$this->escapeHtml($callNumPrefix)?><?=$this->escapeHtml($callnumber)?>
+      <?php endif; ?>
+    </span>
+  <?php endif; ?>
 <?php else: ?>
   <span class="fullAvailability"><strong class="text-danger">Unavailable</strong></span>
 <?php endif; ?>
