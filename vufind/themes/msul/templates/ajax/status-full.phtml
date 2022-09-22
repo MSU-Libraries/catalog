@@ -1,7 +1,7 @@
 <?php
 $selected = '';
 foreach ($this->statusItems as $item) {
-  if ($selected) {
+  if ($selected == '') {
     $selected = $item;
   } else if ($selected['status'] != 'Available') {
     if ($item['status'] == 'Available' || ($selected['status'] != 'Restricted' && $item['status'] == 'Restricted'))
@@ -9,11 +9,11 @@ foreach ($this->statusItems as $item) {
   }
 }
 ?>
-<?php if ($selected): ?>
+<?php if ($selected != ''): ?>
+  <?php $status = $selected['status']; ?>
+  <?php $location = $selected['location']; ?>
+  <?php $callnumber = $selected['callnumber']; ?>
   <div>
-    <?php $status = $selected['status']; ?>
-    <?php $location = $selected['location']; ?>
-    <?php $callnumber = $selected['callnumber']; ?>
     <strong>Holdings:</strong>
     <span class="fullAvailability">
       <?php if ($selected['availability']): ?>
@@ -24,7 +24,7 @@ foreach ($this->statusItems as $item) {
         <strong class="text-danger"><?=$this->transEsc($status)?></strong>
       <?php endif; ?>
     </span>
-    <?php if ($location): ?>
+    <?php if ($location != ''): ?>
       at
       <span class="fullLocation">
         <?php $locationText = $this->transEscWithPrefix('location_', explode(" - ", $location)[0]); ?>
@@ -35,7 +35,7 @@ foreach ($this->statusItems as $item) {
         <?php endif; ?>
       </span>
     <?php endif; ?>
-    <?php if ($callnumber): ?>
+    <?php if ($callnumber != ''): ?>
       ; CN
       <span class="fullCallnumber">
         <?php if ($this->callnumberHandler): ?>
