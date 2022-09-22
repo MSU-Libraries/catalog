@@ -8,11 +8,22 @@ foreach ($this->statusItems as $item) {
       $selected = $item;
   }
 }
+if ($selected != '') {
+  $status = $selected['status'];
+  $location = $selected['location'];
+  $callnumber = $selected['callnumber'];
+  if (in_array($status, array('Aged to lost', 'Claimed returned', 'Declared lost', 'In process (non-requestable)',
+      'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed', 'Unknown', 'Withdrawn')))
+    $status = 'Unavailable';
+  else if (in_array($status, array('Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out')))
+    $status = 'Checked Out';
+  else if ($status == 'Restricted')
+    $status = 'Lib Use Only';
+  else if (!in_array($status, array('Available', 'Unavailable')))
+    $status = 'Unknown status';
+}
 ?>
 <?php if ($selected != ''): ?>
-  <?php $status = $selected['status']; ?>
-  <?php $location = $selected['location']; ?>
-  <?php $callnumber = $selected['callnumber']; ?>
   <strong>Holdings:</strong>
   <span class="fullAvailability">
     <?php if ($selected['availability']): ?>
