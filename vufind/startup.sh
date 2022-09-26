@@ -18,5 +18,8 @@ do
     echo "Created Solr collection for $COLL"
 done
 
+# Compile theme
+php util/cssBuilder.php
+
 # Start Apache
 tail -f /var/log/vufind/vufind.log & apachectl -DFOREGROUND
