@@ -2,3 +2,4 @@
 build-*
 .terraform*
 .DS_Store
+compiled.css
