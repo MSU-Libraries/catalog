@@ -5,6 +5,9 @@ mkdir -p /mnt/shared/harvest_folio/
 mv /usr/local/vufind/local/harvest/folio/ /tmp/
 ln -s /mnt/shared/harvest_folio/ /usr/local/vufind/local/harvest/folio
 
+# Replace the $NODE in the crontab entry
+envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
+
 # Start up syslog (required for cron)
 rsyslogd
 
