@@ -23,6 +23,17 @@ return array (
           ),
         ),
       ),
+      'auth' => 
+      array (
+        'factories' => 
+        array (
+          'Catalog\\Auth\\LDAP' => 'Laminas\\ServiceManager\\Factory\\InvokableFactory',
+        ),
+        'aliases' => 
+        array (
+          'VuFind\\Auth\\LDAP' => 'Catalog\\Auth\\LDAP',
+        )
+      ),
     ),
   ),
 );
