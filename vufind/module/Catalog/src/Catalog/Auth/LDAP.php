@@ -22,7 +22,7 @@ class LDAP extends \VuFind\Auth\LDAP
         $connection = $this->connect();
 
         // If necessary, bind in order to perform a search:
-        $this->bindForSearch($connection, $username, $password);
+        $this->bindForSearchWithUserCredentials($connection, $username, $password);
 
         // Search for username
         $info = $this->findUsername($connection, $username);
@@ -39,16 +39,18 @@ class LDAP extends \VuFind\Auth\LDAP
     }
 
     /**
-     * If configured, bind an administrative user in order to perform a search
+     * Bind using the username and password
      *
      * @param resource $connection LDAP connection
+     * @param string $username Username
+     * @param string $password Password
      *
      * @return void
      */
-    protected function bindForSearch($connection, $username, $password)
+    protected function bindForSearchWithUserCredentials($connection, $username, $password)
     {
-        // This is customized for MSU CampusAD
         if ($username != '' && $password != '') {
+            // This is customized for MSU CampusAD
             $user = 'CAMPUSAD\\'.$username;
             $this->debug("binding as $user");
             $ldapBind = @ldap_bind($connection, $user, $password);
