@@ -40,7 +40,7 @@ use VuFind\Exception\Auth as AuthException;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:authentication_handlers Wiki
  */
-class LDAP extends AbstractBase
+class LDAP extends \VuFind\Auth\AbstractBase
 {
     /**
      * Validate configuration parameters.  This is a support method for getConfig(),
