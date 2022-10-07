@@ -272,7 +272,7 @@ oai_harvest_combiner() {
     fi
     COMBINE_TS=$(date +%Y%m%d_%H%M%S)
     COMBINE_TARGET="combined_${COMBINE_TS}.xml"
-    verbose "Combining ${#COMBINE_FILES[@]} into ${COMBINE_TARGET}"
+    verbose "Combining ${#COMBINE_FILES[@]} files into ${COMBINE_TARGET}"
     xml_grep --wrap collection --cond "marc:record" "${COMBINE_FILES[@]}" > "${ARGS[VUFIND_HARVEST_DIR]}/${COMBINE_TARGET}"
     verbose "Done combining ${COMBINE_TARGET}; removing pre-combined files."
     rm -v "${COMBINE_FILES[@]}"
@@ -388,13 +388,6 @@ copyback_from_shared() {
 # Perform VuFind batch import of OAI records
 batch_import() {
     assert_vufind_harvest_dir_writable
-    verbose "Processing delete records from harvest."
-    countdown 5
-    if ! /usr/local/vufind/harvest/batch-delete.sh folio; then
-        echo "ERROR: Batch delete script failed."
-        exit 1
-    fi
-    verbose "Completed processing records to be deleted."
 
     verbose "Starting batch import..."
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" ]]; then
@@ -417,6 +410,14 @@ batch_import() {
         exit 1
     fi
     verbose "Completed batch import"
+
+    verbose "Processing delete records from harvest."
+    countdown 5
+    if ! /usr/local/vufind/harvest/batch-delete.sh folio; then
+        echo "ERROR: Batch delete script failed."
+        exit 1
+    fi
+    verbose "Completed processing records to be deleted."
 }
 
 # Main logic for the script
