@@ -390,8 +390,8 @@ batch_import() {
     assert_vufind_harvest_dir_writable
     verbose "Processing delete records from harvest."
     countdown 5
-    if ! /usr/local/vufind/harvest/batch-delete.sh; then
-        echo "ERROR: Batch delete failed with code: $?"
+    if ! /usr/local/vufind/harvest/batch-delete.sh folio; then
+        echo "ERROR: Batch delete script failed."
         exit 1
     fi
     verbose "Completed processing records to be deleted."
