@@ -34,7 +34,7 @@ Set Stack Name:
           SITE_HOSTNAME="${STACK_NAME}.aws.lib.msu.edu"
       fi
       echo "STACK_NAME=${STACK_NAME}" > build.env
-      echo "SITE_HOSTNAME=${SITE_HOSTNAME}" > build.env
+      echo "SITE_HOSTNAME=${SITE_HOSTNAME}" >> build.env
   artifacts:
     reports:
       dotenv: build.env
