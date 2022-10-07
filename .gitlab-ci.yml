@@ -110,6 +110,8 @@ Deploy Compose Files:
     - ./yq -i ".services.cron.environment[\"STACK_NAME\"]=\"${STACK_NAME}\"" docker-compose.solr-cloud.yml
     # Remove the cron service if the stack name is NOT catalog-beta
     - if [ "${STACK_NAME}" != "catalog-beta" ]; then ./yq -i "del(.services.cron)" docker-compose.yml; fi
+    # Unset parallelism limit for non-production to speed up redeployments on devel stacks
+    - if [ "${STACK_NAME}" != "catalog-beta" ]; then ./yq -i "del(.services.catalog.deploy.update_config.parallelism)" docker-compose.yml; fi
     # Replace $STACK_NAME in main compose file
     - cat docker-compose.yml | envsubst | sponge docker-compose.yml
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
