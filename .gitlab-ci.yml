@@ -25,12 +25,16 @@ Set Stack Name:
   script:
     - |
       STACK_NAME=
+      SITE_HOSTNAME=
       if [[ $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH ]]; then
           STACK_NAME="catalog-beta"
+          SITE_HOSTNAME="catalog-beta.lib.msu.edu"
       elif [[ "${CI_COMMIT_BRANCH}" == "devel-"* || "${CI_COMMIT_BRANCH}" == "review-"* ]]; then
           STACK_NAME="${CI_COMMIT_BRANCH}"
+          SITE_HOSTNAME="${STACK_NAME}.aws.lib.msu.edu"
       fi
       echo "STACK_NAME=${STACK_NAME}" > build.env
+      echo "SITE_HOSTNAME=${SITE_HOSTNAME}" > build.env
   artifacts:
     reports:
       dotenv: build.env
