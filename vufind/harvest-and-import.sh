@@ -166,21 +166,28 @@ verbose() {
     echo "${MSG}" >> "$LOG_FILE"
 }
 
+verbose_inline() {
+    MSG="$1"
+    if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
+        echo -n -e "${MSG}"
+    fi
+    echo -n -e "${MSG}" >> "$LOG_FILE"
+}
+
 #####
 # Start a timed countdown (allowing user to cancel)
 #  $1 => (Optional) String message to display before countdown; default: "Proceeding in:"
 #  $2 => (Optional) Integer number of seconds to countdown from; default: 5
 countdown() {
-    CD_MSG="${1:-Proceeding in:}"
-    CD_CNT="${2:-5}"
-    echo
-    echo -n -e "${CD_MSG}"
+    CD_CNT="${1:-5}"
+    CD_MSG="${2:-Proceeding in:}"
+    verbose_inline "${CD_MSG}"
     while [[ "$CD_CNT" -gt 0 ]]; do
-        echo -n " ${CD_CNT}"; sleep 1.1
+        verbose_inline " ${CD_CNT}";
+        sleep 1.1
         (( CD_CNT -= 1 ))
     done
-    echo
-    echo
+    verbose_inline "\n"
 }
 
 # Print the last modified time as epoch seconds, or 0 if not a valid/accessible file
@@ -192,18 +199,13 @@ last_modified() {
     fi
 }
 
-archive_shared_xml() {
+archive_current_harvest() {
     assert_shared_dir_writable
-    verbose "Checking for previous harvest files"
-    if ! ls "${ARGS[SHARED_DIR]}"/current/combined_*.xml >/dev/null 2>&1 && [[ ! -f "${ARGS[SHARED_DIR]}/current/last_harvest.txt" ]]; then
-        verbose "No previous harvest files found"
-        return 0
-    fi
+    verbose "Creating archive of latest harvest"
 
     ARCHIVE_TS=$(date +%Y%m%d_%H%M%S)
-    mkdir -p "${ARGS[SHARED_DIR]}/archives"
     ARCHIVE_FILE="${ARGS[SHARED_DIR]}/archives/archive_${ARCHIVE_TS}.tar.gz"
-    pushd "${ARGS[SHARED_DIR]}/" > /dev/null 2>&1 || exit 1
+    pushd "${ARGS[VUFIND_HARVEST_DIR]}/" > /dev/null 2>&1 || exit 1
     declare -a ARCHIVE_LIST
     while read -r FILE; do
         ARCHIVE_LIST+=("$FILE")
@@ -216,8 +218,8 @@ archive_shared_xml() {
 
     # Archive all combined xml files and the last_harvest file, if it exists
     if [[ "${#ARCHIVE_LIST[@]}" -gt 0 ]]; then
-        verbose "Archiving harvest files."
-        countdown
+        verbose "Archiving ${#ARCHIVE_LIST[@]} harvest files."
+        countdown 5
         if ! tar -czvf "$ARCHIVE_FILE" "${ARCHIVE_LIST[@]}"; then
             echo "ERROR: Could not archive harvest files into ${ARCHIVE_FILE}"
             exit 1
@@ -246,40 +248,36 @@ reset_solr() {
         return
     fi
     verbose "Clearing the biblio Solr index."
-    countdown
+    countdown 5
     curl ${ARGS[SOLR_URL]}/biblio/update -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
     curl ${ARGS[SOLR_URL]}/biblio/update -H "Content-type: text/xml" --data-binary '<commit />'
     verbose "Done clearing the Solr index."
 }
 
-reset_vufind_harvest() {
-    assert_vufind_harvest_dir_writable
-    verbose "Clearing VuFind harvest directory for new full harvest."
-    countdown
-    find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth1 \
+clear_harvest_files() {
+    countdown 5
+    find "${1}" -mindepth 1 -maxdepth 1 \
       \(
         -name '*.xml' -o \
-        -name '*_oai_.delete' -o \
+        -name '*_oai_*.delete' -o \
         -name 'last_harvest.txt' -o \
         -name 'last_state.txt' -o \
         -name 'harvest.log' \
       \) -delete
 }
 
-# TODO now that archiving doesn't reset oai/current/, when should that be reset? only on success for a full harvest?
-
 # Perform an OAI harvest
 oai_harvest() {
     assert_vufind_harvest_dir_writable
     assert_shared_dir_writable
 
-    # If this is a full harvest, archive the previous XML files in the shared location
     if [[ "${ARGS[FULL]}" -eq 1 ]]; then
-        reset_vufind_harvest
+        verbose "Clearing VuFind harvest directory for new full harvest."
+        clear_harvest_files "${ARGS[VUFIND_HARVEST_DIR]}/"
     fi
 
     verbose "Starting OAI harvest."
-    countdown
+    countdown 5
 
     MAX_FAILURES=10
     CUR_FAILURES=0
@@ -298,7 +296,7 @@ oai_harvest() {
 
     # Combine XML files for faster import
     verbose "Combining harvested XML files."
-    countdown
+    countdown 5
     declare -g -a COMBINE_FILES=()
     while read -r FILE; do
         COMBINE_FILES+=("$FILE")
@@ -308,30 +306,22 @@ oai_harvest() {
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_oai_*.xml')
     oai_harvest_combiner
 
+    if [[ "${ARGS[FULL]}" -eq 1 ]]; then
+        archive_current_harvest
+
+        verbose "Clearing shared current directory before we sync the new full harvest."
+        clear_harvest_files "${ARGS[SHARED_DIR]}/current/"
+    fi
+
     verbose "Syncing combined harvest files to shared storage."
-    # TODO much faster to use rsync, especially with full harvests
-    cp --preserve=timestamps "${ARGS[VUFIND_HARVEST_DIR]}"/combined_*.xml "${ARGS[SHARED_DIR]}/current/"
-
-    HARVEST_LOG="${ARGS[VUFIND_HARVEST_DIR]}/harvest.log"
-    if [[ -f "${HARVEST_LOG}" ]]; then
-        verbose "Copying harvest.log to shared dir"
-        cp --preserve=timestamps "${HARVEST_LOG}" "${ARGS[SHARED_DIR]}/current/"
-    fi
-    LAST_HARVEST="${ARGS[VUFIND_HARVEST_DIR]}/last_harvest.txt"
-    if [[ -f "${LAST_HARVEST}" ]]; then
-        verbose "Copying last_harvest.txt to shared dir"
-        cp --preserve=timestamps "${LAST_HARVEST}" "${ARGS[SHARED_DIR]}/current/"
-    fi
-
-    # Create an archive is this was a full harvest ?? other cases ??
-    # archive_shared_xml # TODO
+    rsync -vt "${ARGS[VUFIND_HARVEST_DIR]}"/* "${ARGS[SHARED_DIR]}/current/"
 }
 
 # Copy XML files back from shared dir to VuFind dir
 copyback_from_shared() {
     assert_vufind_harvest_dir_writable
     verbose "Replacing any VuFind combined XML with files from shared directory."
-    countdown
+    countdown 5
 
     # Clear out any exising xml files before copying back from shared storage
     rm -f "${ARGS[VUFIND_HARVEST_DIR]}/combined_"*.xml
@@ -354,14 +344,15 @@ copyback_from_shared() {
 batch_import() {
     assert_vufind_harvest_dir_writable
     verbose "Processing delete records from harvest."
-    countdown
+    countdown 5
     /usr/local/vufind/harvest/batch-delete.sh
+    #TODO check for script failure
     verbose "Completed processing records to be deleted."
 
     verbose "Starting batch import..."
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" ]]; then
         verbose "Will only import ${ARGS[LIMIT_BY_DELETE]} XML files; others will be deleted."
-        countdown
+        countdown 5
         # Delete excess files beyond the provided limit from the VUFIND_HARVEST_DIR prior to import
         FOUND_COUNT=0
         while read -r FILE; do
@@ -371,10 +362,11 @@ batch_import() {
             fi
         done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name 'combined_*.xml')
     else
-        countdown
+        countdown 5
     fi
 
     /usr/local/vufind/harvest/batch-import-marc.sh folio
+    #TODO check for script failure
     verbose "Completed batch import"
 }
 
@@ -399,6 +391,7 @@ main() {
     fi
     if [[ "${ARGS[BATCH_IMPORT]}" -eq 1 ]]; then
         batch_import
+        #TODO having imported successfully; should we clear out the processed/ directory? maybe make it a flag?
     fi
 
     verbose "All processing complete!"
