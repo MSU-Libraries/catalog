@@ -33,7 +33,7 @@ $config = [
      * The 'application' configuration array groups a set configuration options
      * relative to an application protected by SimpleSAMLphp.
      */
-    //'application' => [
+    'application' => [
         /*
          * The 'baseURL' configuration option allows you to specify a protocol,
          * host and optionally a port that serves as the canonical base for all
@@ -48,8 +48,8 @@ $config = [
          * need to compute the right URLs yourself and pass them dynamically
          * to SimpleSAMLphp's API.
          */
-        //'baseURL' => 'https://example.com',
-    //],
+        'baseURL' => 'https://'.getenv('SITE_HOSTNAME'),
+    ],
 
     /*
      * The following settings are *filesystem paths* which define where
