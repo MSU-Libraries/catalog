@@ -27,11 +27,11 @@ return array (
       array (
         'factories' => 
         array (
-          'Catalog\\Auth\\LDAP' => 'Laminas\\ServiceManager\\Factory\\InvokableFactory',
+          'Catalog\\Auth\\SAML' => 'Catalog\\Auth\\SAMLFactory',
         ),
         'aliases' => 
         array (
-          'VuFind\\Auth\\LDAP' => 'Catalog\\Auth\\LDAP',
+          'saml' => 'Catalog\\Auth\\SAML',
         )
       ),
     ),

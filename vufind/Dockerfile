@@ -17,8 +17,9 @@ RUN \
     apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
         gettext-base locales msmtp-mta \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
+        # and to add simplesamlphp
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl \
-        php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml -y && \
+        php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml simplesamlphp -y && \
     # Setup Timezone
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
