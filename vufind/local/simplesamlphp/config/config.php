@@ -63,7 +63,7 @@ $config = [
      * root directory.
      */
     'certdir' => 'cert/',
-    'loggingdir' => 'log/',
+    'loggingdir' => '/var/log/simplesamlphp/',
     'datadir' => 'data/',
     'tempdir' => '/tmp/simplesaml',
 
@@ -292,7 +292,7 @@ $config = [
      *
      */
     'logging.level' => SimpleSAML\Logger::NOTICE,
-    'logging.handler' => 'syslog',
+    'logging.handler' => 'file',
 
     /*
      * Specify the format of the logs. Its use varies depending on the log handler used (for instance, you cannot
