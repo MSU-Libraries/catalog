@@ -11,6 +11,8 @@ ENV VUFIND_LOCAL_MODULES=Catalog
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
 
+COPY install-composer.sh /install-composer.sh
+
 RUN \
     # Perform updates
     apt update && \
@@ -41,7 +43,11 @@ RUN \
     # Create log file and redirect to stdout
     mkdir /var/log/vufind && \
     touch /var/log/vufind/vufind.log && \
-    chown -R 33:33 /var/log/vufind
+    chown -R 33:33 /var/log/vufind && \
+    # Install Composer
+    /install-composer.sh && \
+    mv /composer.phar /usr/local/bin/composer && \
+    rm /install-composer.sh
 
 # Build Arguments
 ARG SITE_HOSTNAME
