@@ -14,6 +14,7 @@ default_args() {
     ARGS[SOLR_URL]="http://solr:8983/solr"
     ARGS[RESET_SOLR]=0
     ARGS[VERBOSE]=0
+    ARGS[TEST_HARVEST]=
 }
 default_args
 
@@ -69,6 +70,10 @@ runhelp() {
     echo "      Clear out the biblio Solr collection prior to importing."
     echo "  -v|--verbose"
     echo "      Show verbose output."
+    echo "  -T|--test-harvest HARVEST_TGZ"
+    echo "      Instead of calling VuFind's harvest script, instead extract"
+    echo "      this gzip'd tar file into the VUFIND_HARVEST_DIR. This flag"
+    echo "      is used to test this script (only used with --oai-harvest)."
     echo ""
 }
 
@@ -133,11 +138,44 @@ parse_args() {
         -v|--verbose)
             ARGS[VERBOSE]=1
             shift;;
+        -T|--test-harvest)
+            ARGS[TEST_HARVEST]=$( readlink -f "$2" )
+            RC=$?
+            if [[ "$RC" -ne 0 || ! -f "${ARGS[TEST_HARVEST]}" ]]; then
+                echo "ERROR: -T|--test-harvest must be a file: $2"
+                exit 1
+            fi
+            TEST_FILES=$( tar -tzf "${ARGS[TEST_HARVEST]}" )
+            RC=$?
+            if [[ "$RC" -ne 0 || -z "${TEST_FILES}" ]]; then
+                echo "ERROR: -T|--test-harvest must be a non-empty gzip tarball: $2"
+                exit 1
+            fi
+            shift; shift ;;
         *)
             echo "ERROR: Unknown flag: $1"
             exit 1
         esac
     done
+}
+
+catch_invalid_args() {
+    if [[ "${ARGS[OAI_HARVEST]}" -eq 1 && "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
+        echo "ERROR: It is invalid to set both --oai-harvest and --copy-shared flags."
+        exit 1
+    fi
+    if [[ -n "${ARGS[LIMIT]}" && "${ARGS[COPY_SHARED]}" -ne 1 ]]; then
+        echo "ERROR: The --limit flag is only valid when --copy-shared is also set."
+        exit 1
+    fi
+    if [[ -n "${ARGS[LIMIT_BY_DELETE]}" && "${ARGS[BATCH_IMPORT]}" -ne 1 ]]; then
+        echo "ERROR: The --limit-by-delete flag is only valid when --batch-import is also set."
+        exit 1
+    fi
+    if [[ -n "${ARGS[TEST_HARVEST]}" && "${ARGS[OAI_HARVEST]}" -ne 1 ]]; then
+        echo "ERROR: The --test-harvest flag is only valid when --oai-harvest is also set."
+        exit 1
+    fi
 }
 
 assert_shared_dir_writable() {
@@ -249,8 +287,8 @@ reset_solr() {
     fi
     verbose "Clearing the biblio Solr index."
     countdown 5
-    curl ${ARGS[SOLR_URL]}/biblio/update -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
-    curl ${ARGS[SOLR_URL]}/biblio/update -H "Content-type: text/xml" --data-binary '<commit />'
+    curl "${ARGS[SOLR_URL]}/biblio/update" -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
+    curl "${ARGS[SOLR_URL]}/biblio/update" -H "Content-type: text/xml" --data-binary '<commit />'
     verbose "Done clearing the Solr index."
 }
 
@@ -276,23 +314,30 @@ oai_harvest() {
         clear_harvest_files "${ARGS[VUFIND_HARVEST_DIR]}/"
     fi
 
-    verbose "Starting OAI harvest."
-    countdown 5
 
-    MAX_FAILURES=10
-    CUR_FAILURES=0
-    while ! php /usr/local/vufind/harvest/harvest_oai.php && [[ "$CUR_FAILURES" -lt "$MAX_FAILURES" ]]; do
-        (( CUR_FAILURES += 1))
-        verbose "Failure from harvest_oai.php (#${CUR_FAILURES})."
-        if [[ "$CUR_FAILURES" -lt "$MAX_FAILURES" ]]; then
-            verbose "Waiting before trying to continue harvest..."
-            sleep 30
-        else
-            verbose "Too many failures while attempting to harvest! Exiting."
-            exit 1
-        fi
-    done
-    verbose "Completed OAI harvest."
+    if [[ -n "${ARGS[TEST_HARVEST]}" ]]; then
+        verbose "TESTING: Extracting OAI harvest from file: ${ARGS[TEST_HARVEST]}"
+        countdown 5
+        tar -C "${ARGS[VUFIND_HARVEST_DIR]}" -xzvf "${ARGS[TEST_HARVEST]}"
+        verbose "TESTING: Harvest extraction completed."
+    else
+        verbose "Starting OAI harvest."
+        countdown 5
+        MAX_FAILURES=10
+        CUR_FAILURES=0
+        while ! php /usr/local/vufind/harvest/harvest_oai.php && [[ "$CUR_FAILURES" -lt "$MAX_FAILURES" ]]; do
+            (( CUR_FAILURES += 1))
+            verbose "Failure from harvest_oai.php (#${CUR_FAILURES})."
+            if [[ "$CUR_FAILURES" -lt "$MAX_FAILURES" ]]; then
+                verbose "Waiting before trying to continue harvest..."
+                sleep 30
+            else
+                verbose "Too many failures while attempting to harvest! Exiting."
+                exit 1
+            fi
+        done
+        verbose "Completed OAI harvest."
+    fi
 
     # Combine XML files for faster import
     verbose "Combining harvested XML files."
@@ -345,8 +390,10 @@ batch_import() {
     assert_vufind_harvest_dir_writable
     verbose "Processing delete records from harvest."
     countdown 5
-    /usr/local/vufind/harvest/batch-delete.sh
-    #TODO check for script failure
+    if ! /usr/local/vufind/harvest/batch-delete.sh; then
+        echo "ERROR: Batch delete failed with code: $?"
+        exit 1
+    fi
     verbose "Completed processing records to be deleted."
 
     verbose "Starting batch import..."
@@ -365,8 +412,10 @@ batch_import() {
         countdown 5
     fi
 
-    /usr/local/vufind/harvest/batch-import-marc.sh folio
-    #TODO check for script failure
+    if ! /usr/local/vufind/harvest/batch-import-marc.sh folio; then
+        echo "ERROR: Batch import failed with code: $?"
+        exit 1
+    fi
     verbose "Completed batch import"
 }
 
@@ -377,10 +426,6 @@ main() {
     verbose "Logging to ${LOG_FILE}"
     verbose "Starting processing"
 
-    if [[ "${ARGS[OAI_HARVEST]}" -eq 1 && "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
-        echo "ERROR: It is invalid to set both --oai-harvest and --copy-shared flags."
-        exit 1
-    fi
     if [[ "${ARGS[OAI_HARVEST]}" -eq 1 ]]; then
         oai_harvest
     elif [[ "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
@@ -391,7 +436,6 @@ main() {
     fi
     if [[ "${ARGS[BATCH_IMPORT]}" -eq 1 ]]; then
         batch_import
-        #TODO having imported successfully; should we clear out the processed/ directory? maybe make it a flag?
     fi
 
     verbose "All processing complete!"
@@ -399,4 +443,5 @@ main() {
 
 # Parse and start running
 parse_args "$@"
+catch_invalid_args
 main
