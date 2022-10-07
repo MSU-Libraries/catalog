@@ -39,7 +39,7 @@ use VuFind\Exception\Auth as AuthException;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org Main Page
  */
-class SAML extends AbstractBase
+class SAML extends VuFind\Auth\AbstractBase
 {
     /**
      * Header name for entityID of the IdP that authenticated the user.
