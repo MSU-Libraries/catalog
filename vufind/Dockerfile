@@ -93,7 +93,9 @@ RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-def
     echo "    LogLevel warn" >> /etc/apache2/sites-enabled/000-default.conf && \
     echo "    ErrorLog /proc/self/fd/2" >> /etc/apache2/sites-enabled/000-default.conf && \
     echo "    CustomLog /proc/self/fd/1 combined" >> /etc/apache2/sites-enabled/000-default.conf && \
-    echo "</VirtualHost>" >> /etc/apache2/sites-enabled/000-default.conf
+    echo "</VirtualHost>" >> /etc/apache2/sites-enabled/000-default.conf && \
+    # enable simplesamlphp at /simplesamlphp
+    a2enconf simplesamlphp
 
 # Add file customizations
 COPY local/ /usr/local/vufind/local
