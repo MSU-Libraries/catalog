@@ -74,6 +74,8 @@ services:
         # Middleware to add /vufind to path
         - "traefik.http.middlewares.fix-prefix.replacepathregex.regex=^/(vufind/)?(.*)"
         - "traefik.http.middlewares.fix-prefix.replacepathregex.replacement=/vufind/$$2"
+        - "traefik.http.middlewares.fix-prefix.replacepathregex.regex=^/vufind/simplesamlphp/(.*)"
+        - "traefik.http.middlewares.fix-prefix.replacepathregex.replacement=/simplesamlphp/$$1"
         # Traefik Dashboard HTTP
         - "traefik.http.routers.dashboard-http-router.entrypoints=msul-http-ent"
         - "traefik.http.routers.dashboard-http-router.middlewares=http-redirect"
