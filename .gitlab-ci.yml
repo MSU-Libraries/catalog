@@ -317,7 +317,7 @@ Vufind Populate Environment:
             exit 1;
         fi;
         NUM_RECS=$(ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) curl -s 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' | jq '.response.numFound'");
-        if [[ "{$NUM_RECS}" -eq "0" ]]; then
+        if [[ "${NUM_RECS}" -eq "0" ]]; then
             # Load some records
             echo "Running harvest-and-import.sh now";
             ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -r >/dev/null 2>&1";
@@ -329,7 +329,7 @@ Vufind Populate Environment:
             ssh deploy@$DEPLOY_HOST_C "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
             echo "Completed alphabetic browse database build";
         else
-            echo "{$NUM_RECS} loaded records already exist. Doing nothing.";
+            echo "${NUM_RECS} loaded records already exist. Doing nothing.";
         fi;
 
 Verify Health:
