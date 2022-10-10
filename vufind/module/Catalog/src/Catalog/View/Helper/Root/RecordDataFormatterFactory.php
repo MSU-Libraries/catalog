@@ -9,7 +9,20 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
     public function getDefaultCoreSpecs()
     {
         $spec = new SpecBuilder(parent::getDefaultCoreSpecs());
-        $spec->setLine('Genre', 'getGenre');
+
+        # Add Genre to record page
+        $spec->setTemplateLine(
+            'Genre',
+            'getGenre',
+            'data-genre.phtml'
+        );
+
+        # Reorder the fields to get Genre next to Subjects
+        $spec->reorderKeys(["Published in", "New Title", "Previous Title", "Authors",
+                                "Format", "Language", "Published", "Edition", "Series",
+                                "Subjects", "Genre", "child_records", "Online Access",
+                                "Related Items", "Tags"]);
+
         return $spec->getArray();
     }
 }
