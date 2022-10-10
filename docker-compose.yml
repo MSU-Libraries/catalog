@@ -20,6 +20,7 @@ services:
         max-size: "10m"
     environment:
       SIMPLESAMLPHP_CONFIG_DIR: "/usr/local/vufind/local/simplesamlphp/config"
+      SIMPLESAMLPHP_CUSTOM_DIR: "/usr/local/vufind/local/simplesamlphp"
       SAML_ENTITY_ID: "TEST"
       SAML_IDP_ENTITY_ID: "https://fujifish.github.io/samling/samling.html"
     deploy:
