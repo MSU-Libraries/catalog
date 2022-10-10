@@ -18,6 +18,8 @@ in the `/vufind/local` directory. An example of running the command might be:
 * Update the [CI/CD Config](https://github.com/MSU-Libraries/catalog/blob/main/.gitlab-ci.yml)
 to update the `VUFIND_VERSION` variable to be the new release you are updating to.
 
+  * If updating SimpleSAMLphp, also update `SIMPLESAMLPHP_VERSION` in the same file.
+
 * Create a new branch with these changes named either `review-`* or `devel-`* to trigger a pipeline with
 a new environment.
 

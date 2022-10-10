@@ -39,6 +39,7 @@ Build Vufind Image:
     - > 
         docker build 
         --build-arg VUFIND_VERSION=$VUFIND_VERSION
+        --build-arg SIMPLESAMLPHP_VERSION=$SIMPLESAMLPHP_VERSION
         --build-arg SITE_HOSTNAME=$SITE_HOSTNAME
         --build-arg FOLIO_URL=$FOLIO_URL 
         --build-arg FOLIO_USER=$FOLIO_USER 

@@ -13,6 +13,7 @@ variables:
   VUFIND_VERSION: "8.1"
   # Used during upgrade, which needs to know previous version
   PREV_VUFIND_VERSION: "8.0.4"
+  SIMPLESAMLPHP_VERSION: "1.19.6"
   DEPLOY_HOST_A: catalog-1.aws.lib.msu.edu
   DEPLOY_HOST_B: catalog-2.aws.lib.msu.edu
   DEPLOY_HOST_C: catalog-3.aws.lib.msu.edu

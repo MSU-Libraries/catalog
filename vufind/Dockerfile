@@ -7,21 +7,23 @@ ENV VUFIND_LOCAL_DIR=/usr/local/vufind/local
 ENV VUFIND_HOME=/usr/local/vufind
 ENV JAVA_HOME=/usr/lib/jvm/default-java
 ENV VUFIND_LOCAL_MODULES=Catalog
+ENV SIMPLESAMLPHP_HOME=/usr/local/simplesamlphp
 
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
+ARG SIMPLESAMLPHP_VERSION
+ENV SIMPLESAMLPHP_VERSION=$SIMPLESAMLPHP_VERSION
 
 COPY install-composer.sh /install-composer.sh
 
 RUN \
     # Perform updates
     apt update && \
-    apt install wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
+    apt install -y wget vim lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
         gettext-base locales msmtp-mta \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
-        # and to add simplesamlphp
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl \
-        php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml simplesamlphp -y && \
+        php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml && \
     # Setup Timezone
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
@@ -47,7 +49,15 @@ RUN \
     # Install Composer
     /install-composer.sh && \
     mv /composer.phar /usr/local/bin/composer && \
-    rm /install-composer.sh
+    rm /install-composer.sh && \
+    # Install SimpleSAMLphp
+    wget https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIMPLESAMLPHP_VERSION}/simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz && \
+    tar -C /tmp/ -xzf simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz && \
+    mv /tmp/simplesamlphp-${SIMPLESAMLPHP_VERSION} ${SIMPLESAMLPHP_HOME} && \
+    cp apache2/conf-available/simplesamlphp.conf /etc/apache2/conf-available/ && \
+    envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \
+    a2enconf simplesamlphp.conf && \
+    rm simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz
 
 # Build Arguments
 ARG SITE_HOSTNAME

@@ -99,7 +99,7 @@ class SAML extends \VuFind\Auth\AbstractBase
         \Laminas\Session\ManagerInterface $sessionManager,
         \Laminas\Http\PhpEnvironment\Request $request
     ) {
-        require_once('/usr/share/simplesamlphp/lib/_autoload.php');
+        require_once(getenv('SIMPLESAMLPHP_HOME').'/lib/_autoload.php');
         $this->sessionManager = $sessionManager;
         $this->request = $request;
         $this->auth = new \SimpleSAML\Auth\Simple('default-sp');
