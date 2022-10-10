@@ -9,8 +9,8 @@
  * to SimpleSAMLphp metadata converter, which by default is available as
  * /admin/metadata-converter.php in your SimpleSAMLphp installation.
  */
-$metadata[getenv('SAML_IDP_ENTITY_ID')] = [
+$metadata['https://fujifish.github.io/samling/samling.html'] = [
     'SingleSignOnService'  => 'https://fujifish.github.io/samling/samling.html',
     'SingleLogoutService'  => 'https://fujifish.github.io/samling/samling.html',
-    /*'certificate'          => getenv('SIMPLESAMLPHP_CUSTOM_DIR').'/cert/example.pem',*/
+    'certificate'          => getenv('SIMPLESAMLPHP_CUSTOM_DIR').'/cert/samling.pem',
 ];
