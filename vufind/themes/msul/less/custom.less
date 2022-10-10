@@ -11,13 +11,25 @@ body {
 
 /* --- Header --- */
 header {
-  background:#18453b url('/vufind/themes/msul/images/newHeader.jpg') no-repeat;
-  background-size:cover;
-  height:10.5rem;
-  margin-bottom:5rem;
-  .container.navbar {
-    background:none;
+
+
+   
+
+  .banner.container {
+    background: url('/vufind/themes/msul/images/newHeader.jpg') no-repeat; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  border:0;
+  /*
+      background-image: url('/vufind/themes/msul/images/newHeader.jpg');
+      background-color: @msugreen;
+      background-repeat: no-repeat;
+   background-size:auto; */
+      
     margin-bottom:3rem;
+
       .navbar-header {
         a, &:hover, &:active, &:visited, &:focus {
         color:#fff;
@@ -38,7 +50,7 @@ header {
           a, &:visited {
             color:#fff;
             &:hover, &:active, &:focus {
-              color:#18453b;
+              color:@msugreen;
             }
           }
         }
@@ -173,28 +185,32 @@ text-align:center;
 
 .container {
   width: 100%;
-  max-width: 1500px;
-  .mainbody {
-    .top-facets {
-      margin-top:8rem;
-      margin-bottom:2rem;
-    }
-  }
+
+}
+.banner, .search, .breadcrumbs, .main, .footer {
 
 }
 
 
 @media (min-width: 768px) {
-  .mainbody {
-    .top-facets {
-      margin-top:2rem !important;
-    }
+.sidebar.left {
+  border-right:1px solid @medgray;
+}
+  .container {
+    width:100%;
+      &.navbar {
+        -webkit-border-radius: 0;
+-moz-border-radius: 0;
+border-radius: 0;
+      }
   }
   }
 
 
 
-
+.top-facets {
+  margin-bottom:2rem;
+}
 
 
 
@@ -209,20 +225,10 @@ label {
   color:@eggplant;
 }
 
-.searchtools { 
-  i {
-    padding-right: .5rem;
-  }
-  a {
-    padding-right: 1rem !important;
-    padding-left: 0rem !important;
-  }
+.searchHomeContent, .nav.searchbox {
+  margin-bottom:4rem;
 }
 
-.search-stats {
-  font-weight: 700;
-}
-.search-header {
-  margin-top: 1rem;
-  color: @darkgrey !important;
+a.facet, .top-facet a {
+  text-decoration:none;
 }

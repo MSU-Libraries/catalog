@@ -117,9 +117,9 @@
 .active-filters .facet,
 .facet-group .active {
   background-color: @list-group-active-bg;
-  color: @darkparakeetgreen; // #fff;
+  color: #fff;
 
-  a { color: #fff; }
+  a { color: #fff; text-decoration:none !important; }
 }
 .facet.active .badge {
   background-color: #fff;
@@ -172,7 +172,6 @@ body.rtl .full-facet-list .active .fa.fa-times { float: left; }
   .date-to   { padding-left:  .25rem; }
 }
 @media (min-width: 768px) {
-  .sidebar {border-right: 1px solid @list-group-border; margin-top:-3rem;}
   .author-facets { display: flex; }
   .author-list { flex: 0 1 100%; }
 }
