@@ -1,4 +1,4 @@
-<?php>
+<?php
 
 namespace Catalog\View\Helper\Root;
 
@@ -9,7 +9,7 @@ class RecordDataFormatterFactory extends \Vufind\View\Helper\Root\RecordDataForm
     public function getDefaultCoreSpecs()
     {
         $spec = new SpecBuilder(parent::getDefaultCoreSpecs());
-        $spect->setLine('Genre', 'getGenre');
+        $spec->setLine('Genre', 'getGenre');
         return $spec->getArray();
     }
 }
