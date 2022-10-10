@@ -12,7 +12,6 @@ ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
 
 COPY install-composer.sh /install-composer.sh
-
 RUN \
     # Perform updates
     apt update && \
@@ -57,7 +56,7 @@ ENV SIMPLESAMLPHP_HOME=/usr/local/simplesamlphp \
     SIMPLESAMLPHP_CONFIG_DIR=/usr/local/simplesamlphp/local/config \
     SIMPLESAMLPHP_VERSION=$SIMPLESAMLPHP_VERSION \
     SIMPLESAMLPHP_SALT=$SIMPLESAMLPHP_SALT \
-    SIMPLESAMLPHP_ADMIN_PW=$SIMPLESAMLPHP_ADMIN_PW \
+    SIMPLESAMLPHP_ADMIN_PW=$SIMPLESAMLPHP_ADMIN_PW
 
 RUN wget https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIMPLESAMLPHP_VERSION}/simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz && \
     tar -C /tmp/ -xzf simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz && \
