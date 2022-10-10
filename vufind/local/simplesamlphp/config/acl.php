@@ -1,10 +1,16 @@
 <?php
 
 /*
+   NOTE: this is removed in 2.0
+   See https://github.com/simplesamlphp/simplesamlphp/issues/426
+*/
+ 
+/*
  * This file defines "named" access control lists, which can
  * be reused in several places.
  */
 $config = [
+    /*
     'adminlist' => [
         //['allow', 'equals', 'mail', 'admin1@example.org'],
         //['allow', 'has', 'groups', 'admin'],
@@ -56,4 +62,5 @@ $config = [
     'example-allow-all' => [
         ['allow'],
     ],
+    */
 ];
