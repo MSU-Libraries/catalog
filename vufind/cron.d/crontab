@@ -27,3 +27,5 @@ MAILTO=$EMAIL
 # Trigger harvest start
 #*/2 *	* * *	root    /usr/bin/flock -n /tmp/harvest.lock /harvest-and-import.sh --oai-harvest --batch-import
 
+# Course reserves update
+30 ${NODE}	* * *	root    /usr/bin/php /usr/local/vufind/util/index_reserves.php 2>&1 | logger -t INDEX_RESERVES

@@ -59,6 +59,8 @@ services:
         max-size: "10m"
     healthcheck:
       disable: true
+    environment:
+      NODE: "{{slice .Node.Hostname 8 9}}"
     deploy:
       mode: replicated
       replicas: 1
