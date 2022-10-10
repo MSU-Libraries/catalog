@@ -29,6 +29,8 @@ docker build ./vufind/ -t catalog:latest \
     --build-arg RECAPTCHA_SITE_KEY=mysitekey \
     --build-arg RECAPTCHA_SECRET_KEY=mysecretkey \
     --build-arg SIMPLESAMLPHP_VERSION=1.19.6
+    --build-arg SIMPLESAMLPHP_SALT=abcXYZ
+    --build-arg SIMPLESAMLPHP_ADMIN_PW=mySecretPass
 ```
 
 * `VUFIND_VERSION`: The version of VuFind to install 
@@ -55,6 +57,8 @@ uses `1` by default
 * `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation
 * `RECAPTCHA_SECRET_KEY`: Secret key for reCaptcha form validation
 * `SIMPLESAMLPHP_VERSION`: The version of SimpleSAMLphp to install
+* `SIMPLESAMLPHP_SALT`: Random salt for SimpleSAMLphp
+* `SIMPLESAMLPHP_ADMIN_PW`: Password to the admin interface of SimpleSAMLphp
 
 ## To start the application stack
 During the first time you are bring up the stack, you will need

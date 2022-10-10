@@ -7,12 +7,9 @@ ENV VUFIND_LOCAL_DIR=/usr/local/vufind/local
 ENV VUFIND_HOME=/usr/local/vufind
 ENV JAVA_HOME=/usr/lib/jvm/default-java
 ENV VUFIND_LOCAL_MODULES=Catalog
-ENV SIMPLESAMLPHP_HOME=/usr/local/simplesamlphp
 
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
-ARG SIMPLESAMLPHP_VERSION
-ENV SIMPLESAMLPHP_VERSION=$SIMPLESAMLPHP_VERSION
 
 COPY install-composer.sh /install-composer.sh
 
@@ -49,15 +46,29 @@ RUN \
     # Install Composer
     /install-composer.sh && \
     mv /composer.phar /usr/local/bin/composer && \
-    rm /install-composer.sh && \
-    # Install SimpleSAMLphp
-    wget https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIMPLESAMLPHP_VERSION}/simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz && \
+    rm /install-composer.sh
+
+# Install SimpleSAMLphp
+ARG SIMPLESAMLPHP_VERSION
+ARG SIMPLESAMLPHP_SALT
+ARG SIMPLESAMLPHP_ADMIN_PW
+ENV SIMPLESAMLPHP_HOME=/usr/local/simplesamlphp \
+    SIMPLESAMLPHP_CUSTOM_DIR=/usr/local/simplesamlphp/local \
+    SIMPLESAMLPHP_CONFIG_DIR=/usr/local/simplesamlphp/local/config \
+    SIMPLESAMLPHP_VERSION=$SIMPLESAMLPHP_VERSION \
+    SIMPLESAMLPHP_SALT=$SIMPLESAMLPHP_SALT \
+    SIMPLESAMLPHP_ADMIN_PW=$SIMPLESAMLPHP_ADMIN_PW \
+
+RUN wget https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIMPLESAMLPHP_VERSION}/simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz && \
     tar -C /tmp/ -xzf simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz && \
     mv /tmp/simplesamlphp-${SIMPLESAMLPHP_VERSION} ${SIMPLESAMLPHP_HOME} && \
-    cp apache2/conf-available/simplesamlphp.conf /etc/apache2/conf-available/ && \
+    rm simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz
+COPY apache2/conf-available/simplesamlphp.conf /etc/apache2/conf-available/
+COPY simplesamlphp/local/ ${SIMPLESAMLPHP_CUSTOM_DIR}/
+RUN envsubst < ${SIMPLESAMLPHP_CUSTOM_DIR}/config.php | sponge ${SIMPLESAMLPHP_CUSTOM_DIR}/config.php && \
     envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \
     a2enconf simplesamlphp.conf && \
-    rm simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz
+    chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR}
 
 # Build Arguments
 ARG SITE_HOSTNAME

@@ -130,7 +130,7 @@ $config = [
      * A possible way to generate a random salt is by running the following command from a unix shell:
      * LC_CTYPE=C tr -c -d '0123456789abcdefghijklmnopqrstuvwxyz' </dev/urandom | dd bs=32 count=1 2>/dev/null;echo
      */
-    'secretsalt' => 'defaultsecretsalt',
+    'secretsalt' => '${SIMPLESAMLPHP_SALT}',
 
     /*
      * This password must be kept secret, and modified from the default value 123.
@@ -138,20 +138,20 @@ $config = [
      * metadata listing and diagnostics pages.
      * You can also put a hash here; run "bin/pwgen.php" to generate one.
      */
-    'auth.adminpassword' => '123',
+    'auth.adminpassword' => '${SIMPLESAMLPHP_ADMIN_PW}',
 
     /*
      * Set this options to true if you want to require administrator password to access the web interface
      * or the metadata pages, respectively.
      */
-    'admin.protectindexpage' => false,
-    'admin.protectmetadata' => false,
+    'admin.protectindexpage' => true,
+    'admin.protectmetadata' => true,
 
     /*
      * Set this option to false if you don't want SimpleSAMLphp to check for new stable releases when
      * visiting the configuration tab in the web interface.
      */
-    'admin.checkforupdates' => true,
+    'admin.checkforupdates' => false,
 
     /*
      * Array of domains that are allowed when generating links or redirects
