@@ -2,9 +2,9 @@
 
 namespace Catalog\View\Helper\Root;
 
-use Vufind\View\Helper\Root\RecordDataFormatter\SpecBuilder;
+use VuFind\View\Helper\Root\RecordDataFormatter\SpecBuilder;
 
-class RecordDataFormatterFactory extends \Vufind\View\Helper\Root\RecordDataFormatterFactory
+class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataFormatterFactory
 {
     public function getDefaultCoreSpecs()
     {
