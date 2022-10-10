@@ -392,11 +392,12 @@ Remove Environment:
       docker stack rm $STACK_NAME-internal;
       rm -rf $COMPOSE_PATH;
       sleep 15;
-      docker system prune --volumes -a -f --filter label=name=$STACK_NAME"
+      docker system prune -a -f
+      docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
     - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
     - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
-    - ssh deploy@$DEPLOY_HOST_B "docker system prune --volumes -a -f --filter label=name=$STACK_NAME"
-    - ssh deploy@$DEPLOY_HOST_C "docker system prune --volumes -a -f --filter label=name=$STACK_NAME"
+    - ssh deploy@$DEPLOY_HOST_B "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
+    - ssh deploy@$DEPLOY_HOST_C "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
 
 ############# Templates ###############
 
