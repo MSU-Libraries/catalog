@@ -64,10 +64,12 @@ RUN wget https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIM
     rm simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz
 COPY apache2/conf-available/simplesamlphp.conf /etc/apache2/conf-available/
 COPY simplesamlphp/local/ ${SIMPLESAMLPHP_CUSTOM_DIR}/
-RUN envsubst < ${SIMPLESAMLPHP_CUSTOM_DIR}/config.php | sponge ${SIMPLESAMLPHP_CUSTOM_DIR}/config.php && \
+RUN envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW}' < ${SIMPLESAMLPHP_CONFIG_DIR}/config.php | sponge ${SIMPLESAMLPHP_CONFIG_DIR}/config.php && \
     envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \
     a2enconf simplesamlphp.conf && \
-    chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR}
+    chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR} && \
+    mkdir /var/log/simplesamlphp && \
+    chown www-data /var/log/simplesamlphp
 
 # Build Arguments
 ARG SITE_HOSTNAME
