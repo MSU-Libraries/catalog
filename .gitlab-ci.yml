@@ -309,16 +309,28 @@ Vufind Populate Environment:
   script:
     - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts;
     - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
-    # Load some records
-    - echo "Running harvest-and-import.sh now";
-    - ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -r >/dev/null 2>&1";
-    - echo "Import completed with exit code $?";
-    # Rebuild alphabetic browse databases
-    - echo "Running Alphabetic browse database build";
-    - ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
-    - ssh deploy@$DEPLOY_HOST_B "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
-    - ssh deploy@$DEPLOY_HOST_C "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
-    - echo "Completed alphabetic browse database build";
+    # Determine if records are already loaded
+    - |
+        STAT_CD=$(ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) curl 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' --write-out %{http_code} --silent --output /dev/null");
+        if [[ "${STAT_CD}" -ne 200 ]]; then
+            echo "Failed to get number of records from Solr. Curl returned ${STAT_CD}.";
+            exit 1;
+        fi;
+        NUM_RECS=$(ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) curl -s 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' | jq '.response.numFound'");
+        if [[ "${NUM_RECS}" -eq "0" ]]; then
+            # Load some records
+            echo "Running harvest-and-import.sh now";
+            ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -r >/dev/null 2>&1";
+            echo "Import completed with exit code $?";
+            # Rebuild alphabetic browse databases
+            echo "Running Alphabetic browse database build";
+            ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+            ssh deploy@$DEPLOY_HOST_B "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+            ssh deploy@$DEPLOY_HOST_C "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+            echo "Completed alphabetic browse database build";
+        else
+            echo "${NUM_RECS} loaded records already exist. Doing nothing.";
+        fi;
 
 Verify Health:
   stage: Post-Deploy
@@ -392,11 +404,12 @@ Remove Environment:
       docker stack rm $STACK_NAME-internal;
       rm -rf $COMPOSE_PATH;
       sleep 15;
-      docker system prune --volumes -a -f --filter label=name=$STACK_NAME"
+      docker system prune -a -f
+      docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
     - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
     - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
-    - ssh deploy@$DEPLOY_HOST_B "docker system prune --volumes -a -f --filter label=name=$STACK_NAME"
-    - ssh deploy@$DEPLOY_HOST_C "docker system prune --volumes -a -f --filter label=name=$STACK_NAME"
+    - ssh deploy@$DEPLOY_HOST_B "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
+    - ssh deploy@$DEPLOY_HOST_C "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
 
 ############# Templates ###############
 
@@ -404,6 +417,7 @@ Remove Environment:
   tags:
     - msul-shared
   extends: .setup_ssh
+  retry: 2
   variables:
     ENCODED_PRIVATE_KEY: $DEPLOY_PRIVATE_KEY
     SERVER: $DEPLOY_HOST_A

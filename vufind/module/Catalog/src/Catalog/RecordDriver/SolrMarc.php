@@ -13,5 +13,11 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         return is_array($this->fields['physical']) ? reset($this->fields['physical']) : $this->fields['physical'] ?? [];
     }
+
+    public function getGenre()
+    {
+        return is_array($this->fields['genre_facet']) ? reset($this->fields['genre_facet']) : $this->fields['genre_facet'] ?? [];
+    }
+
 }
 
