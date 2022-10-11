@@ -1,19 +1,35 @@
 @import "bootstrap"; /* Include bootstrap theme's less base */
+@import "vendor/bootstrap/variables";
+@import "components/variables";
+@import "components/sidebar";
 
 body {
     font-family: 'Gotham SSm A', 'Gotham SSm B', Arial, Helvetica, sans-serif;
 }
 /* ------ Layout ------ */
 
+
 /* --- Header --- */
 header {
-  background:#18453b url('https://lib.msu.edu/sites/all/themes/msul_omega/images/msul_header_main.png') no-repeat;
-  background-size:cover;
-  height:10.5rem;
-  margin-bottom:5rem;
-  .container.navbar {
-    background:none;
+
+
+   
+
+  .banner.container {
+    background: url('/vufind/themes/msul/images/newHeader.jpg') no-repeat; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  border:0;
+  /*
+      background-image: url('/vufind/themes/msul/images/newHeader.jpg');
+      background-color: @msugreen;
+      background-repeat: no-repeat;
+   background-size:auto; */
+      
     margin-bottom:3rem;
+
       .navbar-header {
         a, &:hover, &:active, &:visited, &:focus {
         color:#fff;
@@ -34,7 +50,7 @@ header {
           a, &:visited {
             color:#fff;
             &:hover, &:active, &:focus {
-              color:#18453b;
+              color:@msugreen;
             }
           }
         }
@@ -51,7 +67,7 @@ footer {
         margin-bottom:8rem;
       }
     }
-  .msu-footer { 
+  .msu-footer {
     .col-lg-3 img {
       margin-bottom:0;
 
@@ -63,7 +79,7 @@ footer {
         display:block;
         padding-left:0;
         line-height:1;
-  
+
         margin-bottom:1rem;
         padding:0;
           &:first-child {
@@ -103,7 +119,7 @@ footer {
 
 
 
-            
+
           }
       }
      }
@@ -162,9 +178,57 @@ text-align:center;
  }
 }
 
+/* --- Main Content --- */
+
+  // Main content and sidebar widths and float
+
+
+.container {
+  width: 100%;
+
+}
+.banner, .search, .breadcrumbs, .main, .footer {
+
+}
+
+
+@media (min-width: 768px) {
+.sidebar.left {
+  border-right:1px solid @medgray;
+}
+  .container {
+    width:100%;
+      &.navbar {
+        -webkit-border-radius: 0;
+-moz-border-radius: 0;
+border-radius: 0;
+      }
+  }
+  }
+
+
+
+.top-facets {
+  margin-bottom:2rem;
+}
 
 
 
 
+label {
+  color: @msugreen;
+}
 
+.search-term {
+  font-weight: 500;
+  font-size: x-large;
+  color:@eggplant;
+}
 
+.searchHomeContent, .nav.searchbox {
+  margin-bottom:4rem;
+}
+
+a.facet, .top-facet a {
+  text-decoration:none;
+}

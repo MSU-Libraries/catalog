@@ -351,7 +351,7 @@ Verify Health:
             echo "Checking health for ${SERVICE}...";
             for HOST in ${HOSTS}; do
                 ATTEMPTS=0;
-                while [[ "$ATTEMPTS" -le 10 ]]; do
+                while [[ "$ATTEMPTS" -le 15 ]]; do
                     HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE}) 2>/dev/null || echo \"No Health\"");
                     if [[ "${HEALTH}" == "\"healthy\"" ]]; then
                         echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} is healthy."

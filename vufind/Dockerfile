@@ -41,7 +41,18 @@ RUN \
     # Create log file and redirect to stdout
     mkdir /var/log/vufind && \
     touch /var/log/vufind/vufind.log && \
-    chown -R 33:33 /var/log/vufind
+    chown -R 33:33 /var/log/vufind && \
+    # Create user for grunt
+    groupadd -g 1000 msuldevs && \
+    useradd msuldevs -u 1000 -g 1000 -d/home/msuldevs
+
+USER 1000
+
+# Install requirements for grunt
+RUN cd /usr/local/vufind && \
+    npm install
+
+USER 0
 
 # Build Arguments
 ARG FOLIO_URL
@@ -128,7 +139,10 @@ RUN \
     # Set required environment variables
     echo JAVA_HOME="$JAVA_HOME" >> /etc/environment && \
     echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
-    echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR"  >> /etc/environment
+    echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR"  >> /etc/environment && \
+    # Install grunt
+    npm install -g grunt-cli && \
+    grunt less
 
 EXPOSE 80
 
