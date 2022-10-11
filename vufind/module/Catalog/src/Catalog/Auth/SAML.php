@@ -42,11 +42,6 @@ use VuFind\Exception\Auth as AuthException;
 class SAML extends \VuFind\Auth\AbstractBase
 {
     /**
-     * Header name for entityID of the IdP that authenticated the user.
-     */
-    public const DEFAULT_IDPSERVERPARAM = 'SAML-Identity-Provider';
-
-    /**
      * This is array of attributes which $this->authenticate()
      * method should check for.
      *
@@ -72,20 +67,6 @@ class SAML extends \VuFind\Auth\AbstractBase
      * @var \Laminas\Http\PhpEnvironment\Request
      */
     protected $request;
-
-    /**
-     * Name of attribute with SAML identity provider
-     *
-     * @var string
-     */
-    protected $samlIdentityProvider = self::DEFAULT_IDPSERVERPARAM;
-
-    /**
-     * Name of attribute with SAML session ID
-     *
-     * @var string
-     */
-    protected $samlSessionId = null;
 
     /**
      * Constructor
@@ -115,9 +96,6 @@ class SAML extends \VuFind\Auth\AbstractBase
     public function setConfig($config)
     {
         parent::setConfig($config);
-        $this->samlIdentityProvider = $this->config->SAML->idpserverparam
-            ?? self::DEFAULT_IDPSERVERPARAM;
-        $this->samlSessionId = $this->config->SAML->session_id ?? null;
     }
 
     /**
@@ -159,7 +137,6 @@ class SAML extends \VuFind\Auth\AbstractBase
         }
 
         // Check if username is set.
-        $entityId = $this->getCurrentEntityId();
         $config = $this->config->SAML;
         $username = $this->getAttribute($config['username']);
         if (empty($username)) {
@@ -223,8 +200,6 @@ class SAML extends \VuFind\Auth\AbstractBase
             );
         }
 
-        $this->storeSAMLSession($request);
-
         // Save and return the user object:
         $user->save();
         return $user;
@@ -258,13 +233,12 @@ class SAML extends \VuFind\Auth\AbstractBase
     public function isExpired()
     {
         $config = $this->config->SAML;
-        if (!isset($this->samlSessionId)
+        if (!($config->singleLogout ?? false)
             || !($config->checkExpiredSession ?? true)
         ) {
             return false;
         }
-        $sessionId = $this->getAttribute($this->samlSessionId);
-        return !isset($sessionId);
+        return !$this->auth->isAuthenticated();
     }
 
     /**
@@ -279,12 +253,9 @@ class SAML extends \VuFind\Auth\AbstractBase
     {
         // If single log-out is enabled, use a special URL:
         $config = $this->config->SAML;
-        if (isset($config->logout) && !empty($config->logout)) {
-            $append = (strpos($config->logout, '?') !== false) ? '&' : '?';
-            $url = $config->logout . $append . 'return='
-                . urlencode($url);
+        if ($config->singleLogout ?? false) {
+            $url = $this->auth->getLogoutURL($url);
         }
-
         // Send back the redirect URL (possibly modified):
         return $url;
     }
@@ -301,7 +272,6 @@ class SAML extends \VuFind\Auth\AbstractBase
      */
     public function connectLibraryCard($request, $connectingUser)
     {
-        $entityId = $this->getCurrentEntityId();
         $config = $this->config->SAML;
         $username = $this->getAttribute($config['cat_username']);
         if (!$username) {
@@ -349,42 +319,6 @@ class SAML extends \VuFind\Auth\AbstractBase
         }
 
         return $sortedUserAttributes;
-    }
-
-    /**
-     * Add session id mapping to external_session table for single logout support
-     *
-     * @param \Laminas\Http\PhpEnvironment\Request $request Request object containing
-     * account credentials.
-     *
-     * @return void
-     */
-    protected function storeSAMLSession($request)
-    {
-        if (!isset($this->samlSessionId)) {
-            return;
-        }
-        $samlSessionId = $this->getAttribute($this->samlSessionId);
-        if (null === $samlSessionId) {
-            return;
-        }
-        $localSessionId = $this->sessionManager->getId();
-        $externalSession = $this->getDbTableManager()->get('ExternalSession');
-        $externalSession->addSessionMapping($localSessionId, $samlSessionId);
-        $this->debug(
-            "Cached SAML session id '$samlSessionId' for local session"
-            . " '$localSessionId'"
-        );
-    }
-
-    /**
-     * Fetch entityId used for authentication
-     *
-     * @return string entityId of IdP
-     */
-    protected function getCurrentEntityId()
-    {
-        return $this->getAttribute($this->samlIdentityProvider);
     }
 
     /**
