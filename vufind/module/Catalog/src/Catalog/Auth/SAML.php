@@ -153,16 +153,10 @@ class SAML extends \VuFind\Auth\AbstractBase
         // validate config before authentication
         $this->validateConfig();
 
-        // Require SAML authentication
-        // $this->auth->requireAuth();
-
         // Check SAML authentication
         if (!$this->auth->isAuthenticated()) {
             throw new AuthException('authentication_error_denied');
         }
-
-        // Revert from SimpleSAMLphp to PHP session
-        SimpleSAML_Session::getSessionFromRequest()->cleanup();
 
         // Check if username is set.
         $entityId = $this->getCurrentEntityId();
