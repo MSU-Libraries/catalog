@@ -44,7 +44,7 @@ RUN \
     chown -R 33:33 /var/log/vufind && \
     # Create user for grunt
     groupadd -g 1000 msuldevs && \
-    useradd msuldevs -u 1000 -g 1000
+    useradd msuldevs -u 1000 -g 1000 && \
     mkdir /home/msuldevs && \
     chown 1000:1000 /home/msuldevs
 
