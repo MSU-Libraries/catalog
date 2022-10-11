@@ -26,11 +26,13 @@ Set Stack Name:
     - |
       STACK_NAME=
       if [[ $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH ]]; then
-          STACK_NAME="catalog-beta"
+          STACK_NAME="catalog-beta";
       elif [[ "${CI_COMMIT_BRANCH}" == "devel-"* || "${CI_COMMIT_BRANCH}" == "review-"* ]]; then
-          STACK_NAME="${CI_COMMIT_BRANCH}"
+          STACK_NAME="${CI_COMMIT_BRANCH}";
       fi
-      echo "STACK_NAME=${STACK_NAME}" > build.env
+    - echo "STACK_NAME=${STACK_NAME}" > build.env
+    - test -n "${STACK_NAME}"
+    - test -f build.env
   artifacts:
     reports:
       dotenv: build.env
