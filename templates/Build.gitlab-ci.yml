@@ -39,6 +39,7 @@ Build Vufind Image:
     - > 
         docker build 
         --build-arg VUFIND_VERSION=$VUFIND_VERSION
+        --build-arg SITE_HOSTNAME=$SITE_HOSTNAME
         --build-arg FOLIO_URL=$FOLIO_URL 
         --build-arg FOLIO_USER=$FOLIO_USER 
         --build-arg FOLIO_PASS=$FOLIO_PASS 
@@ -59,6 +60,9 @@ Build Vufind Image:
         --build-arg EDS_ORG=$EDS_ORG
         --build-arg RECAPTCHA_SITE_KEY=$RECAPTCHA_SITE_KEY
         --build-arg RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY
+        --build-arg SIMPLESAMLPHP_VERSION=$SIMPLESAMLPHP_VERSION
+        --build-arg SIMPLESAMLPHP_SALT=$SIMPLESAMLPHP_SALT
+        --build-arg SIMPLESAMLPHP_ADMIN_PW=$SIMPLESAMLPHP_ADMIN_PW
         --tag $CURR 
         --cache-from $LATEST 
         vufind/
