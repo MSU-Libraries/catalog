@@ -12,10 +12,11 @@
 $metadata['https://fujifish.github.io/samling/samling.html'] = [
     'SingleSignOnService'  => 'https://fujifish.github.io/samling/samling.html',
     'SingleLogoutService'  => 'https://fujifish.github.io/samling/samling.html',
-    'certificate'          => getenv('SIMPLESAMLPHP_CUSTOM_DIR').'/cert/samling.pem',
+    'certificate'          => 'samling.pem',
 ];
 $metadata['https://samltest.id/saml/idp'] = [
     'SingleSignOnService'  => 'https://samltest.id/idp/profile/SAML2/Redirect/SSO',
     'SingleLogoutService'  => 'https://samltest.id/idp/profile/SAML2/Redirect/SLO',
-    'certificate'          => getenv('SIMPLESAMLPHP_CUSTOM_DIR').'/cert/samltest.pem',
+    'certificate'          => 'samltest.pem',
+    'sign.logout'          => true,
 ];

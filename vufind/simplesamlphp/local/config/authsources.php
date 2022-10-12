@@ -59,6 +59,10 @@ $config = [
             'urn:oid:x.x.x.x',
         ],
         */
+
+        /* SP certs */
+        'privatekey' => 'sp.pem',
+        'certificate' => 'sp.crt',
     ],
 
 
