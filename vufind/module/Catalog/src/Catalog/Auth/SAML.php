@@ -331,6 +331,13 @@ class SAML extends \VuFind\Auth\AbstractBase
     protected function getAttribute($attribute)
     {
         $attrs = $this->auth->getAttributes();
-        return $attrs[$attribute];
+        $value = $attrs[$attribute];
+        if (is_array($value)) {
+            if (count($value) > 0)
+                $value = $value[0];
+            else
+                $value = null;
+        }
+        return $value;
     }
 }
