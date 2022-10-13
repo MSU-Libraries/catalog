@@ -16,7 +16,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 
     public function getGenre()
     {
-        return (! is_array($this->fields['genre_facet']) ? [$this->fields['genre_facet']] : $this->fields['genre_facet']) ?? [];
+        return !empty($this->fields['genre_facet']) ? $this->fields['genre_facet'] : [];
     }
 
     public function getLocations()
