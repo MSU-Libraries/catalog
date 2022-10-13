@@ -23,6 +23,17 @@ return array (
           ),
         ),
       ),
+      'auth' => 
+      array (
+        'factories' => 
+        array (
+          'Catalog\\Auth\\SAML' => 'Catalog\\Auth\\SAMLFactory',
+        ),
+        'aliases' => 
+        array (
+          'saml' => 'Catalog\\Auth\\SAML',
+        )
+      ),
     ),
   ),
 );

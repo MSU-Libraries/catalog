@@ -13,6 +13,7 @@ variables:
   VUFIND_VERSION: "8.1"
   # Used during upgrade, which needs to know previous version
   PREV_VUFIND_VERSION: "8.0.4"
+  SIMPLESAMLPHP_VERSION: "1.19.6"
   DEPLOY_HOST_A: catalog-1.aws.lib.msu.edu
   DEPLOY_HOST_B: catalog-2.aws.lib.msu.edu
   DEPLOY_HOST_C: catalog-3.aws.lib.msu.edu
@@ -25,14 +26,16 @@ Set Stack Name:
   script:
     - |
       STACK_NAME=
+      SITE_HOSTNAME=
       if [[ $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH ]]; then
-          STACK_NAME="catalog-beta";
+          STACK_NAME="catalog-beta"
+          SITE_HOSTNAME="catalog-beta.lib.msu.edu"
       elif [[ "${CI_COMMIT_BRANCH}" == "devel-"* || "${CI_COMMIT_BRANCH}" == "review-"* ]]; then
-          STACK_NAME="${CI_COMMIT_BRANCH}";
+          STACK_NAME="${CI_COMMIT_BRANCH}"
+          SITE_HOSTNAME="${STACK_NAME}.aws.lib.msu.edu"
       fi
-    - echo "STACK_NAME=${STACK_NAME}" > build.env
-    - test -n "${STACK_NAME}"
-    - test -f build.env
+      echo "STACK_NAME=${STACK_NAME}" > build.env
+      echo "SITE_HOSTNAME=${SITE_HOSTNAME}" >> build.env
   artifacts:
     reports:
       dotenv: build.env
@@ -351,7 +354,7 @@ Verify Health:
             echo "Checking health for ${SERVICE}...";
             for HOST in ${HOSTS}; do
                 ATTEMPTS=0;
-                while [[ "$ATTEMPTS" -le 10 ]]; do
+                while [[ "$ATTEMPTS" -le 15 ]]; do
                     HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE}) 2>/dev/null || echo \"No Health\"");
                     if [[ "${HEALTH}" == "\"healthy\"" ]]; then
                         echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} is healthy."
@@ -408,7 +411,7 @@ Remove Environment:
       docker stack rm $STACK_NAME-internal;
       rm -rf $COMPOSE_PATH;
       sleep 15;
-      docker system prune -a -f
+      docker system prune -a -f;
       docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
     - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
     - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts

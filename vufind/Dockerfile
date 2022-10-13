@@ -11,14 +11,16 @@ ENV VUFIND_LOCAL_MODULES=Catalog
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
 
+COPY install-composer.sh /install-composer.sh
 RUN \
     # Perform updates
     apt update && \
-    apt install wget vim-nox lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
+    apt install -y wget vim-nox lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
         gettext-base locales msmtp-mta rsync \
+        nodejs npm git \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl \
-        php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml -y && \
+        php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml && \
     # Setup Timezone
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
@@ -40,9 +42,51 @@ RUN \
     # Create log file and redirect to stdout
     mkdir /var/log/vufind && \
     touch /var/log/vufind/vufind.log && \
-    chown -R 33:33 /var/log/vufind
+    chown -R 33:33 /var/log/vufind && \
+    # Install Composer
+    /install-composer.sh && \
+    mv /composer.phar /usr/local/bin/composer && \
+    rm /install-composer.sh && \
+    # Create user for grunt
+    groupadd -g 1000 msuldevs && \
+    useradd msuldevs -u 1000 -g 1000 && \
+    mkdir /home/msuldevs && \
+    chown 1000:1000 /home/msuldevs
+
+USER 1000
+
+# Install requirements for grunt
+RUN cd /usr/local/vufind && \
+    npm install
+
+USER 0
+
+# Install SimpleSAMLphp
+ARG SIMPLESAMLPHP_VERSION
+ARG SIMPLESAMLPHP_SALT
+ARG SIMPLESAMLPHP_ADMIN_PW
+ENV SIMPLESAMLPHP_HOME=/usr/local/simplesamlphp \
+    SIMPLESAMLPHP_CUSTOM_DIR=/usr/local/simplesamlphp/local \
+    SIMPLESAMLPHP_CONFIG_DIR=/usr/local/simplesamlphp/local/config \
+    SIMPLESAMLPHP_VERSION=$SIMPLESAMLPHP_VERSION \
+    SIMPLESAMLPHP_SALT=$SIMPLESAMLPHP_SALT \
+    SIMPLESAMLPHP_ADMIN_PW=$SIMPLESAMLPHP_ADMIN_PW
+
+RUN wget https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIMPLESAMLPHP_VERSION}/simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz && \
+    tar -C /tmp/ -xzf simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz && \
+    mv /tmp/simplesamlphp-${SIMPLESAMLPHP_VERSION} ${SIMPLESAMLPHP_HOME} && \
+    rm simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz
+COPY apache2/conf-available/simplesamlphp.conf /etc/apache2/conf-available/
+COPY simplesamlphp/local/ ${SIMPLESAMLPHP_CUSTOM_DIR}/
+RUN envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW}' < ${SIMPLESAMLPHP_CONFIG_DIR}/config.php | sponge ${SIMPLESAMLPHP_CONFIG_DIR}/config.php && \
+    envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \
+    a2enconf simplesamlphp.conf && \
+    chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR} && \
+    mkdir /var/log/simplesamlphp && \
+    chown www-data /var/log/simplesamlphp
 
 # Build Arguments
+ARG SITE_HOSTNAME
 ARG FOLIO_URL
 ARG FOLIO_USER
 ARG FOLIO_PASS
@@ -65,6 +109,7 @@ ARG RECAPTCHA_SITE_KEY
 ARG RECAPTCHA_SECRET_KEY
 
 ENV DEBUG=$DEBUG \
+    SITE_HOSTNAME=$SITE_HOSTNAME \
     FOLIO_URL=$FOLIO_URL \
     FOLIO_USER=$FOLIO_USER \
     FOLIO_PASS=$FOLIO_PASS \
@@ -92,7 +137,9 @@ RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-def
     echo "    LogLevel warn" >> /etc/apache2/sites-enabled/000-default.conf && \
     echo "    ErrorLog /proc/self/fd/2" >> /etc/apache2/sites-enabled/000-default.conf && \
     echo "    CustomLog /proc/self/fd/1 combined" >> /etc/apache2/sites-enabled/000-default.conf && \
-    echo "</VirtualHost>" >> /etc/apache2/sites-enabled/000-default.conf
+    echo "</VirtualHost>" >> /etc/apache2/sites-enabled/000-default.conf && \
+    # enable simplesamlphp at /simplesamlphp
+    a2enconf simplesamlphp
 
 # Add file customizations
 COPY local/ /usr/local/vufind/local
@@ -127,7 +174,10 @@ RUN \
     # Set required environment variables
     echo JAVA_HOME="$JAVA_HOME" >> /etc/environment && \
     echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
-    echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR"  >> /etc/environment
+    echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR"  >> /etc/environment && \
+    # Install grunt
+    npm install -g grunt-cli && \
+    grunt less
 
 EXPOSE 80
 
