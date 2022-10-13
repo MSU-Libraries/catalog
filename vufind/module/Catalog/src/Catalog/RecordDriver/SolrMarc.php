@@ -19,5 +19,27 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         return (! is_array($this->fields['genre_facet']) ? [$this->fields['genre_facet']] : $this->fields['genre_facet']) ?? [];
     }
 
+    public function getLocations()
+    {
+        $locs = [];
+        $marc = $this->getMarcReader();
+        $marcArr952 = $marc->getFields('952', ['b','c','d']);
+        foreach ($marcArr952 as $marc952) {
+            $subfields = $marc952['subfields'];
+            $sfvals = [];
+            foreach ($subfields as $subfield) {
+                $sfvals[$subfield['code']] = $subfield['data'];
+            }
+            if ($sfvals['b'] == "Michigan State University") {
+                $locs[] = empty($sfvals['d']) ? $sfvals['c'] : $sfvals['d'];
+            }
+        }
+        return $locs;
+    }
+
+    public function getLocation() {
+        return $this->getLocations()[0] ?? '';
+    }
+
 }
 
