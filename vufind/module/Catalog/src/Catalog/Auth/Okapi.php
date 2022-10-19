@@ -44,7 +44,7 @@ use VuFind\Exception\ILS as ILSException;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:authentication_handlers Wiki
  */
-class Okapi extends AbstractBase
+class Okapi extends \VuFind\Auth\AbstractBase
 { 
     /**
      * The Folio driver.
@@ -69,7 +69,7 @@ class Okapi extends AbstractBase
         $this->driver = $driverManager->get('Folio');
         $config = $configReader->get('Folio');
         $driverConfig = is_object($config) ? $config->toArray() : [];
-        $driverConfig['okapi_login'] = true;
+        $driverConfig['User']['okapi_login'] = true;
         $this->driver->setConfig($driverConfig);
         $this->driver->init();
     }
