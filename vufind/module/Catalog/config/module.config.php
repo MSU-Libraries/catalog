@@ -28,10 +28,12 @@ return array (
         'factories' => 
         array (
           'Catalog\\Auth\\SAML' => 'Catalog\\Auth\\SAMLFactory',
+          'Catalog\\Auth\\Okapi' => 'Catalog\\Auth\\OkapiFactory',
         ),
         'aliases' => 
         array (
           'saml' => 'Catalog\\Auth\\SAML',
+          'okapi' => 'Catalog\\Auth\\Okapi',
         )
       ),
     ),
