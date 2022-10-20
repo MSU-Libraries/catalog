@@ -11,7 +11,7 @@ import org.solrmarc.index.SolrIndexerMixin;
 
 public class LocationMixin extends SolrIndexerMixin {
 
-    public List<String> getLocations(final Record record, String dummy) {
+    public List<String> getLocations(final Record record, String defaultValue) {
         List<String> result = new ArrayList<String>();
         List<VariableField> locationFields = record.getVariableFields("952");
         List<Subfield> cSubfields = getSubfieldsMatching(locationFields, "c");
@@ -36,6 +36,9 @@ public class LocationMixin extends SolrIndexerMixin {
             if (c != null && d != null && !c.equals(d) && !d.contains("-")) {
                 result.add("1/" + c + "/" + d + "/");
             }
+        }
+        if (result.isEmpty()) {
+                result.add("0/" + defaultValue  + "/");
         }
         return result;
     }
