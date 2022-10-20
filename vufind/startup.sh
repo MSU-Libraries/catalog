@@ -4,13 +4,16 @@
 # Populating the shared storage if empty
 mkdir -p /mnt/shared/local/${STACK_NAME}
 if [ ! "$(ls -A /mnt/shared/local/${STACK_NAME})" ]; then
-    cp -r /usr/local/vufind/local /mnt/local
-    cp -r /usr/local/vufind/themes/msul /mnt/local
-    cp -r /usr/local/vufind/modules/Catalog /mnt/local
+    cp -r /usr/local/vufind/local /mnt/shared/local/${STACK_NAME}
+    cp -r /usr/local/vufind/themes/msul /mnt/shared/local/${STACK_NAME}
+    cp -r /usr/local/vufind/module/Catalog /mnt/shared/local/${STACK_NAME}
 fi
-ln -sf /mnt/local/local /usr/local/vufind
-ln -sf /mnt/local/msul /usr/local/vufind/themes
-ln -sf /mnt/local/Catalog /usr/local/vufind/modules
+rm -rf /usr/local/vufind/local
+ln -sf /mnt/shared/local/${STACK_NAME}/local /usr/local/vufind
+rm -rf /usr/local/vufind/themes/msul
+ln -sf /mnt/shared/local/${STACK_NAME}/msul /usr/local/vufind/themes
+rm -rf /usr/local/vufind/module/Catalog
+ln -sf /mnt/shared/local/${STACK_NAME}/Catalog /usr/local/vufind/module
 
 # Ensure SolrCloud is available prior to creating Collections
 SOLR_CLUSTER_SIZE=0
