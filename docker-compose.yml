@@ -13,6 +13,7 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - /mnt/shared:/mnt/shared:ro
+      - /mnt/share/local/${STACK_NAME}:/mnt/local:rw
     logging:
       driver: "json-file"
       options:

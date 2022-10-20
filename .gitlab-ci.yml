@@ -10,9 +10,9 @@ stages:
   - Release
 
 variables:
-  VUFIND_VERSION: "8.1"
+  VUFIND_VERSION: "8.1.1"
   # Used during upgrade, which needs to know previous version
-  PREV_VUFIND_VERSION: "8.0.4"
+  PREV_VUFIND_VERSION: "8.1"
   SIMPLESAMLPHP_VERSION: "1.19.6"
   DEPLOY_HOST_A: catalog-1.aws.lib.msu.edu
   DEPLOY_HOST_B: catalog-2.aws.lib.msu.edu
