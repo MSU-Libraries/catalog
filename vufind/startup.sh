@@ -2,7 +2,8 @@
 
 # Create symlinks to the shared storage
 # Populating the shared storage if empty
-if [ ! "$(ls -A /mnt/local)" ]; then
+mkdir -p /mnt/shared/local/${STACK_NAME}
+if [ ! "$(ls -A /mnt/shared/local/${STACK_NAME})" ]; then
     cp -r /usr/local/vufind/local /mnt/local
     cp -r /usr/local/vufind/themes/msul /mnt/local
     cp -r /usr/local/vufind/modules/Catalog /mnt/local

@@ -127,8 +127,6 @@ Deploy Compose Files:
     # Copy the updated compose files to the server
     - ssh deploy@$DEPLOY_HOST_A mkdir -p $COMPOSE_PATH
     - scp docker-compose* deploy@$DEPLOY_HOST_A:$COMPOSE_PATH/
-    # Create the sub-directory in the shared storage
-    - ssh deploy@$DEPLOY_HOST_A mkdir -p /mnt/share/local/${STACK_NAME}
 
 Deploy Internal Network:
   stage: Networking
