@@ -65,10 +65,19 @@ class OkapiFactory implements \Laminas\ServiceManager\Factory\FactoryInterface
         if (!empty($options)) {
             throw new \Exception('Unexpected options sent to factory.');
         }
+        $dateConverter = $container->get(\VuFind\Date\Converter::class);
+        $sessionFactory = function ($namespace) use ($container) {
+            $manager = $container->get(\Laminas\Session\SessionManager::class);
+            return new \Laminas\Session\Container("Folio_$namespace", $manager);
+        };
+        $driver = new \VuFind\ILS\Driver\Folio($dateConverter, $sessionFactory);
+        $driver->setLogger($container->get(\VuFind\Log\Logger::class));
+        $driver->setTranslator($container->get(\Laminas\Mvc\I18n\Translator::class));
+        $driver->setHttpService($container->get(\VuFindHttp\HttpService::class));
         return new $requestedName(
             $container->get(\VuFind\ILS\Connection::class),
-            $container->get(\VuFind\ILS\Driver\PluginManager::class),
-            $container->get(\VuFind\Config\PluginManager::class)
+            $container->get(\VuFind\Config\PluginManager::class),
+            $driver
         );
     }
 }
