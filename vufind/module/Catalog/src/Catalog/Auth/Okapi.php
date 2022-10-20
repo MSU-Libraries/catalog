@@ -1,6 +1,6 @@
 <?php
 /**
- * ILS authentication module.
+ * Okapi authentication module.
  *
  * PHP version 7
  *
