@@ -329,7 +329,7 @@ Vufind Populate Environment:
         if [[ "${NUM_RECS}" -eq "0" ]]; then
             # Load some records
             echo "Running harvest-and-import.sh now";
-            ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -r >/dev/null 2>&1";
+            ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -r -s /mnt/shared/oai/devel-batch >/dev/null 2>&1";
             echo "Import completed with exit code $?";
             # Rebuild alphabetic browse databases
             echo "Running Alphabetic browse database build";
