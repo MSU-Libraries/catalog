@@ -63,14 +63,14 @@ public class MaterialTypeMixin extends SolrIndexerMixin {
 
     private List<String> getValuesMatching(Record record, String fieldCode, String subfieldCodes) {
         List<VariableField> fields = record.getVariableFields(fieldCode);
-        ArrayList<Subfield> subfields = new ArrayList<Subfield>();
+        List<String> values = new ArrayList<String>();
         for (VariableField vf : fields) {
             if (!(vf instanceof DataField))
-                return(subfields);
+                continue;
             DataField df = (DataField)vf;
-            subfields.addAll(df.getSubfields(subfieldCodes));
+            values.addAll(df.getSubfields(subfieldCodes)
+                .stream().map(f -> f.getData()).collect(Collectors.toList()));
         }
-        List<String> values = subfields.stream().map(f -> f.getData()).collect(Collectors.toList());
         return(values);
     }
 
