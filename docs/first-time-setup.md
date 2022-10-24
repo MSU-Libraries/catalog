@@ -108,7 +108,7 @@ following permissions within FOLIO:
 * Users: Can view fees/fines and loans
 * Users: Can view user profile
 
-## For GitLab Users
+## For GitLab users
 ### Creating a CI/CD Token
 Create a new [access token](https://gitlab.msu.edu/help/user/project/settings/project_access_tokens)
 that has `read_registry` privileges to the repository and create a new CI/CD variable with the
@@ -117,3 +117,21 @@ resulting key value (`REGISTRY_ACCESS_TOKEN`).
 ### Create CI/CD Variables
 There are a number of variables that are required for the CI/CD pipeline to run. Refer to the
 [CI/CD variables section](CICD.md#variables) for details.
+
+## For local development
+To make changes to the theme, custom module, or files stored within `local` you can either
+modify them directly inside the containers (ideally scale the `${STACK_NAME}_catalog_catalog`
+down to 1 beforehand to not confuse yourself), or you can mount the shared storage and make
+changes there. Changes to the live storage are symboliclly linked to the containers and will
+appear real time in the environment -- very handy for theme development!
+
+Within the shared storage there will be a sub-directory for each branch name. This documentation
+assumes that the share has been set up and configured already on the hosts.
+
+```bash
+/mnt/catalog
+└── devel-mybranch
+    ├── Catalog
+    ├── local
+    └── msul
+```
