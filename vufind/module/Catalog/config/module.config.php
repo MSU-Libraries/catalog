@@ -36,6 +36,13 @@ return array (
           'okapi' => 'Catalog\\Auth\\Okapi',
         )
       ),
+      'ils_driver' =>
+      array (
+        'aliases' => 
+        array (
+          'folio' => 'Catalog\\ILS\\Driver\\Folio',
+        ),
+      )
     ),
   ),
 );
