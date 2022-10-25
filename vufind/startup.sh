@@ -1,7 +1,21 @@
 #!/bin/bash
 
-# Ensure SolrCloud is available prior to creating Collections
+# Create symlinks to the shared storage
+# Populating the shared storage if empty
+mkdir -p /mnt/shared/local/${STACK_NAME}
+if [ ! "$(ls -A /mnt/shared/local/${STACK_NAME})" ]; then
+    rsync -aiv /usr/local/vufind/local/ /mnt/shared/local/${STACK_NAME}/local/
+    rsync -aiv /usr/local/vufind/themes/msul/ /mnt/shared/local/${STACK_NAME}/msul/
+    rsync -aiv /usr/local/vufind/module/Catalog/ /mnt/shared/local/${STACK_NAME}/Catalog/
+fi
+rm -rf /usr/local/vufind/local
+ln -sf /mnt/shared/local/${STACK_NAME}/local /usr/local/vufind
+rm -rf /usr/local/vufind/themes/msul
+ln -sf /mnt/shared/local/${STACK_NAME}/msul /usr/local/vufind/themes
+rm -rf /usr/local/vufind/module/Catalog
+ln -sf /mnt/shared/local/${STACK_NAME}/Catalog /usr/local/vufind/module
 
+# Ensure SolrCloud is available prior to creating Collections
 SOLR_CLUSTER_SIZE=0
 while [[ "$SOLR_CLUSTER_SIZE" -lt 1 ]]; do
     echo "No Solr nodes online yet. Waiting..."

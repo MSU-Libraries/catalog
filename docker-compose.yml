@@ -12,7 +12,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - /mnt/shared:/mnt/shared:ro
+      - /mnt/shared:/mnt/shared:rw
     logging:
       driver: "json-file"
       options:
@@ -20,6 +20,7 @@ services:
         max-size: "10m"
     environment:
       SAML_IDP_ENTITY_ID: "https://fujifish.github.io/samling/samling.html"
+      STACK_NAME: "${STACK_NAME}"
     deploy:
       mode: replicated
       replicas: 3
