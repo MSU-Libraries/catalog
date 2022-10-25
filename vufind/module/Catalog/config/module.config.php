@@ -36,6 +36,17 @@ return array (
           'okapi' => 'Catalog\\Auth\\Okapi',
         )
       ),
+      'ils_driver' =>
+      array (
+        'factories' =>
+        array (
+          'Catalog\\ILS\\Driver\\Folio' => 'VuFind\\ILS\\Driver\\FolioFactory',
+        ),
+        'aliases' => 
+        array (
+          'folio' => 'Catalog\\ILS\\Driver\\Folio',
+        ),
+      )
     ),
   ),
 );
