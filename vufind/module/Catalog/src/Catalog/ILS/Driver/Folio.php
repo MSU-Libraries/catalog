@@ -114,11 +114,22 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $item->itemLevelCallNumberPrefix ?? '',
                     $item->itemLevelCallNumber ?? ''
                 );
+                // concatenate enumeration fields if present
+                $enum = implode(
+                    ' ', array_filter(
+                        [
+                            $item->volume ?? null,
+                            $item->enumeration ?? null,
+                            $item->chronology ?? null
+                        ]
+                    )
+                );
                 $items[] = $callNumberData + [
                     'id' => $bibId,
                     'item_id' => $item->id,
                     'holding_id' => $holding->id,
                     'number' => count($items) + 1,
+                    'enumchron' => $enum,
                     'barcode' => $item->barcode ?? '',
                     'status' => $item->status->name,
                     'availability' => $item->status->name == 'Available',
@@ -131,9 +142,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     'location' => $locationName,
                     'location_code' => $locationCode,
                     'reserve' => 'TODO',
-                    'addLink' => true,
-                    'enumchron' => $item->volume
-                ];
+                    'addLink' => true                ];
             }
         }
         return $items;
