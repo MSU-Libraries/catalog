@@ -64,8 +64,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $query
         ) as $holding) {
             $query = [
-                'query' => '(holdingsRecordId=="' . $holding->id
-                    . '" NOT discoverySuppress==true)'
+                'query' => 'holdingsRecordId=="' . $holding->id
+                    . '" NOT discoverySuppress==true sortBy volume'
             ];
             $notesFormatter = function ($note) {
                 return !($note->staffOnly ?? false)
