@@ -107,6 +107,7 @@ following permissions within FOLIO:
 * Settings (OAI-PMH): Can view and edit settings
 * Users: Can view fees/fines and loans
 * Users: Can view user profile
+* For course reserves: `course-reserves-storage.courselistings.collection.get` (a permission set needs to be created with the API for this)
 
 ## For GitLab users
 ### Creating a CI/CD Token
