@@ -184,6 +184,8 @@ Deploy Solr:
     - Deploy Internal Network
     - Deploy Traefik
   script:
+    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
+    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
     # Pull images now to save time with stack deploy
     - >
       ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA" &
@@ -239,6 +241,8 @@ Deploy Vufind:
     - Deploy Solr
     - Deploy Compose Files
   script:
+    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
+    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
     # Pull images now to save time with stack deploy
     - >
       ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" &
