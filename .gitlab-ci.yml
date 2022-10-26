@@ -428,7 +428,7 @@ Remove Environment:
       prunevols() {
         SERVER=$1;
         VOLS=$(ssh deploy@$SERVER "docker volume ls --filter name=$STACK_NAME --format '{{.Name}}'");
-        if [ ! -z \"${VOLS}\" ]; then
+        if [ ! -z "${VOLS}" ]; then
           ssh deploy@$SERVER "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm";
         fi
         }
