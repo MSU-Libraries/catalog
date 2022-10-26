@@ -40,7 +40,7 @@ for COLL in "${COLLS[@]}"
 do
     # See if the collection already exists in Solr
     MATCHED_COLL=$(curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.collections | keys[]" | grep "${COLL}")
-    if [ -z "${MATCHED_COLL}"]; then
+    if [ -z "${MATCHED_COLL}" ]; then
         # Create collection
         curl "http://solr:8983/solr/admin/collections?action=CREATE&name=$COLL&numShards=1&replicationFactor=3&wt=xml&collection.configName=$COLL"
         echo "Created Solr collection for $COLL."
