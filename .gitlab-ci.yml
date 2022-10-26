@@ -446,7 +446,11 @@ Remove Environment:
       rm -rf $COMPOSE_PATH;
       sleep 15;
       docker system prune -a -f;
-      docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
+      VOLS=$(docker volume ls --filter name=$STACK_NAME --format '{{.Name}}');
+      if [ ! -z \"${VOLS}\" ]; then
+        docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm;
+      fi
+      "
     - ssh deploy@$DEPLOY_HOST_B "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
     - ssh deploy@$DEPLOY_HOST_C "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
 
