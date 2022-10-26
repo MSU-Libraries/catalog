@@ -424,6 +424,14 @@ Remove Environment:
       artifacts: true
     - Deploy Vufind
   script:
+    - >
+      prunevols() {
+        SERVER=$1;
+        VOLS=$(ssh deploy@$SERVER "docker volume ls --filter name=$STACK_NAME --format '{{.Name}}'");
+        if [ ! -z \"${VOLS}\" ]; then
+          ssh deploy@$SERVER "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm";
+        fi
+        }
     # Add .aws credentials
     - cat provision-dns-playbook/variables.yml | envsubst | sponge provision-dns-playbook/variables.yml
     # Replace STACK_NAME in env/prod/main.tf and create host file in provision-dns-playbook
@@ -444,15 +452,10 @@ Remove Environment:
       docker stack rm $STACK_NAME-catalog;
       docker stack rm $STACK_NAME-internal;
       rm -rf $COMPOSE_PATH;
-      sleep 15;
-      docker system prune -a -f;
-      VOLS=$(docker volume ls --filter name=$STACK_NAME --format '{{.Name}}');
-      if [ ! -z \"${VOLS}\" ]; then
-        docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm;
-      fi
-      "
-    - ssh deploy@$DEPLOY_HOST_B "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
-    - ssh deploy@$DEPLOY_HOST_C "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
+      sleep 15;"
+    - prune($DEPLOY_HOST_A)
+    - prune($DEPLOY_HOST_B)
+    - prune($DEPLOY_HOST_C)
 
 ############# Templates ###############
 
