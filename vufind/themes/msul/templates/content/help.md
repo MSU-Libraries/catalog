@@ -1,12 +1,3 @@
-# VuFind Public Catalog
-
-## Installation and Configuration
-
-Please refer to our documentation for instructions on how to setup and configure an initial
-VuFind Public Catalog instance:
-
-* [Technical User Documentation](https://msu-libraries.github.io/catalog/)
-
 ## Functionality
 
 ### Search
@@ -43,8 +34,45 @@ AllFields:
 ```
 The weightings above (e.g. the `^750` part of `title_short^750`) add a relative boost to records in which search terms appear in the `title_short` field. 
 
+The presence of a generic `allfields` field in the list indicates that all fields indexed in VuFind should return results in the default search box. Searching within the confines of a limiter, such as author or title, simply reduces the number of results.
 
-A number of fielded searches can beSearch configurations are specified in the local [`searchspecs.yaml` file](https://gitlab.msu.edu/msu-libraries/devops/catalog/-/blob/main/vufind/local/config/vufind/searchspecs.yaml). The default 
+The search configurations for each of these fielded searches are specified in the local [`searchspecs.yaml` file](https://gitlab.msu.edu/msu-libraries/devops/catalog/-/blob/main/vufind/local/config/vufind/searchspecs.yaml). For each particular search type, the fields searched are listed in the same format as above. The author search for example:
+
+```
+Author:
+  DismaxFields:
+    - author^100
+    - author2
+    - author_additional
+    - author_corporate
+    - author_variant
+    - author2_variant
+  DismaxHandler: edismax
+```
+
+#### Advanced Search
+
+The advanced search interface provides a similar, though not identical, set of fields to search by. This interface is highly customizable. Please submit a request to `lib.dl.cdawg@msu.edu` if you have any suggestions for improvement.
+
+#### Search Tools
+
+The search results page includes a few options to save and send results.
+
+* **Save Search**: Requires login. Saved searches will appear on your user account page.
+* **Email Search**: Send the url of your search to your, or someone else's, email address.
+* **RSS Feed**: TODO (For this to work we need to index record change dates)
+* *Print*: There is no dedicated print function available in VuFind for search result pages (only individual records). The `file->print` option in the browser may work in a pinch.
+* *Export*: There are no default export options in the VuFind catalog that format results according to a particular citation style or format. These options are available and working on individual record pages.
+
+### Browse
+
+The main search box dropdown menu offers 4 "Browse" options which instead of returning item records return lists according to the field selected: Author, Title, Topic, or Call Number. This same functionality is available via the "Browse Alphabetically" link at the bottom of every page.
+
+A more elaborate faceted browsing experience is available by using the "Browse the Catalog" link also located at the bottom of every page. This section allows you to combine browsing across different fields to arrive at views like
+* [American Cooking by era](https://catalog-beta.lib.msu.edu/vufind/Browse/Era?findby=topic&category=&query=%22Cooking%2C+American%22&query_field=topic_facet&facet_field=era_facet)
+* [Almanacs by Author](https://catalog-beta.lib.msu.edu/vufind/Browse/Author?findby=genre&category=&query=%22Almanacs%22&query_field=genre_facet&facet_field=author_facet)
+* [Most Common Topics in the 17th Century](https://catalog-beta.lib.msu.edu/vufind/Browse/Topic?findby=era&category=&query=%2217th+century%22&query_field=era_facet&facet_field=topic_facet)
+ 
 
 ## Background & How It Works
 
@@ -78,9 +106,16 @@ In addition to the bibliographic content, each record pulled from FOLIO is amend
 ```
 This data includes the functional call number in `952e` and other data important to search and browse functionality within the public catalog. Subfields `c` and `d` are used to populate the `Location` facet in search results.
 
+
 #### Holdings Link Management
 
 TODO
 
 
 
+## Installation and Configuration
+
+Please refer to our documentation for instructions on how to setup and configure an initial
+VuFind Public Catalog instance:
+
+* [Technical User Documentation](https://msu-libraries.github.io/catalog/)
