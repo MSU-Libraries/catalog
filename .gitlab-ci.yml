@@ -453,9 +453,9 @@ Remove Environment:
       docker stack rm $STACK_NAME-internal;
       rm -rf $COMPOSE_PATH;
       sleep 15;"
-    - prune($DEPLOY_HOST_A)
-    - prune($DEPLOY_HOST_B)
-    - prune($DEPLOY_HOST_C)
+    - prune $DEPLOY_HOST_A
+    - prune $DEPLOY_HOST_B
+    - prune $DEPLOY_HOST_C
 
 ############# Templates ###############
 
