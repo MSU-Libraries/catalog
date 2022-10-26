@@ -336,9 +336,9 @@ Vufind Populate Environment:
     - job: Vufind Upgrade
   script:
     # Determine if records are already loaded
-    - CONTAINER_A=$(ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog)")
-    - CONTAINER_B=$(ssh deploy@$DEPLOY_HOST_B "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog)")
-    - CONTAINER_C=$(ssh deploy@$DEPLOY_HOST_C "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog)")
+    - CONTAINER_A=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog")
+    - CONTAINER_B=$(ssh deploy@$DEPLOY_HOST_B "docker ps -q -f name=${STACK_NAME}-catalog_catalog")
+    - CONTAINER_C=$(ssh deploy@$DEPLOY_HOST_C "docker ps -q -f name=${STACK_NAME}-catalog_catalog")
     - |
       if [ -z "${CONTAINER_A}" ] || [ -z "${CONTAINER_B}" ] || [ -z "${CONTAINER_C}" ] ; then
         echo "Could not find container for ${STACK_NAME}-catalog_catalog on all 3 nodes";
