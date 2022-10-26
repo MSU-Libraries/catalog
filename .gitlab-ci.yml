@@ -165,8 +165,7 @@ Bootstrap Stacks:
   script:
     - >
       ssh deploy@$DEPLOY_HOST_A
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      (docker volume ls | grep -q ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud-bootstrap.yml ${STACK_NAME}-mariadb && sleep 30 && docker stack rm ${STACK_NAME}-mariadb && sleep 25)) &&
+      "(docker volume ls | grep -q ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud-bootstrap.yml ${STACK_NAME}-mariadb && sleep 30 && docker stack rm ${STACK_NAME}-mariadb && sleep 25)) &&
       (docker volume ls | grep -q ${STACK_NAME}-solr || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml ${STACK_NAME}-solr && sleep 90))"
 
 Deploy Solr:
@@ -184,17 +183,13 @@ Deploy Solr:
     - Deploy Internal Network
     - Deploy Traefik
   script:
-    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
-    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
     # Pull images now to save time with stack deploy
     - >
       ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA" &
       ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA" &
       ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA"
     - >
-      ssh deploy@$DEPLOY_HOST_A
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr"
+      ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr"
 
 Deploy Swarm Cron:
   stage: Deploy
@@ -218,9 +213,7 @@ Deploy DB:
     - Deploy Internal Network
   script:
     - >
-      ssh deploy@$DEPLOY_HOST_A
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud.yml ${STACK_NAME}-mariadb && sleep 45"
+      ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud.yml ${STACK_NAME}-mariadb && sleep 45"
 
 Deploy Vufind:
   stage: Deploy
@@ -241,17 +234,13 @@ Deploy Vufind:
     - Deploy Solr
     - Deploy Compose Files
   script:
-    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
-    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
     # Pull images now to save time with stack deploy
     - >
       ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" &
       ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" &
       ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA"
     - >
-      ssh deploy@$DEPLOY_HOST_A
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME-catalog"
+      ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME-catalog"
     # Determine URL
     - >
       if [ "${STACK_NAME}" != "catalog-beta" ]; then
@@ -312,8 +301,6 @@ Vufind Upgrade:
                 fi
             done
         }
-        ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts;
-        ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
         catalogwait;
         apk add curl || apt install curl -y;
         echo "Enabling auto configure temporarily";
@@ -348,8 +335,6 @@ Vufind Populate Environment:
       artifacts: true
     - job: Vufind Upgrade
   script:
-    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts;
-    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
     # Determine if records are already loaded
     - CONTAINER_A = $(ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog)")
     - CONTAINER_B = $(ssh deploy@$DEPLOY_HOST_B "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog)")
@@ -418,8 +403,6 @@ Verify Health:
                 fi
             done
         }
-    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts;
-    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
     - checkhealth mariadb_galera;
     - checkhealth catalog_catalog;
     # Give solr more time before attempting since it takes longer to start cluster
@@ -464,8 +447,6 @@ Remove Environment:
       sleep 15;
       docker system prune -a -f;
       docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
-    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
-    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
     - ssh deploy@$DEPLOY_HOST_B "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
     - ssh deploy@$DEPLOY_HOST_C "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
 
@@ -503,6 +484,12 @@ Remove Environment:
     - install -d -m 700 ~/.ssh/
     - ( umask 022; touch ~/.ssh/known_hosts )
     - ssh-keyscan $SERVER >> ~/.ssh/known_hosts
+    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
+    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
+    # Docker login to all servers
+    - ssh deploy@$DEPLOY_HOST_A "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY"
+    - ssh deploy@$DEPLOY_HOST_B "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY"
+    - ssh deploy@$DEPLOY_HOST_C "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY"
 
 include:
   - project: 'msu-libraries/public/cicd-templates'
