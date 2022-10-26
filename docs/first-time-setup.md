@@ -108,6 +108,7 @@ following permissions within FOLIO:
 * Users: Can view fees/fines and loans
 * Users: Can view user profile
 * For course reserves: `course-reserves-storage.courselistings.collection.get` (a permission set needs to be created with the API for this)
+* For renewals: `circulation.renew-by-id.post`
 
 ## For GitLab users
 ### Creating a CI/CD Token
