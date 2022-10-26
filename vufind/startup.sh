@@ -6,8 +6,8 @@ SHARED_STORAGE="/mnt/shared/local"
 # Populating the shared storage if empty
 if [ "${STACK_NAME}" != "catalog-beta" ]; then
     echo "Linking the local, module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
-    rm -rf ${SHARED_STORAGE}/${STACK_NAME}
     mkdir -p ${SHARED_STORAGE}/${STACK_NAME}
+    rm -rf ${SHARED_STORAGE}/${STACK_NAME}/*
     if [ ! "$(ls -A ${SHARED_STORAGE}/${STACK_NAME})" ]; then
         rsync -aiv /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/local/
         rsync -aiv /usr/local/vufind/themes/msul/ ${SHARED_STORAGE}/${STACK_NAME}/msul/
