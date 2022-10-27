@@ -98,17 +98,30 @@ The users credentials are provided as build arguments to the vufind image:
 `FOLIO_USER` and `FOLIO_PASS`.
 
 The `vufind` application user (set in `local/confing/vufind/Folio.ini`) requires the
-following permissions within FOLIO:
+following permissions within FOLIO. They need to be created as a permission set with the FOLIO API, with a `POST` request to `/perms/permissions`.
 
-* Inventory: View instances, holdings, and items
-* MSU OAI-PMH
-* Requests: View
-* Settings (OAI-PMH): Can view
-* Settings (OAI-PMH): Can view and edit settings
-* Users: Can view fees/fines and loans
-* Users: Can view user profile
-* For course reserves: `course-reserves-storage.courselistings.collection.get` (a permission set needs to be created with the API for this)
-* For renewals: `circulation.renew-by-id.post`
+* `inventory.instances.item.get`
+* `inventory-storage.holdings.collection.get`
+* `inventory-storage.instances.collection.get`
+* `inventory-storage.items.collection.get`
+* `inventory-storage.locations.collection.get`
+* `inventory-storage.locations.item.get`
+* `inventory-storage.service-points.collection.get`
+* `circulation.loans.collection.get`
+* `circulation.requests.item.post`
+* `circulation.requests.item.get`
+* `circulation.requests.item.put`
+* `circulation.renew-by-id.post`
+* `circulation-storage.requests.collection.get`
+* `users.collection.get`
+* `accounts.collection.get`
+* `course-reserves-storage.courselistings.collection.get`
+* `course-reserves-storage.courselistings.courses.collection.get`
+* `course-reserves-storage.courselistings.instructors.collection.get`
+* `course-reserves-storage.courses.collection.get`
+* `course-reserves-storage.departments.collection.get`
+* `course-reserves-storage.reserves.collection.get`
+* `oai-pmh.records.collection.get`
 
 ## For GitLab users
 ### Creating a CI/CD Token
