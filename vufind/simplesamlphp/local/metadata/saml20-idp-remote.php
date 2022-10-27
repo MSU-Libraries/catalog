@@ -20,3 +20,9 @@ $metadata['https://samltest.id/saml/idp'] = [
     'certificate'          => 'samltest.pem',
     'sign.logout'          => true,
 ];
+$metadata['http://www.okta.com/exk1ed76cimmz56WW0h8'] = [
+    'SingleSignOnService'  => 'https://auth.test.itservices.msu.edu/app/msutst_devlibpubliccatalog_1/exk1ed76cimmz56WW0h8/sso/saml',
+    'SingleLogoutService'  => 'https://auth.test.itservices.msu.edu/login/signout?fromURI=https%3A%2F%2F'.getenv('SITE_HOSTNAME'),
+    'certificate'          => 'msu-dev.pem',
+    'sign.logout'          => true,
+];
