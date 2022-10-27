@@ -16,6 +16,8 @@ services:
       - target: 443
         published: 443
         protocol: tcp
+    environment:
+      # XXX: The environment will be replaced by traefik-env.yml during deploy
     command:
       - "--providers.docker"
       - "--providers.docker.swarmMode=true"
@@ -38,6 +40,10 @@ services:
       - "--certificatesresolvers.msul-letsencrypt.acme.storage=/etc/traefik/acme.json"
       - "--certificatesresolvers.msul-letsencrypt.acme.httpchallenge=true"
       - "--certificatesresolvers.msul-letsencrypt.acme.httpchallenge.entrypoint=msul-http-ent"
+      - "--certificatesresolvers.msul-letsencrypt-dns.acme.email=LIB.DL.DDaS@msu.edu"
+      - "--certificatesresolvers.msul-letsencrypt-dns.acme.storage=/etc/traefik/acme-dns.json"
+      - "--certificatesresolvers.msul-letsencrypt-dns.acme.dnschallenge=true"
+      - "--certificatesresolvers.msul-letsencrypt-dns.acme.dnschallenge.provider=route53"
     healthcheck:
       test: >
         traefik healthcheck \

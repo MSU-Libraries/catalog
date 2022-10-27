@@ -23,21 +23,21 @@ x-solr-deploy: &solr_deploy
   placement:
     max_replicas_per_node: 1
   labels:
-    # These labels need to stay in this order for the CI to work
+    # XXX: These labels need to stay in this order for the CI to work
     - "traefik.enable=true"
     - "traefik.http.routers.msul-solr-router.entrypoints=msul-http-ent"
     - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
     - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
     - "traefik.http.routers.msul-solr-router.rule=Host(`catalog.aws.lib.msu.edu`) && PathPrefix(`/solr`)"
-    # NEW
     - "traefik.http.routers.devel-solr-msul-solr-router.middlewares=http-redirect"
     - "traefik.http.routers.devel-solr-https-msul-solr-router.entrypoints=msul-https-ent"
     - "traefik.http.routers.devel-solr-https-msul-solr-router.service=devel-solr-https-msul-solr-app"
     - "traefik.http.routers.devel-solr-https-msul-solr-router.middlewares=restrict-auth"
     - "traefik.http.routers.devel-solr-https-msul-solr-router.rule=Host(`devel-solr.aws.lib.msu.edu`) && PathPrefix(`/solr`)"
     - "traefik.http.routers.devel-solr-https-msul-solr-router.tls=true"
-    - "traefik.http.routers.devel-solr-https-msul-solr-router.tls.certresolver=msul-letsencrypt"
-    - "traefik.http.services.devel-solr-https-msul-solr-app.loadbalancer.server.port=8983"
+    - "traefik.http.routers.devel-solr-https-msul-solr-router.tls.certresolver=msul-letsencrypt-dns"
+    - "traefik.http.routers.devel-solr-https-msul-solr-router.tls.domains[0].main=aws.lib.msu.edu"
+    - "traefik.http.routers.devel-solr-https-msul-solr-router.tls.domains[0].sans=*.aws.lib.msu.edu"
 
 version: "3.8"
 services:
