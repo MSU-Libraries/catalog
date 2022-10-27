@@ -69,11 +69,11 @@ The search results page includes a few options to save and send results.
 * **Save Search**: Requires login. Saved searches will appear on your user account page.
 * **Email Search**: No login required. Send the url of your search to any email address.
 * **RSS Feed**: TODO
-* **With Selected: Email**: No login required. In addition to emailing a search url, as above, you can also select some or all records on a page and sent them to an email address of your choosing.
+* **With Selected: Email**: No login required. In addition to emailing a search url, as above, you can also select some or all records on a page and send them to an email address of your choosing.
 * **With Selected: Export**: No login required. All built-in VuFind export options are currently turned on: RefWorks, EndNote, EndNoteWeb, MARC, MARCXML, RDF, BibTeX, and RIS. 
-* **With Selected: Print**: Print out selected sections of the search results page.
+* **With Selected: Print**: Print out selected sections of the search results page. To print all results, the same result can be obtained by using the File-->Print option from the browser menu.
 * **With Selected: Save**: Requires login. Save selected records to a list of your creation.
-* * Citation Export*: There are no default export options in the VuFind catalog that format results according to a particular citation style or format. These options are available and working on individual record pages.
+* *Citation Export*: There are no default export options in the VuFind catalog that format results according to a particular citation style or format. These options are available and working on individual record pages.
 
 ### Browse
 
@@ -111,7 +111,7 @@ topic_facet = 600x:610x:611x:630x:648x:650a:650x:651x:655x
 ```
 The topic facet field pulls values from all of the MARC fields specified above. 
 
-In addition to the bibliographic content, each record pulled from FOLIO is amended to include some holdings-specific information, which allows VuFind to provide real-time information about the location of individual items.
+In addition to the bibliographic content, each record pulled from FOLIO is amended to include some holdings-specific information, which allows VuFind to provide information about the location of individual items. Real time information about availability is pulled from FOLIO any time a user loads a page.
 ```
 952 f   f   |a Michigan State Unversity-Library of Michigan  |b Michigan State University  |c MSU Special Collections  |d MSU Special Collections - Comic Art  |t 0  |e PN6727.K53 K5 1994  |h Library of Congress classification  |i Printed Material  |n 1 
 ```
