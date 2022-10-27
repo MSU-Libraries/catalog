@@ -1,10 +1,18 @@
-## Functionality
+## Public Catalog Functionality
+
+The VuFind Public Catalog provides several different options for searching and retrieving both locally held materials, such as books and other media, and journal articles and other electronic resources for which the Libraries has negotiated access. 
 
 ### Search
 
+The public catalog search options are listed under three tabs on each and every VuFind page: "Catalog", "Articles", and "All". There are different options for limiting search queries and faceting on the results across the three tabs because of the different sources of the underlying data and their various affordances.
+
+* **Catalog**: This is the search of the main VuFind index, which contains records for all unsuppressed records in FOLIO plus 1.8 million records stored in Holdings Link Management (HLM). Robust options for limiting searches and faceting results are available based on the comprehensive descriptive work of our technical services teams.
+* **Articles**: This is a search against EDS but limited to resources of type "article" so as to avoid duplication with the Catalog tab.
+* **All**: A combined view of all materials both from our local catalog and EDS. Since this federated search has to display data from unlike sources, the more advanced search and faceting options can't be very well recreated here (although some improvements could be the target of future work).
+
 #### Main Search Box
 
-A generic search under the Catalog tab in the VuFind public catalog searches a particular set of fields, weighted according to importance. Records with term matches in more heavily weighted fields will appear higher up in results lists. 
+A generic search under the Catalog tab in the VuFind public catalog searches a particular set of fields, weighted according to importance. Records with term matches in more heavily weighted fields will appear higher up in search results.
 
 ```
 AllFields:
@@ -32,7 +40,7 @@ AllFields:
     - issn
     - long_lat_display
 ```
-The weightings above (e.g. the `^750` part of `title_short^750`) add a relative boost to records in which search terms appear in the `title_short` field. 
+The weightings above (e.g. the `^750` part of `title_short^750`) add a relative boost to records in which search terms appear in the specified field. This ensures that a term that matches the title of an item will be ranked higher (and appear earlier) in search results than if the match were in, say, the description of the item.
 
 The presence of a generic `allfields` field in the list indicates that all fields indexed in VuFind should return results in the default search box. Searching within the confines of a limiter, such as author or title, simply reduces the number of results.
 
@@ -52,17 +60,20 @@ Author:
 
 #### Advanced Search
 
-The advanced search interface provides a similar, though not identical, set of fields to search by. This interface is highly customizable. Please submit a request to `lib.dl.cdawg@msu.edu` if you have any suggestions for improvement.
+The advanced search interface provides a similar, though not identical, set of fields to search by. This interface can be customized and we expect with use we might identify particular options to add or remove.
 
 #### Search Tools
 
 The search results page includes a few options to save and send results.
 
 * **Save Search**: Requires login. Saved searches will appear on your user account page.
-* **Email Search**: Send the url of your search to your, or someone else's, email address.
-* **RSS Feed**: TODO (For this to work we need to index record change dates)
-* *Print*: There is no dedicated print function available in VuFind for search result pages (only individual records). The `file->print` option in the browser may work in a pinch.
-* *Export*: There are no default export options in the VuFind catalog that format results according to a particular citation style or format. These options are available and working on individual record pages.
+* **Email Search**: No login required. Send the url of your search to any email address.
+* **RSS Feed**: TODO
+* **With Selected: Email**: No login required. In addition to emailing a search url, as above, you can also select some or all records on a page and sent them to an email address of your choosing.
+* **With Selected: Export**: No login required. All built-in VuFind export options are currently turned on: RefWorks, EndNote, EndNoteWeb, MARC, MARCXML, RDF, BibTeX, and RIS. 
+* **With Selected: Print**: Print out selected sections of the search results page.
+* **With Selected: Save**: Requires login. Save selected records to a list of your creation.
+* * Citation Export*: There are no default export options in the VuFind catalog that format results according to a particular citation style or format. These options are available and working on individual record pages.
 
 ### Browse
 
@@ -80,8 +91,8 @@ A more elaborate faceted browsing experience is available by using the "Browse t
 
 #### The Local Catalog (FOLIO)
 
-All FOLIO inventory records are updated in the VuFind Public Catalog index at least once daily. After an initial full load of all records, incremental updates to new, changed, or deleted records are be updated at a specific hour every evening. 
-
+All FOLIO inventory records are updated in the VuFind Public Catalog index at least once daily. After an initial full load of all records, incremental updates to new, changed, or deleted records are updated at a specific hour every evening.
+ 
 All MARC bibliographic records stored in the FOLIO inventory are harvested (via OAI-PMH) and indexed in the public catalog according to a particular indexing scheme. The default settings for this scheme come from [VuFind’s marc.properties file](https://github.com/vufind-org/vufind/blob/release-8.1/import/marc.properties), but some are extended or overridden by MSUL’s own local customizations in the [marc_local.properties file](https://gitlab.msu.edu/msu-libraries/devops/catalog/-/blob/main/vufind/local/import/marc_local.properties). 
 
 These configuration files are quite powerful and allow for a good deal of customization. For example, the `title` field (used in search results) is specified by VuFind as `title = 245ab, first`. This indicates that the `245` fields `a` and `b` are concatenated to form the title. The `first` argument indicates that if there are multiple `245` fields, only the first one will be selected and indexed. This default title specification is, however, overridden by a local configuration:
@@ -94,13 +105,13 @@ pattern_map.title.pattern_1 = keepRaw
 
 The new configuration has the additional specification `(pattern_map.title)`, which processes the text of the title to eliminate the trailing slash (`/`) at the end of the `245a` subfield. Small changes to the text of any given field can be made using this programmatic method. Changes to individual fields should be made in FOLIO.
 
-Multi-valued fields can be populated from a whole set of fields:
+Multi-valued fields, such as Topic, can be populated from a whole set of fields:
 ```
 topic_facet = 600x:610x:611x:630x:648x:650a:650x:651x:655x
 ```
-The topic facet pulls values from the MARC fields specified above. 
+The topic facet field pulls values from all of the MARC fields specified above. 
 
-In addition to the bibliographic content, each record pulled from FOLIO is amended to include some holdings-specific information, which allows VuFind to provide real-time information about the status of individual items.  
+In addition to the bibliographic content, each record pulled from FOLIO is amended to include some holdings-specific information, which allows VuFind to provide real-time information about the location of individual items.
 ```
 952 f   f   |a Michigan State Unversity-Library of Michigan  |b Michigan State University  |c MSU Special Collections  |d MSU Special Collections - Comic Art  |t 0  |e PN6727.K53 K5 1994  |h Library of Congress classification  |i Printed Material  |n 1 
 ```
@@ -119,3 +130,7 @@ Please refer to our documentation for instructions on how to setup and configure
 VuFind Public Catalog instance:
 
 * [Technical User Documentation](https://msu-libraries.github.io/catalog/)
+
+## Help and Feature Requests
+
+If you have any particular questions, or features you'd like to see, please do get in touch at **lib.dl.cdawg@msu.edu**.
