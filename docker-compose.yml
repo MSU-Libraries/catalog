@@ -21,6 +21,7 @@ services:
     environment:
       SAML_IDP_ENTITY_ID: "http://www.okta.com/exk1ed76cimmz56WW0h8"
       STACK_NAME: "${STACK_NAME}"
+      NODE: "{{slice .Node.Hostname 8 9}}"
     deploy:
       mode: replicated
       replicas: 3

@@ -165,8 +165,7 @@ Bootstrap Stacks:
   script:
     - >
       ssh deploy@$DEPLOY_HOST_A
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      (docker volume ls | grep -q ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud-bootstrap.yml ${STACK_NAME}-mariadb && sleep 30 && docker stack rm ${STACK_NAME}-mariadb && sleep 25)) &&
+      "(docker volume ls | grep -q ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud-bootstrap.yml ${STACK_NAME}-mariadb && sleep 30 && docker stack rm ${STACK_NAME}-mariadb && sleep 25)) &&
       (docker volume ls | grep -q ${STACK_NAME}-solr || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml ${STACK_NAME}-solr && sleep 90))"
 
 Deploy Solr:
@@ -184,10 +183,13 @@ Deploy Solr:
     - Deploy Internal Network
     - Deploy Traefik
   script:
+    # Pull images now to save time with stack deploy
     - >
-      ssh deploy@$DEPLOY_HOST_A
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr"
+      ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA" &
+      ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA" &
+      ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA"
+    - >
+      ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr"
 
 Deploy Swarm Cron:
   stage: Deploy
@@ -211,9 +213,7 @@ Deploy DB:
     - Deploy Internal Network
   script:
     - >
-      ssh deploy@$DEPLOY_HOST_A
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud.yml ${STACK_NAME}-mariadb && sleep 45"
+      ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud.yml ${STACK_NAME}-mariadb && sleep 45"
 
 Deploy Vufind:
   stage: Deploy
@@ -234,10 +234,13 @@ Deploy Vufind:
     - Deploy Solr
     - Deploy Compose Files
   script:
+    # Pull images now to save time with stack deploy
     - >
-      ssh deploy@$DEPLOY_HOST_A
-      "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY &&
-      docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME-catalog"
+      ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" &
+      ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" &
+      ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA"
+    - >
+      ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME-catalog"
     # Determine URL
     - >
       if [ "${STACK_NAME}" != "catalog-beta" ]; then
@@ -268,6 +271,10 @@ Vufind Upgrade:
             NEWVAL=$2;
             for HOST in ${HOSTS}; do
                 CONTAINER=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-catalog_catalog");
+                if [ -z "${CONTAINER}" ]; then
+                  echo "Could not find container for ${STACK_NAME}-catalog_catalog!";
+                  exit 1;
+                fi;
                 ssh deploy@$HOST "docker exec ${CONTAINER} sed -i 's/autoConfigure = $OLDVAL/autoConfigure = $NEWVAL/g' local/config/vufind/config.ini";
             done
         }
@@ -294,8 +301,6 @@ Vufind Upgrade:
                 fi
             done
         }
-        ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts;
-        ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
         catalogwait;
         apk add curl || apt install curl -y;
         echo "Enabling auto configure temporarily";
@@ -303,6 +308,20 @@ Vufind Upgrade:
         echo "Running Vufind upgrade now against ${URL}";
         curl "${URL}/vufind/Upgrade/GetSourceVersion" -k --data-raw "sourceversion=${PREV_VUFIND_VERSION}&skip%5B%5D=config" -L -O;
         echo "Upgrade complete with exit code $?";
+  after_script:
+    - |
+        setconfig() {
+            OLDVAL=$1;
+            NEWVAL=$2;
+            for HOST in ${HOSTS}; do
+                CONTAINER=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-catalog_catalog");
+                if [ -z "${CONTAINER}" ]; then
+                  echo "Could not find container for ${STACK_NAME}-catalog_catalog!";
+                  exit 1;
+                fi;
+                ssh deploy@$HOST "docker exec ${CONTAINER} sed -i 's/autoConfigure = $OLDVAL/autoConfigure = $NEWVAL/g' local/config/vufind/config.ini";
+            done
+        }
         echo "Disabling auto configure";
         setconfig "true" "false";
 
@@ -316,26 +335,32 @@ Vufind Populate Environment:
       artifacts: true
     - job: Vufind Upgrade
   script:
-    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts;
-    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
     # Determine if records are already loaded
+    - CONTAINER_A=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog")
+    - CONTAINER_B=$(ssh deploy@$DEPLOY_HOST_B "docker ps -q -f name=${STACK_NAME}-catalog_catalog")
+    - CONTAINER_C=$(ssh deploy@$DEPLOY_HOST_C "docker ps -q -f name=${STACK_NAME}-catalog_catalog")
     - |
-        STAT_CD=$(ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) curl 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' --write-out %{http_code} --silent --output /dev/null");
+      if [ -z "${CONTAINER_A}" ] || [ -z "${CONTAINER_B}" ] || [ -z "${CONTAINER_C}" ] ; then
+        echo "Could not find container for ${STACK_NAME}-catalog_catalog on all 3 nodes";
+        exit 1;
+      fi;
+    - |
+        STAT_CD=$(ssh deploy@$DEPLOY_HOST_A "docker exec ${CONTAINER_A} curl 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' --write-out %{http_code} --silent --output /dev/null");
         if [[ "${STAT_CD}" -ne 200 ]]; then
             echo "Failed to get number of records from Solr. Curl returned ${STAT_CD}.";
             exit 1;
         fi;
-        NUM_RECS=$(ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) curl -s 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' | jq '.response.numFound'");
+        NUM_RECS=$(ssh deploy@$DEPLOY_HOST_A "docker exec ${CONTAINER_A} curl -s 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' | jq '.response.numFound'");
         if [[ "${NUM_RECS}" -eq "0" ]]; then
             # Load some records
             echo "Running harvest-and-import.sh now";
-            ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -r -s /mnt/shared/oai/devel-batch >/dev/null 2>&1";
+            ssh deploy@$DEPLOY_HOST_A "docker exec ${CONTAINER_A} /harvest-and-import.sh -c -l 1 -b -r -s /mnt/shared/oai/devel-batch >/dev/null 2>&1";
             echo "Import completed with exit code $?";
             # Rebuild alphabetic browse databases
             echo "Running Alphabetic browse database build";
-            ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
-            ssh deploy@$DEPLOY_HOST_B "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
-            ssh deploy@$DEPLOY_HOST_C "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+            ssh deploy@$DEPLOY_HOST_A "docker exec ${CONTAINER_A} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+            ssh deploy@$DEPLOY_HOST_B "docker exec ${CONTAINER_B} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+            ssh deploy@$DEPLOY_HOST_C "docker exec ${CONTAINER_C} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
             echo "Completed alphabetic browse database build";
         else
             echo "${NUM_RECS} loaded records already exist. Doing nothing.";
@@ -357,7 +382,12 @@ Verify Health:
             for HOST in ${HOSTS}; do
                 ATTEMPTS=0;
                 while [[ "$ATTEMPTS" -le 15 ]]; do
-                    HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE}) 2>/dev/null || echo \"No Health\"");
+                    CONTAINER=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-${SERVICE}");
+                    if [ -z "${CONTAINER}" ]; then
+                      HEALTH="No Health";
+                    else
+                      HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE}) 2>/dev/null || echo \"No Health\"");
+                    fi
                     if [[ "${HEALTH}" == "\"healthy\"" ]]; then
                         echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} is healthy."
                         EC=0;
@@ -373,8 +403,6 @@ Verify Health:
                 fi
             done
         }
-    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts;
-    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
     - checkhealth mariadb_galera;
     - checkhealth catalog_catalog;
     # Give solr more time before attempting since it takes longer to start cluster
@@ -396,6 +424,14 @@ Remove Environment:
       artifacts: true
     - Deploy Vufind
   script:
+    - >
+      prunevols() {
+        SERVER=$1;
+        VOLS=$(ssh deploy@$SERVER "docker volume ls --filter name=$STACK_NAME --format '{{.Name}}'");
+        if [ ! -z "${VOLS}" ]; then
+          ssh deploy@$SERVER "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm";
+        fi
+        }
     # Add .aws credentials
     - cat provision-dns-playbook/variables.yml | envsubst | sponge provision-dns-playbook/variables.yml
     # Replace STACK_NAME in env/prod/main.tf and create host file in provision-dns-playbook
@@ -403,7 +439,11 @@ Remove Environment:
     # Run playbook
     - ansible-playbook provision-dns-playbook/decommission.yml
     # Remove the alphabetic browse databases
-    - ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=$STACK_NAME-solr_cron) rm -rf /mnt/shared/alpha-browse/${STACK_NAME}"
+    - |
+      CONTAINER=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=$STACK_NAME-solr_cron");
+      if [ ! -z "${CONTAINER}" ];then
+        ssh deploy@$DEPLOY_HOST_A "docker exec ${CONTAINER} rm -rf /mnt/shared/alpha-browse/${STACK_NAME}";
+      fi
     # Cleanup volumes/networks/images/containers
     - >
       ssh deploy@$DEPLOY_HOST_A
@@ -412,13 +452,10 @@ Remove Environment:
       docker stack rm $STACK_NAME-catalog;
       docker stack rm $STACK_NAME-internal;
       rm -rf $COMPOSE_PATH;
-      sleep 15;
-      docker system prune -a -f;
-      docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
-    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
-    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
-    - ssh deploy@$DEPLOY_HOST_B "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
-    - ssh deploy@$DEPLOY_HOST_C "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
+      sleep 15;"
+    - prunevols $DEPLOY_HOST_A
+    - prunevols $DEPLOY_HOST_B
+    - prunevols $DEPLOY_HOST_C
 
 ############# Templates ###############
 
@@ -436,6 +473,30 @@ Remove Environment:
     - job: Set Stack Name
       artifacts: true
     - Deploy Compose Files
+  before_script:
+    # New steps to check STACK_NAME
+    - test -n "${STACK_NAME}"
+    # Before script before SSH template
+    - >
+      if [ -z $SERVER ] || [ -z $ENCODED_PRIVATE_KEY ] ; then
+         echo "Missing one or more of the required variables: SERVER, ENCODED_PRIVATE_KEY";
+         echo "SERVER: ${SERVER}";
+         echo "ENCODED_PRIVATE_KEY: ${ENCODED_PRIVATE_KEY:0:3}...";
+         exit 1;
+      fi
+    # Setup SSH access to a server using $ENCODED_PRIVATE_KEY and $SERVER
+    - apk add openssh-client || apt install openssh-client
+    - eval $( ssh-agent -s )
+    - echo "$ENCODED_PRIVATE_KEY" | base64 -d | ssh-add -
+    - install -d -m 700 ~/.ssh/
+    - ( umask 022; touch ~/.ssh/known_hosts )
+    - ssh-keyscan $SERVER >> ~/.ssh/known_hosts
+    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
+    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
+    # Docker login to all servers
+    - ssh deploy@$DEPLOY_HOST_A "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY"
+    - ssh deploy@$DEPLOY_HOST_B "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY"
+    - ssh deploy@$DEPLOY_HOST_C "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY"
 
 include:
   - project: 'msu-libraries/public/cicd-templates'
