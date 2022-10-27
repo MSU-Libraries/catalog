@@ -36,7 +36,8 @@ x-solr-deploy: &solr_deploy
     - "traefik.http.routers.devel-solr-https-msul-solr-router.rule=Host(`devel-solr.aws.lib.msu.edu`) && PathPrefix(`/solr`)"
     - "traefik.http.routers.devel-solr-https-msul-solr-router.tls=true"
     - "traefik.http.routers.devel-solr-https-msul-solr-router.tls.certresolver=msul-letsencrypt-dns"
-    - "traefik.http.routers.devel-solr-https-msul-solr-router.tls.domains[0].main=*.aws.lib.msu.edu"
+    - "traefik.http.routers.devel-solr-https-msul-solr-router.tls.domains[0].main=aws.lib.msu.edu"
+    - "traefik.http.routers.devel-solr-https-msul-solr-router.tls.domains[0].sans=*.aws.lib.msu.edu"
 
 version: "3.8"
 services:

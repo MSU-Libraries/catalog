@@ -40,9 +40,10 @@ services:
         - "traefik.http.services.${STACK_NAME}-http-app.loadbalancer.server.port=80"
         # HTTPS Configuration
         - "traefik.http.routers.${STACK_NAME}-https-router.tls=true"
-        # XXX The following two lines must be indexes 6 and 7 of 'labels' for CI to update correctly
+        # XXX The following two lines must be indexes 6, 7, 8 of 'labels' for CI to update correctly
         - "traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt-dns"
-        - "traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].main=*.aws.lib.msu.edu"
+        - "traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].main=aws.lib.msu.edu"
+        - "traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].sans=*.aws.lib.msu.edu"
         - "traefik.http.routers.${STACK_NAME}-https-router.entrypoints=msul-https-ent"
         - "traefik.http.routers.${STACK_NAME}-https-router.middlewares=fix-prefix,saml-prefix"
         - "traefik.http.routers.${STACK_NAME}-https-router.service=${STACK_NAME}-https-app"

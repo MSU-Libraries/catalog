@@ -113,7 +113,8 @@ Deploy Compose Files:
     - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".x-solr-deploy.labels[10] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
     - ./yq -i ".x-solr-deploy.labels[11]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls=true\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[12]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.certresolver=msul-letsencrypt-dns\"" docker-compose.solr-cloud.yml
-    - ./yq -i ".x-solr-deploy.labels[13]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.domains[0].main=*.aws.lib.msu.edu\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".x-solr-deploy.labels[13]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.domains[0].main=aws.lib.msu.edu\"" docker-compose.solr-cloud.yml
+    - ./yq -i ".x-solr-deploy.labels[14]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" docker-compose.solr-cloud.yml
     # Set the stack name in the solr cron environment variable
     - ./yq -i ".services.cron.environment[\"STACK_NAME\"]=\"${STACK_NAME}\"" docker-compose.solr-cloud.yml
     # Development environment changes
@@ -130,8 +131,10 @@ Deploy Compose Files:
         # Use httpchallenge cert resolver (instead of dnschallenge)
         ./yq -i ".services.catalog.deploy.labels[6]=\"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt\"" docker-compose.yml;
         ./yq -i ".x-solr-deploy.labels[12]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.certresolver=msul-letsencrypt\"" docker-compose.solr-cloud.yml
-        # Remove the wildcard domain
+        # Remove the wildcard domain (remove larger line numbers first to prevent confusion)
+        ./yq -i "del(.services.catalog.deploy.labels[8])" docker-compose.yml;
         ./yq -i "del(.services.catalog.deploy.labels[7])" docker-compose.yml;
+        ./yq -i "del(.x-solr-deploy.labels[14])" docker-compose.solr-cloud.yml
         ./yq -i "del(.x-solr-deploy.labels[13])" docker-compose.solr-cloud.yml
       fi
     # Replace $STACK_NAME in main compose file
@@ -167,6 +170,7 @@ Deploy Traefik:
     - >
       ssh deploy@$DEPLOY_HOST_A
       "yq -i \".services.traefik.environment=\$( yq . traefik-env.yml -o json )\" $COMPOSE_PATH/docker-compose.traefik.yml
+      && sed -i \"/^$/d\" $COMPOSE_PATH/docker-compose.traefik.yml
       && docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik.yml traefik && sleep 15"
 
 Bootstrap Stacks:
