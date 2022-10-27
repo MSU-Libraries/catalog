@@ -8,11 +8,9 @@ if [ "${STACK_NAME}" != "catalog-beta" ]; then
     echo "Linking the local, module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
     mkdir -p ${SHARED_STORAGE}/${STACK_NAME}
     rm -rf ${SHARED_STORAGE}/${STACK_NAME}/*
-    if [ ! "$(ls -A ${SHARED_STORAGE}/${STACK_NAME})" ]; then
-        rsync -aiv /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/local/
-        rsync -aiv /usr/local/vufind/themes/msul/ ${SHARED_STORAGE}/${STACK_NAME}/msul/
-        rsync -aiv /usr/local/vufind/module/Catalog/ ${SHARED_STORAGE}/${STACK_NAME}/Catalog/
-    fi
+    rsync -aiv /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/local/
+    rsync -aiv /usr/local/vufind/themes/msul/ ${SHARED_STORAGE}/${STACK_NAME}/msul/
+    rsync -aiv /usr/local/vufind/module/Catalog/ ${SHARED_STORAGE}/${STACK_NAME}/Catalog/
     rm -rf /usr/local/vufind/local
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/local /usr/local/vufind
     rm -rf /usr/local/vufind/themes/msul
