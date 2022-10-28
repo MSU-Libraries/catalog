@@ -102,8 +102,10 @@ following permissions within FOLIO. They need to be created as a permission set 
 
 * `inventory.instances.item.get`
 * `inventory-storage.holdings.collection.get`
+* `inventory-storage.holdings.item.get`
 * `inventory-storage.instances.collection.get`
 * `inventory-storage.items.collection.get`
+* `inventory-storage.items.item.get`
 * `inventory-storage.locations.collection.get`
 * `inventory-storage.locations.item.get`
 * `inventory-storage.service-points.collection.get`
