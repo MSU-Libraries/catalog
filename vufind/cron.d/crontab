@@ -29,3 +29,6 @@ MAILTO=$EMAIL
 
 # Course reserves update
 30 ${NODE}	* * *	root    /usr/bin/php /usr/local/vufind/util/index_reserves.php 2>&1 | logger -t INDEX_RESERVES
+
+# Cleanup unsaved searches
+0 0     * * *   root    php /usr/local/vufind/public/index.php util/expire_searches 2>&1 | logger -t EXPIRE_SEARCHES
