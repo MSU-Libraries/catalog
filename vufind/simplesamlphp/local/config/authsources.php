@@ -1,5 +1,11 @@
 <?php
 
+// Select the IdP with its entityId; see saml20-idp-remote.php for available IdPs.
+if (getenv('STACK_NAME') == 'catalog-beta')
+    $idpEntityId = 'http://www.okta.com/exk1eh7tv3kMdzJgn0h8';
+else
+    $idpEntityId = 'http://www.okta.com/exk1ed76cimmz56WW0h8';
+
 $config = [
     /*
      * When multiple authentication sources are defined, you can specify one to use by default
@@ -33,7 +39,7 @@ $config = [
 
         // The entity ID of the IdP this SP should contact.
         // Can be NULL/unset, in which case the user will be shown a list of available IdPs.
-        'idp' => getenv('SAML_IDP_ENTITY_ID'),
+        'idp' => $idpEntityId,
 
         // The URL to the discovery service.
         // Can be NULL/unset, in which case a builtin discovery service will be used.
