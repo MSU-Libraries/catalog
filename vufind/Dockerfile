@@ -7,6 +7,7 @@ ENV VUFIND_LOCAL_DIR=/usr/local/vufind/local
 ENV VUFIND_HOME=/usr/local/vufind
 ENV JAVA_HOME=/usr/lib/jvm/default-java
 ENV VUFIND_LOCAL_MODULES=Catalog
+ENV VUFIND_CACHE_DIR /tmp/vufind_cache
 
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
@@ -174,7 +175,19 @@ RUN \
     # Set required environment variables
     echo JAVA_HOME="$JAVA_HOME" >> /etc/environment && \
     echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
-    echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR"  >> /etc/environment && \
+    echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR" >> /etc/environment && \
+    echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment && \
+    # Prepare cache directory
+    mkdir -p ${VUFIND_CACHE_DIR}/cli && \
+    chown -R 33:33 ${VUFIND_CACHE_DIR} && \
+    chmod -R g+sw ${VUFIND_CACHE_DIR} && \
+    # Set permissions on local, theme, and Catalog
+    chown -R 1000:1000 ${VUFIND_LOCAL_DIR} && \
+    chmod -R g+sw ${VUFIND_LOCAL_DIR} && \
+    chown -R 1000:1000 ${VUFIND_HOME}/themes/msul && \
+    chmod -R g+sw ${VUFIND_HOME}/themes/msul && \
+    chown -R 1000:1000 ${VUFIND_HOME}/module/Catalog && \
+    chmod -R g+sw ${VUFIND_HOME}/module/Catalog && \
     # Install grunt
     npm install -g grunt-cli && \
     grunt less
