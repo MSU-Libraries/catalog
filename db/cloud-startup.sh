@@ -97,7 +97,7 @@ wait_for_grastate_safe_to_bootstrap() {
     while ! grastate_safe_to_bootstrap && [[ "$CUR_SLEEP" -le "$MAX_SLEEP" ]]; do
         sleep 5
         (( CUR_SLEEP += 5 ))
-        verbose "Wating for safe_to_bootstrap: 1"
+        verbose "Waiting for safe_to_bootstrap: 1"
     done
     verbose "Wait limit exceeded (${MAX_SLEEP} secs); proceeding while not safe to bootstrap."
 }
@@ -173,7 +173,7 @@ galera_slow_shutdown() {
     if [[ "$SELF_NUMBER" -eq "${NODES_ONLINE[0]}" ]]; then
         if [[ "${#NODES_ONLINE[@]}" -gt 1 ]]; then
             verbose "I am lowest online node; resting to allow other nodes to shutdown first."
-            wait_for_grastate_safe_to_bootstrap 70
+            wait_for_grastate_safe_to_bootstrap 75
         else
             verbose "I am the ONLY node, so I'm safe to shutdown immediately."
         fi
