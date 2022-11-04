@@ -16,10 +16,33 @@ set -o pipefail
 
 print_welcome_page
 
+GALERA_STATE_FILE=/bitnami/mariadb/data/grastate.dat
+grastate_stp() {
+    GRA=
+    if [[ -f "$GALERA_STATE_FILE" ]]; then
+        info "Not first boot - grastate already exists"
+        if grep -q "safe_to_bootstrap: 1" "$GALERA_STATE_FILE"; then
+            GRA=1
+        else
+            GRA=0
+        fi
+        info "Previous grastate - safe_to_bootstrap: ${GRA}"
+    else
+        info "First ever node boot (lacking grastate)."
+    fi
+    echo "$GRA"
+}
+
 if [[ "$1" = "/cloud-startup.sh" ]]; then
+    PRE_GRA=$( grastate_stp )
     info "** Starting MariaDB setup **"
+    info "MARIADB_GALERA_CLUSTER_BOOTSTRAP=$MARIADB_GALERA_CLUSTER_BOOTSTRAP"
     /opt/bitnami/scripts/mariadb-galera/setup.sh
     info "** MariaDB setup finished! **"
+    if [[ -z "${PRE_GRA}" && "$MARIADB_GALERA_CLUSTER_BOOTSTRAP" != "yes" ]]; then
+        info "First boot (and without bootstrap); reset grastate safe_to_bootstrap to 0"
+        sed -i 's/^safe_to_bootstrap:.*$/safe_to_bootstrap: 0/' "$GALERA_STATE_FILE"
+    fi
 fi
 
 echo ""
