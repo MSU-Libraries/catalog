@@ -14,7 +14,7 @@ default_args() {
     ARGS[FTP_DIR]=s8364774/vufind/
     ARGS[FTP_USER]=${FTP_USER}
     ARGS[FTP_PASSWORD]=${FTP_PASSWORD}
-    ARGS[SHARED_DIR]=/mnt/shared/oai
+    ARGS[SHARED_DIR]=/mnt/shared/hlm
     ARGS[SOLR_URL]="http://solr:8983/solr"
     ARGS[RESET_SOLR]=0
     ARGS[VERBOSE]=0
@@ -170,7 +170,7 @@ parse_args() {
 
 catch_invalid_args() {
     if [[ "${ARGS[HARVEST]}" -eq 1 && "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
-        echo "ERROR: It is invalid to set both --oai-harvest and --copy-shared flags."
+        echo "ERROR: It is invalid to set both --harvest and --copy-shared flags."
         exit 1
     fi
     if [[ -n "${ARGS[LIMIT]}" && "${ARGS[COPY_SHARED]}" -ne 1 ]]; then
@@ -178,7 +178,7 @@ catch_invalid_args() {
         exit 1
     fi
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" && "${ARGS[IMPORT]}" -ne 1 ]]; then
-        echo "ERROR: The --limit-by-delete flag is only valid when --batch-import is also set."
+        echo "ERROR: The --limit-by-delete flag is only valid when --import is also set."
         exit 1
     fi
 }
@@ -305,7 +305,7 @@ harvest() {
     while IFS= read -r HLM_FILE
     do
         # If it is not in the harvest dir and it is an XML file, then get it
-        if [ -f "${ARGS[VUFIND_HARVEST_DIR]}/${HLM_FILE}" ] && [[ ${HLM_FILE} == *.xml ]]; then
+        if [ ! -f "${ARGS[VUFIND_HARVEST_DIR]}/${HLM_FILE}" ] && [[ ${HLM_FILE} == *.xml ]]; then
             wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${HLM_FILE}
         fi
     done < <(curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]} -l -s)
@@ -322,7 +322,7 @@ copyback_from_shared() {
     countdown 5
 
     # Clear out any exising xml files before copying back from shared storage
-    rm -f "${ARGS[VUFIND_HARVEST_DIR]}/*.xml"
+    clear_harvest_files "${ARGS[VUFIND_HARVEST_DIR]}/"
 
     COPIED_COUNT=0
     while read -r FILE; do
@@ -362,7 +362,6 @@ import() {
     fi
     verbose "Completed batch import"
 
-    # TODO Not sure if we have any??
     verbose "Processing delete records from harvest."
     countdown 5
     if ! /usr/local/vufind/harvest/batch-delete.sh hlm; then
