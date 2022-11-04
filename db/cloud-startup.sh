@@ -121,7 +121,6 @@ galera_slow_startup() {
     # - Another galera node is online
     # - No other nodes online, and grastate.dat file contains "safe_to_bootstrap: 1"
     # Otherwise not okay to proceed; sleep, rescan nodes, then check again
-
     while true; do
         verbose "Checking if safe to start..."
         if any_galera_node_online; then
