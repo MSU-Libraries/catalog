@@ -36,10 +36,11 @@ grastate_stp() {
 if [[ "$1" = "/cloud-startup.sh" ]]; then
     PRE_GRA=$( grastate_stp )
     info "** Starting MariaDB setup **"
+    info "MARIADB_GALERA_CLUSTER_BOOTSTRAP=$MARIADB_GALERA_CLUSTER_BOOTSTRAP"
     /opt/bitnami/scripts/mariadb-galera/setup.sh
     info "** MariaDB setup finished! **"
-    if [[ -z "${PRE_GRA}" ]]; then
-        info "First boot; reset grastate safe_to_bootstrap to 0"
+    if [[ -z "${PRE_GRA}" && "$MARIADB_GALERA_CLUSTER_BOOTSTRAP" != "yes" ]]; then
+        info "First boot (and without bootstrap); reset grastate safe_to_bootstrap to 0"
         sed -i 's/^safe_to_bootstrap:.*$/safe_to_bootstrap: 0/' "$GALERA_STATE_FILE"
     fi
 fi
