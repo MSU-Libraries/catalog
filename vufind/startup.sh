@@ -17,7 +17,10 @@ if [ "${STACK_NAME}" != "catalog-beta" ]; then
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/msul /usr/local/vufind/themes
     rm -rf /usr/local/vufind/module/Catalog
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/Catalog /usr/local/vufind/module
-fi;
+fi
+
+# Prepare cache cli dir (volume only exists after start)
+clear-vufind-cache
 
 # Ensure SolrCloud is available prior to creating Collections
 CLUSTER_STATUS_URL="http://solr:8983/solr/admin/collections?action=clusterstatus"

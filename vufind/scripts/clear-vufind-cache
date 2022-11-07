@@ -1,0 +1,8 @@
+#!/bin/bash
+
+rm -r "${VUFIND_CACHE_DIR}"/*
+
+# Re-initialize cli cache dir
+mkdir -p ${VUFIND_CACHE_DIR}/cli
+chown 33:33 ${VUFIND_CACHE_DIR}/cli
+chmod g+sw ${VUFIND_CACHE_DIR}/cli
