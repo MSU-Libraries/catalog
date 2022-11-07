@@ -16,7 +16,6 @@ default_args() {
     ARGS[FTP_PASSWORD]=${FTP_PASSWORD}
     ARGS[SHARED_DIR]=/mnt/shared/hlm
     ARGS[SOLR_URL]="http://solr:8983/solr"
-    ARGS[RESET_SOLR]=0
     ARGS[VERBOSE]=0
 }
 default_args
@@ -84,10 +83,6 @@ runhelp() {
     echo "      Default: Stored in the environment variable \$FTP_PASSWORD"
     echo "  -v|--verbose"
     echo "      Show verbose output."
-    echo "  -T|--test-harvest HARVEST_TGZ"
-    echo "      Instead of calling VuFind's harvest script, instead extract"
-    echo "      this gzip'd tar file into the VUFIND_HARVEST_DIR. This flag"
-    echo "      is used to test this script (only used with --harvest)."
     echo ""
 }
 

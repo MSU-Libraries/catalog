@@ -377,6 +377,9 @@ Vufind Populate Environment:
             echo "Running harvest-and-import.sh now";
             ssh deploy@$DEPLOY_HOST_A "docker exec ${CONTAINER_A} /harvest-and-import.sh -c -l 1 -b -r -s /mnt/shared/oai/devel-batch >/dev/null 2>&1";
             echo "Import completed with exit code $?";
+            echo "Running HLM harvest-and-import.sh now";
+            ssh deploy@$DEPLOY_HOST_A "docker exec ${CONTAINER_A} /hlm-harvest-and-import.sh -l 1 -c -i -s /mnt/shared/hlm/devel-batch >/dev/null 2>&1";
+            echo "Import completed with exit code $?";
             # Rebuild alphabetic browse databases
             echo "Running Alphabetic browse database build";
             ssh deploy@$DEPLOY_HOST_A "docker exec ${CONTAINER_A} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
