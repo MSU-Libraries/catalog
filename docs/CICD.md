@@ -111,6 +111,8 @@ resources such as Solr and the Traefik dashboard
 * `FOLIO_TENANT`: Tenant ID 
 * `FOLIO_URL`: Okapi URL for FOLIO used by Vufind 
 * `FOLIO_USER`: Application user used by Vufind for ILS calls 
+* `FTP_USER`: User name for the EBSCO FTP server
+* `FTP_PASSWORD`: Password for `FTP_USER`
 * `GITHUB_USER_TOKEN`: Token used to publish releases to GitHub repository 
 * `OAI_URL`: URL for making OAI calls to FOLIO when harvesting (can include API Token) 
 * `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation

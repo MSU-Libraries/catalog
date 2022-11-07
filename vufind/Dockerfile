@@ -149,6 +149,7 @@ COPY module/Catalog /usr/local/vufind/module/Catalog
 COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
+COPY hlm-harvest-and-import.sh /hlm-harvest-and-import.sh
 COPY msmtp/aliases /etc/aliases
 COPY msmtp/msmtprc /etc/msmtprc
 
