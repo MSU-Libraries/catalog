@@ -146,6 +146,19 @@ Deploy Compose Files:
     - ssh deploy@$DEPLOY_HOST_A mkdir -p $COMPOSE_PATH
     - scp docker-compose* deploy@$DEPLOY_HOST_A:$COMPOSE_PATH/
 
+Perform Database Backup:
+  stage: Prepare
+  extends: .stack_template
+  rules:
+    - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
+  script:
+    - CONTAINER="$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog")"
+    - >
+      if [[ -n "${CONTAINER}" ]]; then
+        echo "Performing a database backup";
+        ssh deploy@$DEPLOY_HOST_A "docker exec $CONTAINER /backup.sh --db --rotations 5 -v";
+      fi
+
 Deploy Internal Network:
   stage: Networking
   extends: .stack_template
@@ -360,9 +373,17 @@ Vufind Populate Environment:
     - CONTAINER_A=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo ""
     - CONTAINER_B=$(ssh deploy@$DEPLOY_HOST_B "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo ""
     - CONTAINER_C=$(ssh deploy@$DEPLOY_HOST_C "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo ""
+    - S_CONTAINER_A=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo ""
+    - S_CONTAINER_B=$(ssh deploy@$DEPLOY_HOST_B "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo ""
+    - S_CONTAINER_C=$(ssh deploy@$DEPLOY_HOST_C "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo ""
     - |
       if [ -z "${CONTAINER_A}" ] || [ -z "${CONTAINER_B}" ] || [ -z "${CONTAINER_C}" ] ; then
         echo "Could not find container for ${STACK_NAME}-catalog_catalog on all 3 nodes";
+        exit 1;
+      fi;
+    - |
+      if [ -z "${S_CONTAINER_A}" ] || [ -z "${S_CONTAINER_B}" ] || [ -z "${S_CONTAINER_C}" ] ; then
+        echo "Could not find container for ${STACK_NAME}-solr_cron on all 3 nodes";
         exit 1;
       fi;
     - |
@@ -382,9 +403,9 @@ Vufind Populate Environment:
             echo "Import completed with exit code $?";
             # Rebuild alphabetic browse databases
             echo "Running Alphabetic browse database build";
-            ssh deploy@$DEPLOY_HOST_A "docker exec ${CONTAINER_A} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
-            ssh deploy@$DEPLOY_HOST_B "docker exec ${CONTAINER_B} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
-            ssh deploy@$DEPLOY_HOST_C "docker exec ${CONTAINER_C} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+            ssh deploy@$DEPLOY_HOST_A "docker exec ${S_CONTAINER_A} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+            ssh deploy@$DEPLOY_HOST_B "docker exec ${S_CONTAINER_B} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+            ssh deploy@$DEPLOY_HOST_C "docker exec ${S_CONTAINER_C} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
             echo "Completed alphabetic browse database build";
         else
             echo "${NUM_RECS} loaded records already exist. Doing nothing.";
