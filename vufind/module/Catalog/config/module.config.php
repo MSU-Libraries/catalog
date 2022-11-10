@@ -46,7 +46,19 @@ return array (
         array (
           'folio' => 'Catalog\\ILS\\Driver\\Folio',
         ),
-      )
+      ),
+      'command' =>
+      array (
+        'factories' => 
+        array (
+          'Catalog\\VuFindConsole\\Command\\Util\\IndexReservesCommand' =>
+            'VuFindConsole\\Command\\Util\\AbstractSolrAndIlsCommandFactory',
+        ),
+        'aliases' => 
+        array (
+          'util/index_reserves' => 'Catalog\\VuFindConsole\\Command\\Util\\IndexReservesCommand',
+        ),
+      ),
     ),
   ),
 );
