@@ -15,7 +15,6 @@ default_args() {
     ARGS[FTP_USER]=${FTP_USER}
     ARGS[FTP_PASSWORD]=${FTP_PASSWORD}
     ARGS[SHARED_DIR]=/mnt/shared/hlm
-    ARGS[SOLR_URL]="http://solr:8983/solr"
     ARGS[VERBOSE]=0
 }
 default_args
@@ -27,15 +26,15 @@ runhelp() {
     echo "       and import that data into VuFind's Solr."
     echo ""
     echo "Examples: "
-    echo "   /harvest-and-import.sh --harvest --full --import"
+    echo "   /hlm-harvest-and-import.sh --harvest --full --import"
     echo "     Do a full harvest from scratch and import that data"
-    echo "   /harvest-and-import.sh --harvest --import"
+    echo "   /hlm-harvest-and-import.sh --harvest --import"
     echo "     Do an update harvest with changes made since the"
     echo "     last run, and import that data"
-    echo "   /harvest-and-import.sh --import"
+    echo "   /hlm-harvest-and-import.sh --import"
     echo "     Run only a import of data that has already been"
     echo "     harvested and saved to the shared location."
-    echo "   /harvest-and-import.sh --harvest"
+    echo "   /hlm-harvest-and-import.sh --harvest"
     echo "     Only run the harvest, but do not proceed to import"
     echo "     the data into VuFind"
     echo ""
@@ -65,9 +64,6 @@ runhelp() {
     echo "  -s|--shared-harvest-dir SHARED_DIR"
     echo "      Full path to the shared storage location for HLM files."
     echo "      Default: ${ARGS[SHARED_DIR]}"
-    echo "  -S|--solr SOLR_URL"
-    echo "      Base URL for accessing Solr (only used for --reset-solr)."
-    echo "      Default: ${ARGS[SOLR_URL]}"
     echo "  -F|--ftp-server FTP_SERVER"
     echo "      FTP server that contains the HLM records from EBSCO"
     echo "      Default: ${ARGS[FTP_SERVER]}"
@@ -137,9 +133,6 @@ parse_args() {
                 echo "ERROR: -s|--shared-harvest-dir path does not exist: $2"
                 exit 1
             fi
-            shift; shift ;;
-        -S|--solr)
-            ARGS[SOLR_URL]="$2"
             shift; shift ;;
         -F|--ftp-server)
             ARGS[FTP_SERVER]="$2"
@@ -254,9 +247,7 @@ archive_current_harvest() {
     declare -a ARCHIVE_LIST
     while read -r FILE; do
         ARCHIVE_LIST+=("$FILE")
-    done < <( find ./ -mindepth 1 -maxdepth 1 \
-        -name '*.xml' -o \
-    )
+    done < <( find ./ -mindepth 1 -maxdepth 1 -name '*.xml' )
 
     # Archive all xml files and the last_harvest file, if it exists
     if [[ "${#ARCHIVE_LIST[@]}" -gt 0 ]]; then
@@ -272,10 +263,7 @@ archive_current_harvest() {
 
 clear_harvest_files() {
     countdown 5
-    find "${1}" -mindepth 1 -maxdepth 1 \
-      \( \
-        -name '*.xml' -o \
-      \) -delete
+    find "${1}" -mindepth 1 -maxdepth 1 -name '*.xml' -delete
 }
 
 # Perform an harvest of HLM Records
