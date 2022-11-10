@@ -148,4 +148,63 @@ class Folio extends \VuFind\ILS\Driver\Folio
         return $items;
     }
 
+    /**
+     * Find Reserves
+     *
+     * Obtain information on course reserves.
+     *
+     * @param string $course ID from getCourses (empty string to match all)
+     * @param string $inst   ID from getInstructors (empty string to match all)
+     * @param string $dept   ID from getDepartments (empty string to match all)
+     *
+     * @return mixed An array of associative arrays representing reserve items.
+     */
+    public function findReserves($course, $inst, $dept)
+    {
+        $retVal = [];
+        $idType = $this->getBibIdType();
+
+        // Results can be paginated, so let's loop until we've gotten everything:
+        foreach ($this->getPagedResults(
+            'reserves',
+            '/coursereserves/reserves'
+        ) as $item) {
+            if ($idType == 'hrid') {
+                $bibId = $item->copiedItem->instanceHrid ?? null;
+            } else {
+                $bibId = $item->copiedItem->instanceId ?? null;
+            }
+            if ($bibId !== null) {
+                $courseData = $this->getCourseDetails(
+                    $item->courseListingId ?? null
+                );
+                $instructorIds = $this->getInstructorIds(
+                    $item->courseListingId ?? null
+                );
+                foreach ($courseData as $courseId => $departmentId) {
+                    foreach ($instructorIds as $instructorId) {
+                        $retVal[] = [
+                            'BIB_ID' => $bibId,
+                            'COURSE_ID' => $courseId == '' ? null : $courseId,
+                            'DEPARTMENT_ID' => $departmentId == ''
+                                ? null : $departmentId,
+                            'INSTRUCTOR_ID' => $instructorId,
+                        ];
+                    }
+                }
+            }
+        }
+
+        // If the user has requested a filter, apply it now:
+        if (!empty($course) || !empty($inst) || !empty($dept)) {
+            $filter = function ($value) use ($course, $inst, $dept) {
+                return (empty($course) || $course == $value['COURSE_ID'])
+                    && (empty($inst) || $inst == $value['INSTRUCTOR_ID'])
+                    && (empty($dept) || $dept == $value['DEPARTMENT_ID']);
+            };
+            return array_filter($retVal, $filter);
+        }
+        return $retVal;
+    }
+
 }
