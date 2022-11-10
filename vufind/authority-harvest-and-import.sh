@@ -9,12 +9,14 @@ default_args() {
     ARGS[IMPORT]=0
     ARGS[LIMIT]=
     ARGS[LIMIT_BY_DELETE]=
-    ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/hlm
-    ARGS[FTP_SERVER]=atozftp.ebsco.com
-    ARGS[FTP_DIR]=s8364774/vufind/
+    ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/authority
+    ARGS[FTP_SERVER]=ftp.bslw.com
+    ARGS[FTP_DIR]=out/
     ARGS[FTP_USER]=${FTP_USER}
     ARGS[FTP_PASSWORD]=${FTP_PASSWORD}
-    ARGS[SHARED_DIR]=/mnt/shared/hlm
+    ARGS[SHARED_DIR]=/mnt/shared/authority
+    ARGS[SOLR_URL]="http://solr:8983/solr"
+    ARGS[RESET_SOLR]=0
     ARGS[VERBOSE]=0
 }
 default_args
@@ -22,19 +24,19 @@ default_args
 # Script help text
 runhelp() {
     echo ""
-    echo "Usage: Harvest HLM records from EBSCO via their FTP server"
-    echo "       and import that data into VuFind's Solr."
+    echo "Usage: Harvest authority records from via the FTP server"
+    echo "       and import that data into VuFind's authority Solr index."
     echo ""
     echo "Examples: "
-    echo "   /hlm-harvest-and-import.sh --harvest --full --import"
+    echo "   /authority-harvest-and-import.sh --harvest --full --import"
     echo "     Do a full harvest from scratch and import that data"
-    echo "   /hlm-harvest-and-import.sh --harvest --import"
+    echo "   /authority-harvest-and-import.sh --harvest --import"
     echo "     Do an update harvest with changes made since the"
     echo "     last run, and import that data"
-    echo "   /hlm-harvest-and-import.sh --import"
+    echo "   /authority-harvest-and-import.sh --import"
     echo "     Run only a import of data that has already been"
     echo "     harvested and saved to the shared location."
-    echo "   /hlm-harvest-and-import.sh --harvest"
+    echo "   /authority-harvest-and-import.sh --harvest"
     echo "     Only run the harvest, but do not proceed to import"
     echo "     the data into VuFind"
     echo ""
@@ -64,12 +66,14 @@ runhelp() {
     echo "  -s|--shared-harvest-dir SHARED_DIR"
     echo "      Full path to the shared storage location for HLM files."
     echo "      Default: ${ARGS[SHARED_DIR]}"
+    echo "  -S|--solr SOLR_URL"
+    echo "      Base URL for accessing Solr (only used for --reset-solr)."
+    echo "      Default: ${ARGS[SOLR_URL]}"
     echo "  -F|--ftp-server FTP_SERVER"
-    echo "      FTP server that contains the HLM records from EBSCO"
+    echo "      FTP server that contains the authority records"
     echo "      Default: ${ARGS[FTP_SERVER]}"
     echo "  -D|--ftp-dir FTP_DIR"
-    echo "      Directory on the FTP server that contains the HLM records "
-    echo "      from EBSCO"
+    echo "      Directory on the FTP server that contains the authority records"
     echo "      Default: ${ARGS[FTP_DIR]}"
     echo "  -U|--ftp-user FTP_USER"
     echo "      User for connecting to the FTP server"
@@ -77,6 +81,8 @@ runhelp() {
     echo "  -P|--ftp-password FTP_PASSWORD"
     echo "      Password for connecting to the FTP server"
     echo "      Default: Stored in the environment variable \$FTP_PASSWORD"
+    echo "  -r|--reset-solr"
+    echo "      Clear out the authority Solr collection prior to importing."
     echo "  -v|--verbose"
     echo "      Show verbose output."
     echo ""
@@ -146,6 +152,9 @@ parse_args() {
         -P|--ftp-password)
             ARGS[FTP_PASSWORD]="$2"
             shift; shift ;;
+        -r|--reset-solr)
+            ARGS[RESET_SOLR]=1
+            shift;;
         -v|--verbose)
             ARGS[VERBOSE]=1
             shift;;
@@ -187,9 +196,9 @@ assert_vufind_harvest_dir_writable() {
     fi
 }
 
-assert_ebsco_ftp_readable() {
+assert_ftp_readable() {
     if ! curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]}; then
-        echo "ERROR: EBSCO HLM harvest location is not readable: ${ARGS[FTP_SERVER]}"
+        echo "ERROR: FTP harvest location is not readable: ${ARGS[FTP_SERVER]}"
         exit 1
     fi
 }
@@ -247,7 +256,9 @@ archive_current_harvest() {
     declare -a ARCHIVE_LIST
     while read -r FILE; do
         ARCHIVE_LIST+=("$FILE")
-    done < <( find ./ -mindepth 1 -maxdepth 1 -name '*.xml' )
+    done < <( find ./ -mindepth 1 -maxdepth 1 \
+        -name '*.xml' -o \
+    )
 
     # Archive all xml files and the last_harvest file, if it exists
     if [[ "${#ARCHIVE_LIST[@]}" -gt 0 ]]; then
@@ -263,7 +274,10 @@ archive_current_harvest() {
 
 clear_harvest_files() {
     countdown 5
-    find "${1}" -mindepth 1 -maxdepth 1 -name '*.xml' -delete
+    find "${1}" -mindepth 1 -maxdepth 1 \
+      \( \
+        -name '*.xml' -o \
+      \) -delete
 }
 
 # Perform an harvest of HLM Records
@@ -285,11 +299,11 @@ harvest() {
     # Check FTP server to compare files for ones we don't have
     OLD_PWD=$(pwd)
     cd ${ARGS[VUFIND_HARVEST_DIR]}
-    while IFS= read -r HLM_FILE
+    while IFS= read -r AUTH_FILE
     do
         # If it is not in the harvest dir and it is an XML file, then get it
-        if [ ! -f "${ARGS[VUFIND_HARVEST_DIR]}/${HLM_FILE}" ] && [[ ${HLM_FILE} == *.xml ]]; then
-            wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${HLM_FILE}
+        if [ ! -f "${ARGS[VUFIND_HARVEST_DIR]}/${AUTH_FILE}" ] && [[ ${AUTH_FILE} == *.xml ]]; then
+            wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${AUTH_FILE}
         fi
     done < <(curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]} -l -s)
     cd ${OLD_PWD}
@@ -301,7 +315,7 @@ harvest() {
 # Copy XML files back from shared dir to VuFind dir
 copyback_from_shared() {
     assert_vufind_harvest_dir_writable
-    verbose "Replacing any VuFind XML with files from shared directory."
+    verbose "Replacing any VuFind files with files from shared directory."
     countdown 5
 
     # Clear out any exising xml files before copying back from shared storage
@@ -316,7 +330,7 @@ copyback_from_shared() {
             break
         fi
     done < <(find "${ARGS[SHARED_DIR]}/current/" -mindepth 1 -maxdepth 1 -name '*.xml')
-
+    # TODO match MRC
 }
 
 # Perform VuFind batch import of HLM records
@@ -324,6 +338,9 @@ import() {
     assert_vufind_harvest_dir_writable
 
     verbose "Starting import..."
+
+    # TODO rename all MRC files to XML
+
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" ]]; then
         verbose "Will only import ${ARGS[LIMIT_BY_DELETE]} XML files; others will be deleted."
         countdown 5
@@ -339,20 +356,35 @@ import() {
         countdown 5
     fi
 
-    if ! /usr/local/vufind/harvest/batch-import-marc.sh hlm; then
+    # TODO make this a big if-block based on file name to pick the property file to pass
+    if ! /usr/local/vufind/harvest/batch-import-marc.sh authority marc_auth_fast_formgenre.properties; then
         echo "ERROR: Batch import failed with code: $?"
         exit 1
     fi
     verbose "Completed batch import"
 
+    # TODO see if the same delete script works for authorities. create sample delete file from biblio/folio
     verbose "Processing delete records from harvest."
     countdown 5
-    if ! /usr/local/vufind/harvest/batch-delete.sh hlm; then
+    if ! /usr/local/vufind/harvest/batch-delete.sh authority; then
         echo "ERROR: Batch delete script failed."
         exit 1
     fi
     verbose "Completed processing records to be deleted."
 }
+
+# Reset the authority Solr collection by clearing all records
+reset_solr() {
+    if [[ "${ARGS[RESET_SOLR]}" -eq 0 ]]; then
+        return
+    fi
+    verbose "Clearing the authority Solr index."
+    countdown 5
+    curl "${ARGS[SOLR_URL]}/authority/update" -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
+    curl "${ARGS[SOLR_URL]}/authority/update" -H "Content-type: text/xml" --data-binary '<commit />'
+    verbose "Done clearing the Solr index."
+}
+
 
 # Main logic for the script
 main() {
@@ -365,6 +397,9 @@ main() {
         harvest
     elif [[ "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
         copyback_from_shared
+    fi
+    if [[ "${ARGS[RESET_SOLR]}" -eq 1 ]]; then
+        reset_solr
     fi
     if [[ "${ARGS[IMPORT]}" -eq 1 ]]; then
         import
