@@ -146,6 +146,19 @@ Deploy Compose Files:
     - ssh deploy@$DEPLOY_HOST_A mkdir -p $COMPOSE_PATH
     - scp docker-compose* deploy@$DEPLOY_HOST_A:$COMPOSE_PATH/
 
+Perform Database Backup:
+  stage: Prepare
+  extends: .stack_template
+  rules:
+    - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
+  script:
+    - CONTAINER="$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog")"
+    - >
+      if [[ -n "${CONTAINER}" ]]; then
+        echo "Performing a database backup";
+        ssh deploy@$DEPLOY_HOST_A "docker exec $CONTAINER /backup.sh --db --rotations 5 -v";
+      fi
+
 Deploy Internal Network:
   stage: Networking
   extends: .stack_template
