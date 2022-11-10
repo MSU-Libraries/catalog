@@ -150,6 +150,8 @@ COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
 COPY hlm-harvest-and-import.sh /hlm-harvest-and-import.sh
+COPY backup.sh /backup.sh
+COPY restore.sh /restore.sh
 COPY msmtp/aliases /etc/aliases
 COPY msmtp/msmtprc /etc/msmtprc
 
