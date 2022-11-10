@@ -135,7 +135,7 @@ restore_collection() {
 
     # Wait until restore is complete
     sleep 3
-    MAX_WAITS=50
+    MAX_WAITS=500
     CUR_WAIT=1
     URL="http://solr2:8983/solr/${COLL}/replication?command=restorestatus&wt=json"
     STAT=""

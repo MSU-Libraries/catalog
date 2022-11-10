@@ -126,7 +126,7 @@ backup_collection() {
 
     # Verify that the backup successfully completed
     SNAPSHOT="snapshot.${SNAPSHOT}"
-    MAX_WAITS=50
+    MAX_WAITS=500
     CUR_WAIT=1
     EXPECTED=""
     ACTUAL="0"
