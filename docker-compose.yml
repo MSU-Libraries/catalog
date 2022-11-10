@@ -6,14 +6,13 @@ services:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
     volumes:
       - logs:/var/log/apache2
+      - /mnt/shared:/mnt/shared:rw
+      - vufind_cache:/mnt/vufind_cache
     networks:
       - public
       - internal
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    volumes:
-      - /mnt/shared:/mnt/shared:rw
-      - vufind_cache:/mnt/vufind_cache
     logging:
       driver: "json-file"
       options:
@@ -111,3 +110,4 @@ networks:
 
 volumes:
   logs:
+  vufind_cache:
