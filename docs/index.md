@@ -9,4 +9,5 @@ It describes how to setup and configure the containerized Vufind.
 * [Harvesting](harvesting.md)
 * [CI/CD](CICD.md)
 * [Upgrading](upgrading.md)
+* [Backup & Restore](backup-and-restore.md)
 * [Troubleshooting](troubleshooting.md)

@@ -49,14 +49,14 @@ runhelp() {
     echo "  -i|--import"
     echo "      Run VuFind batch import on files within VUFIND_HARVEST_DIR."
     echo "  -c|--copy-shared"
-    echo "      Copy XML file(s) from SHARED_DIR back to VUFIND_HARVEST_DIR."
+    echo "      Copy MARC file(s) from SHARED_DIR back to VUFIND_HARVEST_DIR."
     echo "      Only usable when NOT running a harvest (see also --limit)."
     echo "  -l|--limit COPY_COUNT"
     echo "      Usable with --copy-shared only. This will limit the number"
     echo "      of files copied from SHARED_DIR to VUFIND_HARVEST_DIR."
     echo "  -X|--limit-by-delete IMPORT_COUNT"
     echo "      Usable with --batch-import only. This will limit the number"
-    echo "      of files imported from VUFIND_HARVEST_DIR by deleting XML"
+    echo "      of files imported from VUFIND_HARVEST_DIR by deleting MARC"
     echo "      import files exceeding the given count prior to importing."
     echo "  -d|--vufind-harvest-dir VUFIND_HARVEST_DIR"
     echo "      Full path to the VuFind harvest directory."
@@ -248,9 +248,9 @@ archive_current_harvest() {
     declare -a ARCHIVE_LIST
     while read -r FILE; do
         ARCHIVE_LIST+=("$FILE")
-    done < <( find ./ -mindepth 1 -maxdepth 1 -name '*.xml' )
+    done < <( find ./ -mindepth 1 -maxdepth 1 -name '*.marc' )
 
-    # Archive all xml files and the last_harvest file, if it exists
+    # Archive all marc files and the last_harvest file, if it exists
     if [[ "${#ARCHIVE_LIST[@]}" -gt 0 ]]; then
         verbose "Archiving ${#ARCHIVE_LIST[@]} harvest files."
         countdown 5
@@ -264,7 +264,7 @@ archive_current_harvest() {
 
 clear_harvest_files() {
     countdown 5
-    find "${1}" -mindepth 1 -maxdepth 1 -name '*.xml' -delete
+    find "${1}" -mindepth 1 -maxdepth 1 -name '*.marc' -delete
 }
 
 # Perform an harvest of HLM Records
@@ -288,8 +288,8 @@ harvest() {
     cd ${ARGS[VUFIND_HARVEST_DIR]}
     while IFS= read -r HLM_FILE
     do
-        # If it is not in the shared storage and it is an XML file, then get it
-        if [ ! -f "${ARGS[SHARED_DIR]}/current/${HLM_FILE}" ] && [[ ${HLM_FILE} == *.xml ]]; then
+        # If it is not in the shared storage and it is an MARC file, then get it
+        if [ ! -f "${ARGS[SHARED_DIR]}/current/${HLM_FILE}" ] && [[ ${HLM_FILE} == *.marc ]]; then
             if ! wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${HLM_FILE} > /dev/null 2>&1; then
                 verbose "ERROR: Failed to retrieve ${HLM_FILE} from FTP server" 1
                 exit 1
@@ -302,13 +302,13 @@ harvest() {
     rsync -t --exclude "processed" --exclude "log" "${ARGS[VUFIND_HARVEST_DIR]}"/* "${ARGS[SHARED_DIR]}/current/"
 }
 
-# Copy XML files back from shared dir to VuFind dir
+# Copy MARC files back from shared dir to VuFind dir
 copyback_from_shared() {
     assert_vufind_harvest_dir_writable
-    verbose "Replacing any VuFind XML with files from shared directory."
+    verbose "Replacing any VuFind MARC with files from shared directory."
     countdown 5
 
-    # Clear out any exising xml files before copying back from shared storage
+    # Clear out any exising marc files before copying back from shared storage
     clear_harvest_files "${ARGS[VUFIND_HARVEST_DIR]}/"
 
     COPIED_COUNT=0
@@ -316,10 +316,10 @@ copyback_from_shared() {
         cp --preserve=timestamps "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/"
         (( COPIED_COUNT += 1 ))
         if [[ -n "${ARGS[LIMIT]}" && "${COPIED_COUNT}" -ge "${ARGS[LIMIT]}" ]]; then
-            # If limit is set, only copy the provided limit of xml files over to the VUFIND_HARVEST_DIR
+            # If limit is set, only copy the provided limit of marc files over to the VUFIND_HARVEST_DIR
             break
         fi
-    done < <(find "${ARGS[SHARED_DIR]}/current/" -mindepth 1 -maxdepth 1 -name '*.xml')
+    done < <(find "${ARGS[SHARED_DIR]}/current/" -mindepth 1 -maxdepth 1 -name '*.marc')
 
 }
 
@@ -329,7 +329,7 @@ import() {
 
     verbose "Starting import..."
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" ]]; then
-        verbose "Will only import ${ARGS[LIMIT_BY_DELETE]} XML files; others will be deleted."
+        verbose "Will only import ${ARGS[LIMIT_BY_DELETE]} MARC files; others will be deleted."
         countdown 5
         # Delete excess files beyond the provided limit from the VUFIND_HARVEST_DIR prior to import
         FOUND_COUNT=0
@@ -338,7 +338,7 @@ import() {
             if [[ "${FOUND_COUNT}" -gt "${ARGS[LIMIT_BY_DELETE]}" ]]; then
                 rm "$FILE"
             fi
-        done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.xml')
+        done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.marc')
     else
         countdown 5
     fi
