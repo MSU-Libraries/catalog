@@ -161,7 +161,10 @@ COPY cachecron.d/ /etc/cachecron.d/
 RUN chmod -R g-w,o-w /etc/cron.d/ && \
     sed -i "/imklog/d" /etc/rsyslog.conf && \
     sed -i "/PrivDrop/d" /etc/rsyslog.conf && \
-    echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf
+    echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf && \
+    # Fix permissions on scripts
+    chmod o-w /usr/local/bin/* && \
+    chmod o-w /*.sh
 
 WORKDIR /usr/local/vufind
 
