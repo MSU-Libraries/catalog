@@ -11,6 +11,6 @@
 #     chronic /path/to/my_cron_job.sh
 
 # VuFund cache clear on start
-@reboot chronic clear-vufind-cache 2>&1 | logger -t CACHE_CLEAR
+@reboot root chronic clear-vufind-cache 2>&1 | logger -t CACHE_CLEAR
 # Periodic cache clear
-1 */2	* * * chronic clear-vufind-cache 2>&1 | logger -t CACHE_CLEAR
+1 */2	* * * root chronic clear-vufind-cache 2>&1 | logger -t CACHE_CLEAR
