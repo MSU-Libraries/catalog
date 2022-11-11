@@ -7,7 +7,7 @@ ENV VUFIND_LOCAL_DIR=/usr/local/vufind/local
 ENV VUFIND_HOME=/usr/local/vufind
 ENV JAVA_HOME=/usr/lib/jvm/default-java
 ENV VUFIND_LOCAL_MODULES=Catalog
-ENV VUFIND_CACHE_DIR /tmp/vufind_cache
+ENV VUFIND_CACHE_DIR=/mnt/vufind_cache
 
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
@@ -146,8 +146,10 @@ RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-def
 COPY local/ /usr/local/vufind/local
 COPY themes/msul /usr/local/vufind/themes/msul
 COPY module/Catalog /usr/local/vufind/module/Catalog
+COPY scripts /usr/local/bin
 COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
+COPY startup-cachecron.sh /startup-cachecron.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
 COPY hlm-harvest-and-import.sh /hlm-harvest-and-import.sh
 COPY backup.sh /backup.sh
@@ -157,10 +159,14 @@ COPY msmtp/msmtprc /etc/msmtprc
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
+COPY cachecron.d/ /etc/cachecron.d/
 RUN chmod -R g-w,o-w /etc/cron.d/ && \
     sed -i "/imklog/d" /etc/rsyslog.conf && \
     sed -i "/PrivDrop/d" /etc/rsyslog.conf && \
-    echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf
+    echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf && \
+    # Fix permissions on scripts
+    chmod o-w /usr/local/bin/* && \
+    chmod o-w /*.sh
 
 WORKDIR /usr/local/vufind
 
@@ -181,7 +187,7 @@ RUN \
     echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR" >> /etc/environment && \
     echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment && \
     # Prepare cache directory
-    mkdir -p ${VUFIND_CACHE_DIR}/cli && \
+    mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
     chmod -R g+sw ${VUFIND_CACHE_DIR} && \
     # Set permissions on local, theme, and Catalog
