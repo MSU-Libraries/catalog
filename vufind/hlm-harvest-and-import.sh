@@ -188,7 +188,7 @@ assert_vufind_harvest_dir_writable() {
 }
 
 assert_ebsco_ftp_readable() {
-    if ! curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]}; then
+    if ! curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]} > /dev/null 2>&1; then
         echo "ERROR: EBSCO HLM harvest location is not readable: ${ARGS[FTP_SERVER]}"
         exit 1
     fi
@@ -196,9 +196,10 @@ assert_ebsco_ftp_readable() {
 
 # Print message if verbose is enabled
 verbose() {
+    FORCE=$2
     LOG_TS=$(date +%Y-%m-%d\ %H:%M:%S)
     MSG="[${LOG_TS}] $1"
-    if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
+    if [[ "${ARGS[VERBOSE]}" -eq 1 ]] || [[ "$FORCE" -eq 1 ]]; then
         echo "${MSG}"
     fi
     echo "${MSG}" >> "$LOG_FILE"
@@ -254,7 +255,7 @@ archive_current_harvest() {
         verbose "Archiving ${#ARCHIVE_LIST[@]} harvest files."
         countdown 5
         if ! tar -czvf "$ARCHIVE_FILE" "${ARCHIVE_LIST[@]}"; then
-            echo "ERROR: Could not archive harvest files into ${ARCHIVE_FILE}"
+            verbose "ERROR: Could not archive harvest files into ${ARCHIVE_FILE}" 1
             exit 1
         fi
     fi
@@ -287,15 +288,18 @@ harvest() {
     cd ${ARGS[VUFIND_HARVEST_DIR]}
     while IFS= read -r HLM_FILE
     do
-        # If it is not in the harvest dir and it is an XML file, then get it
-        if [ ! -f "${ARGS[VUFIND_HARVEST_DIR]}/${HLM_FILE}" ] && [[ ${HLM_FILE} == *.xml ]]; then
-            wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${HLM_FILE}
+        # If it is not in the shared storage and it is an XML file, then get it
+        if [ ! -f "${ARGS[SHARED_DIR]}/current/${HLM_FILE}" ] && [[ ${HLM_FILE} == *.xml ]]; then
+            if ! wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${HLM_FILE} > /dev/null 2>&1; then
+                verbose "ERROR: Failed to retrieve ${HLM_FILE} from FTP server" 1
+                exit 1
+            fi
         fi
     done < <(curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]} -l -s)
     cd ${OLD_PWD}
 
     verbose "Syncing harvest files to shared storage."
-    rsync -vt "${ARGS[VUFIND_HARVEST_DIR]}"/* "${ARGS[SHARED_DIR]}/current/"
+    rsync -t --exclude "processed" --exclude "log" "${ARGS[VUFIND_HARVEST_DIR]}"/* "${ARGS[SHARED_DIR]}/current/"
 }
 
 # Copy XML files back from shared dir to VuFind dir
@@ -340,7 +344,7 @@ import() {
     fi
 
     if ! /usr/local/vufind/harvest/batch-import-marc.sh hlm; then
-        echo "ERROR: Batch import failed with code: $?"
+        verbose "ERROR: Batch import failed with code: $?" 1
         exit 1
     fi
     verbose "Completed batch import"
@@ -348,7 +352,7 @@ import() {
     verbose "Processing delete records from harvest."
     countdown 5
     if ! /usr/local/vufind/harvest/batch-delete.sh hlm; then
-        echo "ERROR: Batch delete script failed."
+        verbose "ERROR: Batch delete script failed." 1
         exit 1
     fi
     verbose "Completed processing records to be deleted."
