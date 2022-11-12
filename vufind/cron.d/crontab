@@ -22,7 +22,11 @@
 #     chronic mispipe "/path/to/my_cron_job.sh 2>&1" "pee 'logger -t MY_CRON' 'cat'"
 #
 
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=$EMAIL
+
+# VuFund cache clear on start
+@reboot root chronic clear-vufind-cache 2>&1 | logger -t CACHE_CLEAR
 
 # Trigger harvest start
 #*/2 *	* * *	root    /usr/bin/flock -n /tmp/harvest.lock /harvest-and-import.sh --oai-harvest --batch-import
