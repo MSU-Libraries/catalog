@@ -18,7 +18,7 @@ RUN \
     apt update && \
     apt install -y wget vim-nox lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
         gettext-base locales msmtp-mta rsync screen \
-        nodejs npm git pigz \
+        nodejs npm git pigz libxml2-utils libmarc-xml-perl \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl \
         php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml && \

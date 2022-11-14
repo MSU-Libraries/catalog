@@ -342,12 +342,28 @@ import() {
     else
         countdown 5
     fi
+    # TODO -- can remove once https://github.com/vufind-org/vufind/pull/2623 is included
+    # in a release (remember to also update the while loop find below too to)
+    verbose "Pre-processing import files to rename from .marc to .mrc"
+    while read -r FILE; do
+        mv ${FILE} ${FILE%.marc}.mrc
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.marc')
 
     if ! /usr/local/vufind/harvest/batch-import-marc.sh hlm; then
         verbose "ERROR: Batch import failed with code: $?" 1
         exit 1
     fi
     verbose "Completed batch import"
+
+    verbose "Pre-processing deletion files to extract IDs from EBSCO MARC records"
+    while read -r FILE; do
+        DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/$(basename ${FILE})
+        marc2xml ${FILE} > ${DEL_FILE%.mrc}.xml
+        xmllint --xpath "//*[@tag = '001']/text()" ${DEL_FILE%.mrc}.xml > ${DEL_FILE%.mrc}.delete
+        # Cleanup the other files that the batch-delete.sh script won't move to the processed dir
+        rm ${DEL_FILE%.mrc}.xml
+        mv ${FILE} ${ARGS[VUFIND_HARVEST_DIR]}/processed
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*-Del-*.mrc')
 
     verbose "Processing delete records from harvest."
     countdown 5
