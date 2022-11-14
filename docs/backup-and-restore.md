@@ -18,7 +18,7 @@ The automated job will run on a nightly basis and keep a rolling rotation of 3 b
 of both the database and Solr index.
 
 The code for the backup script can be found at:
-[backup.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/backup.sh)
+[backup.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/backup.sh)  
 The schedule for the automated cron job can be found at:
 [crontab](https://github.com/MSU-Libraries/catalog/blob/main/vufind/cron.d/crontab)
 
