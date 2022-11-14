@@ -186,6 +186,8 @@ RUN \
     echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
     echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR" >> /etc/environment && \
     echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment && \
+    echo FTP_USER="$FTP_USER" >> /etc/environment && \
+    echo FTP_PASSWORD="$FTP_PASSWORD" >> /etc/environment && \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
