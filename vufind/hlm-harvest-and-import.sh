@@ -299,7 +299,10 @@ harvest() {
     cd ${OLD_PWD}
 
     verbose "Syncing harvest files to shared storage."
-    rsync -t --exclude "processed" --exclude "log" "${ARGS[VUFIND_HARVEST_DIR]}"/* "${ARGS[SHARED_DIR]}/current/"
+    if ! rsync -t --exclude "processed" --exclude "log" "${ARGS[VUFIND_HARVEST_DIR]}"/ "${ARGS[SHARED_DIR]}/current/" > /dev/null 2>&1; then
+        verbose "ERROR: Failed to sync harvest files to shared storage from ${ARGS[VUFIND_HARVEST_DIR]}" 1
+        exit 1
+    fi
 }
 
 # Copy MARC files back from shared dir to VuFind dir
@@ -327,7 +330,7 @@ copyback_from_shared() {
 import() {
     assert_vufind_harvest_dir_writable
 
-    verbose "Starting import..."
+    verbose "Starting import processing..."
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" ]]; then
         verbose "Will only import ${ARGS[LIMIT_BY_DELETE]} MARC files; others will be deleted."
         countdown 5
@@ -349,12 +352,6 @@ import() {
         mv ${FILE} ${FILE%.marc}.mrc
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.marc')
 
-    if ! /usr/local/vufind/harvest/batch-import-marc.sh hlm; then
-        verbose "ERROR: Batch import failed with code: $?" 1
-        exit 1
-    fi
-    verbose "Completed batch import"
-
     verbose "Pre-processing deletion files to extract IDs from EBSCO MARC records"
     while read -r FILE; do
         DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/$(basename ${FILE})
@@ -364,6 +361,13 @@ import() {
         rm ${DEL_FILE%.mrc}.xml
         mv ${FILE} ${ARGS[VUFIND_HARVEST_DIR]}/processed
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*-Del-*.mrc')
+
+    verbose "Running batch import"
+    if ! /usr/local/vufind/harvest/batch-import-marc.sh hlm; then
+        verbose "ERROR: Batch import failed with code: $?" 1
+        exit 1
+    fi
+    verbose "Completed batch import"
 
     verbose "Processing delete records from harvest."
     countdown 5
