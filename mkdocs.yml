@@ -27,5 +27,7 @@ nav:
     - First Time Setup: first-time-setup.md
     - Harvesting: harvesting.md
     - CI/CD: CICD.md
-    - Upgrading: upgrading.md
     - Troubleshooting: troubleshooting.md
+- Administration:
+    - Backup &amp; Restore: backup-and-restore.md
+    - Upgrading: upgrading.md
