@@ -353,6 +353,7 @@ import() {
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.marc')
 
     verbose "Pre-processing deletion files to extract IDs from EBSCO MARC records"
+    mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/processed # needed in case it doesn't already exist
     while read -r FILE; do
         DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/$(basename ${FILE})
         marc2xml ${FILE} > ${DEL_FILE%.mrc}.xml
