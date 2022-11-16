@@ -4,6 +4,7 @@ Tag Release:
   stage: Release
   tags:
     - msul-shared
+  interruptible: true
   rules:
     - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
       when: manual
@@ -30,6 +31,7 @@ GitHub Release:
   stage: Release
   tags:
     - msul-shared
+  interruptible: true
   rules:
     - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
   needs:

@@ -21,6 +21,7 @@ variables:
 
 Set Stack Name:
   stage: Prepare
+  interruptible: true
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_PIPELINE_SOURCE == "schedule"'
   script:
@@ -516,6 +517,7 @@ Remove Environment:
     - msul-shared
   extends: .setup_ssh
   retry: 2
+  interruptible: true
   variables:
     ENCODED_PRIVATE_KEY: $DEPLOY_PRIVATE_KEY
     SERVER: $DEPLOY_HOST_A
