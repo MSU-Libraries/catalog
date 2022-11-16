@@ -556,7 +556,6 @@ Remove Environment:
 Deploy:
   interruptible: true
 
-
 include:
   - project: 'msu-libraries/public/cicd-templates'
     ref: main
