@@ -26,6 +26,7 @@ services:
       - '--providers.docker.defaultRule=Host(`{{ index .Labels "com.docker.stack.namespace" | trimSuffix "-catalog" }}.aws.lib.msu.edu`)'
       - "--entrypoints.msul-http-ent.address=:80"
       - "--entrypoints.msul-https-ent.address=:443"
+      - "--entryPoints.msul-https-ent.forwardedHeaders.trustedIPs=10.0.0.0/16"
       - "--log"
       - "--log.level=ERROR"
       - "--accesslog"
@@ -96,8 +97,6 @@ services:
         - "traefik.http.routers.dashboard-https-router.rule=\
             PathPrefix(`/dashboard`) || PathPrefix(`/api`) || PathPrefix(`/debug`)"
         - "traefik.http.routers.dashboard-https-router.service=api@internal"
-        # Exclude 10.0.0.3 (router) from X-Forwarded-For
-        - "traefik.http.middlewares.test-ipwhitelist.ipwhitelist.ipstrategy.excludedips=10.0.0.3"
 
 networks:
   public:
