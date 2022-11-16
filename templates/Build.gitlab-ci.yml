@@ -64,6 +64,8 @@ Build Vufind Image:
         --build-arg SIMPLESAMLPHP_VERSION=$SIMPLESAMLPHP_VERSION
         --build-arg SIMPLESAMLPHP_SALT=$SIMPLESAMLPHP_SALT
         --build-arg SIMPLESAMLPHP_ADMIN_PW=$SIMPLESAMLPHP_ADMIN_PW
+        --build-arg FTP_USER=$FTP_USER
+        --build-arg FTP_PASSWORD=$FTP_PASSWORD
         --tag $CURR 
         --cache-from $LATEST 
         vufind/

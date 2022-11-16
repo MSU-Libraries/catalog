@@ -21,8 +21,6 @@ services:
     environment:
       STACK_NAME: "${STACK_NAME}"
       NODE: "{{slice .Node.Hostname 8 9}}"
-      FTP_USER: "${FTP_USER}"
-      FTP_PASSWORD: "${FTP_PASSWORD}"
     deploy:
       mode: replicated
       replicas: 3
@@ -92,8 +90,6 @@ services:
       disable: true
     environment:
       NODE: "{{slice .Node.Hostname 8 9}}"
-      FTP_USER: "${FTP_USER}"
-      FTP_PASSWORD: "${FTP_PASSWORD}"
     deploy:
       mode: replicated
       replicas: 1
