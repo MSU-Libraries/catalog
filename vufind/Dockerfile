@@ -130,7 +130,9 @@ ENV DEBUG=$DEBUG \
     EDS_PROFILE=$EDS_PROFILE \
     EDS_ORG=$EDS_ORG \
     RECAPTCHA_SITE_KEY=$RECAPTCHA_SITE_KEY \
-    RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY
+    RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY \
+    FTP_USER=$FTP_USER \
+    FTP_PASSWORD=$FTP_PASSWORD
 
 # Setup Apache
 RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-default.conf && \
