@@ -96,6 +96,8 @@ services:
         - "traefik.http.routers.dashboard-https-router.rule=\
             PathPrefix(`/dashboard`) || PathPrefix(`/api`) || PathPrefix(`/debug`)"
         - "traefik.http.routers.dashboard-https-router.service=api@internal"
+        # Exclude 10.0.0.3 (router) from X-Forwarded-For
+        - "traefik.http.middlewares.test-ipwhitelist.ipwhitelist.ipstrategy.excludedips=10.0.0.3"
 
 networks:
   public:
