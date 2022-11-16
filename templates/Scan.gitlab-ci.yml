@@ -1,6 +1,9 @@
 ############# Scan ###############
 # https://docs.gitlab.com/ee/user/application_security/container_scanning/
 
+secret_detection:
+  interruptible: true
+
 Shellcheck:
   stage: test
   image: alpine:latest
