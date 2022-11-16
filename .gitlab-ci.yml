@@ -553,6 +553,10 @@ Remove Environment:
     - ssh deploy@$DEPLOY_HOST_B "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY"
     - ssh deploy@$DEPLOY_HOST_C "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY"
 
+Deploy:
+  interruptible: true
+
+
 include:
   - project: 'msu-libraries/public/cicd-templates'
     ref: main
