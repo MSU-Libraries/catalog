@@ -45,7 +45,7 @@ services:
         - "traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].main=aws.lib.msu.edu"
         - "traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].sans=*.aws.lib.msu.edu"
         - "traefik.http.routers.${STACK_NAME}-https-router.entrypoints=msul-https-ent"
-        - "traefik.http.routers.${STACK_NAME}-https-router.middlewares=fix-prefix,saml-prefix"
+        - "traefik.http.routers.${STACK_NAME}-https-router.middlewares=remove-prefix"
         - "traefik.http.routers.${STACK_NAME}-https-router.service=${STACK_NAME}-https-app"
         - "traefik.http.services.${STACK_NAME}-https-app.loadbalancer.server.port=80"
 
