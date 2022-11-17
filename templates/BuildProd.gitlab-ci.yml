@@ -26,6 +26,7 @@ Build Prod Vufind Image:
       artifacts: true
 
 .build_prod_template:
+  stage: Build Prod
   extends: .build_template
   variables:
     LATEST: $CI_REGISTRY_IMAGE/$COMPONENT-prod:latest
