@@ -178,7 +178,7 @@ RUN \
     rm import/marc_local.properties && \
     # Replace environment variables in template ini files
     envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.ini && \
-    envsubst < local/config/vufind/Folio.ini | sponge local/config/vufind/Folio.ini && \
+    envsubst < local/config/vufind/folio.ini | sponge local/config/vufind/folio.ini && \
     envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
     envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
     envsubst < /etc/aliases | sponge /etc/aliases && \
