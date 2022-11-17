@@ -2,7 +2,6 @@ stages:
   - test
   - Build
   - Deploy
-  - Build Prod
   - Deploy Prod
   - Cleanup
   - Release
@@ -18,7 +17,7 @@ variables:
   COMPOSE_PATH: /home/deploy/$STACK_NAME
 
 Set Stack Name:
-  stage: Build
+  stage: Deploy
   interruptible: true
   variables:
     PROD: "false"
@@ -83,21 +82,17 @@ Deploy Compose Files:
     - ./yq -i ".services.traefik.deploy.labels[2]=\"traefik.http.middlewares.restrict-auth.basicauth.users=$BASICAUTH_FOR_RESOURCES\"" docker-compose.traefik.yml
     # Modify the image tag from :latest -> $CI_COMMIT_SHORT_SHA
     - |
-      SUFFIX="";
-      if [ "${STACK_NAME}" == "catalog-prod" ]; then
-          SUFFIX="-prod";
-      fi;
-      ./yq -i ".services.catalog.image=\"$CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml;
-      ./yq -i ".services.cron.image=\"$CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml;
-      ./yq -i ".services.cachecron.image=\"$CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml;
-      ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-bootstrap.yml;
-      ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud.yml;
-      ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-force.yml;
-      ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml;
-      ./yq -i ".services.zk.image=\"$CI_REGISTRY_IMAGE/zk${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml;
-      ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml;
-      ./yq -i ".services.cron.image=\"$CI_REGISTRY_IMAGE/solr${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml;
-      ./yq -i ".services.zk.image=\"$CI_REGISTRY_IMAGE/zk${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml;
+      ./yq -i ".services.catalog.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml;
+      ./yq -i ".services.cron.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml;
+      ./yq -i ".services.cachecron.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml;
+      ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-bootstrap.yml;
+      ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud.yml;
+      ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-force.yml;
+      ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml;
+      ./yq -i ".services.zk.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml;
+      ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml;
+      ./yq -i ".services.cron.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml;
+      ./yq -i ".services.zk.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml;
     # Modify the name of internal network to include $STACK_NAME
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.internal.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-cloud-bootstrap.yml
@@ -133,6 +128,11 @@ Deploy Compose Files:
     - ./yq -i ".x-solr-deploy.labels[14]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" docker-compose.solr-cloud.yml
     # Set the stack name in the solr cron environment variable
     - ./yq -i ".services.cron.environment[\"STACK_NAME\"]=\"${STACK_NAME}\"" docker-compose.solr-cloud.yml
+    # Set the stack name and site url in the vufind environment variable
+    - ./yq -i ".services.catalog.environment[\"STACK_NAME\"]=\"${STACK_NAME}\"" docker-compose.yml
+    - ./yq -i ".services.catalog.environment[\"SITE_HOSTNAME\"]=\"${SITE_HOSTNAME}\"" docker-compose.yml
+    - ./yq -i ".services.cron.environment[\"STACK_NAME\"]=\"${STACK_NAME}\"" docker-compose.yml
+    - ./yq -i ".services.cron.environment[\"SITE_HOSTNAME\"]=\"${SITE_HOSTNAME}\"" docker-compose.yml
     # Development environment changes
     - |
       if [ ! "${STACK_NAME}" == *"catalog-"* ]; then
@@ -230,14 +230,9 @@ Deploy Solr:
   script:
     # Pull images now to save time with stack deploy
     - >
-      SUFFIX="";
-      if [ "${STACK_NAME}" == "catalog-prod" ]; then
-          SUFFIX="-prod";
-      fi
-    - >
-      ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/solr${SUFFIX}:$CI_COMMIT_SHORT_SHA" &
-      ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/solr${SUFFIX}:$CI_COMMIT_SHORT_SHA" &
-      ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/solr${SUFFIX}:$CI_COMMIT_SHORT_SHA"
+      ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA" &
+      ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA" &
+      ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA"
     - >
       ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr"
 
@@ -285,14 +280,9 @@ Deploy Vufind:
   script:
     # Pull images now to save time with stack deploy
     - >
-      SUFFIX="";
-      if [ "${STACK_NAME}" == "catalog-prod" ]; then
-          SUFFIX="-prod";
-      fi
-    - >
-      ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA" &
-      ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA" &
-      ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA"
+      ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" &
+      ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" &
+      ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA"
     - >
       ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME-catalog"
     # Determine URL
@@ -332,16 +322,12 @@ Vufind Upgrade:
         }
         catalogwait() {
             sleep 15;
-            SUFFIX="";
-            if [ "${STACK_NAME}" == "catalog-prod" ]; then
-                SUFFIX="-prod";
-            fi
             for HOST in ${HOSTS}; do
-                echo "Checking to see if catalog container for ${HOST} is online ($CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA)...";
+                echo "Checking to see if catalog container for ${HOST} is online ($CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA)...";
                 ATTEMPTS=0;
                 while [[ "$ATTEMPTS" -le 20 ]]; do
                     TARGET_IMAGE=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}' 2>/dev/null") || echo "NOT ONLINE";
-                    if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA" ]]; then
+                    if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
                         echo "$(date +'%m-%d-%Y %T %z') -- Container for host ${HOST} is online with new image!";
                         EC=0;
                         break;
