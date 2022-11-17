@@ -17,7 +17,7 @@ variables:
   COMPOSE_PATH: /home/deploy/$STACK_NAME
 
 Set Stack Name:
-  stage: Deploy
+  stage: Build
   interruptible: true
   variables:
     PROD: "false"
