@@ -1,7 +1,9 @@
 <?php
 
 // Select the IdP with its entityId; see saml20-idp-remote.php for available IdPs.
-if (getenv('STACK_NAME') == 'catalog-beta')
+if (getenv('STACK_NAME') == 'catalog-prod')
+    $idpEntityId = 'http://www.okta.com/exkng5q6tqDecNuDY357';
+elseif (getenv('STACK_NAME') == 'catalog-beta')
     $idpEntityId = 'http://www.okta.com/exk1eh7u7cb8BIF9z0h8';
 else
     $idpEntityId = 'http://www.okta.com/exk1ed76cimmz56WW0h8';

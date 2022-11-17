@@ -120,6 +120,12 @@ resources such as Solr and the Traefik dashboard
 * `REGISTRY_ACCESS_TOKEN`: Read-only registry access token used by deploy user
 * `RW_CICD_TOKEN`: Read-Write access token to this repository used to create release tags 
 
+## Deploy Freezes
+If you want to prevent deployments to the production environment during certain times, you
+can make use of GitLab's [Deploy Freeze](https://gitlab.msu.edu/help/ci/environments/deployment_safety.md#prevent-deployments-during-deploy-freeze-windows)
+feature. Simply enter in a timeframe using cron-style syntax in the "Deploy Freeze" section
+of the CI/CD Settings of the repository.
+
 [^1]: 
     There are many ways to generate this password hash, such as online generators or command
     line tools (like `htpasswd` in the `apache-utils` package). For Traefik performance

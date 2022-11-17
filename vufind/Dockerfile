@@ -6,8 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV VUFIND_LOCAL_DIR=/usr/local/vufind/local
 ENV VUFIND_HOME=/usr/local/vufind
 ENV JAVA_HOME=/usr/lib/jvm/default-java
-ENV VUFIND_LOCAL_MODULES=Catalog
-ENV VUFIND_CACHE_DIR /tmp/vufind_cache
+ENV VUFIND_CACHE_DIR=/mnt/vufind_cache
 
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
@@ -18,7 +17,7 @@ RUN \
     apt update && \
     apt install -y wget vim-nox lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
         gettext-base locales msmtp-mta rsync screen \
-        nodejs npm git \
+        nodejs npm git pigz libxml2-utils libmarc-xml-perl \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl \
         php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml && \
@@ -108,6 +107,8 @@ ARG EDS_PROFILE
 ARG EDS_ORG
 ARG RECAPTCHA_SITE_KEY
 ARG RECAPTCHA_SECRET_KEY
+ARG FTP_USER
+ARG FTP_PASSWORD
 
 ENV DEBUG=$DEBUG \
     SITE_HOSTNAME=$SITE_HOSTNAME \
@@ -130,7 +131,9 @@ ENV DEBUG=$DEBUG \
     EDS_PROFILE=$EDS_PROFILE \
     EDS_ORG=$EDS_ORG \
     RECAPTCHA_SITE_KEY=$RECAPTCHA_SITE_KEY \
-    RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY
+    RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY \
+    FTP_USER=$FTP_USER \
+    FTP_PASSWORD=$FTP_PASSWORD
 
 # Setup Apache
 RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-default.conf && \
@@ -146,19 +149,27 @@ RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-def
 COPY local/ /usr/local/vufind/local
 COPY themes/msul /usr/local/vufind/themes/msul
 COPY module/Catalog /usr/local/vufind/module/Catalog
+COPY scripts /usr/local/bin
 COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
+COPY startup-cachecron.sh /startup-cachecron.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
 COPY hlm-harvest-and-import.sh /hlm-harvest-and-import.sh
+COPY backup.sh /backup.sh
+COPY restore.sh /restore.sh
 COPY msmtp/aliases /etc/aliases
 COPY msmtp/msmtprc /etc/msmtprc
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
+COPY cachecron.d/ /etc/cachecron.d/
 RUN chmod -R g-w,o-w /etc/cron.d/ && \
     sed -i "/imklog/d" /etc/rsyslog.conf && \
     sed -i "/PrivDrop/d" /etc/rsyslog.conf && \
-    echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf
+    echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf && \
+    # Fix permissions on scripts
+    chmod o-w /usr/local/bin/* && \
+    chmod o-w /*.sh
 
 WORKDIR /usr/local/vufind
 
@@ -171,15 +182,15 @@ RUN \
     envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
     envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
     envsubst < /etc/aliases | sponge /etc/aliases && \
-    # Enable module
-    sed -i "s/#SetEnv VUFIND_LOCAL_MODULES VuFindLocalTemplate/SetEnv VUFIND_LOCAL_MODULES Catalog/g" ${VUFIND_LOCAL_DIR}/httpd-vufind.conf && \
     # Set required environment variables
     echo JAVA_HOME="$JAVA_HOME" >> /etc/environment && \
     echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
     echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR" >> /etc/environment && \
     echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment && \
+    echo FTP_USER="$FTP_USER" >> /etc/environment && \
+    echo FTP_PASSWORD="$FTP_PASSWORD" >> /etc/environment && \
     # Prepare cache directory
-    mkdir -p ${VUFIND_CACHE_DIR}/cli && \
+    mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
     chmod -R g+sw ${VUFIND_CACHE_DIR} && \
     # Set permissions on local, theme, and Catalog
@@ -196,6 +207,6 @@ RUN \
 EXPOSE 80
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
-   CMD curl --fail -s http://localhost:80/vufind || exit 1  
+   CMD curl --fail -s http://localhost:80/ || exit 1  
 
 CMD /startup.sh

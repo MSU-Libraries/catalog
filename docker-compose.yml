@@ -3,16 +3,16 @@ version: "3.8"
 
 services:
   catalog:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest 
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
     volumes:
       - logs:/var/log/apache2
+      - /mnt/shared:/mnt/shared:rw
+      - vufind_cache:/mnt/vufind_cache
     networks:
       - public
       - internal
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    volumes:
-      - /mnt/shared:/mnt/shared:rw
     logging:
       driver: "json-file"
       options:
@@ -21,8 +21,6 @@ services:
     environment:
       STACK_NAME: "${STACK_NAME}"
       NODE: "{{slice .Node.Hostname 8 9}}"
-      FTP_USER: "${FTP_USER}"
-      FTP_PASSWORD: "${FTP_PASSWORD}"
     deploy:
       mode: replicated
       replicas: 3
@@ -47,9 +45,32 @@ services:
         - "traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].main=aws.lib.msu.edu"
         - "traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].sans=*.aws.lib.msu.edu"
         - "traefik.http.routers.${STACK_NAME}-https-router.entrypoints=msul-https-ent"
-        - "traefik.http.routers.${STACK_NAME}-https-router.middlewares=fix-prefix,saml-prefix"
+        - "traefik.http.routers.${STACK_NAME}-https-router.middlewares=remove-prefix"
         - "traefik.http.routers.${STACK_NAME}-https-router.service=${STACK_NAME}-https-app"
         - "traefik.http.services.${STACK_NAME}-https-app.loadbalancer.server.port=80"
+
+  cachecron:
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
+    command: /startup-cachecron.sh
+    volumes:
+      - vufind_cache:/mnt/vufind_cache
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    healthcheck:
+      disable: true
+    deploy:
+      mode: replicated
+      replicas: 3
+      placement:
+        max_replicas_per_node: 1
+      restart_policy:
+        window: 15s
+      update_config:
+        parallelism: 1
+        failure_action: rollback
 
   cron:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:latest
@@ -69,8 +90,6 @@ services:
       disable: true
     environment:
       NODE: "{{slice .Node.Hostname 8 9}}"
-      FTP_USER: "${FTP_USER}"
-      FTP_PASSWORD: "${FTP_PASSWORD}"
     deploy:
       mode: replicated
       replicas: 1
@@ -89,3 +108,4 @@ networks:
 
 volumes:
   logs:
+  vufind_cache:
