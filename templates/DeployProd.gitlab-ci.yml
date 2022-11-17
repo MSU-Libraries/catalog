@@ -1,6 +1,6 @@
 ############# Prod Deploy ###############
 Set Prod Stack Name:
-  stage: Build Prod
+  stage: Deploy
   extends: Set Stack Name
   variables:
     PROD: "true"
