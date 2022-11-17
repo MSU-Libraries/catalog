@@ -174,8 +174,6 @@ RUN chmod -R g-w,o-w /etc/cron.d/ && \
 WORKDIR /usr/local/vufind
 
 RUN \
-    # Remove core config files that prevent local overrides
-    rm import/marc_local.properties && \
     # Replace environment variables in template ini files
     envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.ini && \
     envsubst < local/config/vufind/Folio.ini | sponge local/config/vufind/Folio.ini && \
