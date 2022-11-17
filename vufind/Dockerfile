@@ -28,7 +28,11 @@ RUN \
     # Setup Timezone
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
-    # Get the package
+    # Install Composer
+    /install-composer.sh && \
+    mv /composer.phar /usr/local/bin/composer && \
+    rm /install-composer.sh && \
+    # Get VuFind the package
     wget https://github.com/vufind-org/vufind/releases/download/v${VUFIND_VERSION}/vufind_${VUFIND_VERSION}.deb && \
     # Install the package
     service apache2 restart && \
@@ -40,6 +44,7 @@ RUN \
     yq -i '.config.platform.php="7.4.1"' /usr/local/vufind/composer.json && \
     yq -i '.require.php=">=7.4.1"' /usr/local/vufind/composer.json && \
     yq -i '.require.vufind-org/vufindharvest="5.0.0"' /usr/local/vufind/composer.json && \
+    pushd /usr/local/vufind/ && composer update && popd && \
     # Remove unused dependencies after Vufind is installed
     mv /usr/local/vufind/solr /tmp && \
     mkdir -p /usr/local/vufind/solr/vendor/dist && \
@@ -51,10 +56,6 @@ RUN \
     mkdir /var/log/vufind && \
     touch /var/log/vufind/vufind.log && \
     chown -R 33:33 /var/log/vufind && \
-    # Install Composer
-    /install-composer.sh && \
-    mv /composer.phar /usr/local/bin/composer && \
-    rm /install-composer.sh && \
     # Create user for grunt
     groupadd -g 1000 msuldevs && \
     useradd msuldevs -u 1000 -g 1000 && \
