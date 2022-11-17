@@ -111,7 +111,7 @@ Deploy Compose Files:
     - ./yq -i ".x-solr-deploy.labels[1]=\"traefik.http.routers.${STACK_NAME}-msul-solr-router.entrypoints=msul-http-ent\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[2]=\"traefik.http.routers.${STACK_NAME}-msul-solr-router.service=${STACK_NAME}-msul-solr-app\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[3]=\"traefik.http.services.${STACK_NAME}-msul-solr-app.loadbalancer.server.port=8983\"" docker-compose.solr-cloud.yml
-    - if [ ! "${STACK_NAME}" == *"catalog-"* ]; then ./yq -i ".x-solr-deploy.labels[4] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
+    - if [[ "${STACK_NAME}" != catalog-* ]]; then ./yq -i ".x-solr-deploy.labels[4] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
     - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".x-solr-deploy.labels[4] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`catalog-beta.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
     - if [ "${STACK_NAME}" == "catalog-prod" ]; then ./yq -i ".x-solr-deploy.labels[4] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`catalog-prod.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
     - ./yq -i ".x-solr-deploy.labels[5]=\"traefik.http.routers.${STACK_NAME}-msul-solr-router.middlewares=http-redirect\"" docker-compose.solr-cloud.yml
@@ -119,7 +119,7 @@ Deploy Compose Files:
     - ./yq -i ".x-solr-deploy.labels[7]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.service=${STACK_NAME}-https-msul-solr-app\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[8]=\"traefik.http.services.${STACK_NAME}-https-msul-solr-app.loadbalancer.server.port=8983\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[9]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.middlewares=restrict-auth\"" docker-compose.solr-cloud.yml
-    - if [ ! "${STACK_NAME}" == *"catalog-"* ]; then ./yq -i ".x-solr-deploy.labels[10] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
+    - if [[ "${STACK_NAME}" != catalog-* ]]; then ./yq -i ".x-solr-deploy.labels[10] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
     - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".x-solr-deploy.labels[10] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
     - if [ "${STACK_NAME}" == "catalog-prod" ]; then ./yq -i ".x-solr-deploy.labels[10] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`catalog-prod.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
     - ./yq -i ".x-solr-deploy.labels[11]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls=true\"" docker-compose.solr-cloud.yml
@@ -135,7 +135,7 @@ Deploy Compose Files:
     - ./yq -i ".services.cron.environment[\"SITE_HOSTNAME\"]=\"${SITE_HOSTNAME}\"" docker-compose.yml
     # Development environment changes
     - |
-      if [ ! "${STACK_NAME}" == *"catalog-"* ]; then
+      if [[ "${STACK_NAME}" != catalog-* ]]; then
         # Remove the cron service if the stack name is NOT catalog-beta
         ./yq -i "del(.services.cron)" docker-compose.yml;
         # Unset parallelism limit for non-production to speed up redeployments on devel stacks
@@ -143,7 +143,7 @@ Deploy Compose Files:
       fi
     # Staging environment changes
     - |
-      if [ "${STACK_NAME}" == *"catalog-"* ]; then
+      if [[ "${STACK_NAME}" == catalog-* ]]; then
         # Use httpchallenge cert resolver (instead of dnschallenge)
         ./yq -i ".services.catalog.deploy.labels[6]=\"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt\"" docker-compose.yml;
         ./yq -i ".x-solr-deploy.labels[12]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.certresolver=msul-letsencrypt\"" docker-compose.solr-cloud.yml
