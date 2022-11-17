@@ -44,7 +44,7 @@ RUN \
     yq -i '.config.platform.php="7.4.1"' /usr/local/vufind/composer.json && \
     yq -i '.require.php=">=7.4.1"' /usr/local/vufind/composer.json && \
     yq -i '.require.vufind-org/vufindharvest="5.0.0"' /usr/local/vufind/composer.json && \
-    pushd /usr/local/vufind/ && composer update && popd && \
+    composer --working-dir=/usr/local/vufind/ update && \
     # Remove unused dependencies after Vufind is installed
     mv /usr/local/vufind/solr /tmp && \
     mkdir -p /usr/local/vufind/solr/vendor/dist && \
