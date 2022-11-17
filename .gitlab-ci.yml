@@ -2,6 +2,7 @@ stages:
   - test
   - Build
   - Deploy
+  - Build Prod
   - Deploy Prod
   - Cleanup
   - Release
@@ -20,7 +21,9 @@ include:
   - project: 'msu-libraries/public/cicd-templates'
     ref: main
     file: 'SSH.gitlab-ci.yml'
-  - 'templates/Build.gitlab-ci.yml'
-  - 'templates/Scan.gitlab-ci.yml'
   - 'templates/Deploy.gitlab-ci.yml'
+  - 'templates/DeployProd.gitlab-ci.yml'
+  - 'templates/Build.gitlab-ci.yml'
+  - 'templates/BuildProd.gitlab-ci.yml'
+  - 'templates/Scan.gitlab-ci.yml'
   - 'templates/Release.gitlab-ci.yml'
