@@ -20,7 +20,7 @@ Deploy Prod Compose Files:
 
 Perform Prod Database Backup:
   stage: Deploy Prod
-  extends: Perform Database Backup:
+  extends: Perform Database Backup
   needs:
     - job: Set Prod Stack Name
       artifacts: true
