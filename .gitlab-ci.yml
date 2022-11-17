@@ -348,7 +348,7 @@ Vufind Upgrade:
         echo "Enabling auto configure temporarily";
         setconfig "false" "true";
         echo "Running Vufind upgrade now against ${URL}";
-        curl "${URL}/vufind/Upgrade/GetSourceVersion" -k --data-raw "sourceversion=${PREV_VUFIND_VERSION}&skip%5B%5D=config" -L -O;
+        curl "${URL}/Upgrade/GetSourceVersion" -k --data-raw "sourceversion=${PREV_VUFIND_VERSION}&skip%5B%5D=config" -L -O;
         echo "Upgrade complete with exit code $?";
   after_script:
     - |
