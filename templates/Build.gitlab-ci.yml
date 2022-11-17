@@ -1,5 +1,4 @@
 ############# Build ###############
-
 Build DB Image:
   variables:
      COMPONENT: db

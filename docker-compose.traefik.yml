@@ -82,6 +82,10 @@ services:
         - "traefik.http.middlewares.fix-prefix.replacepathregex.replacement=/vufind/$$2"
         - "traefik.http.middlewares.saml-prefix.replacepathregex.regex=^/vufind/simplesamlphp/(.*)"
         - "traefik.http.middlewares.saml-prefix.replacepathregex.replacement=/simplesamlphp/$$1"
+        # Redirect to remove /vufind prefix
+        - "traefik.http.middlewares.remove-prefix.redirectregex.regex=^(https://[^/]+)/vufind(/.*)"
+        - "traefik.http.middlewares.remove-prefix.redirectregex.replacement=$${1}$${2}"
+        - "traefik.http.middlewares.remove-prefix.redirectregex.permanent=true"
         # Traefik Dashboard HTTP
         - "traefik.http.routers.dashboard-http-router.entrypoints=msul-http-ent"
         - "traefik.http.routers.dashboard-http-router.middlewares=http-redirect"
