@@ -143,7 +143,7 @@ Deploy Compose Files:
       fi
     # Staging environment changes
     - |
-      if [ "${STACK_NAME}" == "catalog-"* ]; then
+      if [ "${STACK_NAME}" == *"catalog-"* ]; then
         # Use httpchallenge cert resolver (instead of dnschallenge)
         ./yq -i ".services.catalog.deploy.labels[6]=\"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt\"" docker-compose.yml;
         ./yq -i ".x-solr-deploy.labels[12]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.certresolver=msul-letsencrypt\"" docker-compose.solr-cloud.yml
