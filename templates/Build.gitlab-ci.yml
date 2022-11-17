@@ -108,6 +108,3 @@ Build Vufind Image:
         docker tag $CURR $LATEST
         docker push $LATEST
       fi
-
-include:
-  - 'templates/*.gitlab-ci.yml'

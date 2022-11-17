@@ -35,6 +35,3 @@ Build Prod Vufind Image:
       artifacts: true
   rules:
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
-
-include:
-  - 'templates/*.gitlab-ci.yml'
