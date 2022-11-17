@@ -289,6 +289,7 @@ Deploy Vufind:
       if [ "${STACK_NAME}" == "catalog-prod" ]; then
           SUFFIX="-prod";
       fi
+    - >
       ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA" &
       ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA" &
       ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA"
