@@ -8,6 +8,7 @@
 #  * All collections have a health of "GREEN"
 #  * All shards have a status of "active"
 #  * All replicas have a status of "active"
+#  * TODO -- verify record counts between nodes
 
 EXIT_CODE=0
 

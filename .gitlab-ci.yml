@@ -13,6 +13,7 @@ variables:
   VUFIND_VERSION: "8.1"
   # Used during upgrade, which needs to know previous version
   PREV_VUFIND_VERSION: "8.0.4"
+  SIMPLESAMLPHP_VERSION: "1.19.6"
   DEPLOY_HOST_A: catalog-1.aws.lib.msu.edu
   DEPLOY_HOST_B: catalog-2.aws.lib.msu.edu
   DEPLOY_HOST_C: catalog-3.aws.lib.msu.edu
@@ -25,12 +26,18 @@ Set Stack Name:
   script:
     - |
       STACK_NAME=
+      SITE_HOSTNAME=
       if [[ $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH ]]; then
-          STACK_NAME="catalog-beta"
+          STACK_NAME="catalog-beta";
+          SITE_HOSTNAME="catalog-beta.lib.msu.edu";
       elif [[ "${CI_COMMIT_BRANCH}" == "devel-"* || "${CI_COMMIT_BRANCH}" == "review-"* ]]; then
-          STACK_NAME="${CI_COMMIT_BRANCH}"
+          STACK_NAME="${CI_COMMIT_BRANCH}";
+          SITE_HOSTNAME="${STACK_NAME}.aws.lib.msu.edu";
       fi
-      echo "STACK_NAME=${STACK_NAME}" > build.env
+    - echo "STACK_NAME=${STACK_NAME}" > build.env
+    - echo "SITE_HOSTNAME=${SITE_HOSTNAME}" >> build.env
+    - test -n "${STACK_NAME}"
+    - test -f build.env
   artifacts:
     reports:
       dotenv: build.env
@@ -110,6 +117,8 @@ Deploy Compose Files:
     - ./yq -i ".services.cron.environment[\"STACK_NAME\"]=\"${STACK_NAME}\"" docker-compose.solr-cloud.yml
     # Remove the cron service if the stack name is NOT catalog-beta
     - if [ "${STACK_NAME}" != "catalog-beta" ]; then ./yq -i "del(.services.cron)" docker-compose.yml; fi
+    # Unset parallelism limit for non-production to speed up redeployments on devel stacks
+    - if [ "${STACK_NAME}" != "catalog-beta" ]; then ./yq -i "del(.services.catalog.deploy.update_config.parallelism)" docker-compose.yml; fi
     # Replace $STACK_NAME in main compose file
     - cat docker-compose.yml | envsubst | sponge docker-compose.yml
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
@@ -309,16 +318,28 @@ Vufind Populate Environment:
   script:
     - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts;
     - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts;
-    # Load some records
-    - echo "Running harvest-and-import.sh now";
-    - ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -r >/dev/null 2>&1";
-    - echo "Import completed with exit code $?";
-    # Rebuild alphabetic browse databases
-    - echo "Running Alphabetic browse database build";
-    - ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
-    - ssh deploy@$DEPLOY_HOST_B "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
-    - ssh deploy@$DEPLOY_HOST_C "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
-    - echo "Completed alphabetic browse database build";
+    # Determine if records are already loaded
+    - |
+        STAT_CD=$(ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) curl 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' --write-out %{http_code} --silent --output /dev/null");
+        if [[ "${STAT_CD}" -ne 200 ]]; then
+            echo "Failed to get number of records from Solr. Curl returned ${STAT_CD}.";
+            exit 1;
+        fi;
+        NUM_RECS=$(ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) curl -s 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' | jq '.response.numFound'");
+        if [[ "${NUM_RECS}" -eq "0" ]]; then
+            # Load some records
+            echo "Running harvest-and-import.sh now";
+            ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-catalog_catalog) /harvest-and-import.sh -c -l 1 -b -r >/dev/null 2>&1";
+            echo "Import completed with exit code $?";
+            # Rebuild alphabetic browse databases
+            echo "Running Alphabetic browse database build";
+            ssh deploy@$DEPLOY_HOST_A "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+            ssh deploy@$DEPLOY_HOST_B "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+            ssh deploy@$DEPLOY_HOST_C "docker exec \$(docker ps -q -f name=${STACK_NAME}-solr_cron) /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+            echo "Completed alphabetic browse database build";
+        else
+            echo "${NUM_RECS} loaded records already exist. Doing nothing.";
+        fi;
 
 Verify Health:
   stage: Post-Deploy
@@ -335,7 +356,7 @@ Verify Health:
             echo "Checking health for ${SERVICE}...";
             for HOST in ${HOSTS}; do
                 ATTEMPTS=0;
-                while [[ "$ATTEMPTS" -le 10 ]]; do
+                while [[ "$ATTEMPTS" -le 15 ]]; do
                     HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE}) 2>/dev/null || echo \"No Health\"");
                     if [[ "${HEALTH}" == "\"healthy\"" ]]; then
                         echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} is healthy."
@@ -392,11 +413,12 @@ Remove Environment:
       docker stack rm $STACK_NAME-internal;
       rm -rf $COMPOSE_PATH;
       sleep 15;
-      docker system prune --volumes -a -f --filter label=name=$STACK_NAME"
+      docker system prune -a -f;
+      docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
     - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
     - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
-    - ssh deploy@$DEPLOY_HOST_B "docker system prune --volumes -a -f --filter label=name=$STACK_NAME"
-    - ssh deploy@$DEPLOY_HOST_C "docker system prune --volumes -a -f --filter label=name=$STACK_NAME"
+    - ssh deploy@$DEPLOY_HOST_B "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
+    - ssh deploy@$DEPLOY_HOST_C "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"
 
 ############# Templates ###############
 
@@ -404,6 +426,7 @@ Remove Environment:
   tags:
     - msul-shared
   extends: .setup_ssh
+  retry: 2
   variables:
     ENCODED_PRIVATE_KEY: $DEPLOY_PRIVATE_KEY
     SERVER: $DEPLOY_HOST_A

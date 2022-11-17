@@ -20,14 +20,17 @@ docker build ./vufind/ -t catalog:latest \
     --build-arg MAIL_PORT=25 \
     --build-arg MAIL_USERNAME= \
     --build-arg MAIL_PASSWORD= \
-    --build-arg SOLR_URL=http://solr:8983/solr
-    --build-arg EDS_USER=eds
-    --build-arg EDS_PASS=123
-    --build-arg EDS_PROFILE=profile.edu.id
-    --build-arg EDS_ORG=eds.org
+    --build-arg SOLR_URL=http://solr:8983/solr \
+    --build-arg EDS_USER=eds \
+    --build-arg EDS_PASS=123 \
+    --build-arg EDS_PROFILE=profile.edu.id \
+    --build-arg EDS_ORG=eds.org \
     --build-arg FEEDBACK_EMAIL=another_email@example.edu \
-    --build-arg RECAPTCHA_SITE_KEY=mysitekey
-    --build-arg RECAPTCHA_SECRET_KEY=mysecretkey
+    --build-arg RECAPTCHA_SITE_KEY=mysitekey \
+    --build-arg RECAPTCHA_SECRET_KEY=mysecretkey \
+    --build-arg SIMPLESAMLPHP_VERSION=1.19.6
+    --build-arg SIMPLESAMLPHP_SALT=abcXYZ
+    --build-arg SIMPLESAMLPHP_ADMIN_PW=mySecretPass
 ```
 
 * `VUFIND_VERSION`: The version of VuFind to install 
@@ -53,6 +56,9 @@ uses `1` by default
 * `EDS_ORG`: Organization ID to use with the EDS API
 * `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation
 * `RECAPTCHA_SECRET_KEY`: Secret key for reCaptcha form validation
+* `SIMPLESAMLPHP_VERSION`: The version of SimpleSAMLphp to install
+* `SIMPLESAMLPHP_SALT`: Random salt for SimpleSAMLphp
+* `SIMPLESAMLPHP_ADMIN_PW`: Password to the admin interface of SimpleSAMLphp
 
 ## To start the application stack
 During the first time you are bring up the stack, you will need

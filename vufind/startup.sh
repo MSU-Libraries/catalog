@@ -18,5 +18,10 @@ do
     echo "Created Solr collection for $COLL"
 done
 
+# Run grunt if a devel/review site
+if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
+    grunt watch:less&
+fi
+
 # Start Apache
 tail -f /var/log/vufind/vufind.log & apachectl -DFOREGROUND
