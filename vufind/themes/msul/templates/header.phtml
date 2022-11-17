@@ -1,12 +1,13 @@
 <?php $account = $this->auth()->getManager(); ?>
 <div class="banner container navbar">
   <div class="navbar-header">
-    <div class="navbar-msubrand"><a href="https://msu.edu/" rel="nofollow"><img alt="Michigan State University" src="/vufind/themes/msul/images/masthead-helmet-white.png"></a></div>
+    <div class="navbar-msubrand"><a href="https://msu.edu/" rel="nofollow"><img alt="Michigan State University" src="/themes/msul/images/masthead-helmet-white.png"></a></div>
     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-collapse" aria-hidden="true">
       <i class="fa fa-bars"></i>
     </button>
 
     <a href="https://lib.msu.edu/" class="navbar-brand">MSU Libraries</a>
+    <a href="<?=$this->url('home') ?>" class="navbar-brand navbar-band-border">Catalog</a>
   </div>
   <?php if (!isset($this->layout()->renderingError)): ?>
     <div class="collapse navbar-collapse" id="header-collapse">

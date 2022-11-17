@@ -8,6 +8,9 @@ ln -s /mnt/shared/local_harvest_folio/ /usr/local/vufind/local/harvest/folio
 # Replace the $NODE in the crontab entry
 envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
 
+# Change to using file sessions
+sed -i 's/type\s*=\s*Database/type=File/' /usr/local/vufind/local/config/vufind/config.ini
+
 # Start up syslog (required for cron)
 rsyslogd
 

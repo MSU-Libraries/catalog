@@ -3,6 +3,7 @@ package org.solrmarc.mixin;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
@@ -11,8 +12,13 @@ import org.solrmarc.index.SolrIndexerMixin;
 
 public class LocationMixin extends SolrIndexerMixin {
 
-    public List<String> getLocations(final Record record, String dummy) {
+    public List<String> getLocations(final Record record) {
         List<String> result = new ArrayList<String>();
+        List<VariableField> cniFields = record.getVariableFields("003");
+        if (cniFields.stream().anyMatch(vf -> "EBZ".equals(((ControlField)vf).getData()))) {
+            result.add("0/EBSCO/");
+            return result;
+        }
         List<VariableField> locationFields = record.getVariableFields("952");
         List<Subfield> cSubfields = getSubfieldsMatching(locationFields, "c");
         List<Subfield> dSubfields = getSubfieldsMatching(locationFields, "d");

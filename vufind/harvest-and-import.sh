@@ -295,7 +295,7 @@ reset_solr() {
 clear_harvest_files() {
     countdown 5
     find "${1}" -mindepth 1 -maxdepth 1 \
-      \(
+      \( \
         -name '*.xml' -o \
         -name '*_oai_*.delete' -o \
         -name 'last_harvest.txt' -o \

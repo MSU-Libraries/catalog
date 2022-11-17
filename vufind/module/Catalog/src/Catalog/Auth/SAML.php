@@ -169,14 +169,14 @@ class SAML extends \VuFind\Auth\AbstractBase
 
         // Has the user configured attributes to use for populating the user table?
         foreach ($this->attribsToCheck as $attribute) {
-            if (isset($saml[$attribute])) {
-                $value = $this->getAttribute($saml[$attribute]);
+            if (isset($config[$attribute])) {
+                $value = $this->getAttribute($config[$attribute]);
                 if ($attribute == 'email') {
                     $user->updateEmail($value);
-                } elseif ($attribute == 'cat_username' && isset($saml['prefix'])
+                } elseif ($attribute == 'cat_username' && isset($config['prefix'])
                     && !empty($value)
                 ) {
-                    $user->cat_username = $saml['prefix'] . '.' . $value;
+                    $user->cat_username = $config['prefix'] . '.' . $value;
                 } elseif ($attribute == 'cat_password') {
                     $catPassword = $value;
                 } else {
@@ -331,6 +331,13 @@ class SAML extends \VuFind\Auth\AbstractBase
     protected function getAttribute($attribute)
     {
         $attrs = $this->auth->getAttributes();
-        return $attrs[$attribute];
+        $value = $attrs[$attribute];
+        if (is_array($value)) {
+            if (count($value) > 0)
+                $value = $value[0];
+            else
+                $value = null;
+        }
+        return $value;
     }
 }

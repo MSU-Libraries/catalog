@@ -28,11 +28,36 @@ return array (
         'factories' => 
         array (
           'Catalog\\Auth\\SAML' => 'Catalog\\Auth\\SAMLFactory',
+          'Catalog\\Auth\\Okapi' => 'Catalog\\Auth\\OkapiFactory',
         ),
         'aliases' => 
         array (
           'saml' => 'Catalog\\Auth\\SAML',
+          'okapi' => 'Catalog\\Auth\\Okapi',
         )
+      ),
+      'ils_driver' =>
+      array (
+        'factories' =>
+        array (
+          'Catalog\\ILS\\Driver\\Folio' => 'VuFind\\ILS\\Driver\\FolioFactory',
+        ),
+        'aliases' => 
+        array (
+          'folio' => 'Catalog\\ILS\\Driver\\Folio',
+        ),
+      ),
+      'command' =>
+      array (
+        'factories' => 
+        array (
+          'Catalog\\VuFindConsole\\Command\\Util\\IndexReservesCommand' =>
+            'VuFindConsole\\Command\\Util\\AbstractSolrAndIlsCommandFactory',
+        ),
+        'aliases' => 
+        array (
+          'util/index_reserves' => 'Catalog\\VuFindConsole\\Command\\Util\\IndexReservesCommand',
+        ),
       ),
     ),
   ),
