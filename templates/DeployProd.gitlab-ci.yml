@@ -2,7 +2,7 @@ Set Prod Stack Name:
   stage: Deploy Prod
   extends: Set Stack Name
   variables:
-    PROD: true
+    PROD: "true"
 
 Create Prod DNS:
   stage: Deploy Prod
