@@ -1,11 +1,9 @@
 stages:
-  - Prepare
-  - Build
   - test
-  - Networking
-  - Bootstrap
+  - Build
   - Deploy
-  - Post-Deploy
+  - Build Prod
+  - Deploy Prod
   - Cleanup
   - Release
 
@@ -17,18 +15,25 @@ variables:
   DEPLOY_HOST_A: catalog-1.aws.lib.msu.edu
   DEPLOY_HOST_B: catalog-2.aws.lib.msu.edu
   DEPLOY_HOST_C: catalog-3.aws.lib.msu.edu
-  COMPOSE_PATH: /home/deploy/$CI_COMMIT_BRANCH
+  COMPOSE_PATH: /home/deploy/$STACK_NAME
 
 Set Stack Name:
-  stage: Prepare
+  stage: Build
   interruptible: true
+  variables:
+    PROD: "false"
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_PIPELINE_SOURCE == "schedule"'
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_PIPELINE_SOURCE == "schedule") && $PROD == "false"'
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $PROD == "true"'
+      when: manual
   script:
     - |
       STACK_NAME=
       SITE_HOSTNAME=
-      if [[ $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH ]]; then
+      if [[ $PROD == "true" ]]; then
+          STACK_NAME="catalog-prod";
+          SITE_HOSTNAME="catalog-prod.lib.msu.edu";
+      elif [[ $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH ]]; then
           STACK_NAME="catalog-beta";
           SITE_HOSTNAME="catalog-beta.lib.msu.edu";
       elif [[ "${CI_COMMIT_BRANCH}" == "devel-"* || "${CI_COMMIT_BRANCH}" == "review-"* ]]; then
@@ -44,7 +49,6 @@ Set Stack Name:
       dotenv: build.env
 
 Create DNS:
-  stage: Prepare
   extends: .stack_template
   image: $CI_REGISTRY_IMAGE/ansible:latest
   rules:
@@ -63,7 +67,6 @@ Create DNS:
     - sleep 60
 
 Deploy Compose Files:
-  stage: Prepare
   extends: .stack_template
   rules:
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
@@ -79,17 +82,22 @@ Deploy Compose Files:
     # Add basicauth password for restricted resources
     - ./yq -i ".services.traefik.deploy.labels[2]=\"traefik.http.middlewares.restrict-auth.basicauth.users=$BASICAUTH_FOR_RESOURCES\"" docker-compose.traefik.yml
     # Modify the image tag from :latest -> $CI_COMMIT_SHORT_SHA
-    - ./yq -i ".services.catalog.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
-    - ./yq -i ".services.cron.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
-    - ./yq -i ".services.cachecron.image=\"$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml
-    - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-bootstrap.yml
-    - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud.yml
-    - ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-force.yml
-    - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
-    - ./yq -i ".services.zk.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml
-    - ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
-    - ./yq -i ".services.cron.image=\"$CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
-    - ./yq -i ".services.zk.image=\"$CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml
+    - |
+      SUFFIX="";
+      if [ "${STACK_NAME}" == "catalog-prod" ]; then
+          SUFFIX="-prod";
+      fi;
+      ./yq -i ".services.catalog.image=\"$CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml;
+      ./yq -i ".services.cron.image=\"$CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml;
+      ./yq -i ".services.cachecron.image=\"$CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.yml;
+      ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-bootstrap.yml;
+      ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud.yml;
+      ./yq -i ".services.galera.image=\"$CI_REGISTRY_IMAGE/db${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.mariadb-cloud-force.yml;
+      ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml;
+      ./yq -i ".services.zk.image=\"$CI_REGISTRY_IMAGE/zk${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud-bootstrap.yml;
+      ./yq -i ".services.solr.image=\"$CI_REGISTRY_IMAGE/solr${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml;
+      ./yq -i ".services.cron.image=\"$CI_REGISTRY_IMAGE/solr${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml;
+      ./yq -i ".services.zk.image=\"$CI_REGISTRY_IMAGE/zk${SUFFIX}:$CI_COMMIT_SHORT_SHA\"" docker-compose.solr-cloud.yml;
     # Modify the name of internal network to include $STACK_NAME
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.internal.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.mariadb-cloud-bootstrap.yml
@@ -101,19 +109,24 @@ Deploy Compose Files:
     # Add labels for host rule if stack name is catalog-beta
     - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.catalog-beta-http-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\"" docker-compose.yml; fi
     - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.catalog-beta-https-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\"" docker-compose.yml; fi
+    # Add labels for host rule if stack name is catalog-prod
+    - if [ "${STACK_NAME}" == "catalog-prod" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.catalog-beta-http-router.rule=Host(\`catalog-prod.lib.msu.edu\`, \`catalog.lib.msu.edu\`)\"" docker-compose.yml; fi
+    - if [ "${STACK_NAME}" == "catalog-prod" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.catalog-beta-https-router.rule=Host(\`catalog-prod.lib.msu.edu\`, \`catalog.lib.msu.edu\`)\"" docker-compose.yml; fi
     # Add $STACK_NAME to solr traefik labels
     - ./yq -i ".x-solr-deploy.labels[1]=\"traefik.http.routers.${STACK_NAME}-msul-solr-router.entrypoints=msul-http-ent\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[2]=\"traefik.http.routers.${STACK_NAME}-msul-solr-router.service=${STACK_NAME}-msul-solr-app\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[3]=\"traefik.http.services.${STACK_NAME}-msul-solr-app.loadbalancer.server.port=8983\"" docker-compose.solr-cloud.yml
-    - if [ "${STACK_NAME}" != "catalog-beta" ]; then ./yq -i ".x-solr-deploy.labels[4] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
-    - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".x-solr-deploy.labels[4] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
+    - if [ ! "${STACK_NAME}" == *"catalog-"* ]; then ./yq -i ".x-solr-deploy.labels[4] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
+    - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".x-solr-deploy.labels[4] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`catalog-beta.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
+    - if [ "${STACK_NAME}" == "catalog-prod" ]; then ./yq -i ".x-solr-deploy.labels[4] =\"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`catalog-prod.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
     - ./yq -i ".x-solr-deploy.labels[5]=\"traefik.http.routers.${STACK_NAME}-msul-solr-router.middlewares=http-redirect\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[6]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.entrypoints=msul-https-ent\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[7]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.service=${STACK_NAME}-https-msul-solr-app\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[8]=\"traefik.http.services.${STACK_NAME}-https-msul-solr-app.loadbalancer.server.port=8983\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[9]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.middlewares=restrict-auth\"" docker-compose.solr-cloud.yml
-    - if [ "${STACK_NAME}" != "catalog-beta" ]; then ./yq -i ".x-solr-deploy.labels[10] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
+    - if [ ! "${STACK_NAME}" == *"catalog-"* ]; then ./yq -i ".x-solr-deploy.labels[10] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
     - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".x-solr-deploy.labels[10] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
+    - if [ "${STACK_NAME}" == "catalog-prod" ]; then ./yq -i ".x-solr-deploy.labels[10] =\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`catalog-prod.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml; fi
     - ./yq -i ".x-solr-deploy.labels[11]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls=true\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[12]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.certresolver=msul-letsencrypt-dns\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[13]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.domains[0].main=aws.lib.msu.edu\"" docker-compose.solr-cloud.yml
@@ -122,7 +135,7 @@ Deploy Compose Files:
     - ./yq -i ".services.cron.environment[\"STACK_NAME\"]=\"${STACK_NAME}\"" docker-compose.solr-cloud.yml
     # Development environment changes
     - |
-      if [ "${STACK_NAME}" != "catalog-beta" ]; then
+      if [ ! "${STACK_NAME}" == *"catalog-"* ]; then
         # Remove the cron service if the stack name is NOT catalog-beta
         ./yq -i "del(.services.cron)" docker-compose.yml;
         # Unset parallelism limit for non-production to speed up redeployments on devel stacks
@@ -130,7 +143,7 @@ Deploy Compose Files:
       fi
     # Staging environment changes
     - |
-      if [ "${STACK_NAME}" == "catalog-beta" ]; then
+      if [ "${STACK_NAME}" == "catalog-"* ]; then
         # Use httpchallenge cert resolver (instead of dnschallenge)
         ./yq -i ".services.catalog.deploy.labels[6]=\"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt\"" docker-compose.yml;
         ./yq -i ".x-solr-deploy.labels[12]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.certresolver=msul-letsencrypt\"" docker-compose.solr-cloud.yml
@@ -153,7 +166,6 @@ Deploy Compose Files:
     - scp docker-compose* deploy@$DEPLOY_HOST_A:$COMPOSE_PATH/
 
 Perform Database Backup:
-  stage: Prepare
   extends: .stack_template
   rules:
     - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule" && $CI_DEPLOY_FREEZE == null'
@@ -166,19 +178,13 @@ Perform Database Backup:
       fi
 
 Deploy Internal Network:
-  stage: Networking
   extends: .stack_template
-  needs:
-    - job: Set Stack Name
-      artifacts: true
-    - Deploy Compose Files
   script:
     - >
       ssh deploy@$DEPLOY_HOST_A
       "docker stack deploy -c $COMPOSE_PATH/docker-compose.internal.yml $STACK_NAME-internal && sleep 15"
 
 Deploy Traefik:
-  stage: Networking
   extends: .stack_template
   needs:
     - job: Set Stack Name
@@ -193,7 +199,6 @@ Deploy Traefik:
       && docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik.yml traefik && sleep 15"
 
 Bootstrap Stacks:
-  stage: Bootstrap
   extends: .stack_template
   needs:
     - job: Set Stack Name
@@ -209,7 +214,6 @@ Bootstrap Stacks:
       (docker volume ls | grep -q ${STACK_NAME}-solr || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml ${STACK_NAME}-solr && sleep 90))"
 
 Deploy Solr:
-  stage: Deploy
   extends: .stack_template
   rules:
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
@@ -226,14 +230,18 @@ Deploy Solr:
   script:
     # Pull images now to save time with stack deploy
     - >
-      ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA" &
-      ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA" &
-      ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA"
+      SUFFIX="";
+      if [ "${STACK_NAME}" == "catalog-prod" ]; then
+          SUFFIX="-prod";
+      fi
+    - >
+      ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/solr${SUFFIX}:$CI_COMMIT_SHORT_SHA" &
+      ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/solr${SUFFIX}:$CI_COMMIT_SHORT_SHA" &
+      ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/solr${SUFFIX}:$CI_COMMIT_SHORT_SHA"
     - >
       ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr"
 
 Deploy Swarm Cron:
-  stage: Deploy
   extends: .stack_template
   script:
     - >
@@ -241,7 +249,6 @@ Deploy Swarm Cron:
       "docker stack deploy -c $COMPOSE_PATH/docker-compose.swarm-cron.yml swarm-cron"
 
 Deploy DB:
-  stage: Deploy
   extends: .stack_template
   rules:
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
@@ -258,7 +265,6 @@ Deploy DB:
       ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud.yml ${STACK_NAME}-mariadb && sleep 45"
 
 Deploy Vufind:
-  stage: Deploy
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH
@@ -279,17 +285,22 @@ Deploy Vufind:
   script:
     # Pull images now to save time with stack deploy
     - >
-      ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" &
-      ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" &
-      ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA"
+      SUFFIX="";
+      if [ "${STACK_NAME}" == "catalog-prod" ]; then
+          SUFFIX="-prod";
+      fi
+    - >
+      ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA" &
+      ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA" &
+      ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA"
     - >
       ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME-catalog"
     # Determine URL
     - >
-      if [ "${STACK_NAME}" != "catalog-beta" ]; then
+      if [ ! "${STACK_NAME}" == *"catalog-"* ]; then
         URL="https://${STACK_NAME}.aws.lib.msu.edu";
       else
-        URL="https://catalog-beta.lib.msu.edu";
+        URL="https://${STACK_NAME}.lib.msu.edu";
       fi
     # Report the environemnt URL to GitLab
     - echo "URL=$URL" >> deploy.env
@@ -298,7 +309,6 @@ Deploy Vufind:
       dotenv: deploy.env
 
 Vufind Upgrade:
-  stage: Post-Deploy
   extends: .stack_template
   needs:
     - job: Set Stack Name
@@ -322,12 +332,16 @@ Vufind Upgrade:
         }
         catalogwait() {
             sleep 15;
+            SUFFIX="";
+            if [ "${STACK_NAME}" == "catalog-prod" ]; then
+                SUFFIX="-prod";
+            fi
             for HOST in ${HOSTS}; do
-                echo "Checking to see if catalog container for ${HOST} is online ($CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA)...";
+                echo "Checking to see if catalog container for ${HOST} is online ($CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA)...";
                 ATTEMPTS=0;
                 while [[ "$ATTEMPTS" -le 20 ]]; do
                     TARGET_IMAGE=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}' 2>/dev/null") || echo "NOT ONLINE";
-                    if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
+                    if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind${SUFFIX}:$CI_COMMIT_SHORT_SHA" ]]; then
                         echo "$(date +'%m-%d-%Y %T %z') -- Container for host ${HOST} is online with new image!";
                         EC=0;
                         break;
@@ -368,7 +382,6 @@ Vufind Upgrade:
         setconfig "true" "false";
 
 Vufind Populate Environment:
-  stage: Post-Deploy
   extends: .stack_template
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
@@ -420,7 +433,6 @@ Vufind Populate Environment:
         fi;
 
 Verify Health:
-  stage: Post-Deploy
   extends: .stack_template
   needs:
     - job: Set Stack Name
@@ -494,7 +506,7 @@ Remove Environment:
     # Remove the alphabetic browse databases
     - |
       CONTAINER=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=$STACK_NAME-solr_cron");
-      if [ ! -z "${CONTAINER}" ];then
+      if [ ! -z "${CONTAINER}" ]; then
         ssh deploy@$DEPLOY_HOST_A "docker exec ${CONTAINER} rm -rf /mnt/shared/alpha-browse/${STACK_NAME}";
       fi
     # Cleanup volumes/networks/images/containers
@@ -513,6 +525,7 @@ Remove Environment:
 ############# Templates ###############
 
 .stack_template:
+  stage: Deploy
   tags:
     - msul-shared
   extends: .setup_ssh
@@ -560,6 +573,4 @@ include:
   - project: 'msu-libraries/public/cicd-templates'
     ref: main
     file: 'SSH.gitlab-ci.yml'
-  - 'templates/Build.gitlab-ci.yml'
-  - 'templates/Scan.gitlab-ci.yml'
-  - 'templates/Release.gitlab-ci.yml'
+  - 'templates/*.gitlab-ci.yml'
