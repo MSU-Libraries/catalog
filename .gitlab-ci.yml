@@ -30,7 +30,7 @@ Set Stack Name:
     - |
       STACK_NAME=
       SITE_HOSTNAME=
-      if [[ $PROD ]]; then
+      if [[ $PROD == "true" ]]; then
           STACK_NAME="catalog-prod";
           SITE_HOSTNAME="catalog-prod.lib.msu.edu";
       elif [[ $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH ]]; then
