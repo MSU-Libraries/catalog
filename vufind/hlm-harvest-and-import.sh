@@ -364,17 +364,31 @@ import() {
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*-Del-*.mrc')
 
     verbose "Running batch import"
-    if ! /usr/local/vufind/harvest/batch-import-marc.sh hlm; then
-        verbose "ERROR: Batch import failed with code: $?" 1
-        exit 1
+    if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
+        if ! /usr/local/vufind/harvest/batch-import-marc.sh hlm; then
+            verbose "ERROR: Batch import failed with code: $?" 1
+            exit 1
+        fi
+    else
+        if ! /usr/local/vufind/harvest/batch-import-marc.sh hlm >> "$LOG_FILE"; then
+            verbose "ERROR: Batch import failed with code: $?" 1
+            exit 1
+        fi
     fi
     verbose "Completed batch import"
 
     verbose "Processing delete records from harvest."
     countdown 5
-    if ! /usr/local/vufind/harvest/batch-delete.sh hlm; then
-        verbose "ERROR: Batch delete script failed." 1
-        exit 1
+    if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
+        if ! /usr/local/vufind/harvest/batch-delete.sh hlm; then
+            verbose "ERROR: Batch delete script failed with code: $?" 1
+            exit 1
+        fi
+    else
+        if ! /usr/local/vufind/harvest/batch-delete.sh hlm >> "$LOG_FILE"; then
+            verbose "ERROR: Batch delete script failed with code: $?" 1
+            exit 1
+        fi
     fi
     verbose "Completed processing records to be deleted."
 }
