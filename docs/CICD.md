@@ -111,12 +111,20 @@ resources such as Solr and the Traefik dashboard
 * `FOLIO_TENANT`: Tenant ID 
 * `FOLIO_URL`: Okapi URL for FOLIO used by Vufind 
 * `FOLIO_USER`: Application user used by Vufind for ILS calls 
+* `FTP_USER`: User name for the EBSCO FTP server
+* `FTP_PASSWORD`: Password for `FTP_USER`
 * `GITHUB_USER_TOKEN`: Token used to publish releases to GitHub repository 
 * `OAI_URL`: URL for making OAI calls to FOLIO when harvesting (can include API Token) 
 * `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation
 * `RECAPTCHA_SECRET_KEY`: Secret key for reCaptcha form validation
 * `REGISTRY_ACCESS_TOKEN`: Read-only registry access token used by deploy user
 * `RW_CICD_TOKEN`: Read-Write access token to this repository used to create release tags 
+
+## Deploy Freezes
+If you want to prevent deployments to the production environment during certain times, you
+can make use of GitLab's [Deploy Freeze](https://gitlab.msu.edu/help/ci/environments/deployment_safety.md#prevent-deployments-during-deploy-freeze-windows)
+feature. Simply enter in a timeframe using cron-style syntax in the "Deploy Freeze" section
+of the CI/CD Settings of the repository.
 
 [^1]: 
     There are many ways to generate this password hash, such as online generators or command

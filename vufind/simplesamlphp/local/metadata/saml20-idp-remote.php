@@ -51,3 +51,11 @@ $metadata['http://www.okta.com/exk1eh7u7cb8BIF9z0h8'] = [
     'certificate'          => 'msu-qa.pem',
     'sign.logout'          => true,
 ];
+// MSU PROD
+$metadata['http://www.okta.com/exkng5q6tqDecNuDY357'] = [
+    'name'                 => 'MSU PROD IdP',
+    'SingleSignOnService'  => 'https://auth.msu.edu/app/msu_libpubliccatalog_1/exkng5q6tqDecNuDY357/sso/saml',
+    'SingleLogoutService'  => 'https://auth.itservices.msu.edu/login/signout?fromURI=https://catalog-prod.lib.msu.edu',
+    'certificate'          => 'msu-prod.pem',
+    'sign.logout'          => true,
+];

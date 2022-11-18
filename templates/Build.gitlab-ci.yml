@@ -1,5 +1,4 @@
 ############# Build ###############
-
 Build DB Image:
   variables:
      COMPONENT: db
@@ -24,8 +23,10 @@ Build Vufind Image:
   stage: Build
   tags:
     - msul-shared
+  interruptible: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_PIPELINE_SOURCE == "schedule"'
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   variables:
     LATEST: $CI_REGISTRY_IMAGE/vufind:latest
     CURR: $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA
@@ -38,6 +39,7 @@ Build Vufind Image:
     - docker pull $LATEST || true
     - > 
         docker build 
+        --build-arg GITHUB_USER_TOKEN=$GITHUB_USER_TOKEN
         --build-arg VUFIND_VERSION=$VUFIND_VERSION
         --build-arg SITE_HOSTNAME=$SITE_HOSTNAME
         --build-arg FOLIO_URL=$FOLIO_URL 
@@ -63,6 +65,8 @@ Build Vufind Image:
         --build-arg SIMPLESAMLPHP_VERSION=$SIMPLESAMLPHP_VERSION
         --build-arg SIMPLESAMLPHP_SALT=$SIMPLESAMLPHP_SALT
         --build-arg SIMPLESAMLPHP_ADMIN_PW=$SIMPLESAMLPHP_ADMIN_PW
+        --build-arg FTP_USER=$FTP_USER
+        --build-arg FTP_PASSWORD=$FTP_PASSWORD
         --tag $CURR 
         --cache-from $LATEST 
         vufind/
@@ -79,8 +83,10 @@ Build Vufind Image:
   stage: Build
   tags:
     - msul-shared
+  interruptible: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_PIPELINE_SOURCE == "schedule"'
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   variables:
     LATEST: $CI_REGISTRY_IMAGE/$COMPONENT:latest
     CURR: $CI_REGISTRY_IMAGE/$COMPONENT:$CI_COMMIT_SHORT_SHA

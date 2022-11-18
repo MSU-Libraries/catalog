@@ -1,13 +1,18 @@
 #!/bin/bash
 
 SHARED_STORAGE="/mnt/shared/local"
+TIMESTAMP=$( date +%Y%m%d%H%M%S )
 
 # Create symlinks to the shared storage for non-production environments
 # Populating the shared storage if empty
 if [ "${STACK_NAME}" != "catalog-beta" ]; then
     echo "Linking the local, module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
     mkdir -p ${SHARED_STORAGE}/${STACK_NAME}
-    rm -rf ${SHARED_STORAGE}/${STACK_NAME}/*
+    chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}
+    if [[ $( ls -1 ${SHARED_STORAGE}/${STACK_NAME}/* | wc -l ) -gt 0 ]]; then
+        mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
+        mv ${SHARED_STORAGE}/${STACK_NAME}/* ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
+    fi
     rsync -aiv /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/local/
     rsync -aiv /usr/local/vufind/themes/msul/ ${SHARED_STORAGE}/${STACK_NAME}/msul/
     rsync -aiv /usr/local/vufind/module/Catalog/ ${SHARED_STORAGE}/${STACK_NAME}/Catalog/
@@ -17,7 +22,10 @@ if [ "${STACK_NAME}" != "catalog-beta" ]; then
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/msul /usr/local/vufind/themes
     rm -rf /usr/local/vufind/module/Catalog
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/Catalog /usr/local/vufind/module
-fi;
+fi
+
+# Prepare cache cli dir (volume only exists after start)
+clear-vufind-cache
 
 # Ensure SolrCloud is available prior to creating Collections
 CLUSTER_STATUS_URL="http://solr:8983/solr/admin/collections?action=clusterstatus"

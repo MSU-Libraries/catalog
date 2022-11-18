@@ -6,9 +6,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV VUFIND_LOCAL_DIR=/usr/local/vufind/local
 ENV VUFIND_HOME=/usr/local/vufind
 ENV JAVA_HOME=/usr/lib/jvm/default-java
-ENV VUFIND_LOCAL_MODULES=Catalog
-ENV VUFIND_CACHE_DIR /tmp/vufind_cache
+ENV VUFIND_CACHE_DIR=/mnt/vufind_cache
 
+ARG GITHUB_USER_TOKEN
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
 
@@ -18,14 +18,21 @@ RUN \
     apt update && \
     apt install -y wget vim-nox lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
         gettext-base locales msmtp-mta rsync screen \
-        nodejs npm git \
+        nodejs npm git pigz libxml2-utils libmarc-xml-perl \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl \
         php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml && \
+    # Install yq
+    wget --header="Authorization: token ${GITHUB_USER_TOKEN}" https://github.com/mikefarah/yq/releases/download/v4.30.4/yq_linux_amd64 -O /usr/local/bin/yq && \
+    chmod +x /usr/local/bin/yq && \
     # Setup Timezone
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
-    # Get the package
+    # Install Composer
+    /install-composer.sh && \
+    mv /composer.phar /usr/local/bin/composer && \
+    rm /install-composer.sh && \
+    # Get VuFind the package
     wget https://github.com/vufind-org/vufind/releases/download/v${VUFIND_VERSION}/vufind_${VUFIND_VERSION}.deb && \
     # Install the package
     service apache2 restart && \
@@ -33,6 +40,11 @@ RUN \
         ./vufind_${VUFIND_VERSION}.deb && \
     apt clean && \
     rm vufind_${VUFIND_VERSION}.deb && \
+    # Update vufindharvest library to version 5.0.0 (fixes last_harvest.txt issue)
+    yq -i '.config.platform.php="7.4.1"' /usr/local/vufind/composer.json && \
+    yq -i '.require.php=">=7.4.1"' /usr/local/vufind/composer.json && \
+    yq -i '.require.vufind-org/vufindharvest="5.0.0"' /usr/local/vufind/composer.json && \
+    composer --working-dir=/usr/local/vufind/ update && \
     # Remove unused dependencies after Vufind is installed
     mv /usr/local/vufind/solr /tmp && \
     mkdir -p /usr/local/vufind/solr/vendor/dist && \
@@ -44,10 +56,6 @@ RUN \
     mkdir /var/log/vufind && \
     touch /var/log/vufind/vufind.log && \
     chown -R 33:33 /var/log/vufind && \
-    # Install Composer
-    /install-composer.sh && \
-    mv /composer.phar /usr/local/bin/composer && \
-    rm /install-composer.sh && \
     # Create user for grunt
     groupadd -g 1000 msuldevs && \
     useradd msuldevs -u 1000 -g 1000 && \
@@ -108,6 +116,8 @@ ARG EDS_PROFILE
 ARG EDS_ORG
 ARG RECAPTCHA_SITE_KEY
 ARG RECAPTCHA_SECRET_KEY
+ARG FTP_USER
+ARG FTP_PASSWORD
 
 ENV DEBUG=$DEBUG \
     SITE_HOSTNAME=$SITE_HOSTNAME \
@@ -130,7 +140,9 @@ ENV DEBUG=$DEBUG \
     EDS_PROFILE=$EDS_PROFILE \
     EDS_ORG=$EDS_ORG \
     RECAPTCHA_SITE_KEY=$RECAPTCHA_SITE_KEY \
-    RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY
+    RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY \
+    FTP_USER=$FTP_USER \
+    FTP_PASSWORD=$FTP_PASSWORD
 
 # Setup Apache
 RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-default.conf && \
@@ -146,39 +158,46 @@ RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-def
 COPY local/ /usr/local/vufind/local
 COPY themes/msul /usr/local/vufind/themes/msul
 COPY module/Catalog /usr/local/vufind/module/Catalog
+COPY scripts /usr/local/bin
 COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
+COPY startup-cachecron.sh /startup-cachecron.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
+COPY hlm-harvest-and-import.sh /hlm-harvest-and-import.sh
+COPY backup.sh /backup.sh
+COPY restore.sh /restore.sh
 COPY msmtp/aliases /etc/aliases
 COPY msmtp/msmtprc /etc/msmtprc
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
+COPY cachecron.d/ /etc/cachecron.d/
 RUN chmod -R g-w,o-w /etc/cron.d/ && \
     sed -i "/imklog/d" /etc/rsyslog.conf && \
     sed -i "/PrivDrop/d" /etc/rsyslog.conf && \
-    echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf
+    echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf && \
+    # Fix permissions on scripts
+    chmod o-w /usr/local/bin/* && \
+    chmod o-w /*.sh
 
 WORKDIR /usr/local/vufind
 
 RUN \
-    # Remove core config files that prevent local overrides
-    rm import/marc_local.properties && \
     # Replace environment variables in template ini files
     envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.ini && \
-    envsubst < local/config/vufind/Folio.ini | sponge local/config/vufind/Folio.ini && \
+    envsubst < local/config/vufind/folio.ini | sponge local/config/vufind/folio.ini && \
     envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
     envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
     envsubst < /etc/aliases | sponge /etc/aliases && \
-    # Enable module
-    sed -i "s/#SetEnv VUFIND_LOCAL_MODULES VuFindLocalTemplate/SetEnv VUFIND_LOCAL_MODULES Catalog/g" ${VUFIND_LOCAL_DIR}/httpd-vufind.conf && \
     # Set required environment variables
     echo JAVA_HOME="$JAVA_HOME" >> /etc/environment && \
     echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
     echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR" >> /etc/environment && \
     echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment && \
+    echo FTP_USER="$FTP_USER" >> /etc/environment && \
+    echo FTP_PASSWORD="$FTP_PASSWORD" >> /etc/environment && \
     # Prepare cache directory
-    mkdir -p ${VUFIND_CACHE_DIR}/cli && \
+    mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
     chmod -R g+sw ${VUFIND_CACHE_DIR} && \
     # Set permissions on local, theme, and Catalog
@@ -195,6 +214,6 @@ RUN \
 EXPOSE 80
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
-   CMD curl --fail -s http://localhost:80/vufind || exit 1  
+   CMD curl --fail -s http://localhost:80/ || exit 1  
 
 CMD /startup.sh
