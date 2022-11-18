@@ -35,7 +35,9 @@ use VuFind\Exception\ILS as ILSException;
  * Folio Okapi authentication module.
  * This is independant from the ILS/Folio authentication method, so that it can
  * use okapi_login=true while still using okapi_login=false for other login options.
- * It takes the Folio.ini config and only changes okapi_login.
+ * It takes the folio.ini config and only changes okapi_login.
+ * WARNING: note the lowercase folio.ini, we use a custom name because of MultiBackend.
+ * (this would not be a good default for general Vufind)
  * As opposed to Folio.php, this only handles authentication, not ILS functions.
  *
  * @category VuFind
@@ -67,7 +69,7 @@ class Okapi extends \VuFind\Auth\AbstractBase
     ) {
         $this->catalog = $connection;
         $this->driver = clone $driverManager->get('Folio');
-        $config = $configReader->get('Folio');
+        $config = $configReader->get('folio');
         $driverConfig = is_object($config) ? $config->toArray() : [];
         $driverConfig['User']['okapi_login'] = true;
         $this->driver->setConfig($driverConfig);
