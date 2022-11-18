@@ -164,6 +164,7 @@ COPY startup-cron.sh /startup-cron.sh
 COPY startup-cachecron.sh /startup-cachecron.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
 COPY hlm-harvest-and-import.sh /hlm-harvest-and-import.sh
+COPY authority-and-import.sh /authority-harvest-and-import.sh
 COPY backup.sh /backup.sh
 COPY restore.sh /restore.sh
 COPY msmtp/aliases /etc/aliases
