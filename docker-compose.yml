@@ -20,6 +20,7 @@ services:
         max-size: "10m"
     environment:
       STACK_NAME: "${STACK_NAME}"
+      SITE_HOSTNAME: "${SITE_HOSTNAME}"
       NODE: "{{slice .Node.Hostname 8 9}}"
     deploy:
       mode: replicated
@@ -89,6 +90,8 @@ services:
     healthcheck:
       disable: true
     environment:
+      STACK_NAME: "${STACK_NAME}"
+      SITE_HOSTNAME: "${SITE_HOSTNAME}"
       NODE: "{{slice .Node.Hostname 8 9}}"
     deploy:
       mode: replicated

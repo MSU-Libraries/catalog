@@ -1,5 +1,4 @@
 ############# Build ###############
-
 Build DB Image:
   variables:
      COMPONENT: db
@@ -40,6 +39,7 @@ Build Vufind Image:
     - docker pull $LATEST || true
     - > 
         docker build 
+        --build-arg GITHUB_USER_TOKEN=$GITHUB_USER_TOKEN
         --build-arg VUFIND_VERSION=$VUFIND_VERSION
         --build-arg SITE_HOSTNAME=$SITE_HOSTNAME
         --build-arg FOLIO_URL=$FOLIO_URL 

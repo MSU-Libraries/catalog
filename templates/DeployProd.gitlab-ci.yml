@@ -1,0 +1,100 @@
+############# Prod Deploy ###############
+Set Prod Stack Name:
+  stage: Deploy
+  extends: Set Stack Name
+  variables:
+    PROD: "true"
+  rules:
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $PROD == "true"'
+      when: manual
+
+Deploy Prod Compose Files:
+  stage: Deploy Prod
+  extends: Deploy Compose Files
+  rules:
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+  needs:
+    - job: Set Prod Stack Name
+      artifacts: true
+
+Perform Prod Database Backup:
+  stage: Deploy Prod
+  extends: Perform Database Backup
+  rules:
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+  needs:
+    - job: Set Prod Stack Name
+      artifacts: true
+    - Deploy Prod Compose Files
+
+Deploy Prod Internal Network:
+  stage: Deploy Prod
+  extends: Deploy Internal Network
+  rules:
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+  needs:
+    - job: Set Prod Stack Name
+      artifacts: true
+    - Deploy Prod Compose Files
+
+Bootstrap Prod Stacks:
+  stage: Deploy Prod
+  extends: Bootstrap Stacks
+  rules:
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+  needs:
+    - job: Set Prod Stack Name
+      artifacts: true
+    - Deploy Prod Compose Files
+    - Deploy Prod Internal Network
+
+Deploy Prod Solr:
+  stage: Deploy Prod
+  extends: Deploy Solr
+  rules:
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+  needs:
+    - job: Set Prod Stack Name
+      artifacts: true
+    - Bootstrap Prod Stacks
+
+Deploy Prod DB:
+  stage: Deploy Prod
+  extends: Deploy DB
+  rules:
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+  needs:
+    - job: Set Prod Stack Name
+      artifacts: true
+    - Bootstrap Prod Stacks
+
+Deploy Prod Vufind:
+  stage: Deploy Prod
+  extends: Deploy Vufind
+  rules:
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+  needs:
+    - job: Set Prod Stack Name
+      artifacts: true
+    - Deploy Prod DB
+    - Deploy Prod Solr
+
+Prod Vufind Upgrade:
+  stage: Deploy Prod
+  extends: Vufind Upgrade
+  rules:
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+  needs:
+    - job: Set Prod Stack Name
+      artifacts: true
+    - Deploy Prod Vufind
+
+Verify Prod Health:
+  stage: Deploy Prod
+  extends: Verify Health
+  rules:
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+  needs:
+    - job: Set Prod Stack Name
+      artifacts: true
+    - Prod Vufind Upgrade

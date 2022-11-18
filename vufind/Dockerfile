@@ -8,6 +8,7 @@ ENV VUFIND_HOME=/usr/local/vufind
 ENV JAVA_HOME=/usr/lib/jvm/default-java
 ENV VUFIND_CACHE_DIR=/mnt/vufind_cache
 
+ARG GITHUB_USER_TOKEN
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
 
@@ -21,10 +22,17 @@ RUN \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl \
         php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml && \
+    # Install yq
+    wget --header="Authorization: token ${GITHUB_USER_TOKEN}" https://github.com/mikefarah/yq/releases/download/v4.30.4/yq_linux_amd64 -O /usr/local/bin/yq && \
+    chmod +x /usr/local/bin/yq && \
     # Setup Timezone
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
-    # Get the package
+    # Install Composer
+    /install-composer.sh && \
+    mv /composer.phar /usr/local/bin/composer && \
+    rm /install-composer.sh && \
+    # Get VuFind the package
     wget https://github.com/vufind-org/vufind/releases/download/v${VUFIND_VERSION}/vufind_${VUFIND_VERSION}.deb && \
     # Install the package
     service apache2 restart && \
@@ -32,6 +40,11 @@ RUN \
         ./vufind_${VUFIND_VERSION}.deb && \
     apt clean && \
     rm vufind_${VUFIND_VERSION}.deb && \
+    # Update vufindharvest library to version 5.0.0 (fixes last_harvest.txt issue)
+    yq -i '.config.platform.php="7.4.1"' /usr/local/vufind/composer.json && \
+    yq -i '.require.php=">=7.4.1"' /usr/local/vufind/composer.json && \
+    yq -i '.require.vufind-org/vufindharvest="5.0.0"' /usr/local/vufind/composer.json && \
+    composer --working-dir=/usr/local/vufind/ update && \
     # Remove unused dependencies after Vufind is installed
     mv /usr/local/vufind/solr /tmp && \
     mkdir -p /usr/local/vufind/solr/vendor/dist && \
@@ -43,10 +56,6 @@ RUN \
     mkdir /var/log/vufind && \
     touch /var/log/vufind/vufind.log && \
     chown -R 33:33 /var/log/vufind && \
-    # Install Composer
-    /install-composer.sh && \
-    mv /composer.phar /usr/local/bin/composer && \
-    rm /install-composer.sh && \
     # Create user for grunt
     groupadd -g 1000 msuldevs && \
     useradd msuldevs -u 1000 -g 1000 && \
@@ -174,11 +183,9 @@ RUN chmod -R g-w,o-w /etc/cron.d/ && \
 WORKDIR /usr/local/vufind
 
 RUN \
-    # Remove core config files that prevent local overrides
-    rm import/marc_local.properties && \
     # Replace environment variables in template ini files
     envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.ini && \
-    envsubst < local/config/vufind/Folio.ini | sponge local/config/vufind/Folio.ini && \
+    envsubst < local/config/vufind/folio.ini | sponge local/config/vufind/folio.ini && \
     envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
     envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
     envsubst < /etc/aliases | sponge /etc/aliases && \

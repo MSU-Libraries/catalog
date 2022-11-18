@@ -97,7 +97,7 @@ requires a generic user to be created, called `vufind`.
 The users credentials are provided as build arguments to the vufind image:
 `FOLIO_USER` and `FOLIO_PASS`.
 
-The `vufind` application user (set in `local/confing/vufind/Folio.ini`) requires the
+The `vufind` application user (set in `local/confing/vufind/folio.ini`) requires the
 following permissions within FOLIO. They need to be created as a permission set with the FOLIO API, with a `POST` request to `/perms/permissions`.
 
 * `inventory.instances.item.get`
