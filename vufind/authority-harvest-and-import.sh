@@ -12,8 +12,8 @@ default_args() {
     ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/authority
     ARGS[FTP_SERVER]=ftp.bslw.com
     ARGS[FTP_DIR]=out/
-    ARGS[FTP_USER]=${FTP_USER}
-    ARGS[FTP_PASSWORD]=${FTP_PASSWORD}
+    ARGS[FTP_USER]=${AUTH_FTP_USER}
+    ARGS[FTP_PASSWORD]=${AUTH_FTP_PASSWORD}
     ARGS[SHARED_DIR]=/mnt/shared/authority
     ARGS[SOLR_URL]="http://solr:8983/solr"
     ARGS[RESET_SOLR]=0
@@ -77,10 +77,10 @@ runhelp() {
     echo "      Default: ${ARGS[FTP_DIR]}"
     echo "  -U|--ftp-user FTP_USER"
     echo "      User for connecting to the FTP server"
-    echo "      Default: Stored in the environment variable \$FTP_USER"
+    echo "      Default: Stored in the environment variable \$AUTH_FTP_USER"
     echo "  -P|--ftp-password FTP_PASSWORD"
     echo "      Password for connecting to the FTP server"
-    echo "      Default: Stored in the environment variable \$FTP_PASSWORD"
+    echo "      Default: Stored in the environment variable \$AUTH_FTP_PASSWORD"
     echo "  -r|--reset-solr"
     echo "      Clear out the authority Solr collection prior to importing."
     echo "  -v|--verbose"
@@ -256,11 +256,9 @@ archive_current_harvest() {
     declare -a ARCHIVE_LIST
     while read -r FILE; do
         ARCHIVE_LIST+=("$FILE")
-    done < <( find ./ -mindepth 1 -maxdepth 1 \
-        -name '*.xml' -o \
-    )
+    done < <( find ./ -mindepth 1 -maxdepth 1 -name '*.MRC' )
 
-    # Archive all xml files and the last_harvest file, if it exists
+    # Archive all MRC files
     if [[ "${#ARCHIVE_LIST[@]}" -gt 0 ]]; then
         verbose "Archiving ${#ARCHIVE_LIST[@]} harvest files."
         countdown 5
@@ -274,17 +272,14 @@ archive_current_harvest() {
 
 clear_harvest_files() {
     countdown 5
-    find "${1}" -mindepth 1 -maxdepth 1 \
-      \( \
-        -name '*.xml' -o \
-      \) -delete
+    find "${1}" -mindepth 1 -maxdepth 1 -name '*.MRC' -delete
 }
 
 # Perform an harvest of HLM Records
 harvest() {
     assert_vufind_harvest_dir_writable
     assert_shared_dir_writable
-    assert_ebsco_ftp_readable
+    assert_ftp_readable
 
     if [[ "${ARGS[FULL]}" -eq 1 ]]; then
         verbose "Clearing VuFind harvest directory for new full harvest."
@@ -302,17 +297,23 @@ harvest() {
     while IFS= read -r AUTH_FILE
     do
         # If it is not in the harvest dir and it is an XML file, then get it
-        if [ ! -f "${ARGS[VUFIND_HARVEST_DIR]}/${AUTH_FILE}" ] && [[ ${AUTH_FILE} == *.xml ]]; then
-            wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${AUTH_FILE}
+        if [ ! -f "${ARGS[SHARED_DIR]}/current/${AUTH_FILE}" ] && [[ ${AUTH_FILE} == *.MRC ]]; then
+            if ! wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${AUTH_FILE}; then
+                verbose "ERROR: Failed to retrieve ${AUTH_FILE} from FTP server" 1
+                exit 1
+            fi
         fi
     done < <(curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]} -l -s)
     cd ${OLD_PWD}
 
     verbose "Syncing harvest files to shared storage."
-    rsync -vt "${ARGS[VUFIND_HARVEST_DIR]}"/* "${ARGS[SHARED_DIR]}/current/"
+    if ! rsync -t --exclude "processed" --exclude "log" "${ARGS[VUFIND_HARVEST_DIR]}"/ "${ARGS[SHARED_DIR]}/current/" > /dev/null 2>&1; then
+        verbose "ERROR: Failed to sync harvest files to shared storage from ${ARGS[VUFIND_HARVEST_DIR]}" 1
+        exit 1
+    fi
 }
 
-# Copy XML files back from shared dir to VuFind dir
+# Copy MRC files back from shared dir to VuFind dir
 copyback_from_shared() {
     assert_vufind_harvest_dir_writable
     verbose "Replacing any VuFind files with files from shared directory."
@@ -329,8 +330,7 @@ copyback_from_shared() {
             # If limit is set, only copy the provided limit of xml files over to the VUFIND_HARVEST_DIR
             break
         fi
-    done < <(find "${ARGS[SHARED_DIR]}/current/" -mindepth 1 -maxdepth 1 -name '*.xml')
-    # TODO match MRC
+    done < <(find "${ARGS[SHARED_DIR]}/current/" -mindepth 1 -maxdepth 1 -name '*.MRC')
 }
 
 # Perform VuFind batch import of HLM records
@@ -351,19 +351,39 @@ import() {
             if [[ "${FOUND_COUNT}" -gt "${ARGS[LIMIT_BY_DELETE]}" ]]; then
                 rm "$FILE"
             fi
-        done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.xml')
+        done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.MRC')
     else
         countdown 5
     fi
+    
+    # TODO -- can remove once https://github.com/vufind-org/vufind/pull/2623 is included
+    # in a release (remember to also update the while loop find below too to)
+    verbose "Pre-processing import files to rename from .MRC to .mrc"
+    while read -r FILE; do
+        mv ${FILE} ${FILE%.MRC}.mrc
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.MRC')
 
     # TODO make this a big if-block based on file name to pick the property file to pass
-    if ! /usr/local/vufind/harvest/batch-import-marc.sh authority marc_auth_fast_formgenre.properties; then
-        echo "ERROR: Batch import failed with code: $?"
-        exit 1
+    find "${ARGS[VUFIND_HARVEST_DIR]}/" -maxdepth 1 -iname "*.mrc" -type f -print0 | while read -d $'\0' file; do
+        PROP_FILE="marc_auth_fast_formgenre.properties"
+        if [ "${file}" == LC.NAME* ]; then
+            PROP_FILE="marc_auth_fast_personal.properties"
+        fi
+        $VUFIND_HOME/import-marc-auth.sh $file ${PROP_FILE} 2> >(log $file)
+        if [ "$?" -eq "0" ] && [ $MOVE_DATA == true ]; then
+            mv $file "${ARGS[VUFIND_HARVEST_DIR]}"/processed/$(basename $file)
+        else
+            echo "ERROR: Batch import failed with code: $?"
+            exit 1
+        fi
+    done
+
+    if ! /usr/local/vufind/import-marc-auth.sh ${AUTH_FILE} marc_auth_fast_formgenre.properties; then
     fi
     verbose "Completed batch import"
 
-    # TODO see if the same delete script works for authorities. create sample delete file from biblio/folio
+    # We don't get deletions from Backstage, eventually we will get them from catalogers
+    # TODO -- manually test this to make sure it will delete from authority index, and not biblio
     verbose "Processing delete records from harvest."
     countdown 5
     if ! /usr/local/vufind/harvest/batch-delete.sh authority; then
