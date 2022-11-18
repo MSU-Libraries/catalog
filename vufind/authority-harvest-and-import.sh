@@ -296,15 +296,20 @@ harvest() {
     cd ${ARGS[VUFIND_HARVEST_DIR]}
     while IFS= read -r AUTH_FILE
     do
-        # If it is not in the harvest dir and it is an XML file, then get it
-        if [ ! -f "${ARGS[SHARED_DIR]}/current/${AUTH_FILE}" ] && [[ ${AUTH_FILE} == *.MRC ]]; then
+        # If it is not in the harvest dir and it is an zip file, then get it
+        if [ ! -f "${ARGS[SHARED_DIR]}/current/${AUTH_FILE}" ] && [[ ${AUTH_FILE} == *.zip ]]; then
             if ! wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${AUTH_FILE}; then
                 verbose "ERROR: Failed to retrieve ${AUTH_FILE} from FTP server" 1
                 exit 1
             fi
+            mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/tmp
+            unzip ${AUTH_FILE} -d ${ARGS[VUFIND_HARVEST_DIR]}/tmp
+            mv ${ARGS[VUFIND_HARVEST_DIR]}/tmp/*.MRC ${ARGS[VUFIND_HARVEST_DIR]}/
+            rm -rf ${ARGS[VUFIND_HARVEST_DIR]}/tmp
         fi
     done < <(curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]} -l -s)
     cd ${OLD_PWD}
+
 
     verbose "Syncing harvest files to shared storage."
     if ! rsync -t --exclude "processed" --exclude "log" "${ARGS[VUFIND_HARVEST_DIR]}"/ "${ARGS[SHARED_DIR]}/current/" > /dev/null 2>&1; then
@@ -339,8 +344,6 @@ import() {
 
     verbose "Starting import..."
 
-    # TODO rename all MRC files to XML
-
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" ]]; then
         verbose "Will only import ${ARGS[LIMIT_BY_DELETE]} XML files; others will be deleted."
         countdown 5
@@ -363,10 +366,15 @@ import() {
         mv ${FILE} ${FILE%.MRC}.mrc
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.MRC')
 
-    # TODO make this a big if-block based on file name to pick the property file to pass
-    find "${ARGS[VUFIND_HARVEST_DIR]}/" -maxdepth 1 -iname "*.mrc" -type f -print0 | while read -d $'\0' file; do
+    ## TODO -- Pre-process the LC.SUBJ* files to split out the subject data from the names
+
+    find "${ARGS[VUFIND_HARVEST_DIR]}/" -maxdepth 1 -iname "*.mrc" ! -name 'FAST*' \
+      ! -name 'MESH.GENRE*' ! -name 'MESH.NAME*' ! -name 'NAME*' ! -name 'LC.SUBJ*' \
+      -type f -print0 | while read -d $'\0' file; do
+        
+        # Determine which properties file to use
         PROP_FILE="marc_auth_fast_formgenre.properties"
-        if [ "${file}" == LC.NAME* ]; then
+        if [[ "${file}" == LC.NAME* ]]; then
             PROP_FILE="marc_auth_fast_personal.properties"
         fi
         $VUFIND_HOME/import-marc-auth.sh $file ${PROP_FILE} 2> >(log $file)
