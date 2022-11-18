@@ -96,4 +96,3 @@ Verify Prod Health:
     - job: Set Prod Stack Name
       artifacts: true
     - Prod Vufind Upgrade
-

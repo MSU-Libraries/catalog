@@ -102,11 +102,11 @@ Deploy Compose Files:
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.solr-cloud.yml
     - ./yq -i ".networks.internal.name=\"${STACK_NAME}-internal\"" docker-compose.yml
     # Add labels for host rule if stack name is catalog-beta
-    - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.catalog-beta-http-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\"" docker-compose.yml; fi
-    - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.catalog-beta-https-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\"" docker-compose.yml; fi
+    - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\"" docker-compose.yml; fi
+    - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`catalog-beta.lib.msu.edu\`)\"" docker-compose.yml; fi
     # Add labels for host rule if stack name is catalog-prod
-    - if [ "${STACK_NAME}" == "catalog-prod" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.catalog-beta-http-router.rule=Host(\`catalog-prod.lib.msu.edu\`, \`catalog.lib.msu.edu\`)\"" docker-compose.yml; fi
-    - if [ "${STACK_NAME}" == "catalog-prod" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.catalog-beta-https-router.rule=Host(\`catalog-prod.lib.msu.edu\`, \`catalog.lib.msu.edu\`)\"" docker-compose.yml; fi
+    - if [ "${STACK_NAME}" == "catalog-prod" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-router.rule=Host(\`catalog-prod.lib.msu.edu\`, \`catalog.lib.msu.edu\`)\"" docker-compose.yml; fi
+    - if [ "${STACK_NAME}" == "catalog-prod" ]; then ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`catalog-prod.lib.msu.edu\`, \`catalog.lib.msu.edu\`)\"" docker-compose.yml; fi
     # Add $STACK_NAME to solr traefik labels
     - ./yq -i ".x-solr-deploy.labels[1]=\"traefik.http.routers.${STACK_NAME}-msul-solr-router.entrypoints=msul-http-ent\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[2]=\"traefik.http.routers.${STACK_NAME}-msul-solr-router.service=${STACK_NAME}-msul-solr-app\"" docker-compose.solr-cloud.yml
@@ -128,11 +128,6 @@ Deploy Compose Files:
     - ./yq -i ".x-solr-deploy.labels[14]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" docker-compose.solr-cloud.yml
     # Set the stack name in the solr cron environment variable
     - ./yq -i ".services.cron.environment[\"STACK_NAME\"]=\"${STACK_NAME}\"" docker-compose.solr-cloud.yml
-    # Set the stack name and site url in the vufind environment variable
-    - ./yq -i ".services.catalog.environment[\"STACK_NAME\"]=\"${STACK_NAME}\"" docker-compose.yml
-    - ./yq -i ".services.catalog.environment[\"SITE_HOSTNAME\"]=\"${SITE_HOSTNAME}\"" docker-compose.yml
-    - ./yq -i ".services.cron.environment[\"STACK_NAME\"]=\"${STACK_NAME}\"" docker-compose.yml
-    - ./yq -i ".services.cron.environment[\"SITE_HOSTNAME\"]=\"${SITE_HOSTNAME}\"" docker-compose.yml
     # Development environment changes
     - |
       if [[ "${STACK_NAME}" != catalog-* ]]; then
@@ -155,7 +150,7 @@ Deploy Compose Files:
         # Remove the cachecron service if the stack name is production
         ./yq -i "del(.services.cachecron)" docker-compose.yml;
       fi
-    # Replace $STACK_NAME in main compose file
+    # Replace $STACK_NAME and SITE_HOSTNAME in main compose file
     - cat docker-compose.yml | envsubst | sponge docker-compose.yml
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
     - sed -i "/^$/d" docker-compose.traefik.yml
@@ -207,6 +202,7 @@ Bootstrap Stacks:
     - Deploy Internal Network
     - Build DB Image
     - Build Solr Image
+    - Perform Database Backup
   script:
     - >
       ssh deploy@$DEPLOY_HOST_A
@@ -227,6 +223,7 @@ Deploy Solr:
     - Deploy Compose Files
     - Deploy Internal Network
     - Deploy Traefik
+    - Perform Database Backup
   script:
     # Pull images now to save time with stack deploy
     - >
@@ -255,6 +252,7 @@ Deploy DB:
     - Bootstrap Stacks
     - Deploy Compose Files
     - Deploy Internal Network
+    - Perform Database Backup
   script:
     - >
       ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud.yml ${STACK_NAME}-mariadb && sleep 45"
@@ -277,6 +275,7 @@ Deploy Vufind:
     - Deploy DB
     - Deploy Solr
     - Deploy Compose Files
+    - Perform Database Backup
   script:
     # Pull images now to save time with stack deploy
     - >
