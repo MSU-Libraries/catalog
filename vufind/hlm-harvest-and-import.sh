@@ -299,7 +299,7 @@ harvest() {
     cd ${OLD_PWD}
 
     verbose "Syncing harvest files to shared storage."
-    if ! rsync -t --exclude "processed" --exclude "log" "${ARGS[VUFIND_HARVEST_DIR]}"/ "${ARGS[SHARED_DIR]}/current/" > /dev/null 2>&1; then
+    if ! rsync -ai --exclude "processed" --exclude "log" --exclude ".gitkeep" "${ARGS[VUFIND_HARVEST_DIR]}"/ "${ARGS[SHARED_DIR]}/current/" > /dev/null 2>&1; then
         verbose "ERROR: Failed to sync harvest files to shared storage from ${ARGS[VUFIND_HARVEST_DIR]}" 1
         exit 1
     fi
