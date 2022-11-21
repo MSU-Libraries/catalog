@@ -23,6 +23,9 @@ Build Vufind Image:
   stage: Build
   tags:
     - msul-shared
+  environment:
+    name: $CI_COMMIT_BRANCH
+    action: prepare
   interruptible: true
   rules:
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
