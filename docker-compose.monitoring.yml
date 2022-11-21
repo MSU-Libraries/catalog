@@ -30,19 +30,20 @@ services:
         parallelism: 1
         failure_action: rollback
       labels:
+        # XXX: the 5th label should not change as it is edited in .gitlab-ci.yml
         - "traefik.enable=true"
-        - "traefik.http.routers.${STACK_NAME}-http-router.entrypoints=msul-http-ent"
-        - "traefik.http.routers.${STACK_NAME}-http-router.middlewares=http-redirect"
-        - "traefik.http.routers.${STACK_NAME}-http-router.service=${STACK_NAME}-http-app"
-        - "traefik.http.routers.${STACK_NAME}-http-router.rule=Host(`catalog.aws.lib.msu.edu`) && PathPrefix(`/monitoring`)"
-        - "traefik.http.services.${STACK_NAME}-http-app.loadbalancer.server.port=80"
-        - "traefik.http.routers.${STACK_NAME}-https-router.tls=true"
-        - "traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt-dns"
-        - "traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].main=aws.lib.msu.edu"
-        - "traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].sans=*.aws.lib.msu.edu"
-        - "traefik.http.routers.${STACK_NAME}-https-router.entrypoints=msul-https-ent"
-        - "traefik.http.routers.${STACK_NAME}-https-router.service=${STACK_NAME}-https-app"
-        - "traefik.http.services.${STACK_NAME}-https-app.loadbalancer.server.port=80"
+        - "traefik.http.routers.${STACK_NAME}-monitor-http-router.entrypoints=msul-http-ent"
+        - "traefik.http.routers.${STACK_NAME}-monitor-http-router.middlewares=http-redirect"
+        - "traefik.http.routers.${STACK_NAME}-monitor-http-router.service=${STACK_NAME}-http-app"
+        - "traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(`value modified by .gitlab-ci.yml`) && PathPrefix(`/monitoring`)"
+        - "traefik.http.services.${STACK_NAME}-monitor-http-app.loadbalancer.server.port=80"
+        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.tls=true"
+        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.tls.certresolver=msul-letsencrypt-dns"
+        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.tls.domains[0].main=aws.lib.msu.edu"
+        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.tls.domains[0].sans=*.aws.lib.msu.edu"
+        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.entrypoints=msul-https-ent"
+        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.service=${STACK_NAME}-https-app"
+        - "traefik.http.services.${STACK_NAME}-monitor-https-app.loadbalancer.server.port=80"
 
 networks:
   internal:
