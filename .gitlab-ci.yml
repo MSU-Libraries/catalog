@@ -129,9 +129,9 @@ Deploy Compose Files:
     - ./yq -i ".x-solr-deploy.labels[13]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.domains[0].main=aws.lib.msu.edu\"" docker-compose.solr-cloud.yml
     - ./yq -i ".x-solr-deploy.labels[14]=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" docker-compose.solr-cloud.yml
     # Add $STACK_NAME to monitoring traefik labels
-    - if [[ "${STACK_NAME}" != catalog-* ]]; then ./yq -i ".deploy.labels[5] =\"traefik.http.routers.${STACK_NAME}-https-msul-monitoring-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml; fi
-    - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".deploy.labels[5] =\"traefik.http.routers.${STACK_NAME}-https-msul-monitoring-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml; fi
-    - if [ "${STACK_NAME}" == "catalog-prod" ]; then ./yq -i ".deploy.labels[5] =\"traefik.http.routers.${STACK_NAME}-https-msul-monitoring-router.rule=Host(\`catalog-prod.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml; fi
+    - if [[ "${STACK_NAME}" != catalog-* ]]; then ./yq -i ".services.monitoring.deploy.labels[5] =\"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml; fi
+    - if [ "${STACK_NAME}" == "catalog-beta" ]; then ./yq -i ".services.monitoring.deploy.labels[5] =\"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml; fi
+    - if [ "${STACK_NAME}" == "catalog-prod" ]; then ./yq -i ".services.monitoring.deploy.labels[5] =\"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`catalog-prod.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml; fi
     # Set the stack name in the solr cron environment variable
     - ./yq -i ".services.cron.environment[\"STACK_NAME\"]=\"${STACK_NAME}\"" docker-compose.solr-cloud.yml
     # Development environment changes
