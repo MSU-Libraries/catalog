@@ -197,7 +197,36 @@ text-align:center;
 
   // Main content and sidebar widths and float
 
+.search-home-facets li a, .vf-footer li a {
+  text-decoration:none;
+}
 
+.searchHomeContent form .active-filters {
+  display:none;
+}
+@media only screen and (min-width : 768px) {
+  .home-facet.language, .home-facet.format {
+  border-left:1px solid @medgray;
+  padding-left:5%;
+}
+}
+.home-facet.language ul li:last-child, .home-facet.format ul li:last-child  {
+  text-align:center;
+  width:9.5rem;
+  margin-top:1rem;
+  padding:0.1rem;
+  text-decoration: none;
+  border: 2px solid @parakeetgreen;
+  -webkit-border-radius: 7rem;
+  -moz-border-radius: 7rem;
+  border-radius: 7rem;
+
+    &:hover {
+      text-decoration:none;
+      color:@darkparakeetgreen;
+    }
+
+}
 
 
 form.searchForm, .record-tabs {
