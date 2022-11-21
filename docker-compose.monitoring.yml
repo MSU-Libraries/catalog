@@ -30,7 +30,7 @@ services:
         parallelism: 1
         failure_action: rollback
       labels:
-        # XXX: the 5th label should not change as it is edited in .gitlab-ci.yml
+        # XXX: the label with index 5 (0-based) should not change as it is edited in .gitlab-ci.yml
         - "traefik.enable=true"
         - "traefik.http.routers.${STACK_NAME}-monitor-http-router.entrypoints=msul-http-ent"
         - "traefik.http.routers.${STACK_NAME}-monitor-http-router.middlewares=http-redirect"
