@@ -7,7 +7,7 @@ TIMESTAMP=$( date +%Y%m%d%H%M%S )
 # Populating the shared storage if empty
 if [ "${STACK_NAME}" != "catalog-beta" ]; then
     echo "Linking the local, module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
-    mkdir -p ${SHARED_STORAGE}/${STACK_NAME}
+    mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/logs
     chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}
     if [[ $( ls -1 ${SHARED_STORAGE}/${STACK_NAME}/* | wc -l ) -gt 0 ]]; then
         mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}

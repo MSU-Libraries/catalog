@@ -151,8 +151,9 @@ Deploy Compose Files:
         # Remove the cachecron service if the stack name is production
         ./yq -i "del(.services.cachecron)" docker-compose.yml;
       fi
-    # Replace $STACK_NAME and SITE_HOSTNAME in main compose file
+    # Replace $STACK_NAME and SITE_HOSTNAME in compose files
     - cat docker-compose.yml | envsubst | sponge docker-compose.yml
+    - cat docker-compose.monitoring.yml | envsubst | sponge docker-compose.monitoring.yml
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
     - sed -i "/^$/d" docker-compose.traefik.yml
     - sed -i "/^$/d" docker-compose.internal.yml
