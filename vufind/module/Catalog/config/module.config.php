@@ -1,6 +1,30 @@
 <?php
 
 return array (
+  'router' =>
+  array (
+    'routes' =>
+    array (
+      'getthis' =>
+      array (
+        'type' => 'Laminas\\Router\\Http\\Segment',
+        'options' =>
+        array (
+          'route' => '/CatalogRecord/GetThis/[:id]',
+          'defaults' =>
+          array (
+            'controller' => 'Catalog\\Controller\\CatalogRecordController',
+            'action' => 'GetThis',
+          ),
+        ),
+      ),
+    ),
+  ),
+  'controllers' => [
+    'factories' => [
+      'Catalog\\Controller\\CatalogRecordController' => 'VuFind\\Controller\\AbstractBaseFactory',
+    ],
+  ],
   'vufind' => 
   array (
     'plugin_managers' => 
