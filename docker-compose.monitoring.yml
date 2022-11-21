@@ -4,6 +4,7 @@ version: "3.8"
 services:
   monitoring:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/monitoring:latest
+    hostname: monitoring{{slice .Node.Hostname 8 9}}
     volumes:
       - logs:/mnt/logs
     networks:

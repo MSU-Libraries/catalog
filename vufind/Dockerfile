@@ -52,10 +52,6 @@ RUN \
     mv /tmp/solr/vendor/dist/solr* /usr/local/vufind/solr/vendor/dist/ && \
     mv /tmp/solr/vendor/contrib/analysis-extras/lib /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
     rm -rf /tmp/solr && \
-    # Create log file and redirect to stdout
-    mkdir /var/log/vufind && \
-    touch /var/log/vufind/vufind.log && \
-    chown -R 33:33 /var/log/vufind && \
     # Create user for grunt
     groupadd -g 1000 msuldevs && \
     useradd msuldevs -u 1000 -g 1000 && \
@@ -90,9 +86,7 @@ COPY simplesamlphp/local/ ${SIMPLESAMLPHP_CUSTOM_DIR}/
 RUN envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW}' < ${SIMPLESAMLPHP_CONFIG_DIR}/config.php | sponge ${SIMPLESAMLPHP_CONFIG_DIR}/config.php && \
     envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \
     a2enconf simplesamlphp.conf && \
-    chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR} && \
-    mkdir /var/log/simplesamlphp && \
-    chown www-data /var/log/simplesamlphp
+    chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR}
 
 # Build Arguments
 ARG SITE_HOSTNAME
