@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 @app.route('/monitoring/vufind_log')
 def vufind_log():
-    return Path('/mnt/shared/local/' + os.environ['STACK_NAME'] + '/logs/vufind.log').read_text()
+    return Path('/mnt/logs/vufind/vufind.log').read_text()
 
 @app.route('/monitoring')
 def home():

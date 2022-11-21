@@ -4,6 +4,8 @@ version: "3.8"
 services:
   monitoring:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/monitoring:latest
+    volumes:
+      - logs:/mnt/logs
     networks:
       - public
       - internal
@@ -48,3 +50,6 @@ networks:
   public:
     name: public
     external: true
+
+volumes:
+  logs:

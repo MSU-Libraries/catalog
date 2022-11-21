@@ -7,7 +7,7 @@ TIMESTAMP=$( date +%Y%m%d%H%M%S )
 # Populating the shared storage if empty
 if [ "${STACK_NAME}" != "catalog-beta" ]; then
     echo "Linking the local, module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
-    mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/logs
+    mkdir -p ${SHARED_STORAGE}/${STACK_NAME}
     chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}
     if [[ $( ls -1 ${SHARED_STORAGE}/${STACK_NAME}/* | wc -l ) -gt 0 ]]; then
         mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
@@ -23,6 +23,12 @@ if [ "${STACK_NAME}" != "catalog-beta" ]; then
     rm -rf /usr/local/vufind/module/Catalog
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/Catalog /usr/local/vufind/module
 fi
+
+# Save apache and vufind logs in the logs docker volume
+mkdir /mnt/logs/apache /mnt/logs/vufind
+chown www-data:www-data /mnt/logs/vufind
+ln -sf /mnt/logs/apache /var/log/apache2
+ln -sf /mnt/logs/vufind /var/log/vufind
 
 # Prepare cache cli dir (volume only exists after start)
 clear-vufind-cache
