@@ -1,6 +1,7 @@
 <?php
-
 namespace Catalog\Controller;
+use Catalog\GetThis\GetThisLoader;
+
 
 class RecordController extends \VuFind\Controller\RecordController
 {
@@ -11,8 +12,11 @@ class RecordController extends \VuFind\Controller\RecordController
      */
     public function getthisAction()
     {
+        $getthis = new GetThisLoader($this->params());
+
         $view = $this->createViewModel();
         $view->setTemplate('record/getthis');
+        $view->addChild($getthis, 'getthis');
         return $view;
     }
 }

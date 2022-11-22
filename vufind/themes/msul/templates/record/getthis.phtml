@@ -1,2 +1,7 @@
-<b>GET THIS?</b><br/>
-<b>YEAH, YOU GOT THIS!</b></br/>
+<?php
+// Always render biblio info
+$this->render('record/getthis/bibinfo.phtml');
+
+if ($this->getthis->isOtherLib()) {
+    $this->render('record/getthis/otherlib.phtml');
+}
