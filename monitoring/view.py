@@ -27,12 +27,13 @@ def node_logs_simplesamlphp():
 @app.route('/monitoring/logs/<path:service>')
 def logs_vufind(service):
     logs = []
-    for node in range(1, 3):
+    for node in range(1, 4):
         contents = ''
         try:
             r = requests.get('http://monitoring{}/monitoring/node/logs/{}'.format(node, service))
-            if r.status_code != 201:
+            if r.status_code != 200:
                 raise_exception_for_reply(r)
+            contents = r.text
         except Exception as err:
             contents = 'Error reading the log: {}'.format(err)
         logs.append(contents)
