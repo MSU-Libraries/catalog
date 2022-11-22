@@ -22,7 +22,7 @@ header {
    
 
   .banner.container {
-    background: url('/vufind/themes/msul/images/newHeader.jpg') no-repeat; 
+    background: @msugreen url('/vufind/themes/msul/images/newHeader.jpg') no-repeat; 
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -33,45 +33,78 @@ header {
 border-radius: 0;
 margin-left:0;
 margin-right:0;
-  /*
-      background-image: url('/vufind/themes/msul/images/newHeader.jpg');
-      background-color: @msugreen;
-      background-repeat: no-repeat;
-   background-size:auto; */
-      
-    margin-bottom:3rem;
+margin-bottom:3rem;
+}
+
 
       .navbar-header {
-        a, &:hover, &:active, &:visited, &:focus {
+        a,  a:hover, a:active, a:visited {
         color:#fff;
         text-decoration:none;
         }
-        .navbar-msubrand {
-          margin:1rem 0 2rem 0.25rem;
+        a:focus {
+          outline:1px dotted #fff;
         }
-        .navbar-brand {
-          font-size:3rem;
+        padding:1rem;
+  }
+        .navbar-msubrand {
+
+        margin-bottom:1rem;
+        }
+        .navbar-msul {
+          font-size:2rem;
           font-weight:500;
           letter-spacing:0.1rem;
-          margin-bottom:1rem;
+          
+          margin-bottom:0.25rem;
+            a {
+              padding:0.5rem;
+            }
+            @media only screen and (min-width : 768px) {
+              display:inline-block;
+              font-size:2.5rem;
+              line-height:2.5rem;
+            }
         }
-        .navbar-band-border {
-          border-left:.2rem solid #fff;
-          padding-left:1rem;
+        .navbar-catalog {
+          font-size:2.5rem;
+          font-weight:500;
+          letter-spacing:0.2rem;
+            a {
+              padding:0.5rem;
+            }
+              @media only screen and (min-width : 768px) {
+              display:inline-block;
+              border-left:0.2rem solid #fff;
+              padding-left:0.5rem;
+              line-height:2.5rem;
+            }
+
+
+        }
+        .navbar-toggle {
+          margin-top:3.5rem;
+        }
+
+        .fa {
+          color:#fff;
         }
       }
       .navbar-collapse {
-        nav {
-          a, &:visited {
+          a, a:visited {
             color:#fff;
-            &:hover, &:active, &:focus {
-              color:@msugreen;
             }
+            a:hover, a:active, a:focus {
+              color:@msugreen;
+                .fa {
+                  color:@msugreen;
+                }
+              
           }
         }
-      }
-  }
-}
+      
+
+
 
 /* --- Footer --- */
 footer {
