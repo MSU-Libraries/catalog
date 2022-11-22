@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Response, send_file
+from flask import Flask, render_template, Response
 from pathlib import Path
 import os
 import requests
@@ -10,19 +10,19 @@ def raise_exception_for_reply(r):
 
 @app.route('/monitoring/node/logs/vufind')
 def node_logs_vufind():
-    return send_file('/mnt/logs/vufind/vufind.log')
+    return Path('/mnt/logs/vufind/vufind.log').read_text()
 
 @app.route('/monitoring/node/logs/apache/error')
 def node_logs_apache_error():
-    return send_file('/mnt/logs/apache/error.log')
+    return Path('/mnt/logs/apache/error.log').read_text()
 
 @app.route('/monitoring/node/logs/apache/access')
 def node_logs_apache_access():
-    return send_file('/mnt/logs/apache/access.log')
+    return Path('/mnt/logs/apache/access.log').read_text()
 
 @app.route('/monitoring/node/logs/simplesamlphp')
 def node_logs_simplesamlphp():
-    return send_file('/mnt/logs/simplesamlphp/simplesamlphp.log')
+    return Path('/mnt/logs/simplesamlphp/simplesamlphp.log').read_text()
 
 @app.route('/monitoring/logs/<path:service>')
 def logs_vufind(service):
