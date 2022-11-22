@@ -26,14 +26,17 @@ def node_logs_simplesamlphp():
 
 @app.route('/monitoring/logs/<path:service>')
 def logs_vufind(service):
-    logs = ''
+    logs = []
     for node in range(1, 3):
-        logs += '------ NODE %s ------\n' % node
-        r = requests.get('http://monitoring' + node + '/monitoring/node/logs/%s' % service)
-        if r.status_code != 201:
-            raise_exception_for_reply(r)
-        logs += r.text + '\n'
-    return Response(logs, mimetype='text/plain')
+        contents = ''
+        try:
+            r = requests.get('http://monitoring{}/monitoring/node/logs/{}'.format(node, service))
+            if r.status_code != 201:
+                raise_exception_for_reply(r)
+        except Exception as err:
+            contents = 'Error reading the log: {}'.format(err)
+        logs.append(contents)
+    return render_template('logs.html', service=service, log1=logs[0], log2=logs[1], log3=logs[2])
 
 @app.route('/monitoring')
 def home():
