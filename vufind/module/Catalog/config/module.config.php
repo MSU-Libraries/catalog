@@ -3,16 +3,13 @@
 return array (
   'router' => [
     'routes' => [
-      'getthis' => [
-        'type' => 'Laminas\Router\Http\Segment',
+      'record-getthis' => [
+        'type'    => 'Laminas\Router\Http\Segment',
         'options' => [
-          'route' => '/CatalogRecord/GetThis/[:id]',
-          'constraints' => [
-            'id' => '[a-zA-Z][a-zA-Z0-9._-]*',
-          ],
+          'route'    => '/Record/[:id]/GetThis',
           'defaults' => [
-            'controller' => 'Catalog\Controller\CatalogRecordController',
-            'action' => 'GetThis',
+              'controller' => 'Record',
+              'action'     => 'GetThis',
           ],
         ],
       ],
@@ -20,7 +17,10 @@ return array (
   ],
   'controllers' => [
     'factories' => [
-      'Catalog\Controller\CatalogRecordController' => 'VuFind\Controller\AbstractBaseFactory',
+      'Catalog\\Controller\\RecordController' => 'VuFind\\Controller\\AbstractBaseWithConfigFactory',
+    ],
+    'aliases' => [
+      'VuFind\\Controller\\RecordController' => 'Catalog\\Controller\\RecordController',
     ],
   ],
   'vufind' => 
