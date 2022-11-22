@@ -368,8 +368,8 @@ import() {
 
     ## TODO -- Pre-process the LC.SUBJ* files to split out the subject data from the names
 
-    find "${ARGS[VUFIND_HARVEST_DIR]}/" -maxdepth 1 -iname "*.mrc" ! -name 'FAST*' \
-      ! -name 'MESH.GENRE*' ! -name 'MESH.NAME*' ! -name 'NAME*' ! -name 'LC.SUBJ*' \
+    find "${ARGS[VUFIND_HARVEST_DIR]}/" -maxdepth 1 -iname "*.mrc" ! -name '*_FAST*' \
+      ! -name '*_MESH.GENRE*' ! -name '*_MESH.NAME*' ! -name '*_NAME*' ! -name '*_LC.SUBJ*' \
       -type f -print0 | while read -d $'\0' file; do
         
         # Determine which properties file to use
@@ -384,10 +384,10 @@ import() {
             $VUFIND_HOME/import-marc-auth.sh $file ${PROP_FILE}
             EXIT_CODE=$?
         fi
-        if [ "${EXIT_CODE}" -eq "0" ] && [ $MOVE_DATA == true ]; then
+        if [[ ${EXIT_CODE} -eq 0 ]]; then
             mv $file "${ARGS[VUFIND_HARVEST_DIR]}"/processed/$(basename $file)
         else
-            echo "ERROR: Batch import failed with code: ${EXIT_CODE}"
+            verbose "ERROR: Batch import failed with code: ${EXIT_CODE}" 1
             exit 1
         fi
     done
@@ -398,9 +398,16 @@ import() {
     # TODO -- manually test this to make sure it will delete from authority index, and not biblio
     verbose "Processing delete records from harvest."
     countdown 5
-    if ! /usr/local/vufind/harvest/batch-delete.sh authority; then
-        echo "ERROR: Batch delete script failed."
-        exit 1
+    if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
+        if ! /usr/local/vufind/harvest/batch-delete.sh authority; then
+            verbose "ERROR: Batch delete script failed with code: $?" 1
+            exit 1
+        fi
+    else
+        if ! /usr/local/vufind/harvest/batch-delete.sh authority >> "$LOG_FILE"; then
+            verbose "ERROR: Batch delete script failed with code: $?" 1
+            exit 1
+        fi
     fi
     verbose "Completed processing records to be deleted."
 }
