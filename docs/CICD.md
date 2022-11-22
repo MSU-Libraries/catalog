@@ -10,15 +10,17 @@ the cluster, auto-provisioning DNS CNAMES as part of the pipeline.
 ## Pipeline
 
 * branch: `main`,  
-  stack prefix: `catalog-beta` (`catalog-beta`, `catalog-beta-internal`, `catalog-beta-solr`, `catalog-beta-mariadb`),  
+  stack prefix: `catalog-beta` (`catalog-beta-catalog`, `catalog-beta-internal`, `catalog-beta-solr`, `catalog-beta-mariadb`),  
   url: https://catalog-beta.aws.lib.msu.edu (local DNS https://catalog-beta.lib.msu.edu)
+  stack prefix: `catalog-prod` (`catalog-prod-catalog`, `catalog-prod-internal`, `catalog-prod-solr`, `catalog-prod-mariadb`),  
+  url: https://catalog-prod.aws.lib.msu.edu (local DNS https://catalog-prod.lib.msu.edu)
 
 * branch: `review-some-feature`,  
-  stack prefix: `review-some-feature` (`review-some-feature`, `review-some-feature-internal`, `review-some-feature-solr`, `review-some-feature-mariadb`),  
+  stack prefix: `review-some-feature` (`review-some-feature-catalog`, `review-some-feature-internal`, `review-some-feature-solr`, `review-some-feature-mariadb`),  
   url: https://review-some-feature.aws.lib.msu.edu 
 
 * branch: `devel-some-feature`,  
-  stack prefix: `devel-some-feature` (`devel-some-feature`, `devel-some-feature-internal`, `devel-some-feature-solr`, `devel-some-feature-mariadb`),  
+  stack prefix: `devel-some-feature` (`devel-some-feature-catalog`, `devel-some-feature-internal`, `devel-some-feature-solr`, `devel-some-feature-mariadb`),  
   url: https://devel-some-feature.aws.lib.msu.edu 
 
 * branch: `nothing-special`  
@@ -38,7 +40,16 @@ when you are done with it
 
 ## Pipeline Stages & Jobs
 
-### Prepare
+## test
+**branches**: `main`, `devel-`*, and `review-`*  
+* Runs templates included with GitLab CI/CD to scan for secrets used in committed code
+* Runs `shellcheck` on all bash scripts in the repository
+
+### Build
+**branches**: `main`, `devel-`*, and `review-`*  
+* Builds all of the images in this repository, tagging them with `latest` only if it the `main` branch
+
+### Deploy
 **branches**: `main`, `devel-`*, and `review-`*  
 * Will set the `STACK_NAME` variable that is used throughout the pipeline, which is essentially
 the branch name unless the branch does not start with `devel-`, `review-` or is `main`
@@ -46,34 +57,13 @@ the branch name unless the branch does not start with `devel-`, `review-` or is 
 changing the image tag from `:latest` to the current commit sha and modifying services based on
 the `STACK_NAME`
 * Will call the playbook that creates a DNS record for devel and review environments if necessary
-
-### Build
-**branches**: `main`, `devel-`*, and `review-`*  
-* Builds all of the images in this repository, tagging them with `latest` only if it the `main` branch
-
-## test
-**branches**: `main`, `devel-`*, and `review-`*  
-* Runs templates included with GitLab CI/CD to scan for secrets used in committed code
-* Runs `shellcheck` on all bash scripts in the repository
-
-### Networking
-**branches**: `main`, `devel-`*, and `review-`*  
 * Deploy both the traefik (which handles routing of public traffic to the different enviornments
 hosted on the swarm) and the internal network used by the MariaDB Galera services
 within the indivudual environment)
-
-### Bootstrap
-**branches**: `main`, `devel-`*, and `review-`*  
 * Will bootstrap the `solr` and `mariadb` stacks if they have not already been (i.e. this is the first time
 running this job for this branch)
-
-### Deploy
-**branches**: `main`, `devel-`*, and `review-`*  
 * Deploys the `catalog`, `solr`, `swarm-cron`, and `mariadb` stacks. If this is a devel or review environment, it will
 import a single marc file into the vufind instance as test data
-
-### Post-Deploy
-**branches**: `main`, `devel-`*, and `review-`*  
 * Runs VuFind version upgrades, if applicable
 * If it is a `devel-` or `review-` branch, it will populate the environment with sample data
 * Evaluate the health of the services on all nodes
@@ -94,6 +84,8 @@ project's CI/CD settings to be available to the pipeline. While it is ok for var
 marked as `masked`, they can not be marked as `protected`; otherwise they will not be
 available in the `devel-` and `review-` pipelines.
 
+* `AUTH_FTP_USER`: User name for the authority marc file FTP server
+* `AUTH_FTP_PASSWORD`: Password for `AUTH_FTP_USER`
 * `AWS_KEY`: The AWS access key to use when provisioning the DNS CNAME records
 * `AWS_SECRET`: The AWS secret for the `AWS_KEY` uses when provisioning the DNS CNAME records
 * `BASICAUTH_FOR_RESOURCES`: Bcrypt password hash[^1] for basic authentication to internal

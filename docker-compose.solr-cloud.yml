@@ -24,26 +24,21 @@ x-solr-deploy: &solr_deploy
   placement:
     max_replicas_per_node: 1
   labels:
-    # XXX: These labels need to stay in this order for the CI to work
     - "traefik.enable=true"
-    - "traefik.http.routers.msul-solr-router.entrypoints=msul-http-ent"
-    - "traefik.http.routers.msul-solr-router.service=msul-solr-app"
-    - "traefik.http.services.msul-solr-app.loadbalancer.server.port=8983"
-    - "traefik.http.routers.msul-solr-router.rule=Host(`catalog.aws.lib.msu.edu`) && PathPrefix(`/solr`)"
-    - "traefik.http.routers.devel-solr-msul-solr-router.middlewares=http-redirect"
-    - "traefik.http.routers.devel-solr-https-msul-solr-router.entrypoints=msul-https-ent"
-    - "traefik.http.routers.devel-solr-https-msul-solr-router.service=devel-solr-https-msul-solr-app"
-    - "traefik.http.routers.devel-solr-https-msul-solr-router.middlewares=restrict-auth"
-    - "traefik.http.routers.devel-solr-https-msul-solr-router.rule=Host(`devel-solr.aws.lib.msu.edu`) && PathPrefix(`/solr`)"
-    - "traefik.http.routers.devel-solr-https-msul-solr-router.tls=true"
-    - "traefik.http.routers.devel-solr-https-msul-solr-router.tls.certresolver=msul-letsencrypt-dns"
-    - "traefik.http.routers.devel-solr-https-msul-solr-router.tls.domains[0].main=aws.lib.msu.edu"
-    - "traefik.http.routers.devel-solr-https-msul-solr-router.tls.domains[0].sans=*.aws.lib.msu.edu"
+    - "traefik.http.routers.${STACK_NAME}-msul-solr-router.entrypoints=msul-http-ent"
+    - "traefik.http.routers.${STACK_NAME}-msul-solr-router.service=${STACK_NAME}-msul-solr-app"
+    - "traefik.http.services.${STACK_NAME}-msul-solr-app.loadbalancer.server.port=8983"
+    - "traefik.http.routers.${STACK_NAME}-msul-solr-router.middlewares=http-redirect"
+    - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.entrypoints=msul-https-ent"
+    - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.service=${STACK_NAME}-https-msul-solr-app"
+    - "traefik.http.services.${STACK_NAME}-https-msul-solr-app.loadbalancer.server.port=8983"
+    - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.middlewares=restrict-auth"
+    - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls=true"
 
 version: "3.8"
 services:
   solr:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:latest
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:${CI_COMMIT_SHORT_SHA}
     volumes:
       - bitnami:/bitnami
       - /mnt/shared/backups/solr_dropbox:/mnt/solr_backups
@@ -63,7 +58,7 @@ services:
       <<: *solr_deploy
 
   zk:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:latest
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:${CI_COMMIT_SHORT_SHA}
     volumes:
       - zk-bitnami:/bitnami
     hostname: zk{{slice .Node.Hostname 8 9}}
@@ -89,7 +84,7 @@ services:
         window: 15s
 
   cron:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:latest
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:${CI_COMMIT_SHORT_SHA}
     command: /startup-cron.sh
     user: "0"
     volumes:
@@ -106,7 +101,7 @@ services:
       disable: true
     environment:
       NODE: "{{slice .Node.Hostname 8 9}}"
-      STACK_NAME: "catalog-beta"
+      STACK_NAME: "${STACK_NAME}"
     deploy:
       mode: replicated
       replicas: 3
@@ -121,7 +116,7 @@ services:
 
 networks:
   internal:
-    name: internal
+    name: ${STACK_NAME}-internal
     external: true
   public:
     name: public

@@ -112,6 +112,8 @@ ARG RECAPTCHA_SITE_KEY
 ARG RECAPTCHA_SECRET_KEY
 ARG FTP_USER
 ARG FTP_PASSWORD
+ARG AUTH_FTP_USER
+ARG AUTH_FTP_PASSWORD
 
 ENV DEBUG=$DEBUG \
     SITE_HOSTNAME=$SITE_HOSTNAME \
@@ -136,7 +138,9 @@ ENV DEBUG=$DEBUG \
     RECAPTCHA_SITE_KEY=$RECAPTCHA_SITE_KEY \
     RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY \
     FTP_USER=$FTP_USER \
-    FTP_PASSWORD=$FTP_PASSWORD
+    FTP_PASSWORD=$FTP_PASSWORD \
+    AUTH_FTP_USER=$AUTH_FTP_USER \
+    AUTH_FTP_PASSWORD=$AUTH_FTP_PASSWORD
 
 # Setup Apache
 RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-default.conf && \
@@ -158,6 +162,7 @@ COPY startup-cron.sh /startup-cron.sh
 COPY startup-cachecron.sh /startup-cachecron.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
 COPY hlm-harvest-and-import.sh /hlm-harvest-and-import.sh
+COPY authority-harvest-and-import.sh /authority-harvest-and-import.sh
 COPY backup.sh /backup.sh
 COPY restore.sh /restore.sh
 COPY msmtp/aliases /etc/aliases
@@ -190,6 +195,8 @@ RUN \
     echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment && \
     echo FTP_USER="$FTP_USER" >> /etc/environment && \
     echo FTP_PASSWORD="$FTP_PASSWORD" >> /etc/environment && \
+    echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment && \
+    echo AUTH_FTP_PASSWORD="$AUTH_FTP_PASSWORD" >> /etc/environment && \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \

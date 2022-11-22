@@ -9,12 +9,14 @@ default_args() {
     ARGS[IMPORT]=0
     ARGS[LIMIT]=
     ARGS[LIMIT_BY_DELETE]=
-    ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/hlm
-    ARGS[FTP_SERVER]=atozftp.ebsco.com
-    ARGS[FTP_DIR]=s8364774/vufind/
-    ARGS[FTP_USER]=${FTP_USER}
-    ARGS[FTP_PASSWORD]=${FTP_PASSWORD}
-    ARGS[SHARED_DIR]=/mnt/shared/hlm
+    ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/authority
+    ARGS[FTP_SERVER]=ftp.bslw.com
+    ARGS[FTP_DIR]=out/
+    ARGS[FTP_USER]=${AUTH_FTP_USER}
+    ARGS[FTP_PASSWORD]=${AUTH_FTP_PASSWORD}
+    ARGS[SHARED_DIR]=/mnt/shared/authority
+    ARGS[SOLR_URL]="http://solr:8983/solr"
+    ARGS[RESET_SOLR]=0
     ARGS[VERBOSE]=0
 }
 default_args
@@ -22,19 +24,19 @@ default_args
 # Script help text
 runhelp() {
     echo ""
-    echo "Usage: Harvest HLM records from EBSCO via their FTP server"
-    echo "       and import that data into VuFind's Solr."
+    echo "Usage: Harvest authority records from via the FTP server"
+    echo "       and import that data into VuFind's authority Solr index."
     echo ""
     echo "Examples: "
-    echo "   /hlm-harvest-and-import.sh --harvest --full --import"
+    echo "   /authority-harvest-and-import.sh --harvest --full --import"
     echo "     Do a full harvest from scratch and import that data"
-    echo "   /hlm-harvest-and-import.sh --harvest --import"
+    echo "   /authority-harvest-and-import.sh --harvest --import"
     echo "     Do an update harvest with changes made since the"
     echo "     last run, and import that data"
-    echo "   /hlm-harvest-and-import.sh --import"
+    echo "   /authority-harvest-and-import.sh --import"
     echo "     Run only a import of data that has already been"
     echo "     harvested and saved to the shared location."
-    echo "   /hlm-harvest-and-import.sh --harvest"
+    echo "   /authority-harvest-and-import.sh --harvest"
     echo "     Only run the harvest, but do not proceed to import"
     echo "     the data into VuFind"
     echo ""
@@ -49,14 +51,14 @@ runhelp() {
     echo "  -i|--import"
     echo "      Run VuFind batch import on files within VUFIND_HARVEST_DIR."
     echo "  -c|--copy-shared"
-    echo "      Copy MARC file(s) from SHARED_DIR back to VUFIND_HARVEST_DIR."
+    echo "      Copy XML file(s) from SHARED_DIR back to VUFIND_HARVEST_DIR."
     echo "      Only usable when NOT running a harvest (see also --limit)."
     echo "  -l|--limit COPY_COUNT"
     echo "      Usable with --copy-shared only. This will limit the number"
     echo "      of files copied from SHARED_DIR to VUFIND_HARVEST_DIR."
     echo "  -X|--limit-by-delete IMPORT_COUNT"
     echo "      Usable with --batch-import only. This will limit the number"
-    echo "      of files imported from VUFIND_HARVEST_DIR by deleting MARC"
+    echo "      of files imported from VUFIND_HARVEST_DIR by deleting XML"
     echo "      import files exceeding the given count prior to importing."
     echo "  -d|--vufind-harvest-dir VUFIND_HARVEST_DIR"
     echo "      Full path to the VuFind harvest directory."
@@ -64,19 +66,23 @@ runhelp() {
     echo "  -s|--shared-harvest-dir SHARED_DIR"
     echo "      Full path to the shared storage location for HLM files."
     echo "      Default: ${ARGS[SHARED_DIR]}"
+    echo "  -S|--solr SOLR_URL"
+    echo "      Base URL for accessing Solr (only used for --reset-solr)."
+    echo "      Default: ${ARGS[SOLR_URL]}"
     echo "  -F|--ftp-server FTP_SERVER"
-    echo "      FTP server that contains the HLM records from EBSCO"
+    echo "      FTP server that contains the authority records"
     echo "      Default: ${ARGS[FTP_SERVER]}"
     echo "  -D|--ftp-dir FTP_DIR"
-    echo "      Directory on the FTP server that contains the HLM records "
-    echo "      from EBSCO"
+    echo "      Directory on the FTP server that contains the authority records"
     echo "      Default: ${ARGS[FTP_DIR]}"
     echo "  -U|--ftp-user FTP_USER"
     echo "      User for connecting to the FTP server"
-    echo "      Default: Stored in the environment variable \$FTP_USER"
+    echo "      Default: Stored in the environment variable \$AUTH_FTP_USER"
     echo "  -P|--ftp-password FTP_PASSWORD"
     echo "      Password for connecting to the FTP server"
-    echo "      Default: Stored in the environment variable \$FTP_PASSWORD"
+    echo "      Default: Stored in the environment variable \$AUTH_FTP_PASSWORD"
+    echo "  -r|--reset-solr"
+    echo "      Clear out the authority Solr collection prior to importing."
     echo "  -v|--verbose"
     echo "      Show verbose output."
     echo ""
@@ -146,6 +152,9 @@ parse_args() {
         -P|--ftp-password)
             ARGS[FTP_PASSWORD]="$2"
             shift; shift ;;
+        -r|--reset-solr)
+            ARGS[RESET_SOLR]=1
+            shift;;
         -v|--verbose)
             ARGS[VERBOSE]=1
             shift;;
@@ -187,19 +196,18 @@ assert_vufind_harvest_dir_writable() {
     fi
 }
 
-assert_ebsco_ftp_readable() {
+assert_ftp_readable() {
     if ! curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]} > /dev/null 2>&1; then
-        echo "ERROR: EBSCO HLM harvest location is not readable: ${ARGS[FTP_SERVER]}"
+        echo "ERROR: FTP harvest location is not readable: ${ARGS[FTP_SERVER]}"
         exit 1
     fi
 }
 
 # Print message if verbose is enabled
 verbose() {
-    FORCE=$2
     LOG_TS=$(date +%Y-%m-%d\ %H:%M:%S)
     MSG="[${LOG_TS}] $1"
-    if [[ "${ARGS[VERBOSE]}" -eq 1 ]] || [[ "$FORCE" -eq 1 ]]; then
+    if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
         echo "${MSG}"
     fi
     echo "${MSG}" >> "$LOG_FILE"
@@ -248,14 +256,14 @@ archive_current_harvest() {
     declare -a ARCHIVE_LIST
     while read -r FILE; do
         ARCHIVE_LIST+=("$FILE")
-    done < <( find ./ -mindepth 1 -maxdepth 1 -name '*.marc' )
+    done < <( find ./ -mindepth 1 -maxdepth 1 -name '*.MRC' )
 
-    # Archive all marc files and the last_harvest file, if it exists
+    # Archive all MRC files
     if [[ "${#ARCHIVE_LIST[@]}" -gt 0 ]]; then
         verbose "Archiving ${#ARCHIVE_LIST[@]} harvest files."
         countdown 5
         if ! tar -czvf "$ARCHIVE_FILE" "${ARCHIVE_LIST[@]}"; then
-            verbose "ERROR: Could not archive harvest files into ${ARCHIVE_FILE}" 1
+            echo "ERROR: Could not archive harvest files into ${ARCHIVE_FILE}"
             exit 1
         fi
     fi
@@ -264,14 +272,14 @@ archive_current_harvest() {
 
 clear_harvest_files() {
     countdown 5
-    find "${1}" -mindepth 1 -maxdepth 1 -name '*.marc' -delete
+    find "${1}" -mindepth 1 -maxdepth 1 -name '*.MRC' -delete
 }
 
 # Perform an harvest of HLM Records
 harvest() {
     assert_vufind_harvest_dir_writable
     assert_shared_dir_writable
-    assert_ebsco_ftp_readable
+    assert_ftp_readable
 
     if [[ "${ARGS[FULL]}" -eq 1 ]]; then
         verbose "Clearing VuFind harvest directory for new full harvest."
@@ -286,17 +294,22 @@ harvest() {
     # Check FTP server to compare files for ones we don't have
     OLD_PWD=$(pwd)
     cd ${ARGS[VUFIND_HARVEST_DIR]}
-    while IFS= read -r HLM_FILE
+    while IFS= read -r AUTH_FILE
     do
-        # If it is not in the shared storage and it is an MARC file, then get it
-        if [ ! -f "${ARGS[SHARED_DIR]}/current/${HLM_FILE}" ] && [[ ${HLM_FILE} == *.marc ]]; then
-            if ! wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${HLM_FILE} > /dev/null 2>&1; then
-                verbose "ERROR: Failed to retrieve ${HLM_FILE} from FTP server" 1
+        # If it is not in the harvest dir and it is an zip file, then get it
+        if [ ! -f "${ARGS[SHARED_DIR]}/current/${AUTH_FILE}" ] && [[ ${AUTH_FILE} == *.zip ]]; then
+            if ! wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${AUTH_FILE} > /dev/null 2>&1; then
+                verbose "ERROR: Failed to retrieve ${AUTH_FILE} from FTP server" 1
                 exit 1
             fi
+            mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/tmp
+            unzip -qq ${AUTH_FILE} -d ${ARGS[VUFIND_HARVEST_DIR]}/tmp
+            for F in tmp/* ; do if [[ ${F} == *.MRC ]]; then mv "${F}" "${AUTH_FILE%.zip}"_"${F#tmp/}"; fi done
+            rm -rf ${ARGS[VUFIND_HARVEST_DIR]}/tmp
         fi
     done < <(curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]} -l -s)
     cd ${OLD_PWD}
+
 
     verbose "Syncing harvest files to shared storage."
     if ! rsync -ai --exclude "processed" --exclude "log" --exclude ".gitkeep" "${ARGS[VUFIND_HARVEST_DIR]}"/ "${ARGS[SHARED_DIR]}/current/" > /dev/null 2>&1; then
@@ -305,13 +318,13 @@ harvest() {
     fi
 }
 
-# Copy MARC files back from shared dir to VuFind dir
+# Copy MRC files back from shared dir to VuFind dir
 copyback_from_shared() {
     assert_vufind_harvest_dir_writable
-    verbose "Replacing any VuFind MARC with files from shared directory."
+    verbose "Replacing any VuFind files with files from shared directory."
     countdown 5
 
-    # Clear out any exising marc files before copying back from shared storage
+    # Clear out any exising xml files before copying back from shared storage
     clear_harvest_files "${ARGS[VUFIND_HARVEST_DIR]}/"
 
     COPIED_COUNT=0
@@ -319,20 +332,20 @@ copyback_from_shared() {
         cp --preserve=timestamps "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/"
         (( COPIED_COUNT += 1 ))
         if [[ -n "${ARGS[LIMIT]}" && "${COPIED_COUNT}" -ge "${ARGS[LIMIT]}" ]]; then
-            # If limit is set, only copy the provided limit of marc files over to the VUFIND_HARVEST_DIR
+            # If limit is set, only copy the provided limit of xml files over to the VUFIND_HARVEST_DIR
             break
         fi
-    done < <(find "${ARGS[SHARED_DIR]}/current/" -mindepth 1 -maxdepth 1 -name '*.marc')
-
+    done < <(find "${ARGS[SHARED_DIR]}/current/" -mindepth 1 -maxdepth 1 -name '*.MRC')
 }
 
 # Perform VuFind batch import of HLM records
 import() {
     assert_vufind_harvest_dir_writable
 
-    verbose "Starting import processing..."
+    verbose "Starting import..."
+
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" ]]; then
-        verbose "Will only import ${ARGS[LIMIT_BY_DELETE]} MARC files; others will be deleted."
+        verbose "Will only import ${ARGS[LIMIT_BY_DELETE]} XML files; others will be deleted."
         countdown 5
         # Delete excess files beyond the provided limit from the VUFIND_HARVEST_DIR prior to import
         FOUND_COUNT=0
@@ -341,57 +354,76 @@ import() {
             if [[ "${FOUND_COUNT}" -gt "${ARGS[LIMIT_BY_DELETE]}" ]]; then
                 rm "$FILE"
             fi
-        done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.marc')
+        done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.MRC')
     else
         countdown 5
     fi
+    
     # TODO -- can remove once https://github.com/vufind-org/vufind/pull/2623 is included
     # in a release (remember to also update the while loop find below too to)
-    verbose "Pre-processing import files to rename from .marc to .mrc"
+    verbose "Pre-processing import files to rename from .MRC to .mrc"
     while read -r FILE; do
-        mv ${FILE} ${FILE%.marc}.mrc
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.marc')
+        mv ${FILE} ${FILE%.MRC}.mrc
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.MRC')
 
-    verbose "Pre-processing deletion files to extract IDs from EBSCO MARC records"
-    mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/processed # needed in case it doesn't already exist
-    while read -r FILE; do
-        DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/$(basename ${FILE})
-        marc2xml ${FILE} > ${DEL_FILE%.mrc}.xml
-        xmllint --xpath "//*[@tag = '001']/text()" ${DEL_FILE%.mrc}.xml > ${DEL_FILE%.mrc}.delete
-        # Cleanup the other files that the batch-delete.sh script won't move to the processed dir
-        rm ${DEL_FILE%.mrc}.xml
-        mv ${FILE} ${ARGS[VUFIND_HARVEST_DIR]}/processed
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*-Del-*.mrc')
+    ## TODO -- Pre-process the LC.SUBJ* files to split out the subject data from the names
 
-    verbose "Running batch import"
-    if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
-        if ! /usr/local/vufind/harvest/batch-import-marc.sh hlm; then
-            verbose "ERROR: Batch import failed with code: $?" 1
+    find "${ARGS[VUFIND_HARVEST_DIR]}/" -maxdepth 1 -iname "*.mrc" ! -name '*_FAST*' \
+      ! -name '*_MESH.GENRE*' ! -name '*_MESH.NAME*' ! -name '*_NAME*' ! -name '*_LC.SUBJ*' \
+      -type f -print0 | while read -d $'\0' file; do
+        
+        # Determine which properties file to use
+        PROP_FILE="marc_auth_fast_formgenre.properties"
+        if [[ "${file}" == LC.NAME* ]]; then
+            PROP_FILE="marc_auth_fast_personal.properties"
+        fi
+        if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
+            $VUFIND_HOME/import-marc-auth.sh $file ${PROP_FILE}
+            EXIT_CODE=$?
+        else
+            $VUFIND_HOME/import-marc-auth.sh $file ${PROP_FILE} >> "$LOG_FILE" 2>&1
+            EXIT_CODE=$?
+        fi
+        if [[ ${EXIT_CODE} -eq 0 ]]; then
+            mv $file "${ARGS[VUFIND_HARVEST_DIR]}"/processed/$(basename $file)
+        else
+            verbose "ERROR: Batch import failed with code: ${EXIT_CODE}" 1
             exit 1
         fi
-    else
-        if ! /usr/local/vufind/harvest/batch-import-marc.sh hlm >> "$LOG_FILE"; then
-            verbose "ERROR: Batch import failed with code: $?" 1
-            exit 1
-        fi
-    fi
+    done
+
     verbose "Completed batch import"
 
+    # We don't get deletions from Backstage, eventually we will get them from catalogers
+    # TODO -- manually test this to make sure it will delete from authority index, and not biblio
     verbose "Processing delete records from harvest."
     countdown 5
     if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
-        if ! /usr/local/vufind/harvest/batch-delete.sh hlm; then
+        if ! /usr/local/vufind/harvest/batch-delete.sh authority; then
             verbose "ERROR: Batch delete script failed with code: $?" 1
             exit 1
         fi
     else
-        if ! /usr/local/vufind/harvest/batch-delete.sh hlm >> "$LOG_FILE"; then
+        if ! /usr/local/vufind/harvest/batch-delete.sh authority >> "$LOG_FILE"; then
             verbose "ERROR: Batch delete script failed with code: $?" 1
             exit 1
         fi
     fi
     verbose "Completed processing records to be deleted."
 }
+
+# Reset the authority Solr collection by clearing all records
+reset_solr() {
+    if [[ "${ARGS[RESET_SOLR]}" -eq 0 ]]; then
+        return
+    fi
+    verbose "Clearing the authority Solr index."
+    countdown 5
+    curl "${ARGS[SOLR_URL]}/authority/update" -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
+    curl "${ARGS[SOLR_URL]}/authority/update" -H "Content-type: text/xml" --data-binary '<commit />'
+    verbose "Done clearing the Solr index."
+}
+
 
 # Main logic for the script
 main() {
@@ -404,6 +436,9 @@ main() {
         harvest
     elif [[ "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
         copyback_from_shared
+    fi
+    if [[ "${ARGS[RESET_SOLR]}" -eq 1 ]]; then
+        reset_solr
     fi
     if [[ "${ARGS[IMPORT]}" -eq 1 ]]; then
         import
