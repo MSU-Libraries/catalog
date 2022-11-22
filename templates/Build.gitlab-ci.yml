@@ -83,6 +83,11 @@ Build Vufind Image:
         docker push $LATEST
       fi
 
+Build Monitoring Image:
+  variables:
+     COMPONENT: monitoring
+  extends: .build_template
+
 ############# Templates ###############
 
 .build_template:

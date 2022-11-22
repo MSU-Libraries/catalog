@@ -5,7 +5,7 @@ services:
   catalog:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:${CI_COMMIT_SHORT_SHA}
     volumes:
-      - logs:/var/log/apache2
+      - logs:/mnt/logs
       - /mnt/shared:/mnt/shared:rw
       - vufind_cache:/mnt/vufind_cache
     networks:
@@ -107,4 +107,6 @@ networks:
 
 volumes:
   logs:
+    external: true
+    name: "${STACK_NAME}_logs"
   vufind_cache:

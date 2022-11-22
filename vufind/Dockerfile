@@ -52,10 +52,6 @@ RUN \
     mv /tmp/solr/vendor/dist/solr* /usr/local/vufind/solr/vendor/dist/ && \
     mv /tmp/solr/vendor/contrib/analysis-extras/lib /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
     rm -rf /tmp/solr && \
-    # Create log file and redirect to stdout
-    mkdir /var/log/vufind && \
-    touch /var/log/vufind/vufind.log && \
-    chown -R 33:33 /var/log/vufind && \
     # Create user for grunt
     groupadd -g 1000 msuldevs && \
     useradd msuldevs -u 1000 -g 1000 && \
@@ -90,9 +86,7 @@ COPY simplesamlphp/local/ ${SIMPLESAMLPHP_CUSTOM_DIR}/
 RUN envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW}' < ${SIMPLESAMLPHP_CONFIG_DIR}/config.php | sponge ${SIMPLESAMLPHP_CONFIG_DIR}/config.php && \
     envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \
     a2enconf simplesamlphp.conf && \
-    chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR} && \
-    mkdir /var/log/simplesamlphp && \
-    chown www-data /var/log/simplesamlphp
+    chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR}
 
 # Build Arguments
 ARG SITE_HOSTNAME
@@ -152,8 +146,8 @@ ENV DEBUG=$DEBUG \
 RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-default.conf && \
     echo "<VirtualHost *:80>" >> /etc/apache2/sites-available/000-default.conf && \
     echo "    LogLevel warn" >> /etc/apache2/sites-enabled/000-default.conf && \
-    echo "    ErrorLog /proc/self/fd/2" >> /etc/apache2/sites-enabled/000-default.conf && \
-    echo "    CustomLog /proc/self/fd/1 combined" >> /etc/apache2/sites-enabled/000-default.conf && \
+    echo '    ErrorLog "|/usr/bin/tee /var/log/apache2/error.log"' >> /etc/apache2/sites-enabled/000-default.conf && \
+    echo '    CustomLog "|/usr/bin/tee /var/log/apache2/access.log" combined' >> /etc/apache2/sites-enabled/000-default.conf && \
     echo "</VirtualHost>" >> /etc/apache2/sites-enabled/000-default.conf && \
     # enable simplesamlphp at /simplesamlphp
     a2enconf simplesamlphp

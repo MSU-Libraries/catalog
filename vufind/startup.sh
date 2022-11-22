@@ -24,6 +24,16 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/Catalog /usr/local/vufind/module
 fi
 
+# Save the logs in the logs docker volume
+mkdir /mnt/logs/apache /mnt/logs/vufind /mnt/logs/simplesamlphp
+rm -rf /var/log/apache2
+ln -sf /mnt/logs/apache /var/log/apache2
+ln -sf /mnt/logs/vufind /var/log/vufind
+ln -sf /mnt/logs/simplesamlphp /var/log/simplesamlphp
+touch /mnt/logs/vufind/vufind.log
+touch /var/log/simplesamlphp/simplesamlphp.log
+chown www-data:www-data /mnt/logs/vufind/vufind.log /var/log/simplesamlphp/simplesamlphp.log
+
 # Prepare cache cli dir (volume only exists after start)
 clear-vufind-cache
 
