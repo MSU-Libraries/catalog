@@ -1,28 +1,26 @@
 <?php
 
 return array (
-  'router' =>
-  array (
-    'routes' =>
-    array (
-      'getthis' =>
-      array (
-        'type' => 'Laminas\\Router\\Http\\Segment',
-        'options' =>
-        array (
+  'router' => [
+    'routes' => [
+      'getthis' => [
+        'type' => 'Laminas\Router\Http\Segment',
+        'options' => [
           'route' => '/CatalogRecord/GetThis/[:id]',
-          'defaults' =>
-          array (
-            'controller' => 'Catalog\\Controller\\CatalogRecordController',
+          'constraints' => [
+            'id' => '[a-zA-Z][a-zA-Z0-9._-]*',
+          ],
+          'defaults' => [
+            'controller' => 'Catalog\Controller\CatalogRecordController',
             'action' => 'GetThis',
-          ),
-        ),
-      ),
-    ),
-  ),
+          ],
+        ],
+      ],
+    ],
+  ],
   'controllers' => [
     'factories' => [
-      'Catalog\\Controller\\CatalogRecordController' => 'VuFind\\Controller\\AbstractBaseFactory',
+      'Catalog\Controller\CatalogRecordController' => 'VuFind\Controller\AbstractBaseFactory',
     ],
   ],
   'vufind' => 
