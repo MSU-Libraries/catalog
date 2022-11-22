@@ -1,0 +1,60 @@
+---
+version: "3.8"
+
+services:
+  monitoring:
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/monitoring:latest
+    hostname: monitoring{{slice .Node.Hostname 8 9}}
+    volumes:
+      - logs:/mnt/logs
+    networks:
+      - public
+      - internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    environment:
+      NODE: "{{slice .Node.Hostname 8 9}}"
+    deploy:
+      mode: replicated
+      replicas: 3
+      placement:
+        max_replicas_per_node: 1
+      restart_policy:
+        window: 15s
+      update_config:
+        parallelism: 1
+        failure_action: rollback
+      labels:
+        # XXX: the labels with index 4 and 13 (0-based) should not change as they are edited in .gitlab-ci.yml
+        - "traefik.enable=true"
+        - "traefik.http.routers.${STACK_NAME}-monitor-http-router.entrypoints=msul-http-ent"
+        - "traefik.http.routers.${STACK_NAME}-monitor-http-router.middlewares=http-redirect"
+        - "traefik.http.routers.${STACK_NAME}-monitor-http-router.service=${STACK_NAME}-monitor-http-app"
+        - "traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(`value modified by .gitlab-ci.yml`) && PathPrefix(`/monitoring`)"
+        - "traefik.http.services.${STACK_NAME}-monitor-http-app.loadbalancer.server.port=80"
+        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.tls=true"
+        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.tls.certresolver=msul-letsencrypt-dns"
+        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.tls.domains[0].main=aws.lib.msu.edu"
+        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.tls.domains[0].sans=*.aws.lib.msu.edu"
+        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.entrypoints=msul-https-ent"
+        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.service=${STACK_NAME}-monitor-https-app"
+        - "traefik.http.services.${STACK_NAME}-monitor-https-app.loadbalancer.server.port=80"
+        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.rule=Host(`value modified by .gitlab-ci.yml`) && PathPrefix(`/monitoring`)"
+
+networks:
+  internal:
+    name: internal
+    external: true
+  public:
+    name: public
+    external: true
+
+volumes:
+  logs:
+    external: true
+    name: "${STACK_NAME}_logs"

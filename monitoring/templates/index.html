@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PubCat Monitoring</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <h1>PubCat Monitoring</h1>
+    <ul>
+        <li><a href="/monitoring/logs/vufind">VuFind logs</a></li>
+        <li><a href="/monitoring/logs/apache/access">Apache access logs</a></li>
+        <li><a href="/monitoring/logs/apache/error">Apache error logs</a></li>
+        <li><a href="/monitoring/logs/simplesamlphp">Simplesamlphp logs</a></li>
+    </ul>
+</body>
+</html>

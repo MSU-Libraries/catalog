@@ -131,6 +131,7 @@ Deploy Compose Files:
     - cat docker-compose.mariadb-cloud.yml | envsubst | sponge docker-compose.mariadb-cloud.yml
     - cat docker-compose.internal.yml | envsubst | sponge docker-compose.internal.yml
     - cat docker-compose.traefik.yml | envsubst | sponge docker-compose.traefik.yml
+    - cat docker-compose.monitoring.yml | envsubst | sponge docker-compose.monitoring.yml
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
     - sed -i "/^$/d" docker-compose.traefik.yml
     - sed -i "/^$/d" docker-compose.internal.yml
