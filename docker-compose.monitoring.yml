@@ -56,3 +56,5 @@ networks:
 
 volumes:
   logs:
+    external: true
+
