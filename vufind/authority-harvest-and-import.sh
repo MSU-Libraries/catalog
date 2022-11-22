@@ -312,7 +312,7 @@ harvest() {
 
 
     verbose "Syncing harvest files to shared storage."
-    if ! rsync -t --exclude "processed" --exclude "log" "${ARGS[VUFIND_HARVEST_DIR]}"/ "${ARGS[SHARED_DIR]}/current/" > /dev/null 2>&1; then
+    if ! rsync -ai --exclude "processed" --exclude "log" --exclude ".gitkeep" "${ARGS[VUFIND_HARVEST_DIR]}"/ "${ARGS[SHARED_DIR]}/current/" > /dev/null 2>&1; then
         verbose "ERROR: Failed to sync harvest files to shared storage from ${ARGS[VUFIND_HARVEST_DIR]}" 1
         exit 1
     fi
@@ -378,10 +378,10 @@ import() {
             PROP_FILE="marc_auth_fast_personal.properties"
         fi
         if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
-            $VUFIND_HOME/import-marc-auth.sh $file ${PROP_FILE} >> "$LOG_FILE"
+            $VUFIND_HOME/import-marc-auth.sh $file ${PROP_FILE}
             EXIT_CODE=$?
         else
-            $VUFIND_HOME/import-marc-auth.sh $file ${PROP_FILE}
+            $VUFIND_HOME/import-marc-auth.sh $file ${PROP_FILE} >> "$LOG_FILE" 2>&1
             EXIT_CODE=$?
         fi
         if [[ ${EXIT_CODE} -eq 0 ]]; then
