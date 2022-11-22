@@ -197,7 +197,7 @@ assert_vufind_harvest_dir_writable() {
 }
 
 assert_ftp_readable() {
-    if ! curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]}; then
+    if ! curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]} > /dev/null 2>&1; then
         echo "ERROR: FTP harvest location is not readable: ${ARGS[FTP_SERVER]}"
         exit 1
     fi
@@ -298,13 +298,13 @@ harvest() {
     do
         # If it is not in the harvest dir and it is an zip file, then get it
         if [ ! -f "${ARGS[SHARED_DIR]}/current/${AUTH_FILE}" ] && [[ ${AUTH_FILE} == *.zip ]]; then
-            if ! wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${AUTH_FILE}; then
+            if ! wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${AUTH_FILE} > /dev/null 2>&1; then
                 verbose "ERROR: Failed to retrieve ${AUTH_FILE} from FTP server" 1
                 exit 1
             fi
             mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/tmp
-            unzip ${AUTH_FILE} -d ${ARGS[VUFIND_HARVEST_DIR]}/tmp
-            mv ${ARGS[VUFIND_HARVEST_DIR]}/tmp/*.MRC ${ARGS[VUFIND_HARVEST_DIR]}/
+            unzip -qq ${AUTH_FILE} -d ${ARGS[VUFIND_HARVEST_DIR]}/tmp
+            for F in tmp/* ; do if [[ ${F} == *.MRC ]]; then mv "${F}" "${AUTH_FILE%.zip}"_"${F#tmp/}"; fi done
             rm -rf ${ARGS[VUFIND_HARVEST_DIR]}/tmp
         fi
     done < <(curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]} -l -s)
@@ -368,8 +368,8 @@ import() {
 
     ## TODO -- Pre-process the LC.SUBJ* files to split out the subject data from the names
 
-    find "${ARGS[VUFIND_HARVEST_DIR]}/" -maxdepth 1 -iname "*.mrc" ! -name 'FAST*' \
-      ! -name 'MESH.GENRE*' ! -name 'MESH.NAME*' ! -name 'NAME*' ! -name 'LC.SUBJ*' \
+    find "${ARGS[VUFIND_HARVEST_DIR]}/" -maxdepth 1 -iname "*.mrc" ! -name '*_FAST*' \
+      ! -name '*_MESH.GENRE*' ! -name '*_MESH.NAME*' ! -name '*_NAME*' ! -name '*_LC.SUBJ*' \
       -type f -print0 | while read -d $'\0' file; do
         
         # Determine which properties file to use
@@ -377,26 +377,37 @@ import() {
         if [[ "${file}" == LC.NAME* ]]; then
             PROP_FILE="marc_auth_fast_personal.properties"
         fi
-        $VUFIND_HOME/import-marc-auth.sh $file ${PROP_FILE} 2> >(log $file)
-        if [ "$?" -eq "0" ] && [ $MOVE_DATA == true ]; then
+        if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
+            $VUFIND_HOME/import-marc-auth.sh $file ${PROP_FILE}
+            EXIT_CODE=$?
+        else
+            $VUFIND_HOME/import-marc-auth.sh $file ${PROP_FILE} >> "$LOG_FILE" 2>&1
+            EXIT_CODE=$?
+        fi
+        if [[ ${EXIT_CODE} -eq 0 ]]; then
             mv $file "${ARGS[VUFIND_HARVEST_DIR]}"/processed/$(basename $file)
         else
-            echo "ERROR: Batch import failed with code: $?"
+            verbose "ERROR: Batch import failed with code: ${EXIT_CODE}" 1
             exit 1
         fi
     done
 
-    if ! /usr/local/vufind/import-marc-auth.sh ${AUTH_FILE} marc_auth_fast_formgenre.properties; then
-    fi
     verbose "Completed batch import"
 
     # We don't get deletions from Backstage, eventually we will get them from catalogers
     # TODO -- manually test this to make sure it will delete from authority index, and not biblio
     verbose "Processing delete records from harvest."
     countdown 5
-    if ! /usr/local/vufind/harvest/batch-delete.sh authority; then
-        echo "ERROR: Batch delete script failed."
-        exit 1
+    if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
+        if ! /usr/local/vufind/harvest/batch-delete.sh authority; then
+            verbose "ERROR: Batch delete script failed with code: $?" 1
+            exit 1
+        fi
+    else
+        if ! /usr/local/vufind/harvest/batch-delete.sh authority >> "$LOG_FILE"; then
+            verbose "ERROR: Batch delete script failed with code: $?" 1
+            exit 1
+        fi
     fi
     verbose "Completed processing records to be deleted."
 }
