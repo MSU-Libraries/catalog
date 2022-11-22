@@ -30,7 +30,7 @@ services:
         parallelism: 1
         failure_action: rollback
       labels:
-        # XXX: the label with index 5 (0-based) should not change as it is edited in .gitlab-ci.yml
+        # XXX: the labels with index 4 and 13 (0-based) should not change as they are edited in .gitlab-ci.yml
         - "traefik.enable=true"
         - "traefik.http.routers.${STACK_NAME}-monitor-http-router.entrypoints=msul-http-ent"
         - "traefik.http.routers.${STACK_NAME}-monitor-http-router.middlewares=http-redirect"
@@ -44,6 +44,7 @@ services:
         - "traefik.http.routers.${STACK_NAME}-monitor-https-router.entrypoints=msul-https-ent"
         - "traefik.http.routers.${STACK_NAME}-monitor-https-router.service=${STACK_NAME}-monitor-https-app"
         - "traefik.http.services.${STACK_NAME}-monitor-https-app.loadbalancer.server.port=80"
+        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.rule=Host(`value modified by .gitlab-ci.yml`) && PathPrefix(`/monitoring`)"
 
 networks:
   internal:
