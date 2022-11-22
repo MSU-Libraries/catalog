@@ -72,8 +72,8 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.services.traefik-public-traefik.loadbalancer.server.port=9999"
-        # BasicAuth Middleware for restricted resources (MUST be 3rd entry in labels for CI replace to work)
-        - "traefik.http.middlewares.restrict-auth.basicauth.users="
+        # BasicAuth Middleware for restricted resources
+        - "traefik.http.middlewares.restrict-auth.basicauth.users=${BASICAUTH_FOR_RESOURCES}"
         # Redirect Middleware
         - "traefik.http.middlewares.http-redirect.redirectscheme.scheme=https"
         - "traefik.http.middlewares.http-redirect.redirectscheme.permanent=true"

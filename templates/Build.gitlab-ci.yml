@@ -23,6 +23,7 @@ Build Vufind Image:
   stage: Build
   tags:
     - msul-shared
+  retry: 2
   environment:
     name: $CI_COMMIT_BRANCH
     action: prepare
@@ -86,6 +87,7 @@ Build Vufind Image:
   stage: Build
   tags:
     - msul-shared
+  retry: 2
   interruptible: true
   rules:
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
