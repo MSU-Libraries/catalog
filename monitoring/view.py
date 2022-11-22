@@ -3,7 +3,7 @@ from pathlib import Path
 import os
 import requests
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/monitoring/static')
 
 def raise_exception_for_reply(r):
     raise Exception('Status code: {}. Response: "{}"'.format(r.status_code, r.text))
