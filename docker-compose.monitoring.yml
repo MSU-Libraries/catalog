@@ -57,4 +57,4 @@ networks:
 volumes:
   logs:
     external: true
-
+    name: "${STACK_NAME}_logs"
