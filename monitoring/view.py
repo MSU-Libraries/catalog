@@ -28,7 +28,7 @@ def node_logs_simplesamlphp():
 def logs_vufind(service):
     logs = ''
     for node in range(1, 3):
-        logs += '------ NODE ' + node + ' ------\n'
+        logs += '------ NODE %s ------\n' % node
         r = requests.get('http://monitoring' + node + '/monitoring/node/logs/%s' % service)
         if r.status_code != 201:
             raise_exception_for_reply(r)
