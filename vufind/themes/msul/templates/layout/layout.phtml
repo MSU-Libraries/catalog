@@ -54,13 +54,16 @@
         if ($cart->isActive()) {
           $this->headScript()->appendFile("vendor/js.cookie.js");
           $this->headScript()->appendFile("cart.js");
-          if ($domain = $cart->getCookieDomain()) {
+          $domain = $cart->getCookieDomain();
+          if (!empty($domain)) {
             $appendScripts[] = 'VuFind.cart.setDomain("' . $domain . '");';
           }
-          if ($cookiePath = $cart->getCookiePath()) {
+          $cookiePath = $cart->getCookiePath();
+          if (!empty($cookiePath)) {
             $appendScripts[] = 'VuFind.cart.setCookiePath("' . $cookiePath . '");';
           }
-          if ($cookieSameSite = $cart->getCookieSameSite()) {
+          $cookieSameSite = $cart->getCookieSameSite();
+          if (null !== $cookieSameSite) {
             $appendScripts[] = 'VuFind.cart.setCookieSameSite("' . $cookieSameSite . '");';
           }
         }
@@ -98,7 +101,6 @@ JS;
           $this->headScript()->appendFile("covers.js");
       }
     ?>
-    <?=$this->cookieConsent()->render()?>
     <?=$this->headScript() ?>
 
     <script src="https://unbound.syndetics.com/syndeticsunbound/connector/initiator.php?a_id=615" type="text/javascript"></script>
@@ -123,7 +125,10 @@ JS;
     </header>
     <nav class="breadcrumbs" aria-label="<?=$this->transEscAttr('Breadcrumbs') ?>">
       <div class="container">
-        <?php if (!empty($this->layout()->showBreadcrumbs ?? true) && !empty($this->layout()->breadcrumbs)): ?>
+        <?php if((!isset($this->layout()->showBreadcrumbs) || $this->layout()->showBreadcrumbs == true)
+          && !empty($this->layout()->breadcrumbs)
+          && $this->layout()->breadcrumbs !== false
+        ): ?>
           <ul class="breadcrumb hidden-print"><?=$this->layout()->breadcrumbs ?></ul>
         <?php endif; ?>
       </div>
@@ -139,7 +144,7 @@ JS;
       <div class="modal-dialog">
         <div class="modal-content">
           <button type="button" class="close" data-dismiss="modal">
-            <?=$this->icon('lightbox-close', ['aria-label' => $this->transEscAttr('Close')]) ?>
+            <svg aria-label="<?=$this->transEscAttr('Close') ?>" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
           <div class="modal-body"></div>
         </div>
