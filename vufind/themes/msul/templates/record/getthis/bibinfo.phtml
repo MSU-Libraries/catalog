@@ -1,9 +1,15 @@
 <!-- Get-this: Bibinfo -->
 <div>
-  <span class='bold'>
-  <?= $this->escapeHtml($this->driver->getShortTitle() . ' ' . $this->driver->getSubtitle() . ' ' . $this->driver->getTitleSection()) ?>
-  </span><br/>
-  <span>
-    <?= "TODO status?" ?>
-  </span><br/>
+  <b><?= $this->escapeHtml($this->driver->getShortTitle() . ' ' . $this->driver->getSubtitle() . ' ' . $this->driver->getTitleSection()) ?></b><br/>
+  <br/>
+  <p class="text-left">
+    Status: 
+    <?php
+    foreach ($this->getthis->items as $item) {
+        foreach ($item as $holding) {
+            echo $this->escapeHtml($holding['status'] . ' | ');
+        }
+    }
+    ?>
+  </p><br/>
 </div>

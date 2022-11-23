@@ -2,10 +2,12 @@
 namespace Catalog\GetThis;
 
 class GetThisLoader {
-    protected $params;  // controller's $this->params
+    public $record;  // record driver
+    public $items;   // holding items
 
-    function __construct($params) {
-        $this->params = $params;
+    function __construct($record, $items) {
+        $this->record = $record;
+        $this->items = $items;
     }
 
     public function isOtherLib() {

@@ -2,7 +2,6 @@
 namespace Catalog\Controller;
 use Catalog\GetThis\GetThisLoader;
 
-
 class RecordController extends \VuFind\Controller\RecordController
 {
     /**
@@ -12,11 +11,12 @@ class RecordController extends \VuFind\Controller\RecordController
      */
     public function getthisAction()
     {
-        $getthis = new GetThisLoader($this->params());
-
+        $items = $this->getILS()->getHolding($this->params()->fromRoute('id'));
         $view = $this->createViewModel();
         $view->setTemplate('record/getthis');
-        $view->addChild($getthis, 'getthis');
+        $view->setVariable(
+            'getthis', new GetThisLoader($view->driver, $items),
+        );
         return $view;
     }
 }
