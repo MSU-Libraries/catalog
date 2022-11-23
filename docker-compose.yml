@@ -8,6 +8,7 @@ services:
       - logs:/mnt/logs
       - /mnt/shared:/mnt/shared:rw
       - vufind_cache:/mnt/vufind_cache
+      - /home/deploy/samlcerts/${STACK_NAME}:/mnt/samlcerts:ro
     networks:
       - public
       - internal

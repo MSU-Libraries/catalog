@@ -69,8 +69,8 @@ $config = [
         */
 
         /* SP certs */
-        'privatekey' => 'sp.pem',
-        'certificate' => 'sp.crt',
+        'privatekey' => '/mnt/samlcerts/sp-private.pem',
+        'certificate' => '/mnt/samlcerts/sp.crt',
     ],
 
 
