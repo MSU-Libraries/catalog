@@ -47,7 +47,7 @@ services:
 
 networks:
   internal:
-    name: internal
+    name: ${STACK_NAME}-internal
     external: true
   public:
     name: public
