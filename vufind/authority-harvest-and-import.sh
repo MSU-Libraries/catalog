@@ -374,7 +374,7 @@ import() {
         
         # Determine which properties file to use
         PROP_FILE="marc_auth_fast_formgenre.properties"
-        if [[ "${file}" == LC.NAME* ]]; then
+        if [[ "${file}" == *_LC.NAME* ]]; then
             PROP_FILE="marc_auth_fast_personal.properties"
         fi
         if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
