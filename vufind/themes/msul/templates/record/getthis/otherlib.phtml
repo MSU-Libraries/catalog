@@ -1,4 +1,75 @@
-<!-- Getthis: Otherlib -->
+<!-- Get-this: Otherlib -->
+<?php
+  $loc = $this->getthis->record->getLocation();
+  $title = $this->driver->getRawData()['title_full'];
+  $pubName = $this->driver->getPublisher();
+  if (is_array($publisherName)): $publisherName = implode(", ", $publisherName); endif;
+?>
 <div>
-    TODO OtherLib
+<p>We borrow from other libraries for you at no cost. We use several programs to get the materials quickly to you, including:<br/>
+<ul>
+<?php
+  # If law library use only material, display law patron form first
+  $lawRegex = "/^MSU SCHAEFER/";
+  if (preg_match($lawRegex, $loc) && ($status == "Checked out"
+      || $status == "LIB USE ONLY"
+      || $status == "ON SEARCH"
+      || $status == "LOST: TRY ILL")) {?>
+    <li>Law Library patrons can request this material through
+        <a href="http://www.law.msu.edu/library/ill.php">the Inter-library Loan Request Form</a>
+    </li>
+
+<?php
+  }
+?>
+  <li>MSU Students, Staff and Facaulty can request materials through the Inter-library Loan Request Form.
+      Typically available for pickup in 3-14 business days</li>
+  <ul>
+<?php
+  foreach ($this->getthis->items as $item) {
+        echo "<li><a href='https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:" .
+                $this->escapeHtml($item['status']) . ":" . $this->escapeHtml($item['barcode']) .
+                "&rft.genre=book&LO=EYM%2CGZM%2CMUN&rft.title=" .
+                $this->escapeHtml($title) . "&rft.au=" . $a . "&rft.pub=" . $this->escapeHtml($pubName) . "&rft.isbn=" . $isbn . "&loc=" .
+                $this->escapeHtml($loc) . "&callno=" . $this->escapeHtml($item['callnumber']) .
+                "&CAT=1'>Request Copy " . $this->escapeHtml($item['number']) . " via ILLiad </a></li>";
+  }
+?>
+  </ul>
+<?php
+  $hasMedia = false;
+  foreach ($this->getthis->items as $item) {
+        $callNum = strtolower($item['callnumber'] ?? "");
+        if (preg_match('/fiche/', $callNum) || preg_match('/disc/', $callNum) || preg_match('/video/', $callNum) ||
+            preg_match('/cd/', $callNum) || preg_match('/dvd/', $callNum)) {
+          $hasMedia = true;
+          break;
+        }
+  }
+
+  if (preg_match('/^MSU ROVI/', $loc) && $hasMedia) {
+?>
+  <li>If you only need an article/chapter from this title, it can be typically delivered electronically in
+      2-3 business days (for MSU Students, Staff and Faculty)</li>
+  <ul>
+<?php
+  foreach ($this->getthis->items as $item) {
+        echo "<li><a href='https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:" .
+              $this->escapeHtml($item['status']) . ":" . $this->escapeHtml($item['barcode']) . "&rft.genre=article&LO=EYM%2CGZM%2CMUN&rft.title=" .
+              $this->escapeHtml($title) . "&rft.au=" .
+          $a . "&rft.pub=" . $this->escapeHtml($pubName) . "&rft.isbn=" . $isbn . "&loc=" . $this->escapeHtml($loc)
+          . "&callno=" . $this->escapeHtml($item['callnumber']) .
+              "&CAT=1'>Request a SCAN of Copy " . $this->escapeHtml($item['number']) . "</a></li>";
+  }
+}
+?>
+  </ul>
+  <li>Borrow from the Big 10 libraries, typically available for pickup in 3-5 business days (for MSU Students, Staff and Faculty)</li>
+  <ul>
+    <?php
+    # TODO use isbn if available
+    ?>
+    <li><a href="https://ub.relaisd2d.com/?LS=MICHIGANSTATE&PI=MICHIGANSTATE&query=<?= $title ?>">Search UBorrow</a></li>
+  </ul>
+</ul>
 </div>

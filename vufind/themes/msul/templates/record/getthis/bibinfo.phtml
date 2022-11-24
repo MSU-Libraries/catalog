@@ -1,15 +1,15 @@
 <!-- Get-this: Bibinfo -->
 <div>
-  <b><?= $this->escapeHtml($this->driver->getShortTitle() . ' ' . $this->driver->getSubtitle() . ' ' . $this->driver->getTitleSection()) ?></b><br/>
+  <b><?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?></b><br/>
   <br/>
   <p class="text-left">
-    Status: 
+    Status:
     <?php
+    $status = "";
     foreach ($this->getthis->items as $item) {
-        foreach ($item as $holding) {
-            echo $this->escapeHtml($holding['status'] . ' | ');
-        }
+        $status .= $this->escapeHtml($item['status'] . ' | ');
     }
+    echo substr($status,0, -2);
     ?>
   </p><br/>
 </div>

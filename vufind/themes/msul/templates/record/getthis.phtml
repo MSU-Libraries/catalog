@@ -1,7 +1,26 @@
 <?php
-// Always render biblio info
-$this->render('record/getthis/bibinfo.phtml');
+// ORDER OF SUB-TEMPLATES COPIED FROM LEGACY CODE
 
-if ($this->getthis->isOtherLib()) {
-    $this->render('record/getthis/otherlib.phtml');
+// Always render biblio info
+echo $this->render('record/getthis/bibinfo.phtml');
+
+# inProcess();
+# servMsg(); // Accepts two arguments: a header string, some inline HTML to display under the header
+# reqItem($rovi,"Pickup at Business Library",$BUS_PICKUP);
+# getRovi($rovi);
+# lockerPick();
+# rsRequest($rovi);
+# scanCopy($ismedia);
+# remForm();
+# facDel();
+# remotePat();
+# gulForm();
+# spAeon();
+
+# otherLib();
+if ($this->getthis->showOtherLib()) {
+    echo $this->render('record/getthis/otherlib.phtml');
 }
+
+# circForm(); // Hidden forms; always displayed, but not sure if needed to always be displayed
+
