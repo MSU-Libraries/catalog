@@ -288,6 +288,28 @@ Deploy Vufind:
     reports:
       dotenv: deploy.env
 
+Deploy Monitoring:
+  extends: .stack_template
+  rules:
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Build Monitoring Image
+    - Bootstrap Stacks
+    - Deploy Compose Files
+    - Deploy Internal Network
+    - Deploy Traefik
+  script:
+    # Pull images now to save time with stack deploy
+    - >
+      ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA" &
+      ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA" &
+      ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA"
+- >
+      ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.monitoring.yml ${STACK_NAME}-monitoring"
+
 Vufind Upgrade:
   extends: .stack_template
   needs:
