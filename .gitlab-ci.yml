@@ -95,8 +95,8 @@ Deploy Compose Files:
         # Add host router rules
         ./yq -i ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml
         ./yq -i ".x-solr-deploy.labels +=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml
-        ./yq -i ".services.monitoring.deploy.labels[4] =\"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
-        ./yq -i ".services.monitoring.deploy.labels[13] =\"traefik.http.routers.${STACK_NAME}-monitor-https-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
+        ./yq -i ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
+        ./yq -i ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-https-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
       fi
     # Production environment changes
     - |
@@ -114,8 +114,8 @@ Deploy Compose Files:
           ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" docker-compose.yml
           ./yq -i ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml
           ./yq -i ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml
-          ./yq -i ".services.monitoring.deploy.labels[4] =\"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
-          ./yq -i ".services.monitoring.deploy.labels[13] =\"traefik.http.routers.${STACK_NAME}-monitor-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
+          ./yq -i ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
+          ./yq -i ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
         fi
         ## Changes for catalog-prod
         # TODO add catalog.lib at launch
@@ -124,8 +124,8 @@ Deploy Compose Files:
           ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" docker-compose.yml
           ./yq -i ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml
           ./yq -i ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml
-          ./yq -i ".services.monitoring.deploy.labels[4] =\"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`catalog-prod.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
-          ./yq -i ".services.monitoring.deploy.labels[13] =\"traefik.http.routers.${STACK_NAME}-monitor-https-router.rule=Host(\`catalog-prod.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
+          ./yq -i ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`catalog-prod.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
+          ./yq -i ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-https-router.rule=Host(\`catalog-prod.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
         fi
       fi
       # Authentication environment changes
