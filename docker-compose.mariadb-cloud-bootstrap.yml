@@ -28,6 +28,7 @@ services:
       <<: *mariadb_envs
     volumes:
       - db-bitnami:/bitnami
+      - logs:/mnt/logs
     stop_signal: SIGWINCH
     stop_grace_period: 80s
     deploy:
@@ -49,3 +50,6 @@ networks:
 
 volumes:
   db-bitnami:
+  logs:
+    external: true
+    name: "${STACK_NAME}_logs"

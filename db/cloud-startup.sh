@@ -135,6 +135,16 @@ galera_slow_startup() {
         fi
     done
 
+    # Remove logs redirect to stdout
+    rm -rf /opt/bitnami/mariadb/logs
+    # Add symlink to /mnt/logs for monitoring
+    mkdir -p /mnt/logs/mariadb
+    touch /mnt/logs/mariadb/mysqld.log
+    chown 1001 /mnt/logs/mariadb/mysqld.log
+    ln -sf /mnt/logs/mariadb /opt/bitnami/mariadb/logs
+    # Output the log for docker
+    tail -f /opt/bitnami/mariadb/logs/mysqld.log &
+
     # Start Galera as a background process so we can listen for the shutdown signal
     if [[ "$MARIADB_GALERA_CLUSTER_BOOTSTRAP" == "yes" ]]; then
         verbose "Starting service as a bootstrap node..."

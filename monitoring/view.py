@@ -24,6 +24,10 @@ def node_logs_apache_access():
 def node_logs_simplesamlphp():
     return Path('/mnt/logs/simplesamlphp/simplesamlphp.log').read_text()
 
+@app.route('/monitoring/node/logs/mariadb')
+def node_logs_mariadb():
+    return Path('/mnt/logs/mariadb/mysqld.log').read_text()
+
 @app.route('/monitoring/logs/<path:service>')
 def logs_vufind(service):
     logs = []
