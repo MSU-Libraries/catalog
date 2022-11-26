@@ -12,6 +12,10 @@ RUN wget -O /docker-entrypoint-initdb.d/vufind.sql \
     https://raw.githubusercontent.com/vufind-org/vufind/v${VUFIND_VERSION}/module/VuFind/sql/mysql.sql && \
     sed -i '1s/^/use vufind;\n/' /docker-entrypoint-initdb.d/vufind.sql
 
+# Give ownership of /mnt/logs to 1001 so the logs can be written there
+RUN mkdir -p /mnt/logs && \
+    chown 1001 /mnt/logs
+
 USER 1001
 
 COPY ./cloud-entrypoint.sh /cloud-entrypoint.sh
