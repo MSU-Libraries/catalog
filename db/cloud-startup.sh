@@ -135,9 +135,6 @@ galera_slow_startup() {
         fi
     done
 
-    # Output the log for docker
-    tail -f /mnt/logs/mariadb/mysqld.log &
-
     # Start Galera as a background process so we can listen for the shutdown signal
     if [[ "$MARIADB_GALERA_CLUSTER_BOOTSTRAP" == "yes" ]]; then
         verbose "Starting service as a bootstrap node..."
