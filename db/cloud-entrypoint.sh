@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Setup logs as root to have the needed permissions
+# Remove logs redirect to stdout
+rm -rf /opt/bitnami/mariadb/logs
+# Add symlink to /mnt/logs for monitoring
+mkdir -p /mnt/logs/mariadb
+chown 1001 /mnt/logs/mariadb
+ln -sf /mnt/logs/mariadb /opt/bitnami/mariadb/logs
+
+# Continue as user 1001
+su - 1001
+
 # shellcheck disable=SC1091
 
 set -o errexit

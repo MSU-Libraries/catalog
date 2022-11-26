@@ -12,8 +12,6 @@ RUN wget -O /docker-entrypoint-initdb.d/vufind.sql \
     https://raw.githubusercontent.com/vufind-org/vufind/v${VUFIND_VERSION}/module/VuFind/sql/mysql.sql && \
     sed -i '1s/^/use vufind;\n/' /docker-entrypoint-initdb.d/vufind.sql
 
-USER 1001
-
 COPY ./cloud-entrypoint.sh /cloud-entrypoint.sh
 COPY ./cloud-startup.sh /cloud-startup.sh
 COPY ./my_custom.cnf /opt/bitnami/mariadb/conf/

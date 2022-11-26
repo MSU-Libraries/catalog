@@ -135,12 +135,6 @@ galera_slow_startup() {
         fi
     done
 
-    # Remove logs redirect to stdout
-    rm -f /opt/bitnami/mariadb/logs/mysqld.log
-    # Add symlink to /mnt/logs for monitoring
-    mkdir -p /mnt/logs/mariadb
-    touch /mnt/logs/mariadb/mysqld.log
-    ln -sf /mnt/logs/mariadb/mysqld.log /opt/bitnami/mariadb/logs/mysqld.log
     # Output the log for docker
     tail -f /mnt/logs/mariadb/mysqld.log &
 
