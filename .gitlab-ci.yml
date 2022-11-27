@@ -154,13 +154,15 @@ Initialize Database Logs:
   extends: .stack_template
   script:
     # Create logs volume and set permissions for /mnt/logs/mariadb so that mariadb can write the log there
-    - >
-      ssh deploy@$DEPLOY_HOST_A
-        "docker volume create ${STACK_NAME}_logs && docker run --rm -v ${STACK_NAME}_logs:/mnt/logs alpine /bin/sh -c 'mkdir -p /mnt/logs/mariadb && chown 1001 /mnt/logs/mariadb'" &&
-      ssh deploy@$DEPLOY_HOST_B
-        "docker volume create ${STACK_NAME}_logs && docker run --rm -v ${STACK_NAME}_logs:/mnt/logs alpine /bin/sh -c 'mkdir -p /mnt/logs/mariadb && chown 1001 /mnt/logs/mariadb'" &&
-      ssh deploy@$DEPLOY_HOST_C
-        "docker volume create ${STACK_NAME}_logs && docker run --rm -v ${STACK_NAME}_logs:/mnt/logs alpine /bin/sh -c 'mkdir -p /mnt/logs/mariadb && chown 1001 /mnt/logs/mariadb'"
+    - ssh deploy@$DEPLOY_HOST_A
+      "docker volume create ${STACK_NAME}_logs &&
+      docker run --rm -v ${STACK_NAME}_logs:/mnt/logs alpine /bin/sh -c 'mkdir -p /mnt/logs/mariadb && chown 1001 /mnt/logs/mariadb'"
+    - ssh deploy@$DEPLOY_HOST_B
+      "docker volume create ${STACK_NAME}_logs &&
+      docker run --rm -v ${STACK_NAME}_logs:/mnt/logs alpine /bin/sh -c 'mkdir -p /mnt/logs/mariadb && chown 1001 /mnt/logs/mariadb'"
+    - ssh deploy@$DEPLOY_HOST_C
+      "docker volume create ${STACK_NAME}_logs &&
+      docker run --rm -v ${STACK_NAME}_logs:/mnt/logs alpine /bin/sh -c 'mkdir -p /mnt/logs/mariadb && chown 1001 /mnt/logs/mariadb'"
 
 Perform Database Backup:
   extends: .stack_template
