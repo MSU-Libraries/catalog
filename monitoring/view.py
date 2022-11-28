@@ -20,7 +20,11 @@ def node_logs(service):
         'traefik/access': '/mnt/traefik_logs/traefik/access.log';
     }
     if (service in paths):
-        return Path(paths[service]).read_text()
+        path = Path(paths[service])
+        if (path.is_file()):
+            return path.read_text()
+        else:
+            return 'Log file does not exist on this node.'
     else:
         return 'Error: unknown service.'
 
