@@ -11,13 +11,13 @@ def raise_exception_for_reply(r):
 @app.route('/monitoring/node/logs/<path:service>')
 def node_logs(service):
     paths = {
-        'vufind':         '/mnt/logs/vufind/vufind.log';
-        'apache/error':   '/mnt/logs/apache/error.log';
-        'apache/access':  '/mnt/logs/apache/access.log';
-        'simplesamlphp':  '/mnt/logs/simplesamlphp/simplesamlphp.log';
-        'mariadb':        '/mnt/logs/mariadb/mysqld.log';
-        'traefik/log':    '/mnt/traefik_logs/traefik/traefik.log';
-        'traefik/access': '/mnt/traefik_logs/traefik/access.log';
+        'vufind':         '/mnt/logs/vufind/vufind.log',
+        'apache/error':   '/mnt/logs/apache/error.log',
+        'apache/access':  '/mnt/logs/apache/access.log',
+        'simplesamlphp':  '/mnt/logs/simplesamlphp/simplesamlphp.log',
+        'mariadb':        '/mnt/logs/mariadb/mysqld.log',
+        'traefik/log':    '/mnt/traefik_logs/traefik/traefik.log',
+        'traefik/access': '/mnt/traefik_logs/traefik/access.log',
     }
     if (service in paths):
         path = Path(paths[service])
