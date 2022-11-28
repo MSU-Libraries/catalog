@@ -8,25 +8,21 @@ app = Flask(__name__, static_url_path='/monitoring/static')
 def raise_exception_for_reply(r):
     raise Exception('Status code: {}. Response: "{}"'.format(r.status_code, r.text))
 
-@app.route('/monitoring/node/logs/vufind')
-def node_logs_vufind():
-    return Path('/mnt/logs/vufind/vufind.log').read_text()
-
-@app.route('/monitoring/node/logs/apache/error')
-def node_logs_apache_error():
-    return Path('/mnt/logs/apache/error.log').read_text()
-
-@app.route('/monitoring/node/logs/apache/access')
-def node_logs_apache_access():
-    return Path('/mnt/logs/apache/access.log').read_text()
-
-@app.route('/monitoring/node/logs/simplesamlphp')
-def node_logs_simplesamlphp():
-    return Path('/mnt/logs/simplesamlphp/simplesamlphp.log').read_text()
-
-@app.route('/monitoring/node/logs/mariadb')
-def node_logs_mariadb():
-    return Path('/mnt/logs/mariadb/mysqld.log').read_text()
+@app.route('/monitoring/node/logs/<path:service>')
+def node_logs(service):
+    paths = {
+        'vufind':         '/mnt/logs/vufind/vufind.log';
+        'apache/error':   '/mnt/logs/apache/error.log';
+        'apache/access':  '/mnt/logs/apache/access.log';
+        'simplesamlphp':  '/mnt/logs/simplesamlphp/simplesamlphp.log';
+        'mariadb':        '/mnt/logs/mariadb/mysqld.log';
+        'traefik/log':    '/mnt/traefik_logs/traefik/traefik.log';
+        'traefik/access': '/mnt/traefik_logs/traefik/access.log';
+    }
+    if (service in paths):
+        return Path(paths[service]).read_text()
+    else:
+        return 'Error: unknown service.'
 
 @app.route('/monitoring/logs/<path:service>')
 def logs_vufind(service):

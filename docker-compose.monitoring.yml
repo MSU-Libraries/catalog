@@ -7,6 +7,7 @@ services:
     hostname: monitoring{{slice .Node.Hostname 8 9}}
     volumes:
       - logs:/mnt/logs
+      - traefik_logs:/mnt/traefik_logs
     networks:
       - public
       - internal
@@ -57,3 +58,6 @@ volumes:
   logs:
     external: true
     name: "${STACK_NAME}_logs"
+  traefik_logs:
+    external: true
+    name: "traefik_logs"

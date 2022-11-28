@@ -7,6 +7,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik:/etc/traefik
+      - logs:/mnt/logs
     networks:
       - public
     ports:
@@ -28,7 +29,9 @@ services:
       - "--entrypoints.msul-https-ent.address=:443"
       - "--log"
       - "--log.level=ERROR"
+      - "--log.filepath=/mnt/logs/traefik.log"
       - "--accesslog"
+      - "--accesslog.filepath=/mnt/logs/access.log"
       - "--api.dashboard=true"
       #- "--api.debug=true"     # Enable this line to use Traefik's /debug
       - "--entrypoints.health-ent.address=127.0.0.1:8081"
@@ -112,3 +115,6 @@ networks:
 volumes:
   traefik:
     driver: local
+  logs:
+    external: true
+    name: "traefik_logs"
