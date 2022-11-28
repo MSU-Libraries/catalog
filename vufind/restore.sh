@@ -7,6 +7,7 @@ default_args() {
     ARGS[AUTHORITY]=
     ARGS[BIBLIO]=
     ARGS[DB]=
+    ARGS[NODE]=1
     ARGS[VERBOSE]=0
 }
 default_args
@@ -20,8 +21,8 @@ runhelp() {
     echo "Examples:"
     echo "  ./restore.sh --biblio /path/to/biblio/snapshot.1.tar.gz"
     echo "     Restore the biblio Solr index using data from snapshot.1.tar.gz"
-    echo "  ./restore.sh --db /path/to/vufind.tar"
-    echo "     Restore the database using vufind.tar backup"
+    echo "  ./restore.sh --db /path/to/20220101.tar"
+    echo "     Restore the database using 20220101.tar backup"
     echo "  ./restore.sh --authority /path/to/authority/snapshot.1.tar.gz"
     echo "     Restore the authority Solr index using data from snapshot.1.tar.gz"
     echo ""
@@ -32,6 +33,9 @@ runhelp() {
     echo "     Full path to the biblio Solr index backup to restore to"
     echo "  -d/--db"
     echo "     Full path to the database backup to restore to"
+    echo "  -n/--node"
+    echo "     Node number to restore the database backup from"
+    echo "     Default: 1"
     echo "  -s|--shared-dir SHARED_DIR"
     echo "      Full path to the shared storage location for backups to be stored."
     echo "      Default: ${ARGS[SHARED_DIR]}"
@@ -81,6 +85,13 @@ parse_args() {
                 exit 1
             fi
             shift; shift ;;
+        -n|--node)
+            ARGS[NODE]="$2"
+            if [[ ! "${ARGS[NODE]}" -gt 0 ]]; then
+                echo "ERROR: -n|--node only accept positive integers"
+                exit 1
+            fi
+            shift; shift ;;
         -v|--verbose)
             ARGS[VERBOSE]=1
             shift;;
@@ -93,7 +104,12 @@ parse_args() {
 
 catch_invalid_args() {
     if [[ -z "${ARGS[AUTHORITY]}" && -z "${ARGS[DB]}" && -z "${ARGS[BIBLIO]}" ]]; then
-        echo "ERROR: Neither --authority, --biblio or --db flag is set. Please selet one or more to use this tool."
+        echo "ERROR: Neither --authority, --biblio or --db flag is set. Please select one or more to use this tool."
+        exit 1
+    fi
+
+    if [[ -z "${ARGS[DB]}" && -n "${ARGS[NODE]}" ]]; then
+        echo "ERROR: --node cannot be used without --db. Please see the --help message for more information."
         exit 1
     fi
 }
@@ -169,7 +185,7 @@ restore_db() {
         verbose "ERROR: could not extract ${ARGS[DB]} to /tmp/restore" 1
         exit 1
     fi
-    BACKUP="$(find /tmp/restore -type f -name '*.sql')"
+    BACKUP="$(find /tmp/restore -type f -name "galera${NODE}-*.sql")"
 
     verbose "Temporarily setting Galera node to desychronized state"
     if ! mysql -h galera2 -u root -p12345 -e "SET GLOBAL wsrep_desync = ON" 2>/dev/null; then

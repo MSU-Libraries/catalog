@@ -12,7 +12,9 @@ SolrCloud backups work, see the
 
 The database backup is a dump of all the tables while putting the galera node into a
 desynchronized state while the backup is running to help ensure the backup is in a more
-consistent state.
+consistent state. In case the galera cluster ever gets into a de-clustered state,
+this backup script will take a dump from all three of the galera nodes just to be
+safe.
 
 The automated job will run on a nightly basis and keep a rolling rotation of 3 backups
 of both the database and Solr index.
@@ -45,6 +47,9 @@ Examples for restoring from backups:
 
 # Restoring the database
 ./restore.sh --db /mnt/shared/backups/db/dbbackup.tar
+
+# Restore the database using the backup from node 2
+./restore.sh --db /mnt/shared/backups/db/dbbackup.tar --node 2
 
 # Restoring the `authority` and `biblio` index
 ./restore -b /tmp/biblio.tar.gz -a /tmp/authority.tar.gz -v 
