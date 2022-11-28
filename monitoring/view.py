@@ -20,7 +20,7 @@ def cluster_state_uuid():
 def home():
     galera_status = status.get_galera_status()
     solr_status = status.get_solr_status()
-    return render_template('index.html', galera_status=galera_status, solr_status=solr_status)
+    return flask.render_template('index.html', galera_status=galera_status, solr_status=solr_status)
 
 
 if __name__ == "__main__":

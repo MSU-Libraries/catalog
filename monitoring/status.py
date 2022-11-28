@@ -7,7 +7,7 @@ def raise_exception_for_reply(r):
 
 
 def cluster_state_uuid():
-    process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind", "-pvufind", "-ss", "-e", "SELECT variable_value from information_schema.global_status WHERE variable_name='wsrep_cluster_state_uuid';"], capture_output=True)
+    process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind", "-pvufind", "-ss", "-e", "SELECT variable_value from information_schema.global_status WHERE variable_name='wsrep_cluster_state_uuid';"], capture_output=True, text=True)
     if process.returncode != 0:
         return "Error checking the status: {}".format(process.stderr)
     return process.stdout
@@ -27,10 +27,10 @@ def check_cluster_state_uuid():
     return uuids[0] == uuids[1] and uuids[0] == uuids[2]
 
 def get_galera_status():
-    process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind", "-pvufind", "-ss", "-e", "SELECT variable_value from information_schema.global_status WHERE variable_name='wsrep_cluster_siz';"], capture_output=True)
+    process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind", "-pvufind", "-ss", "-e", "SELECT variable_value from information_schema.global_status WHERE variable_name='wsrep_cluster_size';"], capture_output=True, text=True)
     if process.returncode != 0:
         return "Error checking the status: {}".format(process.stderr)
-    if process.stdout != '3':
+    if process.stdout.strip() != '3':
         return 'WRONG CLUSTER SIZE'
     if not check_cluster_state_uuid():
         return 'DIFFERENT CLUSTER STATE UUIDS'
