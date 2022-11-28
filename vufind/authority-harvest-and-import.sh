@@ -362,6 +362,7 @@ import() {
     # TODO -- can remove once https://github.com/vufind-org/vufind/pull/2623 is included
     # in a release (remember to also update the while loop find below too to)
     verbose "Pre-processing import files to rename from .MRC to .mrc"
+    mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/processed # needed in case it doesn't already exist
     while read -r FILE; do
         mv ${FILE} ${FILE%.MRC}.mrc
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.MRC')
