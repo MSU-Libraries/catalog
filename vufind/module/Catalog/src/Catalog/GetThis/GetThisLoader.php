@@ -5,12 +5,15 @@ use Catalog\GetThis\RegexLookup as Regex;
 class GetThisLoader {
     public $record;  // record driver
     public $items;   // holding items
+    public $msgTemplate; // template to use for servMsg
 
     function __construct($record, $items) {
         $this->record = $record;
         $this->items = $items;
+        $this->msgTemplate = null;
     }
 
+    //TODO when item_id == null, get first available item, if exists; otherwise first item ??
     public function getItem($item_id=null) {
         $item = null;
         foreach ($this->items as $hold_item) {
@@ -59,13 +62,119 @@ class GetThisLoader {
         );
     }
 
+    public function isLibUseOnly($item_id=null) {
+        $stat = $this->getStatus($item_id);
+        return Regex::LIB_USE_ONLY($stat);
+    }
+
+    public function showInProcess($item_id=null) {
+        $stat = $this->getStatus($item_id);
+        return Regex::IN_PROCESS($stat);
+    }
+
+    public function showServMsg($item_id=null) {
+        $stat = $this->getStatus($item_id);
+        $loc = $this->getLocation($item_id);
+        if ($this->isOut($item_id)) {
+            if (Regex::MAKERSPACE($loc)) {
+                $this->msgTemplate = 'makercheckedout.phtml';
+            }
+        }
+        else {
+            if (Regex::UNIV_ARCH($loc)) {
+                $this->msgTemplate = 'univarch.phtml';
+            }
+            elseif (Regex::ART($loc) && Regex::PERM($loc)) {
+                $this->msgTemplate = 'reserve.phtml';
+            }
+            elseif (Regex::ART($loc)) {
+                $this->msgTemplate = 'ask.phtml';
+            }
+            //TODO BUSINESS && RESERVE : reserve3day.phtml
+            //TODO RESERVE_DIGITAL
+            //      && status AVAILABLE : servMsg("Request Digital Lending",$CDL_INSTRUCTION)
+            //      && status not AVAILABLE : servMsg("Request Digital Lending",$CDL_CHECKEDOUT)
+            //TODO REFERENCE : ask.phtml
+            //TODO VIDEO_GAME : servMsg("Request this Item", $rvgame.$libonly)
+            //TODO DIGITAL_MEDIA : pickup.phtml
+            //TODO KLINE_DMC && RESERV : reserve3day.phtml
+            //TODO LAW_RESERVE : servMsg($SELF_SERV, $DXRESERVE)
+            //TODO LAW_RARE_BOOK : servMsg($SELF_SERV, $dxrbkmsg)
+            //TODO SCHAEFER && status not AVAILABLE : servMsg("Requet this Item", $lawmsg)
+            //TODO MICROFORMS
+            //      && REMOTE : servMsg("Request this item",$mfremote.$libonly)
+            //      && not REMOTE : ask.phtml
+            //TODO MAKERSPACE : servMsg($SELF_SERV, $MAKERAVAIL)
+            //TODO MAP
+            //      && CIRCULATING && isLibUseOnly() : ask.phtml
+            //      && not CIRCULATING : servMsg("Request this item", $MAP_PICKUP)
+            //TODO MUSIC
+            //      && REF : pickup.phtml
+            //      && RESERV : reserve3day.phtml
+            //TODO RESERVE : reserve3day.phtml
+            //TODO TURFGRASS : servMsg('Turfgrass Information Center', $TURFMSG)
+            //TODO VINCENT_VOICE : pickup.phtml
+        }
+        return $this->msgTemplate !== null;
+    }
+
+    public function showReqItem($item_id=null) {
+        //TODO
+        return true;
+    }
+
+    public function showGetRovi($item_id=null) {
+        //TODO
+        return true;
+    }
+
+    public function showLockerPick($item_id=null) {
+        //TODO
+        return true;
+    }
+
+    public function showRemRequest($item_id=null) {
+        //TODO
+        return true;
+    }
+
+    public function showScanCopy($item_id=null) {
+        //TODO
+        return true;
+    }
+
+    public function showRemForm($item_id=null) {
+        //TODO
+        return true;
+    }
+
+    public function showFacDel($item_id=null) {
+        //TODO
+        return true;
+    }
+
+    public function showRemotePat($item_id=null) {
+        //TODO
+        return true;
+    }
+
+    public function showGulForm($item_id=null) {
+        //TODO
+        return true;
+    }
+
+    public function showSpcAeon($item_id=null) {
+        //TODO
+        return true;
+    }
+
     public function showOtherLib($item_id=null) {
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
         $desc = "TODO"; //$desc = $this->record->getDescription();
 
         // status not "IN PROCESS"
-        if (Regex::IN_PROCESS($stat)) {
+        if ($this->showInProcess($item_id)) {
             return false;
         }
         // isOut() is true and

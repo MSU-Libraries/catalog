@@ -26,39 +26,51 @@ class RegexLookup {
     }
 
     // Status
-    const IN_PROCESS            = ['/IN PROCESS/i'];
     const AVAILABLE             = ['/AVAILABLE/i'];
+    const IN_PROCESS            = ['/IN PROCESS/i'];
     const LIB_USE_ONLY          = ['/LIB USE ONLY/i'];
     const ON_DISPLAY            = ['/ON DISPLAY/i'];
     // Description
     const VINYL                 = ['/VINYL/i'];
     // Location
     const MAIN                  = ['/^MSU MAIN/i'];
-    const MAKERSPACE            = ['/MAKERSPACE/i'];
+    const AFRICANA              = ['/^MSU AFRICANA/i'];
     const ART                   = ['/^MSU ART LIBRARY/i'];
-    const PERM                  = ['/PERM/i'];        # Legacy note: used for Art Reserves
-    const BUSINESS              = ['/MSU BUSINESS/i'];
-    const RESERVE               = ['/RESERVE/i'];
-    const RESERV                = ['/RESERV/i'];  // TODO can we expire of the the RESERV checks?
+    const BOOK                  = ['/BOOK/i'];
     const BROWSING              = ['/BROWSING/i'];
+    const BUSINESS              = ['/MSU BUSINESS/i'];
     const CAREER                = ['/CAREER/i'];
-    const RESERVE_DIGITAL       = ['/RESERVE DIGITAL/i'];
-    const LIB_OF_MICH           = ['/LIB OF MICH/i'];
-    const REFERENCE             = ['/REFERENCE/i'];
     const CESAR_CHAVEZ          = ['/CESAR CHAVEZ/i'];
-    const DIGITAL_MEDIA         = ['/DIGITAL\/MEDIA\./i'];
-    const KLINE_DMC             = ['/^MSU G\.M\.KLINE DIGITAL/i'];
-    const FACULTY_BOOK          = ['/FACULTY BOOK/i'];
-    const SCHAEFER              = ['/^MSU SCHAEFER/i'];
-    const MICROFORMS            = ['/^MSU MICROFORMS/i'];
-    const GOV                   = ['/^MSU GOV/i'];
-    const MAP                   = ['/^MSU MAP/i'];
     const CIRCULATING           = ['/CIRCULATING/i', '/FOLD/i'];
+    const DIGITAL_MEDIA         = ['/DIGITAL\/MEDIA\./i'];
+    const FACULTY_BOOK          = ['/FACULTY BOOK/i'];
+    const GOV                   = ['/^MSU GOV/i'];
+    const GULL                  = ['/^MSU GULL/i'];
+    const KLINE_DMC             = ['/^MSU G\.M\.KLINE DIGITAL/i'];
+    const LAW_RARE_BOOK         = ['/LAW LIB RARE BOOK/i'];
+    const LAW_RESERVE           = ['/LAW LIBRARY RESERVE/i'];
+    const LIB_OF_MICH           = ['/LIB OF MICH/i'];
+    const MAKERSPACE            = ['/MAKERSPACE/i'];
+    const MAP                   = ['/^MSU MAP/i'];
+    const MICROFORMS            = ['/^MSU MICROFORMS/i'];
     const MUSIC                 = ['/^MSU MUSIC LIBRARY/i'];
+    const PERM                  = ['/PERM/i'];        # Legacy note: used for Art Reserves
+    const READING_ROOM          = ['/READING ROOM/i'];
+    const REFERENCE             = ['/REFERENCE/i'];
+    const REF                   = ['/REF/i'];
+    const REMOTE                = ['/^MSU REMOTE/i'];
+    const RESERV                = ['/RESERV/i'];  // TODO can we expire one of the the RESERV checks? emailed Dao
+    const RESERVE               = ['/RESERVE/i'];
+    const RESERVE_DIGITAL       = ['/RESERVE DIGITAL/i'];
+    const ROVI                  = ['/^MSU ROVI/i'];
+    const SCHAEFER              = ['/^MSU SCHAEFER/i'];
     const SPEC_COLL             = ['/^MSU SPEC COLL/i', '/SPECIAL COLLECTION/i'];
     const SPEC_COLL_REMOTE      = ['/SPEC COLL REMOTE/i'];
-    const REMOTE                = ['/^MSU REMOTE/i'];
+    const THESES_REMOTE         = ['/THESES REMOTE/i'];
+    const THESES_REMOTE_MICRO   = ['/THESES REMOTE MICROFORMS/i'];
     const TRAVEL                = ['/TRAVEL/i'];
     const TURFGRASS             = ['/^MSU TURFGRASS/i', '/MSU BEARD/i'];
+    const UNIV_ARCH             = ['/UNIV ARCH/i'];
+    const VIDEO_GAME            = ['/VIDEO GAME/i'];
     const VINCENT_VOICE         = ['/^MSU VINCENT VOICE/i'];
 }

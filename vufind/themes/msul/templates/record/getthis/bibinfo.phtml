@@ -5,11 +5,11 @@
   <p class="text-left">
     Status:
     <?php
-    $status = "";
+	$status = "";
     foreach ($this->getthis->items as $item) {
         $status .= $this->escapeHtml($item['status'] . ' | ');
     }
-    echo substr($status,0, -2);
+	echo substr($status,0, -2);
     ?>
   </p><br/>
 </div>

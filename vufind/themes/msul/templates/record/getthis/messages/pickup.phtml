@@ -1,0 +1,24 @@
+<?php
+$item = $this->getthis->getItem();
+$loc = $this->getthis->getLocation();
+$title = $this->driver->getTitle();
+$author = $this->driver->getPrimaryAuthor();
+$bib_id = $this->driver->getBibId(null, null, $item['item_id']);    //TODO unsure if bib_id == bibnum
+?>
+<div class='advSearchLimits'>
+<table id="fmBox" border="0">
+<tr><td>
+    <fieldset id="fbox">
+        <legend id="fheader">Request this Item</legend>
+        <label for="Da" width="100%">
+            Materials must be paged before you can receive it. Please fill out
+            <a href='https://codeprod.lib.msu.edu/forms/reqform.php?TITLE=<?= $this->escapeUrl($title) ?>&CALL=<?= $this->escapeUrl($item['callnumber']) ?>&AUTHOR=<?= $this->escapeUrl($author) ?>&LOC=<?= $this->escapeUrl($loc) ?>&BIBNUM=<?= $this->escapeUrl($bib_id) ?>'>this form</a>
+            first and we will contact you when the item is ready for pickup.
+            <?php if ($this->getthis->isLibUseOnly()) {
+                ?>However, this material cannot leave the building.<?php
+            } ?>
+        </label>
+    </fieldset>
+</td></tr>
+</table>
+</div>

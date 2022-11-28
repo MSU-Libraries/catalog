@@ -22,5 +22,4 @@ class RecordController extends \VuFind\Controller\RecordController
         );
         return $view;
     }
-
 }

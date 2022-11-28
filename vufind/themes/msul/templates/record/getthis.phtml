@@ -5,17 +5,64 @@
 echo $this->render('record/getthis/bibinfo.phtml');
 
 # inProcess();
+if ($this->getthis->showInProcess()) {
+    echo $this->render('record/getthis/inprocess.phtml');
+}
+
 # servMsg(); // Accepts two arguments: a header string, some inline HTML to display under the header
+if ($this->getthis->showServMsg()) {
+    echo $this->render('record/getthis/messages/' . $this->getthis->msgTemplate);
+}
+
 # reqItem($rovi,"Pickup at Business Library",$BUS_PICKUP);
+if ($this->getthis->showReqItem()) {
+    echo $this->render('record/getthis/reqitem.phtml');
+}
+
 # getRovi($rovi);
+if ($this->getthis->showGetRovi()) {
+    echo $this->render('record/getthis/getrovi.phtml');
+}
+
 # lockerPick();
+if ($this->getthis->showLockerPick()) {
+    echo $this->render('record/getthis/lockerpick.phtml');
+}
+
 # rsRequest($rovi);
+if ($this->getthis->showRemRequest()) {
+    echo $this->render('record/getthis/remrequest.phtml');
+}
+
 # scanCopy($ismedia);
+if ($this->getthis->showScanCopy()) {
+    echo $this->render('record/getthis/scancopy.phtml');
+}
+
 # remForm();
+if ($this->getthis->showRemForm()) {
+    echo $this->render('record/getthis/remform.phtml');
+}
+
 # facDel();
+if ($this->getthis->showFacDel()) {
+    echo $this->render('record/getthis/facdel.phtml');
+}
+
 # remotePat();
+if ($this->getthis->showRemotePat()) {
+    echo $this->render('record/getthis/remotepat.phtml');
+}
+
 # gulForm();
+if ($this->getthis->showGulForm()) {
+    echo $this->render('record/getthis/gulform.phtml');
+}
+
 # spAeon();
+if ($this->getthis->showSpcAeon()) {
+    echo $this->render('record/getthis/spcaeon.phtml');
+}
 
 # otherLib();
 if ($this->getthis->showOtherLib()) {
@@ -23,4 +70,4 @@ if ($this->getthis->showOtherLib()) {
 }
 
 # circForm(); // Hidden forms; always displayed, but not sure if needed to always be displayed
-
+echo $this->render('record/getthis/circform.phtml');
