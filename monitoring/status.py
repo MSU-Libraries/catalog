@@ -48,7 +48,7 @@ def get_solr_status():
             contents = r.text
         except Exception as err:
             return 'Error reading the solr clusterstatus: {}'.format(err)
-        j = json.load(contents)
+        j = json.loads(contents)
         live_nodes = j['cluster']['live_nodes'].length
         if live_nodes != 3:
             return 'Error: node {}: {} live nodes'.format(node, live_nodes)
