@@ -8,14 +8,22 @@
 </head>
 <body>
     <h1>PubCat Monitoring</h1>
+    <h2>Status</h2>
+    <ul>
+        <li>Traefik: </li>
+        <li>Galera: {{galera_status}}</li>
+        <li>Solr: {{solr_status}}</li>
+        <li>Vufind: </li>
+    </ul>
+    <h2>Logs</h2>
     <ul>
         <li><a href="/monitoring/logs/vufind">VuFind logs</a></li>
         <li><a href="/monitoring/logs/apache/access">Apache access logs</a></li>
         <li><a href="/monitoring/logs/apache/error">Apache error logs</a></li>
         <li><a href="/monitoring/logs/simplesamlphp">Simplesamlphp logs</a></li>
         <li><a href="/monitoring/logs/mariadb">Mariadb logs</a></li>
-        <li><a href="/monitoring/logs/traefik/traefik.log">Traefik log</a></li>
-        <li><a href="/monitoring/logs/traefik/access.log">Traefik access log</a></li>
+        <li><a href="/monitoring/logs/traefik/log">Traefik log</a></li>
+        <li><a href="/monitoring/logs/traefik/access">Traefik access log</a></li>
     </ul>
 </body>
 </html>
