@@ -2,6 +2,8 @@ import flask
 import pathlib
 import requests
 
+TIMEOUT = 10
+
 def raise_exception_for_reply(r):
     raise Exception('Status code: {}. Response: "{}"'.format(r.status_code, r.text))
 
@@ -29,7 +31,7 @@ def logs_vufind(service):
     for node in range(1, 4):
         contents = ''
         try:
-            r = requests.get('http://monitoring{}/monitoring/node/logs/{}'.format(node, service))
+            r = requests.get('http://monitoring{}/monitoring/node/logs/{}'.format(node, service), timeout=TIMEOUT)
             if r.status_code != 200:
                 raise_exception_for_reply(r)
             contents = r.text
