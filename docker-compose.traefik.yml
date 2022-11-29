@@ -34,7 +34,7 @@ services:
       - "--accesslog.filepath=/mnt/logs/access.log"
       - "--api.dashboard=true"
       #- "--api.debug=true"     # Enable this line to use Traefik's /debug
-      - "--entrypoints.health-ent.address=127.0.0.1:8081"
+      - "--entrypoints.health-ent.address=:8081"
       - "--ping"
       - "--ping.entrypoint=health-ent"
       - "--global.checknewversion=false"

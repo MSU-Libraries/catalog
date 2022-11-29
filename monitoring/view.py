@@ -19,6 +19,7 @@ def cluster_state_uuid():
 @app.route('/monitoring')
 def home():
     status_list = {}
+    status_list['traefik'] = status.get_traefik_status()
     status_list['galera'] = status.get_galera_status()
     status_list['solr'] = status.get_solr_status()
     status_list['vufind'] = status.get_vufind_status()

@@ -5,7 +5,7 @@
 {% block content %}
     <h2>Status</h2>
     <ul>
-        <li>Traefik: </li>
+        <li>Traefik: <span class="text-{{services['traefik']['color']}}">{{services['traefik']['status']}}</span></li>
         <li>Galera: <span class="text-{{services['galera']['color']}}">{{services['galera']['status']}}</span></li>
         <li>Solr: <span class="text-{{services['solr']['color']}}">{{services['solr']['status']}}</span></li>
         <li>Vufind: <span class="text-{{services['vufind']['color']}}">{{services['vufind']['status']}}</span></li>

@@ -4,6 +4,15 @@ import requests
 
 TIMEOUT = 10
 
+def get_traefik_status():
+    try:
+        req = requests.get('http://traefik:8081/ping', timeout=TIMEOUT)
+        req.raise_for_status()
+        return 'OK'
+    except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
+        return f'Error with traefik ping: {err}'
+
+
 def cluster_state_uuid():
     try:
         process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind", "-pvufind", "-ss", "-e",
@@ -80,7 +89,7 @@ def get_solr_status():
         j = json.loads(contents)
         live_nodes = j['cluster']['live_nodes']
         if len(live_nodes) != 3:
-            return f'Error: node {node}: only {live_nodes} live nodes'
+            return f'Error: node {node}: only {len(live_nodes)} live nodes'
         if len(j['cluster']['collections']) != 4:
             return f"Wrong number of collections: {len(j['cluster']['collections'])}"
         for collection_name, collection in j['cluster']['collections'].items():
@@ -88,6 +97,7 @@ def get_solr_status():
             if res != 'OK':
                 return res
     return 'OK'
+
 
 def get_vufind_status():
     for node in range(1, 4):
