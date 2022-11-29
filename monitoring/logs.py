@@ -1,11 +1,8 @@
-import flask
 import pathlib
+import flask
 import requests
 
 TIMEOUT = 10
-
-def raise_exception_for_reply(r):
-    raise Exception('Status code: {}. Response: "{}"'.format(r.status_code, r.text))
 
 def node_logs(service):
     paths = {
@@ -17,25 +14,21 @@ def node_logs(service):
         'traefik/log':    '/mnt/traefik_logs/traefik/traefik.log',
         'traefik/access': '/mnt/traefik_logs/traefik/access.log',
     }
-    if (service in paths):
+    if service in paths:
         path = pathlib.Path(paths[service])
-        if (path.is_file()):
-            return path.read_text()
-        else:
-            return 'Log file does not exist on this node.'
-    else:
-        return 'Error: unknown service.'
+        if path.is_file():
+            return path.read_text(encoding="utf8")
+        return 'Log file does not exist on this node.'
+    return 'Error: unknown service.'
 
 def logs_vufind(service):
     logs = []
     for node in range(1, 4):
-        contents = ''
         try:
-            r = requests.get('http://monitoring{}/monitoring/node/logs/{}'.format(node, service), timeout=TIMEOUT)
-            if r.status_code != 200:
-                raise_exception_for_reply(r)
-            contents = r.text
-        except Exception as err:
-            contents = 'Error reading the log: {}'.format(err)
+            req = requests.get(f'http://monitoring{node}/monitoring/node/logs/{service}', timeout=TIMEOUT)
+            req.raise_for_status()
+            contents = req.text
+        except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
+            contents = f'Error reading the log: {err}'
         logs.append(contents)
     return flask.render_template('logs.html', service=service, log1=logs[0], log2=logs[1], log3=logs[2])

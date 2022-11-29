@@ -23,14 +23,14 @@ def home():
     status_list['solr'] = status.get_solr_status()
     status_list['vufind'] = status.get_vufind_status()
     services = {}
-    for s_name, s in status_list.items():
-        if s == 'OK':
+    for s_name, s_text in status_list.items():
+        if s_text == 'OK':
             color = 'success'
         else:
             color = 'danger'
         services[s_name] = {
             'color': color,
-            'status': s,
+            'status': s_text,
         }
     return flask.render_template('index.html', services=services)
 
