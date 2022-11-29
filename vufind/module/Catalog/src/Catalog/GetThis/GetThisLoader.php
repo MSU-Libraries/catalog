@@ -87,19 +87,29 @@ class GetThisLoader {
             elseif (Regex::ART($loc) && Regex::PERM($loc)) {
                 $this->msgTemplate = 'reserve.phtml';
             }
-            elseif (Regex::ART($loc)) {
+            elseif (Regex::ART($loc) || Regex::REFERENCE($loc)) {
                 $this->msgTemplate = 'ask.phtml';
             }
-            //TODO BUSINESS && RESERVE : reserve3day.phtml
-            //TODO RESERVE_DIGITAL
-            //      && status AVAILABLE : servMsg("Request Digital Lending",$CDL_INSTRUCTION)
-            //      && status not AVAILABLE : servMsg("Request Digital Lending",$CDL_CHECKEDOUT)
-            //TODO REFERENCE : ask.phtml
-            //TODO VIDEO_GAME : servMsg("Request this Item", $rvgame.$libonly)
-            //TODO DIGITAL_MEDIA : pickup.phtml
-            //TODO KLINE_DMC && RESERV : reserve3day.phtml
-            //TODO LAW_RESERVE : servMsg($SELF_SERV, $DXRESERVE)
-            //TODO LAW_RARE_BOOK : servMsg($SELF_SERV, $dxrbkmsg)
+            elseif (Regex::RESERVE_DIGITAL($loc)) {
+                if (Regex::AVAILABLE($stat)) {
+                    $this->msgTemplate = 'cdlavail.phtml';
+                }
+                else {
+                    $this->msgTemplate = 'cdlout.phtml';
+                }
+            }
+            elseif (Regex::DIGITAL_MEDIA($loc) || (Regex::MUSIC($loc) && Regex::REF($loc))) {
+                $this->msgTemplate = 'pickup.phtml';
+            }
+            elseif (Regex::VIDEO_GAME($loc)) {
+                $this->msgTemplate = 'gamae.phtml';
+            }
+            elseif (Regex::LAW_RESERVE($loc)) {
+                $this->msgTemplate = 'lawreserve.phtml';
+            }
+            elseif (Regex::LAW_RARE_BOOK($loc)) {
+                $this->msgTemplate = 'lawrare.phtml';
+            }
             //TODO SCHAEFER && status not AVAILABLE : servMsg("Requet this Item", $lawmsg)
             //TODO MICROFORMS
             //      && REMOTE : servMsg("Request this item",$mfremote.$libonly)
@@ -108,10 +118,10 @@ class GetThisLoader {
             //TODO MAP
             //      && CIRCULATING && isLibUseOnly() : ask.phtml
             //      && not CIRCULATING : servMsg("Request this item", $MAP_PICKUP)
-            //TODO MUSIC
-            //      && REF : pickup.phtml
-            //      && RESERV : reserve3day.phtml
-            //TODO RESERVE : reserve3day.phtml
+            // MUSIC && RESERV : reserve3day.phtml      -- unneeded, let RESERV catch this
+            // BUSINESS && RESERV : reserve3day.phtml   -- unneeded, let RESERV catch this
+            // KLINE_DMC && RESERV : reserve3day.phtml  -- unneeded, let RESERV catch this
+            //TODO RESERV : reserve3day.phtml
             //TODO TURFGRASS : servMsg('Turfgrass Information Center', $TURFMSG)
             //TODO VINCENT_VOICE : pickup.phtml
         }
@@ -171,61 +181,25 @@ class GetThisLoader {
     public function showOtherLib($item_id=null) {
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
-        $desc = "TODO"; //$desc = $this->record->getDescription();
+        $desc = $this->record->getSummary(); // TODO how to get actual description?
 
-        // status not "IN PROCESS"
         if ($this->showInProcess($item_id)) {
             return false;
         }
-        // isOut() is true and
-        //   location is not MAKERSPACE
         if ($this->isOut($item_id) && !Regex::MAKERSPACE($loc)) {
             return true;
         }
-        // isOut() is false and one of
-        //   location matches ^MSU ART LIBRARY and PERM
-        //   location matches MSU BUSINESS and RESERVE
-        //   location matches BROWSING and status not AVAILABLE
-        //   location matches CAREER and status not AVAILABLE
-        //   location matches RESERVE DIGITAL
-        //   location matches LIB OF MICH
-        //   location matches REFERENCE
-        //   location matches CESAR CHAVEZ and status not AVAILABLE
-        //   location matches "DIGITAL/MEDIA."
-        //   location matches "^MSU G.M.KLINE DIGITAL" and
-        //     location matches RESERV or status not AVAILABLE
-        //   location matches FACULTY BOOK and status not AVAILABLE
-        //   location matches ^MSU SCHAEFER
-        //   location matches ^MSU MICROFORMS
-        //   location matches ^MSU GOV
-        //   location matches ^MSU MAP and location matches either of CIRCULATING or FOLD
-        //     and either isOut() or status matches LIB USE ONLY
-        //   location matches ^MSU MUSIC LIBRARY and location matches RESERV
-        //   location matches ^MSU REMOTE and description matches VINYL
-        //   location matches RESERVE
-        //   location matches SPEC COLL REMOTE and
-        //     status matches either LIB USE ONLY or ON DISPLAY
-        //   location matches ^MSU SPEC COLL or SPECIAL COLLECTION
-        //   location matches TRAVEL and status not AVAILABLE
-        //   location matches MSU BEARD or ^MSU TURFGRASS and isMedia() is false
-        //   location matches ^MSU VINCENT VOICE
-        //   location matches ^MSU MAIN and status not AVAILABLE
-        //   status not AVAILABLE
         if (!$this->isOut($item_id) && (
                 (Regex::ART($loc) && Regex::PERM($loc)) ||
-                (Regex::BUSINESS($loc) && Regex::RESERVE($loc)) ||
-                Regex::RESERVE_DIGITAL($loc) ||
                 Regex::LIB_OF_MICH($loc) ||
                 Regex::REFERENCE($loc) ||
                 Regex::DIGITAL_MEDIA($loc) ||
-                (Regex::KLINE_DMC($loc) && Regex::RESERV($loc)) ||
                 Regex::SCHAEFER($loc) ||
                 Regex::MICROFORMS($loc) ||
                 Regex::GOV($loc) ||
                 (Regex::MAP($loc) && Regex::CIRCULATION($loc) && Regex::LIB_USE_ONLY($stat)) ||
-                (Regex::MUSIC($loc) && Regex::RESERV($loc)) ||
                 (Regex::REMOTE($loc) && Regex::VINYL($desc)) ||
-                Regex::RESERVE($loc) ||
+                Regex::RESERV($loc) ||
                 (Regex::SPEC_COLL_REMOTE($loc) && (Regex::LIB_USE_ONLY($stat) || Regex::ON_DISPLAY($stat))) ||
                 Regex::SPEC_COLL($loc) ||
                 (Regex::TURFGRASS($loc) && !$this->isMedia($item_id)) ||

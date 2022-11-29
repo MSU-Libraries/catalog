@@ -59,8 +59,7 @@ class RegexLookup {
     const REFERENCE             = ['/REFERENCE/i'];
     const REF                   = ['/REF/i'];
     const REMOTE                = ['/^MSU REMOTE/i'];
-    const RESERV                = ['/RESERV/i'];  // TODO can we expire one of the the RESERV checks? emailed Dao
-    const RESERVE               = ['/RESERVE/i'];
+    const RESERV                = ['/RESERV/i'];
     const RESERVE_DIGITAL       = ['/RESERVE DIGITAL/i'];
     const ROVI                  = ['/^MSU ROVI/i'];
     const SCHAEFER              = ['/^MSU SCHAEFER/i'];
