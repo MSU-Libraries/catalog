@@ -18,18 +18,19 @@ def cluster_state_uuid():
 
 @app.route('/monitoring')
 def home():
+    status_list = {}
+    status_list['galera'] = status.get_galera_status()
+    status_list['solr'] = status.get_solr_status()
+    status_list['vufind'] = status.get_vufind_status()
     services = {}
-    services['galera'] = status.get_galera_status()
-    services['solr'] = status.get_solr_status()
-    services['vufind'] = status.get_vufind_status()
-    for s_name, s in services.items():
+    for s_name, s in status_list.items():
         if s == 'OK':
             color = 'success'
         else:
             color = 'danger'
         services[s_name] = {
-            color: color,
-            status: s,
+            'color': color,
+            'status': s,
         }
     return flask.render_template('index.html', services=services)
 
