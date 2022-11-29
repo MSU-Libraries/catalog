@@ -8,6 +8,9 @@ def get_traefik_status():
     try:
         req = requests.get('http://traefik:8081/ping', timeout=TIMEOUT)
         req.raise_for_status()
+        contents = req.text
+        if contents != 'OK':
+            return f'Strange reply from traefik ping: {contents}'
         return 'OK'
     except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
         return f'Error with traefik ping: {err}'
@@ -42,10 +45,11 @@ def get_galera_status():
         capture_output=True, text=True, timeout=TIMEOUT, check=True)
     except subprocess.CalledProcessError as err:
         return f"Error checking the status: {err.stderr}"
-    if process.stdout.strip() != '3':
-        return 'WRONG CLUSTER SIZE'
+    cluster_size = process.stdout.strip()
+    if cluster_size != '3':
+        return f'Error: wrong cluster size: {cluster_size}'
     if not check_cluster_state_uuid():
-        return 'DIFFERENT CLUSTER STATE UUIDS'
+        return 'Error: different cluster state uuids'
     return 'OK'
 
 
