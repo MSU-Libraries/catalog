@@ -1,19 +1,14 @@
-<!DOCTYPE html>
+{% extends 'layout.html' %}
 
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>PubCat Monitoring</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-</head>
-<body>
-    <h1>PubCat Monitoring</h1>
+{% block title %}Home{% endblock %}
+
+{% block content %}
     <h2>Status</h2>
     <ul>
         <li>Traefik: </li>
-        <li>Galera: {{services['galera']}}</li>
-        <li>Solr: {{services['solr']}}</li>
-        <li>Vufind: {{services['vufind']}}</li>
+        <li>Galera: <span class="text-{{services['galera']['color']}}">{{services['galera']['status']}}</span></li>
+        <li>Solr: <span class="text-{{services['solr']['color']}}">{{services['solr']['status']}}</span></li>
+        <li>Vufind: <span class="text-{{services['vufind']['color']}}">{{services['vufind']['status']}}</span></li>
     </ul>
     <h2>Logs</h2>
     <ul>
@@ -25,5 +20,4 @@
         <li><a href="/monitoring/logs/traefik/log">Traefik log</a></li>
         <li><a href="/monitoring/logs/traefik/access">Traefik access log</a></li>
     </ul>
-</body>
-</html>
+{% endblock %}

@@ -27,7 +27,10 @@ def home():
             color = 'success'
         else:
             color = 'danger'
-        services[s_name] = '<span class="text-{}">{}</span>'.format(color, s)
+        services[s_name] = {
+            color: color,
+            status: s,
+        }
     return flask.render_template('index.html', services=services)
 
 
