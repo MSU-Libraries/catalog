@@ -9,7 +9,9 @@ def raise_exception_for_reply(r):
 
 
 def cluster_state_uuid():
-    process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind", "-pvufind", "-ss", "-e", "SELECT variable_value from information_schema.global_status WHERE variable_name='wsrep_cluster_state_uuid';"], capture_output=True, text=True)
+    process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind", "-pvufind", "-ss", "-e",
+        "SELECT variable_value from information_schema.global_status WHERE variable_name='wsrep_cluster_state_uuid';"],
+        capture_output=True, text=True, timeout=TIMEOUT)
     if process.returncode != 0:
         return "Error checking the status: {}".format(process.stderr)
     return process.stdout
@@ -29,7 +31,9 @@ def check_cluster_state_uuid():
     return uuids[0] == uuids[1] and uuids[0] == uuids[2]
 
 def get_galera_status():
-    process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind", "-pvufind", "-ss", "-e", "SELECT variable_value from information_schema.global_status WHERE variable_name='wsrep_cluster_size';"], capture_output=True, text=True)
+    process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind", "-pvufind", "-ss", "-e",
+        "SELECT variable_value from information_schema.global_status WHERE variable_name='wsrep_cluster_size';"],
+        capture_output=True, text=True, timeout=TIMEOUT)
     if process.returncode != 0:
         return "Error checking the status: {}".format(process.stderr)
     if process.stdout.strip() != '3':
@@ -73,6 +77,23 @@ def get_solr_status():
                         return 'Collection {} shard {} replica {} has the state {} (expected: active).'.format(
                             collection_name, shard_name, replica_name, replica['state'])
                     if replica['node_name'] not in live_nodes:
-                        return 'Collection {} shard {} replica {} has a node name that is not in the list of live nodes: {}'
+                        return 'Collection {} shard {} replica {} has a node name that is not in the list of live nodes: {}' \
                             .format(collection_name, shard_name, replica_name, replica['node_name'])
     return 'OK'
+
+def get_vufind_status():
+    for node in range(1, 4):
+        contents = ''
+        try:
+            r = requests.get('http://vufind{}/'.format(node), timeout=TIMEOUT)
+            if r.status_code != 200:
+                raise_exception_for_reply(r)
+            contents = r.text
+        except Exception as err:
+            return 'Error getting vufind home page on node {}: {}'.format(node, err)
+        if '</html>' not in contents:
+            return 'Vufind home page not complete for node {}'.format(node)
+        if '<h1>An error has occurred</h1>' in contents:
+            return 'An error is reported in Vufind home page for node {}'.format(node)
+    return 'OK'
+
