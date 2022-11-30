@@ -31,6 +31,7 @@ docker build ./vufind/ -t catalog:latest \
     --build-arg SIMPLESAMLPHP_VERSION=1.19.6
     --build-arg SIMPLESAMLPHP_SALT=abcXYZ
     --build-arg SIMPLESAMLPHP_ADMIN_PW=mySecretPass
+    --build-arg DEPLOY_KEY=readonlygitlabdeploykey
 ```
 
 * `VUFIND_VERSION`: The version of VuFind to install 
@@ -59,6 +60,7 @@ uses `1` by default
 * `SIMPLESAMLPHP_VERSION`: The version of SimpleSAMLphp to install
 * `SIMPLESAMLPHP_SALT`: Random salt for SimpleSAMLphp
 * `SIMPLESAMLPHP_ADMIN_PW`: Password to the admin interface of SimpleSAMLphp
+* `DEPLOY_KEY`: GitLab read-only deploy key base64 encoded
 
 ## To start the application stack
 During the first time you are bring up the stack, you will need

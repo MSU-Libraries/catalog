@@ -114,6 +114,7 @@ ARG FTP_USER
 ARG FTP_PASSWORD
 ARG AUTH_FTP_USER
 ARG AUTH_FTP_PASSWORD
+ARG DEPLOY_KEY
 
 ENV DEBUG=$DEBUG \
     SITE_HOSTNAME=$SITE_HOSTNAME \
@@ -210,11 +211,17 @@ RUN \
     chmod -R g+sw ${VUFIND_HOME}/module/Catalog && \
     # Install grunt
     npm install -g grunt-cli && \
-    grunt less
+    grunt less && \
+    # Set up deploy key
+    eval $( ssh-agent -s )
+    echo "$DEPLOY_KEY" | base64 -d | ssh-add - && \
+    install -d -m 700 ~/.ssh/ && \
+    ( umask 022; touch ~/.ssh/known_hosts ) && \
+    ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
 
 EXPOSE 80
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
-   CMD curl --fail -s http://localhost:80/ || exit 1  
+   CMD curl --fail -s http://localhost:80/ || exit 1
 
 CMD /startup.sh

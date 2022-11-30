@@ -6,22 +6,25 @@ TIMESTAMP=$( date +%Y%m%d%H%M%S )
 # Create symlinks to the shared storage for non-production environments
 # Populating the shared storage if empty
 if [[ "${STACK_NAME}" != catalog-* ]]; then
-    echo "Linking the local, module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
+    echo "Cloning and linking the local, module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
     mkdir -p ${SHARED_STORAGE}/${STACK_NAME}
     chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}
+    if [ ! -d "${SHARED_STORAGE}/${STACK_NAME}/.git" ]; then
+        git clone git@gitlab.msu.edu:msu-libraries/devops/catalog.git ${SHARED_STORAGE}/${STACK_NAME}
+    fi
     if [[ $( ls -1 ${SHARED_STORAGE}/${STACK_NAME}/* | wc -l ) -gt 0 ]]; then
         mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
         mv ${SHARED_STORAGE}/${STACK_NAME}/* ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
     fi
-    rsync -aiv /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/local/
-    rsync -aiv /usr/local/vufind/themes/msul/ ${SHARED_STORAGE}/${STACK_NAME}/msul/
-    rsync -aiv /usr/local/vufind/module/Catalog/ ${SHARED_STORAGE}/${STACK_NAME}/Catalog/
+    rsync -aiv /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/vufind/local/
+    rsync -aiv /usr/local/vufind/themes/msul/ ${SHARED_STORAGE}/${STACK_NAME}/vufind/themes/msul/
+    rsync -aiv /usr/local/vufind/module/Catalog/ ${SHARED_STORAGE}/${STACK_NAME}/vufind/module/Catalog/
     rm -rf /usr/local/vufind/local
-    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/local /usr/local/vufind
+    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/vufind/local /usr/local/vufind
     rm -rf /usr/local/vufind/themes/msul
-    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/msul /usr/local/vufind/themes
+    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/themes/msul /usr/local/vufind/themes
     rm -rf /usr/local/vufind/module/Catalog
-    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/Catalog /usr/local/vufind/module
+    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/module/Catalog /usr/local/vufind/module
 fi
 
 # Save the logs in the logs docker volume

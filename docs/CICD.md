@@ -91,6 +91,7 @@ available in the `devel-` and `review-` pipelines.
 * `BASICAUTH_FOR_RESOURCES`: Bcrypt password hash[^1] for basic authentication to internal
 resources such as Solr and the Traefik dashboard
 * `DEPLOY_PRIVATE_KEY`: The `base64` encoded private ssh key to the deploy server
+* `DEPLOY_KEY`: GitLab read-only deploy key base64 encoded
 * `EDS_ORG`: Organization ID for the EDS API
 * `EDS_PASS`: Password for the `EDS_USER` username
 * `EDS_PROFILE`: Profile name for EDS
