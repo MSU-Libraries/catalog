@@ -125,7 +125,7 @@ backup_collection() {
     fi
 
     # Verify that the backup started
-    sleep 3
+    sleep 10
     SNAPSHOT="snapshot.${SNAPSHOT}"
     if [ ! -d "${ARGS[SHARED_DIR]}/solr_dropbox/${COLL}/${SNAPSHOT}" ]; then
         verbose "ERROR: Failed to start backup for the '${COLL}' collection in Solr!" 1
@@ -146,8 +146,8 @@ backup_collection() {
             verbose "Backup still in progress (${ACTUAL}/${EXPECTED} files copied)"
         fi
         sleep 3
-	EXPECTED="$(curl -s "http://solr2:8983/solr/${COLL}/replication?command=details&wt=json" | jq '.details.commits[0][5]|length')"
-	ACTUAL="$(find ${ARGS[SHARED_DIR]}/solr_dropbox/"${COLL}"/"${SNAPSHOT}" -type f | wc -l)"
+        EXPECTED="$(curl -s "http://solr2:8983/solr/${COLL}/replication?command=details&wt=json" | jq '.details.commits[0][5]|length')"
+        ACTUAL="$(find ${ARGS[SHARED_DIR]}/solr_dropbox/"${COLL}"/"${SNAPSHOT}" -type f 2>/dev/null | wc -l)"
         CUR_WAIT=$((CUR_WAIT+1))
     done
 
