@@ -40,5 +40,5 @@ MAILTO=$EMAIL
 0 0     * * *   root    php /usr/local/vufind/public/index.php util/expire_searches 2>&1 | logger -t EXPIRE_SEARCHES
 
 # Backups
-5 12    * * *   root    /backup.sh --solr -v 2>&1 | pee "logger -t BACKUP_SOLR" "cat"
-0 20    * * *   root    /backup.sh --db -r 5 2>&1 | pee "logger -t BACKUP_DB" "cat"
+5 20    * * *   root    /backup.sh --solr 2>&1 | pee "logger -t BACKUP_SOLR" "cat"
+15 15    * * *   root    /backup.sh --db -r 5 2>&1 | pee "logger -t BACKUP_DB" "cat"

@@ -212,7 +212,9 @@ backup_db() {
         verbose "ERROR: Could not navigate into database backup directory (${ARGS[SHARED_DIR]}/db)" 1
         exit 1
     fi
+    ls -l ${ARGS[SHARED_DIR]}/db
     if ! tar -cf "${TIMESTAMP}".tar ./*"${TIMESTAMP}".sql; then
+        ls -l ${ARGS[SHARED_DIR]}/db
         verbose "ERROR: Failed to compress the database dumps." 1
         exit 1
     else
