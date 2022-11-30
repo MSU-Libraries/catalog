@@ -213,7 +213,7 @@ RUN \
     npm install -g grunt-cli && \
     grunt less && \
     # Set up deploy key
-    eval $( ssh-agent -s )
+    eval $( ssh-agent -s ) && \
     echo "$DEPLOY_KEY" | base64 -d | ssh-add - && \
     install -d -m 700 ~/.ssh/ && \
     ( umask 022; touch ~/.ssh/known_hosts ) && \
