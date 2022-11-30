@@ -1,19 +1,23 @@
-<!DOCTYPE html>
+{% extends 'layout.html' %}
 
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>PubCat Monitoring</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-</head>
-<body>
-    <h1>PubCat Monitoring</h1>
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <h2>Status</h2>
+    <ul>
+        <li>Traefik: <span class="text-{{services['traefik']['color']}}">{{services['traefik']['status']}}</span></li>
+        <li>Galera: <span class="text-{{services['galera']['color']}}">{{services['galera']['status']}}</span></li>
+        <li>Solr: <span class="text-{{services['solr']['color']}}">{{services['solr']['status']}}</span></li>
+        <li>Vufind: <span class="text-{{services['vufind']['color']}}">{{services['vufind']['status']}}</span></li>
+    </ul>
+    <h2>Logs</h2>
     <ul>
         <li><a href="/monitoring/logs/vufind">VuFind logs</a></li>
         <li><a href="/monitoring/logs/apache/access">Apache access logs</a></li>
         <li><a href="/monitoring/logs/apache/error">Apache error logs</a></li>
         <li><a href="/monitoring/logs/simplesamlphp">Simplesamlphp logs</a></li>
         <li><a href="/monitoring/logs/mariadb">Mariadb logs</a></li>
+        <li><a href="/monitoring/logs/traefik/log">Traefik log</a></li>
+        <li><a href="/monitoring/logs/traefik/access">Traefik access log</a></li>
     </ul>
-</body>
-</html>
+{% endblock %}

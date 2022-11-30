@@ -3,10 +3,11 @@ version: "3.8"
 
 services:
   monitoring:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/monitoring:latest
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/monitoring:${CI_COMMIT_SHORT_SHA}
     hostname: monitoring{{slice .Node.Hostname 8 9}}
     volumes:
       - logs:/mnt/logs
+      - traefik_logs:/mnt/traefik_logs
     networks:
       - public
       - internal
@@ -57,3 +58,6 @@ volumes:
   logs:
     external: true
     name: "${STACK_NAME}_logs"
+  traefik_logs:
+    external: true
+    name: "traefik_logs"
