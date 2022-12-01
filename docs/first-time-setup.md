@@ -145,12 +145,9 @@ changes there. Changes to the live storage are symboliclly linked to the contain
 appear real time in the environment -- very handy for theme development!
 
 Within the shared storage there will be a sub-directory for each branch name. This documentation
-assumes that the share has been set up and configured already on the hosts.
+assumes that the share has been set up and configured already on the hosts. The sub-directory
+will contain a clone of this repository which can be easily used to track changes between
+subsequent deploys to the same branch.
 
-```bash
-/mnt/catalog
-└── devel-mybranch
-    ├── Catalog
-    ├── local
-    └── msul
-```
+Note that subsequent deploys only do a `git fetch` to avoid overwriting local changes. You are
+responsible for doing a `git pull` to apply new changes.
