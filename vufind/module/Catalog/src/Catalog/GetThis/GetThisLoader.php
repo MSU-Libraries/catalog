@@ -102,7 +102,7 @@ class GetThisLoader {
                 $this->msgTemplate = 'pickup.phtml';
             }
             elseif (Regex::VIDEO_GAME($loc)) {
-                $this->msgTemplate = 'gamae.phtml';
+                $this->msgTemplate = 'game.phtml';
             }
             elseif (Regex::LAW_RESERVE($loc)) {
                 $this->msgTemplate = 'lawreserve.phtml';
@@ -110,20 +110,37 @@ class GetThisLoader {
             elseif (Regex::LAW_RARE_BOOK($loc)) {
                 $this->msgTemplate = 'lawrare.phtml';
             }
-            //TODO SCHAEFER && status not AVAILABLE : servMsg("Requet this Item", $lawmsg)
-            //TODO MICROFORMS
-            //      && REMOTE : servMsg("Request this item",$mfremote.$libonly)
-            //      && not REMOTE : ask.phtml
-            //TODO MAKERSPACE : servMsg($SELF_SERV, $MAKERAVAIL)
-            //TODO MAP
-            //      && CIRCULATING && isLibUseOnly() : ask.phtml
-            //      && not CIRCULATING : servMsg("Request this item", $MAP_PICKUP)
-            // MUSIC && RESERV : reserve3day.phtml      -- unneeded, let RESERV catch this
-            // BUSINESS && RESERV : reserve3day.phtml   -- unneeded, let RESERV catch this
-            // KLINE_DMC && RESERV : reserve3day.phtml  -- unneeded, let RESERV catch this
-            //TODO RESERV : reserve3day.phtml
-            //TODO TURFGRASS : servMsg('Turfgrass Information Center', $TURFMSG)
-            //TODO VINCENT_VOICE : pickup.phtml
+            elseif (Regex::SCHAEFER($loc) && !Regex::AVAILABLE($stat)) {
+                $this->msgTemplate = 'law.phtml';
+            }
+            elseif (Regex::MICROFORMS($loc)) {
+                if (Regex::REMOTE($loc)) {
+                    $this->msgTemplate = 'mfremote.phtml';
+                }
+                else {
+                    $this->msgTemplate = 'ask.phtml';
+                }
+            }
+            elseif (Regex::MAKERSPACE($loc)) {
+                $this->msgTemplate = 'maker.phtml';
+            }
+            elseif (Regex::MAP($loc)) {
+                if (Regex::CIRCULATING($loc) && $this->isLibUseOnly()) {
+                    $this->msgTemplate = 'ask.phtml';
+                }
+                elseif (!Regex::CIRCULATING($loc)) {
+                    $this->msgTemplate = 'mappickup.phtml';
+                }
+            }
+            elseif (Regex::RESERV($loc)) {
+                $this->msgTemplate = 'reserve3day.phtml';
+            }
+            elseif (Regex::TURFGRASS($loc)) {
+                $this->msgTemplate = 'turfgrass.phtml';
+            }
+            elseif (Regex::VINCENT_VOICE($loc)) {
+                $this->msgTemplate = 'pickup.phtml';
+            }
         }
         return $this->msgTemplate !== null;
     }

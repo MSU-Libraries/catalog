@@ -9,14 +9,11 @@ $bibnum = $this->driver->getSierraBN();
 <table id="fmBox" border="0">
 <tr><td>
     <fieldset id="fbox">
-        <legend id="fheader">Request this Item</legend>
+        <legend id="fheader">Request Digital Lending</legend>
         <label for="Da" width="100%">
-            Materials must be paged before you can receive it. Please fill out
+            Materials must be paged for in-building use. Please fill out
             <a href='https://codeprod.lib.msu.edu/forms/reqform.php?TITLE=<?= $this->escapeUrl($title) ?>&CALL=<?= $this->escapeUrl($item['callnumber']) ?>&AUTHOR=<?= $this->escapeUrl($author) ?>&LOC=<?= $this->escapeUrl($loc) ?>&BIBNUM=<?= $this->escapeUrl($bibnum) ?>'>this form</a>
-            first and we will contact you when the item is ready for pickup.
-            <?php if ($this->getthis->isLibUseOnly()) {
-                ?>However, this material cannot leave the building.<?php
-            } ?>
+            and we will contact you about your viewing options.
         </label>
     </fieldset>
 </td></tr>

@@ -2,7 +2,7 @@
 $item = $this->getthis->getItem();
 $title = $this->driver->getTitle();
 $author = $this->driver->getPrimaryAuthor();
-$bibnum = ''; //TODO how to get bibnum?
+$bibnum = $this->driver->getSierraBN();
 ?>
 <div class='advSearchLimits'>
 <table id="fmBox" border="0">
