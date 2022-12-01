@@ -213,7 +213,7 @@ RUN \
     chmod -R g+sw ${VUFIND_HOME}/module/Catalog && \
     # Install grunt
     npm install -g grunt-cli && \
-    grunt less && \
+    grunt less
 
 EXPOSE 80
 
