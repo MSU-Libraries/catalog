@@ -18,7 +18,16 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
         ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
         # Clone repository
         git clone -b ${STACK_NAME} git@gitlab.msu.edu:msu-libraries/devops/catalog.git ${SHARED_STORAGE}/${STACK_NAME}
+        # Set up the repository for group editting
+        git config --system --add safe.directory \*
+        git -C "${SHARED_STORAGE}/${STACK_NAME}" config core.sharedRepository group
+        chgrp -R msuldevs "${SHARED_STORAGE}/${STACK_NAME}"
+        chmod -R g+rw "${SHARED_STORAGE}/${STACK_NAME}"
+        chmod g-w "${SHARED_STORAGE}/${STACK_NAME}"/.git/objects/pack/*
+        find "${SHARED_STORAGE}/${STACK_NAME}" -type d -exec chmod g+s {} \;
+
     fi
+    git fetch
     rm -rf /usr/local/vufind/local
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/vufind/local /usr/local/vufind
     rm -rf /usr/local/vufind/themes/msul
