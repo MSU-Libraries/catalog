@@ -1,6 +1,9 @@
 import pathlib
 import flask
-import requests
+import aiohttp
+
+import util
+
 
 TIMEOUT = 10
 
@@ -22,13 +25,11 @@ def node_logs(service):
     return 'Error: unknown service.'
 
 def logs_vufind(service):
-    logs = []
+    urls = []
     for node in range(1, 4):
-        try:
-            req = requests.get(f'http://monitoring{node}/monitoring/node/logs/{service}', timeout=TIMEOUT)
-            req.raise_for_status()
-            contents = req.text
-        except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
-            contents = f'Error reading the log: {err}'
-        logs.append(contents)
+        urls.append(f'http://monitoring{node}/monitoring/node/logs/{service}')
+    try:
+        logs = util.async_get_requests(urls)
+    except (aiohttp.ClientError) as err:
+        return f'Error reading the log: {err}'
     return flask.render_template('logs.html', service=service, log1=logs[0], log2=logs[1], log3=logs[2])

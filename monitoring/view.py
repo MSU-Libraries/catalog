@@ -1,6 +1,8 @@
 import flask
+
 import logs
 import status
+
 
 app = flask.Flask(__name__, static_url_path='/monitoring/static')
 
