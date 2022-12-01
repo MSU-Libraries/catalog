@@ -6,9 +6,6 @@ MAX_PARALLEL_REQUESTS = 100
 TIMEOUT = 10
 
 def async_get_requests(urls, convert_to_json=False):
-    conn = aiohttp.TCPConnector(limit_per_host=100, limit=0, ttl_dns_cache=300)
-    results = []
-
     async def gather_with_concurrency():
         semaphore = asyncio.Semaphore(MAX_PARALLEL_REQUESTS)
         aiohttp_timeout = aiohttp.ClientTimeout(total=TIMEOUT)
@@ -38,6 +35,8 @@ def async_get_requests(urls, convert_to_json=False):
             raise ex
 
     loop = get_or_create_eventloop()
+    conn = aiohttp.TCPConnector(limit_per_host=100, limit=0, ttl_dns_cache=300)
+    results = []
     loop.run_until_complete(gather_with_concurrency())
     conn.close()
     return results
