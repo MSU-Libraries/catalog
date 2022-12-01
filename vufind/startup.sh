@@ -10,6 +10,13 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
     mkdir -p ${SHARED_STORAGE}/${STACK_NAME}
     chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}
     if [ ! -d "${SHARED_STORAGE}/${STACK_NAME}/.git" ]; then
+        # Set up deploy key
+        eval $( ssh-agent -s ) && \
+        echo "$DEPLOY_KEY" | base64 -d | ssh-add - && \
+        install -d -m 700 ~/.ssh/ && \
+        ( umask 022; touch ~/.ssh/known_hosts ) && \
+        ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
+        # Clone repository
         git clone git@gitlab.msu.edu:msu-libraries/devops/catalog.git ${SHARED_STORAGE}/${STACK_NAME}
     fi
     if [[ $( ls -1 ${SHARED_STORAGE}/${STACK_NAME}/* | wc -l ) -gt 0 ]]; then

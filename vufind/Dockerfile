@@ -141,7 +141,8 @@ ENV DEBUG=$DEBUG \
     FTP_USER=$FTP_USER \
     FTP_PASSWORD=$FTP_PASSWORD \
     AUTH_FTP_USER=$AUTH_FTP_USER \
-    AUTH_FTP_PASSWORD=$AUTH_FTP_PASSWORD
+    AUTH_FTP_PASSWORD=$AUTH_FTP_PASSWORD \
+    DEPLOY_KEY=$DEPLOY_KEY
 
 # Setup Apache
 RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-default.conf && \
@@ -198,6 +199,7 @@ RUN \
     echo FTP_PASSWORD="$FTP_PASSWORD" >> /etc/environment && \
     echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment && \
     echo AUTH_FTP_PASSWORD="$AUTH_FTP_PASSWORD" >> /etc/environment && \
+    echo DEPLOY_KEY="$DEPLOY_KEY" >> /etc/environment && \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
@@ -212,12 +214,6 @@ RUN \
     # Install grunt
     npm install -g grunt-cli && \
     grunt less && \
-    # Set up deploy key
-    eval $( ssh-agent -s ) && \
-    echo "$DEPLOY_KEY" | base64 -d | ssh-add - && \
-    install -d -m 700 ~/.ssh/ && \
-    ( umask 022; touch ~/.ssh/known_hosts ) && \
-    ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
 
 EXPOSE 80
 
