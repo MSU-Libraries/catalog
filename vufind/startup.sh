@@ -23,15 +23,12 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
         mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
         mv ${SHARED_STORAGE}/${STACK_NAME}/* ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
     fi
-    rsync -aiv /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/vufind/local/
-    rsync -aiv /usr/local/vufind/themes/msul/ ${SHARED_STORAGE}/${STACK_NAME}/vufind/themes/msul/
-    rsync -aiv /usr/local/vufind/module/Catalog/ ${SHARED_STORAGE}/${STACK_NAME}/vufind/module/Catalog/
     rm -rf /usr/local/vufind/local
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/vufind/local /usr/local/vufind
     rm -rf /usr/local/vufind/themes/msul
-    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/themes/msul /usr/local/vufind/themes
+    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/vufind/themes/msul /usr/local/vufind/themes
     rm -rf /usr/local/vufind/module/Catalog
-    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/module/Catalog /usr/local/vufind/module
+    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/vufind/module/Catalog /usr/local/vufind/module
 fi
 
 # Save the logs in the logs docker volume
