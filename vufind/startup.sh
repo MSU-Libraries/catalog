@@ -19,10 +19,6 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
         # Clone repository
         git clone git@gitlab.msu.edu:msu-libraries/devops/catalog.git ${SHARED_STORAGE}/${STACK_NAME}
     fi
-    if [[ $( ls -1 ${SHARED_STORAGE}/${STACK_NAME}/* | wc -l ) -gt 0 ]]; then
-        mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
-        mv ${SHARED_STORAGE}/${STACK_NAME}/* ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
-    fi
     rm -rf /usr/local/vufind/local
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/vufind/local /usr/local/vufind
     rm -rf /usr/local/vufind/themes/msul
