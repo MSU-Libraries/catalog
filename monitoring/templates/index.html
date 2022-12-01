@@ -2,6 +2,8 @@
 
 {% block title %}Home{% endblock %}
 
+{% block meta %}<meta http-equiv="refresh" content="10">{% endblock %}
+
 {% block content %}
     <h2>Status</h2>
     <ul>
@@ -19,5 +21,12 @@
         <li><a href="/monitoring/logs/mariadb">Mariadb logs</a></li>
         <li><a href="/monitoring/logs/traefik/log">Traefik log</a></li>
         <li><a href="/monitoring/logs/traefik/access">Traefik access log</a></li>
+    </ul>
+    <h2>Other admin apps</h2>
+    <ul>
+        <li><a href="/dashboard/">Traefik</a></li>
+        <li><a href="/solr/">Solr</a></li>
+        <li><a href="/simplesamlphp/">SimpleSAMLphp</a></li>
+        <li><a href="/Admin/Home">Vufind</a></li>
     </ul>
 {% endblock %}
