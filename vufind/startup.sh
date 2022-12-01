@@ -17,7 +17,7 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
         ( umask 022; touch ~/.ssh/known_hosts ) && \
         ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
         # Clone repository
-        git clone git@gitlab.msu.edu:msu-libraries/devops/catalog.git ${SHARED_STORAGE}/${STACK_NAME}
+        git clone -b ${STACK_NAME} git@gitlab.msu.edu:msu-libraries/devops/catalog.git ${SHARED_STORAGE}/${STACK_NAME}
     fi
     rm -rf /usr/local/vufind/local
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/vufind/local /usr/local/vufind
