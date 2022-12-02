@@ -105,18 +105,69 @@ def get_solr_status():
     return 'OK'
 
 
-def get_vufind_status():
+def _check_vufind_home_page():
     urls = []
     for node in range(1, 4):
         urls.append(f'http://vufind{node}/')
     try:
         results = util.async_get_requests(urls)
     except (aiohttp.ClientError) as err:
-        return f'Error reading the solr clusterstatus: {err}'
+        return f'Error reading vufind home page on node {node}: {err}'
     for node in range(1, 4):
         text = results[node-1]
         if '</html>' not in text:
             return f'Vufind home page not complete for node {node}'
-        if '<h1>An error has occurred</h1>' in text:
+        if '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
             return f'An error is reported in Vufind home page for node {node}'
+    return 'OK'
+
+def _check_vufind_record_page():
+    urls = []
+    for node in range(1, 4):
+        urls.append(f'http://vufind{node}/Record/folio.in00001912238')
+    try:
+        results = util.async_get_requests(urls)
+    except (aiohttp.ClientError) as err:
+        return f'Error reading vufind record page on node {node}: {err}'
+    for node in range(1, 4):
+        text = results[node-1]
+        if '</html>' not in text:
+            return f'Vufind record page folio.in00001912238 not complete for node {node}'
+        if '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
+            return f'An error is reported in Vufind record page folio.in00001912238 for node {node}'
+        if 'CR-186011' not in text:
+            return f'Vufind record page folio.in00001912238 not complete for node {node}'
+        if 'NAS 1.26:186011' not in text:
+            return f'Vufind record page folio.in00001912238 not complete for node {node}'
+    return 'OK'
+
+def _check_vufind_search_page():
+    urls = []
+    for node in range(1, 4):
+        urls.append(
+            f'http://vufind{node}/Search/Results?limit=5&dfApplied=1&lookfor=+Automated+flight+test&type=AllFields')
+    try:
+        results = util.async_get_requests(urls)
+    except (aiohttp.ClientError) as err:
+        return f'Error reading vufind search page on node {node}: {err}'
+    for node in range(1, 4):
+        text = results[node-1]
+        if '</html>' not in text:
+            return f'Vufind search page not complete for node {node}'
+        if '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
+            return f'An error is reported in Vufind search page for node {node}'
+        if 'folio.in00001912238' not in text:
+            return f'Vufind search page not complete for node {node}'
+    return 'OK'
+
+def get_vufind_status():
+    res = _check_vufind_home_page()
+    if res != 'OK':
+        return res
+    res = _check_vufind_record_page()
+    if res != 'OK':
+        return res
+    res = _check_vufind_search_page()
+    if res != 'OK':
+        return res
     return 'OK'
