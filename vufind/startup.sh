@@ -12,10 +12,10 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
     chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}/local-confs
     chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}/repo
     # Set up deploy key
-    eval $( ssh-agent -s )
-    echo "$DEPLOY_KEY" | base64 -d | ssh-add -
     install -d -m 700 ~/.ssh/
+    echo "$DEPLOY_KEY" | base64 -d > ~/.ssh/id_ed25519
     ( umask 022; touch ~/.ssh/known_hosts )
+    chmod 600 ~/.ssh/id_ed25519
     ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
     # Set up the "repo" dir
     if [ ! -d "${SHARED_STORAGE}/${STACK_NAME}/repo/.git" ]; then
@@ -31,7 +31,7 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
         chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/
         chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/module/
     fi
-    git fetch -C "${SHARED_STORAGE}/${STACK_NAME}"/repo
+    git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch
     # Setting up "local" sync dir
     if [[ $( ls -1 ${SHARED_STORAGE}/${STACK_NAME}/local-confs/* | wc -l ) -gt 0 ]]; then
         # archive the last pipeline's configs
@@ -39,7 +39,7 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
         mv ${SHARED_STORAGE}/${STACK_NAME}/local-confs/* ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
     fi
     # Sync over the current pipeline's configs
-    rsync -aiv /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/local-confs/
+    rsync -ai /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/local-confs/
     # Set up the symlink
     rm -rf /usr/local/vufind/local
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/local-confs /usr/local/vufind/local
