@@ -27,7 +27,7 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
         find "${SHARED_STORAGE}/${STACK_NAME}" -type d -exec chmod g+s {} \;
 
     fi
-    git fetch
+    git fetch -C "${SHARED_STORAGE}/${STACK_NAME}"
     rm -rf /usr/local/vufind/local
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/vufind/local /usr/local/vufind
     rm -rf /usr/local/vufind/themes/msul
