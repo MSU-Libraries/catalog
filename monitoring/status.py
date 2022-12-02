@@ -220,6 +220,7 @@ def get_memory_status():
         if float(mems[node-1]) < lowest:
             lowest_node = node
             lowest = float(mems[node-1])
+    lowest = round(lowest, 1)
     if lowest < 20.:
         return f"Low available memory on node {lowest_node}: {lowest}%"
     return f"OK - lowest available memory: {lowest}%"
@@ -245,6 +246,7 @@ def get_disk_space_status():
         if float(disk_spaces[node-1]) < lowest:
             lowest_node = node
             lowest = float(disk_spaces[node-1])
+    lowest = round(lowest, 1)
     if lowest < 20.:
         return f"Low available disk space on node {lowest_node}: {lowest}%"
     return f"OK - lowest available disk space: {lowest}%"
