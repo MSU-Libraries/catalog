@@ -114,8 +114,6 @@ backup_collection() {
     mkdir -p ${ARGS[SHARED_DIR]}/solr_dropbox/"${COLL}"
     chmod -R 777 ${ARGS[SHARED_DIR]}/solr_dropbox/
 
-    remove_old_backups ${ARGS[SHARED_DIR]}/solr/"${COLL}"
-
     # Trigger the backup in Solr
     verbose "Starting backup of '${COLL}' index"
     SNAPSHOT="$(date +%Y%m%d%H%M%S)"
@@ -177,6 +175,8 @@ backup_collection() {
     fi
 
     verbose "Backup completed for '${COLL}' index."
+
+    remove_old_backups ${ARGS[SHARED_DIR]}/solr/"${COLL}"
 }
 
 backup_db() {
@@ -184,8 +184,12 @@ backup_db() {
 
     verbose "Temporarily setting Galera node to desychronized state"
     if ! mysql -h galera2 -u root -p12345 -e "SET GLOBAL wsrep_desync = ON" 2>/dev/null; then
-        verbose "ERROR: Failed to set node to desychronized state. Unsafe to continue backup." 1
-        exit 1
+        # Check if it was a false negative and the state was actually set
+        if ! mysql -h galera2 -u root -p12345 -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
+          | grep 1 > /dev/null 2>&1; then
+            verbose "ERROR: Failed to set node to desychronized state. Unsafe to continue backup." 1
+            exit 1
+        fi
     fi
 
     remove_old_backups ${ARGS[SHARED_DIR]}/db
@@ -202,8 +206,12 @@ backup_db() {
 
     verbose "Re-enabling Galera node to sychronized state"
     if ! mysql -h galera2 -u root -p12345 -e "SET GLOBAL wsrep_desync = OFF" 2>/dev/null; then
-        verbose "ERROR: Failed to re-set node to synchronized state after dump was complete." 1
-        exit 1
+        # Check if it was a false negative and the state was actually set
+        if ! mysql -h galera2 -u root -p12345 -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
+          | grep 0 > /dev/null 2>&1; then
+            verbose "ERROR: Failed to re-set node to synchronized state after dump was complete." 1
+            exit 1
+        fi
     fi
 
     verbose "Compressing the backup"

@@ -37,8 +37,4 @@ MAILTO=$EMAIL
 30 ${NODE}	* * *	root    /usr/bin/php /usr/local/vufind/util/index_reserves.php 2>&1 | tee /mnt/logs/vufind/reserves_update.log | logger -t INDEX_RESERVES
 
 # Cleanup unsaved searches
-0 0     * * *   root    php /usr/local/vufind/public/index.php util/expire_searches 2>&1 | tee /mnt/logs/vufind/searches_cleanup.log | logger -t EXPIRE_SEARCHES
-
-# Backups
-5 20    * * *   root    /backup.sh --solr 2>&1 | tee /mnt/logs/backups/solr.log | pee "logger -t BACKUP_SOLR" "cat"
-0 20    * * *   root    /backup.sh --db -r 5 2>&1 | tee /mnt/logs/backups/db.log | pee "logger -t BACKUP_DB" "cat"
+0 0     * * *   root    php /usr/local/vufind/public/index.php util/expire_searches 2>&1 | logger -t EXPIRE_SEARCHES
