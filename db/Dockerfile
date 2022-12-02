@@ -1,4 +1,4 @@
-FROM bitnami/mariadb-galera:10.7
+FROM bitnami/mariadb-galera:10.6
 
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
