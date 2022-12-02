@@ -377,21 +377,6 @@ Vufind Upgrade:
         echo "Running Vufind upgrade now against ${URL}";
         curl "${URL}/Upgrade/GetSourceVersion" -k --data-raw "sourceversion=${PREV_VUFIND_VERSION}&skip%5B%5D=config" -L -O;
         echo "Upgrade complete with exit code $?";
-  after_script:
-    - HOSTS="$DEPLOY_HOST_A $DEPLOY_HOST_B $DEPLOY_HOST_C";
-    - |
-        setconfig() {
-            OLDVAL=$1;
-            NEWVAL=$2;
-            for HOST in ${HOSTS}; do
-                CONTAINER=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "NOT ONLINE";
-                if [ -z "${CONTAINER}" ]; then
-                  echo "Could not find container for ${STACK_NAME}-catalog_catalog!";
-                  exit 1;
-                fi;
-                ssh deploy@$HOST "docker exec ${CONTAINER} sed -i 's/autoConfigure = $OLDVAL/autoConfigure = $NEWVAL/g' local/config/vufind/config.ini";
-            done
-        }
         echo "Disabling auto configure";
         setconfig "true" "false";
 
