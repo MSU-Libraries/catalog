@@ -2,5 +2,5 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=$EMAIL
 
 # Backups
-5 20    * * *   root    /backup.sh --solr 2>&1 | pee "logger -t BACKUP_SOLR" "cat"
-0 20    * * *   root    /backup.sh --db -r 5 2>&1 | pee "logger -t BACKUP_DB" "cat"
+5 20    * * *   root    /backup.sh --solr 2>&1 | tee /mnt/logs/backups/solr.log | pee "logger -t BACKUP_SOLR" "cat"
+0 20    * * *   root    /backup.sh --db -r 5 2>&1 | tee /mnt/logs/backups/db.log | pee "logger -t BACKUP_DB" "cat"
