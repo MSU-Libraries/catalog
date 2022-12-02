@@ -1,11 +1,10 @@
 import pathlib
+import asyncio
 import flask
 import aiohttp
 
 import util
 
-
-TIMEOUT = 10
 
 def node_logs(service):
     paths = {
@@ -30,6 +29,8 @@ def logs_vufind(service):
         urls.append(f'http://monitoring{node}/monitoring/node/logs/{service}')
     try:
         logs = util.async_get_requests(urls)
-    except (aiohttp.ClientError) as err:
-        return f'Error reading the log: {err}'
+    except aiohttp.ClientError as err:
+        return f'Error reading the {service} log: {err}'
+    except asyncio.exceptions.TimeoutError:
+        return f'Timeout when reading the {service} log'
     return flask.render_template('logs.html', service=service, log1=logs[0], log2=logs[1], log3=logs[2])
