@@ -114,33 +114,38 @@ backup_collection() {
     mkdir -p ${ARGS[SHARED_DIR]}/solr_dropbox/"${COLL}"
     chmod -R 777 ${ARGS[SHARED_DIR]}/solr_dropbox/
 
-    remove_old_backups ${ARGS[SHARED_DIR]}/solr/"${COLL}"
-
     # Trigger the backup in Solr
     verbose "Starting backup of '${COLL}' index"
     SNAPSHOT="$(date +%Y%m%d%H%M%S)"
-    if ! curl "http://solr2:8983/solr/${COLL}/replication?command=backup&location=/mnt/solr_backups/${COLL}&numberToKeep=${ARGS[ROTATIONS]}&name=${SNAPSHOT}" > /dev/null 2>&1; then
-        verbose "ERROR: Failed to trigger a backup of the '${COLL}' collection in Solr!"
+    if ! curl "http://solr2:8983/solr/${COLL}/replication?command=backup&location=/mnt/solr_backups/${COLL}&name=${SNAPSHOT}" > /dev/null 2>&1; then
+        verbose "ERROR: Failed to trigger a backup of the '${COLL}' collection in Solr. Exit code: $?" 1
+        exit 1
+    fi
+
+    # Verify that the backup started
+    sleep 10
+    SNAPSHOT="snapshot.${SNAPSHOT}"
+    if [ ! -d "${ARGS[SHARED_DIR]}/solr_dropbox/${COLL}/${SNAPSHOT}" ]; then
+        verbose "ERROR: Failed to start backup for the '${COLL}' collection in Solr!" 1
         exit 1
     fi
 
     # Verify that the backup successfully completed
-    SNAPSHOT="snapshot.${SNAPSHOT}"
-    MAX_WAITS=500
+    MAX_WAITS=900
     CUR_WAIT=1
     EXPECTED=""
     ACTUAL="0"
     while [[ "${EXPECTED}" != "${ACTUAL}" ]]; do
         if [ "$CUR_WAIT" -gt "$MAX_WAITS" ]; then
-            verbose "ERROR: Backup never completed for '${COLL}' index!" 1
+            verbose "ERROR: Backup never completed for '${COLL}' index! (${ACTUAL}/${EXPECTED} files copied)" 1
             exit 1
         fi
-	if [[ "${EXPECTED}" != "" ]]; then
-	    verbose "Backup still in progress (${ACTUAL}/${EXPECTED} files copied)"
-	fi
-        sleep 1
-	EXPECTED="$(curl -s "http://solr2:8983/solr/${COLL}/replication?command=details&wt=json" | jq '.details.commits[0][5]|length')"
-	ACTUAL="$(find ${ARGS[SHARED_DIR]}/solr_dropbox/"${COLL}"/"${SNAPSHOT}" -type f | wc -l)"
+        if [[ "${EXPECTED}" != "" ]]; then
+            verbose "Backup still in progress (${ACTUAL}/${EXPECTED} files copied)"
+        fi
+        sleep 3
+        EXPECTED="$(curl -s "http://solr2:8983/solr/${COLL}/replication?command=details&wt=json" | jq '.details.commits[0][5]|length')"
+        ACTUAL="$(find ${ARGS[SHARED_DIR]}/solr_dropbox/"${COLL}"/"${SNAPSHOT}" -type f 2>/dev/null | wc -l)"
         CUR_WAIT=$((CUR_WAIT+1))
     done
 
@@ -170,6 +175,8 @@ backup_collection() {
     fi
 
     verbose "Backup completed for '${COLL}' index."
+
+    remove_old_backups ${ARGS[SHARED_DIR]}/solr/"${COLL}"
 }
 
 backup_db() {
@@ -177,23 +184,34 @@ backup_db() {
 
     verbose "Temporarily setting Galera node to desychronized state"
     if ! mysql -h galera2 -u root -p12345 -e "SET GLOBAL wsrep_desync = ON" 2>/dev/null; then
-        verbose "ERROR: Failed to set node to desychronized state. Unsafe to continue backup." 1
-        exit 1
+        # Check if it was a false negative and the state was actually set
+        if ! mysql -h galera2 -u root -p12345 -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
+          | grep 1 > /dev/null 2>&1; then
+            verbose "ERROR: Failed to set node to desychronized state. Unsafe to continue backup." 1
+            exit 1
+        fi
     fi
 
     remove_old_backups ${ARGS[SHARED_DIR]}/db
 
     verbose "Starting backup of database"
     TIMESTAMP=$( date +%Y%m%d%H%M%S )
-    if ! mysqldump -h galera2 -u root -p12345 --triggers --routines --column-statistics=0 vufind > ${ARGS[SHARED_DIR]}/db/vufind-"${TIMESTAMP}".sql 2>/dev/null; then
-        verbose "ERROR: Failed to successfully backup the database" 1
-        exit 1
-    fi
+    DBS=( galera1 galera2 galera3 )
+    for DB in "${DBS[@]}"; do
+        if ! mysqldump -h "${DB}" -u root -p12345 --triggers --routines --column-statistics=0 vufind > ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql 2>/dev/null; then
+            verbose "ERROR: Failed to successfully backup the database from ${DB}" 1
+            exit 1
+        fi
+    done
 
     verbose "Re-enabling Galera node to sychronized state"
     if ! mysql -h galera2 -u root -p12345 -e "SET GLOBAL wsrep_desync = OFF" 2>/dev/null; then
-        verbose "ERROR: Failed to re-set node to synchronized state after dump was complete." 1
-        exit 1
+        # Check if it was a false negative and the state was actually set
+        if ! mysql -h galera2 -u root -p12345 -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
+          | grep 0 > /dev/null 2>&1; then
+            verbose "ERROR: Failed to re-set node to synchronized state after dump was complete." 1
+            exit 1
+        fi
     fi
 
     verbose "Compressing the backup"
@@ -202,15 +220,12 @@ backup_db() {
         verbose "ERROR: Could not navigate into database backup directory (${ARGS[SHARED_DIR]}/db)" 1
         exit 1
     fi
-    # Writing this as a `find` would be much more complex
-    # shellcheck disable=SC2012
-    DB_BACKUP="$(ls -Atr | tail -n 1)"
-    if ! tar -cf "${DB_BACKUP}".tar "${DB_BACKUP}"; then
-        verbose "ERROR: Failed to compress the database dump." 1
+    if ! tar -cf "${TIMESTAMP}".tar ./*"${TIMESTAMP}".sql; then
+        verbose "ERROR: Failed to compress the database dumps." 1
         exit 1
     else
-        if ! rm "${DB_BACKUP}"; then
-            verbose "ERROR: Failed to remove the uncompressed database dump" 1 # Not exiting
+        if ! rm ./*"${TIMESTAMP}.sql"; then
+            verbose "ERROR: Failed to remove the uncompressed database dumps" 1 # Not exiting
         fi
     fi
     if ! cd "${PREV_CWD}"; then
@@ -231,8 +246,8 @@ remove_old_backups() {
             # Remove backups when we have more than the max number of rotations that should be saved
             # starting with the oldest backup
             if [ "${CUR_BACKUP}" -ge "${ARGS[ROTATIONS]}" ]; then
-                if ! rm "${BACKUP}"; then
-                    verbose "ERROR: Could not remove old backup file: ${BACKUP}"
+                if [ -f "${BACKUP}" ] && ! rm "${BACKUP}"; then
+                    verbose "ERROR: Could not remove old backup file: ${BACKUP}" 1
                 fi
             fi
             CUR_BACKUP=$((CUR_BACKUP+1))

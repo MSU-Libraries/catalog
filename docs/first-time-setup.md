@@ -31,6 +31,7 @@ docker build ./vufind/ -t catalog:latest \
     --build-arg SIMPLESAMLPHP_VERSION=1.19.6
     --build-arg SIMPLESAMLPHP_SALT=abcXYZ
     --build-arg SIMPLESAMLPHP_ADMIN_PW=mySecretPass
+    --build-arg DEPLOY_KEY=readonlygitlabdeploykey
 ```
 
 * `VUFIND_VERSION`: The version of VuFind to install 
@@ -59,6 +60,7 @@ uses `1` by default
 * `SIMPLESAMLPHP_VERSION`: The version of SimpleSAMLphp to install
 * `SIMPLESAMLPHP_SALT`: Random salt for SimpleSAMLphp
 * `SIMPLESAMLPHP_ADMIN_PW`: Password to the admin interface of SimpleSAMLphp
+* `DEPLOY_KEY`: GitLab read-only deploy key base64 encoded
 
 ## To start the application stack
 During the first time you are bring up the stack, you will need
@@ -143,12 +145,9 @@ changes there. Changes to the live storage are symboliclly linked to the contain
 appear real time in the environment -- very handy for theme development!
 
 Within the shared storage there will be a sub-directory for each branch name. This documentation
-assumes that the share has been set up and configured already on the hosts.
+assumes that the share has been set up and configured already on the hosts. The sub-directory
+will contain a clone of this repository which can be easily used to track changes between
+subsequent deploys to the same branch.
 
-```bash
-/mnt/catalog
-└── devel-mybranch
-    ├── Catalog
-    ├── local
-    └── msul
-```
+Note that subsequent deploys only do a `git fetch` to avoid overwriting local changes. You are
+responsible for doing a `git pull` to apply new changes.

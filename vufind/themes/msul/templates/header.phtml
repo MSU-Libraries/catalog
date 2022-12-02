@@ -6,8 +6,8 @@
       <i class="fa fa-bars"></i>
     </button>
 
-    <a href="https://lib.msu.edu/" class="navbar-brand">MSU Libraries</a>
-    <a href="<?=$this->url('home') ?>" class="navbar-brand navbar-band-border">Catalog</a>
+    <p class="navbar-msul"><a href="https://lib.msu.edu/">MSU Libraries</a></p>
+    <p class="navbar-catalog"><a href="<?=$this->url('home') ?>">Public Catalog</a></p>
   </div>
   <?php if (!isset($this->layout()->renderingError)): ?>
     <div class="collapse navbar-collapse" id="header-collapse">

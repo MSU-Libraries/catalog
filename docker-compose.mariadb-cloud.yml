@@ -15,7 +15,7 @@ x-mariadb-envs: &mariadb_envs
 version: "3.8"
 services:
   galera:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:latest
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/db:${CI_COMMIT_SHORT_SHA}
     hostname: galera{{slice .Node.Hostname 8 9}}
     networks:
       - internal
@@ -24,6 +24,7 @@ services:
       <<: *mariadb_envs
     volumes:
       - db-bitnami:/bitnami
+      - logs:/mnt/logs
     stop_signal: SIGWINCH
     stop_grace_period: 80s
     deploy:
@@ -40,8 +41,11 @@ services:
 
 networks:
   internal:
-    name: internal
+    name: ${STACK_NAME}-internal
     external: true
 
 volumes:
   db-bitnami:
+  logs:
+    external: true
+    name: "${STACK_NAME}_logs"

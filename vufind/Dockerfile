@@ -52,10 +52,6 @@ RUN \
     mv /tmp/solr/vendor/dist/solr* /usr/local/vufind/solr/vendor/dist/ && \
     mv /tmp/solr/vendor/contrib/analysis-extras/lib /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
     rm -rf /tmp/solr && \
-    # Create log file and redirect to stdout
-    mkdir /var/log/vufind && \
-    touch /var/log/vufind/vufind.log && \
-    chown -R 33:33 /var/log/vufind && \
     # Create user for grunt
     groupadd -g 1000 msuldevs && \
     useradd msuldevs -u 1000 -g 1000 && \
@@ -93,9 +89,7 @@ COPY simplesamlphp/local/ ${SIMPLESAMLPHP_CUSTOM_DIR}/
 RUN envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW}' < ${SIMPLESAMLPHP_CONFIG_DIR}/config.php | sponge ${SIMPLESAMLPHP_CONFIG_DIR}/config.php && \
     envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \
     a2enconf simplesamlphp.conf && \
-    chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR} && \
-    mkdir /var/log/simplesamlphp && \
-    chown www-data /var/log/simplesamlphp
+    chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR}
 
 # Build Arguments
 ARG SITE_HOSTNAME
@@ -121,9 +115,11 @@ ARG RECAPTCHA_SITE_KEY
 ARG RECAPTCHA_SECRET_KEY
 ARG FTP_USER
 ARG FTP_PASSWORD
+ARG AUTH_FTP_USER
+ARG AUTH_FTP_PASSWORD
+ARG DEPLOY_KEY
 
-ENV DEBUG=$DEBUG \
-    SITE_HOSTNAME=$SITE_HOSTNAME \
+ENV SITE_HOSTNAME=$SITE_HOSTNAME \
     FOLIO_URL=$FOLIO_URL \
     FOLIO_USER=$FOLIO_USER \
     FOLIO_PASS=$FOLIO_PASS \
@@ -145,14 +141,17 @@ ENV DEBUG=$DEBUG \
     RECAPTCHA_SITE_KEY=$RECAPTCHA_SITE_KEY \
     RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY \
     FTP_USER=$FTP_USER \
-    FTP_PASSWORD=$FTP_PASSWORD
+    FTP_PASSWORD=$FTP_PASSWORD \
+    AUTH_FTP_USER=$AUTH_FTP_USER \
+    AUTH_FTP_PASSWORD=$AUTH_FTP_PASSWORD \
+    DEPLOY_KEY=$DEPLOY_KEY
 
 # Setup Apache
 RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-default.conf && \
     echo "<VirtualHost *:80>" >> /etc/apache2/sites-available/000-default.conf && \
     echo "    LogLevel warn" >> /etc/apache2/sites-enabled/000-default.conf && \
-    echo "    ErrorLog /proc/self/fd/2" >> /etc/apache2/sites-enabled/000-default.conf && \
-    echo "    CustomLog /proc/self/fd/1 combined" >> /etc/apache2/sites-enabled/000-default.conf && \
+    echo '    ErrorLog "|/usr/bin/tee /var/log/apache2/error.log"' >> /etc/apache2/sites-enabled/000-default.conf && \
+    echo '    CustomLog "|/usr/bin/tee /var/log/apache2/access.log" combined' >> /etc/apache2/sites-enabled/000-default.conf && \
     echo "</VirtualHost>" >> /etc/apache2/sites-enabled/000-default.conf && \
     # enable simplesamlphp at /simplesamlphp
     a2enconf simplesamlphp
@@ -167,6 +166,7 @@ COPY startup-cron.sh /startup-cron.sh
 COPY startup-cachecron.sh /startup-cachecron.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
 COPY hlm-harvest-and-import.sh /hlm-harvest-and-import.sh
+COPY authority-harvest-and-import.sh /authority-harvest-and-import.sh
 COPY backup.sh /backup.sh
 COPY restore.sh /restore.sh
 COPY msmtp/aliases /etc/aliases
@@ -199,6 +199,9 @@ RUN \
     echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment && \
     echo FTP_USER="$FTP_USER" >> /etc/environment && \
     echo FTP_PASSWORD="$FTP_PASSWORD" >> /etc/environment && \
+    echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment && \
+    echo AUTH_FTP_PASSWORD="$AUTH_FTP_PASSWORD" >> /etc/environment && \
+    echo DEPLOY_KEY="$DEPLOY_KEY" >> /etc/environment && \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
@@ -217,6 +220,6 @@ RUN \
 EXPOSE 80
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
-   CMD curl --fail -s http://localhost:80/ || exit 1  
+   CMD curl --fail -s http://localhost:80/ || exit 1
 
 CMD /startup.sh

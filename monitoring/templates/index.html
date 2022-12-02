@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block meta %}<meta http-equiv="refresh" content="15">{% endblock %}
+
+{% block content %}
+    <h2>Status</h2>
+    <ul>
+        <li>Traefik: <span class="text-{{services['traefik']['color']}}">{{services['traefik']['status']}}</span></li>
+        <li>Galera: <span class="text-{{services['galera']['color']}}">{{services['galera']['status']}}</span></li>
+        <li>Solr: <span class="text-{{services['solr']['color']}}">{{services['solr']['status']}}</span></li>
+        <li>Vufind: <span class="text-{{services['vufind']['color']}}">{{services['vufind']['status']}}</span></li>
+    </ul>
+    <h2>Logs</h2>
+    <ul>
+        <li><a href="/monitoring/logs/vufind">VuFind</a></li>
+        <li><a href="/monitoring/logs/apache/access">Apache access</a></li>
+        <li><a href="/monitoring/logs/apache/error">Apache error</a></li>
+        <li><a href="/monitoring/logs/simplesamlphp">Simplesamlphp</a></li>
+        <li><a href="/monitoring/logs/mariadb">Mariadb</a></li>
+        <li><a href="/monitoring/logs/traefik/log">Traefik</a></li>
+        <li><a href="/monitoring/logs/traefik/access">Traefik access</a></li>
+        <li><a href="/monitoring/logs/harvests/folio">FOLIO harvest</a></li>
+        <li><a href="/monitoring/logs/harvests/hlm">HLM harvest</a></li>
+        <li><a href="/monitoring/logs/harvests/authority">Authority harvest</a></li>
+        <li><a href="/monitoring/logs/vufind/reserves_update">Reserve update</a></li>
+        <li><a href="/monitoring/logs/vufind/searches_cleanup">Searches cleanup</a></li>
+        <li><a href="/monitoring/logs/backups/solr">Solr backup</a></li>
+        <li><a href="/monitoring/logs/backups/db">DB backup</a></li>
+    </ul>
+    <h2>Other admin apps</h2>
+    <ul>
+        <li><a href="/dashboard/">Traefik</a></li>
+        <li><a href="/solr/">Solr</a></li>
+        <li><a href="/simplesamlphp/">SimpleSAMLphp</a></li>
+        <li><a href="/Admin/Home">Vufind</a></li>
+    </ul>
+{% endblock %}

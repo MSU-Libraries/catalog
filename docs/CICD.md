@@ -84,11 +84,14 @@ project's CI/CD settings to be available to the pipeline. While it is ok for var
 marked as `masked`, they can not be marked as `protected`; otherwise they will not be
 available in the `devel-` and `review-` pipelines.
 
+* `AUTH_FTP_USER`: User name for the authority marc file FTP server
+* `AUTH_FTP_PASSWORD`: Password for `AUTH_FTP_USER`
 * `AWS_KEY`: The AWS access key to use when provisioning the DNS CNAME records
 * `AWS_SECRET`: The AWS secret for the `AWS_KEY` uses when provisioning the DNS CNAME records
 * `BASICAUTH_FOR_RESOURCES`: Bcrypt password hash[^1] for basic authentication to internal
 resources such as Solr and the Traefik dashboard
 * `DEPLOY_PRIVATE_KEY`: The `base64` encoded private ssh key to the deploy server
+* `DEPLOY_KEY`: GitLab read-only deploy key base64 encoded
 * `EDS_ORG`: Organization ID for the EDS API
 * `EDS_PASS`: Password for the `EDS_USER` username
 * `EDS_PROFILE`: Profile name for EDS

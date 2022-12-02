@@ -11,6 +11,11 @@ envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
 # Change to using file sessions
 sed -i 's/type\s*=\s*Database/type=File/' /usr/local/vufind/local/config/vufind/config.ini
 
+# If not catalog-prod remove the backup jobs
+if [[ "${STACK_NAME}" != catalog-prod ]]; then
+    rm /etc/cron.d/backups
+fi
+
 # Start up syslog (required for cron)
 rsyslogd
 

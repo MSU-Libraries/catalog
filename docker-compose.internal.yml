@@ -27,5 +27,5 @@ services:
 # Internal network used by backend stacks (e.g. Solr, MariaDB)
 networks:
   internal:
-    name: internal
+    name: ${STACK_NAME}-internal
     driver: overlay
