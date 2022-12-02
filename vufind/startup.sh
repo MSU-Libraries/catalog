@@ -25,7 +25,9 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
         chmod -R g+rw "${SHARED_STORAGE}/${STACK_NAME}"
         chmod g-w "${SHARED_STORAGE}/${STACK_NAME}"/.git/objects/pack/*
         find "${SHARED_STORAGE}/${STACK_NAME}" -type d -exec chmod g+s {} \;
-
+        chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/vufind/local/
+        chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/vufind/themes/
+        chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/vufind/module/
     fi
     git fetch -C "${SHARED_STORAGE}/${STACK_NAME}"
     rm -rf /usr/local/vufind/local
