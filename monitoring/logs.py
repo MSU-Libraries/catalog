@@ -8,13 +8,20 @@ import util
 
 def node_logs(service):
     paths = {
-        'vufind':         '/mnt/logs/vufind/vufind.log',
-        'apache/error':   '/mnt/logs/apache/error.log',
-        'apache/access':  '/mnt/logs/apache/access.log',
-        'simplesamlphp':  '/mnt/logs/simplesamlphp/simplesamlphp.log',
-        'mariadb':        '/mnt/logs/mariadb/mysqld.log',
-        'traefik/log':    '/mnt/traefik_logs/traefik/traefik.log',
-        'traefik/access': '/mnt/traefik_logs/traefik/access.log',
+        'vufind':                  '/mnt/logs/vufind/vufind.log',
+        'apache/error':            '/mnt/logs/apache/error.log',
+        'apache/access':           '/mnt/logs/apache/access.log',
+        'simplesamlphp':           '/mnt/logs/simplesamlphp/simplesamlphp.log',
+        'mariadb':                 '/mnt/logs/mariadb/mysqld.log',
+        'traefik/log':             '/mnt/traefik_logs/traefik/traefik.log',
+        'traefik/access':          '/mnt/traefik_logs/traefik/access.log',
+        'harvests/folio':          '/mnt/logs/harvests/folio.log',
+        'harvests/hlm':            '/mnt/logs/harvests/hlm.log',
+        'harvests/authority':      '/mnt/logs/harvests/authority.log',
+        'vufind/reserves_update':  '/mnt/logs/vufind/reserves_update.log',
+        'vufind/searches_cleanup': '/mnt/logs/vufind/searches_cleanup.log',
+        'backups/solr':            '/mnt/logs/backups/solr.log',
+        'backups/db':              '/mnt/logs/backups/db.log',
     }
     if service in paths:
         path = pathlib.Path(paths[service])

@@ -25,7 +25,7 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
 fi
 
 # Save the logs in the logs docker volume
-mkdir -p /mnt/logs/apache /mnt/logs/vufind /mnt/logs/simplesamlphp
+mkdir -p /mnt/logs/apache /mnt/logs/vufind /mnt/logs/simplesamlphp /mnt/logs/harvests /mnt/logs/backups
 rm -rf /var/log/apache2
 ln -sf /mnt/logs/apache /var/log/apache2
 ln -sf /mnt/logs/vufind /var/log/vufind
