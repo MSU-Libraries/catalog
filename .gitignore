@@ -3,3 +3,4 @@ build-*
 .terraform*
 .DS_Store
 compiled.css
+vufind/themes/msul/css/less/

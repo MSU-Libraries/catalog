@@ -30,6 +30,12 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
         chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/vufind/module/
     fi
     git fetch -C "${SHARED_STORAGE}/${STACK_NAME}"
+    # Overwrite the files that had envsubst ran on them in the Dockerfile
+    cp local/config/vufind/config.ini "${SHARED_STORAGE}/${STACK_NAME}"/vufind/local/config/vufind/config.ini
+    cp local/config/vufind/folio.ini "${SHARED_STORAGE}/${STACK_NAME}"/vufind/local/config/vufind/folio.ini
+    cp local/config/vufind/EDS.ini "${SHARED_STORAGE}/${STACK_NAME}"/vufind/local/config/vufind/EDS.ini
+    cp local/harvest/oai.ini "${SHARED_STORAGE}/${STACK_NAME}"/vufind/local/harvest/oai.ini
+    # Set up the symlink
     rm -rf /usr/local/vufind/local
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/vufind/local /usr/local/vufind
     rm -rf /usr/local/vufind/themes/msul
