@@ -6,22 +6,47 @@ TIMESTAMP=$( date +%Y%m%d%H%M%S )
 # Create symlinks to the shared storage for non-production environments
 # Populating the shared storage if empty
 if [[ "${STACK_NAME}" != catalog-* ]]; then
-    echo "Linking the local, module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
-    mkdir -p ${SHARED_STORAGE}/${STACK_NAME}
-    chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}
-    if [[ $( ls -1 ${SHARED_STORAGE}/${STACK_NAME}/* | wc -l ) -gt 0 ]]; then
-        mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
-        mv ${SHARED_STORAGE}/${STACK_NAME}/* ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
+    echo "Setting up links for module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
+    mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/local-confs
+    mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/repo
+    chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}/local-confs
+    chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}/repo
+    # Set up deploy key
+    install -d -m 700 ~/.ssh/
+    echo "$DEPLOY_KEY" | base64 -d > ~/.ssh/id_ed25519
+    ( umask 022; touch ~/.ssh/known_hosts )
+    chmod 600 ~/.ssh/id_ed25519
+    ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
+    # Set up the "repo" dir
+    if [ ! -d "${SHARED_STORAGE}/${STACK_NAME}/repo/.git" ]; then
+        # Clone repository
+        git clone -b ${STACK_NAME} git@gitlab.msu.edu:msu-libraries/devops/catalog.git ${SHARED_STORAGE}/${STACK_NAME}/repo
+        # Set up the repository for group editting
+        git config --system --add safe.directory \*
+        git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo config core.sharedRepository group
+        chgrp -R msuldevs "${SHARED_STORAGE}/${STACK_NAME}"/repo
+        chmod -R g+rw "${SHARED_STORAGE}/${STACK_NAME}"/repo
+        chmod g-w "${SHARED_STORAGE}/${STACK_NAME}"/repo/.git/objects/pack/*
+        find "${SHARED_STORAGE}/${STACK_NAME}" -type d -exec chmod g+s {} \;
+        chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/
+        chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/module/
     fi
-    rsync -aiv /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/local/
-    rsync -aiv /usr/local/vufind/themes/msul/ ${SHARED_STORAGE}/${STACK_NAME}/msul/
-    rsync -aiv /usr/local/vufind/module/Catalog/ ${SHARED_STORAGE}/${STACK_NAME}/Catalog/
+    git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch
+    # Setting up "local" sync dir
+    if [[ $( ls -1 ${SHARED_STORAGE}/${STACK_NAME}/local-confs/* | wc -l ) -gt 0 ]]; then
+        # archive the last pipeline's configs
+        mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
+        mv ${SHARED_STORAGE}/${STACK_NAME}/local-confs/* ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
+    fi
+    # Sync over the current pipeline's configs
+    rsync -ai /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/local-confs/
+    # Set up the symlink
     rm -rf /usr/local/vufind/local
-    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/local /usr/local/vufind
+    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/local-confs /usr/local/vufind/local
     rm -rf /usr/local/vufind/themes/msul
-    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/msul /usr/local/vufind/themes
+    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/themes/msul /usr/local/vufind/themes
     rm -rf /usr/local/vufind/module/Catalog
-    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/Catalog /usr/local/vufind/module
+    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog /usr/local/vufind/module
 fi
 
 # Save the logs in the logs docker volume

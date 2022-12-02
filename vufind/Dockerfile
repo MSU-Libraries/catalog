@@ -114,6 +114,7 @@ ARG FTP_USER
 ARG FTP_PASSWORD
 ARG AUTH_FTP_USER
 ARG AUTH_FTP_PASSWORD
+ARG DEPLOY_KEY
 
 ENV SITE_HOSTNAME=$SITE_HOSTNAME \
     FOLIO_URL=$FOLIO_URL \
@@ -139,7 +140,8 @@ ENV SITE_HOSTNAME=$SITE_HOSTNAME \
     FTP_USER=$FTP_USER \
     FTP_PASSWORD=$FTP_PASSWORD \
     AUTH_FTP_USER=$AUTH_FTP_USER \
-    AUTH_FTP_PASSWORD=$AUTH_FTP_PASSWORD
+    AUTH_FTP_PASSWORD=$AUTH_FTP_PASSWORD \
+    DEPLOY_KEY=$DEPLOY_KEY
 
 # Setup Apache
 RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-default.conf && \
@@ -196,6 +198,7 @@ RUN \
     echo FTP_PASSWORD="$FTP_PASSWORD" >> /etc/environment && \
     echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment && \
     echo AUTH_FTP_PASSWORD="$AUTH_FTP_PASSWORD" >> /etc/environment && \
+    echo DEPLOY_KEY="$DEPLOY_KEY" >> /etc/environment && \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
@@ -214,6 +217,6 @@ RUN \
 EXPOSE 80
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
-   CMD curl --fail -s http://localhost:80/ || exit 1  
+   CMD curl --fail -s http://localhost:80/ || exit 1
 
 CMD /startup.sh
