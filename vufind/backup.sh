@@ -129,7 +129,6 @@ backup_collection() {
     SNAPSHOT="snapshot.${SNAPSHOT}"
     if [ ! -d "${ARGS[SHARED_DIR]}/solr_dropbox/${COLL}/${SNAPSHOT}" ]; then
         verbose "ERROR: Failed to start backup for the '${COLL}' collection in Solr!" 1
-        curl -s "http://solr2:8983/solr/${COLL}/replication?command=details&wt=json" # TODO remove
         exit 1
     fi
 
@@ -213,12 +212,8 @@ backup_db() {
         verbose "ERROR: Could not navigate into database backup directory (${ARGS[SHARED_DIR]}/db)" 1
         exit 1
     fi
-    BEFORE=$(ls -l ${ARGS[SHARED_DIR]}/db) # TODO remove
     if ! tar -cf "${TIMESTAMP}".tar ./*"${TIMESTAMP}".sql; then
         verbose "ERROR: Failed to compress the database dumps." 1
-        verbose "Contents before tar:" 1 # TODO remove
-        verbose "${BEFORE}" 1 # TODO remove
-        ls -l ${ARGS[SHARED_DIR]}/db # TODO remove
         exit 1
     else
         if ! rm ./*"${TIMESTAMP}.sql"; then
