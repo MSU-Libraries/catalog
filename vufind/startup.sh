@@ -11,14 +11,14 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
     mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/repo
     chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}/local-confs
     chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}/repo
+    # Set up deploy key
+    eval $( ssh-agent -s ) && \
+    echo "$DEPLOY_KEY" | base64 -d | ssh-add - && \
+    install -d -m 700 ~/.ssh/ && \
+    ( umask 022; touch ~/.ssh/known_hosts ) && \
+    ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
     # Set up the "repo" dir
     if [ ! -d "${SHARED_STORAGE}/${STACK_NAME}/repo/.git" ]; then
-        # Set up deploy key
-        eval $( ssh-agent -s ) && \
-        echo "$DEPLOY_KEY" | base64 -d | ssh-add - && \
-        install -d -m 700 ~/.ssh/ && \
-        ( umask 022; touch ~/.ssh/known_hosts ) && \
-        ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
         # Clone repository
         git clone -b ${STACK_NAME} git@gitlab.msu.edu:msu-libraries/devops/catalog.git ${SHARED_STORAGE}/${STACK_NAME}/repo
         # Set up the repository for group editting
@@ -31,7 +31,7 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
         chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/
         chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/module/
     fi
-    git fetch -C "${SHARED_STORAGE}/${STACK_NAME}"
+    git fetch -C "${SHARED_STORAGE}/${STACK_NAME}"/repo
     # Setting up "local" sync dir
     if [[ $( ls -1 ${SHARED_STORAGE}/${STACK_NAME}/local-confs/* | wc -l ) -gt 0 ]]; then
         # archive the last pipeline's configs
