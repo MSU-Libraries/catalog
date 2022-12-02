@@ -1,4 +1,5 @@
 import subprocess
+import asyncio
 import requests
 import aiohttp
 
@@ -35,8 +36,10 @@ def check_cluster_state_uuid():
         urls.append(f'http://monitoring{node}/monitoring/node/cluster_state_uuid')
     try:
         uuids = util.async_get_requests(urls)
-    except (aiohttp.ClientError) as err:
-        return f'Error reading cluster state uuid on node {node}: {err}'
+    except aiohttp.ClientError as err:
+        return f'Error reading cluster state uuid: {err}'
+    except asyncio.exceptions.TimeoutError:
+        return 'Timeout when reading cluster state uuid'
     return uuids[0] == uuids[1] and uuids[0] == uuids[2]
 
 def get_galera_status():
@@ -88,8 +91,10 @@ def get_solr_status():
         urls.append(f'http://solr{node}:8983/solr/admin/collections?action=clusterstatus')
     try:
         jsons = util.async_get_requests(urls, convert_to_json=True)
-    except (aiohttp.ClientError) as err:
+    except aiohttp.ClientError as err:
         return f'Error reading the solr clusterstatus: {err}'
+    except asyncio.exceptions.TimeoutError:
+        return 'Timeout when reading the solr clusterstatus'
 
     for node in range(1, 4):
         j = jsons[node-1]
@@ -111,8 +116,10 @@ def _check_vufind_home_page():
         urls.append(f'http://vufind{node}/')
     try:
         results = util.async_get_requests(urls)
-    except (aiohttp.ClientError) as err:
-        return f'Error reading vufind home page on node {node}: {err}'
+    except aiohttp.ClientError as err:
+        return f'Error reading vufind home page: {err}'
+    except asyncio.exceptions.TimeoutError:
+        return 'Timeout when reading vufind home page'
     for node in range(1, 4):
         text = results[node-1]
         if '</html>' not in text:
@@ -127,8 +134,10 @@ def _check_vufind_record_page():
         urls.append(f'http://vufind{node}/Record/folio.in00001912238')
     try:
         results = util.async_get_requests(urls)
-    except (aiohttp.ClientError) as err:
-        return f'Error reading vufind record page on node {node}: {err}'
+    except aiohttp.ClientError as err:
+        return f'Error reading vufind record page: {err}'
+    except asyncio.exceptions.TimeoutError:
+        return 'Timeout when reading vufind record page'
     for node in range(1, 4):
         text = results[node-1]
         if '</html>' not in text:
@@ -148,8 +157,10 @@ def _check_vufind_search_page():
             f'http://vufind{node}/Search/Results?limit=5&dfApplied=1&lookfor=+Automated+flight+test&type=AllFields')
     try:
         results = util.async_get_requests(urls)
-    except (aiohttp.ClientError) as err:
-        return f'Error reading vufind search page on node {node}: {err}'
+    except aiohttp.ClientError as err:
+        return f'Error reading vufind search page: {err}'
+    except asyncio.exceptions.TimeoutError:
+        return 'Timeout when reading vufind search page'
     for node in range(1, 4):
         text = results[node-1]
         if '</html>' not in text:
