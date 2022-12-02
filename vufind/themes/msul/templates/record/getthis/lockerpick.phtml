@@ -1,0 +1,27 @@
+<!-- Getthis: lockerpick -->
+<?php
+  $item = $this->getthis->getItem();
+  $loc = $this->getthis->getLocation();
+  $title = $this->driver->getTitle();
+  $bibnum = $this->driver->getSierraBN();
+  $author = $this->driver->getPrimaryAuthor();
+?>
+<div>
+    <p>
+        <b><a href="https://www.lib.msu.edu/mars/" target="_blank">Luxer One locker</a></b>:
+        You may pick up requested material at a Luxer One locker located
+        in the north entryway of the Main Library. To request material to be held for you in
+        a locker, please use the form below and you will be notified by email when the material
+        is available. You will use the access code provided in the email to retrieve the material.
+        Please note that this service could take up to 24 business hours.
+    </p>
+    <ul>
+        <li>
+            <a href="https://lib.msu.edu/lockerDelivery?&TI=<?= $this->escapeUrl($title) ?>
+            &CN=<?= $this->escapeUrl($author) ?>&AU=<?= $this->escapeUrl($author) ?>
+            &BIBNUM=<?= $this->escapeUrl($bibnum) ?>&LOC=<?= $this->escapeUrl($loc) ?>">
+                Request Item Pick up From a Locker
+            </a>
+        </li>
+    </ul>
+</div>

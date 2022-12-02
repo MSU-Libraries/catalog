@@ -146,8 +146,17 @@ class GetThisLoader {
     }
 
     public function showReqItem($item_id=null) {
-        //TODO
-        return true;
+        // ART and not RESERV and not isLibUseOnly
+        // BROWSING and stat AVAILABLE
+
+        return false;
+    }
+
+    public function showReqBusiness($item_id=null) {
+        if (Regex::BUSINESS($loc) && !Regex::RESERV($LOC)) {
+            return true;
+        }
+        return false;
     }
 
     public function showGetRovi($item_id=null) {

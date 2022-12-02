@@ -2,21 +2,15 @@
 $item = $this->getthis->getItem();
 $loc = $this->getthis->getLocation();
 ?>
-<div class='advSearchLimits'>
-<table id="fmBox" border="0">
-<tr><td>
-    <fieldset id="fbox">
-        <legend id="fheader">Request this Item</legend>
-        <label for="Da" width="100%">
-            You may check out the material from tha
-            <a href='http://locate.lib.msu.edu/map.cgi?LOC=<?= $this->escapeHtml($loc) ?>&CALL=<?= $this->escapeHtml($callnum) ?>'
-            target='_blank'>appropriate Service Desk</a> using call number <?= $this->escapeHtml($callnum) ?>,
-            during the Desk&#39;s open hours.
-            <?php if ($this->getthis->isLibUseOnly()) {
-                ?>However, this material cannot leave the building.<?php
-            } ?>
-        </label>
-    </fieldset>
-</td></tr>
-</table>
+<div>
+    <p>
+        <b>Request this Item:</b>
+        You may check out the material from the
+        <a href='http://locate.lib.msu.edu/map.cgi?LOC=<?= $this->escapeHtml($loc) ?>&CALL=<?= $this->escapeHtml($callnum) ?>'
+        target='_blank'>appropriate Service Desk</a> using call number <?= $this->escapeHtml($callnum) ?>,
+        during the Desk&#39;s open hours.
+        <?php if ($this->getthis->isLibUseOnly()) {
+            ?>However, this material cannot leave the building.<?php
+        } ?>
+    </p>
 </div>

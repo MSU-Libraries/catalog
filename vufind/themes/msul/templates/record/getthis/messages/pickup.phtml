@@ -5,20 +5,14 @@ $title = $this->driver->getTitle();
 $author = $this->driver->getPrimaryAuthor();
 $bibnum = $this->driver->getSierraBN();
 ?>
-<div class='advSearchLimits'>
-<table id="fmBox" border="0">
-<tr><td>
-    <fieldset id="fbox">
-        <legend id="fheader">Request this Item</legend>
-        <label for="Da" width="100%">
-            Materials must be paged before you can receive it. Please fill out
-            <a href='https://codeprod.lib.msu.edu/forms/reqform.php?TITLE=<?= $this->escapeUrl($title) ?>&CALL=<?= $this->escapeUrl($item['callnumber']) ?>&AUTHOR=<?= $this->escapeUrl($author) ?>&LOC=<?= $this->escapeUrl($loc) ?>&BIBNUM=<?= $this->escapeUrl($bibnum) ?>'>this form</a>
-            first and we will contact you when the item is ready for pickup.
-            <?php if ($this->getthis->isLibUseOnly()) {
-                ?>However, this material cannot leave the building.<?php
-            } ?>
-        </label>
-    </fieldset>
-</td></tr>
-</table>
+<div>
+    <p>
+        <b>Request this Item:</b>
+        Materials must be paged before you can receive it. Please fill out
+        <a href='https://codeprod.lib.msu.edu/forms/reqform.php?TITLE=<?= $this->escapeUrl($title) ?>&CALL=<?= $this->escapeUrl($item['callnumber']) ?>&AUTHOR=<?= $this->escapeUrl($author) ?>&LOC=<?= $this->escapeUrl($loc) ?>&BIBNUM=<?= $this->escapeUrl($bibnum) ?>'>this form</a>
+        first and we will contact you when the item is ready for pickup.
+        <?php if ($this->getthis->isLibUseOnly()) {
+            ?>However, this material cannot leave the building.<?php
+        } ?>
+    </p>
 </div>
