@@ -42,7 +42,7 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
     rsync -aiv /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/local-confs/
     # Set up the symlink
     rm -rf /usr/local/vufind/local
-    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/local-confs /usr/local/vufind
+    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/local-confs /usr/local/vufind/local
     rm -rf /usr/local/vufind/themes/msul
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/themes/msul /usr/local/vufind/themes
     rm -rf /usr/local/vufind/module/Catalog
