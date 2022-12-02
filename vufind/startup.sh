@@ -12,10 +12,10 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
     chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}/local-confs
     chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}/repo
     # Set up deploy key
-    eval $( ssh-agent -s ) && \
-    echo "$DEPLOY_KEY" | base64 -d | ssh-add - && \
-    install -d -m 700 ~/.ssh/ && \
-    ( umask 022; touch ~/.ssh/known_hosts ) && \
+    eval $( ssh-agent -s )
+    echo "$DEPLOY_KEY" | base64 -d | ssh-add -
+    install -d -m 700 ~/.ssh/
+    ( umask 022; touch ~/.ssh/known_hosts )
     ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
     # Set up the "repo" dir
     if [ ! -d "${SHARED_STORAGE}/${STACK_NAME}/repo/.git" ]; then
