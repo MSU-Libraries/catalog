@@ -119,8 +119,7 @@ backup_collection() {
     # Trigger the backup in Solr
     verbose "Starting backup of '${COLL}' index"
     SNAPSHOT="$(date +%Y%m%d%H%M%S)"
-    # TODO add back redirect to dev/null
-    if ! curl "http://solr2:8983/solr/${COLL}/replication?command=backup&location=/mnt/solr_backups/${COLL}&name=${SNAPSHOT}"; then
+    if ! curl "http://solr2:8983/solr/${COLL}/replication?command=backup&location=/mnt/solr_backups/${COLL}&name=${SNAPSHOT}"i> /dev/null 2>&1; then
         verbose "ERROR: Failed to trigger a backup of the '${COLL}' collection in Solr. Exit code: $?" 1
         exit 1
     fi

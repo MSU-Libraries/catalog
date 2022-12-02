@@ -171,7 +171,7 @@ Perform Database Backup:
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   script:
     - > 
-      if [[ "${STACK_NAME}" != catalog-* ]]; then
+      if [[ "${STACK_NAME}" != catalog-prod ]]; then
          echo "Not backing up non production environment.";
          exit 0;
       fi
