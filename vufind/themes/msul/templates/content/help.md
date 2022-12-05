@@ -1,13 +1,13 @@
 ## Public Catalog Functionality
 
-The VuFind Public Catalog provides several different options for searching and retrieving both locally held materials, such as books and other media, and journal articles and other electronic resources for which the Libraries has negotiated access. 
+The VuFind-based Public Catalog provides several different options for searching and retrieving locally held materials, such as books and other media, and journal articles and other online resources accessible to MSUL users. 
 
 ### Search
 
-The public catalog search options are listed under three tabs on each and every VuFind page: "Catalog", "Articles", and "All". There are different options for limiting search queries and faceting on the results across the three tabs because of the different sources of the underlying data and their various affordances.
+The public catalog search options are listed under three tabs on most VuFind pages: "Catalog", "Journal Articles", and "All". Because of the differing sources for the underlying data, and our ability to change that data (or not), each tab offers a different set of options for limiting search queries and faceting on the results.
 
-* **Catalog**: This is the search of the main VuFind index, which contains records for all unsuppressed records in FOLIO plus 1.8 million records stored in Holdings Link Management (HLM). Robust options for limiting searches and faceting results are available based on the comprehensive descriptive work of our technical services teams.
-* **Articles**: This is a search against EDS but limited to resources of type "article" so as to avoid duplication with the Catalog tab.
+* **Catalog**: This is the search of the main catalog index, which contains records for all unsuppressed records in FOLIO plus 1.8 million records stored in Holdings Link Management (HLM / FOLIO eHoldings app). Robust options for limiting searches and faceting results are available according to the comprehensive descriptive work of our technical services teams.
+* **Journal Articles**: This is currently a search against all of EDS but in the future will be limited to exclude our local catalog and eBooks from our custom eBook catalogs.
 * **All**: A combined view of all materials both from our local catalog and EDS. Since this federated search has to display data from unlike sources, the more advanced search and faceting options can't be very well recreated here (although some improvements could be the target of future work).
 
 #### Main Search Box
@@ -77,7 +77,7 @@ The search results page includes a few options to save and send results.
 
 ### Browse
 
-The main search box dropdown menu offers 4 "Browse" options which instead of returning item records return lists according to the field selected: Author, Title, Topic, or Call Number. This same functionality is available via the "Browse Alphabetically" link at the bottom of every page.
+The main search box dropdown menu offers 4 "Browse" options which instead of returning item records, return left-anchored lists according to the field selected: Author, Title, Topic, or Call Number. This same functionality is available via the "Browse Alphabetically" link at the bottom of every page.
 
 A more elaborate faceted browsing experience is available by using the "Browse the Catalog" link also located at the bottom of every page. This section allows you to combine browsing across different fields to arrive at views like
 * [American Cooking by era](https://catalog-beta.lib.msu.edu/vufind/Browse/Era?findby=topic&category=&query=%22Cooking%2C+American%22&query_field=topic_facet&facet_field=era_facet)
@@ -103,7 +103,7 @@ pattern_map.title.pattern_0 = (.*)\s?\/$=>$1
 pattern_map.title.pattern_1 = keepRaw
 ```
 
-The new configuration has the additional specification `(pattern_map.title)`, which processes the text of the title to eliminate the trailing slash (`/`) at the end of the `245a` subfield. Small changes to the text of any given field can be made using this programmatic method. Changes to individual fields should be made in FOLIO.
+The new configuration has the additional specification `(pattern_map.title)`, which processes the text of the title to eliminate the trailing slash (`/`) at the end of the `245a` subfield. Small *global* changes to the text of any given field can be made using this programmatic method. Changes to field values for individual records should be made in FOLIO.
 
 Multi-valued fields, such as Topic, can be populated from a whole set of fields:
 ```
@@ -111,7 +111,7 @@ topic_facet = 600x:610x:611x:630x:648x:650a:650x:651x:655x
 ```
 The topic facet field pulls values from all of the MARC fields specified above. 
 
-In addition to the bibliographic content, each record pulled from FOLIO is amended to include some holdings-specific information, which allows VuFind to provide information about the location of individual items. Real time information about availability is pulled from FOLIO any time a user loads a page.
+In addition to the bibliographic content, each record pulled from FOLIO is appended with holdings-specific information, which allows VuFind to provide information about the location of individual items. Real time information about availability, on the other hand, is pulled from FOLIO any time a user loads a page.
 ```
 952 f   f   |a Michigan State Unversity-Library of Michigan  |b Michigan State University  |c MSU Special Collections  |d MSU Special Collections - Comic Art  |t 0  |e PN6727.K53 K5 1994  |h Library of Congress classification  |i Printed Material  |n 1 
 ```
