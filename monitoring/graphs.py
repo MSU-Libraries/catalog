@@ -85,7 +85,7 @@ def graph(data, period):
     pt_y = []
     pt_x = []
     for node in range(1, 4):
-        pt_y_item = json.loads(nodes_graph_data[node-1]).pt_y
+        pt_y_item = json.loads(nodes_graph_data[node-1])['pt_y']
         pt_y.append(pt_y_item)
         pt_x_item = []
         for i in range(0, len(pt_y_item)):
