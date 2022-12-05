@@ -13,8 +13,9 @@ def main():
     conn = db.connect(user='monitoring', password='monitoring', host='galera', database="monitoring")
     cur = conn.cursor()
     try:
-        statement = "INSERT INTO data (node, time, available_memory, available_disk_space) VALUES (%s, %s, %s, %s)"
-        data = (node, time, memory, disk)
+        statement = "INSERT INTO data (node, time, available_memory, available_disk_space, " \
+            "apache_requests) VALUES (%s, %s, %s, %s, %s)"
+        data = (node, time, memory, disk, 0)
         cur.execute(statement, data)
         conn.commit()
     except db.Error as err:
