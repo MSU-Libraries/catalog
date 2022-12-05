@@ -1,4 +1,4 @@
-function plot(pt_x, pt_y, data_name, period) {
+function plot(node, pt_x, pt_y, data_name, period) {
     var trace1 = {
         type: 'scatter',
         x: pt_x,
@@ -10,5 +10,5 @@ function plot(pt_x, pt_y, data_name, period) {
         font: { size: 16 }
     };
     var config = { responsive: true };
-    Plotly.newPlot('graph', data, layout, config);
+    Plotly.newPlot('graph'+node, data, layout, config);
 }

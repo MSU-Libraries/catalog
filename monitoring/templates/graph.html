@@ -28,11 +28,28 @@
                 </ul>
             </div>
             <div class="col-9">
-                <div id="graph"></div>
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#node1">Node 1</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#node2">Node 2</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#node3">Node 3</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane container active" id="node1"><div id="graph1"></div></div>
+                    <div class="tab-pane container fade" id="node2"><div id="graph2"></div></div>
+                    <div class="tab-pane container fade" id="node3"><div id="graph3"></div></div>
+                </div>
             </div>
         </div>
     </div>
     <script>
-        plot({{pt_x|tojson}}, {{pt_y|tojson}}, "{{data}}", "{{period}}");
+        plot(1, {{pt_x[0]|tojson}}, {{pt_y[0]|tojson}}, "{{data}}", "{{period}}");
+        plot(2, {{pt_x[1]|tojson}}, {{pt_y[1]|tojson}}, "{{data}}", "{{period}}");
+        plot(3, {{pt_x[2]|tojson}}, {{pt_y[2]|tojson}}, "{{data}}", "{{period}}");
     </script>
 {% endblock %}

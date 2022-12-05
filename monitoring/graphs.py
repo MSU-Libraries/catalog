@@ -1,7 +1,12 @@
 from datetime import datetime, timedelta
 import os
+import asyncio
+import json
 import flask
 import mariadb as db
+import aiohttp
+
+import util
 
 def _times_by_period(period):
     delta_by_period = {
@@ -49,24 +54,41 @@ def _sql_query(data, period_start, period_end, group):
     return f'SELECT {sql_select}, AVG({data}) AS {data} FROM data ' \
         f'WHERE time > "{sql_start}" AND time < "{sql_end}" AND node = {node} GROUP BY {sql_group};'
 
-def _get_db_data(data, period):
+def node_graph_data(data, period):
     # someday this will support any given date/time for start and end
     (period_start, period_end) = _times_by_period(period)
     group = _group_by_times(period_start, period_end)
-    conn = db.connect(user='monitoring', password='monitoring', host='galera', database="monitoring")
-    cur = conn.cursor()
-    cur.execute(_sql_query(data, period_start, period_end, group))
-    result = []
-    for row in cur:
-        result.append(row[-1])
+    try:
+        conn = db.connect(user='monitoring', password='monitoring', host='galera', database="monitoring")
+        cur = conn.cursor()
+        cur.execute(_sql_query(data, period_start, period_end, group))
+        pt_y = []
+        for row in cur:
+            pt_y.append(row[-1])
+    except db.Error as err:
+        return f"Database error: {err}"
+    result = {
+        pt_y: pt_y
+    }
     return result
 
 def graph(data, period):
+    urls = []
+    for node in range(1, 4):
+        urls.append(f'http://monitoring{node}/monitoring/node/graph_data/{data}/{period}')
     try:
-        pt_y = _get_db_data(data, period)
-    except db.Error as err:
-        return f"Database error: {err}"
+        nodes_graph_data = util.async_get_requests(urls)
+    except aiohttp.ClientError as err:
+        return f'Error getting graph data: {err}'
+    except asyncio.exceptions.TimeoutError:
+        return 'Timeout getting graph data'
+    pt_y = []
     pt_x = []
-    for i in range(0, len(pt_y)):
-        pt_x.append(i)
+    for node in range(1, 4):
+        pt_y_item = json.loads(nodes_graph_data[node-1]).pt_y
+        pt_y.append(pt_y_item)
+        pt_x_item = []
+        for i in range(0, len(pt_y_item)):
+            pt_x_item.append(i)
+        pt_x.append(pt_x_item)
     return flask.render_template('graph.html', data=data, period=period, pt_x=pt_x, pt_y=pt_y)

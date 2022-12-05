@@ -9,6 +9,10 @@ import graphs
 
 app = flask.Flask(__name__, static_url_path='/monitoring/static')
 
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=collector.main, id='collector', replace_existing=True, trigger='interval', minutes=1)
+scheduler.start()
+
 @app.route('/monitoring/node/logs/<path:service>')
 def node_logs(service):
     return logs.node_logs(service)
@@ -28,6 +32,10 @@ def node_available_memory():
 @app.route('/monitoring/node/available_disk_space')
 def node_available_disk_space():
     return status.node_available_disk_space()
+
+@app.route('/monitoring/node/graph_data/<data>/<period>')
+def node_graph_data(data, period):
+    return graphs.node_graph_data(data, period)
 
 @app.route('/monitoring/graphs/<data>/<period>')
 def graph(data, period):
@@ -60,7 +68,4 @@ def home():
 
 
 if __name__ == "__main__":
-    scheduler = BackgroundScheduler()
-    job = scheduler.add_job(collector.main, 'interval', minutes=1)
-    scheduler.start()
     app.run(debug=True, host='0.0.0.0', port=80)
