@@ -35,22 +35,22 @@ def _sql_query(data, period_start, period_end, group):
     sql_start = period_start.strftime('%Y-%m-%d %H:%M:%S')
     sql_end = period_end.strftime('%Y-%m-%d %H:%M:%S')
     sql_select_by_group = {
-        'MONTH': 'YEAR(t) AS Year, MONTH(t) AS Month',
-        'DAY': 'YEAR(t) AS Year, MONTH(t) AS Month, DAY(t) AS Day',
-        'HOUR': 'YEAR(t) AS Year, MONTH(t) AS Month, DAY(t) AS Day, HOUR(t) AS Hour',
-        'MINUTE': 'YEAR(t) AS Year, MONTH(t) AS Month, DAY(t) AS Day, HOUR(t) AS Hour, MINUTE(t) AS Minute'
+        'MONTH': 'YEAR(time) AS Year, MONTH(time) AS Month',
+        'DAY': 'YEAR(time) AS Year, MONTH(time) AS Month, DAY(time) AS Day',
+        'HOUR': 'YEAR(time) AS Year, MONTH(time) AS Month, DAY(time) AS Day, HOUR(time) AS Hour',
+        'MINUTE': 'YEAR(time) AS Year, MONTH(time) AS Month, DAY(time) AS Day, HOUR(time) AS Hour, MINUTE(time) AS Minute'
     }
     sql_select = sql_select_by_group[group]
     sql_group_by_group = {
-        'MONTH': 'YEAR(t), MONTH(t)',
-        'DAY': 'YEAR(t), MONTH(t), DAY(t)',
-        'HOUR': 'YEAR(t), MONTH(t), DAY(t), HOUR(t)',
-        'MINUTE': 'YEAR(t), MONTH(t), DAY(t), HOUR(t), MINUTE(t)'
+        'MONTH': 'YEAR(time), MONTH(time)',
+        'DAY': 'YEAR(time), MONTH(time), DAY(time)',
+        'HOUR': 'YEAR(time), MONTH(time), DAY(time), HOUR(time)',
+        'MINUTE': 'YEAR(time), MONTH(time), DAY(time), HOUR(time), MINUTE(time)'
     }
     sql_group = sql_group_by_group[group]
     node = os.getenv('NODE')
-    return f'SELECT {sql_select}, AVG({data}) AS {data} FROM memory ' \
-        f'WHERE time > {sql_start} AND time < {sql_end} AND node = {node} GROUP BY {sql_group};'
+    return f'SELECT {sql_select}, AVG({data}) AS {data} FROM data ' \
+        f'WHERE time > "{sql_start}" AND time < "{sql_end}" AND node = {node} GROUP BY {sql_group};'
 
 def _get_db_data(data, period):
     # someday this will support any given date/time for start and end

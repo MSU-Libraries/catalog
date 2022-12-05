@@ -74,6 +74,7 @@ services:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:${CI_COMMIT_SHORT_SHA}
     command: /startup-cron.sh
     volumes:
+      - logs:/mnt/logs
       - /mnt/shared:/mnt/shared:rw
     networks:
       - internal
