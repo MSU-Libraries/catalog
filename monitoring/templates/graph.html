@@ -5,16 +5,13 @@
 {% block scripts %}
     <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
     <script src="{{ url_for('static', filename='js/plot.js') }}"></script>
-    <script>
-        plot({{pt_x|tojson}}, {{pt_y|tojson}}, {{data}}, {{period}});
-    </script>
 {% endblock %}
 
 {% block content %}
     <p><a href="/monitoring">Back to monitoring home</a></p>
     <div class="container">
         <div class="row">
-            <div class="col">
+            <div class="col-3">
                 <ul>
                     <li>
                         <a href="/monitoring/graphs/{{data}}/hour">Last hour</a>
@@ -30,9 +27,12 @@
                     </li>
                 </ul>
             </div>
-            <div class="col">
+            <div class="col-9">
                 <div id="graph"></div>
             </div>
         </div>
     </div>
+    <script>
+        plot({{pt_x|tojson}}, {{pt_y|tojson}}, "{{data}}", "{{period}}");
+    </script>
 {% endblock %}

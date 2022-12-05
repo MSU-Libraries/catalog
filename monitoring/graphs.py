@@ -58,11 +58,8 @@ def _get_db_data(data, period):
     cur.execute(_sql_query(data, period_start, period_end, group))
     result = []
     for row in cur:
-        result.append(row['data'])
+        result.append(row[-1])
     return result
-
-def _get_title(data, period):
-    return f'{data} for the last {period}'
 
 def graph(data, period):
     try:

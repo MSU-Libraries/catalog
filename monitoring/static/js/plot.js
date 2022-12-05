@@ -1,4 +1,4 @@
-function plot(pt_x, pt_y, data, period) {
+function plot(pt_x, pt_y, data_name, period) {
     var trace1 = {
         type: 'scatter',
         x: pt_x,
@@ -6,7 +6,7 @@ function plot(pt_x, pt_y, data, period) {
     };
     var data = [ trace1 ];
     var layout = { 
-        title: data + ' for the last ' + period,
+        title: data_name + ' for the last ' + period,
         font: { size: 16 }
     };
     var config = { responsive: true };
