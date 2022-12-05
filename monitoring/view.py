@@ -1,10 +1,17 @@
 import flask
+from apscheduler.schedulers.background import BackgroundScheduler
 
 import logs
 import status
+import collector
+import graphs
 
 
 app = flask.Flask(__name__, static_url_path='/monitoring/static')
+
+scheduler = BackgroundScheduler()
+job = scheduler.add_job(collector.main, 'interval', minutes=1)
+scheduler.start()
 
 @app.route('/monitoring/node/logs/<path:service>')
 def node_logs(service):
@@ -25,6 +32,14 @@ def node_available_memory():
 @app.route('/monitoring/node/available_disk_space')
 def node_available_disk_space():
     return status.node_available_disk_space()
+
+@app.route('/monitoring/graphs/<data>/<period>')
+def graph(data, period):
+    if data not in ['available_memory', 'available_disk_space', 'apache_requests']:
+        return 'Error: unknown data'
+    if period not in ['hour', 'day', 'week', 'month']:
+        return 'Error: unknown period'
+    return graphs.graph(data, period)
 
 @app.route('/monitoring')
 def home():

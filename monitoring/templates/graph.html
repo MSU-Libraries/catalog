@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+
+{% block title %}Graphs - {{data}} - {{period}}{% endblock %}
+
+{% block content %}
+    <p><a href="/monitoring">Back to monitoring home</a></p>
+    <div class="container">
+        <div class="row">
+            <ul>
+                <li>
+                    <a href="/monitoring/graphs/{{data}}/hour">Last hour</a>
+                </li>
+                <li>
+                    <a href="/monitoring/graphs/{{data}}/day">Last day</a>
+                </li>
+                <li>
+                    <a href="/monitoring/graphs/{{data}}/week">Last week</a>
+                </li>
+                <li>
+                    <a href="/monitoring/graphs/{{data}}/month">Last month</a>
+                </li>
+            </ul>
+        </div>
+        <div class="row">
+            <div id="graph">{{svg}}</div>
+        </div>
+    </div>
+{% endblock %}
