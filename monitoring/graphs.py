@@ -1,9 +1,6 @@
 from datetime import datetime, timedelta
 import os
-import io
 import flask
-import matplotlib.pyplot as plt
-import numpy as np
 import mariadb as db
 
 def _times_by_period(period):
@@ -69,12 +66,10 @@ def _get_title(data, period):
 
 def graph(data, period):
     try:
-        values = _get_db_data(data, period)
+        pt_y = _get_db_data(data, period)
     except db.Error as err:
         return f"Database error: {err}"
-    plt.plot(np.array(values))
-    plt.title(_get_title(data, period))
-    streamed_file = io.StringIO()
-    plt.savefig(streamed_file, format = "svg")
-    svg = streamed_file.getvalue()
-    return flask.render_template('graph.html', data=data, period=period, svg=svg)
+    pt_x = []
+    for i in range(0, len(pt_y)):
+        pt_x.append(i)
+    return flask.render_template('graph.html', data=data, period=period, pt_x=pt_x, pt_y=pt_y)

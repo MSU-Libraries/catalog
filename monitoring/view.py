@@ -9,10 +9,6 @@ import graphs
 
 app = flask.Flask(__name__, static_url_path='/monitoring/static')
 
-scheduler = BackgroundScheduler()
-job = scheduler.add_job(collector.main, 'interval', minutes=1)
-scheduler.start()
-
 @app.route('/monitoring/node/logs/<path:service>')
 def node_logs(service):
     return logs.node_logs(service)
@@ -64,4 +60,7 @@ def home():
 
 
 if __name__ == "__main__":
+    scheduler = BackgroundScheduler()
+    job = scheduler.add_job(collector.main, 'interval', minutes=1)
+    scheduler.start()
     app.run(debug=True, host='0.0.0.0', port=80)
