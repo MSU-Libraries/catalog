@@ -68,7 +68,7 @@ def node_graph_data(data, period):
     except db.Error as err:
         return f"Database error: {err}"
     result = {
-        pt_y: pt_y
+        'pt_y': pt_y
     }
     return result
 

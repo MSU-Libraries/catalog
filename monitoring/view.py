@@ -35,6 +35,10 @@ def node_available_disk_space():
 
 @app.route('/monitoring/node/graph_data/<data>/<period>')
 def node_graph_data(data, period):
+    if data not in ['available_memory', 'available_disk_space', 'apache_requests']:
+        return 'Error: unknown data'
+    if period not in ['hour', 'day', 'week', 'month']:
+        return 'Error: unknown period'
     return graphs.node_graph_data(data, period)
 
 @app.route('/monitoring/graphs/<data>/<period>')
