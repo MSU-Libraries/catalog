@@ -1,3 +1,4 @@
+import atexit
 import flask
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -12,6 +13,11 @@ app = flask.Flask(__name__, static_url_path='/monitoring/static')
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=collector.main, id='collector', replace_existing=True, trigger='interval', minutes=1)
 scheduler.start()
+
+def shutdown():
+    scheduler.shutdown()
+
+atexit.register(shutdown)
 
 @app.route('/monitoring/node/logs/<path:service>')
 def node_logs(service):
