@@ -1,7 +1,7 @@
 FROM python:3.8-alpine
 
 RUN apk update && \
-    apk add mariadb-client mariadb-connector-c
+    apk add mariadb-client mariadb-dev mariadb-connector-c
 
 COPY ./requirements.txt /app/requirements.txt
 
