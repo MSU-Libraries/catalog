@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 
-{% block title %}Graphs - {{data}} - {{period}}{% endblock %}
+{% block title %}Graphs - {{data.replace('_', ' ')}} - {{period}}{% endblock %}
 
 {% block scripts %}
     <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
