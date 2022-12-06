@@ -67,13 +67,13 @@ def node_graph_data(data, period):
         pt_y = []
         for row in cur:
             if group == 'MONTH':
-                x = datetime(row[0], row[1], 1).strftime('{:%Y-%m}')
+                x = datetime(row[0], row[1], 1).strftime('%Y-%m')
             elif group == 'DAY':
-                x = datetime(row[0], row[1], row[2]).strftime('{:%Y-%m-%d}')
+                x = datetime(row[0], row[1], row[2]).strftime('%Y-%m-%d')
             elif group == 'HOUR':
-                x = datetime(row[0], row[1], row[2], row[3]).strftime('{:%Y-%m-%d %H}')
+                x = datetime(row[0], row[1], row[2], row[3]).strftime('%Y-%m-%d %H')
             else:
-                x = datetime(row[0], row[1], row[2], row[3], row[4]).strftime('{:%Y-%m-%d %H:%M:%S}')
+                x = datetime(row[0], row[1], row[2], row[3], row[4]).strftime('%Y-%m-%d %H:%M:%S')
             pt_x.append(x)
             pt_y.append(row[-1])
     except db.Error as err:
