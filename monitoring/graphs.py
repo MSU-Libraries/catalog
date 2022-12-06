@@ -40,8 +40,8 @@ def _sql_query(data, period_start, period_end, group):
         'MONTH': 'YEAR(time) AS Year, MONTH(time) AS Month',
         'DAY': 'YEAR(time) AS Year, MONTH(time) AS Month, DAY(time) AS Day',
         'HOUR': 'YEAR(time) AS Year, MONTH(time) AS Month, DAY(time) AS Day, HOUR(time) AS Hour',
-        'MINUTE': 'YEAR(time) AS Year, MONTH(time) AS Month, DAY(time) AS Day, " \
-            "HOUR(time) AS Hour, MINUTE(time) AS Minute',
+        'MINUTE': 'YEAR(time) AS Year, MONTH(time) AS Month, DAY(time) AS Day, ' \
+            'HOUR(time) AS Hour, MINUTE(time) AS Minute',
     }
     sql_select = sql_select_by_group[group]
     sql_group_by_group = {
