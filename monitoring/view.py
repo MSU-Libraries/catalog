@@ -1,4 +1,4 @@
-import atexit
+import os
 import flask
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -10,14 +10,10 @@ import graphs
 
 app = flask.Flask(__name__, static_url_path='/monitoring/static')
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(func=collector.main, id='collector', replace_existing=True, trigger='interval', minutes=1)
-scheduler.start()
-
-def shutdown():
-    scheduler.shutdown()
-
-atexit.register(shutdown)
+if not app.debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(func=collector.main, id='collector', replace_existing=True, trigger='interval', minutes=1)
+    scheduler.start()
 
 @app.route('/monitoring/node/logs/<path:service>')
 def node_logs(service):
