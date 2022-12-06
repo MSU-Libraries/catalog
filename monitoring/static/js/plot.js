@@ -5,11 +5,13 @@ function plot(node, pt_x, pt_y, data_name, period) {
         y: pt_y
     };
     var data = [ trace1 ];
+    var ytitle = data_name == 'apache_requests' ? 'unfiltered apache requests' :
+        'Minimum ' + data_name.replaceAll('_', ' ') + ' (%)';
     var layout = { 
         title: data_name.replaceAll('_', ' ') + ' for the last ' + period,
         font: { size: 16 },
         yaxis: {
-            title: 'Minimum ' + data_name.replaceAll('_', ' ') + ' (%)'
+            title: ytitle
         }
     };
     var config = { responsive: true };
