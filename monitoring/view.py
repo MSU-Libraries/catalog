@@ -8,13 +8,9 @@ import collector
 import graphs
 
 
-print('starting view.py')
-print('before flask.Flask WERKZEUG_RUN_MAIN='+os.getenv('WERKZEUG_RUN_MAIN', 'not set'))
 app = flask.Flask(__name__, static_url_path='/monitoring/static')
-print('after flask.Flask WERKZEUG_RUN_MAIN='+os.getenv('WERKZEUG_RUN_MAIN', 'not set'))
 
-if os.getenv('WERKZEUG_RUN_MAIN') == 'true':
-    print('starting scheduler')
+if os.getenv('STACK_NAME') == 'catalog-prod' or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
     scheduler = BackgroundScheduler()
     scheduler.add_job(func=collector.main, id='collector', replace_existing=True, trigger='interval', minutes=1)
     scheduler.start()
@@ -78,6 +74,5 @@ def home():
 
 
 if __name__ == "__main__":
-    print('__main__')
-    print('WERKZEUG_RUN_MAIN='+os.getenv('WERKZEUG_RUN_MAIN', 'not set'))
-    app.run(debug=True, host='0.0.0.0', port=80)
+    debug = os.getenv('STACK_NAME') != 'catalog-prod'
+    app.run(debug=debug, host='0.0.0.0', port=80)

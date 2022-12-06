@@ -14,6 +14,6 @@ RUN pip install -r requirements.txt
 
 COPY . /app
 
-ENTRYPOINT [ "python", "-u" ]
+ENTRYPOINT [ "python" ]
 
-CMD ["view.py" ]
+CMD [ "view.py" ]
