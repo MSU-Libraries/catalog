@@ -9,7 +9,7 @@ import graphs
 
 
 print('starting view.py')
-print('WERKZEUG_RUN_MAIN='+os.getenv('WERKZEUG_RUN_MAIN'))
+print('WERKZEUG_RUN_MAIN='+os.getenv('WERKZEUG_RUN_MAIN', 'not set'))
 app = flask.Flask(__name__, static_url_path='/monitoring/static')
 
 if not app.debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
@@ -82,5 +82,5 @@ def initialize():
 
 if __name__ == "__main__":
     print('__main__')
-    print('WERKZEUG_RUN_MAIN='+os.getenv('WERKZEUG_RUN_MAIN'))
+    print('WERKZEUG_RUN_MAIN='+os.getenv('WERKZEUG_RUN_MAIN', 'not set'))
     app.run(debug=True, host='0.0.0.0', port=80)
