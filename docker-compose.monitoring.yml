@@ -20,6 +20,7 @@ services:
         max-size: "10m"
     environment:
       NODE: "{{slice .Node.Hostname 8 9}}"
+      STACK_NAME: "${STACK_NAME}"
     deploy:
       mode: replicated
       replicas: 3
