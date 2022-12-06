@@ -27,7 +27,9 @@ def cluster_state_uuid():
             "variable_name='wsrep_cluster_state_uuid';"],
             capture_output=True, text=True, timeout=TIMEOUT, check=True)
     except subprocess.CalledProcessError as err:
-        return f"Error checking the status: {err.stderr}"
+        return f"Error getting the cluster state uuid: {err.stderr}"
+    except subprocess.TimeoutExpired:
+        return "Timeout getting the cluster state uuid"
     return process.stdout
 
 def check_cluster_state_uuid():
@@ -49,6 +51,8 @@ def get_galera_status():
         capture_output=True, text=True, timeout=TIMEOUT, check=True)
     except subprocess.CalledProcessError as err:
         return f"Error checking the status: {err.stderr}"
+    except subprocess.TimeoutExpired:
+        return "Timeout when checking the status"
     cluster_size = process.stdout.strip()
     if cluster_size != '3':
         return f'Error: wrong cluster size: {cluster_size}'
@@ -189,6 +193,8 @@ def node_available_memory():
             capture_output=True, text=True, timeout=TIMEOUT, check=True)
     except subprocess.CalledProcessError as err:
         return f"Error getting available memory: {err.stderr}"
+    except subprocess.TimeoutExpired:
+        return "Timeout when getting available memory"
     return process.stdout
 
 def node_available_disk_space():
@@ -197,6 +203,8 @@ def node_available_disk_space():
             capture_output=True, text=True, timeout=TIMEOUT, check=True)
     except subprocess.CalledProcessError as err:
         return f"Error getting available disk space: {err.stderr}"
+    except subprocess.TimeoutExpired:
+        return "Timeout when getting available disk space"
     return process.stdout
 
 def get_memory_status():
