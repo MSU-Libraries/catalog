@@ -53,7 +53,11 @@ def _sql_query(data, period_start, period_end, group):
     }
     sql_group = sql_group_by_group[group]
     node = os.getenv('NODE')
-    return f'SELECT {sql_select}, MIN({data}) AS {data} FROM data ' \
+    if data == 'apache_requests':
+        aggreg = 'AVG'
+    else:
+        aggreg = 'MIN'
+    return f'SELECT {sql_select}, {aggreg}({data}) AS {data} FROM data ' \
         f'WHERE time > "{sql_start}" AND time < "{sql_end}" AND node = {node} GROUP BY {sql_group};'
 
 def node_graph_data(data, period):
