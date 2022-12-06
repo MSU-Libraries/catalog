@@ -9,10 +9,11 @@ import graphs
 
 
 print('starting view.py')
-print('WERKZEUG_RUN_MAIN='+os.getenv('WERKZEUG_RUN_MAIN', 'not set'))
+print('before flask.Flask WERKZEUG_RUN_MAIN='+os.getenv('WERKZEUG_RUN_MAIN', 'not set'))
 app = flask.Flask(__name__, static_url_path='/monitoring/static')
+print('after flask.Flask WERKZEUG_RUN_MAIN='+os.getenv('WERKZEUG_RUN_MAIN', 'not set'))
 
-if not app.debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
+if os.getenv('WERKZEUG_RUN_MAIN') == 'true':
     print('starting scheduler')
     scheduler = BackgroundScheduler()
     scheduler.add_job(func=collector.main, id='collector', replace_existing=True, trigger='interval', minutes=1)
@@ -75,10 +76,6 @@ def home():
         }
     return flask.render_template('index.html', services=services)
 
-
-@app.before_first_request
-def initialize():
-    print('initialize using app.before_first_request')
 
 if __name__ == "__main__":
     print('__main__')
