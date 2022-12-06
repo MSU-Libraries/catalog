@@ -1,7 +1,10 @@
 FROM python:3.8-alpine
 
 RUN apk update && \
-    apk add mariadb-client
+    apk add mariadb-client mariadb-dev mariadb-connector-c gcc musl-dev tzdata && \
+    ln -fs /usr/share/zoneinfo/America/Detroit /etc/localtime
+
+ENV TZ=America/Detroit
 
 COPY ./requirements.txt /app/requirements.txt
 
@@ -13,4 +16,4 @@ COPY . /app
 
 ENTRYPOINT [ "python" ]
 
-CMD ["view.py" ]
+CMD [ "view.py" ]
