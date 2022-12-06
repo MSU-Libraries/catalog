@@ -40,14 +40,15 @@ def _sql_query(data, period_start, period_end, group):
         'MONTH': 'YEAR(time) AS Year, MONTH(time) AS Month',
         'DAY': 'YEAR(time) AS Year, MONTH(time) AS Month, DAY(time) AS Day',
         'HOUR': 'YEAR(time) AS Year, MONTH(time) AS Month, DAY(time) AS Day, HOUR(time) AS Hour',
-        'MINUTE': 'YEAR(time) AS Year, MONTH(time) AS Month, DAY(time) AS Day, HOUR(time) AS Hour, MINUTE(time) AS Minute'
+        'MINUTE': 'YEAR(time) AS Year, MONTH(time) AS Month, DAY(time) AS Day, " \
+            "HOUR(time) AS Hour, MINUTE(time) AS Minute',
     }
     sql_select = sql_select_by_group[group]
     sql_group_by_group = {
         'MONTH': 'YEAR(time), MONTH(time)',
         'DAY': 'YEAR(time), MONTH(time), DAY(time)',
         'HOUR': 'YEAR(time), MONTH(time), DAY(time), HOUR(time)',
-        'MINUTE': 'YEAR(time), MONTH(time), DAY(time), HOUR(time), MINUTE(time)'
+        'MINUTE': 'YEAR(time), MONTH(time), DAY(time), HOUR(time), MINUTE(time)',
     }
     sql_group = sql_group_by_group[group]
     node = os.getenv('NODE')
@@ -66,13 +67,13 @@ def node_graph_data(data, period):
         pt_y = []
         for row in cur:
             if group == 'MONTH':
-                x = f'{row[0]}-{row[1]}'
+                x = datetime(row[0], row[1], 1).strftime('{:%Y-%m}')
             elif group == 'DAY':
-                x = f'{row[0]}-{row[1]}-{row[2]}'
+                x = datetime(row[0], row[1], row[2]).strftime('{:%Y-%m-%d}')
             elif group == 'HOUR':
-                x = f'{row[0]}-{row[1]}-{row[2]} {row[3]}'
+                x = datetime(row[0], row[1], row[2], row[3]).strftime('{:%Y-%m-%d %H}')
             else:
-                x = f'{row[0]}-{row[1]}-{row[2]} {row[3]}:{row[4]}:{row[5]}'
+                x = datetime(row[0], row[1], row[2], row[3], row[4]).strftime('{:%Y-%m-%d %H:%M:%S}')
             pt_x.append(x)
             pt_y.append(row[-1])
     except db.Error as err:
