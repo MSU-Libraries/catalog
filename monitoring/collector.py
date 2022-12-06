@@ -7,6 +7,7 @@ import status
 
 def main():
     time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print('collector main - time:' + time)
     node = os.getenv('NODE')
     memory = status.node_available_memory()
     disk = status.node_available_disk_space()
