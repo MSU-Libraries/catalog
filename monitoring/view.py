@@ -40,7 +40,7 @@ def node_available_disk_space():
 def node_graph_data(data, period):
     if data not in ['available_memory', 'available_disk_space', 'apache_requests']:
         return 'Error: unknown data'
-    if period not in ['hour', 'day', 'week', 'month']:
+    if period not in ['hour', 'day', 'week', 'month', 'year']:
         return 'Error: unknown period'
     return graphs.node_graph_data(data, period)
 
@@ -48,7 +48,7 @@ def node_graph_data(data, period):
 def graph(data, period):
     if data not in ['available_memory', 'available_disk_space', 'apache_requests']:
         return 'Error: unknown data'
-    if period not in ['hour', 'day', 'week', 'month']:
+    if period not in ['hour', 'day', 'week', 'month', 'year']:
         return 'Error: unknown period'
     return graphs.graph(data, period)
 

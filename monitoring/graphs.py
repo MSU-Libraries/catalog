@@ -13,7 +13,8 @@ def _times_by_period(period):
         'hour': timedelta(hours=1),
         'day': timedelta(days=1),
         'week': timedelta(days=7),
-        'month': timedelta(days=30)
+        'month': timedelta(days=30),
+        'year': timedelta(days=365),
     }
     delta = delta_by_period[period]
     period_start = datetime.now() - delta
