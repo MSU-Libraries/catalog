@@ -10,7 +10,8 @@ import graphs
 
 app = flask.Flask(__name__, static_url_path='/monitoring/static')
 
-if os.getenv('STACK_NAME') == 'catalog-prod' or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
+debug = os.getenv('STACK_NAME') != 'catalog-prod'
+if not debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
     scheduler = BackgroundScheduler()
     scheduler.add_job(func=collector.main, id='collector', replace_existing=True, trigger='interval', minutes=1)
     scheduler.start()
@@ -74,5 +75,4 @@ def home():
 
 
 if __name__ == "__main__":
-    debug = os.getenv('STACK_NAME') != 'catalog-prod'
     app.run(debug=debug, host='0.0.0.0', port=80)

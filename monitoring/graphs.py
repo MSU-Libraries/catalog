@@ -62,13 +62,24 @@ def node_graph_data(data, period):
         conn = db.connect(user='monitoring', password='monitoring', host='galera', database="monitoring")
         cur = conn.cursor()
         cur.execute(_sql_query(data, period_start, period_end, group))
+        pt_x = []
         pt_y = []
         for row in cur:
+            if group == 'MONTH':
+                x = f'{row[0]}-{row[1]}'
+            elif group == 'DAY':
+                x = f'{row[0]}-{row[1]}-{row[2]}'
+            elif group == 'HOUR':
+                x = f'{row[0]}-{row[1]}-{row[2]} {row[3]}'
+            else:
+                x = f'{row[0]}-{row[1]}-{row[2]} {row[3]}:{row[4]}:{row[5]}'
+            pt_x.append(x)
             pt_y.append(row[-1])
     except db.Error as err:
         return f"Database error: {err}"
     result = {
-        'pt_y': pt_y
+        'pt_x': pt_x,
+        'pt_y': pt_y,
     }
     return result
 
@@ -85,10 +96,7 @@ def graph(data, period):
     pt_y = []
     pt_x = []
     for node in range(1, 4):
-        pt_y_item = json.loads(nodes_graph_data[node-1])['pt_y']
-        pt_y.append(pt_y_item)
-        pt_x_item = []
-        for i in range(0, len(pt_y_item)):
-            pt_x_item.append(i)
-        pt_x.append(pt_x_item)
+        j = json.loads(nodes_graph_data[node-1])
+        pt_x.append(j['pt_x'])
+        pt_y.append(j['pt_y'])
     return flask.render_template('graph.html', data=data, period=period, pt_x=pt_x, pt_y=pt_y)
