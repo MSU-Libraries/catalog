@@ -5,6 +5,11 @@ mkdir -p /mnt/shared/local_harvest_folio/
 mv /usr/local/vufind/local/harvest/folio/ /tmp/
 ln -s /mnt/shared/local_harvest_folio/ /usr/local/vufind/local/harvest/folio
 
+# Save the logs in the logs docker volume
+mkdir -p /mnt/logs/vufind /mnt/logs/harvests
+ln -sf /mnt/logs/vufind /var/log/vufind
+touch /mnt/logs/vufind/vufind.log
+
 # Replace the $NODE in the crontab entry
 envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
 
