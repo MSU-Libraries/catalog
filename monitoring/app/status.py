@@ -8,6 +8,9 @@ import util
 
 TIMEOUT = 10
 
+
+# Traefik
+
 def get_traefik_status():
     try:
         req = requests.get('http://traefik:8081/ping', timeout=TIMEOUT)
@@ -19,6 +22,8 @@ def get_traefik_status():
     except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
         return f'Error with traefik ping: {err}'
 
+
+# Galera
 
 def cluster_state_uuid():
     try:
@@ -32,7 +37,7 @@ def cluster_state_uuid():
         return "Timeout getting the cluster state uuid"
     return process.stdout
 
-def check_cluster_state_uuid():
+def _check_cluster_state_uuid():
     urls = []
     for node in range(1, 4):
         urls.append(f'http://monitoring{node}/monitoring/node/cluster_state_uuid')
@@ -56,10 +61,12 @@ def get_galera_status():
     cluster_size = process.stdout.strip()
     if cluster_size != '3':
         return f'Error: wrong cluster size: {cluster_size}'
-    if not check_cluster_state_uuid():
+    if not _check_cluster_state_uuid():
         return 'Error: different cluster state uuids'
     return 'OK'
 
+
+# Solr
 
 def _check_shard(collection_name, shard_name, shard, live_nodes):
     if shard['state'] != 'active':
@@ -113,6 +120,8 @@ def get_solr_status():
                 return res
     return 'OK'
 
+
+# Vufind
 
 def _check_vufind_home_page():
     urls = []
@@ -186,6 +195,9 @@ def get_vufind_status():
     if res != 'OK':
         return res
     return 'OK'
+
+
+# Available memory and disk space
 
 def node_available_memory():
     try:
