@@ -1,9 +1,19 @@
+import os
+import flask
+
+import collector
 import graphs
 import home
 import logs
 import status
-from monitoring import app
 
+
+debug = os.getenv('STACK_NAME') != 'catalog-prod'
+app = flask.Flask(__name__, static_url_path='/monitoring/static')
+
+collector.init(debug)
+
+# Routes
 
 # Homepage and status
 
@@ -23,7 +33,6 @@ def node_available_disk_space():
 def homepage():
     return home.homepage()
 
-
 # Logs
 
 @app.route('/monitoring/node/logs/<path:service>')
@@ -33,7 +42,6 @@ def node_logs(service):
 @app.route('/monitoring/logs/<path:service>')
 def logs_vufind(service):
     return logs.logs_vufind(service)
-
 
 # Graphs
 
@@ -52,3 +60,9 @@ def graph(variable, period):
     if period not in ['hour', 'day', 'week', 'month', 'year']:
         return 'Error: unknown period'
     return graphs.graph(variable, period)
+
+
+# Run the app
+
+if __name__ == "__main__":
+    app.run(debug=debug, host='0.0.0.0', port=80)
