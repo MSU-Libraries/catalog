@@ -374,7 +374,7 @@ import() {
       -type f -print0 | while read -d $'\0' file; do
         
         # Determine which properties file to use
-        PROP_FILE="marc_auth_fast_formgenre.properties"
+        PROP_FILE="marc_auth_fast_topical.properties"
         if [[ "${file}" == *_LC.NAME* ]]; then
             PROP_FILE="marc_auth_fast_personal.properties"
         fi
