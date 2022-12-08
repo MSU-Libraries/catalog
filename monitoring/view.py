@@ -36,21 +36,21 @@ def node_available_memory():
 def node_available_disk_space():
     return status.node_available_disk_space()
 
-@app.route('/monitoring/node/graph_data/<data>/<period>')
-def node_graph_data(data, period):
-    if data not in ['available_memory', 'available_disk_space', 'apache_requests']:
-        return 'Error: unknown data'
+@app.route('/monitoring/node/graph_data/<variable>/<period>')
+def node_graph_data(variable, period):
+    if variable not in ['available_memory', 'available_disk_space', 'apache_requests']:
+        return 'Error: unknown variable'
     if period not in ['hour', 'day', 'week', 'month', 'year']:
         return 'Error: unknown period'
-    return graphs.node_graph_data(data, period)
+    return graphs.node_graph_data(variable, period)
 
-@app.route('/monitoring/graphs/<data>/<period>')
-def graph(data, period):
-    if data not in ['available_memory', 'available_disk_space', 'apache_requests']:
-        return 'Error: unknown data'
+@app.route('/monitoring/graphs/<variable>/<period>')
+def graph(variable, period):
+    if variable not in ['available_memory', 'available_disk_space', 'apache_requests']:
+        return 'Error: unknown variable'
     if period not in ['hour', 'day', 'week', 'month', 'year']:
         return 'Error: unknown period'
-    return graphs.graph(data, period)
+    return graphs.graph(variable, period)
 
 @app.route('/monitoring')
 def home():
