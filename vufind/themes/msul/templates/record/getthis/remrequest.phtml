@@ -1,1 +1,22 @@
-<?php
+<div>
+    <p>
+        <b>Remote Storage Request:</b>
+        Requested items are picked up at the
+        <a href="https://lib.msu.edu/makerspace/">Hollander MakeCentral Service Desk</a>
+        (MSU Main Library 2nd Floor West Wing). Material requested after 11am will be available
+        by 5pm the next business day. <br />
+    </p>
+    <ul>
+        <li><a data-lightbox="" href="<?= $this->url(
+            'record-getthissendrequest',
+            [
+                'id'     => $this->driver->getUniqueId(),
+                'action' => 'GetThisSendRequest',
+            ],
+            [
+                'query' => [
+                    "target" => "remotestorage",
+                ],
+            ]) ?>" rel="nofollow">Request Retrieval from Remote Storage</a></li>
+    </ul>
+</div>

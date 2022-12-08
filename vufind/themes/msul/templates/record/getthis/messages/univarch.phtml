@@ -1,12 +1,13 @@
 <?php
 $item = $this->getthis->getItem();
+$callnum = $this->driver->getCallNumber();
 ?>
 <div>
     <p>
         <b>Collections Access:</b>
         You may review the material at the University Archives &amp; Historical Collections in
         <a href='https://goo.gl/maps/cJzgFWghhRRAcFU5A'>Conrad Hall</a> using call number
-        <?= $this->escapeHtml($item['callnumber']) ?> during the
+        <?= $this->escapeHtml($callnum) ?> during the
         <a href='https://lib.msu.edu/branches/ua/Research/ReadingRoom/'>Reading Room</a>&#39;s open hours.
         <br /><br />
         Please contact the University Archives &amp; Historical Collections at

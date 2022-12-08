@@ -1,1 +1,30 @@
+<!-- Getthis: facdel -->
 <?php
+$item = $this->getthis->getItem();
+$title = $this->driver->getTitle();
+$callnum = $this->driver->getCallNumber();
+$author = $this->driver->getPrimaryAuthor();
+$loc = $this->getthis->getLocation();
+$isbn = $this->driver->getCleanISBN();
+$bibnum = $this->driver->getSierraBN();
+$pubname = $this->driver->getPublisher();
+if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
+?>
+<div>
+    <p>
+        <b>
+            <a href="https://www.lib.msu.edu/general/faculty-delivery/" target="_blank">
+            Faculty/Staff Office Delivery</a>:
+        </b>
+        Save a trip to the library! We deliver MSU materials to your on-campus office,
+        free of charge, typically within 3-5 business days. (MSU Staff and Faculty only)
+
+        <ul>
+            <li>
+                <a href="https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:<?= $this->escapeHtml($bibnum) ?>&rft.genre=Book2&LO=EYM%2CGZM%2CMUN&rft.title=<?= $this->escapeHtml($title) ?>&rft.au=<?= $this->escapeHtml($author) ?>&rft.pub=<?= $this->escapeHtml($pubname) ?>&rft.isbn=<?= $this->escapeHtml($isbn) ?>&loc=<?= $this->escapeHtml($loc) ?>&callno=<?= $this->escapeHtml($callnum) ?>&CAT=1">
+                    Request Delivery to My Office
+                </a>
+            </li>
+        </ul>
+    </p>
+</div>

@@ -40,13 +40,47 @@ class GetThisLoader {
         return $this->getItem($item_id)['location'] ?? "";
     }
 
+    public function getLink($item_id=null) {
+        $linkdata = ['link' => ''];
+        # TODO could add some checking if 'holdings', 'items', and 'item_id' keys are in the arrays
+        foreach ($this->record->getRealTimeHoldings()['holdings'] as $location) {
+            foreach ((array) $location['items'] as $item) {
+                if ($item_id === null || $item['item_id'] == $item_id) {
+                    $linkdata = $item;
+                    break;
+                }
+            }
+        }
+        return $linkdata['link'];
+    }
+
+    /**
+     * Get the description for the record
+     *
+     * @return string The description string
+     */
+    public function getDescription() {
+        // TODO how to get actual description?
+        // Does appear to work on items that show a description on record page:
+        // https://devel-getthis.aws.lib.msu.edu/Record/folio.in00006771086 (then var_dump this desc and the value matches)
+        return implode(', ', $this->record->getSummary());
+    }
+
+    public function isSerial($item_id=null) {
+        $is_serial = false;
+        foreach ($this->record->getFormats() as $format){
+            if (preg_match('/SERIAL/i', $format)) $is_serial = true;
+        }
+        return $is_serial;
+    }
+
     public function isOut($item_id=null) {
         $status = $this->getStatus($item_id);
         return (
-            preg_match('/CHECKED/i',$status) ||
-            preg_match('/BILLED/i',$status) ||
+            preg_match('/CHECKED/i', $status) ||
+            preg_match('/BILLED/i', $status) ||
             preg_match('/ON SEARCH/i', $status) ||
-            preg_match('/LOST/i',$status) ||
+            preg_match('/LOST/i', $status) ||
             preg_match('/HOLD/i', $status)
         );
     }
@@ -68,13 +102,16 @@ class GetThisLoader {
     }
 
     public function showInProcess($item_id=null) {
-        $stat = $this->getStatus($item_id);
-        return Regex::IN_PROCESS($stat);
+        //$stat = $this->getStatus($item_id);
+        //return Regex::IN_PROCESS($stat);
+        // XXX Not implementing this form for now
+        return false;
     }
 
     public function showServMsg($item_id=null) {
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
+
         if ($this->isOut($item_id)) {
             if (Regex::MAKERSPACE($loc)) {
                 $this->msgTemplate = 'makercheckedout.phtml';
@@ -146,13 +183,15 @@ class GetThisLoader {
     }
 
     public function showReqItem($item_id=null) {
-        // ART and not RESERV and not isLibUseOnly
-        // BROWSING and stat AVAILABLE
-
+        $loc = $this->getLocation($item_id);
+        if (Regex::BUSINESS($loc) && !Regex::RESERV($loc)) {
+            return true;
+        }
         return false;
     }
 
     public function showReqBusiness($item_id=null) {
+        $loc = $this->getLocation($item_id);
         if (Regex::BUSINESS($loc) && !Regex::RESERV($LOC)) {
             return true;
         }
@@ -160,54 +199,146 @@ class GetThisLoader {
     }
 
     public function showGetRovi($item_id=null) {
-        //TODO
-        return true;
+        //XXX Not implementing for now
+        return false;
     }
 
     public function showLockerPick($item_id=null) {
-        //TODO
-        return true;
+        $stat = $this->getStatus($item_id);
+        $loc = $this->getLocation($item_id);
+
+        if ( (Regex::ART($loc) && !Regex::PERM($loc) && !$this->isLibUseOnly()) ||
+             (Regex::BROWSING($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::CAREER($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::CESAR_CHAVEZ($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::KLINE_DMC($loc) && !Regex::RESERV($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::FACULTY_BOOK($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::GOV($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::MAKERSPACE($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::MAP($loc) && Regex::CIRCULATING($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::MUSIC($loc) && !(Regex::REF($loc) || Regex::RESERV($loc))) ||
+             (Regex::ROVI($loc)) ||
+             (Regex::TRAVEL($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::MAIN($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::AVAILABLE($stat))
+           ) {
+            return true;
+        }
+        return false;
     }
 
     public function showRemRequest($item_id=null) {
-        //TODO
-        return true;
+        $stat = $this->getStatus($item_id);
+        $loc = $this->getLocation($item_id);
+        $desc = $this->getDescription();
+        if ( (Regex::REMOTE($loc)) && !Regex::VINYL($desc) ||
+             (Regex::THESES_REMOTE($loc))
+           ) {
+            return true;
+        }
+        return false;
     }
 
     public function showScanCopy($item_id=null) {
-        //TODO
-        return true;
+        $stat = $this->getStatus($item_id);
+        $loc = $this->getLocation($item_id);
+        $desc = $this->getDescription();
+
+        if ( (Regex::ART($loc) && !Regex::PERM($loc) && !$this->isLibUseOnly()) ||
+             (Regex::BUSINESS($loc)) ||
+             (Regex::CAREER($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::CESAR_CHAVEZ($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::KLINE_DMC($loc)) ||
+             (Regex::FACULTY_BOOK($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::GOV($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::MAP($loc) && Regex::CIRCULATING($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::MUSIC($loc) && (Regex::RESERV($loc) || Regex::BOOK($loc))) ||
+             (Regex::REMOTE($loc)) && !Regex::VINYL($desc) ||
+             (Regex::TRAVEL($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::TURFGRASS($loc) && !$this->isMedia($item_id)) ||
+             (Regex::MAIN($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::AVAILABLE($stat))
+           ) {
+            return true;
+        }
+        return false;
     }
 
     public function showRemForm($item_id=null) {
-        //TODO
-        return true;
+        //XXX Not implementing for now
+        return false;
     }
 
     public function showFacDel($item_id=null) {
-        //TODO
-        return true;
+        $stat = $this->getStatus($item_id);
+        $loc = $this->getLocation($item_id);
+        $desc = $this->getDescription();
+
+        if ( (Regex::ART($loc) && !Regex::PERM($loc) && !$this->isLibUseOnly()) ||
+             (Regex::BUSINESS($loc) && !Regex::RESERV($loc)) ||
+             (Regex::MAP($loc) && Regex::CIRCULATING($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::MUSIC($loc) && !(Regex::REF($loc) || Regex::RESERV($loc))) ||
+             (Regex::REMOTE($loc)) && !Regex::VINYL($desc) ||
+             (Regex::ROVI($loc)) ||
+             (Regex::THESES_REMOTE_MICRO($loc)) ||
+             (Regex::MAIN($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::AVAILABLE($stat))
+           ) {
+            return true;
+        }
+        return false;
     }
 
     public function showRemotePat($item_id=null) {
-        //TODO
-        return true;
+        $stat = $this->getStatus($item_id);
+        $loc = $this->getLocation($item_id);
+        $desc = $this->getDescription();
+
+        if ( (Regex::ART($loc) && !Regex::PERM($loc) && !$this->isLibUseOnly()) ||
+             (Regex::BROWSING($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::BUSINESS($loc) && !Regex::RESERV($loc)) ||
+             (Regex::CAREER($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::CESAR_CHAVEZ($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::VIDEO_GAME($loc)) ||
+             (Regex::KLINE_DMC($loc) && !Regex::RESERV($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::FACULTY_BOOK($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::SCHAEFER($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::GOV($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::MAP($loc) && Regex::CIRCULATING($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::MUSIC($loc) && !(Regex::REF($loc) || Regex::RESERV($loc))) ||
+             (Regex::REMOTE($loc)) && !Regex::VINYL($desc) ||
+             (Regex::ROVI($loc)) ||
+             (Regex::TRAVEL($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::MAIN($loc) && Regex::AVAILABLE($stat)) ||
+             (Regex::AVAILABLE($stat))
+           ) {
+            return true;
+        }
+        return false;
     }
 
     public function showGulForm($item_id=null) {
-        //TODO
-        return true;
+        $loc = $this->getLocation($item_id);
+
+        if (Regex::GULL($loc)) return true;
+        return false;
     }
 
     public function showSpcAeon($item_id=null) {
-        //TODO
-        return true;
+        $stat = $this->getStatus($item_id);
+        $loc = $this->getLocation($item_id);
+
+        if ((Regex::SPEC_COLL_REMOTE($loc) && (Regex::LIB_USE_ONLY($stat) || Regex::ON_DISPLAY($stat))) ||
+             Regex::SPEC_COLL($loc)) {
+            return true;
+        }
+        return false;
     }
 
     public function showOtherLib($item_id=null) {
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
-        $desc = $this->record->getSummary(); // TODO how to get actual description?
+        $desc = $this->getDescription();
 
         if ($this->showInProcess($item_id)) {
             return false;

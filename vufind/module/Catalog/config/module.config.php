@@ -6,10 +6,20 @@ return array (
       'record-getthis' => [
         'type'    => 'Laminas\Router\Http\Segment',
         'options' => [
-          'route'    => '/Record/[:id]/GetThis',
+          'route'    => '/Record/:id/GetThis',
           'defaults' => [
               'controller' => 'Record',
               'action'     => 'GetThis',
+          ],
+        ],
+      ],
+      'record-getthissendrequest' => [
+        'type'    => 'Laminas\Router\Http\Segment',
+        'options' => [
+          'route'    => '/Record/:id/GetThisSendRequest',
+          'defaults' => [
+              'controller' => 'Record',
+              'action'     => 'GetThisSendRequest',
           ],
         ],
       ],
@@ -22,6 +32,13 @@ return array (
     'aliases' => [
       'VuFind\\Controller\\RecordController' => 'Catalog\\Controller\\RecordController',
     ],
+  ],
+  'view_manager' => [
+    'template_map' => [
+      'record/getthis/sendrequest' => __DIR__ . '/../../../themes/msul/templates/record/getthis/sendrequest.phtml',
+      'record/getthis/sendsuccess' => __DIR__ . '/../../../themes/msul/templates/record/getthis/sendsuccess.phtml',
+      'record/getthis/login' => __DIR__ . '/../../../themes/msul/templates/record/getthis/login.phtml',
+    ]
   ],
   'vufind' => 
   array (
