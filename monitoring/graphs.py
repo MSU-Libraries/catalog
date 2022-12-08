@@ -34,7 +34,7 @@ def _group_by_times(period_start, period_end):
         group = 'MINUTE'
     return group
 
-def _sql_query(data, period_start, period_end, group):
+def _sql_query(variable, period_start, period_end, group):
     sql_start = period_start.strftime('%Y-%m-%d %H:%M:%S')
     sql_end = period_end.strftime('%Y-%m-%d %H:%M:%S')
     sql_select_by_group = {
@@ -53,21 +53,21 @@ def _sql_query(data, period_start, period_end, group):
     }
     sql_group = sql_group_by_group[group]
     node = os.getenv('NODE')
-    if data == 'apache_requests':
+    if variable == 'apache_requests':
         aggreg = 'AVG'
     else:
         aggreg = 'MIN'
-    return f'SELECT {sql_select}, {aggreg}({data}) AS {data} FROM data ' \
+    return f'SELECT {sql_select}, {aggreg}({variable}) AS {variable} FROM data ' \
         f'WHERE time > "{sql_start}" AND time < "{sql_end}" AND node = {node} GROUP BY {sql_group};'
 
-def node_graph_data(data, period):
+def node_graph_data(variable, period):
     # someday this will support any given date/time for start and end
     (period_start, period_end) = _times_by_period(period)
     group = _group_by_times(period_start, period_end)
     try:
         conn = db.connect(user='monitoring', password='monitoring', host='galera', database="monitoring")
         cur = conn.cursor()
-        cur.execute(_sql_query(data, period_start, period_end, group))
+        cur.execute(_sql_query(variable, period_start, period_end, group))
         pt_x = []
         pt_y = []
         for row in cur:
@@ -89,20 +89,26 @@ def node_graph_data(data, period):
     }
     return result
 
-def graph(data, period):
+def graph(variable, period):
     urls = []
     for node in range(1, 4):
-        urls.append(f'http://monitoring{node}/monitoring/node/graph_data/{data}/{period}')
+        urls.append(f'http://monitoring{node}/monitoring/node/graph_data/{variable}/{period}')
     try:
         nodes_graph_data = util.async_get_requests(urls)
     except aiohttp.ClientError as err:
         return f'Error getting graph data: {err}'
     except asyncio.exceptions.TimeoutError:
         return 'Timeout getting graph data'
-    pt_y = []
-    pt_x = []
+    data = []
     for node in range(1, 4):
-        j = json.loads(nodes_graph_data[node-1])
-        pt_x.append(j['pt_x'])
-        pt_y.append(j['pt_y'])
-    return flask.render_template('graph.html', data=data, period=period, pt_x=pt_x, pt_y=pt_y)
+        try:
+            j = json.loads(nodes_graph_data[node-1])
+        except json.JSONDecodeError as err:
+            return f'Error decoding JSON from node {node}: {err}'
+        node_data = {}
+        node_data['name'] = f'node {node}'
+        node_data['type'] = 'scatter'
+        node_data['x'] = j['pt_x']
+        node_data['y'] = j['pt_y']
+        data.append(node_data)
+    return flask.render_template('graph.html', variable=variable, period=period, data=data)
