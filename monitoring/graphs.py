@@ -101,7 +101,10 @@ def graph(variable, period):
         return 'Timeout getting graph data'
     data = []
     for node in range(1, 4):
-        j = json.loads(nodes_graph_data[node-1])
+        try:
+            j = json.loads(nodes_graph_data[node-1])
+        except json.JSONDecodeError as err:
+            return f'Error decoding JSON from node {node}: {err}'
         node_data = {}
         node_data['name'] = f'node {node}'
         node_data['type'] = 'scatter'
