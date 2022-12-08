@@ -16,4 +16,4 @@ COPY . /app
 
 ENTRYPOINT [ "python" ]
 
-CMD [ "app/app.py" ]
+CMD [ "app/monitoring.py" ]

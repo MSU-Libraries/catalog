@@ -1,8 +1,8 @@
-from app import app
 import graphs
 import home
 import logs
 import status
+from monitoring import app
 
 
 # Homepage and status
@@ -21,7 +21,7 @@ def node_available_disk_space():
 
 @app.route('/monitoring')
 def homepage():
-    home.homepage()
+    return home.homepage()
 
 
 # Logs
