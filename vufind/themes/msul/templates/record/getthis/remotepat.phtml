@@ -1,0 +1,43 @@
+<!-- Getthis: remotepat -->
+<?php
+$item = $this->getthis->getItem();
+$loc = $this->getthis->getLocation();
+$title = $this->driver->getTitle();
+$bibnum = $this->driver->getSierraBN();
+$author = $this->driver->getPrimaryAuthor();
+$status = $this->getthis->getStatus();
+$isbn = $this->driver->getCleanISBN();
+$callnum = $this->driver->getCallNumber();
+$bibnum = $this->driver->getSierraBN();
+$pubname = $this->driver->getPublisher();
+if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
+?>
+<div>
+    <p>
+        <b><a href="http://www.lib.msu.edu/about/ils/offcampus50/" target="_blank">Distance Delivery Services</a>:</b>
+        Save a trip to the library! We deliver MSU materials directly to your home, free of charge,
+        via UPS. Shipping is limited to anywhere in the US or Canada. (MSU Students, Faculty and Staff only)
+        <ul>
+            <li>
+                <!-- COVID19 -->
+                <a href="https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:distance:<?= $this->escapeHtml($bibnum) ?>&rft.genre=Book3&LO=EYM%2CGZM%2CMUN&rft.title=<?= $this->escapeHtml($title) ?>&rft.au=<?= $this->escapeHtml($author) ?>&rft.pub=<?= $this->escapeHtml($pubname) ?>&rft.isbn=<?= $this->escapeHtml($isbn) ?>&loc=<?= $this->escapeHtml($loc) ?>&callno=<?= $this->escapeHtml($callnum) ?>&CAT=1">
+                    Request Item as Distance User
+                </a>
+            </li>
+        </ul>
+    </p>
+</div>
+<div>
+    <p>
+        <b><a href="http://www.lib.msu.edu/about/ils/offcampus50/" target="_blank">Distance Delivery Services</a>:</b>
+        Save a trip to East Lansing!  We deliver MSU and non-MSU materials to affiliates located over 50
+        miles from campus, free of charge, typically within 3-5 business days. (MSU Distance Users only)
+        <ul>
+            <li>
+                <a href="https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:distance:<?= $this->escapeHtml($bibnum) ?>&rft.genre=Book3&LO=EYM%2CGZM%2CMUN&rft.title=<?= $this->escapeHtml($title) ?>&rft.au=<?= $this->escapeHtml($author) ?>&rft.pub=<?= $this->escapeHtml($pubname) ?>&rft.isbn=<?= $this->escapeHtml($isbn) ?>&loc=<?= $this->escapeHtml($loc) ?>&callno=<?= $this->escapeHtml($callnum) ?>&CAT=1">
+                    Request Item as Distance User
+                </a>
+            </li>
+        </ul>
+    </p>
+</div>

@@ -6,6 +6,8 @@
 ?>
 <nav class="record-nav">
   <ul class="action-toolbar" aria-label="<?=$this->transEscAttr('ajaxview_label_tools'); ?>">
+    <li role="none"><a class="get-record toolbar-btn btn-type-getthis" data-lightbox href="<?= $this->escapeHtmlAttr($this->recordLinker()->getActionUrl($this->driver, 'GetThis')) ?>" rel="nofollow"><?=$this->transEsc('Get this')?></a></li>
+
     <?php if (method_exists($this->driver, "getLocation") && !empty($this->driver->getLocation())): ?>
     <li role="none"><a class="map-record toolbar-btn btn-type-map" data-lightbox href="<?= $this->record($this->driver)->getLink('mapit', null) ?>" rel="nofollow" target="_blank"><?=$this->transEsc('Map this')?></a></li>
     <?php endif; ?>
