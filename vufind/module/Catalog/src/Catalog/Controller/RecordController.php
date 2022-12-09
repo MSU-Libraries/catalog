@@ -7,8 +7,7 @@ use Catalog\GetThis\GetThisLoader;
 class RecordController extends \VuFind\Controller\RecordController
 {
     protected $getthis_email_targets = [
-        'remotestorage' => "colli372@lib.msu.edu",
-        'remotestorage2' => "remote\u{0033}lib.msu.edu",
+        'remotestorage' => "remote\u{0033}lib.msu.edu",
         'circulation' => "uncats\u{0033}lib.msu.edu",
     ];
 

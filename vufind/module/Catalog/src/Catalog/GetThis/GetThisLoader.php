@@ -36,18 +36,41 @@ class GetThisLoader {
         return $this->getItem($item_id)['status'] ?? "Unknown";
     }
 
+    /**
+     * Get the location for a holding item
+     *
+     * @param string $item_id   The holding item UUID. If null (default) will return status for first item
+     *
+     * @return string The location string
+     */
     public function getLocation($item_id=null) {
         return $this->getItem($item_id)['location'] ?? "";
     }
 
+    /**
+     * Get the link data for requesting the item
+     *
+     * @param string $item_id   The holding item UUID. If null (default) will return status for first item
+     *
+     * @return array The data required to build a request URL for the item
+     */
     public function getLink($item_id=null) {
         $linkdata = ['link' => ''];
-        # TODO could add some checking if 'holdings', 'items', and 'item_id' keys are in the arrays
-        foreach ($this->record->getRealTimeHoldings()['holdings'] as $location) {
-            foreach ((array) $location['items'] as $item) {
-                if ($item_id === null || $item['item_id'] == $item_id) {
-                    $linkdata = $item;
-                    break;
+
+        # If $item_id is null, call getItem just in case $items returns the items in a different order
+        # than the real time holdings information
+        $item_id = $this->getItem($item_id)['item_id'] ?? null;
+
+        $holdings = $this->record->getRealTimeHoldings();
+        if (array_key_exists('holdings', $holdings)) {
+            foreach ($holdings['holdings'] as $location) {
+                if (array_key_exists('items', $location)) {
+                    foreach ((array) $location['items'] as $item) {
+                        if ($item_id === null || (array_key_exists('item_id', $item) && $item['item_id'] == $item_id)) {
+                            $linkdata = $item;
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -231,6 +254,7 @@ class GetThisLoader {
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
         $desc = $this->getDescription();
+
         if ( (Regex::REMOTE($loc)) && !Regex::VINYL($desc) ||
              (Regex::THESES_REMOTE($loc))
            ) {
