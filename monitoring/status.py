@@ -27,7 +27,9 @@ def cluster_state_uuid():
             "variable_name='wsrep_cluster_state_uuid';"],
             capture_output=True, text=True, timeout=TIMEOUT, check=True)
     except subprocess.CalledProcessError as err:
-        return f"Error checking the status: {err.stderr}"
+        return f"Error getting the cluster state uuid: {err.stderr}"
+    except subprocess.TimeoutExpired:
+        return "Timeout getting the cluster state uuid"
     return process.stdout
 
 def check_cluster_state_uuid():
@@ -49,6 +51,8 @@ def get_galera_status():
         capture_output=True, text=True, timeout=TIMEOUT, check=True)
     except subprocess.CalledProcessError as err:
         return f"Error checking the status: {err.stderr}"
+    except subprocess.TimeoutExpired:
+        return "Timeout when checking the status"
     cluster_size = process.stdout.strip()
     if cluster_size != '3':
         return f'Error: wrong cluster size: {cluster_size}'
@@ -182,3 +186,75 @@ def get_vufind_status():
     if res != 'OK':
         return res
     return 'OK'
+
+def node_available_memory():
+    try:
+        process = subprocess.run(["/bin/sh", "-c", "free | grep Mem | awk '{print $7/$2 * 100.0}'"],
+            capture_output=True, text=True, timeout=TIMEOUT, check=True)
+    except subprocess.CalledProcessError as err:
+        return f"Error getting available memory: {err.stderr}"
+    except subprocess.TimeoutExpired:
+        return "Timeout when getting available memory"
+    return process.stdout
+
+def node_available_disk_space():
+    try:
+        process = subprocess.run(["/bin/sh", "-c", "df / | grep overlay | awk '{print $4/$2 * 100.0}'"],
+            capture_output=True, text=True, timeout=TIMEOUT, check=True)
+    except subprocess.CalledProcessError as err:
+        return f"Error getting available disk space: {err.stderr}"
+    except subprocess.TimeoutExpired:
+        return "Timeout when getting available disk space"
+    return process.stdout
+
+def get_memory_status():
+    urls = []
+    for node in range(1, 4):
+        urls.append(f'http://monitoring{node}/monitoring/node/available_memory')
+    try:
+        mems = util.async_get_requests(urls)
+    except aiohttp.ClientError as err:
+        return f'Error reading available memory: {err}'
+    except asyncio.exceptions.TimeoutError:
+        return 'Timeout when reading available memory'
+    for node in range(1, 4):
+        try:
+            float(mems[node-1])
+        except ValueError:
+            return f'Returned value for available memory is not a number on node {node}: {mems[node-1]}'
+    lowest = 100
+    lowest_node = 0
+    for node in range(1, 4):
+        if float(mems[node-1]) < lowest:
+            lowest_node = node
+            lowest = float(mems[node-1])
+    lowest = round(lowest, 1)
+    if lowest < 20.:
+        return f"Low available memory on node {lowest_node}: {lowest}%"
+    return f"OK - lowest available memory: {lowest}%"
+
+def get_disk_space_status():
+    urls = []
+    for node in range(1, 4):
+        urls.append(f'http://monitoring{node}/monitoring/node/available_disk_space')
+    try:
+        disk_spaces = util.async_get_requests(urls)
+    except aiohttp.ClientError as err:
+        return f'Error reading available disk space: {err}'
+    except asyncio.exceptions.TimeoutError:
+        return 'Timeout when reading available disk space'
+    for node in range(1, 4):
+        try:
+            float(disk_spaces[node-1])
+        except ValueError:
+            return f'Returned value for available disk space is not a number on node {node}: {disk_spaces[node-1]}'
+    lowest = 100
+    lowest_node = 0
+    for node in range(1, 4):
+        if float(disk_spaces[node-1]) < lowest:
+            lowest_node = node
+            lowest = float(disk_spaces[node-1])
+    lowest = round(lowest, 1)
+    if lowest < 20.:
+        return f"Low available disk space on node {lowest_node}: {lowest}%"
+    return f"OK - lowest available disk space: {lowest}%"

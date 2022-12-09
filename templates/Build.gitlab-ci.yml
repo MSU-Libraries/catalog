@@ -54,8 +54,8 @@ Build Vufind Image:
         --build-arg FOLIO_CANCEL_ID=$FOLIO_CANCEL_ID 
         --build-arg OAI_URL=$OAI_URL 
         --build-arg EMAIL=$EMAIL 
-        --build-arg MAIL_HOST=host.docker.internal
-        --build-arg MAIL_PORT=25 
+        --build-arg MAIL_HOST=$MAIL_HOST
+        --build-arg MAIL_PORT=$MAIL_PORT
         --build-arg MAIL_USERNAME= 
         --build-arg MAIL_PASSWORD= 
         --build-arg FEEDBACK_EMAIL=$FEEDBACK_EMAIL 

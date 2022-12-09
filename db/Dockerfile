@@ -1,4 +1,4 @@
-FROM bitnami/mariadb-galera:10.7
+FROM bitnami/mariadb-galera:10.6
 
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
@@ -11,6 +11,8 @@ ARG VUFIND_VERSION
 RUN wget -O /docker-entrypoint-initdb.d/vufind.sql \
     https://raw.githubusercontent.com/vufind-org/vufind/v${VUFIND_VERSION}/module/VuFind/sql/mysql.sql && \
     sed -i '1s/^/use vufind;\n/' /docker-entrypoint-initdb.d/vufind.sql
+
+COPY monitoring.sql /docker-entrypoint-initdb.d/monitoring.sql
 
 USER 1001
 

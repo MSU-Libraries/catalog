@@ -1,10 +1,20 @@
+import os
 import flask
+from apscheduler.schedulers.background import BackgroundScheduler
 
 import logs
 import status
+import collector
+import graphs
 
 
 app = flask.Flask(__name__, static_url_path='/monitoring/static')
+
+debug = os.getenv('STACK_NAME') != 'catalog-prod'
+if not debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(func=collector.main, id='collector', replace_existing=True, trigger='interval', minutes=1)
+    scheduler.start()
 
 @app.route('/monitoring/node/logs/<path:service>')
 def node_logs(service):
@@ -18,16 +28,42 @@ def logs_vufind(service):
 def cluster_state_uuid():
     return status.cluster_state_uuid()
 
+@app.route('/monitoring/node/available_memory')
+def node_available_memory():
+    return status.node_available_memory()
+
+@app.route('/monitoring/node/available_disk_space')
+def node_available_disk_space():
+    return status.node_available_disk_space()
+
+@app.route('/monitoring/node/graph_data/<variable>/<period>')
+def node_graph_data(variable, period):
+    if variable not in ['available_memory', 'available_disk_space', 'apache_requests']:
+        return 'Error: unknown variable'
+    if period not in ['hour', 'day', 'week', 'month', 'year']:
+        return 'Error: unknown period'
+    return graphs.node_graph_data(variable, period)
+
+@app.route('/monitoring/graphs/<variable>/<period>')
+def graph(variable, period):
+    if variable not in ['available_memory', 'available_disk_space', 'apache_requests']:
+        return 'Error: unknown variable'
+    if period not in ['hour', 'day', 'week', 'month', 'year']:
+        return 'Error: unknown period'
+    return graphs.graph(variable, period)
+
 @app.route('/monitoring')
 def home():
     status_list = {}
+    status_list['memory'] = status.get_memory_status()
+    status_list['disk_space'] = status.get_disk_space_status()
     status_list['traefik'] = status.get_traefik_status()
     status_list['galera'] = status.get_galera_status()
     status_list['solr'] = status.get_solr_status()
     status_list['vufind'] = status.get_vufind_status()
     services = {}
     for s_name, s_text in status_list.items():
-        if s_text == 'OK':
+        if s_text.startswith('OK'):
             color = 'success'
         else:
             color = 'danger'
@@ -39,4 +75,4 @@ def home():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=80)
+    app.run(debug=debug, host='0.0.0.0', port=80)

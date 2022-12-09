@@ -10,7 +10,7 @@ default_args() {
     ARGS[LIMIT]=
     ARGS[LIMIT_BY_DELETE]=
     ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/folio
-    ARGS[SHARED_DIR]=/mnt/shared/oai
+    ARGS[SHARED_DIR]=/mnt/oai_current
     ARGS[SOLR_URL]="http://solr:8983/solr"
     ARGS[RESET_SOLR]=0
     ARGS[VERBOSE]=0

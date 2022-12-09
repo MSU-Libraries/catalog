@@ -145,6 +145,12 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     'addLink' => true                ];
             }
         }
+
+        // Reorder so that it is reverse alphabetical order (MSU will be first instead of LOM)
+        // Can't do at query time because getLocationData is done as a separate call later
+        $locs = array_column($items, 'location');
+        array_multisort($locs, SORT_DESC, $items);
+
         return $items;
     }
 

@@ -7,10 +7,18 @@
 {% block content %}
     <h2>Status</h2>
     <ul>
+        <li>Memory: <span class="text-{{services['memory']['color']}}">{{services['memory']['status']}}</span></li>
+        <li>Disk space: <span class="text-{{services['disk_space']['color']}}">{{services['disk_space']['status']}}</span></li>
         <li>Traefik: <span class="text-{{services['traefik']['color']}}">{{services['traefik']['status']}}</span></li>
         <li>Galera: <span class="text-{{services['galera']['color']}}">{{services['galera']['status']}}</span></li>
         <li>Solr: <span class="text-{{services['solr']['color']}}">{{services['solr']['status']}}</span></li>
         <li>Vufind: <span class="text-{{services['vufind']['color']}}">{{services['vufind']['status']}}</span></li>
+    </ul>
+    <h2>Graphs</h2>
+    <ul>
+        <li><a href="/monitoring/graphs/available_memory/hour">Available memory</a></li>
+        <li><a href="/monitoring/graphs/available_disk_space/hour">Available disk space</a></li>
+        <li><a href="/monitoring/graphs/apache_requests/hour">Apache requests</a></li>
     </ul>
     <h2>Logs</h2>
     <ul>

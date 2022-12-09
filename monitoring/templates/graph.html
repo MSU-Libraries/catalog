@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+
+{% block title %}Graphs - {{variable.replace('_', ' ')}} - {{period}}{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
+    <script src="{{ url_for('static', filename='js/plot.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <p><a href="/monitoring">Back to monitoring home</a></p>
+    <div class="container">
+        <div class="row">
+            <div class="col-2">
+                <ul>
+                    <li>
+                        <a href="/monitoring/graphs/{{variable}}/hour">Last hour</a>
+                    </li>
+                    <li>
+                        <a href="/monitoring/graphs/{{variable}}/day">Last day</a>
+                    </li>
+                    <li>
+                        <a href="/monitoring/graphs/{{variable}}/week">Last week</a>
+                    </li>
+                    <li>
+                        <a href="/monitoring/graphs/{{variable}}/month">Last month</a>
+                    </li>
+                    <li>
+                        <a href="/monitoring/graphs/{{variable}}/year">Last year</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-10">
+                <div id="plot"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        plot("{{variable}}", "{{period}}", {{data|tojson}});
+    </script>
+{% endblock %}
