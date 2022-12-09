@@ -99,8 +99,16 @@ services:
       update_config:
         failure_action: rollback
 
-  mailcatcher:
+  mail:
     image: sj26/mailcatcher
+    command: [
+        "--no-quit",
+        "--ip", "0.0.0.0",
+        "--smtp-port", "25",
+        "--http-port", "80",
+        "--http-path", "mail",
+        "--messages-limit", "100"
+    ]
     networks:
       - public
     logging:
@@ -118,12 +126,12 @@ services:
         # HTTP Configuration
         - "traefik.http.routers.${STACK_NAME}-http-mailcatcher.entrypoints=msul-http-ent"
         - "traefik.http.routers.${STACK_NAME}-http-mailcatcher.service=${STACK_NAME}-http-mailcatcher-app"
-        - "traefik.http.services.${STACK_NAME}-http-mailcatcher-app.loadbalancer.server.port=1080"
+        - "traefik.http.services.${STACK_NAME}-http-mailcatcher-app.loadbalancer.server.port=80"
         - "traefik.http.routers.${STACK_NAME}-http-mailcatcher.middlewares=http-redirect"
         # HTTPS Configuration
         - "traefik.http.routers.${STACK_NAME}-https-mailcatcher.entrypoints=msul-https-ent"
         - "traefik.http.routers.${STACK_NAME}-https-mailcatcher.service=${STACK_NAME}-https-mailcatcher-app"
-        - "traefik.http.services.${STACK_NAME}-https-mailcatcher-app.loadbalancer.server.port=1080"
+        - "traefik.http.services.${STACK_NAME}-https-mailcatcher-app.loadbalancer.server.port=80"
         - "traefik.http.routers.${STACK_NAME}-https-mailcatcher.middlewares=restrict-auth"
         - "traefik.http.routers.${STACK_NAME}-https-mailcatcher.tls=true"
 
