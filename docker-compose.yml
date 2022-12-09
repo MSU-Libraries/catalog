@@ -99,6 +99,34 @@ services:
       update_config:
         failure_action: rollback
 
+  mailcatcher:
+    image: sj26/mailcatcher
+    networks:
+      - public
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        window: 15s
+      labels:
+        - "traefik.enable=true"
+        # HTTP Configuration
+        - "traefik.http.routers.${STACK_NAME}-http-mailcatcher.entrypoints=msul-http-ent"
+        - "traefik.http.routers.${STACK_NAME}-http-mailcatcher.service=${STACK_NAME}-http-mailcatcher-app"
+        - "traefik.http.services.${STACK_NAME}-http-mailcatcher-app.loadbalancer.server.port=1080"
+        - "traefik.http.routers.${STACK_NAME}-http-mailcatcher.middlewares=http-redirect"
+        # HTTPS Configuration
+        - "traefik.http.routers.${STACK_NAME}-https-mailcatcher.entrypoints=msul-https-ent"
+        - "traefik.http.routers.${STACK_NAME}-https-mailcatcher.service=${STACK_NAME}-https-mailcatcher-app"
+        - "traefik.http.services.${STACK_NAME}-https-mailcatcher-app.loadbalancer.server.port=1080"
+        - "traefik.http.routers.${STACK_NAME}-https-mailcatcher.middlewares=restrict-auth"
+        - "traefik.http.routers.${STACK_NAME}-https-mailcatcher.tls=true"
+
 networks:
   internal:
     name: ${STACK_NAME}-internal
