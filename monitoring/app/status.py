@@ -292,6 +292,7 @@ def get_node_status():
     status['available_memory'] = node_available_memory()
     status['available_disk_space'] = node_available_disk_space()
     status['harvests'] = node_harvest_exit_codes()
+    return status
 
 def get_node_statuses():
     urls = []
