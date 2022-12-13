@@ -267,9 +267,10 @@ def node_harvest_exit_codes():
     exit_codes = {}
     for name, path in paths.items():
         path = pathlib.Path(path)
-        if not path.is_file():
+        if path.is_file():
+            exit_code = path.read_text(encoding="utf8")
+        else:
             exit_code = 'file_not_found'
-        exit_code = path.read_text(encoding="utf8")
         exit_codes[name] = exit_code
     return exit_codes
 
