@@ -36,7 +36,7 @@ def node_cluster_state_uuid():
         return f"Error getting the cluster state uuid: {err.stderr}"
     except subprocess.TimeoutExpired:
         return "Timeout getting the cluster state uuid"
-    return process.stdout
+    return process.stdout.strip()
 
 def _check_cluster_state_uuid(statuses):
     uuid0 = statuses[0]['cluster_state_uuid']
@@ -202,7 +202,7 @@ def node_available_memory():
         return f"Error getting available memory: {err.stderr}"
     except subprocess.TimeoutExpired:
         return "Timeout when getting available memory"
-    return process.stdout
+    return process.stdout.strip()
 
 def node_available_disk_space():
     try:
@@ -212,7 +212,7 @@ def node_available_disk_space():
         return f"Error getting available disk space: {err.stderr}"
     except subprocess.TimeoutExpired:
         return "Timeout when getting available disk space"
-    return process.stdout
+    return process.stdout.strip()
 
 def get_memory_status(statuses):
     for node in range(1, 4):
@@ -268,7 +268,7 @@ def node_harvest_exit_codes():
     for name, path in paths.items():
         path = pathlib.Path(path)
         if path.is_file():
-            exit_code = path.read_text(encoding="utf8")
+            exit_code = path.read_text(encoding="utf8").strip()
         else:
             exit_code = 'file_not_found'
         exit_codes[name] = exit_code
@@ -276,7 +276,7 @@ def node_harvest_exit_codes():
 
 def get_harvest_status(name, statuses):
     for node in range(1, 4):
-        code = statuses[node]['harvests'][name]
+        code = statuses[node-1]['harvests'][name]
         if code == 'file_not_found':
             return f'Exit code file does not exist on at least node {node}'
         if code != '0':
