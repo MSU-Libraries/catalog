@@ -4,18 +4,21 @@ import status
 
 
 def homepage():
+    statuses = status.get_node_statuses()
     status_list = {}
-    status_list['memory'] = status.get_memory_status()
-    status_list['disk_space'] = status.get_disk_space_status()
+    status_list['memory'] = status.get_memory_status(statuses)
+    status_list['disk_space'] = status.get_disk_space_status(statuses)
     status_list['traefik'] = status.get_traefik_status()
-    status_list['galera'] = status.get_galera_status()
+    status_list['galera'] = status.get_galera_status(statuses)
     status_list['solr'] = status.get_solr_status()
     status_list['vufind'] = status.get_vufind_status()
-    status_list['folio_harvest'] = status.get_folio_harvest_status()
-    status_list['hlm_harvest'] = status.get_hlm_harvest_status()
-    status_list['authority_harvest'] = status.get_authority_harvest_status()
-    status_list['reserves_update'] = status.get_reserves_update_status()
-    status_list['searches_cleanup'] = status.get_searches_cleanup_status()
+    status_list['folio_harvest'] = status.get_harvest_status('folio', statuses)
+    status_list['hlm_harvest'] = status.get_harvest_status('hlm', statuses)
+    status_list['authority_harvest'] = status.get_harvest_status('authority', statuses)
+    status_list['reserves_update'] = status.get_harvest_status('reserves', statuses)
+    status_list['searches_cleanup'] = status.get_harvest_status('searches', statuses)
+    status_list['solr_backup'] = status.get_harvest_status('solr', statuses)
+    status_list['db_backup'] = status.get_harvest_status('db', statuses)
     services = {}
     for s_name, s_text in status_list.items():
         if s_text.startswith('OK'):

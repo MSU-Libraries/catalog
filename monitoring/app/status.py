@@ -26,7 +26,7 @@ def get_traefik_status():
 
 # Galera
 
-def cluster_state_uuid():
+def node_cluster_state_uuid():
     try:
         process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind", "-pvufind", "-ss", "-e",
             "SELECT variable_value from information_schema.global_status WHERE " \
@@ -38,19 +38,13 @@ def cluster_state_uuid():
         return "Timeout getting the cluster state uuid"
     return process.stdout
 
-def _check_cluster_state_uuid():
-    urls = []
-    for node in range(1, 4):
-        urls.append(f'http://monitoring{node}/monitoring/node/cluster_state_uuid')
-    try:
-        uuids = util.async_get_requests(urls)
-    except aiohttp.ClientError as err:
-        return f'Error reading cluster state uuid: {err}'
-    except asyncio.exceptions.TimeoutError:
-        return 'Timeout when reading cluster state uuid'
-    return uuids[0] == uuids[1] and uuids[0] == uuids[2]
+def _check_cluster_state_uuid(statuses):
+    uuid0 = statuses[0]['cluster_state_uuid']
+    uuid1 = statuses[1]['cluster_state_uuid']
+    uuid2 = statuses[2]['cluster_state_uuid']
+    return uuid0 == uuid1 and uuid0 == uuid2
 
-def get_galera_status():
+def get_galera_status(statuses):
     try:
         process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind", "-pvufind", "-ss", "-e",
             "SELECT variable_value from information_schema.global_status WHERE variable_name='wsrep_cluster_size';"],
@@ -62,7 +56,7 @@ def get_galera_status():
     cluster_size = process.stdout.strip()
     if cluster_size != '3':
         return f'Error: wrong cluster size: {cluster_size}'
-    if not _check_cluster_state_uuid():
+    if not _check_cluster_state_uuid(statuses):
         return 'Error: different cluster state uuids'
     return 'OK'
 
@@ -220,53 +214,39 @@ def node_available_disk_space():
         return "Timeout when getting available disk space"
     return process.stdout
 
-def get_memory_status():
-    urls = []
+def get_memory_status(statuses):
     for node in range(1, 4):
-        urls.append(f'http://monitoring{node}/monitoring/node/available_memory')
-    try:
-        mems = util.async_get_requests(urls)
-    except aiohttp.ClientError as err:
-        return f'Error reading available memory: {err}'
-    except asyncio.exceptions.TimeoutError:
-        return 'Timeout when reading available memory'
-    for node in range(1, 4):
+        available_memory = statuses[node-1]['available_memory']
         try:
-            float(mems[node-1])
+            float(available_memory)
         except ValueError:
-            return f'Returned value for available memory is not a number on node {node}: {mems[node-1]}'
+            return f'Returned value for available memory is not a number on node {node}: {available_memory}'
     lowest = 100
     lowest_node = 0
     for node in range(1, 4):
-        if float(mems[node-1]) < lowest:
+        available_memory = statuses[node-1]['available_memory']
+        if float(available_memory) < lowest:
             lowest_node = node
-            lowest = float(mems[node-1])
+            lowest = float(available_memory)
     lowest = round(lowest, 1)
     if lowest < 20.:
         return f"Low available memory on node {lowest_node}: {lowest}%"
     return f"OK - lowest available memory: {lowest}%"
 
-def get_disk_space_status():
-    urls = []
+def get_disk_space_status(statuses):
     for node in range(1, 4):
-        urls.append(f'http://monitoring{node}/monitoring/node/available_disk_space')
-    try:
-        disk_spaces = util.async_get_requests(urls)
-    except aiohttp.ClientError as err:
-        return f'Error reading available disk space: {err}'
-    except asyncio.exceptions.TimeoutError:
-        return 'Timeout when reading available disk space'
-    for node in range(1, 4):
+        available_disk_space = statuses[node-1]['available_disk_space']
         try:
-            float(disk_spaces[node-1])
+            float(available_disk_space)
         except ValueError:
-            return f'Returned value for available disk space is not a number on node {node}: {disk_spaces[node-1]}'
+            return f'Returned value for available disk space is not a number on node {node}: {available_disk_space}'
     lowest = 100
     lowest_node = 0
     for node in range(1, 4):
-        if float(disk_spaces[node-1]) < lowest:
+        available_disk_space = statuses[node-1]['available_disk_space']
+        if float(available_disk_space) < lowest:
             lowest_node = node
-            lowest = float(disk_spaces[node-1])
+            lowest = float(available_disk_space)
     lowest = round(lowest, 1)
     if lowest < 20.:
         return f"Low available disk space on node {lowest_node}: {lowest}%"
@@ -274,26 +254,52 @@ def get_disk_space_status():
 
 # Harvests
 
-def _harvest_status(exit_code_path):
-    path = pathlib.Path(exit_code_path)
-    if not path.is_file():
-        return 'Exit code file does not exist at {exit_code_path}'
-    exit_code = path.read_text(encoding="utf8")
-    if exit_code != '0':
-        return f'Non-zero exit code: {exit_code}'
+def node_harvest_exit_codes():
+    paths = {
+        'folio': '/mnt/logs/harvests/folio_exit_code',
+        'hlm': '/mnt/logs/harvests/hlm_exit_code',
+        'authority': '/mnt/logs/harvests/authority_exit_code',
+        'reserves': '/mnt/logs/vufind/reserves_exit_code',
+        'searches': '/mnt/logs/vufind/searches_exit_code',
+        'solr': '/mnt/logs/backups/solr_exit_code',
+        'db': '/mnt/logs/backups/db_exit_code',
+    }
+    exit_codes = {}
+    for name, path in paths.items():
+        path = pathlib.Path(path)
+        if not path.is_file():
+            exit_code = 'file_not_found'
+        exit_code = path.read_text(encoding="utf8")
+        exit_codes[name] = exit_code
+    return exit_codes
+
+def get_harvest_status(name, statuses):
+    for node in range(1, 4):
+        code = statuses[node]['harvests'][name]
+        if code == 'file_not_found':
+            return f'Exit code file does not exist on at least node {node}'
+        if code != '0':
+            return f'Non-zero exit code on at least node {node}: {code}'
     return 'OK'
 
-def get_folio_harvest_status():
-    return _harvest_status('/mnt/logs/harvests/folio_exit_code')
 
-def get_hlm_harvest_status():
-    return _harvest_status('/mnt/logs/harvests/hlm_exit_code')
+# Getting all the node statuses at once
 
-def get_authority_harvest_status():
-    return _harvest_status('/mnt/logs/harvests/authority_exit_code')
+def get_node_status():
+    status = {}
+    status['cluster_state_uuid'] = node_cluster_state_uuid()
+    status['available_memory'] = node_available_memory()
+    status['available_disk_space'] = node_available_disk_space()
+    status['harvests'] = node_harvest_exit_codes()
 
-def get_reserves_update_status():
-    return _harvest_status('/mnt/logs/vufind/reserves_exit_code')
-
-def get_searches_cleanup_status():
-    return _harvest_status('/mnt/logs/vufind/searches_exit_code')
+def get_node_statuses():
+    urls = []
+    for node in range(1, 4):
+        urls.append(f'http://monitoring{node}/monitoring/node/status')
+    try:
+        statuses = util.async_get_requests(urls, convert_to_json=True)
+    except aiohttp.ClientError as err:
+        return f'Error reading node status: {err}'
+    except asyncio.exceptions.TimeoutError:
+        return 'Timeout when reading node status'
+    return statuses

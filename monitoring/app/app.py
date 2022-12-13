@@ -19,17 +19,9 @@ collector.init(debug)
 
 # Homepage and status
 
-@app.route('/monitoring/node/cluster_state_uuid')
-def cluster_state_uuid():
-    return status.cluster_state_uuid()
-
-@app.route('/monitoring/node/available_memory')
-def node_available_memory():
-    return status.node_available_memory()
-
-@app.route('/monitoring/node/available_disk_space')
-def node_available_disk_space():
-    return status.node_available_disk_space()
+@app.route('/monitoring/node/status')
+def node_status():
+    return status.get_node_status()
 
 @app.route('/monitoring')
 def homepage():
