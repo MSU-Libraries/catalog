@@ -1,3 +1,4 @@
+import pathlib
 import subprocess
 import asyncio
 import requests
@@ -270,3 +271,29 @@ def get_disk_space_status():
     if lowest < 20.:
         return f"Low available disk space on node {lowest_node}: {lowest}%"
     return f"OK - lowest available disk space: {lowest}%"
+
+# Harvests
+
+def _harvest_status(exit_code_path):
+    path = pathlib.Path(exit_code_path)
+    if not path.is_file():
+        return 'Exit code file does not exist at {exit_code_path}'
+    exit_code = path.read_text(encoding="utf8")
+    if exit_code != '0':
+        return f'Non-zero exit code: {exit_code}'
+    return 'OK'
+
+def get_folio_harvest_status():
+    return _harvest_status('/mnt/logs/harvests/folio_exit_code')
+
+def get_hlm_harvest_status():
+    return _harvest_status('/mnt/logs/harvests/hlm_exit_code')
+
+def get_authority_harvest_status():
+    return _harvest_status('/mnt/logs/harvests/authority_exit_code')
+
+def get_reserves_update_status():
+    return _harvest_status('/mnt/logs/vufind/reserves_exit_code')
+
+def get_searches_cleanup_status():
+    return _harvest_status('/mnt/logs/vufind/searches_exit_code')

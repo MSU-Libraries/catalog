@@ -11,6 +11,8 @@ import status
 debug = os.getenv('STACK_NAME') != 'catalog-prod'
 app = flask.Flask(__name__, static_url_path='/monitoring/static')
 
+# Initialize stats collector with a scheduler
+
 collector.init(debug)
 
 # Routes
@@ -47,18 +49,10 @@ def logs_vufind(service):
 
 @app.route('/monitoring/node/graph_data/<variable>/<period>')
 def node_graph_data(variable, period):
-    if variable not in ['available_memory', 'available_disk_space', 'apache_requests']:
-        return 'Error: unknown variable'
-    if period not in ['hour', 'day', 'week', 'month', 'year']:
-        return 'Error: unknown period'
     return graphs.node_graph_data(variable, period)
 
 @app.route('/monitoring/graphs/<variable>/<period>')
 def graph(variable, period):
-    if variable not in ['available_memory', 'available_disk_space', 'apache_requests']:
-        return 'Error: unknown variable'
-    if period not in ['hour', 'day', 'week', 'month', 'year']:
-        return 'Error: unknown period'
     return graphs.graph(variable, period)
 
 

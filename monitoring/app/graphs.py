@@ -61,6 +61,10 @@ def _sql_query(variable, period_start, period_end, group):
         f'WHERE time > "{sql_start}" AND time < "{sql_end}" AND node = {node} GROUP BY {sql_group};'
 
 def node_graph_data(variable, period):
+    if variable not in ['available_memory', 'available_disk_space', 'apache_requests']:
+        return 'Error: unknown variable'
+    if period not in ['hour', 'day', 'week', 'month', 'year']:
+        return 'Error: unknown period'
     # someday this will support any given date/time for start and end
     (period_start, period_end) = _times_by_period(period)
     group = _group_by_times(period_start, period_end)
@@ -90,6 +94,10 @@ def node_graph_data(variable, period):
     return result
 
 def graph(variable, period):
+    if variable not in ['available_memory', 'available_disk_space', 'apache_requests']:
+        return 'Error: unknown variable'
+    if period not in ['hour', 'day', 'week', 'month', 'year']:
+        return 'Error: unknown period'
     urls = []
     for node in range(1, 4):
         urls.append(f'http://monitoring{node}/monitoring/node/graph_data/{variable}/{period}')
