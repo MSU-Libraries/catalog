@@ -192,6 +192,8 @@ RUN \
     envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
     envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
     envsubst < /etc/aliases | sponge /etc/aliases && \
+    # Determine if test or prod tenant based on FOLIO_URL
+    if [[ "${FOLIO_URL}" == *"test"* ]]; then IS_TEST_TENANT=1; else IS_TEST_TENANT=0; fi && \
     # Set required environment variables
     echo JAVA_HOME="$JAVA_HOME" >> /etc/environment && \
     echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
@@ -202,6 +204,7 @@ RUN \
     echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment && \
     echo AUTH_FTP_PASSWORD="$AUTH_FTP_PASSWORD" >> /etc/environment && \
     echo DEPLOY_KEY="$DEPLOY_KEY" >> /etc/environment && \
+    echo IS_TEST_TENANT="$IS_TEST_TENANT" >> /etc/environment && \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \

@@ -1,4 +1,4 @@
-<?php $account = $this->auth()->getManager(); ?>
+<?php $account = $this->auth()->getManager(); $isTestTenant = System.getenv("IS_TEST_TENANT"); ?>
 <div class="banner container navbar">
   <div class="navbar-header">
     <div class="navbar-msubrand"><a href="https://msu.edu/" rel="nofollow"><img alt="Michigan State University" src="/themes/msul/images/masthead-helmet-white.png"></a></div>
