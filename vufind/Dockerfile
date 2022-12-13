@@ -58,6 +58,9 @@ RUN \
     mkdir /home/msuldevs && \
     chown 1000:1000 /home/msuldevs
 
+# User configs for root
+COPY .vimrc /root/.vimrc
+
 USER 1000
 
 # Install requirements for grunt

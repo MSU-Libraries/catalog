@@ -1,0 +1,20 @@
+<!-- Getthis: gulform -->
+<?php
+$item = $this->getthis->getItem();
+$title = $this->driver->getTitle();
+$edition = $this->driver->getEdition();
+$callnum = $this->driver->getCallNumber();
+$author = $this->driver->getPrimaryAuthor();
+?>
+<div>
+    <p>
+        <b>Gull Lake Library Materials:</b>
+        Requested books are off-campus. You will be notified when these are
+        available for check out from the Main Library Circulation Desk.
+        <ul>
+            <li>
+                <a href="https://www.lib.msu.edu/branches/gul/bookretrieval?book_title=<?= $this->escapeHtml($title) ?>&Author=<?= $this->escapeHtml($author) ?>&volume_edition=<?= $this->escapeHtml($edition) ?>&call_number=<?= $this->escapeHtml($callnum) ?>">Request Item</a>
+            </li>
+        </ul>
+    </p>
+</div>

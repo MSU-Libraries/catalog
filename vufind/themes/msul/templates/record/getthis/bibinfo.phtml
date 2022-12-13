@@ -1,0 +1,35 @@
+<!-- Get-this: Bibinfo -->
+<?php
+$item = $this->getthis->getItem();
+$check = $item['check'] ?? false;
+$link = $this->getthis->getLink();
+
+?>
+<div>
+    <b><?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?></b><br/>
+    <br/>
+    <p class="text-left">
+        Status: <?= $this->getthis->getStatus() ?>
+        <?php if ($item['availability'] ?? false) { ?>
+            <?php if ($link ?? false) { ?>
+                <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
+                   <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
+                   href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
+                   <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place a Hold")?>
+                </a>
+            <?php
+            } ?>
+        <?php
+        } else { ?>
+            <?php if ($link ?? false) { ?>
+                <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
+                   <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
+                   href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
+                   <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Request" : "Request This")?>
+                </a>
+            <?php
+            } ?>
+        <?php
+        } ?>
+    </p><br/>
+</div>

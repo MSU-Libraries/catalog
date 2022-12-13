@@ -1,0 +1,19 @@
+<?php
+$item = $this->getthis->getItem();
+$title = $this->driver->getTitle();
+$author = $this->driver->getPrimaryAuthor();
+$bibnum = $this->driver->getSierraBN();
+$callnum = $this->driver->getCallNumber();
+?>
+<div>
+    <p>
+        <b>Request Digital Lending:</b>
+        Please use <a href='https://lib.msu.edu/cdl?&TI=<?= $this->escapeUrl($title) ?>&CN=<?= $this->escapeUrl($callnum) ?>&AU=<?= $this->escapeUrl($author) ?>&BIBNUM=<?= $this->escapeUrl($bibnum) ?>'>
+        this form to request material that is on Reserve</a>
+        and available for Digital Lending. This material is for short-term use and may not be
+        copied, printed or downloaded. After the form is submitted, we will email you when
+        the item is ready for access online. Please note that this service is only available
+        <a href='https://lib.msu.edu/hours/'>when the Main Library is open</a>. Requests
+        received outside of open hours will be fulfilled the next business day.
+    </p>
+</div>

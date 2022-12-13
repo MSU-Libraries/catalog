@@ -1,0 +1,18 @@
+<?php
+$loc = $this->getthis->getLocation();
+$title_full = $this->driver->getRawData()['title_full'];
+$callnum = $this->driver->getCallNumber();
+?>
+This is your confirmation for requesting retrieval of the following material.
+Once the material is ready, you will be contacted with futher instructions.<?= PHP_EOL ?>
+
+Your identity<?= PHP_EOL ?>
+-----<?= PHP_EOL ?>
+Name: <?= $this->userrow->firstname ?> <?= $this->userrow->lastname ?><?= PHP_EOL ?>
+Account: <?= $this->userrow->username ?><?= PHP_EOL ?>
+
+Material to be Retrieved<?= PHP_EOL ?>
+-----<?= PHP_EOL ?>
+Title: <?= $title_full ?><?= PHP_EOL ?>
+Call Number: <?= $callnum ?><?= PHP_EOL ?>
+Retrieval From: <?= $loc ?><?= PHP_EOL ?>

@@ -68,6 +68,23 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         return $this->getSolrField('genre_facet');
     }
 
+    public function getSierraBN()
+    {
+        $bibnum = null;
+        $marc = $this->getMarcReader();
+        $marcArr907 = $marc->getFields('907', ['y']);
+        foreach ($marcArr907 as $marc907) {
+            $subfields = $marc907['subfields'];
+            foreach ($subfields as $subfield) {
+                if ($subfield['code'] == 'y' && !empty($subfield['data'])) {
+                    $bibnum = ltrim($subfield['data'], '.');
+                    break 2;
+                }
+            }
+        }
+        return $bibnum;
+    }
+
     public function getLocations()
     {
         $locs = [];

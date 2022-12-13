@@ -4,9 +4,7 @@
 @import "components/sidebar";
 @import "components/icons";
 
-body {
-    font-family: 'Gotham SSm A', 'Gotham SSm B', Arial, Helvetica, sans-serif;
-}
+
 .container {
   width: 100%;
   margin-left:0.2rem;
@@ -228,7 +226,26 @@ text-align:center;
 
 /* --- Main Content --- */
 
+
+//hide searchbox from header on results page
+
+
+
+body.template-dir-search.template-name-results header .search.container , body.template-dir-eds.template-name-search header .search.container {
+  display:none;
+}
+.mainbody .container .searchbox {
+  margin-bottom:0;
+}
+
   // Main content and sidebar widths and float
+
+.home-facet-list a {
+  text-decoration:none;
+}
+.home-facet-list a:hover, a:active {
+  text-decoration:underline;
+}
 
 .search-home-facets li a, .vf-footer li a {
   text-decoration:none;
@@ -237,12 +254,14 @@ text-align:center;
 .searchHomeContent form .active-filters {
   display:none;
 }
+
 @media only screen and (min-width : 768px) {
   .home-facet.language, .home-facet.format {
   border-left:1px solid @medgray;
   padding-left:5%;
 }
 }
+
 .home-facet.language ul li:last-child, .home-facet.format ul li:last-child  {
   text-align:center;
   width:9.5rem;
@@ -416,13 +435,6 @@ form.searchForm {
 
 
   @media (min-width: 768px) {
- 
-
-  /*    &.navbar {
-        -webkit-border-radius: 0;
--moz-border-radius: 0;
-border-radius: 0;  
-} */
 
 
     .sidebar.left {
@@ -449,11 +461,59 @@ border-right:1px solid @medgray;
 
 
 
+// move sort dropdown left
 
+@media only screen and (min-width : 768px) {
+  div.search-header {
+  display:block;
+  .search-stats {
+  float:left;
+  margin-right:2rem;
+}
+.search-controls {
+  text-align:left;
+    .search-result-limit {
+      float:left;
+      margin-right:2rem;
+    }
+    .search-sort .form-control {
+      width:15rem;
+    }
+    .view-buttons
+      a, a:visited {
+          text-align:center;
+          padding:0.5rem;
+          text-decoration: none;
+          color:#18453b;
+          background-color: @lightsage;
+          -webkit-border-radius: 0.5rem;
+          -moz-border-radius: 0.5rem;
+          border-radius: 0.5rem;
+      }
 
-@media (min-width: 768px) {
+      a:hover, a:active, span {
+          text-align:center;
+          padding:0.5rem;
+          text-decoration: none;
+          color:#ffffff;
+          background-color: @parakeetgreen;
+          -webkit-border-radius: 0.5rem;
+          -moz-border-radius: 0.5rem;
+          border-radius: 0.5rem;
+      }      
+
+}
+
+}
+
 
   }
+  
+
+
+
+
+
   
 
 
@@ -462,8 +522,13 @@ border-right:1px solid @medgray;
   margin-bottom:2rem;
 }*/
 
-
-
+.active-filters a {
+  text-decoration:none;
+}
+//filter hover color
+.active-filters .search-filter-remove:hover {
+  color: @medgray;
+}
 
 label {
   color: @msugreen;
@@ -483,3 +548,77 @@ label {
   text-decoration:none;
 }
 */
+
+// Pagination 
+
+@media only screen and (min-width : 900px) {
+  .pagination {
+    margin-left:3.5rem;
+  }
+}
+
+.pagination>li>a,
+.pagination>li>span {
+ position:relative;
+ float:left;
+ padding:6px 12px;
+ margin-left:-1px;
+ line-height:1.42857143;
+ color:#888;
+ text-decoration:none;
+ background-color:#fff;
+ border:none;
+}
+.pagination li {
+  font-size:1.5rem;
+  color:#18453b;
+  font-weight:300;
+    a {
+      color:#18453b;
+
+    }
+}
+.pagination li a i {
+  border: 2px solid #888;
+  color: #888;
+  radius: 3rem;
+  -webkit-border-radius: 0.5rem;
+  -moz-border-radius: 0.5rem;
+  border-radius: 0.5rem;
+}
+.pagination li a i.fa-angle-left {
+  padding: 0 .7rem 0.1rem .5rem;
+  margin-left:0.5rem;
+}
+.pagination li a i.fa-angle-right {
+  padding: 0 .5rem 0.1rem .7rem;
+  margin-right:0.5rem;
+}
+.pagination .active span {
+  background-color:#fff;
+  color:#444;
+  font-weight:800;
+    &:hover {
+      background-color:#888;
+    }
+}
+
+// Searchtools spacing
+.search-term {
+  margin-bottom:1rem;
+}
+
+.searchtools {
+  margin-bottom:1rem;
+    a {
+      margin-right:1rem;
+        .fa {
+          margin-right:0.5rem;
+        }
+    }
+}
+
+.view-buttons {
+  margin-top:1rem;
+  margin-bottom:2rem;
+}

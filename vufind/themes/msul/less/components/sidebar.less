@@ -1,3 +1,7 @@
+.sidebar h2 {
+  margin-top:0;
+}
+
 .facet-group {
   display: block;
   margin-bottom: 1rem;
@@ -53,9 +57,17 @@
     padding-left: 0.5rem;
   }
 }
+
+.facet-group:not(:first-child) {
+  border-top:1px solid @medgray;
+}
+
+.facet-group a, .facet a {
+  text-decoration:none;
+}
 .facet-group .facet,
 .facet-load-indicator {
-  border-bottom: 1px solid @list-group-border;
+  border-bottom: none !important;
 }
 .facet-group .title {
   display: block;
@@ -99,14 +111,20 @@
   border: 0;
 }
 
-.checkboxFilter {
-  padding-bottom: 0.5rem;
+
+.checkboxFilter .facet {
+      text-indent: -1rem;
+      margin-left: 1.5rem;
+        i {
+          padding-right:.5rem;
+        }
 }
+
 .checkbox-filter {
   display: flex;
   width: 100%;
   font-weight: bold;
-  color: @text-color;
+
 }
 .facet-group > .checkbox,
 .sidebar .facet.checkbox {
