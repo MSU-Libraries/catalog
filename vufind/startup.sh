@@ -28,8 +28,8 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
         chmod -R g+rw "${SHARED_STORAGE}/${STACK_NAME}"/repo
         chmod g-w "${SHARED_STORAGE}/${STACK_NAME}"/repo/.git/objects/pack/*
         find "${SHARED_STORAGE}/${STACK_NAME}" -type d -exec chmod g+s {} \;
-        chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/
-        chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/module/
+        chown msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/
+        chown msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/module/
     fi
     git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch
     # Setting up "local" sync dir
@@ -47,6 +47,11 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/themes/msul /usr/local/vufind/themes
     rm -rf /usr/local/vufind/module/Catalog
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog /usr/local/vufind/module
+    # Make sure permissions haven't gotten changed on the share along the way
+    # (This can happen no matter what on devel container startup)
+    chown msuldevs:msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/*
+    chown msuldevs:msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/local-confs/*
+    rsync -aip --chmod=D2775,F664 "${SHARED_STORAGE}/${STACK_NAME}"/ "${SHARED_STORAGE}/${STACK_NAME}"/
 fi
 
 # Save the logs in the logs docker volume
