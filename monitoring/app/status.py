@@ -1,3 +1,4 @@
+import os
 import pathlib
 import subprocess
 import asyncio
@@ -26,7 +27,7 @@ def get_traefik_status():
 
 # Galera
 
-def node_cluster_state_uuid():
+def _node_cluster_state_uuid():
     try:
         process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind", "-pvufind", "-ss", "-e",
             "SELECT variable_value from information_schema.global_status WHERE " \
@@ -91,110 +92,114 @@ def _check_collection(collection_name, collection, live_nodes):
             return res
     return 'OK'
 
-def get_solr_status():
-    urls = []
-    for node in range(1, 4):
-        urls.append(f'http://solr{node}:8983/solr/admin/collections?action=clusterstatus')
+def _node_solr_status():
+    node = os.getenv('NODE')
     try:
-        jsons = util.async_get_requests(urls, convert_to_json=True)
-    except aiohttp.ClientError as err:
-        return f'Error reading the solr clusterstatus: {err}'
-    except asyncio.exceptions.TimeoutError:
+        req = requests.get(f'http://solr{node}:8983/solr/admin/collections?action=clusterstatus', timeout=TIMEOUT)
+        req.raise_for_status()
+        j = req.json()
+    except requests.exceptions.Timeout:
         return 'Timeout when reading the solr clusterstatus'
+    except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
+        return f'Error reading the solr clusterstatus: {err}'
+    live_nodes = j['cluster']['live_nodes']
+    if len(live_nodes) != 3:
+        return f'Error: only {len(live_nodes)} live nodes'
+    if len(j['cluster']['collections']) != 4:
+        return f"Wrong number of collections: {len(j['cluster']['collections'])}"
+    for collection_name, collection in j['cluster']['collections'].items():
+        res = _check_collection(collection_name, collection, live_nodes)
+        if res != 'OK':
+            return res
+    return 'OK'
 
+def get_solr_status(statuses):
     for node in range(1, 4):
-        j = jsons[node-1]
-        live_nodes = j['cluster']['live_nodes']
-        if len(live_nodes) != 3:
-            return f'Error: node {node}: only {len(live_nodes)} live nodes'
-        if len(j['cluster']['collections']) != 4:
-            return f"Wrong number of collections: {len(j['cluster']['collections'])}"
-        for collection_name, collection in j['cluster']['collections'].items():
-            res = _check_collection(collection_name, collection, live_nodes)
-            if res != 'OK':
-                return res
+        node_status = statuses[node-1]['solr']
+        if node_status != 'OK':
+            return f'Error on node {node}: {node_status}'
     return 'OK'
 
 
 # Vufind
 
-def _check_vufind_home_page():
-    urls = []
-    for node in range(1, 4):
-        urls.append(f'http://vufind{node}/')
+def _check_vufind_home_page(node):
     try:
-        results = util.async_get_requests(urls)
-    except aiohttp.ClientError as err:
-        return f'Error reading vufind home page: {err}'
-    except asyncio.exceptions.TimeoutError:
+        req = requests.get(f'http://vufind{node}/', timeout=TIMEOUT)
+        req.raise_for_status()
+        text = req.text
+    except requests.exceptions.Timeout:
         return 'Timeout when reading vufind home page'
-    for node in range(1, 4):
-        text = results[node-1]
-        if '</html>' not in text:
-            return f'Vufind home page not complete for node {node}'
-        if '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
-            return f'An error is reported in Vufind home page for node {node}'
+    except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
+        return f'Error reading vufind home page: {err}'
+    if '</html>' not in text:
+        return 'Vufind home page not complete'
+    if '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
+        return 'An error is reported in Vufind home page'
     return 'OK'
 
-def _check_vufind_record_page():
-    urls = []
-    for node in range(1, 4):
-        urls.append(f'http://vufind{node}/Record/folio.in00001912238')
+def _check_vufind_record_page(node):
     try:
-        results = util.async_get_requests(urls)
-    except aiohttp.ClientError as err:
-        return f'Error reading vufind record page: {err}'
-    except asyncio.exceptions.TimeoutError:
+        req = requests.get(f'http://vufind{node}/Record/folio.in00001912238', timeout=TIMEOUT)
+        req.raise_for_status()
+        text = req.text
+    except requests.exceptions.Timeout:
         return 'Timeout when reading vufind record page'
-    for node in range(1, 4):
-        text = results[node-1]
-        if '</html>' not in text:
-            return f'Vufind record page folio.in00001912238 not complete for node {node}'
-        if '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
-            return f'An error is reported in Vufind record page folio.in00001912238 for node {node}'
-        if 'CR-186011' not in text:
-            return f'Vufind record page folio.in00001912238 not complete for node {node}'
-        if 'NAS 1.26:186011' not in text:
-            return f'Vufind record page folio.in00001912238 not complete for node {node}'
+    except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
+        return f'Error reading vufind record page: {err}'
+    if '</html>' not in text:
+        return 'Vufind record page folio.in00001912238 not complete'
+    if '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
+        return 'An error is reported in Vufind record page folio.in00001912238'
+    if 'CR-186011' not in text:
+        return 'Vufind record page folio.in00001912238 not complete'
+    if 'NAS 1.26:186011' not in text:
+        return 'Vufind record page folio.in00001912238 not complete'
     return 'OK'
 
-def _check_vufind_search_page():
-    urls = []
-    for node in range(1, 4):
-        urls.append(
-            f'http://vufind{node}/Search/Results?limit=5&dfApplied=1&lookfor=+Automated+flight+test&type=AllFields')
+def _check_vufind_search_page(node):
     try:
-        results = util.async_get_requests(urls)
-    except aiohttp.ClientError as err:
-        return f'Error reading vufind search page: {err}'
-    except asyncio.exceptions.TimeoutError:
+        req = requests.get(
+            f'http://vufind{node}/Search/Results?limit=5&dfApplied=1&lookfor=+Automated+flight+test&type=AllFields',
+            timeout=TIMEOUT)
+        req.raise_for_status()
+        text = req.text
+    except requests.exceptions.Timeout:
         return 'Timeout when reading vufind search page'
-    for node in range(1, 4):
-        text = results[node-1]
-        if '</html>' not in text:
-            return f'Vufind search page not complete for node {node}'
-        if '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
-            return f'An error is reported in Vufind search page for node {node}'
-        if 'folio.in00001912238' not in text:
-            return f'Vufind search page not complete for node {node}'
+    except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
+        return f'Error reading vufind search page: {err}'
+    if '</html>' not in text:
+        return 'Vufind search page not complete'
+    if '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
+        return 'An error is reported in Vufind search page'
+    if 'folio.in00001912238' not in text:
+        return 'Vufind search page not complete'
     return 'OK'
 
-def get_vufind_status():
-    res = _check_vufind_home_page()
+def _node_vufind_status():
+    node = os.getenv('NODE')
+    res = _check_vufind_home_page(node)
     if res != 'OK':
         return res
-    res = _check_vufind_record_page()
+    res = _check_vufind_record_page(node)
     if res != 'OK':
         return res
-    res = _check_vufind_search_page()
+    res = _check_vufind_search_page(node)
     if res != 'OK':
         return res
+    return 'OK'
+
+def get_vufind_status(statuses):
+    for node in range(1, 4):
+        node_status = statuses[node-1]['vufind']
+        if node_status != 'OK':
+            return f'Error on node {node}: {node_status}'
     return 'OK'
 
 
 # Available memory and disk space
 
-def node_available_memory():
+def _node_available_memory():
     try:
         process = subprocess.run(["/bin/sh", "-c", "free | grep Mem | awk '{print $7/$2 * 100.0}'"],
             capture_output=True, text=True, timeout=TIMEOUT, check=True)
@@ -204,7 +209,7 @@ def node_available_memory():
         return "Timeout when getting available memory"
     return process.stdout.strip()
 
-def node_available_disk_space():
+def _node_available_disk_space():
     try:
         process = subprocess.run(["/bin/sh", "-c", "df / | grep overlay | awk '{print $4/$2 * 100.0}'"],
             capture_output=True, text=True, timeout=TIMEOUT, check=True)
@@ -254,7 +259,7 @@ def get_disk_space_status(statuses):
 
 # Harvests
 
-def node_harvest_exit_codes():
+def _node_harvest_exit_codes():
     paths = {
         'folio': '/mnt/logs/harvests/folio_exit_code',
         'hlm': '/mnt/logs/harvests/hlm_exit_code',
@@ -288,10 +293,12 @@ def get_harvest_status(name, statuses):
 
 def get_node_status():
     status = {}
-    status['cluster_state_uuid'] = node_cluster_state_uuid()
-    status['available_memory'] = node_available_memory()
-    status['available_disk_space'] = node_available_disk_space()
-    status['harvests'] = node_harvest_exit_codes()
+    status['cluster_state_uuid'] = _node_cluster_state_uuid()
+    status['solr'] = _node_solr_status()
+    status['vufind'] = _node_vufind_status()
+    status['available_memory'] = _node_available_memory()
+    status['available_disk_space'] = _node_available_disk_space()
+    status['harvests'] = _node_harvest_exit_codes()
     return status
 
 def get_node_statuses():
