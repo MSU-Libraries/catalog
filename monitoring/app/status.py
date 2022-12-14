@@ -199,7 +199,7 @@ def get_vufind_status(statuses):
 
 # Available memory and disk space
 
-def _node_available_memory():
+def node_available_memory():
     try:
         process = subprocess.run(["/bin/sh", "-c", "free | grep Mem | awk '{print $7/$2 * 100.0}'"],
             capture_output=True, text=True, timeout=TIMEOUT, check=True)
@@ -209,7 +209,7 @@ def _node_available_memory():
         return "Timeout when getting available memory"
     return process.stdout.strip()
 
-def _node_available_disk_space():
+def node_available_disk_space():
     try:
         process = subprocess.run(["/bin/sh", "-c", "df / | grep overlay | awk '{print $4/$2 * 100.0}'"],
             capture_output=True, text=True, timeout=TIMEOUT, check=True)
@@ -296,8 +296,8 @@ def get_node_status():
     status['cluster_state_uuid'] = _node_cluster_state_uuid()
     status['solr'] = _node_solr_status()
     status['vufind'] = _node_vufind_status()
-    status['available_memory'] = _node_available_memory()
-    status['available_disk_space'] = _node_available_disk_space()
+    status['available_memory'] = node_available_memory()
+    status['available_disk_space'] = node_available_disk_space()
     status['harvests'] = _node_harvest_exit_codes()
     return status
 
