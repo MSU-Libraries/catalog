@@ -345,13 +345,6 @@ class GetThisLoader {
         return false;
     }
 
-    public function showGulForm($item_id=null) {
-        $loc = $this->getLocation($item_id);
-
-        if (Regex::GULL($loc)) return true;
-        return false;
-    }
-
     public function showSpcAeon($item_id=null) {
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
