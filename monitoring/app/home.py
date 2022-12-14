@@ -5,6 +5,8 @@ import status
 
 def homepage():
     statuses = status.get_node_statuses()
+    if isinstance(statuses, str):
+        return statuses
     status_list = {}
     status_list['memory'] = status.get_memory_status(statuses)
     status_list['disk_space'] = status.get_disk_space_status(statuses)

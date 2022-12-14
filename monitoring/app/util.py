@@ -3,7 +3,7 @@ import asyncio
 import aiohttp
 
 MAX_PARALLEL_REQUESTS = 100
-TIMEOUT = 10
+TIMEOUT = 15
 
 def async_get_requests(urls, convert_to_json=False):
     async def gather_with_concurrency():
