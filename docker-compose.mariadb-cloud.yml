@@ -31,12 +31,12 @@ services:
       mode: replicated
       replicas: 3
       restart_policy:
-        window: 90s
+        window: 160s
       update_config:
         parallelism: 1
         # No rollback on DB containers unless stability can be assured
         #failure_action: rollback
-        delay: 180s
+        delay: 160s
       placement:
         max_replicas_per_node: 1
 

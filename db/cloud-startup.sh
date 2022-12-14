@@ -24,6 +24,23 @@ node_number() {
     echo "${1##galera}"
 }
 
+###############################
+## Check if array contains a given value
+##  $1 -> Name of array to search
+##  $2 -> Value to find
+## Returns 0 if an element matches the value to find
+array_contains() {
+    local ARRNAME=$1[@]
+    local HAYSTACK=( ${!ARRNAME} )
+    local NEEDLE="$2"
+    for VAL in "${HAYSTACK[@]}"; do
+        if [[ "$NEEDLE" == "$VAL" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
 ip_from_hostname() {
     PAIR=$( getent hosts "$1")
     RC=$?
@@ -46,6 +63,75 @@ galera_node_online() {
     RC=$?
     verbose "Scanned ${1} - return code: $RC"
     return $RC
+}
+
+galera_node_query() {
+    NODE="$1"
+    QUERY="$2"
+    declare -g ROW_CNT=0
+    declare -g -a ROW_$ROW_CNT=
+    while read -r -a ROW_$ROW_CNT; do
+        (( ROW_CNT+=1 ))
+        declare -g -a ROW_$ROW_CNT
+    done < <( timeout 5 mysql -h "$NODE" -u root -p$MARIADB_ROOT_PASSWORD --silent -e "$QUERY" )
+    return $ROW_CNT
+}
+
+galera_node_is_primary_synced() {
+    NODE="$1"
+    # Row indices => 0:Node_Index,1:Node_Status,2:Cluster_Status,3:Cluster_Size
+    if galera_node_query "$NODE" "SHOW WSREP_STATUS"; then  # return is number of rows, so 0 is failure
+        verbose "No response to SHOW WSREP_STATUS on $NODE"
+        return 1
+    fi
+    if [[ "${ROW_0[1]}" != "synced" ]]; then
+        verbose "Warning: WSREP_STATUS $NODE Node Status = ${ROW_0[0]}"
+        return 1
+    elif [[ "${ROW_0[2]}" != "primary" ]]; then
+        verbose "Warning: WSREP_STATUS $NODE Cluster Status = ${ROW_0[0]}"
+        return 1
+    fi
+    return 0
+}
+
+galera_cluster_membership_is_okay() {
+    # Row indices => 0:Index,1:Uuid,2:Name,3:Address
+    if galera_node_query "$GALERA_HOST" "SHOW WSREP_MEMBERSHIP"; then  # return is number of rows, so 0 is failure
+        verbose "No response to SHOW WSREP_MEMBERSHIP on $GALERA_HOST"
+        return 1
+    fi
+    ROWS=$?
+
+    # Find any nodes are missing from the cluster and
+    # ensure there no duplicates of expected node found
+    # and no unexpected node names found
+    for NODE in "${NODES_ARR[@]}"; do
+        NFOUND=0
+        for ((IDX=0; IDX<ROWS; IDX++)); do
+            NNVAR=ROW_$IDX[2]
+            if [[ "$NODE" == "${!NNVAR}" ]]; then
+                (( NFOUND += 1 ))
+            fi
+        done
+        if [[ "$NFOUND" -gt 1 ]]; then
+            verbose "Duplicate $NODE nodes (found ${NFOUND}) in cluster"
+            return 1
+        elif [[ "$NFOUND" -lt 1 ]]; then
+            verbose "Cluster membership is missing node $NODE"
+            return 1
+        fi
+        if ! array_contains NODES_ARR "$NODE"; then
+            verbose "Cluster contains unexpeted node: $NODE (expected: ${NODES_STR}}"
+            return 1
+        fi
+    done
+
+    # Cluster size is correct (this check _should_ be redunant after earlier checks)
+    if [[ "$ROWS" -ne "${#NODES_ARR}" ]]; then
+        verbose "Cluster size is $ROWS (should be ${#NODES_ARR})"
+        return 1
+    fi
+    return 0
 }
 
 any_galera_node_online() {

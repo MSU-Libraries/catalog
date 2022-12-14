@@ -2,3 +2,7 @@
 [mysqld]
 wait_timeout        = 345600    # 4 days
 max_connections     = 200
+
+[mariadb]
+# Enable SHOW WSREP_STATUS; and SHOW WSREP_MEMBERSHIP; commands
+plugin_load_add = wsrep_info
