@@ -41,6 +41,7 @@ COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
 COPY healthcheck.sh /healthcheck.sh
 COPY clusterhealth.sh /clusterhealth.sh
+COPY cron-alphabrowse.sh /cron-alphabrowse.sh
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
   CMD /healthcheck.sh
