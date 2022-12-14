@@ -68,6 +68,7 @@ def node_graph_data(variable, period):
     # someday this will support any given date/time for start and end
     (period_start, period_end) = _times_by_period(period)
     group = _group_by_times(period_start, period_end)
+    conn = None
     try:
         conn = db.connect(user='monitoring', password='monitoring', host='galera', database="monitoring")
         cur = conn.cursor()
@@ -86,7 +87,10 @@ def node_graph_data(variable, period):
             pt_x.append(x)
             pt_y.append(row[-1])
     except db.Error as err:
+        if conn is not None:
+            conn.close()
         return f"Database error: {err}"
+    conn.close()
     result = {
         'pt_x': pt_x,
         'pt_y': pt_y,

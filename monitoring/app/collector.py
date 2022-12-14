@@ -51,3 +51,4 @@ def main():
         conn.commit()
     except db.Error as err:
         print(f"Error adding entry to database: {err}", file=sys.stderr)
+    conn.close()
