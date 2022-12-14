@@ -29,12 +29,12 @@ MAILTO=$EMAIL
 @reboot root chronic clear-vufind-cache 2>&1 | logger -t CACHE_CLEAR
 
 # Trigger harvest start
-#*/2 *	* * *	root    /usr/bin/flock -n /tmp/harvest.lock /harvest-and-import.sh --oai-harvest --batch-import | tee /mnt/logs/harvests/folio.log
-0 ${NODE}    * * *	root    /usr/bin/flock -n /tmp/hlm-harvest.lock /hlm-harvest-and-import.sh --harvest --import 2>&1 | tee /mnt/logs/harvests/hlm.log | pee "logger -t HLM_IMPORT" "cat"
-0 4    * * 0	root    /usr/bin/flock -n /tmp/authority-harvest.lock /authority-harvest-and-import.sh --harvest --import 2>&1 | tee /mnt/logs/harvests/authority.log | pee "logger -t AUTHORITY_IMPORT" "cat"
+#*/2 *	* * *	root    cron-folio.sh
+0 ${NODE}    * * *	root    cron-hlm.sh
+0 4    * * 0	root    cron-authority.sh
 
 # Course reserves update
-30 ${NODE}	* * *	root    /usr/bin/php /usr/local/vufind/util/index_reserves.php 2>&1 | tee /mnt/logs/vufind/reserves_update.log | logger -t INDEX_RESERVES
+30 ${NODE}	* * *	root    cron-reserves.sh
 
 # Cleanup unsaved searches
-0 0     * * *   root    php /usr/local/vufind/public/index.php util/expire_searches 2>&1 | tee /mnt/logs/vufind/searches_cleanup.log | logger -t EXPIRE_SEARCHES
+0 0     * * *   root    cron-searches.sh
