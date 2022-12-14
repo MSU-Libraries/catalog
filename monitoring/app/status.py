@@ -268,6 +268,7 @@ def _node_harvest_exit_codes():
         'searches': '/mnt/logs/vufind/searches_exit_code',
         'solr': '/mnt/logs/backups/solr_exit_code',
         'db': '/mnt/logs/backups/db_exit_code',
+        'alphabrowse': '/mnt/logs/solr/alphabrowse_exit_code',
     }
     exit_codes = {}
     for name, path in paths.items():

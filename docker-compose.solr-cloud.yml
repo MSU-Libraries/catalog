@@ -90,6 +90,7 @@ services:
     volumes:
       - bitnami:/bitnami
       - /mnt/shared:/mnt/shared:rw
+      - logs:/mnt/logs
     networks:
       - internal
     logging:

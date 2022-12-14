@@ -30,7 +30,7 @@ MAILTO=$EMAIL
 
 # Trigger harvest start
 #*/2 *	* * *	root    cron-folio.sh
-0 ${NODE}    * * *	root    cron-hlm.sh
+5 ${NODE}    * * *	root    cron-hlm.sh
 0 4    * * 0	root    cron-authority.sh
 
 # Course reserves update

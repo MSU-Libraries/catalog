@@ -16,6 +16,7 @@ def homepage():
     status_list['hlm_harvest'] = status.get_harvest_status('hlm', statuses)
     status_list['authority_harvest'] = status.get_harvest_status('authority', statuses)
     status_list['reserves_update'] = status.get_harvest_status('reserves', statuses)
+    status_list['alphabrowse'] = status.get_harvest_status('alphabrowse', statuses)
     status_list['searches_cleanup'] = status.get_harvest_status('searches', statuses)
     status_list['solr_backup'] = status.get_harvest_status('solr', statuses)
     status_list['db_backup'] = status.get_harvest_status('db', statuses)
