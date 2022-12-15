@@ -15,6 +15,7 @@ ENV VUFIND_VERSION=$VUFIND_VERSION
 COPY install-composer.sh /install-composer.sh
 RUN \
     # Perform updates
+    --mount=type=cache,target=/cache
     apt update && \
     apt install -y wget vim-nox lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
         gettext-base locales msmtp-mta rsync screen \
