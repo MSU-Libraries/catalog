@@ -42,7 +42,7 @@ Build Vufind Image:
   script:
     - docker pull $LATEST || true
     - > 
-        docker build 
+        DOCKER_BUILDKIT=1 docker build 
         --build-arg GITHUB_USER_TOKEN=$GITHUB_USER_TOKEN
         --build-arg VUFIND_VERSION=$VUFIND_VERSION
         --build-arg SITE_HOSTNAME=$SITE_HOSTNAME
