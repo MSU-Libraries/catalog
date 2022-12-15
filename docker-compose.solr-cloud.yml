@@ -19,8 +19,8 @@ x-solr-deploy: &solr_deploy
     window: 15s
   update_config:
     parallelism: 1
-    failure_action: rollback
     delay: 10s
+    monitor: 10s
   placement:
     max_replicas_per_node: 1
   labels:
@@ -79,7 +79,6 @@ services:
         max_replicas_per_node: 1
       update_config:
         parallelism: 1
-        failure_action: rollback
       restart_policy:
         window: 15s
 
@@ -110,7 +109,6 @@ services:
         window: 15s
       update_config:
         parallelism: 1
-        failure_action: rollback
         delay: 10s
       placement:
         max_replicas_per_node: 1

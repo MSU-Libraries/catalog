@@ -13,8 +13,6 @@ services:
       - "LOG_JSON=false"
     deploy:
       replicas: 1
-      update_config:
-        failure_action: rollback
       placement:
         constraints:
           - node.role == manager
@@ -31,5 +29,3 @@ services:
         - "swarm.cronjob.skip-running=false"
       restart_policy:
         condition: none
-      update_config:
-        failure_action: rollback
