@@ -6,10 +6,10 @@ the right section! We use two separate code repositories, one for infrastructure
 code (this repository). The infrastructure repository is internal and uses GitLab CI/CD to kickoff Ansible
 playbooks that run terraform commands to manage the infrastructure in AWS for us. This repository however is
 public, and contains all our customization on top of Vufind (like our own custom module and theme) but much
-more beyond that – it has our own Docker swarm setup that runs all the services Vufind depends on. Like our
-infrastructure playbook, we use GitLab CI/CD to run jobs that deploy our code to our AWS EC2 instances.
-Based on the Git branch name, it will decide if it will spin up a new development environment, update an
-existing one, or update our production environment. To get a little more into the details, the CI/CD triggers
+more beyond that – it has our own Docker swarm setup that runs all the services Vufind depends on. Just like our
+infrastructure repository, our application repository uses GitLab CI/CD to run jobs that deploy the code to our
+AWS EC2 instances. Based on the Git branch name, it will decide if it will spin up a new development environment,
+update an existing one, or update our production environment. To get a little more into the details, the CI/CD triggers
 a Docker build passing `--build-arg` parameters to the build command with multiple CI/CD variables stored in
 GitLab. Those variables are then used in the Dockerfile throughout the build (for example: the `config.ini` file
 is populated with data in the CI/CD variables with the use of the `envsubst` command in the Dockerfile after the
