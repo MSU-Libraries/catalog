@@ -281,13 +281,32 @@ def _node_harvest_exit_codes():
     return exit_codes
 
 def get_harvest_status(name, statuses):
+    nb_executed = 0
+    node_where_executed = 0
+    exit_code = ''
+    node_with_first_error = 0
+    none_found = True
     for node in range(1, 4):
         code = statuses[node-1]['harvests'][name]
-        if code == 'file_not_found':
-            return f'Exit code file does not exist on at least node {node}'
-        if code != '0':
-            return f'Non-zero exit code on at least node {node}: {code}'
-    return 'OK'
+        if code == '0':
+            nb_executed += 1
+            node_where_executed = node
+        elif exit_code == '':
+            exit_code = code
+            node_with_first_error = node
+        if code != 'file_not_found':
+            none_found = False
+    if nb_executed == 3:
+        return 'OK - executed on all 3 nodes'
+    if nb_executed == 2:
+        return 'OK - executed on 2 nodes'
+    if nb_executed == 1:
+        return f'OK - executed on node {node_where_executed}'
+    if none_found:
+        return 'This was not executed on any node'
+    if exit_code == 'file_not_found':
+        return f'Error: exit code file does not exist on at least node {node_with_first_error}'
+    return f'Error: exit code on node {node_with_first_error}: {exit_code}'
 
 
 # Getting all the node statuses at once
@@ -307,7 +326,7 @@ def get_node_statuses():
     for node in range(1, 4):
         urls.append(f'http://monitoring{node}/monitoring/node/status')
     try:
-        statuses = util.async_get_requests(urls, convert_to_json=True)
+        statuses = util.async_get_requests(urls, convert_to_json=True, timeout=15)
     except aiohttp.ClientError as err:
         return f'Error reading node status: {err}'
     except asyncio.exceptions.TimeoutError:

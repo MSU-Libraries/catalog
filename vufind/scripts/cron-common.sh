@@ -1,13 +1,9 @@
 #!/bin/bash
 
-# Cron job - Update alphabetical browsing
-
-CRON_COMMAND="/alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}"
-LATEST_PATH=/mnt/logs/solr/alphabrowse_latest.log
-LOG_PATH=/mnt/logs/solr/alphabrowse.log
-EXIT_CODE_PATH=/mnt/logs/solr/alphabrowse_exit_code
-DOCKER_TAG=ALPHA_BROWSE
-OUPUT_LOG=0
+# Run a cron command and save output and exit code
+# Takes these parameters: CRON_COMMAND, LATEST_PATH, LOG_PATH, EXIT_CODE_PATH, DOCKER_TAG, OUPUT_LOG
+# (all the vufind cron scripts are assumed to be on the PATH)
+# NOTE: solr/cron-alphabrowse.sh duplicates this code
 
 rm -f "$LATEST_PATH" "$EXIT_CODE_PATH"
 $CRON_COMMAND >$LATEST_PATH 2>&1
