@@ -2,6 +2,7 @@ import os
 import pathlib
 import subprocess
 import asyncio
+from datetime import datetime, timedelta
 import requests
 import aiohttp
 
@@ -274,7 +275,15 @@ def _node_harvest_exit_codes():
     for name, path in paths.items():
         path = pathlib.Path(path)
         if path.is_file():
-            exit_code = path.read_text(encoding="utf8").strip()
+            date = datetime.fromtimestamp(path.stat().st_mtime)
+            if name == 'authority':
+                check_date = datetime.now() - timedelta(days=7)
+            else:
+                check_date = datetime.now() - timedelta(days=1)
+            if date > check_date:
+                exit_code = path.read_text(encoding="utf8").strip()
+            else:
+                exit_code = 'too_old'
         else:
             exit_code = 'file_not_found'
         exit_codes[name] = exit_code
@@ -284,29 +293,24 @@ def get_harvest_status(name, statuses):
     nb_executed = 0
     node_where_executed = 0
     exit_code = ''
-    node_with_first_error = 0
-    none_found = True
+    node_with_error = 0
     for node in range(1, 4):
         code = statuses[node-1]['harvests'][name]
         if code == '0':
             nb_executed += 1
             node_where_executed = node
-        elif exit_code == '':
+        elif exit_code == '' and code not in ('file_not_found', 'too_old'):
             exit_code = code
-            node_with_first_error = node
-        if code != 'file_not_found':
-            none_found = False
+            node_with_error = node
     if nb_executed == 3:
         return 'OK - executed on all 3 nodes'
     if nb_executed == 2:
         return 'OK - executed on 2 nodes'
     if nb_executed == 1:
         return f'OK - executed on node {node_where_executed}'
-    if none_found:
+    if exit_code == '':
         return 'This was not executed on any node'
-    if exit_code == 'file_not_found':
-        return f'Error: exit code file does not exist on at least node {node_with_first_error}'
-    return f'Error: exit code on node {node_with_first_error}: {exit_code}'
+    return f'Error: exit code on node {node_with_error}: {exit_code}'
 
 
 # Getting all the node statuses at once
