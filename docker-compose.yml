@@ -72,6 +72,7 @@ services:
         window: 15s
       update_config:
         parallelism: 1
+        failure_action: rollback
         delay: 10s
 
   cron:
@@ -102,6 +103,7 @@ services:
         window: 15s
       update_config:
         parallelism: 1
+        failure_action: rollback
         delay: 10s
 
   mail:
