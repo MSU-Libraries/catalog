@@ -4,8 +4,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Detroit
 
 # Perform updates
-RUN apt update && \
-    apt install software-properties-common curl gnupg openssh-client git python3-netaddr python3-dnspython -y
+RUN \
+    --mount=type=cache,target=/cache \
+    apt update && \
+    apt install software-properties-common curl gnupg openssh-client git python3-netaddr python3-dnspython -y && \
+    rm -rf /var/lib/apt/lists/*
 
 # Setup Timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \

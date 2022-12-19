@@ -2,8 +2,11 @@ FROM bitnami/mariadb-galera:10.6
 
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt update && \
-    apt install netcat-openbsd wget -y
+RUN \
+    --mount=type=cache,target=/cache \
+    apt update && \
+    apt install netcat-openbsd wget -y && \
+    rm -rf /var/lib/apt/lists/*
 
 ARG VUFIND_VERSION
 
