@@ -54,8 +54,8 @@ services:
       update_config:
         parallelism: 1
         # No rollback on DB containers unless stability can be assured
-        #failure_action: rollback
-        delay: 160s
+        failure_action: pause
+        delay: 140s
       placement:
         constraints:
           # Update N to be the Docker Swarm node number with most recent SQL file changes
