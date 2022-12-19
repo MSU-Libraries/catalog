@@ -111,7 +111,7 @@ Build Monitoring Image:
   script:
     - docker pull $LATEST || true
     - > 
-        docker build 
+        DOCKER_BUILDKIT=1 docker build 
         --tag $CURR
         --build-arg VUFIND_VERSION=$VUFIND_VERSION
         --cache-from $LATEST 
