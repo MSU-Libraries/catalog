@@ -20,6 +20,7 @@ x-solr-deploy: &solr_deploy
     parallelism: 1
     failure_action: rollback
     delay: 10s
+    monitor: 10s
   placement:
     max_replicas_per_node: 1
 

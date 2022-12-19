@@ -4,19 +4,68 @@ namespace Catalog\RecordDriver;
 
 class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 {
+    /**
+    * Takes a Marc field (ex: 950) and a list of sub fields (ex: ['a','b'])
+    * and returns the values inside those fields in an array
+    * (ex: ['val 1', 'val 2'])
+    * 
+    * args:
+    *    string field: Marc field to search within
+    *    array subfield: sub-fields to return
+    * return:
+    *   array: the values within the subfields under the field
+    */
+    public function getMarcField(string $field, array $subfield)
+    {
+        $vals = [];
+        $marc = $this->getMarcReader();
+        $marc_fields = $marc->getFields($field, $subfield);
+        foreach ($marc_fields as $marc_data) {
+            $subfields = $marc_data['subfields'];
+	        foreach ($subfields as $subfield) {
+                $vals[] = $subfield['data'];
+            }
+        }
+        return $vals;
+    }
+
+    /**
+    * Takes a Solr field and returns the contents of the field (either
+    * a string or array)
+    * 
+    * args:
+    *    string field: Name of the Solr field to get
+    * return:
+    *    string|array: Contents of the solr field
+    */
+    public function getSolrField(string $field)
+    {
+        $val = "";
+	    if (array_key_exists($field, $this->fields) && !empty($this->fields[$field])) {
+	        $val = $this->fields[$field];
+        }
+        return $val;
+    }
+
+    public function getNotes() 
+    {
+	    return array_merge($this->getMarcField('590', ['a','b','c','d','e']), 
+		    $this->getMarcField('561', ['a','b','c','d','e']));
+    }
+
     public function getPublisher()
     {
-        return (is_array($this->fields['publisher']) ? reset($this->fields['publisher']) : $this->fields['publisher']) ?? [];
+        return $this->getSolrField('publisher');
     }
 
     public function getPhysical()
     {
-        return (is_array($this->fields['physical']) ? reset($this->fields['physical']) : $this->fields['physical']) ?? [];
+        return $this->getSolrField('physical');
     }
 
-    public function getGenre()
+    public function getGenres()
     {
-        return !empty($this->fields['genre_facet']) ? $this->fields['genre_facet'] : [];
+        return $this->getSolrField('genre_facet');
     }
 
     public function getSierraBN()

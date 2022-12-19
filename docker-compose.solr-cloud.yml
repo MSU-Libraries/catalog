@@ -21,6 +21,7 @@ x-solr-deploy: &solr_deploy
     parallelism: 1
     failure_action: rollback
     delay: 10s
+    monitor: 10s
   placement:
     max_replicas_per_node: 1
   labels:
@@ -90,6 +91,7 @@ services:
     volumes:
       - bitnami:/bitnami
       - /mnt/shared:/mnt/shared:rw
+      - logs:/mnt/logs
     networks:
       - internal
     logging:
@@ -125,3 +127,6 @@ networks:
 volumes:
   bitnami:
   zk-bitnami:
+  logs:
+    external: true
+    name: "${STACK_NAME}_logs"

@@ -13,6 +13,10 @@ class GetThisLoader {
         $this->msgTemplate = null;
     }
 
+    public function isHLM() {
+        return str_starts_with($this->record->getUniqueId(), "hlm.");
+    }
+
     //TODO when item_id == null, get first available item, if exists; otherwise first item ??
     public function getItem($item_id=null) {
         $item = null;
@@ -338,13 +342,6 @@ class GetThisLoader {
            ) {
             return true;
         }
-        return false;
-    }
-
-    public function showGulForm($item_id=null) {
-        $loc = $this->getLocation($item_id);
-
-        if (Regex::GULL($loc)) return true;
         return false;
     }
 

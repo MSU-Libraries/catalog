@@ -13,6 +13,14 @@
         <li>Galera: <span class="text-{{services['galera']['color']}}">{{services['galera']['status']}}</span></li>
         <li>Solr: <span class="text-{{services['solr']['color']}}">{{services['solr']['status']}}</span></li>
         <li>Vufind: <span class="text-{{services['vufind']['color']}}">{{services['vufind']['status']}}</span></li>
+        <li>FOLIO harvest: <span class="text-{{services['folio_harvest']['color']}}">{{services['folio_harvest']['status']}}</span></li>
+        <li>HLM harvest: <span class="text-{{services['hlm_harvest']['color']}}">{{services['hlm_harvest']['status']}}</span></li>
+        <li>Authority harvest: <span class="text-{{services['authority_harvest']['color']}}">{{services['authority_harvest']['status']}}</span></li>
+        <li>Reserves update: <span class="text-{{services['reserves_update']['color']}}">{{services['reserves_update']['status']}}</span></li>
+        <li>Alphabetical browse update: <span class="text-{{services['alphabrowse']['color']}}">{{services['alphabrowse']['status']}}</span></li>
+        <li>Searches cleanup: <span class="text-{{services['searches_cleanup']['color']}}">{{services['searches_cleanup']['status']}}</span></li>
+        <li>Solr backup: <span class="text-{{services['solr_backup']['color']}}">{{services['solr_backup']['status']}}</span></li>
+        <li>DB backup: <span class="text-{{services['db_backup']['color']}}">{{services['db_backup']['status']}}</span></li>
     </ul>
     <h2>Graphs</h2>
     <ul>
@@ -33,6 +41,7 @@
         <li><a href="/monitoring/logs/harvests/hlm">HLM harvest</a></li>
         <li><a href="/monitoring/logs/harvests/authority">Authority harvest</a></li>
         <li><a href="/monitoring/logs/vufind/reserves_update">Reserve update</a></li>
+        <li><a href="/monitoring/logs/solr/alphabrowse">Alphabetical Browse update</a></li>
         <li><a href="/monitoring/logs/vufind/searches_cleanup">Searches cleanup</a></li>
         <li><a href="/monitoring/logs/backups/solr">Solr backup</a></li>
         <li><a href="/monitoring/logs/backups/db">DB backup</a></li>

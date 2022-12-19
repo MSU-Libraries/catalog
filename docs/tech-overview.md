@@ -1,5 +1,65 @@
 # Technical Overview
 
+## High Level Overview
+If you’re looking for the answer for the quickest answer to “how do we deploy our site”, then you’re reading
+the right section! We use two separate code repositories, one for infrastructure and one for our application
+code (this repository). The infrastructure repository is internal and uses GitLab CI/CD to kickoff Ansible
+playbooks that run terraform commands to manage the infrastructure in AWS for us. This repository however is
+public, and contains all our customization on top of Vufind (like our own custom module and theme) but much
+more beyond that – it has our own Docker swarm setup that runs all the services Vufind depends on. Just like our
+infrastructure repository, our application repository uses GitLab CI/CD to run jobs that deploy the code to our
+AWS EC2 instances. Based on the Git branch name, it will decide if it will spin up a new development environment,
+update an existing one, or update our production environment. To get a little more into the details, the CI/CD triggers
+a Docker build passing `--build-arg` parameters to the build command with multiple CI/CD variables stored in
+GitLab. Those variables are then used in the Dockerfile throughout the build (for example: the `config.ini` file
+is populated with data in the CI/CD variables with the use of the `envsubst` command in the Dockerfile after the
+`ARG` variables have been copied into `ENV` variables).
+
+## Detailed Overview
+### Infrastructure as Code
+* No reliance on manually provisioning hardware or waiting for humans to accomplish any task.
+From nothing to a full production ready environment can be accomplished via the CI tasks.
+* Using Terraform to provision entire stack:
+    * Virtual Networking & Firewalling
+    * Shared services like mounted storage and email relay service
+    * Virtual Machines with Network Interfaces, IPs, & Local Block Storage
+    * Initial user setup
+* Once provisioning is completed, all users and core services are ready for use.
+
+### Fully Redundant
+* Current infrastructure spans 3 availability zones (i.e. different data centers)
+and could expand to allow for additional nodes.
+* Each service is clustered with active load balancing; this includes MariaDB, Solr,
+and VuFind (along with their supporting services, like cron jobs). The public access point
+(Traefik) is a lightweight single instance which Docker Swarm can redeploy onto another node
+in seconds, should its current node go down.
+
+### Automated Environment Creation (and Destruction)
+* With an appropriately named git branch, a fully functional environment will be created for use or testing.
+    * Creating a branch starting with `devel-` or `review-` will automatically trigger CI stages to
+    create a new deployment site.
+    * GitLab CI also has 1 click cleanup and removal of environments (except production, to prevent mistakes)
+* Environments are completely disposable. We typically make one for a ticket, then destroy it once we
+close it. The only ones we leave up are the production deployments (currently, our "beta" and "prod" sites).
+
+### Equality Between Development and Production Environments
+Anything the production environment has, the development environments have as well. Full redundant
+services, TLS Certificates from Let's Encrypt, email support, and so on. The only thing we decided
+to limit was the automated data import. That was restricted to 10,000 records just because
+importing the full catalog would slow things down too much (approx 7 million bib records +
+3 million authority records).
+
+### Idempotency for both Infrastructure and Environment Deployment
+We run the same CI pipelines for both the creation & modification of our infrastructure.
+Likewise for our deployment environments, one unified pipeline that can run to create or update things.
+
+### Developer Friendly Interfaces & Logs
+* Services with management or monitoring interfaces are automatically enabled with
+permissions granted so developers can access them.
+    * Solr Admin Web Interface
+    * Traefik Dashboard
+* Logs for services are set up to be output to Docker for ease of accessing.
+
 ## Technologies Used  
 * **Docker**: Used to create images for the various services (Vufind, Solr, etc.) that
 containers are created from  

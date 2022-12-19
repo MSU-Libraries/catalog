@@ -21,7 +21,7 @@ if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
 
         <ul>
             <li>
-                <a href="https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:<?= $this->escapeHtml($bibnum) ?>&rft.genre=Book2&LO=EYM%2CGZM%2CMUN&rft.title=<?= $this->escapeHtml($title) ?>&rft.au=<?= $this->escapeHtml($author) ?>&rft.pub=<?= $this->escapeHtml($pubname) ?>&rft.isbn=<?= $this->escapeHtml($isbn) ?>&loc=<?= $this->escapeHtml($loc) ?>&callno=<?= $this->escapeHtml($callnum) ?>&CAT=1">
+                <a href="https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:<?= $this->escapeHtml($bibnum) ?>&LO=EYM%2CGZM%2CMUN&rft.title=<?= $this->escapeHtml($title) ?>&rft.au=<?= $this->escapeHtml($author) ?>&rft.pub=<?= $this->escapeHtml($pubname) ?>&rft.isbn=<?= $this->escapeHtml($isbn) ?>&loc=<?= $this->escapeHtml($loc) ?>&callno=<?= $this->escapeHtml($callnum) ?>&CAT=1">
                     Request Delivery to My Office
                 </a>
             </li>

@@ -38,9 +38,9 @@ services:
         window: 160s
       update_config:
         parallelism: 1
-        # No rollback on DB containers unless stability can be assured
-        failure_action: pause
+        failure_action: rollback
         delay: 140s
+        monitor: 20s
       placement:
         max_replicas_per_node: 1
 

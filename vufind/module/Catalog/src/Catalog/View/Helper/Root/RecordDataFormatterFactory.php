@@ -10,18 +10,33 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
     {
         $spec = new SpecBuilder(parent::getDefaultCoreSpecs());
 
-        # Add Genre to record page
         $spec->setTemplateLine(
             'Genre',
-            'getGenre',
+            'getGenres',
             'data-genre.phtml'
         );
+        $spec->setTemplateLine(
+            'Notes',
+            'getNotes',
+            'data-notes.phtml'
+        );
+        $spec->setLine('Physical Description', 'getPhysicalDescriptions');
 
         # Reorder the fields to get Genre next to Subjects
         $spec->reorderKeys(["Published in", "New Title", "Previous Title", "Authors",
-                                "Format", "Language", "Published", "Edition", "Series",
-                                "Subjects", "Genre", "child_records", "Online Access",
-                                "Related Items", "Tags"]);
+                "Format", "Language", "Published", "Edition", "Series",
+                "Subjects", "Genre", "Physical Description",
+                "child_records", "Online Access", "Related Items", "Notes", "Tags"]);
+
+        return $spec->getArray();
+    }
+
+    public function getDefaultDescriptionSpecs()
+    {
+        $spec = new SpecBuilder(parent::getDefaultDescriptionSpecs());
+
+        # Remove Physical Description
+        $spec->setLine('Physical Description', null);
 
         return $spec->getArray();
     }

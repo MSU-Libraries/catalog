@@ -2,12 +2,20 @@ import os
 import sys
 import subprocess
 from datetime import datetime, timedelta
+from apscheduler.schedulers.background import BackgroundScheduler
 import mariadb as db
 
 import status
 
 
 TIMEOUT = 10
+
+
+def init(debug):
+    if not debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(func=main, id='collector', replace_existing=True, trigger='interval', minutes=1)
+        scheduler.start()
 
 def _get_last_minute_apache_requests():
     # get the number of requests from the apache log within all of the previous minute
@@ -43,3 +51,4 @@ def main():
         conn.commit()
     except db.Error as err:
         print(f"Error adding entry to database: {err}", file=sys.stderr)
+    conn.close()
