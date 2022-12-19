@@ -3,6 +3,7 @@ import pathlib
 import subprocess
 import asyncio
 from datetime import datetime, timedelta
+import re
 import requests
 import aiohttp
 import humanize
@@ -314,6 +315,7 @@ def get_harvest_status(name, statuses):
         return f'OK - executed on node {node_where_executed}'
     if exit_code == '':
         readable_delta = humanize.naturaldelta(_harvest_delta(name))
+        readable_delta = re.sub(r'^a\s', '', readable_delta)
         return f'This was not executed on any node in the last {readable_delta}'
     return f'Error: exit code on node {node_with_error}: {exit_code}'
 
