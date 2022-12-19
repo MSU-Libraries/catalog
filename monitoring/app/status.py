@@ -5,6 +5,7 @@ import asyncio
 from datetime import datetime, timedelta
 import requests
 import aiohttp
+import human_readable
 
 import util
 
@@ -258,7 +259,13 @@ def get_disk_space_status(statuses):
         return f"Low available disk space on node {lowest_node}: {lowest}%"
     return f"OK - lowest available disk space: {lowest}%"
 
+
 # Harvests
+
+def _harvest_delta(name):
+    if name == 'authority':
+        return timedelta(days=7)
+    return timedelta(days=1)
 
 def _node_harvest_exit_codes():
     paths = {
@@ -276,10 +283,7 @@ def _node_harvest_exit_codes():
         path = pathlib.Path(path)
         if path.is_file():
             date = datetime.fromtimestamp(path.stat().st_mtime)
-            if name == 'authority':
-                check_date = datetime.now() - timedelta(days=7)
-            else:
-                check_date = datetime.now() - timedelta(days=1)
+            check_date = datetime.now() - _harvest_delta(name)
             if date > check_date:
                 exit_code = path.read_text(encoding="utf8").strip()
             else:
@@ -309,7 +313,8 @@ def get_harvest_status(name, statuses):
     if nb_executed == 1:
         return f'OK - executed on node {node_where_executed}'
     if exit_code == '':
-        return 'This was not executed on any node'
+        readable_delta = human_readable.time_delta(_harvest_delta(name))
+        return f'This was not executed on any node in the last {readable_delta}'
     return f'Error: exit code on node {node_with_error}: {exit_code}'
 
 
