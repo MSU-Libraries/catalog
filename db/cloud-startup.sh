@@ -133,7 +133,7 @@ galera_node_is_primary_synced() {
         verbose "Warning: WSREP_STATUS $NODE_NAME Cluster Status = ${ROW_0[0]}"
         return 1
     fi
-    # Possible statuses: Initialized, Connnected, Joining, Waiting on SST, Joined, Synced, Donor, Error
+    # Possible statuses: Initialized, Connnected, Joining, Waiting on SST, Joined, Synced, Donor, Error, Disconnecting, Disconnected
     if [[ "${ROW_0[1]}" != "synced" ]]; then
         verbose "Warning: WSREP_STATUS $NODE_NAME Node Status = ${ROW_0[0]}"
         return 1
@@ -309,6 +309,7 @@ galera_slow_startup() {
     # Otherwise not okay to proceed; sleep, rescan nodes, then check again
     while true; do
         verbose "Checking if safe to start."
+        update_node_ips
         if another_galera_node_is_primary_synced; then
             verbose "Found another node already online and synced."
             break
@@ -358,7 +359,7 @@ galera_slow_shutdown() {
     verbose "Scanning to see if other nodes are online."
     # Scan other nodes to see if they are up
     NODES_ONLINE=($(scan_for_online_nodes))
-    verbose "Lowest online node number: ${NODES_ONLINE[0]}"
+    verbose "Lowest online node number: ${NODES_ONLINE[0]:-None}"
 
     # Wait to give other node scans time to complete
     sleep 5
@@ -371,6 +372,8 @@ galera_slow_shutdown() {
         wait_for_other_node_synced_or_safe_to_bootstrap 150
     elif galera_node_is_primary_synced "${NODES_ONLINE[0]}"; then
         verbose "Node number ${NODES_ONLINE[0]} is online and synced. I'm safe to shutdown."
+    elif [[ "${#NODES_ONLINE[@]}" -eq 0 ]]; then
+        verbose "Shutting down, but detected no nodes were online at the time."
     else
         verbose "The lowest node is ${NODES_ONLINE[0]}, but it is not synched! Waiting for things to improve."
         wait_for_other_node_synced_or_safe_to_bootstrap 150
