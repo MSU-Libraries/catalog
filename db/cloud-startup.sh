@@ -273,15 +273,21 @@ wait_for_other_node_synced_or_safe_to_bootstrap() {
     while [[ "$CUR_SLEEP" -le "$MAX_SLEEP" ]]; do
         sleep 5
         (( CUR_SLEEP += 5 ))
-        if ! grastate_safe_to_bootstrap; then
-            verbose "I am not safe_to_bootstrap: 1"
-        elif galera_node_is_donor "$GALERA_HOST"; then
-            verbose "I am currently a donor for another node's syncing"
-        elif ! another_galera_node_is_primary_synced; then
-            verbose "I cannot leave when no other nodes are synced to the primary cluster"
+
+        if galera_node_is_donor "$GALERA_HOST"; then
+            verbose "Unsafe. I am currently a donor for another node's syncing and must remain"
+            continue
         fi
+        if grastate_safe_to_bootstrap; then
+            verbose "SAFE because I am safe_to_bootstrap: 1"
+            break
+        fi
+        if another_galera_node_is_primary_synced; then
+            verbose "SAFE because another node is synced to the primary cluster"
+            break
+        fi
+        verbose "Unsafe. I am not safe_to_bootstrap and no other node is synced to primary cluster"
     done
-    #TODO possible optimization: when waiting for bootstrap, check after 30 seconds to see if another node is primary synced; if so, assume cluster doesn't need my bootstrap and proceed
 
     if [[ "$CUR_SLEEP" -gt "$MAX_SLEEP" ]]; then
         verbose "Wait limit exceeded (${MAX_SLEEP} secs); proceeding while not safe to bootstrap."
