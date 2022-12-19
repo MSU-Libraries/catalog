@@ -5,7 +5,7 @@ import asyncio
 from datetime import datetime, timedelta
 import requests
 import aiohttp
-import human_readable
+import humanize
 
 import util
 
@@ -313,7 +313,7 @@ def get_harvest_status(name, statuses):
     if nb_executed == 1:
         return f'OK - executed on node {node_where_executed}'
     if exit_code == '':
-        readable_delta = human_readable.time_delta(_harvest_delta(name))
+        readable_delta = humanize.naturaldelta(_harvest_delta(name))
         return f'This was not executed on any node in the last {readable_delta}'
     return f'Error: exit code on node {node_with_error}: {exit_code}'
 

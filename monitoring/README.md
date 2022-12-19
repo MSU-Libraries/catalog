@@ -29,7 +29,6 @@ Here is a summary of what top-level files/directories are for:
 - `--disable=missing-function-docstring`
 - `--max-line-length=120`
 - `--good-names=i,j,k,x,y,ex`
-- `--generated-members=human_readable.*`
 
 ## TODO
 See JIRA tickets.
