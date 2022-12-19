@@ -284,8 +284,12 @@ wait_for_other_node_synced_or_safe_to_bootstrap() {
 
     if [[ "$CUR_SLEEP" -gt "$MAX_SLEEP" ]]; then
         verbose "Wait limit exceeded (${MAX_SLEEP} secs); proceeding while not safe to bootstrap."
-        verbose "CLUSTER WILL REQUIRE FORCE BOOTSTRAP."
-        touch /bitnami/node_shutdown_unsafely
+        if another_galera_node_is_primary_synced; then
+            verbose "Another node is primary synced. Assuming cluster is okay."
+        else
+            verbose "CLUSTER WILL REQUIRE FORCE BOOTSTRAP."
+            touch /bitnami/node_shutdown_unsafely
+        fi
     fi
 }
 
@@ -370,14 +374,14 @@ galera_slow_shutdown() {
     verbose "I am node number: ${SELF_NUMBER}"
     if [[ "$SELF_NUMBER" -eq "${NODES_ONLINE[0]}" ]]; then
         verbose "I am lowest online node and may need to let others sync from me."
-        wait_for_other_node_synced_or_safe_to_bootstrap 150
+        wait_for_other_node_synced_or_safe_to_bootstrap 120
     elif galera_node_is_primary_synced "${NODES_ONLINE[0]}"; then
         verbose "Node number ${NODES_ONLINE[0]} is online and synced. I'm safe to shutdown."
     elif [[ "${#NODES_ONLINE[@]}" -eq 0 ]]; then
         verbose "Shutting down, but detected no nodes were online at the time."
     else
         verbose "The lowest node is ${NODES_ONLINE[0]}, but it is not synched! Waiting for things to improve."
-        wait_for_other_node_synced_or_safe_to_bootstrap 150
+        wait_for_other_node_synced_or_safe_to_bootstrap 140
     fi
 
     # As this might NOT be a global stop for all nodes, there is no need to re-scan to confirm.
