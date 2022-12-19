@@ -95,7 +95,8 @@ update_node_ips() {
 galera_node_online() {
     nc -zw1 "$1" 3306 2> /dev/null
     RC=$?
-    verbose "Scanned ${1} - return code: $RC"
+    HOST=$( to_hostname "$1" )
+    verbose "Scanned ${HOST} - return code: $RC"
     return $RC
 }
 

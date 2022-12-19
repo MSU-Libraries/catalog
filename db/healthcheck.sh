@@ -29,12 +29,13 @@ if [[ "$ROW_CNT" -ne 1 ]]; then
     echo "WSREP_STATUS did not return one row."
     exit 1
 fi
+echo "Node is ${ROW_0[2]} ${ROW_0[1]} (cluster size: ${ROW_0[3]})"
 if [[ "${ROW_0[2]}" != "primary" ]]; then
-    echo "Node not part of primary cluster (${ROW_0[2]} : ${ROW_0[1]})."
+    echo "Node not part of primary cluster."
     exit 1
 fi
 if [[ "${ROW_0[1]}" != "synced" ]]; then
-    echo "Node status not synced (${ROW_0[2]} : ${ROW_0[1]})."
+    echo "Node status not synced."
     exit 1
 fi
 
