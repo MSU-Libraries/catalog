@@ -113,6 +113,9 @@ Deploy Compose Files:
         ./yq -i "del(.services.zk.deploy.update_config.failure_action)" docker-compose.solr-cloud-bootstrap.yml;
         ./yq -i "del(.x-solr-deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
         ./yq -i "del(.services.zk.deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
+        ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud.yml;
+        ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud-force.yml;
+        ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud-bootstrap.yml;
         ./yq -i "del(.services.cron.deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
         ./yq -i "del(.services.catalog.deploy.update_config.failure_action)" docker-compose.yml;
         ./yq -i "del(.services.cachecron.deploy.update_config.failure_action)" docker-compose.yml;
