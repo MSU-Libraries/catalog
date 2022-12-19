@@ -107,6 +107,16 @@ Deploy Compose Files:
         ./yq -i ".x-solr-deploy.labels +=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml
         ./yq -i ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
         ./yq -i ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-https-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
+        # Disable container rollback
+        ./yq -i "del(.services.monitoring.deploy.update_config.failure_action)" docker-compose.monitoring.yml;
+        ./yq -i "del(.x-solr-deploy.update_config.failure_action)" docker-compose.solr-cloud-bootstrap.yml;
+        ./yq -i "del(.services.zk.deploy.update_config.failure_action)" docker-compose.solr-cloud-bootstrap.yml;
+        ./yq -i "del(.x-solr-deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
+        ./yq -i "del(.services.zk.deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
+        ./yq -i "del(.services.cron.deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
+        ./yq -i "del(.services.catalog.deploy.update_config.failure_action)" docker-compose.yml;
+        ./yq -i "del(.services.cachecron.deploy.update_config.failure_action)" docker-compose.yml;
+        ./yq -i "del(.services.cron.deploy.update_config.failure_action)" docker-compose.yml;
       fi
     # Production environment changes
     - |

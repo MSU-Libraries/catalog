@@ -55,6 +55,7 @@ services:
         parallelism: 1
         failure_action: rollback
         delay: 150s
+        monitor: 20s
       placement:
         constraints:
           # Update N to be the Docker Swarm node number with most recent SQL file changes

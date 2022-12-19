@@ -6,8 +6,10 @@ ENV TZ=America/Detroit
 USER root
 
 # Perform updates
-RUN apt update && \
-    apt install wget vim rsyslog cron moreutils gettext-base jq -y
+RUN \
+    apt update && \
+    apt install wget vim rsyslog cron moreutils gettext-base jq -y && \
+    rm -rf /var/lib/apt/lists/*
 
 # Setup Timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
