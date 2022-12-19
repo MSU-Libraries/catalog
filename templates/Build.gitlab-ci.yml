@@ -1,4 +1,10 @@
 ############# Build ###############
+# Cache apt packages in between jobs
+cache:
+  key: catalog
+  paths:
+    - /cache
+
 Build DB Image:
   variables:
      COMPONENT: db
