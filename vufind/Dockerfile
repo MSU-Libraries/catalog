@@ -223,6 +223,6 @@ RUN \
 EXPOSE 80
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
-   CMD curl --fail -s http://localhost:80/ || exit 1
+   CMD curl --fail -s http://localhost:81/ || exit 1
 
 CMD /startup.sh
