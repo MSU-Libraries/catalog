@@ -37,6 +37,16 @@ Deploy Prod Internal Network:
       artifacts: true
     - Deploy Prod Compose Files
 
+Initialize Prod Database Logs:
+  stage: Deploy Prod
+  extends: Initialize Database Logs
+  rules:
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+  needs:
+    - job: Set Prod Stack Name
+      artifacts: true
+    - Deploy Prod Internal Network
+
 Bootstrap Prod Stacks:
   stage: Deploy Prod
   extends: Bootstrap Stacks
