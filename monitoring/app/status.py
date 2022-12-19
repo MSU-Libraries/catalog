@@ -337,7 +337,7 @@ def get_node_statuses():
     for node in range(1, 4):
         urls.append(f'http://monitoring{node}/monitoring/node/status')
     try:
-        statuses = util.async_get_requests(urls, convert_to_json=True, timeout=15)
+        statuses = util.async_get_requests(urls, convert_to_json=True, timeout=20)
     except aiohttp.ClientError as err:
         return f'Error reading node status: {err}'
     except asyncio.exceptions.TimeoutError:
