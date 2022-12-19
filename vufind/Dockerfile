@@ -8,11 +8,6 @@ ENV VUFIND_HOME=/usr/local/vufind
 ENV JAVA_HOME=/usr/lib/jvm/default-java
 ENV VUFIND_CACHE_DIR=/mnt/vufind_cache
 
-ARG GITHUB_USER_TOKEN
-ARG VUFIND_VERSION
-ENV VUFIND_VERSION=$VUFIND_VERSION
-
-COPY install-composer.sh /install-composer.sh
 RUN \
     # Perform updates
     --mount=type=cache,target=/cache \
@@ -24,6 +19,13 @@ RUN \
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl \
         php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml && \
     rm -rf /var/lib/apt/lists/*
+
+ARG GITHUB_USER_TOKEN
+ARG VUFIND_VERSION
+ENV VUFIND_VERSION=$VUFIND_VERSION
+
+COPY install-composer.sh /install-composer.sh
+
 RUN \
     # Install yq
     wget --header="Authorization: token ${GITHUB_USER_TOKEN}" https://github.com/mikefarah/yq/releases/download/v4.30.4/yq_linux_amd64 -O /usr/local/bin/yq && \
@@ -223,6 +225,6 @@ RUN \
 EXPOSE 80
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
-   CMD curl --fail -s http://localhost:81/ || exit 1
+   CMD curl --fail -s http://localhost:80/ || exit 1
 
 CMD /startup.sh

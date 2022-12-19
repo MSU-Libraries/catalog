@@ -30,6 +30,7 @@ services:
         window: 15s
       update_config:
         parallelism: 1
+        failure_action: rollback
         monitor: 10s
       labels:
         # XXX: More rules (for the prefix redirect) are added in .gitlab-ci.yml
