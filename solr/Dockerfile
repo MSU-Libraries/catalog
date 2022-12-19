@@ -7,7 +7,6 @@ USER root
 
 # Perform updates
 RUN \
-    --mount=type=cache,target=/cache \
     apt update && \
     apt install wget vim rsyslog cron moreutils gettext-base jq -y && \
     rm -rf /var/lib/apt/lists/*

@@ -10,7 +10,6 @@ ENV VUFIND_CACHE_DIR=/mnt/vufind_cache
 
 RUN \
     # Perform updates
-    --mount=type=cache,target=/cache \
     apt update && \
     apt install -y wget vim-nox lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
         gettext-base locales msmtp-mta rsync screen \
