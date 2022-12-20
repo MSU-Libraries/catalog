@@ -43,9 +43,6 @@ if [[ "$1" = "/cloud-startup.sh" ]]; then
         info "First boot (and without bootstrap); reset grastate safe_to_bootstrap to 0"
         sed -i 's/^safe_to_bootstrap:.*$/safe_to_bootstrap: 0/' "$GALERA_STATE_FILE"
     fi
-    # Create dir for custom non-Bitnami files (e.g. flag files)
-    mkdir -p /bitnami/custom/
-    chown 1001 /bitnami/custom/
 fi
 
 echo ""
