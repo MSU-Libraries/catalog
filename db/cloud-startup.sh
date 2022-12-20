@@ -295,7 +295,7 @@ wait_for_other_node_synced_or_safe_to_bootstrap() {
             verbose "Another node is primary synced. Assuming cluster is okay."
         else
             verbose "CLUSTER WILL REQUIRE FORCE BOOTSTRAP."
-            touch /bitnami/node_shutdown_unsafely
+            touch /bitnami/custom/node_shutdown_unsafely
         fi
     fi
 }
@@ -335,7 +335,7 @@ galera_slow_startup() {
     done
 
     # Remove unsafe shutdown flag file; if we got this far, things look to be okay
-    rm -f /bitnami/node_shutdown_unsafely
+    rm -f /bitnami/custom/node_shutdown_unsafely
     # Remove logs redirect to stdout
     rm -f /opt/bitnami/mariadb/logs/mysqld.log
     # Add symlink to log file for monitoring
