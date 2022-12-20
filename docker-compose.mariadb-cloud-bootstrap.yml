@@ -35,11 +35,11 @@ services:
       mode: replicated
       replicas: 1
       restart_policy:
-        window: 90s
+        window: 160s
       update_config:
         parallelism: 1
         failure_action: rollback
-        delay: 150s
+        delay: 140s
         monitor: 20s
       placement:
         max_replicas_per_node: 1
