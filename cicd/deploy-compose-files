@@ -26,7 +26,7 @@ fi
 apply_devel_changes() {
     # Use dnschallenge cert resolver (instead of httpchallenge)
     ./yq -i \
-    ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt-dns\"" 
+    ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt-dns\"" \
     docker-compose.yml;
     ./yq -i \
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].main=aws.lib.msu.edu\"" \
