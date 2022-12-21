@@ -1,0 +1,45 @@
+#!/bin/bash
+
+runhelp() {
+    echo ""
+    echo "Purpose: General component build template"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - LATEST: Image tag for the latest image to use as cache"
+    echo "  - CURR: Image tag for current image"
+    echo "  - COMPONENT: Component name (context for the build)"
+    echo "  - VUFIND_VERSION: The current version of Vufind"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - If the build fails"
+    echo "  - If the push fails"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+main() {
+    # Pull to use as cache
+    docker pull "${LATEST}" || true;
+
+    # Build
+    docker build \
+    --tag "${CURR}" \
+    --build-arg VUFIND_VERSION="${VUFIND_VERSION}" \
+    --cache-from "${LATEST}" \
+    "$COMPONENT"/;
+
+    # Push the current image
+    docker push "${CURR}";
+
+    # Tag and push as latest image if this is the default branch
+    if [[ ${CI_DEFAULT_BRANCH} == "${CI_COMMIT_BRANCH}" ]]; then
+        docker tag "${CURR}" "${LATEST}";
+        docker push "${LATEST}";
+    fi;
+}
+
+main
