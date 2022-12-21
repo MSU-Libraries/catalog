@@ -254,8 +254,5 @@ Remove Environment:
   before_script:
     - apk add --no-cache bash
 
-Deploy:
-  interruptible: true
-
 include:
   - 'templates/*.gitlab-ci.yml'
