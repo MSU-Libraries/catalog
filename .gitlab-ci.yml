@@ -174,7 +174,7 @@ Deploy Monitoring:
     - cicd/deploy-monitoring
 
 Verify Vufind Image:
-  extends: .stack_template:
+  extends: .stack_template
   needs:
     - job: Set Stack Name
       artifacts: true
