@@ -42,7 +42,7 @@ Create DNS:
     - job: Set Stack Name
       artifacts: true
   script:
-    - bash ./cicd/create-dns
+    - ./cicd/create-dns
 
 Deploy Compose Files:
   extends: .stack_template
@@ -231,7 +231,7 @@ Remove Environment:
       artifacts: true
     - Deploy Vufind
   script:
-    - bash ./cicd/remove-environment
+    - ./cicd/remove-environment
 
 ############# Templates ###############
 
@@ -252,7 +252,7 @@ Remove Environment:
       artifacts: true
     - Deploy Compose Files
   before_script:
-    - apk add --no-cache bash
+    - apk add --no-cache bash || true
 
 include:
   - 'templates/*.gitlab-ci.yml'
