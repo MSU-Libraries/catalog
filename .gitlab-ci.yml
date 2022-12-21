@@ -26,7 +26,7 @@ Set Stack Name:
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $PROD == "true"'
       when: manual
   script:
-    - apt add --no-cache bash
+    - apk add --no-cache bash
     - bash ./cicd/set-stack-name
   artifacts:
     reports:
