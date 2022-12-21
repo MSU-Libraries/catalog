@@ -26,6 +26,8 @@ Set Stack Name:
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $PROD == "true"'
       when: manual
   script:
+    - ls -l
+    - ls -l cicd/
     - ./cicd/set-stack-name
   artifacts:
     reports:
