@@ -21,9 +21,9 @@ fi
 
 main() {
     ssh deploy@"${DEPLOY_HOST_A}" \
-    "yq -i \".services.traefik.environment=\$( yq . traefik-env.yml -o json )\" \${COMPOSE_PATH}/docker-compose.traefik.yml
-    && sed -i \"/^$/d\" \${COMPOSE_PATH}/docker-compose.traefik.yml
-    && docker stack deploy -c \${COMPOSE_PATH}/docker-compose.traefik.yml traefik"
+    "yq -i \".services.traefik.environment=\$( yq . traefik-env.yml -o json )\" ${COMPOSE_PATH}/docker-compose.traefik.yml
+    && sed -i \"/^$/d\" ${COMPOSE_PATH}/docker-compose.traefik.yml
+    && docker stack deploy -c ${COMPOSE_PATH}/docker-compose.traefik.yml traefik"
 
     sleep 15
 }

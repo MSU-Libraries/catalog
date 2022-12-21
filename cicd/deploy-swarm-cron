@@ -19,7 +19,7 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
-    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy -c \${COMPOSE_PATH}/docker-compose.swarm-cron.yml swarm-cron"
+    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy -c ${COMPOSE_PATH}/docker-compose.swarm-cron.yml swarm-cron"
 }
 
 main

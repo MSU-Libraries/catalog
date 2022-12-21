@@ -195,8 +195,8 @@ main() {
     sed -i "/^$/d" docker-compose.yml;
 
     # Copy the updated compose files to the server
-    ssh deploy@"$DEPLOY_HOST_A" mkdir -p "$COMPOSE_PATH";
-    scp docker-compose* deploy@"$DEPLOY_HOST_A":"$COMPOSE_PATH"/;
+    ssh deploy@"${DEPLOY_HOST_A}" mkdir -p "${COMPOSE_PATH}";
+    scp docker-compose* deploy@"${DEPLOY_HOST_A}":"${COMPOSE_PATH}"/;
 }
 
 main

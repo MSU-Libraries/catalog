@@ -22,12 +22,12 @@ fi
 
 main() {
     # Pull images now to save time with stack deploy
-    ssh deploy@"${DEPLOY_HOST_A}" "docker pull \$CI_REGISTRY_IMAGE/solr:\$CI_COMMIT_SHORT_SHA" &
-    ssh deploy@"${DEPLOY_HOST_B}" "docker pull \$CI_REGISTRY_IMAGE/solr:\$CI_COMMIT_SHORT_SHA" & 
-    ssh deploy@"${DEPLOY_HOST_C}" "docker pull \$CI_REGISTRY_IMAGE/solr:\$CI_COMMIT_SHORT_SHA";
+    ssh deploy@"${DEPLOY_HOST_A}" "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA" &
+    ssh deploy@"${DEPLOY_HOST_B}" "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA" & 
+    ssh deploy@"${DEPLOY_HOST_C}" "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA";
     wait
 
-    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --with-registry-auth -c \$COMPOSE_PATH/docker-compose.solr-cloud.yml \${STACK_NAME}-solr";
+    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr";
 }
 
 main

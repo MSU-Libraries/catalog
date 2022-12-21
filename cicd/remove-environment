@@ -25,9 +25,9 @@ fi
 
 prunevols() {
     HOST=$1;
-    VOLS=$(ssh deploy@"${HOST}" "docker volume ls --filter name=\$STACK_NAME --format '{{.Name}}'");
+    VOLS=$(ssh deploy@"${HOST}" "docker volume ls --filter name=$STACK_NAME --format '{{.Name}}'");
     if [ -n "${VOLS}" ]; then
-        ssh deploy@"${HOST}" "docker system prune -a -f; docker volume ls --filter name=\$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm";
+        ssh deploy@"${HOST}" "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm";
     fi
 }
 
@@ -42,19 +42,19 @@ main() {
     ansible-playbook provision-dns-playbook/decommission.yml;
 
     # Remove the alphabetic browse databases
-    CONTAINER=$(ssh deploy@"${DEPLOY_HOST_A}" "docker ps -q -f name=\${STACK_NAME}-solr_cron");
+    CONTAINER=$(ssh deploy@"${DEPLOY_HOST_A}" "docker ps -q -f name=${STACK_NAME}-solr_cron");
     if [ -n "${CONTAINER}" ]; then
-        ssh deploy@"${DEPLOY_HOST_A}" "docker exec \${CONTAINER} rm -rf /mnt/shared/alpha-browse/\${STACK_NAME}";
+        ssh deploy@"${DEPLOY_HOST_A}" "docker exec ${CONTAINER} rm -rf /mnt/shared/alpha-browse/${STACK_NAME}";
     fi
 
     # Cleanup volumes/networks/images/containers
     ssh deploy@"${DEPLOY_HOST_A}" \
-    "docker stack rm \${STACK_NAME}-solr;
-    docker stack rm \${STACK_NAME}-mariadb;
-    docker stack rm \${STACK_NAME}-catalog;
-    docker stack rm \${STACK_NAME}-monitoring;
-    docker stack rm \${STACK_NAME}-internal;
-    rm -rf \$COMPOSE_PATH;";
+    "docker stack rm ${STACK_NAME}-solr;
+    docker stack rm ${STACK_NAME}-mariadb;
+    docker stack rm ${STACK_NAME}-catalog;
+    docker stack rm ${STACK_NAME}-monitoring;
+    docker stack rm ${STACK_NAME}-internal;
+    rm -rf $COMPOSE_PATH;";
 
     sleep 15
 

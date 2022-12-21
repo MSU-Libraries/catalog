@@ -24,11 +24,11 @@ main() {
         exit 0;
     fi
 
-    CONTAINER="$(ssh deploy@"${DEPLOY_HOST_A}" "docker ps -q -f name=\${STACK_NAME}-catalog_catalog")";
+    CONTAINER="$(ssh deploy@"${DEPLOY_HOST_A}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog")";
 
     if [[ -n "${CONTAINER}" ]]; then
         echo "Performing a database backup";
-        ssh deploy@"${DEPLOY_HOST_A}" "docker exec \${CONTAINER} /backup.sh --db --rotations 5 -v";
+        ssh deploy@"${DEPLOY_HOST_A}" "docker exec ${CONTAINER} /backup.sh --db --rotations 5 -v";
     fi
 }
 

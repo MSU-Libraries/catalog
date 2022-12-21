@@ -23,11 +23,11 @@ checkhealth() {
     for HOST in ${HOSTS}; do
         ATTEMPTS=0;
         while [[ "${ATTEMPTS}" -le 15 ]]; do
-            CONTAINER=$(ssh deploy@"${HOST}" "docker ps -q -f name=\${STACK_NAME}-\${SERVICE}") || echo "";
+            CONTAINER=$(ssh deploy@"${HOST}" "docker ps -q -f name=${STACK_NAME}-${SERVICE}") || echo "";
             if [ -z "${CONTAINER}" ]; then
               HEALTH="No Health";
             else
-              HEALTH=$(ssh deploy@"${HOST}" "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=\${STACK_NAME}-\${SERVICE}) 2>/dev/null || echo \"No Health\"") || echo "No Health";
+              HEALTH=$(ssh deploy@"${HOST}" "docker inspect --format '{{json .State.Health.Status }}' $(docker ps -q -f name=\""${STACK_NAME}"-"${SERVICE}"\") 2>/dev/null || echo \"No Health\"") || echo "No Health";
             fi
             if [[ "${HEALTH}" == "\"healthy\"" ]]; then
                 echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} is healthy."

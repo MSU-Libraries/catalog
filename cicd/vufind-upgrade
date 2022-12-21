@@ -30,12 +30,12 @@ setconfig() {
     # shellcheck disable=SC2034
     NEWVAL=$2;
     for HOST in ${HOSTS}; do
-        CONTAINER=$(ssh deploy@"${HOST}" "docker ps -q -f name=\${STACK_NAME}-catalog_catalog") || echo "NOT ONLINE";
+        CONTAINER=$(ssh deploy@"${HOST}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "NOT ONLINE";
         if [ -z "${CONTAINER}" ]; then
           echo "Could not find container for ${STACK_NAME}-catalog_catalog!";
           exit 1;
         fi;
-        ssh deploy@"${HOST}" "docker exec \${CONTAINER} sed -i 's/autoConfigure = \${OLDVAL}/autoConfigure = \${NEWVAL}/g' local/config/vufind/config.ini";
+        ssh deploy@"${HOST}" "docker exec ${CONTAINER} sed -i 's/autoConfigure = ${OLDVAL}/autoConfigure = ${NEWVAL}/g' local/config/vufind/config.ini";
     done
 }
 
