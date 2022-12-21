@@ -15,7 +15,7 @@ Shellcheck CI:
   before_script:
     - apk add shellcheck || apt install shellcheck
   script:
-    - SHELLCHECK_OPTS="--exclude SC2029" shellcheck cicd/
+    - SHELLCHECK_OPTS="--exclude SC2029" shellcheck cicd/*
 
 Shellcheck:
   stage: test
