@@ -239,7 +239,6 @@ Remove Environment:
   stage: Deploy
   tags:
     - msul-shared
-  extends: .setup_ssh
   retry: 2
   interruptible: true
   variables:
@@ -252,12 +251,11 @@ Remove Environment:
     - job: Set Stack Name
       artifacts: true
     - Deploy Compose Files
+  before_script:
+    - apk add --no-cache bash
 
 Deploy:
   interruptible: true
 
 include:
-  - project: 'msu-libraries/public/cicd-templates'
-    ref: main
-    file: 'SSH.gitlab-ci.yml'
   - 'templates/*.gitlab-ci.yml'
