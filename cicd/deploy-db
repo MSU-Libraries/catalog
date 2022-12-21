@@ -1,0 +1,29 @@
+#!/bin/bash
+
+runhelp() {
+    echo ""
+    echo "Purpose: Deploy the database stack"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - STACK_NAME: Name of the stack"
+    echo "  - DEPLOY_HOST_A: The first host in the cluster"
+    echo "  - COMPOSE_PATH: Where the docker-compose files are located on the DEPLOY_HOST_A"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - The stack deploy command fails"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+main() {
+    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --with-registry-auth -c \${COMPOSE_PATH}/docker-compose.mariadb-cloud.yml \${STACK_NAME}-mariadb"
+
+    # TODO eventually have this query the WSREP status and loop until ready instead of sleeping
+    sleep 45
+}
+
+main

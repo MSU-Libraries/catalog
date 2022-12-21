@@ -4,6 +4,19 @@
 secret_detection:
   interruptible: true
 
+Shellcheck CI:
+  stage: test
+  image: alpine:latest
+  tags:
+    - msul-shared
+  interruptible: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "schedule" && $CI_PIPELINE_SOURCE != "merge_request_event" && $CI_COMMIT_TAG == ""'
+  before_script:
+    - apk add shellcheck || apt install shellcheck
+  script:
+    - shellcheck cicd/
+
 Shellcheck:
   stage: test
   image: alpine:latest

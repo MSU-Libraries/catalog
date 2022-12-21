@@ -1,0 +1,33 @@
+#!/bin/bash
+
+runhelp() {
+    echo ""
+    echo "Purpose: Deploy the monitoring application stack"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - STACK_NAME: Stack name"
+    echo "  - DEPLOY_HOST_A: The first host in the cluster"
+    echo "  - DEPLOY_HOST_B: The second host in the cluster"
+    echo "  - DEPLOY_HOST_C: The third host in the cluster"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - Deploying the stack fails"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+main() {
+    # Pull images now to save time with stack deploy
+    ssh deploy@"${DEPLOY_HOST_A}" "docker pull \$CI_REGISTRY_IMAGE/monitoring:\$CI_COMMIT_SHORT_SHA" &
+    ssh deploy@"${DEPLOY_HOST_B}" "docker pull \$CI_REGISTRY_IMAGE/monitoring:\$CI_COMMIT_SHORT_SHA" & 
+    ssh deploy@"${DEPLOY_HOST_C}" "docker pull \$CI_REGISTRY_IMAGE/monitoring:\$CI_COMMIT_SHORT_SHA";
+    wait
+
+    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --with-registry-auth -c \$COMPOSE_PATH/docker-compose.monitoring.yml \${STACK_NAME}-monitoring";
+}
+
+main

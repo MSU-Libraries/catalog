@@ -1,0 +1,31 @@
+#!/bin/bash
+
+runhelp() {
+    echo ""
+    echo "Purpose: Deploy the public Traefik stack"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - DEPLOY_HOST_A: The first host in the cluster"
+    echo "  - COMPOSE_PATH: Where the docker-compose files are located on the DEPLOY_HOST_A"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - The yq replacement fails"
+    echo "  - The stack deploy command fails"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+main() {
+    ssh deploy@"${DEPLOY_HOST_A}" \
+    "yq -i \".services.traefik.environment=\$( yq . traefik-env.yml -o json )\" \${COMPOSE_PATH}/docker-compose.traefik.yml
+    && sed -i \"/^$/d\" \${COMPOSE_PATH}/docker-compose.traefik.yml
+    && docker stack deploy -c \${COMPOSE_PATH}/docker-compose.traefik.yml traefik"
+
+    sleep 15
+}
+
+main

@@ -1,0 +1,50 @@
+#!/bin/bash
+
+runhelp() {
+    echo ""
+    echo "Purpose: Verify that the Vufind container on each host is running the latest"
+    echo "         image tag."
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - STACK_NAME: Name of the stack"
+    echo "  - DEPLOY_HOST_A: The first host in the cluster"
+    echo "  - DEPLOY_HOST_B: The second host in the cluster"
+    echo "  - DEPLOY_HOST_C: The third host in the cluster"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - If any of the 3 nodes are not running the current image"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+main() {
+    HOSTS="${DEPLOY_HOST_A} ${DEPLOY_HOST_B} ${DEPLOY_HOST_C}";
+    sleep 15;
+    for HOST in ${HOSTS}; do
+        echo "Checking to see if catalog container for ${HOST} is online (${CI_REGISTRY_IMAGE}/vufind:${CI_COMMIT_SHORT_SHA})...";
+        ATTEMPTS=0;
+        while [[ "${ATTEMPTS}" -le 10 ]]; do
+            TARGET_IMAGE=$(ssh deploy@"${HOST}" "docker ps -q -f name=\${STACK_NAME}-catalog_catalog --format '{{ .Image }}' 2>/dev/null") || echo "NOT ONLINE";
+            if [[ "${TARGET_IMAGE}" == "${CI_REGISTRY_IMAGE}/vufind:${CI_COMMIT_SHORT_SHA}" ]]; then
+                echo "$(date +'%m-%d-%Y %T %z') -- Container for host ${HOST} is online with new image!";
+                EC=0;
+                break;
+            fi
+            echo "Catalog container not online. Waiting...";
+            EC=1;
+            sleep 10;
+            ATTEMPTS=$((ATTEMPTS+1));
+        done
+        if [[ ${EC} -ne 0 ]]; then
+            echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): Container never came online with new image. Still running ${TARGET_IMAGE}!"
+            exit 1;
+        fi
+    done
+}
+
+main
+

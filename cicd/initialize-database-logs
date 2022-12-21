@@ -1,0 +1,35 @@
+#!/bin/bash
+
+runhelp() {
+    echo ""
+    echo "Purpose: Create the volume for the logs and initialize the directory with"
+    echo "         proper permissions for MariaDB"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - STACK_NAME: Name of the stack"
+    echo "  - DEPLOY_HOST_A: The first host in the cluster"
+    echo "  - DEPLOY_HOST_B: The second host in the cluster"
+    echo "  - DEPLOY_HOST_C: The third host in the cluster"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - If creation of the volumes failed"
+    echo "  - If creating the database log directory or setting the permissions failed"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+main() {
+    # Create logs volume and set permissions for /mnt/logs/mariadb so that mariadb can write the log there
+    HOSTS="$DEPLOY_HOST_A $DEPLOY_HOST_B $DEPLOY_HOST_C";
+    for HOST in ${HOSTS}; do
+        ssh deploy@"${HOST}" \
+        "docker volume create \${STACK_NAME}_logs &&
+        docker run --rm -v \${STACK_NAME}_logs:/mnt/logs alpine sh -c 'mkdir -p /mnt/logs/mariadb && chown 1001 /mnt/logs/mariadb'";
+    done
+}
+
+main
