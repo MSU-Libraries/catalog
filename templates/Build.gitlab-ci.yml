@@ -44,8 +44,9 @@ Build Vufind Image:
       artifacts: true
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - apk add --no-cache bash
   script:
-    - ./cicd/build-vufind
+    - bash ./cicd/build-vufind
 
 ############# Templates ###############
 
@@ -63,8 +64,9 @@ Build Vufind Image:
     CURR: $CI_REGISTRY_IMAGE/$COMPONENT:$CI_COMMIT_SHORT_SHA
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - apk add --no-cache bash
   needs:
     - job: Set Stack Name
       artifacts: true
   script:
-    - ./cicd/build-general
+    - bash ./cicd/build-general

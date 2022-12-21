@@ -41,7 +41,7 @@ Create DNS:
     - job: Set Stack Name
       artifacts: true
   script:
-    - ./cicd/create-dns
+    - bash ./cicd/create-dns
 
 Deploy Compose Files:
   extends: .stack_template
@@ -52,12 +52,12 @@ Deploy Compose Files:
     - job: Set Stack Name
       artifacts: true
   script:
-    - ./cicd/deploy-compose-files
+    - bash ./cicd/deploy-compose-files
 
 Initialize Database Logs:
   extends: .stack_template
   script:
-     - ./cicd/initialize-database-logs
+     - bash ./cicd/initialize-database-logs
 
 Perform Database Backup:
   extends: .stack_template
@@ -65,12 +65,12 @@ Perform Database Backup:
     - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule" && $CI_DEPLOY_FREEZE == null'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   script:
-    - ./cicd/perform-database-backup
+    - bash ./cicd/perform-database-backup
 
 Deploy Internal Network:
   extends: .stack_template
   script:
-    - ./cicd/deploy-internal-network
+    - bash ./cicd/deploy-internal-network
 
 Deploy Traefik:
   extends: .stack_template
@@ -79,7 +79,7 @@ Deploy Traefik:
       artifacts: true
     - Deploy Compose Files
   script:
-    - ./cicd/deploy-traefik
+    - bash ./cicd/deploy-traefik
 
 Bootstrap Stacks:
   extends: .stack_template
@@ -92,7 +92,7 @@ Bootstrap Stacks:
     - Build Solr Image
     - Perform Database Backup
   script:
-    - ./cicd/bootstrap-stacks
+    - bash ./cicd/bootstrap-stacks
 
 Deploy Solr:
   extends: .stack_template
@@ -110,12 +110,12 @@ Deploy Solr:
     - Deploy Traefik
     - Perform Database Backup
   script:
-    - ./cicd/deploy-solr
+    - bash ./cicd/deploy-solr
 
 Deploy Swarm Cron:
   extends: .stack_template
   script:
-    - ./cicd/deploy-swarm-cron
+    - bash ./cicd/deploy-swarm-cron
 
 Deploy DB:
   extends: .stack_template
@@ -132,7 +132,7 @@ Deploy DB:
     - Initialize Database Logs
     - Perform Database Backup
   script:
-    - ./cicd/deploy-db
+    - bash ./cicd/deploy-db
 
 Deploy Vufind:
   extends: .stack_template
@@ -154,7 +154,7 @@ Deploy Vufind:
     - Deploy Compose Files
     - Perform Database Backup
   script:
-    - ./cicd/deploy-vufind
+    - bash ./cicd/deploy-vufind
   artifacts:
     reports:
       dotenv: deploy.env
@@ -172,7 +172,7 @@ Deploy Monitoring:
     - Deploy Internal Network
     - Deploy Traefik
   script:
-    - ./cicd/deploy-monitoring
+    - bash ./cicd/deploy-monitoring
 
 Verify Vufind Image:
   extends: .stack_template
@@ -182,7 +182,7 @@ Verify Vufind Image:
     - job: Deploy Vufind
       artifacts: true
   script:
-    - ./cicd/verify-vufind-image
+    - bash ./cicd/verify-vufind-image
 
 Vufind Upgrade:
   extends: .stack_template
@@ -193,7 +193,7 @@ Vufind Upgrade:
       artifacts: true
     - Verify Vufind Image
   script:
-    - ./cicd/vufind-upgrade
+    - bash ./cicd/vufind-upgrade
 
 Populate Vufind Environment:
   extends: .stack_template
@@ -204,7 +204,7 @@ Populate Vufind Environment:
       artifacts: true
     - Vufind Upgrade
   script:
-    - ./cicd/populate-vufind-environment
+    - bash ./cicd/populate-vufind-environment
 
 Verify Health:
   extends: .stack_template
@@ -213,7 +213,7 @@ Verify Health:
       artifacts: true
     - Verify Vufind Image
   script:
-    - ./cicd/verify-health
+    - bash ./cicd/verify-health
 
 Remove Environment:
   stage: Cleanup
@@ -230,7 +230,7 @@ Remove Environment:
       artifacts: true
     - Deploy Vufind
   script:
-    - ./cicd/remove-environment
+    - bash ./cicd/remove-environment
 
 ############# Templates ###############
 
