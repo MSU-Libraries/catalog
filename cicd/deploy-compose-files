@@ -166,7 +166,7 @@ main() {
 
     # Development environment changes
     if [[ "${STACK_NAME}" != catalog-* ]]; then
-        apply_deve_changes;
+        apply_devel_changes;
     fi
     # Production environment changes
     if [[ "${STACK_NAME}" == catalog-* ]]; then
