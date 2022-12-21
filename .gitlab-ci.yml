@@ -180,7 +180,7 @@ Verify Vufind Image:
       artifacts: true
     - job: Deploy Vufind
       artifacts: true
-   script:
+  script:
      - cicd/verify-vufind-image
 
 Vufind Upgrade:
