@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before-script
+
 runhelp() {
     echo ""
     echo "Purpose: Deploy the internal network for the stack"
@@ -25,4 +27,5 @@ main() {
     sleep 15
 }
 
+beforescript
 main

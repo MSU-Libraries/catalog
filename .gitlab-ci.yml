@@ -25,8 +25,9 @@ Set Stack Name:
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_PIPELINE_SOURCE == "schedule") && $PROD == "false"'
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $PROD == "true"'
       when: manual
-  script:
+  before_script:
     - apk add --no-cache bash
+  script:
     - bash ./cicd/set-stack-name
   artifacts:
     reports:
@@ -251,8 +252,6 @@ Remove Environment:
     - job: Set Stack Name
       artifacts: true
     - Deploy Compose Files
-  before_script:
-    - ./cicd/before-script
 
 Deploy:
   interruptible: true

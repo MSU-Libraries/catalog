@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before_script
+
 runhelp() {
     echo ""
     echo "Purpose: [Script Purpose]"
@@ -21,4 +23,5 @@ main() {
     exit 0;
 }
 
+before_script
 main

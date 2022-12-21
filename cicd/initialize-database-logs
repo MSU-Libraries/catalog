@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before-script
+
 runhelp() {
     echo ""
     echo "Purpose: Create the volume for the logs and initialize the directory with"
@@ -32,4 +34,5 @@ main() {
     done
 }
 
+beforescript
 main

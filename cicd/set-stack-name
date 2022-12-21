@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before-script
+
 runhelp() {
     echo ""
     echo "Purpose: Sets the stack name variables for the deployment based"
@@ -48,4 +50,5 @@ main() {
     test -f build.env
 }
 
+beforescript
 main

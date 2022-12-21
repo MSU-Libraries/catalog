@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before-script
+
 runhelp() {
     echo ""
     echo "Purpose: Verify that the Vufind container on each host is running the latest"
@@ -46,5 +48,5 @@ main() {
     done
 }
 
+beforescript
 main
-

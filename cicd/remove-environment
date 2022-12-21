@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before-script
+
 runhelp() {
     echo ""
     echo "Purpose: Remove the environment from the nodes and cleanup the data left behind"
@@ -63,4 +65,5 @@ main() {
     prunevols "${DEPLOY_HOST_C}";
 }
 
+beforescript
 main

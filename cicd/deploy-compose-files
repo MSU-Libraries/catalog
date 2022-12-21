@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before-script
+
 runhelp() {
     echo ""
     echo "Purpose: Performs updates to the docker-compose files and deploys them to the server"
@@ -199,4 +201,5 @@ main() {
     scp docker-compose* deploy@"${DEPLOY_HOST_A}":"${COMPOSE_PATH}"/;
 }
 
+beforescript
 main

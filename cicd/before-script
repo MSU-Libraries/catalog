@@ -22,7 +22,7 @@ if [ -n "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; t
     exit 0
 fi
 
-main() {
+beforescript() {
     # Check for STACK_NAME
     test -n "${STACK_NAME}"
 
@@ -51,5 +51,3 @@ main() {
     ssh deploy@"$DEPLOY_HOST_B" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
     ssh deploy@"$DEPLOY_HOST_C" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
 }
-
-main

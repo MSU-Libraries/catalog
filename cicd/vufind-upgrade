@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before-script
+
 runhelp() {
     echo ""
     echo "Purpose: Run the vufind upgrade command through cURL"
@@ -55,4 +57,5 @@ main() {
     setconfig "true" "false";
 }
 
+beforescript
 main

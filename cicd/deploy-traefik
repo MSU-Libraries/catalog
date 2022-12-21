@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before-script
+
 runhelp() {
     echo ""
     echo "Purpose: Deploy the public Traefik stack"
@@ -28,4 +30,5 @@ main() {
     sleep 15
 }
 
+beforescript
 main

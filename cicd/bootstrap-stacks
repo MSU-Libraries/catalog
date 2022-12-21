@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before-script
+
 runhelp() {
     echo ""
     echo "Purpose: Perform first-time setup to the Solr and MariaDB stacks"
@@ -25,4 +27,5 @@ main() {
       (docker volume ls | grep -q ${STACK_NAME}-solr || (docker stack deploy --with-registry-auth -c ${COMPOSE_PATH}/docker-compose.solr-cloud-bootstrap.yml ${STACK_NAME}-solr && sleep 90))"
 }
 
+beforescript
 main

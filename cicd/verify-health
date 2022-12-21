@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before-script
+
 runhelp() {
     echo ""
     echo "Purpose: [Script Purpose]"
@@ -54,4 +56,5 @@ main() {
     checkhealth solr_solr;
 }
 
+beforescript
 main

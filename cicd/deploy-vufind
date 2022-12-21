@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before-script
+
 runhelp() {
     echo ""
     echo "Purpose: Deploy the Vufind application stack"
@@ -36,4 +38,5 @@ main() {
     echo "URL=${URL}" >> deploy.env;
 }
 
+beforescript
 main

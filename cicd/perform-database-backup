@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before-script
+
 runhelp() {
     echo ""
     echo "Purpose: Take a backup of all database nodes on the production environment"
@@ -32,4 +34,5 @@ main() {
     fi
 }
 
+beforescript
 main

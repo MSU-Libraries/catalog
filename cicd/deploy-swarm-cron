@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before-script
+
 runhelp() {
     echo ""
     echo "Purpose: Deploy the global swarm cron stack"
@@ -22,4 +24,5 @@ main() {
     ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy -c ${COMPOSE_PATH}/docker-compose.swarm-cron.yml swarm-cron"
 }
 
+beforescript
 main

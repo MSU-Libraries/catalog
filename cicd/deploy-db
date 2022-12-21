@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before-script
+
 runhelp() {
     echo ""
     echo "Purpose: Deploy the database stack"
@@ -26,4 +28,5 @@ main() {
     sleep 45
 }
 
+beforescript
 main

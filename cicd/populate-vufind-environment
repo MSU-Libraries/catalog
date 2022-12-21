@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source before-script
+
 runhelp() {
     echo ""
     echo "Purpose: Prepopulate development and review environments with data"
@@ -69,4 +71,5 @@ main() {
     fi;
 }
 
+beforescript
 main
