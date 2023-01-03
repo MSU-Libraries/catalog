@@ -1,0 +1,56 @@
+#!/bin/bash
+
+source "${CI_PROJECT_DIR}"/cicd/before-script
+
+runhelp() {
+    echo ""
+    echo "Purpose: Verify the health of the stack by calling the check"
+    echo "         scripts used by the NCPA plugin"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - STACK_NAME: Name of the stack"
+    echo "  - DEPLOY_HOST_A: The first host in the cluster"
+    echo "  - DEPLOY_HOST_B: The second host in the cluster"
+    echo "  - DEPLOY_HOST_C: The third host in the cluster"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - If the NCPA plugin returns a non-zero exit code"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+check() {
+    SERVICE=$1
+    for HOST in ${HOSTS}; do
+        ATTEMPTS=0;
+        while [[ "${ATTEMPTS}" -le 15 ]]; do
+            echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): Checking ${SERVICE} health...";
+            HEALTH=$(ssh deploy@"${HOST}" "/usr/local/ncpa/plugins/check_${SERVICE}.sh ${STACK_NAME}");
+            EC=$?
+            if [[ ${EC} -eq 0 ]]; then
+                echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${GALERA} is healthy!";
+                break;
+            fi
+            echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} not healthy yet. Waiting...";
+            sleep 10;
+            ATTEMPTS=$((ATTEMPTS+1));
+        done
+        if [[ ${EC} -ne 0 ]]; then
+            echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} is not healthy! ${HEALTH}";
+            exit 1;
+        fi
+    done
+}
+
+main() {
+    HOSTS="$DEPLOY_HOST_A $DEPLOY_HOST_B $DEPLOY_HOST_C";
+    check galera
+    check solr
+}
+
+beforescript
+main

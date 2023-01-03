@@ -207,14 +207,14 @@ Populate Vufind Environment:
   script:
     - bash ./cicd/populate-vufind-environment
 
-Verify Health:
+Verify Stack Health:
   extends: .stack_template
   needs:
     - job: Set Stack Name
       artifacts: true
     - Verify Vufind Image
   script:
-    - bash ./cicd/verify-health
+    - bash ./cicd/verify-stack-health
 
 Remove Environment:
   stage: Cleanup

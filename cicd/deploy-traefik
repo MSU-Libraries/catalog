@@ -22,10 +22,9 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
-    ssh deploy@"${DEPLOY_HOST_A}" \
-    "yq -i \".services.traefik.environment=\$( yq . traefik-env.yml -o json )\" ${COMPOSE_PATH}/docker-compose.traefik.yml
-    && sed -i \"/^$/d\" ${COMPOSE_PATH}/docker-compose.traefik.yml
-    && docker stack deploy -c ${COMPOSE_PATH}/docker-compose.traefik.yml traefik"
+    ssh deploy@"${DEPLOY_HOST_A}" "yq -i \".services.traefik.environment=\$( yq . traefik-env.yml -o json )\" ${COMPOSE_PATH}/docker-compose.traefik.yml
+    ssh deploy@"${DEPLOY_HOST_A}" "sed -i \"/^$/d\" ${COMPOSE_PATH}/docker-compose.traefik.yml
+    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy -c ${COMPOSE_PATH}/docker-compose.traefik.yml traefik"
 
     sleep 15
 }
