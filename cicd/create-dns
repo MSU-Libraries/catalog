@@ -21,10 +21,6 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
     exit 0
 fi
 
-source before_script
-before_script
-
-
 main() {
     # Add .aws credentials
     envsubst <  provision-dns-playbook/variables.yml | sponge provision-dns-playbook/variables.yml

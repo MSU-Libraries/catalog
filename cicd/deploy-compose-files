@@ -199,6 +199,7 @@ main() {
     # Copy the updated compose files to the server
     ssh deploy@"${DEPLOY_HOST_A}" mkdir -p "${COMPOSE_PATH}";
     scp docker-compose* deploy@"${DEPLOY_HOST_A}":"${COMPOSE_PATH}"/;
+    echo "Copying files to ${COMPOSE_PATH}"
 }
 
 beforescript
