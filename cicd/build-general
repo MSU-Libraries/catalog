@@ -30,7 +30,7 @@ main() {
     --tag "${CURR}" \
     --build-arg VUFIND_VERSION="${VUFIND_VERSION}" \
     --cache-from "${LATEST}" \
-    "$COMPONENT"/;
+    "${COMPONENT}"/;
 
     # Push the current image
     docker push "${CURR}";
@@ -43,5 +43,8 @@ main() {
 }
 
 # exit script if any command fails
-set -e
-main
+set -e;
+if ! main; then
+    echo "Failed to build ${COMPONENT}. Sleeping to add delay before potential retry.";
+    sleep 3;
+fi;
