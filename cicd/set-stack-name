@@ -48,4 +48,6 @@ main() {
     test -f build.env
 }
 
+# exit script if any command fails
+set -e
 main

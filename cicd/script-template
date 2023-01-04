@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source before_script
+source "${CI_PROJECT_DIR}"/cicd/before-script
 
 runhelp() {
     echo ""
@@ -23,5 +23,7 @@ main() {
     exit 0;
 }
 
-before_script
+beforescript
+# or if not using beforescript be sure to add this to ensure failed commands
+# fail the script: set -e
 main
