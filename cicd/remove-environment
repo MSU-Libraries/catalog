@@ -69,4 +69,5 @@ beforescript
 if ! main; then
     echo "Failed to build ${COMPONENT}. Sleeping to add delay before potential retry.";
     sleep 3;
+    exit 1;
 fi;
