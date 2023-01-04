@@ -99,11 +99,15 @@
   <div class="collapse navbar-collapse" id="navbar-warning">
     <p>
       <b>Notice:</b> While this site is integrated with live production data,
-      <a href="https://catalog.lib.msu.edu/" target="_blank"><b>EDS</b></a> remains the official public
-      catalog interface for MSU Libraries. This site may have uncompleted functionality and may
-      change without notice. <em>As this site is available for evaluation purposes, all
-      <a data-lightbox href="<?=$this->url('feedback-home') ?>">feedback and suggestions</a>
-      are appreciated!</em>
+      <a href="https://catalog.lib.msu.edu/" target="_blank">
+        <i class="fa fa-sign-in" aria-hidden="true"></i> EDS
+      </a> is currently the official public catalog interface for MSU Libraries.
+      Using this site, features could change without notice and you may encounter
+      incomplete functionality or bugs.
+      <em>
+        You can help us improve this catalog interface by providing
+        <a data-lightbox href="<?=$this->url('feedback-home') ?>">feedback and suggestions</a>!
+      </em>
     </p>
   </div>
 <?php endif; ?>
