@@ -11,6 +11,12 @@ mkdir -p /mnt/logs/vufind /mnt/logs/harvests
 ln -sf /mnt/logs/vufind /var/log/vufind
 touch /mnt/logs/vufind/vufind.log
 
+# Set custom cron minute offsets for OAI harvesting
+FOLIO_CRON_MINS="0,30"  # catalog-prod
+if [[ "${STACK_NAME}" == "catalog-beta" ]]; then
+    FOLIO_CRON_MINS="15,45"
+fi
+export FOLIO_CRON_MINS
 # Replace the $NODE in the crontab entry
 envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
 

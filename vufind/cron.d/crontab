@@ -29,7 +29,7 @@ MAILTO=$EMAIL
 @reboot root chronic clear-vufind-cache 2>&1 | logger -t CACHE_CLEAR
 
 # Trigger harvest start
-#*/2 *	* * *	root    cron-folio.sh
+${FOLIO_CRON_MINS} * * * *	root    cron-folio.sh
 5 ${NODE}    * * *	root    cron-hlm.sh
 0 4    * * 0	root    cron-authority.sh
 
