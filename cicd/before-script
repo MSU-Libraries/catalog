@@ -50,4 +50,7 @@ beforescript() {
     ssh deploy@"$DEPLOY_HOST_A" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
     ssh deploy@"$DEPLOY_HOST_B" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
     ssh deploy@"$DEPLOY_HOST_C" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
+
+    # exit script if any command fails
+    set -e
 }
