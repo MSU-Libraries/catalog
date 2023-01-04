@@ -42,4 +42,6 @@ main() {
     fi;
 }
 
+# exit script if any command fails
+set -e
 main
