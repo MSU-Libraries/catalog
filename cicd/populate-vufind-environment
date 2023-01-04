@@ -46,7 +46,8 @@ main() {
     STAT_CD=$(ssh deploy@"${DEPLOY_HOST_A}" "docker exec ${CONTAINER_A} curl 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' --write-out %{http_code} --silent --output /dev/null") || echo "-1";
 
     if [[ "${STAT_CD}" -ne 200 ]]; then
-        echo "Failed to get number of records from Solr. Curl returned ${STAT_CD}.";
+        echo "Failed to get number of records from Solr. Curl returned ${STAT_CD}. Sleeping for 5 seconds to add delay before retry.";
+        sleep 5;
         exit 1;
     fi;
 
