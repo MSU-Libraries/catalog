@@ -14,6 +14,7 @@ $link = $this->getthis->getLink();
             <?php if ($link ?? false) { ?>
                 <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
                    <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
+                   target="_blank"
                    href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
                    <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place a Hold")?>
                 </a>
@@ -24,6 +25,7 @@ $link = $this->getthis->getLink();
             <?php if ($link ?? false) { ?>
                 <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
                    <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
+                   target="_blank"
                    href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
                    <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Request" : "Request This")?>
                 </a>

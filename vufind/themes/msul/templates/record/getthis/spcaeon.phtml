@@ -34,7 +34,7 @@ $pubname = substr($pubname, 0, 255);
             <b>Special Collections:</b>
             <?= $msg ?>
             This material may only be viewed on a dedicated computer in the
-            <a href='https://lib.msu.edu/general/library-hours-cal/special-collections/'>
+            <a href='https://lib.msu.edu/general/library-hours-cal/special-collections/' target="_blank">
             Special Collections Reading Room</a>. Please visit anytime Special Collections is
             open and a staff member will be happy to assist you.
         </p>
@@ -44,7 +44,7 @@ $pubname = substr($pubname, 0, 255);
             <?= $msg ?>
             <ul>
                 <li>
-                    <a href="https://spcrequest.lib.msu.edu/Logon/?Action=10&Form=20&value=GenericRequestMonograph&DocumentType=book&ItemTitle=<?= $this->escapeHtml($title) ?>&ItemEdition=<?= $this->escapeHtml($edition) ?>&ItemAuthor=<?= $this->escapeHtml($author) ?>&ItemPublisher=<?= $this->escapeHtml($pubname) ?>&Location=<?= $this->escapeHtml($loc) ?>&CallNumber=<?= $this->escapeHtml($callnum) ?>&ItemNumber=<?= $this->escapeHtml($bibnum) ?>&ItemVolume=<?= $this->escapeHtml($barcode) ?>">Request Item</a>
+                    <a href="https://spcrequest.lib.msu.edu/Logon/?Action=10&Form=20&value=GenericRequestMonograph&DocumentType=book&ItemTitle=<?= $this->escapeHtml($title) ?>&ItemEdition=<?= $this->escapeHtml($edition) ?>&ItemAuthor=<?= $this->escapeHtml($author) ?>&ItemPublisher=<?= $this->escapeHtml($pubname) ?>&Location=<?= $this->escapeHtml($loc) ?>&CallNumber=<?= $this->escapeHtml($callnum) ?>&ItemNumber=<?= $this->escapeHtml($bibnum) ?>&ItemVolume=<?= $this->escapeHtml($barcode) ?>" target="_blank">Request Item</a>
                 </li>
             </ul>
         </p>
