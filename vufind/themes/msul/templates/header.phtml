@@ -95,6 +95,17 @@
       </a>
     </p>
   </div>
+<?php else: ?>
+  <div class="collapse navbar-collapse" id="navbar-warning">
+    <p>
+      <b>Notice:</b> While this site is integrated with live production data,
+      <a href="https://catalog.lib.msu.edu/" target="_blank"><b>EDS</b></a> remains the official public
+      catalog interface for MSU Libraries. This site may have uncompleted functionality and may
+      change without notice. <em>As this site is available for evaluation purposes, all
+      <a data-lightbox href="<?=$this->url('feedback-home') ?>">feedback and suggestions</a>
+      are appreciated!</em>
+    </p>
+  </div>
 <?php endif; ?>
 <?php if ($this->layout()->searchbox !== false): ?>
   <div class="search container navbar">
