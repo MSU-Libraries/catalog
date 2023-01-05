@@ -14,7 +14,7 @@ default_args() {
     ARGS[FTP_DIR]=s8364774/vufind/
     ARGS[FTP_USER]=${FTP_USER}
     ARGS[FTP_PASSWORD]=${FTP_PASSWORD}
-    ARGS[SHARED_DIR]=/mnt/shared/hlm
+    ARGS[SHARED_DIR]=/mnt/hlm
     ARGS[VERBOSE]=0
 }
 default_args
@@ -42,7 +42,7 @@ runhelp() {
     echo "  -t|--harvest"
     echo "      Run an harvest into VUFIND_HARVEST_DIR. Will attempt"
     echo "      to resume from last harvest state unless -f flag given."
-    echo "      On success, sync a copy of harvest files to SHARED_DIR."
+    echo "      On success, sync a copy of harvest files to SHARED_DIR/current/."
     echo "  -f|--full"
     echo "      Forces a reset of VUFIND_HARVEST_DIR, resulting"
     echo "      in a full harvest. Must be used with --harvest."
