@@ -19,34 +19,36 @@ services:
         protocol: tcp
     environment:
       # XXX: The environment will be replaced by traefik-env.yml during deploy
-    command:
-      - "--providers.docker"
-      - "--providers.docker.swarmMode=true"
-      - "--providers.docker.exposedByDefault=false"
-      - "--providers.docker.network=public"
-      - '--providers.docker.defaultRule=Host(`{{ index .Labels "com.docker.stack.namespace" | trimSuffix "-catalog" }}.aws.lib.msu.edu`)'
-      - "--entrypoints.msul-http-ent.address=:80"
-      - "--entrypoints.msul-https-ent.address=:443"
-      - "--log"
-      - "--log.level=ERROR"
-      - "--log.filepath=/mnt/logs/traefik.log"
-      - "--accesslog"
-      - "--accesslog.filepath=/mnt/logs/access.log"
-      - "--api.dashboard=true"
-      #- "--api.debug=true"     # Enable this line to use Traefik's /debug
-      - "--entrypoints.health-ent.address=:8081"
-      - "--ping"
-      - "--ping.entrypoint=health-ent"
-      - "--global.checknewversion=false"
-      - "--global.sendanonymoususage=false"
-      - "--certificatesresolvers.msul-letsencrypt.acme.email=LIB.DL.DDaS@msu.edu"
-      - "--certificatesresolvers.msul-letsencrypt.acme.storage=/etc/traefik/acme.json"
-      - "--certificatesresolvers.msul-letsencrypt.acme.httpchallenge=true"
-      - "--certificatesresolvers.msul-letsencrypt.acme.httpchallenge.entrypoint=msul-http-ent"
-      - "--certificatesresolvers.msul-letsencrypt-dns.acme.email=LIB.DL.DDaS@msu.edu"
-      - "--certificatesresolvers.msul-letsencrypt-dns.acme.storage=/etc/traefik/acme-dns.json"
-      - "--certificatesresolvers.msul-letsencrypt-dns.acme.dnschallenge=true"
-      - "--certificatesresolvers.msul-letsencrypt-dns.acme.dnschallenge.provider=route53"
+    command: "sh -c 'touch /mnt/logs/traefik.log; tail -f /mnt/logs/traefik.log &
+      exec traefik
+        --providers.docker
+        --providers.docker.swarmMode=true
+        --providers.docker.exposedByDefault=false
+        --providers.docker.network=public
+        --providers.docker.defaultRule=Host(`{{ index .Labels \"com.docker.stack.namespace\" | trimSuffix \"-catalog\" }}.aws.lib.msu.edu`)
+        --entrypoints.msul-http-ent.address=:80
+        --entrypoints.msul-https-ent.address=:443
+        --log
+        --log.level=ERROR
+        --log.filepath=/mnt/logs/traefik.log
+        --accesslog
+        --accesslog.filepath=/mnt/logs/access.log
+        --api.dashboard=true
+        #--api.debug=true     # Enable this line to use the /debug endpoint
+        --entrypoints.health-ent.address=:8081
+        --ping
+        --ping.entrypoint=health-ent
+        --global.checknewversion=false
+        --global.sendanonymoususage=false
+        --certificatesresolvers.msul-letsencrypt.acme.email=LIB.DL.DDaS@msu.edu
+        --certificatesresolvers.msul-letsencrypt.acme.storage=/etc/traefik/acme.json
+        --certificatesresolvers.msul-letsencrypt.acme.httpchallenge=true
+        --certificatesresolvers.msul-letsencrypt.acme.httpchallenge.entrypoint=msul-http-ent
+        --certificatesresolvers.msul-letsencrypt-dns.acme.email=LIB.DL.DDaS@msu.edu
+        --certificatesresolvers.msul-letsencrypt-dns.acme.storage=/etc/traefik/acme-dns.json
+        --certificatesresolvers.msul-letsencrypt-dns.acme.dnschallenge=true
+        --certificatesresolvers.msul-letsencrypt-dns.acme.dnschallenge.provider=route53
+      '"
     healthcheck:
       test: >
         traefik healthcheck \
