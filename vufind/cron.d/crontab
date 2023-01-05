@@ -36,5 +36,6 @@ MAILTO=$EMAIL
 # Course reserves update
 30 ${NODE}	* * *	root    cron-reserves.sh
 
-# Cleanup unsaved searches
+# Cleanup data
 0 0     * * *   root    cron-searches.sh
+30 0     * * *   root    cron-sessions.sh
