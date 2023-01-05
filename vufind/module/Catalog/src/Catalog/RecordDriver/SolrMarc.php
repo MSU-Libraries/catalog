@@ -49,8 +49,10 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 
     public function getNotes() 
     {
-	    return array_merge($this->getMarcField('590', ['a','b','c','d','e']), 
-		    $this->getMarcField('561', ['a','b','c','d','e']));
+	    return array_merge($this->getMarcField('541', ['a','b','c','d','e']), 
+		    $this->getMarcField('561', ['a','b','c','d','e']),
+            $this->getMarcField('563', ['a','b','c','d','e']),
+            $this->getMarcField('590', ['a','b','c','d','e']));
     }
 
     public function getPublisher()
