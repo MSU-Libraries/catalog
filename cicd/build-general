@@ -32,20 +32,37 @@ main() {
     --cache-from "${LATEST}" \
     "${COMPONENT}"/;
 
+    EC=$?;
+    if [[ ${EC} -ne 0 ]]; then
+        echo "Failed to build ${COMPONENT}. Sleeping to add delay before potential retry.";
+        sleep 3;
+        exit 1;
+    fi;
+
     # Push the current image
     docker push "${CURR}";
+
+    EC=$?;
+    if [[ ${EC} -ne 0 ]]; then
+        echo "Failed to push ${COMPONENT}. Sleeping to add delay before potential retry.";
+        sleep 3;
+        exit 1;
+    fi;
 
     # Tag and push as latest image if this is the default branch
     if [[ ${CI_DEFAULT_BRANCH} == "${CI_COMMIT_BRANCH}" ]]; then
         docker tag "${CURR}" "${LATEST}";
         docker push "${LATEST}";
     fi;
+
+    EC=$?;
+    if [[ ${EC} -ne 0 ]]; then
+        echo "Failed to add latest tag for ${COMPONENT}. Sleeping to add delay before potential retry.";
+        sleep 3;
+        exit 1;
+    fi;
 }
 
 # exit script if any command fails
 set -e;
-if ! main; then
-    echo "Failed to build ${COMPONENT}. Sleeping to add delay before potential retry.";
-    sleep 3;
-    exit 1;
-fi;
+main;

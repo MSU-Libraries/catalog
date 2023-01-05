@@ -61,14 +61,35 @@ main() {
         --cache-from "${LATEST}" \
         vufind/;
 
+    EC=$?;
+    if [[ ${EC} -ne 0 ]]; then
+        echo "Failed to build. Sleeping to add delay before potential retry.";
+        sleep 3;
+        exit 1;
+    fi;
+
     docker push "${CURR}";
+
+    EC=$?;
+    if [[ ${EC} -ne 0 ]]; then
+        echo "Failed to push. Sleeping to add delay before potential retry.";
+        sleep 3;
+        exit 1;
+    fi;
 
     if [[ ${CI_DEFAULT_BRANCH} == "${CI_COMMIT_BRANCH}" ]]; then
         docker tag "${CURR}" "${LATEST}";
         docker push "${LATEST}";
     fi
+
+    EC=$?;
+    if [[ ${EC} -ne 0 ]]; then
+        echo "Failed to add latest tag. Sleeping to add delay before potential retry.";
+        sleep 3;
+        exit 1;
+    fi;
 }
 
 # exit script if any command fails
-set -e
-main
+set -e;
+main;
