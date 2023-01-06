@@ -7,7 +7,7 @@
     </button>
 
     <h2 class="navbar-msul"><a href="https://lib.msu.edu/">MSU Libraries</a></h2>
-    <h1 class="navbar-catalog"><a href="<?=$this->url('home') ?>">Public Catalog</a></h1>
+    <h1 class="navbar-catalog"><a href="/Search">Public Catalog</a></h1>
   </div>
   <?php if (!isset($this->layout()->renderingError)): ?>
     <div class="collapse navbar-collapse" id="header-collapse">
@@ -98,6 +98,7 @@
 <?php endif; ?>
 <?php if ($this->layout()->searchbox !== false): ?>
   <div class="search container navbar">
+    <div class="backtocat"><p><a style="text-decoration:none;" href="/Search">&#8592;&nbsp;&nbsp;Back to the catalog</a></p></div>
     <div class="nav searchbox hidden-print" role="search">
       <?=$this->layout()->searchbox ?>
     </div>
