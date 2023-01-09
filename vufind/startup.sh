@@ -50,6 +50,7 @@ if [[ "${STACK_NAME}" != catalog-* ]]; then
     # Make sure permissions haven't gotten changed on the share along the way
     # (This can happen no matter what on devel container startup)
     chown msuldevs:msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/*
+    chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/msul/
     chown msuldevs:msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/local-confs/*
     rsync -aip --chmod=D2775,F664 "${SHARED_STORAGE}/${STACK_NAME}"/ "${SHARED_STORAGE}/${STACK_NAME}"/
 fi
