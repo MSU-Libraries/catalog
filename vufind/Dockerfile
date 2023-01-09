@@ -206,8 +206,10 @@ RUN \
     echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment && \
     echo AUTH_FTP_PASSWORD="$AUTH_FTP_PASSWORD" >> /etc/environment && \
     echo DEPLOY_KEY="$DEPLOY_KEY" >> /etc/environment && \
-    # Prepare cache directory
+    # Prepare cache directories
     mkdir -p ${VUFIND_CACHE_DIR} && \
+    mkdir -p ${VUFIND_HOME}/themes/msul/css/less/ && \
+    chown -R 33:33 ${VUFIND_HOME}/themes/msul/css/less/ && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
     # Set permissions on local, theme, and Catalog
     chown -R 1000:1000 ${VUFIND_LOCAL_DIR} && \
