@@ -7,7 +7,7 @@ LATEST_PATH=/mnt/logs/solr/alphabrowse_latest.log
 LOG_PATH=/mnt/logs/solr/alphabrowse.log
 EXIT_CODE_PATH=/mnt/logs/solr/alphabrowse_exit_code
 DOCKER_TAG=ALPHA_BROWSE
-OUPUT_LOG=0
+OUTPUT_LOG=0
 
 rm -f "$LATEST_PATH" "$EXIT_CODE_PATH"
 $CRON_COMMAND >$LATEST_PATH 2>&1
@@ -19,7 +19,7 @@ echo $EXIT_CODE >$EXIT_CODE_PATH
 
 if [[ $EXIT_CODE -ne 0 ]]; then
     cat $LATEST_PATH | logger -t $DOCKER_TAG
-    if [[ $OUPUT_LOG -eq 1 ]]; then
+    if [[ $OUTPUT_LOG -eq 1 ]]; then
         cat $LATEST_PATH
     fi
 fi

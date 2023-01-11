@@ -7,6 +7,6 @@ export LATEST_PATH=/mnt/logs/harvests/folio_latest.log
 export LOG_PATH=/mnt/logs/harvests/folio.log
 export EXIT_CODE_PATH=/mnt/logs/harvests/folio_exit_code
 export DOCKER_TAG=FOLIO_HARVEST
-export OUPUT_LOG=1
+export OUTPUT_LOG=1
 
 cron-common.sh

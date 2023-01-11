@@ -52,6 +52,7 @@ services:
       options:
         max-file: "5"
         max-size: "10m"
+    init: true
     environment:
       SOLR_HOST: solr{{slice .Node.Hostname 8 9}}
       <<: *solr_envs
