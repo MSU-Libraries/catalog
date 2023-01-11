@@ -42,6 +42,11 @@ return array (
   ],
   'vufind' => [
     'plugin_managers' => [
+      'search_backend' => [
+        'factories' => [
+          'EDS' => 'Catalog\\Search\\Factory\\EdsBackendFactory',
+        ],
+      ],
       'recorddriver' => [
         'factories' => [
           'Catalog\\RecordDriver\\SolrMarc' => 'VuFind\\RecordDriver\\SolrDefaultFactory',
