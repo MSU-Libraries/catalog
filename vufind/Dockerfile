@@ -18,6 +18,8 @@ RUN \
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl \
         php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml && \
     rm -rf /var/lib/apt/lists/*
+COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
+RUN apt install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
 
 ARG GITHUB_USER_TOKEN
 ARG VUFIND_VERSION
@@ -88,12 +90,13 @@ RUN wget https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIM
     tar -C /tmp/ -xzf simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz && \
     mv /tmp/simplesamlphp-${SIMPLESAMLPHP_VERSION} ${SIMPLESAMLPHP_HOME} && \
     rm simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz
-COPY apache2/conf-available/simplesamlphp.conf /etc/apache2/conf-available/
+COPY apache2/conf-available/ /etc/apache2/conf-available/
 COPY simplesamlphp/local/ ${SIMPLESAMLPHP_CUSTOM_DIR}/
 RUN envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW}' < ${SIMPLESAMLPHP_CONFIG_DIR}/config.php | sponge ${SIMPLESAMLPHP_CONFIG_DIR}/config.php && \
     envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \
     a2enconf simplesamlphp.conf && \
-    chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR}
+    chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR} && \
+    a2enconf catalog.conf
 
 # Build Arguments
 ARG SITE_HOSTNAME
