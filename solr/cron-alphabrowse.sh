@@ -2,9 +2,6 @@
 
 # Cron job - Update alphabetical browsing
 
-# Get the stack name from the parameters passed in
-STACK_NAME=${1}
-
 CRON_COMMAND="/alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}"
 LATEST_PATH=/mnt/logs/solr/alphabrowse_latest.log
 LOG_PATH=/mnt/logs/solr/alphabrowse.log
