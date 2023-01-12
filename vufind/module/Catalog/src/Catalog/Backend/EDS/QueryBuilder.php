@@ -27,7 +27,7 @@ class QueryBuilder extends \VuFindSearch\Backend\EDS\QueryBuilder
             $expression = $this->defaultQuery;
         }
         // MSUL Override to to exclude specific items already indexed in Solr
-        $expression = $expression . ' NOT LN cat09276a NOT cat09276a';
+        $expression = $expression . ' NOT (LN cat09242a OR LO system.nl-s8364774 OR LN cat09276a)';
         return json_encode(
             ['term' => $expression, 'field' => $fieldCode, 'bool' => $operator]
         );
