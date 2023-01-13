@@ -25,29 +25,10 @@ Set Stack Name:
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_PIPELINE_SOURCE == "schedule") && $PROD == "false"'
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $PROD == "true"'
       when: manual
+  before_script:
+    - apk add --no-cache bash
   script:
-    - |
-      STACK_NAME=
-      SITE_HOSTNAME=
-      MAIL_HOST=host.docker.internal
-      MAIL_PORT=25
-      if [[ $PROD == "true" ]]; then
-          STACK_NAME="catalog-prod";
-          SITE_HOSTNAME="catalog-prod.lib.msu.edu";
-      elif [[ $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH ]]; then
-          STACK_NAME="catalog-beta";
-          SITE_HOSTNAME="catalog-beta.lib.msu.edu";
-      elif [[ "${CI_COMMIT_BRANCH}" == "devel-"* || "${CI_COMMIT_BRANCH}" == "review-"* ]]; then
-          STACK_NAME="${CI_COMMIT_BRANCH}";
-          SITE_HOSTNAME="${STACK_NAME}.aws.lib.msu.edu";
-          MAIL_HOST=mail
-      fi
-    - echo "STACK_NAME=${STACK_NAME}" > build.env
-    - echo "SITE_HOSTNAME=${SITE_HOSTNAME}" >> build.env
-    - echo "MAIL_HOST=${MAIL_HOST}" >> build.env
-    - echo "MAIL_PORT=${MAIL_PORT}" >> build.env
-    - test -n "${STACK_NAME}"
-    - test -f build.env
+    - bash ./cicd/set-stack-name
   artifacts:
     reports:
       dotenv: build.env
@@ -61,14 +42,7 @@ Create DNS:
     - job: Set Stack Name
       artifacts: true
   script:
-    # Add .aws credentials
-    - cat provision-dns-playbook/variables.yml | envsubst | sponge provision-dns-playbook/variables.yml
-    # Replace STACK_NAME in env/prod/main.tf and create host file in provision-dns-playbook
-    - cat dns-terraform/env/prod/main.tf | envsubst | sponge dns-terraform/env/prod/main.tf
-    # Run playbook
-    - ansible-playbook provision-dns-playbook/provision.yml
-    # Give time for DNS to propogate
-    - sleep 60
+    - ./cicd/create-dns
 
 Deploy Compose Files:
   extends: .stack_template
@@ -79,115 +53,12 @@ Deploy Compose Files:
     - job: Set Stack Name
       artifacts: true
   script:
-    # Install yq, enbsubst, and sponge
-    - apk add wget gettext moreutils
-    - "wget --header=\"Authorization: token $GITHUB_USER_TOKEN\" https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O ./yq"
-    - chmod +x ./yq
-    # Development environment changes
-    - |
-      if [[ "${STACK_NAME}" != catalog-* ]]; then
-        # Use dnschallenge cert resolver (instead of httpchallenge)
-        ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt-dns\"" docker-compose.yml;
-        ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].main=aws.lib.msu.edu\"" docker-compose.yml;
-        ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" docker-compose.yml;
-        ./yq -i ".services.mail.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.tls.certresolver=msul-letsencrypt-dns\"" docker-compose.yml;
-        ./yq -i ".services.mail.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.tls.domains[0].main=aws.lib.msu.edu\"" docker-compose.yml;
-        ./yq -i ".services.mail.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.tls.domains[0].sans=*.aws.lib.msu.edu\"" docker-compose.yml;
-        ./yq -i ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.certresolver=msul-letsencrypt-dns\"" docker-compose.solr-cloud.yml
-        ./yq -i ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.domains[0].main=aws.lib.msu.edu\"" docker-compose.solr-cloud.yml
-        ./yq -i ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" docker-compose.solr-cloud.yml
-        # Remove the cron service if the stack name is NOT catalog-beta
-        ./yq -i "del(.services.cron)" docker-compose.yml;
-        # Unset parallelism limit for non-production to speed up redeployments on devel stacks
-        ./yq -i "del(.services.catalog.deploy.update_config.parallelism)" docker-compose.yml;
-        # Add host router rules
-        ./yq -i ".services.mail.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-mail.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/mail\`)\"" docker-compose.yml
-        ./yq -i ".services.mail.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/mail\`)\"" docker-compose.yml
-        ./yq -i ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml
-        ./yq -i ".x-solr-deploy.labels +=\"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml
-        ./yq -i ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
-        ./yq -i ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-https-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
-        # Disable container rollback
-        ./yq -i "del(.services.monitoring.deploy.update_config.failure_action)" docker-compose.monitoring.yml;
-        ./yq -i "del(.x-solr-deploy.update_config.failure_action)" docker-compose.solr-cloud-bootstrap.yml;
-        ./yq -i "del(.services.zk.deploy.update_config.failure_action)" docker-compose.solr-cloud-bootstrap.yml;
-        ./yq -i "del(.x-solr-deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
-        ./yq -i "del(.services.zk.deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
-        ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud.yml;
-        ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud-force.yml;
-        ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud-bootstrap.yml;
-        ./yq -i "del(.services.cron.deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
-        ./yq -i "del(.services.catalog.deploy.update_config.failure_action)" docker-compose.yml;
-        ./yq -i "del(.services.cachecron.deploy.update_config.failure_action)" docker-compose.yml;
-        ./yq -i "del(.services.cron.deploy.update_config.failure_action)" docker-compose.yml;
-      fi
-    # Production environment changes
-    - |
-      if [[ "${STACK_NAME}" == catalog-* ]]; then
-        ## Apply to both catalog-beta and catalog-prod ##
-        # Use httpchallenge cert resolver (instead of dnschallenge)
-        ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt\"" docker-compose.yml;
-        ./yq -i ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.certresolver=msul-letsencrypt\"" docker-compose.solr-cloud.yml
-        # Remove the cachecron service if the stack name is production
-        ./yq -i "del(.services.cachecron)" docker-compose.yml;
-        # Remove mailcatcher service
-        ./yq -i "del(.services.mail)" docker-compose.yml;
-        ## Changes for catalog-beta
-        if [ "${STACK_NAME}" == "catalog-beta" ]; then
-          # Override default router rule
-          ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" docker-compose.yml
-          ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" docker-compose.yml
-          ./yq -i ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml
-          ./yq -i ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml
-          ./yq -i ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
-          ./yq -i ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
-        fi
-        ## Changes for catalog-prod
-        # TODO add catalog.lib at launch
-        if [ "${STACK_NAME}" == "catalog-prod" ]; then
-          ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" docker-compose.yml
-          ./yq -i ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" docker-compose.yml
-          ./yq -i ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml
-          ./yq -i ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" docker-compose.solr-cloud.yml
-          ./yq -i ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`catalog-prod.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
-          ./yq -i ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-https-router.rule=Host(\`catalog-prod.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" docker-compose.monitoring.yml
-        fi
-      fi
-      # Authentication environment changes
-      if [[ "${STACK_NAME}" == catalog-* ]] || [ "${STACK_NAME}" == "devel-authentication" ]; then
-        ./yq -i ".services.catalog.volumes += \"/home/deploy/samlcerts/${STACK_NAME}:/mnt/samlcerts:ro\"" docker-compose.yml
-      fi
-    # Replace variables in all compose files
-    - cat docker-compose.yml | envsubst | sponge docker-compose.yml
-    - cat docker-compose.solr-cloud.yml | envsubst | sponge docker-compose.solr-cloud.yml
-    - cat docker-compose.solr-cloud-bootstrap.yml | envsubst | sponge docker-compose.solr-cloud-bootstrap.yml
-    - cat docker-compose.mariadb-cloud-bootstrap.yml | envsubst | sponge docker-compose.mariadb-cloud-bootstrap.yml
-    - cat docker-compose.mariadb-cloud-force.yml | envsubst | sponge docker-compose.mariadb-cloud-force.yml
-    - cat docker-compose.mariadb-cloud.yml | envsubst | sponge docker-compose.mariadb-cloud.yml
-    - cat docker-compose.internal.yml | envsubst | sponge docker-compose.internal.yml
-    - cat docker-compose.traefik.yml | envsubst | sponge docker-compose.traefik.yml
-    - cat docker-compose.monitoring.yml | envsubst | sponge docker-compose.monitoring.yml
-    # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
-    - sed -i "/^$/d" docker-compose.traefik.yml
-    - sed -i "/^$/d" docker-compose.internal.yml
-    - sed -i "/^$/d" docker-compose.yml
-    # Copy the updated compose files to the server
-    - ssh deploy@$DEPLOY_HOST_A mkdir -p $COMPOSE_PATH
-    - scp docker-compose* deploy@$DEPLOY_HOST_A:$COMPOSE_PATH/
+    - bash ./cicd/deploy-compose-files
 
 Initialize Database Logs:
   extends: .stack_template
   script:
-    # Create logs volume and set permissions for /mnt/logs/mariadb so that mariadb can write the log there
-    - ssh deploy@$DEPLOY_HOST_A
-      "docker volume create ${STACK_NAME}_logs &&
-      docker run --rm -v ${STACK_NAME}_logs:/mnt/logs alpine /bin/sh -c 'mkdir -p /mnt/logs/mariadb && chown 1001 /mnt/logs/mariadb'"
-    - ssh deploy@$DEPLOY_HOST_B
-      "docker volume create ${STACK_NAME}_logs &&
-      docker run --rm -v ${STACK_NAME}_logs:/mnt/logs alpine /bin/sh -c 'mkdir -p /mnt/logs/mariadb && chown 1001 /mnt/logs/mariadb'"
-    - ssh deploy@$DEPLOY_HOST_C
-      "docker volume create ${STACK_NAME}_logs &&
-      docker run --rm -v ${STACK_NAME}_logs:/mnt/logs alpine /bin/sh -c 'mkdir -p /mnt/logs/mariadb && chown 1001 /mnt/logs/mariadb'"
+     - bash ./cicd/initialize-database-logs
 
 Perform Database Backup:
   extends: .stack_template
@@ -195,24 +66,12 @@ Perform Database Backup:
     - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule" && $CI_DEPLOY_FREEZE == null'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   script:
-    - > 
-      if [[ "${STACK_NAME}" != catalog-prod ]]; then
-         echo "Not backing up non production environment.";
-         exit 0;
-      fi
-    - CONTAINER="$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog")"
-    - >
-      if [[ -n "${CONTAINER}" ]]; then
-        echo "Performing a database backup";
-        ssh deploy@$DEPLOY_HOST_A "docker exec $CONTAINER /backup.sh --db --rotations 5 -v";
-      fi
+    - bash ./cicd/perform-database-backup
 
 Deploy Internal Network:
   extends: .stack_template
   script:
-    - >
-      ssh deploy@$DEPLOY_HOST_A
-      "docker stack deploy -c $COMPOSE_PATH/docker-compose.internal.yml $STACK_NAME-internal && sleep 15"
+    - bash ./cicd/deploy-internal-network
 
 Deploy Traefik:
   extends: .stack_template
@@ -221,12 +80,7 @@ Deploy Traefik:
       artifacts: true
     - Deploy Compose Files
   script:
-    # Update docker-compose.traefik.yml to sent environment vars to traefik-env.yml before deploy
-    - >
-      ssh deploy@$DEPLOY_HOST_A
-      "yq -i \".services.traefik.environment=\$( yq . traefik-env.yml -o json )\" $COMPOSE_PATH/docker-compose.traefik.yml
-      && sed -i \"/^$/d\" $COMPOSE_PATH/docker-compose.traefik.yml
-      && docker stack deploy -c $COMPOSE_PATH/docker-compose.traefik.yml traefik && sleep 15"
+    - bash ./cicd/deploy-traefik
 
 Bootstrap Stacks:
   extends: .stack_template
@@ -239,10 +93,7 @@ Bootstrap Stacks:
     - Build Solr Image
     - Perform Database Backup
   script:
-    - >
-      ssh deploy@$DEPLOY_HOST_A
-      "(docker volume ls | grep -q ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud-bootstrap.yml ${STACK_NAME}-mariadb && sleep 30 && docker stack rm ${STACK_NAME}-mariadb && sleep 25)) &&
-      (docker volume ls | grep -q ${STACK_NAME}-solr || (docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud-bootstrap.yml ${STACK_NAME}-solr && sleep 90))"
+    - bash ./cicd/bootstrap-stacks
 
 Deploy Solr:
   extends: .stack_template
@@ -260,20 +111,12 @@ Deploy Solr:
     - Deploy Traefik
     - Perform Database Backup
   script:
-    # Pull images now to save time with stack deploy
-    - >
-      ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA" &
-      ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA" &
-      ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA"
-    - >
-      ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr"
+    - bash ./cicd/deploy-solr
 
 Deploy Swarm Cron:
   extends: .stack_template
   script:
-    - >
-      ssh deploy@$DEPLOY_HOST_A
-      "docker stack deploy -c $COMPOSE_PATH/docker-compose.swarm-cron.yml swarm-cron"
+    - bash ./cicd/deploy-swarm-cron
 
 Deploy DB:
   extends: .stack_template
@@ -290,8 +133,7 @@ Deploy DB:
     - Initialize Database Logs
     - Perform Database Backup
   script:
-    - >
-      ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.mariadb-cloud.yml ${STACK_NAME}-mariadb && sleep 45"
+    - bash ./cicd/deploy-db
 
 Deploy Vufind:
   extends: .stack_template
@@ -313,17 +155,7 @@ Deploy Vufind:
     - Deploy Compose Files
     - Perform Database Backup
   script:
-    # Pull images now to save time with stack deploy
-    - >
-      ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" &
-      ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" &
-      ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA"
-    - >
-      ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml $STACK_NAME-catalog"
-    # Set URL
-    - URL="$SITE_HOSTNAME"
-    # Report the environemnt URL to GitLab
-    - echo "URL=$URL" >> deploy.env
+    - bash ./cicd/deploy-vufind
   artifacts:
     reports:
       dotenv: deploy.env
@@ -341,13 +173,17 @@ Deploy Monitoring:
     - Deploy Internal Network
     - Deploy Traefik
   script:
-    # Pull images now to save time with stack deploy
-    - >
-      ssh deploy@$DEPLOY_HOST_A "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA" &
-      ssh deploy@$DEPLOY_HOST_B "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA" &
-      ssh deploy@$DEPLOY_HOST_C "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA"
-    - >
-      ssh deploy@$DEPLOY_HOST_A "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.monitoring.yml ${STACK_NAME}-monitoring"
+    - bash ./cicd/deploy-monitoring
+
+Verify Vufind Image:
+  extends: .stack_template
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - job: Deploy Vufind
+      artifacts: true
+  script:
+    - bash ./cicd/verify-vufind-image
 
 Vufind Upgrade:
   extends: .stack_template
@@ -356,146 +192,29 @@ Vufind Upgrade:
       artifacts: true
     - job: Deploy Vufind
       artifacts: true
+    - Verify Vufind Image
   script:
-    - HOSTS="$DEPLOY_HOST_A $DEPLOY_HOST_B $DEPLOY_HOST_C";
-    - |
-        setconfig() {
-            OLDVAL=$1;
-            NEWVAL=$2;
-            for HOST in ${HOSTS}; do
-                CONTAINER=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "NOT ONLINE";
-                if [ -z "${CONTAINER}" ]; then
-                  echo "Could not find container for ${STACK_NAME}-catalog_catalog!";
-                  exit 1;
-                fi;
-                ssh deploy@$HOST "docker exec ${CONTAINER} sed -i 's/autoConfigure = $OLDVAL/autoConfigure = $NEWVAL/g' local/config/vufind/config.ini";
-            done
-        }
-        catalogwait() {
-            sleep 15;
-            for HOST in ${HOSTS}; do
-                echo "Checking to see if catalog container for ${HOST} is online ($CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA)...";
-                ATTEMPTS=0;
-                while [[ "$ATTEMPTS" -le 20 ]]; do
-                    TARGET_IMAGE=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-catalog_catalog --format '{{ .Image }}' 2>/dev/null") || echo "NOT ONLINE";
-                    if [[ "$TARGET_IMAGE" == "$CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA" ]]; then
-                        echo "$(date +'%m-%d-%Y %T %z') -- Container for host ${HOST} is online with new image!";
-                        EC=0;
-                        break;
-                    fi
-                    echo "Catalog container not online. Waiting...";
-                    EC=1;
-                    sleep 10;
-                    ATTEMPTS=$((ATTEMPTS+1));
-                done
-                if [[ $EC -ne 0 ]]; then
-                    echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): Container never came online with new image. Still running ${TARGET_IMAGE}!"
-                    exit 1;
-                fi
-            done
-        }
-        catalogwait;
-        apk add curl || apt install curl -y;
-        echo "Enabling auto configure temporarily";
-        setconfig "false" "true";
-        echo "Running Vufind upgrade now against ${URL}";
-        curl "${URL}/Upgrade/GetSourceVersion" -k --data-raw "sourceversion=${PREV_VUFIND_VERSION}&skip%5B%5D=config" -L -O;
-        echo "Upgrade complete with exit code $?";
-        echo "Disabling auto configure";
-        setconfig "true" "false";
+    - bash ./cicd/vufind-upgrade
 
-Vufind Populate Environment:
+Populate Vufind Environment:
   extends: .stack_template
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   needs:
     - job: Set Stack Name
       artifacts: true
-    - job: Vufind Upgrade
+    - Vufind Upgrade
   script:
-    # Determine if records are already loaded
-    - CONTAINER_A=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo ""
-    - CONTAINER_B=$(ssh deploy@$DEPLOY_HOST_B "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo ""
-    - CONTAINER_C=$(ssh deploy@$DEPLOY_HOST_C "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo ""
-    - S_CONTAINER_A=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo ""
-    - S_CONTAINER_B=$(ssh deploy@$DEPLOY_HOST_B "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo ""
-    - S_CONTAINER_C=$(ssh deploy@$DEPLOY_HOST_C "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo ""
-    - |
-      if [ -z "${CONTAINER_A}" ] || [ -z "${CONTAINER_B}" ] || [ -z "${CONTAINER_C}" ] ; then
-        echo "Could not find container for ${STACK_NAME}-catalog_catalog on all 3 nodes";
-        exit 1;
-      fi;
-    - |
-      if [ -z "${S_CONTAINER_A}" ] || [ -z "${S_CONTAINER_B}" ] || [ -z "${S_CONTAINER_C}" ] ; then
-        echo "Could not find container for ${STACK_NAME}-solr_cron on all 3 nodes";
-        exit 1;
-      fi;
-    - |
-        STAT_CD=$(ssh deploy@$DEPLOY_HOST_A "docker exec ${CONTAINER_A} curl 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' --write-out %{http_code} --silent --output /dev/null") || echo "-1";
-        if [[ "${STAT_CD}" -ne 200 ]]; then
-            echo "Failed to get number of records from Solr. Curl returned ${STAT_CD}.";
-            exit 1;
-        fi;
-        NUM_RECS=$(ssh deploy@$DEPLOY_HOST_A "docker exec ${CONTAINER_A} curl -s 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' | jq '.response.numFound'") ||  echo "-1";
-        if [[ "${NUM_RECS}" -eq "0" ]]; then
-            # Load some records
-            echo "Running harvest-and-import.sh now";
-            ssh deploy@$DEPLOY_HOST_A "docker exec ${CONTAINER_A} /harvest-and-import.sh -c -l 1 -b -r -s /mnt/shared/oai/devel-batch >/dev/null 2>&1";
-            echo "Import completed with exit code $?";
-            echo "Running HLM harvest-and-import.sh now";
-            ssh deploy@$DEPLOY_HOST_A "docker exec ${CONTAINER_A} /hlm-harvest-and-import.sh -l 1 -c -i -s /mnt/shared/hlm/devel-batch >/dev/null 2>&1";
-            echo "Import completed with exit code $?";
-            # Rebuild alphabetic browse databases
-            echo "Running Alphabetic browse database build";
-            ssh deploy@$DEPLOY_HOST_A "docker exec ${S_CONTAINER_A} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
-            ssh deploy@$DEPLOY_HOST_B "docker exec ${S_CONTAINER_B} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
-            ssh deploy@$DEPLOY_HOST_C "docker exec ${S_CONTAINER_C} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
-            echo "Completed alphabetic browse database build";
-        else
-            echo "${NUM_RECS} loaded records already exist. Doing nothing.";
-        fi;
+    - bash ./cicd/populate-vufind-environment
 
-Verify Health:
+Verify Stack Health:
   extends: .stack_template
   needs:
     - job: Set Stack Name
       artifacts: true
-    - job: Vufind Upgrade
+    - Verify Vufind Image
   script:
-    - HOSTS="$DEPLOY_HOST_A $DEPLOY_HOST_B $DEPLOY_HOST_C";
-    - |
-        checkhealth() {
-            SERVICE=$1;
-            echo "Checking health for ${SERVICE}...";
-            for HOST in ${HOSTS}; do
-                ATTEMPTS=0;
-                while [[ "$ATTEMPTS" -le 15 ]]; do
-                    CONTAINER=$(ssh deploy@$HOST "docker ps -q -f name=${STACK_NAME}-${SERVICE}") || echo "";
-                    if [ -z "${CONTAINER}" ]; then
-                      HEALTH="No Health";
-                    else
-                      HEALTH=$(ssh deploy@$HOST "docker inspect --format '{{json .State.Health.Status }}' \$(docker ps -q -f name=${STACK_NAME}-${SERVICE}) 2>/dev/null || echo \"No Health\"") || echo "No Health";
-                    fi
-                    if [[ "${HEALTH}" == "\"healthy\"" ]]; then
-                        echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} is healthy."
-                        EC=0;
-                        break;
-                    fi
-                    EC=1;
-                    sleep 10;
-                    ATTEMPTS=$((ATTEMPTS+1));
-                done
-                if [[ $EC -ne 0 ]]; then
-                    echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} is not healthy! (actual health: ${HEALTH})";
-                    exit 1;
-                fi
-            done
-        }
-    - checkhealth mariadb_galera;
-    - checkhealth catalog_catalog;
-    # Give solr more time before attempting since it takes longer to start cluster
-    - sleep 10;
-    - checkhealth solr_solr;
+    - bash ./cicd/verify-stack-health
 
 Remove Environment:
   stage: Cleanup
@@ -512,39 +231,7 @@ Remove Environment:
       artifacts: true
     - Deploy Vufind
   script:
-    - >
-      prunevols() {
-        SERVER=$1;
-        VOLS=$(ssh deploy@$SERVER "docker volume ls --filter name=$STACK_NAME --format '{{.Name}}'");
-        if [ ! -z "${VOLS}" ]; then
-          ssh deploy@$SERVER "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm";
-        fi
-        }
-    # Add .aws credentials
-    - cat provision-dns-playbook/variables.yml | envsubst | sponge provision-dns-playbook/variables.yml
-    # Replace STACK_NAME in env/prod/main.tf and create host file in provision-dns-playbook
-    - cat dns-terraform/env/prod/main.tf | envsubst | sponge dns-terraform/env/prod/main.tf
-    # Run playbook
-    - ansible-playbook provision-dns-playbook/decommission.yml
-    # Remove the alphabetic browse databases
-    - |
-      CONTAINER=$(ssh deploy@$DEPLOY_HOST_A "docker ps -q -f name=$STACK_NAME-solr_cron");
-      if [ ! -z "${CONTAINER}" ]; then
-        ssh deploy@$DEPLOY_HOST_A "docker exec ${CONTAINER} rm -rf /mnt/shared/alpha-browse/${STACK_NAME}";
-      fi
-    # Cleanup volumes/networks/images/containers
-    - >
-      ssh deploy@$DEPLOY_HOST_A
-      "docker stack rm $STACK_NAME-solr;
-      docker stack rm $STACK_NAME-mariadb;
-      docker stack rm $STACK_NAME-catalog;
-      docker stack rm $STACK_NAME-monitoring;
-      docker stack rm $STACK_NAME-internal;
-      rm -rf $COMPOSE_PATH;
-      sleep 15;"
-    - prunevols $DEPLOY_HOST_A
-    - prunevols $DEPLOY_HOST_B
-    - prunevols $DEPLOY_HOST_C
+    - ./cicd/remove-environment
 
 ############# Templates ###############
 
@@ -552,7 +239,6 @@ Remove Environment:
   stage: Deploy
   tags:
     - msul-shared
-  extends: .setup_ssh
   retry: 2
   interruptible: true
   variables:
@@ -566,35 +252,7 @@ Remove Environment:
       artifacts: true
     - Deploy Compose Files
   before_script:
-    # New steps to check STACK_NAME
-    - test -n "${STACK_NAME}"
-    # Before script before SSH template
-    - >
-      if [ -z $SERVER ] || [ -z $ENCODED_PRIVATE_KEY ] ; then
-         echo "Missing one or more of the required variables: SERVER, ENCODED_PRIVATE_KEY";
-         echo "SERVER: ${SERVER}";
-         echo "ENCODED_PRIVATE_KEY: ${ENCODED_PRIVATE_KEY:0:3}...";
-         exit 1;
-      fi
-    # Setup SSH access to a server using $ENCODED_PRIVATE_KEY and $SERVER
-    - apk add openssh-client || apt install openssh-client
-    - eval $( ssh-agent -s )
-    - echo "$ENCODED_PRIVATE_KEY" | base64 -d | ssh-add -
-    - install -d -m 700 ~/.ssh/
-    - ( umask 022; touch ~/.ssh/known_hosts )
-    - ssh-keyscan $SERVER >> ~/.ssh/known_hosts
-    - ssh-keyscan $DEPLOY_HOST_B >> ~/.ssh/known_hosts
-    - ssh-keyscan $DEPLOY_HOST_C >> ~/.ssh/known_hosts
-    # Docker login to all servers
-    - ssh deploy@$DEPLOY_HOST_A "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY"
-    - ssh deploy@$DEPLOY_HOST_B "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY"
-    - ssh deploy@$DEPLOY_HOST_C "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY"
-
-Deploy:
-  interruptible: true
+    - apk add --no-cache bash || true
 
 include:
-  - project: 'msu-libraries/public/cicd-templates'
-    ref: main
-    file: 'SSH.gitlab-ci.yml'
   - 'templates/*.gitlab-ci.yml'

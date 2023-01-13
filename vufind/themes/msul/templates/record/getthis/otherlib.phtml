@@ -18,7 +18,7 @@ if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
       # If law library use only material, display law patron form first
       if (Regex::SCHAEFER($loc) && $this->getthis->isOut()) { ?>
           <p><b>Law Library Inter-library Loan:</b> Law Library patrons can request this material through
-              <a href="http://www.law.msu.edu/library/ill.php">the Inter-library Loan Request Form</a>
+              <a href="http://www.law.msu.edu/library/ill.php" target="_blank">the Inter-library Loan Request Form</a>
           </p>
      <?php
       } ?>
@@ -32,7 +32,7 @@ if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
             $this->escapeHtml($title) . "&rft.au=" . $this->escapeHtml($author) . "&rft.pub=" . $this->escapeHtml($pubname) .
             "&rft.isbn=" . $this->escapeHtml($isbn) . "&loc=" .
             $this->escapeHtml($loc) . "&callno=" . $this->escapeHtml($callnum) .
-            "&CAT=1'>Request Copy via ILLiad</a></li>";
+            "&CAT=1' target='_blank'>Request Copy via ILLiad</a></li>";
         ?>
     </ul>
     <?php
@@ -47,7 +47,7 @@ if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
             $this->escapeHtml($title) . "&rft.au=" . $this->escapeHtml($author) . "&rft.pub=" . $this->escapeHtml($pubname) .
             "&rft.isbn=" . $this->escapeHtml($isbn) . "&loc=" . $this->escapeHtml($loc) . "&callno=" .
             $this->escapeHtml($callnum) .
-            "&CAT=1'>Request a SCAN of Copy</a></li>";
+            "&CAT=1' target='_blank'>Request a SCAN of Copy</a></li>";
     } ?>
     </ul>
 
@@ -58,7 +58,7 @@ if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
         $search = $isbn;
         if (empty($search)) $search = $title_full;
         ?>
-            <li><a href="https://ub.relaisd2d.com/?LS=MICHIGANSTATE&PI=MICHIGANSTATE&query=<?= $search ?>">
+            <li><a href="https://ub.relaisd2d.com/?LS=MICHIGANSTATE&PI=MICHIGANSTATE&query=<?= $search ?>" target="_blank">
             Search UBorrow</a></li>
     </ul>
 </div>

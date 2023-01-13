@@ -10,7 +10,7 @@ default_args() {
     ARGS[LIMIT]=
     ARGS[LIMIT_BY_DELETE]=
     ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/folio
-    ARGS[SHARED_DIR]=/mnt/oai_current
+    ARGS[SHARED_DIR]=/mnt/oai
     ARGS[SOLR_URL]="http://solr:8983/solr"
     ARGS[RESET_SOLR]=0
     ARGS[VERBOSE]=0
@@ -41,7 +41,7 @@ runhelp() {
     echo "  -o|--oai-harvest"
     echo "      Run an OAI harvest into VUFIND_HARVEST_DIR. Will attempt"
     echo "      to resume from last harvest state unless -f flag given."
-    echo "      On success, sync a copy of harvest files to SHARED_DIR."
+    echo "      On success, sync copy of harvest files to SHARED_DIR/current/."
     echo "  -f|--full"
     echo "      Forces a reset of VUFIND_HARVEST_DIR, resulting"
     echo "      in a full harvest. Must be used with --oai-harvest."

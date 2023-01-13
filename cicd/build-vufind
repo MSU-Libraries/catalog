@@ -1,0 +1,95 @@
+#!/bin/bash
+
+runhelp() {
+    echo ""
+    echo "Purpose: Build the Vufind image"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - LATEST: Image tag for the latest image to use as cache"
+    echo "  - CURR: Image tag for current image"
+    echo "  - COMPONENT: Component name (context for the build)"
+    echo "  - VUFIND_VERSION: The current version of Vufind"
+    echo "  - Many other build Args: Documented in technical documentation"
+    echo "    https://msu-libraries.github.io/catalog/CICD/#variables"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - If the build fails"
+    echo "  - If the push fails"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+main() {
+    DOCKER_BUILDKIT=1 docker build \
+        --build-arg BUILDKIT_INLINE_CACHE=1 \
+        --build-arg GITHUB_USER_TOKEN="${GITHUB_USER_TOKEN}" \
+        --build-arg VUFIND_VERSION="${VUFIND_VERSION}" \
+        --build-arg SITE_HOSTNAME="${SITE_HOSTNAME}" \
+        --build-arg FOLIO_URL="${FOLIO_URL}" \
+        --build-arg FOLIO_USER="${FOLIO_USER}" \
+        --build-arg FOLIO_PASS="${FOLIO_PASS}" \
+        --build-arg FOLIO_TENANT="${FOLIO_TENANT}" \
+        --build-arg FOLIO_REC_ID="${FOLIO_REC_ID}" \
+        --build-arg FOLIO_CANCEL_ID="${FOLIO_CANCEL_ID}" \
+        --build-arg OAI_URL="${OAI_URL}" \
+        --build-arg EMAIL="${EMAIL}" \
+        --build-arg MAIL_HOST="${MAIL_HOST}" \
+        --build-arg MAIL_PORT="${MAIL_PORT}" \
+        --build-arg MAIL_USERNAME= \
+        --build-arg MAIL_PASSWORD= \
+        --build-arg FEEDBACK_EMAIL="${FEEDBACK_EMAIL}" \
+        --build-arg SOLR_URL=http://solr:8983/solr \
+        --build-arg EDS_USER="${EDS_USER}" \
+        --build-arg EDS_PASS="${EDS_PASS}" \
+        --build-arg EDS_PROFILE="${EDS_PROFILE}" \
+        --build-arg EDS_ORG="${EDS_ORG}" \
+        --build-arg RECAPTCHA_SITE_KEY="${RECAPTCHA_SITE_KEY}" \
+        --build-arg RECAPTCHA_SECRET_KEY="${RECAPTCHA_SECRET_KEY}" \
+        --build-arg SIMPLESAMLPHP_VERSION="${SIMPLESAMLPHP_VERSION}" \
+        --build-arg SIMPLESAMLPHP_SALT="${SIMPLESAMLPHP_SALT}" \
+        --build-arg SIMPLESAMLPHP_ADMIN_PW="${SIMPLESAMLPHP_ADMIN_PW}" \
+        --build-arg FTP_USER="${FTP_USER}" \
+        --build-arg FTP_PASSWORD="${FTP_PASSWORD}" \
+        --build-arg AUTH_FTP_USER="${AUTH_FTP_USER}" \
+        --build-arg AUTH_FTP_PASSWORD="${AUTH_FTP_PASSWORD}" \
+        --build-arg DEPLOY_KEY="${DEPLOY_KEY}" \
+        --tag "${CURR}" \
+        --cache-from "${LATEST}" \
+        vufind/;
+
+    EC=$?;
+    if [[ ${EC} -ne 0 ]]; then
+        echo "Failed to build. Sleeping to add delay before potential retry.";
+        sleep 3;
+        exit 1;
+    fi;
+
+    docker push "${CURR}";
+
+    EC=$?;
+    if [[ ${EC} -ne 0 ]]; then
+        echo "Failed to push. Sleeping to add delay before potential retry.";
+        sleep 3;
+        exit 1;
+    fi;
+
+    if [[ ${CI_DEFAULT_BRANCH} == "${CI_COMMIT_BRANCH}" ]]; then
+        docker tag "${CURR}" "${LATEST}";
+        docker push "${LATEST}";
+    fi
+
+    EC=$?;
+    if [[ ${EC} -ne 0 ]]; then
+        echo "Failed to add latest tag. Sleeping to add delay before potential retry.";
+        sleep 3;
+        exit 1;
+    fi;
+}
+
+# exit script if any command fails
+set -e;
+main;

@@ -1,16 +1,32 @@
 #!/bin/bash
 
-# Map folio harvest directory onto the shared storage (need the added storage capacity)
-mkdir -p /mnt/shared/oai/${STACK_NAME}_harvest_folio/ /mnt/shared/oai/${STACK_NAME}_current/
+# Map harvest directories onto the shared storage
+# FOLIO
+mkdir -p /mnt/shared/oai/${STACK_NAME}/harvest_folio/ /mnt/shared/oai/${STACK_NAME}/current/ /mnt/shared/oai/${STACK_NAME}/archives/
 mv /usr/local/vufind/local/harvest/folio/ /tmp/
-ln -s /mnt/shared/oai/${STACK_NAME}_harvest_folio/ /usr/local/vufind/local/harvest/folio
-ln -s /mnt/shared/oai/${STACK_NAME}_current/ /mnt/oai_current
+ln -s /mnt/shared/oai/${STACK_NAME}/harvest_folio/ /usr/local/vufind/local/harvest/folio
+ln -s /mnt/shared/oai/${STACK_NAME}/ /mnt/oai
+# HLM
+mkdir -p /mnt/shared/hlm/${STACK_NAME}/current/ /mnt/shared/hlm/${STACK_NAME}/archives/
+ln -s /mnt/shared/hlm/${STACK_NAME}/ /mnt/hlm
+# AUTHORITY
+mkdir -p /mnt/shared/authority/${STACK_NAME}/current/ /mnt/shared/authority/${STACK_NAME}/archives/
+ln -s /mnt/shared/authority/${STACK_NAME}/ /mnt/authority
 
 # Save the logs in the logs docker volume
 mkdir -p /mnt/logs/vufind /mnt/logs/harvests
 ln -sf /mnt/logs/vufind /var/log/vufind
 touch /mnt/logs/vufind/vufind.log
 
+# Set custom cron minute offsets for OAI harvesting
+FOLIO_CRON_MINS="0,30"  # catalog-prod
+HARV_CRON_MINS="30"
+if [[ "${STACK_NAME}" == "catalog-beta" ]]; then
+    FOLIO_CRON_MINS="15,45"
+    HARV_CRON_MINS="45"
+fi
+export FOLIO_CRON_MINS
+export HARV_CRON_MINS
 # Replace the $NODE in the crontab entry
 envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
 

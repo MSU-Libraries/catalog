@@ -1,0 +1,53 @@
+#!/bin/bash
+
+runhelp() {
+    echo ""
+    echo "Purpose: Sets the stack name variables for the deployment based"
+    echo "         on the branch name."
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - PROD: true/false if the environment is production"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - STACK_NAME can not be set"
+    echo "  - The artifact file, build.env, does not exist"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+main() {
+    STACK_NAME=
+    SITE_HOSTNAME=
+    MAIL_HOST=host.docker.internal
+    MAIL_PORT=25
+
+    if [[ $PROD == "true" ]]; then
+        STACK_NAME="catalog-prod";
+        SITE_HOSTNAME="catalog-prod.lib.msu.edu";
+    elif [[ $CI_DEFAULT_BRANCH == "${CI_COMMIT_BRANCH}" ]]; then
+        STACK_NAME="catalog-beta";
+        SITE_HOSTNAME="catalog-beta.lib.msu.edu";
+    elif [[ "${CI_COMMIT_BRANCH}" == "devel-"* || "${CI_COMMIT_BRANCH}" == "review-"* ]]; then
+        STACK_NAME="${CI_COMMIT_BRANCH}";
+        SITE_HOSTNAME="${STACK_NAME}.aws.lib.msu.edu";
+        MAIL_HOST=mail
+    fi
+
+    {
+        echo "STACK_NAME=${STACK_NAME}"
+        echo "SITE_HOSTNAME=${SITE_HOSTNAME}"
+        echo "MAIL_HOST=${MAIL_HOST}"
+        echo "MAIL_PORT=${MAIL_PORT}"
+    } > build.env
+
+    test -n "${STACK_NAME}"
+    test -f build.env
+}
+
+# exit script if any command fails
+set -e
+main

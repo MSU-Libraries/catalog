@@ -1,0 +1,39 @@
+#!/bin/bash
+
+source "${CI_PROJECT_DIR}"/cicd/before-script
+
+runhelp() {
+    echo ""
+    echo "Purpose: Creates a DNS entry in AWS for the devel and review environments"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - AWS_KEY: Used for populating the variables.yml file"
+    echo "  - AWS_SECRET: Used for populating the variables.yml file"
+    echo "  - STACK_NAME: Used for populating the main.tf file"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - If the povision playbook fails"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+main() {
+    # Add .aws credentials
+    envsubst <  provision-dns-playbook/variables.yml | sponge provision-dns-playbook/variables.yml
+   
+    # Replace STACK_NAME in env/prod/main.tf and create host file in provision-dns-playbook
+    envsubst < dns-terraform/env/prod/main.tf | sponge dns-terraform/env/prod/main.tf
+
+    # Run playbook
+    ansible-playbook provision-dns-playbook/provision.yml
+
+    # Give time for DNS to propogate
+    sleep 60
+}
+
+beforescript
+main

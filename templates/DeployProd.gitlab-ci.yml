@@ -110,9 +110,9 @@ Prod Vufind Upgrade:
       artifacts: true
     - Deploy Prod Vufind
 
-Verify Prod Health:
+Verify Prod Stack Health:
   stage: Deploy Prod
-  extends: Verify Health
+  extends: Verify Stack Health
   rules:
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
   needs:

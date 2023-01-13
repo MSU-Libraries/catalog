@@ -1,0 +1,29 @@
+#!/bin/bash
+
+source "${CI_PROJECT_DIR}"/cicd/before-script
+
+runhelp() {
+    echo ""
+    echo "Purpose: [Script Purpose]"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - [VAR]: [Possible values and/or description of use]"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - [Any scenarios that will trigger a non-zero exit code]"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+main() {
+    exit 0;
+}
+
+beforescript
+# or if not using beforescript be sure to add this to ensure failed commands
+# fail the script: set -e
+main

@@ -3,6 +3,9 @@
 DEFAULT_BUILD_PATH=/tmp/alpha-browse/build
 DEFAULT_SHARED_PATH=/mnt/shared/alpha-browse
 DEFAULT_MAX_AGE_HOURS=6
+if [[ -n "${STACK_NAME}" ]]; then
+    DEFAULT_SHARED_PATH="${DEFAULT_SHARED_PATH}/${STACK_NAME}"
+fi
 
 # Script help text
 runhelp() {

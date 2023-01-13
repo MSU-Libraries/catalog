@@ -19,6 +19,11 @@ Build Ansible Image:
      COMPONENT: ansible
   extends: .build_template
 
+Build Monitoring Image:
+  variables:
+     COMPONENT: monitoring
+  extends: .build_template
+
 Build Vufind Image:
   stage: Build
   tags:
@@ -39,55 +44,9 @@ Build Vufind Image:
       artifacts: true
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - apk add --no-cache bash
   script:
-    - >
-        DOCKER_BUILDKIT=1 docker build
-        --build-arg BUILDKIT_INLINE_CACHE=1
-        --build-arg GITHUB_USER_TOKEN=$GITHUB_USER_TOKEN
-        --build-arg VUFIND_VERSION=$VUFIND_VERSION
-        --build-arg SITE_HOSTNAME=$SITE_HOSTNAME
-        --build-arg FOLIO_URL=$FOLIO_URL
-        --build-arg FOLIO_USER=$FOLIO_USER
-        --build-arg FOLIO_PASS=$FOLIO_PASS
-        --build-arg FOLIO_TENANT=$FOLIO_TENANT
-        --build-arg FOLIO_REC_ID=$FOLIO_REC_ID
-        --build-arg FOLIO_CANCEL_ID=$FOLIO_CANCEL_ID
-        --build-arg OAI_URL=$OAI_URL
-        --build-arg EMAIL=$EMAIL
-        --build-arg MAIL_HOST=$MAIL_HOST
-        --build-arg MAIL_PORT=$MAIL_PORT
-        --build-arg MAIL_USERNAME=
-        --build-arg MAIL_PASSWORD=
-        --build-arg FEEDBACK_EMAIL=$FEEDBACK_EMAIL
-        --build-arg SOLR_URL=http://solr:8983/solr
-        --build-arg EDS_USER=$EDS_USER
-        --build-arg EDS_PASS=$EDS_PASS
-        --build-arg EDS_PROFILE=$EDS_PROFILE
-        --build-arg EDS_ORG=$EDS_ORG
-        --build-arg RECAPTCHA_SITE_KEY=$RECAPTCHA_SITE_KEY
-        --build-arg RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY
-        --build-arg SIMPLESAMLPHP_VERSION=$SIMPLESAMLPHP_VERSION
-        --build-arg SIMPLESAMLPHP_SALT=$SIMPLESAMLPHP_SALT
-        --build-arg SIMPLESAMLPHP_ADMIN_PW=$SIMPLESAMLPHP_ADMIN_PW
-        --build-arg FTP_USER=$FTP_USER
-        --build-arg FTP_PASSWORD=$FTP_PASSWORD
-        --build-arg AUTH_FTP_USER=$AUTH_FTP_USER
-        --build-arg AUTH_FTP_PASSWORD=$AUTH_FTP_PASSWORD
-        --build-arg DEPLOY_KEY=$DEPLOY_KEY
-        --tag $CURR
-        --cache-from $LATEST
-        vufind/
-    - docker push $CURR
-    - |
-      if [[ $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH ]]; then
-        docker tag $CURR $LATEST
-        docker push $LATEST
-      fi
-
-Build Monitoring Image:
-  variables:
-     COMPONENT: monitoring
-  extends: .build_template
+    - bash ./cicd/build-vufind
 
 ############# Templates ###############
 
@@ -105,20 +64,9 @@ Build Monitoring Image:
     CURR: $CI_REGISTRY_IMAGE/$COMPONENT:$CI_COMMIT_SHORT_SHA
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - apk add --no-cache bash
   needs:
     - job: Set Stack Name
       artifacts: true
   script:
-    - docker pull $LATEST || true
-    - >
-        docker build
-        --tag $CURR
-        --build-arg VUFIND_VERSION=$VUFIND_VERSION
-        --cache-from $LATEST
-        $COMPONENT/
-    - docker push $CURR
-    - |
-      if [[ $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH ]]; then
-        docker tag $CURR $LATEST
-        docker push $LATEST
-      fi
+    - bash ./cicd/build-general

@@ -8,7 +8,7 @@ USER root
 # Perform updates
 RUN \
     apt update && \
-    apt install wget vim rsyslog cron moreutils gettext-base jq -y && \
+    apt install wget vim-nox htop rsyslog cron moreutils gettext-base jq -y && \
     rm -rf /var/lib/apt/lists/*
 
 # Setup Timezone

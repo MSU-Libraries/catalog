@@ -8,14 +8,14 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     * Takes a Marc field (ex: 950) and a list of sub fields (ex: ['a','b'])
     * and returns the values inside those fields in an array
     * (ex: ['val 1', 'val 2'])
-    * 
+    *
     * args:
     *    string field: Marc field to search within
-    *    array subfield: sub-fields to return
+    *    array subfield: sub-fields to return or empty for all
     * return:
     *   array: the values within the subfields under the field
     */
-    public function getMarcField(string $field, array $subfield)
+    public function getMarcField(string $field, ?array $subfield = null)
     {
         $vals = [];
         $marc = $this->getMarcReader();
@@ -30,9 +30,48 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+    * Takes a Marc field that notes are stored in (ex: 950) and a list of
+    * sub fields (ex: ['a','b']) optionally
+    * and concatonates the subfields together and returns the fields back
+    * as an array
+    * (ex: ['subA subB subC', 'field2SubA field2SubB'])
+    *
+    * args:
+    *    string field: Marc field to search within
+    *    array subfield: sub-fields to return or empty for all
+    * return:
+    *   array: the values within the subfields under the field
+    */
+    public function getNotesMarcFields(string $field, ?array $subfield = null)
+    {
+        $vals = [];
+        $marc = $this->getMarcReader();
+        $marc_fields = $marc->getFields($field, $subfield);
+        foreach ($marc_fields as $marc_data) {
+            $exclude = false;
+            $val = "";
+            $subfields = $marc_data['subfields'];
+	        foreach ($subfields as $subfield) {
+                # exclude field from display if value of subfield 5 is not MiEM
+                if ($subfield['code'] == '5' && $subfield['data'] != 'MiEM' && $subfield['data'] != 'MiEMMF') {
+                    $exclude = true;
+                    break;
+                }
+                # exclude subfield 5 from display
+                if ($subfield['code'] == '5') continue;
+                $val .= $subfield['data'] . " ";
+            }
+            if (!$exclude) {
+                $vals[] = trim($val);
+            }
+        }
+        return $vals;
+    }
+
+    /**
     * Takes a Solr field and returns the contents of the field (either
     * a string or array)
-    * 
+    *
     * args:
     *    string field: Name of the Solr field to get
     * return:
@@ -47,10 +86,12 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         return $val;
     }
 
-    public function getNotes() 
+    public function getNotes()
     {
-	    return array_merge($this->getMarcField('590', ['a','b','c','d','e']), 
-		    $this->getMarcField('561', ['a','b','c','d','e']));
+	    return array_merge($this->getNotesMarcFields('541'),
+		    $this->getNotesMarcFields('561'),
+            $this->getNotesMarcFields('563'),
+            $this->getNotesMarcFields('590'));
     }
 
     public function getPublisher()

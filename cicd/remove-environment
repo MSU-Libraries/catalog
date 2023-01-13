@@ -1,0 +1,73 @@
+#!/bin/bash
+
+source "${CI_PROJECT_DIR}"/cicd/before-script
+
+runhelp() {
+    echo ""
+    echo "Purpose: Remove the environment from the nodes and cleanup the data left behind"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - AWS_KEY: Used for populating the variables.yml file"
+    echo "  - AWS_SECRET: Used for populating the variables.yml file"
+    echo "  - STACK_NAME: Used for populating the main.tf file"
+    echo "  - DEPLOY_HOST_A: The first node in the cluster"
+    echo "  - DEPLOY_HOST_B: The second node in the cluster"
+    echo "  - DEPLOY_HOST_C: The third node in the cluster"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - The branch does not exist in GitLab anymore"
+    echo "  - Required AWS credentials not provided to remove DNS entry"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+prunevols() {
+    HOST=$1;
+    VOLS=$(ssh deploy@"${HOST}" "docker volume ls --filter name=$STACK_NAME --format '{{.Name}}'");
+    if [ -n "${VOLS}" ]; then
+        ssh deploy@"${HOST}" "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm";
+    fi
+}
+
+main() {
+    # Add .aws credentials
+    envsubst < provision-dns-playbook/variables.yml | sponge provision-dns-playbook/variables.yml;
+
+    # Replace STACK_NAME in env/prod/main.tf and create host file in provision-dns-playbook
+    envsubst < dns-terraform/env/prod/main.tf | sponge dns-terraform/env/prod/main.tf;
+
+    # Run playbook
+    ansible-playbook provision-dns-playbook/decommission.yml;
+
+    # Remove the alphabetic browse databases
+    CONTAINER=$(ssh deploy@"${DEPLOY_HOST_A}" "docker ps -q -f name=${STACK_NAME}-solr_cron");
+    if [ -n "${CONTAINER}" ]; then
+        ssh deploy@"${DEPLOY_HOST_A}" "docker exec ${CONTAINER} rm -rf /mnt/shared/alpha-browse/${STACK_NAME}";
+    fi
+
+    # Cleanup volumes/networks/images/containers
+    ssh deploy@"${DEPLOY_HOST_A}" \
+    "docker stack rm ${STACK_NAME}-solr;
+    docker stack rm ${STACK_NAME}-mariadb;
+    docker stack rm ${STACK_NAME}-catalog;
+    docker stack rm ${STACK_NAME}-monitoring;
+    docker stack rm ${STACK_NAME}-internal;
+    rm -rf $COMPOSE_PATH;";
+
+    sleep 15
+
+    prunevols "${DEPLOY_HOST_A}";
+    prunevols "${DEPLOY_HOST_B}";
+    prunevols "${DEPLOY_HOST_C}";
+}
+
+beforescript
+if ! main; then
+    echo "Failed to build ${COMPONENT}. Sleeping to add delay before potential retry.";
+    sleep 3;
+    exit 1;
+fi;
