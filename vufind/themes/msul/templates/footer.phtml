@@ -26,8 +26,8 @@
         <h2><?=$this->transEsc('Need Help?')?></h2>
         <ul>
           <li><a href="<?=$this->url('help-home')?>?topic=search&amp;_=<?=time() ?>" data-lightbox class="help-link"><?=$this->transEsc('Search Tips')?></a></li>
-          <li><a href="<?=$this->url('content-page', ['page' => 'asklibrary']) ?>"><?=$this->transEsc('Ask a Librarian')?></a></li>
-          <li><a href="<?=$this->url('content-page', ['page' => 'faq']) ?>"><?=$this->transEsc('FAQs')?></a></li>
+          <li><a href="https://lib.msu.edu/contact/askalib/">Ask a Librarian</a></li>
+<!--         <li><a href="<?=$this->url('content-page', ['page' => 'faq']) ?>"><?=$this->transEsc('FAQs')?></a></li> -->
         </ul>
       <?=$this->slot('footer-right')->end(); ?>
     </div>
