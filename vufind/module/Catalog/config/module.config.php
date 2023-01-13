@@ -73,9 +73,11 @@ return array (
       'ils_driver' => [
         'factories' => [
           'Catalog\\ILS\\Driver\\Folio' => 'VuFind\\ILS\\Driver\\FolioFactory',
+          'Catalog\\ILS\\Driver\\MultiBackend' => 'VuFind\\ILS\\Driver\\MultiBackendFactory',
         ],
         'aliases' => [
           'folio' => 'Catalog\\ILS\\Driver\\Folio',
+          'multibackend' => 'Catalog\\ILS\\Driver\\MultiBackend',
         ],
       ],
       'command' => [

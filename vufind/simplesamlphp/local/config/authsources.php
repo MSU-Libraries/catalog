@@ -7,6 +7,8 @@ elseif (getenv('STACK_NAME') == 'catalog-beta')
     $idpEntityId = 'http://www.okta.com/exko9ngr82UjBdFPU357';
 else
     $idpEntityId = 'http://www.okta.com/exk1ed76cimmz56WW0h8';
+// Uncomment below for samling override (TESTING ON DEVEL INSTANCES ONLY)
+#$idpEntityId = 'https://fujifish.github.io/samling/samling.html';
 
 $config = [
     /*
