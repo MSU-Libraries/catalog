@@ -57,6 +57,7 @@ Bootstrap Prod Stacks:
       artifacts: true
     - Deploy Prod Compose Files
     - Deploy Prod Internal Network
+    - Perform Prod Database Backup
 
 Deploy Prod Solr:
   stage: Deploy Prod
@@ -67,6 +68,7 @@ Deploy Prod Solr:
     - job: Set Prod Stack Name
       artifacts: true
     - Bootstrap Prod Stacks
+    - Perform Prod Database Backup
 
 Deploy Prod DB:
   stage: Deploy Prod
@@ -78,6 +80,7 @@ Deploy Prod DB:
       artifacts: true
     - Bootstrap Prod Stacks
     - Initialize Prod Database Logs
+    - Perform Prod Database Backup
 
 Deploy Prod Vufind:
   stage: Deploy Prod
@@ -89,6 +92,7 @@ Deploy Prod Vufind:
       artifacts: true
     - Deploy Prod DB
     - Deploy Prod Solr
+    - Perform Prod Database Backup
 
 Deploy Prod Monitoring:
   stage: Deploy Prod

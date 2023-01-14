@@ -24,6 +24,7 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
+    echo "Building image"
     DOCKER_BUILDKIT=1 docker build \
         --build-arg BUILDKIT_INLINE_CACHE=1 \
         --build-arg GITHUB_USER_TOKEN="${GITHUB_USER_TOKEN}" \
@@ -68,6 +69,7 @@ main() {
         exit 1;
     fi;
 
+    echo "Pushing image"
     docker push "${CURR}";
 
     EC=$?;
@@ -78,6 +80,7 @@ main() {
     fi;
 
     if [[ ${CI_DEFAULT_BRANCH} == "${CI_COMMIT_BRANCH}" ]]; then
+        echo "Pushing new image with :latest tag"
         docker tag "${CURR}" "${LATEST}";
         docker push "${LATEST}";
     fi

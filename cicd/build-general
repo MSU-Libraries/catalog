@@ -22,10 +22,10 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
-    # Pull to use as cache
+    echo "Pulling image to use as cache"
     docker pull "${LATEST}" || true;
 
-    # Build
+    echo "Building image"
     docker build \
     --tag "${CURR}" \
     --build-arg VUFIND_VERSION="${VUFIND_VERSION}" \
@@ -39,7 +39,7 @@ main() {
         exit 1;
     fi;
 
-    # Push the current image
+    echo "Pushing image"
     docker push "${CURR}";
 
     EC=$?;
@@ -49,8 +49,8 @@ main() {
         exit 1;
     fi;
 
-    # Tag and push as latest image if this is the default branch
     if [[ ${CI_DEFAULT_BRANCH} == "${CI_COMMIT_BRANCH}" ]]; then
+        echo "Pushing new image with :latest tag"
         docker tag "${CURR}" "${LATEST}";
         docker push "${LATEST}";
     fi;
