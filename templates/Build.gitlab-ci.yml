@@ -37,7 +37,7 @@ Build Vufind Image:
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   variables:
-    LATEST: $CI_REGISTRY_IMAGE/vufind:current
+    LATEST: $CI_REGISTRY_IMAGE/vufind:latest
     CURR: $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA
   needs:
     - job: Set Stack Name
@@ -60,7 +60,7 @@ Build Vufind Image:
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   variables:
-    LATEST: $CI_REGISTRY_IMAGE/$COMPONENT:current
+    LATEST: $CI_REGISTRY_IMAGE/$COMPONENT:latest
     CURR: $CI_REGISTRY_IMAGE/$COMPONENT:$CI_COMMIT_SHORT_SHA
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
