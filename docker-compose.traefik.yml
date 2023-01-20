@@ -8,6 +8,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik:/etc/traefik
       - logs:/mnt/logs
+      - ${PWD}/provider.yml:/etc/traefik_providers/provider.yml
     networks:
       - public
     ports:
@@ -19,35 +20,11 @@ services:
         protocol: tcp
     environment:
       # XXX: The environment will be replaced by traefik-env.yml during deploy
-    command: "sh -c 'GO=\"{{ index .Labels \"com.docker.stack.namespace\" | trimSuffix \"-catalog\" }}\";
-      touch /mnt/logs/traefik.log; tail -f /mnt/logs/traefik.log &
-      exec traefik
-        --providers.docker
-         --providers.docker.swarmMode=true
-         --providers.docker.exposedByDefault=false
-         --providers.docker.network=public
-         --providers.docker.defaultRule=Host\\(\\`$GO.aws.lib.msu.edu\\`\\)
-         --entrypoints.msul-http-ent.address=:80
-         --entrypoints.msul-https-ent.address=:443
-         --log
-         --log.level=ERROR
-         --log.filepath=/mnt/logs/traefik.log
-         --accesslog
-         --accesslog.filepath=/mnt/logs/access.log
-         --api.dashboard=true
-         --entrypoints.health-ent.address=:8081
-         --ping
-         --ping.entrypoint=health-ent
-         --global.checknewversion=false
-         --global.sendanonymoususage=false
-         --certificatesresolvers.msul-letsencrypt.acme.email=LIB.DL.DDaS@msu.edu
-         --certificatesresolvers.msul-letsencrypt.acme.storage=/etc/traefik/acme.json
-         --certificatesresolvers.msul-letsencrypt.acme.httpchallenge=true
-         --certificatesresolvers.msul-letsencrypt.acme.httpchallenge.entrypoint=msul-http-ent
-         --certificatesresolvers.msul-letsencrypt-dns.acme.email=LIB.DL.DDaS@msu.edu
-         --certificatesresolvers.msul-letsencrypt-dns.acme.storage=/etc/traefik/acme-dns.json
-         --certificatesresolvers.msul-letsencrypt-dns.acme.dnschallenge=true
-         --certificatesresolvers.msul-letsencrypt-dns.acme.dnschallenge.provider=route53
+    # XXX: Error when it tries to parse the defaultRules:
+    # executing \"\" at <.Labels>: can't evaluate field Labels in type bool
+    command: "sh -c '
+      touch /mnt/logs/traefik.log; touch /etc/traefik_providers; tail -f /mnt/logs/traefik.log &
+      exec traefik --providers.file.directory=/etc/traefik_providers
       '"
     healthcheck:
       test: >

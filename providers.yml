@@ -1,0 +1,45 @@
+providers:
+  docker:
+    swarmMode: true
+    exposedByDefault: false
+    network: public
+    defaultRule: Host(`{{ index .Labels "com.docker.stack.namespace" | trimSuffix "-catalog" }}.aws.lib.msu.edu`)'
+
+entrypoints:
+  msul-http-ent:
+    address: ":80"
+  msul-https-ent:
+    address: ":443"
+  health-ent:
+    address: ":8081"
+         
+certificatesresolvers:
+  msul-letsencrypt:
+    acme:
+      email: "LIB.DL.DDaS@msu.edu"
+      storage: "/etc/traefik/acme.json"
+      httpchallenge: true
+        entrypoint: msul-http-ent
+  msul-letsencrypt-dns:
+    acme:
+      email: "LIB.DL.DDaS@msu.edu"
+      storage: "/etc/traefik/acme-dns.json"
+      dnschallenge: true
+        provider: route53
+
+log:
+  level: DEBUG
+  filepath: "/mnt/logs/traefik.log"
+
+accesslog:
+  filepath: "/mnt/logs/access.log"
+
+api:
+  dashboard: true
+
+ping:
+  entrypoint: health-ent
+
+global:
+  checknewversion: false
+  sendanonymoususage: false
