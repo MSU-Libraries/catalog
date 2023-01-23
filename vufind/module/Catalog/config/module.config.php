@@ -60,6 +60,14 @@ return array (
           ],
         ],
       ],
+      'recordtab' => [
+        'factories' => [
+          'Catalog\\RecordTab\\HoldingsILS' => 'VuFind\\RecordTab\\HoldingsILSFactory',
+        ],
+        'aliases' => [
+          'VuFind\\RecordTab\\HoldingsILS' => 'Catalog\\RecordTab\\HoldingsILS',
+        ],
+      ],
       'auth' => [
         'factories' => [
           'Catalog\\Auth\\SAML' => 'Catalog\\Auth\\SAMLFactory',
