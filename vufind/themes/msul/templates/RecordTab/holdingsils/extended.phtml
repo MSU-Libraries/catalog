@@ -6,14 +6,16 @@
 <tr vocab="http://schema.org/" typeof="Offer">
   <td colspan="2" class="holding-<?=$holding['availability'] ? "available" : "unavailable" ?>">
     <div class="holding-details">
-      <span class="holding-field copy-number">
-        <?=$this->transEsc("Copy")?> <?=$this->escapeHtml($holding['number'])?>
-      </span>
       <span class="holding-field enumchron">
         <?php if ($holding['enumchron'] ?? false): ?>
           (<?=$this->escapeHtml($holding['enumchron'])?>)
         <?php endif; ?>         
       </span>
+      <?php if (($duplicate_volume || empty($holding['enumchron'])) && $holding['number'] > 1): ?>
+          <span class="holding-field copy-number">
+            <?=$this->escapeHtml($holding['number'])?>
+          </span>
+      <?php endif; ?>
       <?php if ($holding['barcode'] ?? false): ?>
         <span class="holding-field barcode">
           <?=$this->escapeHtml($holding['barcode'])?>

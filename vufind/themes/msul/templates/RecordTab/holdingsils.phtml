@@ -83,11 +83,13 @@
 <?php
   $truncateSettings = [
     'rows' => $this->config()->getHoldingsItemLimit(),
+    'btn-class' => 'btn-primary'
   ];
 ?>
 <table class="truncate-field" data-truncate="<?=$this->escapeHtmlAttr(json_encode($truncateSettings))?>">
   <caption class="sr-only"><?=$this->transEsc('holdings_details_from', ['%%location%%' => $this->transEsc($holding['location'])]) ?></caption>
-  <?php $callNos = $this->tab->getUniqueCallNumbers($holding['items'], true); if (!empty($callNos)): ?>
+  <?php $holdingsSummary = $this->tab->getHoldingsSummary($holding['items']);
+        $callNos = $this->tab->getUniqueCallNumbers($holding['items'], true); if (!empty($callNos)): ?>
   <tr>
     <th><?=$this->transEsc("Call Number")?>: </th>
     <td width="50%">
@@ -97,7 +99,7 @@
         <?php else: ?>
           <?=$this->escapeHtml($callNo['display'])?>
         <?php endif; ?>
-        <br />
+        &nbsp;&nbsp;<?= $holdingsSummary ?><br/>
       <?php endforeach; ?>
     </td>
   </tr>
@@ -113,19 +115,32 @@
       </td>
     </tr>
   <?php endforeach; ?>
+  <!-- Sort the items by the volume -->
+  <?php
+    uasort($holding['items'], function($item1, $item2) {
+        return $item1['enumchron'] <=> $item2['enumchron'];
+    });
+    $duplicate_volume = false;
+    $last_volume = '';
+  ?>
   <?php foreach ($holding['items'] as $row): ?>
     <?php
+        if (!empty($row['enumchron']) && $row['enumchron'] == $last_volume){
+            $duplicate_volume = true;
+        }
         try {
             echo $this->context($this)->renderInContext(
                 'RecordTab/holdingsils/' . $this->tab->getTemplate() . '.phtml',
-                ['holding' => $row]
+                ['holding' => $row, 'duplicate_volume' => $duplicate_volume]
             );
         } catch (Exception $e) {
             echo $this->context($this)->renderInContext(
                 'RecordTab/holdingsils/standard.phtml',
-                ['holding' => $row]
+                ['holding' => $row, 'duplicate_volume' => $duplicate_volume]
             );
         }
+        $last_volume = $row['enumchron'];
+        $duplicate_volume = false;
     ?>
   <?php endforeach; ?>
   <?php if (!empty($holding['purchase_history'])): ?>
