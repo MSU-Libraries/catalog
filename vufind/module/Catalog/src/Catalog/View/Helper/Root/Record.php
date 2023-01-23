@@ -16,6 +16,9 @@ class Record extends \VuFind\View\Helper\Root\Record
     {
         $details = parent::getLinkDetails($openUrlActive);
 
+        ?><pre>
+        <?= var_dump($details) ?>
+        </pre><?php
         return $this->deduplicateLinks($details);
     }
 
