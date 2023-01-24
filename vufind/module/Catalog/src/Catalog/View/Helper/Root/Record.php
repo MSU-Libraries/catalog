@@ -1,107 +1,26 @@
 <?php
-
 namespace Catalog\View\Helper\Root;
+
+use VuFind\Config\YamlReader;
 
 class Record extends \VuFind\View\Helper\Root\Record
 {
     /**
-     * Added labels to links:
+     * Link labels loaded from 'labels' key in accesslinks.yaml config. Each entry:
      *   label: The string to add to the link desc
      *   desc : Regex must match against the 'desc' field for label to match; or null to ignore
      *   url  : Regex must match against the 'url' field for label to match; or null to ignore
      */
-    private $linkLabels = array(
-        [ 'label' => 'EBSCO',
-            'desc' => null,
-            'url' => '#https://search\\.ebscohost\\.com/#' ],
-        [ 'label' => 'Alexander Street',
-            'desc' => null,
-            'url' => '#https://www\\.aspresolver\\.com/#' ],
-        [ 'label' => 'Ebook Central @ Proquest',
-            'desc' => null,
-            'url' => '#https://ebookcentral\\.proquest\\.com/lib/michstate-ebooks#' ],
-        [ 'label' => 'Hein Online',
-            'desc' => null,
-            'url' => '#https://heinonline\\.org/#' ],
-        [ 'label' => 'Springer Link',
-            'desc' => null,
-            'url' => '#https://link\\.springer\\.com/#' ],
-        [ 'label' => 'University of North Texas Ditigal Library',
-            'desc' => null,
-            'url' => '#https://digital\\.library\\.unt\\.edu/#' ],
-        [ 'label' => 'National Center for Biotechnology Information @ National Library of Medicine',
-            'desc' => null,
-            'url' => '#https://www\\.ncbi\\.nlm\\.nih\\.gov/#' ],
-        [ 'label' => 'Digital Object Identifier Permalink',
-            'desc' => null,
-            'url' => '#https://(dx\.)?doi\\.org/#' ],
-        [ 'label' => 'FRASER @ Federal Reserve Bank of St. Louis',
-            'desc' => null,
-            'url' => '#https://fraser\\.stlouisfed\\.org/#' ],
-        [ 'label' => 'ScienceDirect',
-            'desc' => null,
-            'url' => '#https://www\\.sciencedirect\\.com/#' ],
-        [ 'label' => 'Brill',
-            'desc' => null,
-            'url' => '#https://brill\\.com/#' ],
-        [ 'label' => 'Firenze University Press',
-            'desc' => null,
-            'url' => '#https://www\\.fupress\\.com/#' ],
-        [ 'label' => 'Handle.Net Permalink',
-            'desc' => null,
-            'url' => '#https://hdl\\.handle\\.net/#' ],
-        [ 'label' => 'Wiley Online Library',
-            'desc' => null,
-            'url' => '#https://onlinelibrary\\.wiley\\.com/#' ],
-        [ 'label' => 'University of California Press E-Books Collection',
-            'desc' => null,
-            'url' => '#https://publishing\\.cdlib\\.org/ucpressebooks/#' ],
-        [ 'label' => 'Open Access Publishing in European Networks',
-            'desc' => null,
-            'url' => '#https://library\\.oapen\\.org/#' ],
-        [ 'label' => 'Society for Industrial and Applied Mathematics',
-            'desc' => null,
-            'url' => '#https://epubs\\.siam\\.org/#' ],
-        [ 'label' => 'Taylor & Francis eBooks',
-            'desc' => null,
-            'url' => '#https://www\\.taylorfrancis\\.com/#' ],
-        [ 'label' => 'IEEE Xplore',
-            'desc' => null,
-            'url' => '#https://ieeexplore\\.ieee\\.org/#' ],
-        [ 'label' => 'JSTOR',
-            'desc' => null,
-            'url' => '#https://www\\.jstor\\.org/#' ],
-        [ 'label' => 'Frontiers',
-            'desc' => null,
-            'url' => '#https://journal\\.frontiersin\\.org/#' ],
-        [ 'label' => 'International Monetary Fund eLibrary',
-            'desc' => null,
-            'url' => '#https://www\\.elibrary\\.imf\\.org/#' ],
-        [ 'label' => 'Adam Matthew Digital',
-            'desc' => null,
-            'url' => '#http://([a-z0-9.-]*)?amdigital\\.co\\.uk/#' ],
-        [ 'label' => 'World Bank eLibrary',
-            'desc' => null,
-            'url' => '#https://elibrary\\.worldbank\\.org/#' ],
-        [ 'label' => 'ClinicalKey',
-            'desc' => null,
-            'url' => '#https://www\\.clinicalkey\\.com/#' ],
-        [ 'label' => 'American Chemical Society Publications',
-            'desc' => null,
-            'url' => '#https://pubs\\.acs\\.org/#' ],
-        [ 'label' => 'R2 Digital Library',
-            'desc' => null,
-            'url' => '#https://www\\.r2library\\.com/#' ],
-        [ 'label' => 'Open Book Publishers',
-            'desc' => null,
-            'url' => '#https://www\\.openbookpublishers\\.com/#' ],
-        [ 'label' => 'Open Textbook Library @ University of Minnesota',
-            'desc' => null,
-            'url' => '#https://open.umn.edu/opentextbooks/#' ],
-        [ 'label' => 'Directory of Open Access Books',
-            'desc' => null,
-            'url' => '#https://directory\\.doabooks\\.org/#' ],
-    );
+    private $linkLabels = array();
+
+    function __construct($config = null) {
+        parent::__construct($config);
+        $yamlReader = new YamlReader();
+        $this->accessLinksConfig = $yamlReader->get("accesslinks.yaml");
+        if (array_key_exists('labels', $this->accessLinksConfig)) {
+            $this->linkLabels = $this->accessLinksConfig['labels'];
+        }
+    }
 
     /**
      * Given a link array, update the 'desc' to add an idenitfer
