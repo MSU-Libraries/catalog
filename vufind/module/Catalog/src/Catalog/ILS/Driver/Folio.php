@@ -128,7 +128,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     'id' => $bibId,
                     'item_id' => $item->id,
                     'holding_id' => $holding->id,
-                    'number' => count($items) + 1,
+                    'number' => 0, # will be set afterwards
                     'enumchron' => $enum,
                     'barcode' => $item->barcode ?? '',
                     'status' => $item->status->name,
@@ -144,12 +144,29 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     'reserve' => 'TODO',
                     'addLink' => true                ];
             }
+
         }
 
-        // Reorder so that it is reverse alphabetical order (MSU will be first instead of LOM)
-        // Can't do at query time because getLocationData is done as a separate call later
-        $locs = array_column($items, 'location');
-        array_multisort($locs, SORT_DESC, $items);
+        # Sort by enumchron (volume) and set the number (copy) field
+        uasort($items, function($item1, $item2) {
+            return $item2['location'] <=> $item1['location'] ?: # reverse sort
+                   $item1['enumchron'] <=> $item2['enumchron'] ?:
+                   $item1['id'] <=> $item2['id'];
+        });
+        $prev_enumchron = 'INVALID';
+        $prev_location = 'INVALID';
+        $number = 1;
+        foreach ($items as &$item) {
+            if ($item['enumchron'] == $prev_enumchron && $item['location'] == $prev_location){
+                $number += 1;
+            } else {
+                $number = 1;
+            }
+            $item['number'] = $number;
+            $prev_enumchron = $item['enumchron'];
+            $prev_location = $item['location'];
+        }
+
 
         return $items;
     }
@@ -213,4 +230,21 @@ class Folio extends \VuFind\ILS\Driver\Folio
         return $retVal;
     }
 
+    /**
+     * Check item location against list of configured locations
+     * where holds should be offered
+     *
+     * @param string $locationName locationName from getHolding
+     *
+     * @return bool
+     */
+    protected function isHoldable($locationName)
+    {
+        foreach((array)($this->config['Holds']['excludeHoldLocations'] ?? []) as $exclude) {
+            if (strpos($locationName, $exclude) !== false) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
