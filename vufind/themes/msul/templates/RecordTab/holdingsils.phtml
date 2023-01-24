@@ -114,13 +114,7 @@
       </td>
     </tr>
   <?php endforeach; ?>
-  <!-- Sort the items by the volume -->
   <?php
-    uasort($holding['items'], function($item1, $item2) {
-        return $item1['enumchron'] <=> $item2['enumchron'];
-    });
-    $duplicate_volume = false;
-    $last_volume = '';
   ?>
   <?php foreach ($holding['items'] as $row): ?>
     <?php
@@ -130,12 +124,12 @@
         try {
             echo $this->context($this)->renderInContext(
                 'RecordTab/holdingsils/' . $this->tab->getTemplate() . '.phtml',
-                ['holding' => $row, 'duplicate_volume' => $duplicate_volume]
+                ['holding' => $row]
             );
         } catch (Exception $e) {
             echo $this->context($this)->renderInContext(
                 'RecordTab/holdingsils/standard.phtml',
-                ['holding' => $row, 'duplicate_volume' => $duplicate_volume]
+                ['holding' => $row]
             );
         }
         $last_volume = $row['enumchron'];
