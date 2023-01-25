@@ -118,9 +118,6 @@
   ?>
   <?php foreach ($holding['items'] as $row): ?>
     <?php
-        if (!empty($row['enumchron']) && $row['enumchron'] == $last_volume){
-            $duplicate_volume = true;
-        }
         try {
             echo $this->context($this)->renderInContext(
                 'RecordTab/holdingsils/' . $this->tab->getTemplate() . '.phtml',
@@ -132,8 +129,6 @@
                 ['holding' => $row]
             );
         }
-        $last_volume = $row['enumchron'];
-        $duplicate_volume = false;
     ?>
   <?php endforeach; ?>
   <?php if (!empty($holding['purchase_history'])): ?>
