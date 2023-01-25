@@ -167,6 +167,7 @@ RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-def
 COPY local/ /usr/local/vufind/local
 COPY themes/msul /usr/local/vufind/themes/msul
 COPY module/Catalog /usr/local/vufind/module/Catalog
+COPY robots.txt /usr/local/vufind/public/robots.txt
 COPY scripts /usr/local/bin
 COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
@@ -178,6 +179,7 @@ COPY backup.sh /backup.sh
 COPY restore.sh /restore.sh
 COPY msmtp/aliases /etc/aliases
 COPY msmtp/msmtprc /etc/msmtprc
+
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
