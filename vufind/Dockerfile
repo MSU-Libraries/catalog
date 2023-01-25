@@ -180,7 +180,6 @@ COPY restore.sh /restore.sh
 COPY msmtp/aliases /etc/aliases
 COPY msmtp/msmtprc /etc/msmtprc
 
-
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
 COPY cachecron.d/ /etc/cachecron.d/
