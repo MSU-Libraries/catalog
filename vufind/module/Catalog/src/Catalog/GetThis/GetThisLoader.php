@@ -128,6 +128,46 @@ class GetThisLoader {
         return Regex::LIB_USE_ONLY($stat);
     }
 
+    public function isAllReserve() {
+        $count_reserve = 0;
+        foreach ($this->items as $item) {
+            $loc = $this->getLocation($item['item_id']);
+            if (Regex::LIB_OF_MICH($loc)) {
+                continue;
+            }
+
+            if (Regex::RESERV($loc)) {
+                $count_reserve += 1;
+            }
+        }
+        if ($count_reserve == count($this->items)) {
+            return false;
+        }
+        else return true;
+    }
+
+    /* Check if all items are on either: on reserve, non-circulating, or checked out
+     *
+     */
+    public function isAllReserveNonCircOut() {
+        $count_out = 0;
+
+        foreach ($this->items as $item) {
+            $loc = $this->getLocation($item['item_id']);
+            if (Regex::LIB_OF_MICH($loc)) {
+                continue;
+            }
+
+            if (Regex::RESERV($loc) || $this->isOut($item['item_id']) || $this->isLibUseOnly($item['item_id'])) {
+                $count_out += 1;
+            }
+        }
+        if ($count_out == count($this->items)) {
+            return true;
+        }
+        else return false;
+    }
+
     public function showInProcess($item_id=null) {
         //$stat = $this->getStatus($item_id);
         //return Regex::IN_PROCESS($stat);
@@ -302,6 +342,11 @@ class GetThisLoader {
         $loc = $this->getLocation($item_id);
         $desc = $this->getDescription();
 
+        # If all the items are on reserve, return false
+        if (!$this->isAllReserve()) {
+            return false;
+        }
+
         if ( (Regex::ART($loc) && !Regex::PERM($loc) && !$this->isLibUseOnly()) ||
              (Regex::BUSINESS($loc) && !Regex::RESERV($loc)) ||
              (Regex::MAP($loc) && Regex::CIRCULATING($loc) && Regex::AVAILABLE($stat)) ||
@@ -321,6 +366,11 @@ class GetThisLoader {
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
         $desc = $this->getDescription();
+
+        # If all the items are on reserve, return false
+        if (!$this->isAllReserve()) {
+            return false;
+        }
 
         if ( (Regex::ART($loc) && !Regex::PERM($loc) && !$this->isLibUseOnly()) ||
              (Regex::BROWSING($loc) && Regex::AVAILABLE($stat)) ||
@@ -357,35 +407,11 @@ class GetThisLoader {
     }
 
     public function showOtherLib($item_id=null) {
-        $stat = $this->getStatus($item_id);
-        $loc = $this->getLocation($item_id);
-        $desc = $this->getDescription();
-
-        if ($this->showInProcess($item_id)) {
-            return false;
-        }
-        if ($this->isOut($item_id) && !Regex::MAKERSPACE($loc)) {
-            return true;
-        }
-        if (!$this->isOut($item_id) && (
-                (Regex::ART($loc) && Regex::PERM($loc)) ||
-                Regex::LIB_OF_MICH($loc) ||
-                Regex::REFERENCE($loc) ||
-                Regex::DIGITAL_MEDIA($loc) ||
-                Regex::SCHAEFER($loc) ||
-                Regex::MICROFORMS($loc) ||
-                Regex::GOV($loc) ||
-                (Regex::MAP($loc) && Regex::CIRCULATION($loc) && Regex::LIB_USE_ONLY($stat)) ||
-                (Regex::REMOTE($loc) && Regex::VINYL($desc)) ||
-                Regex::RESERV($loc) ||
-                (Regex::SPEC_COLL_REMOTE($loc) && (Regex::LIB_USE_ONLY($stat) || Regex::ON_DISPLAY($stat))) ||
-                Regex::SPEC_COLL($loc) ||
-                (Regex::TURFGRASS($loc) && !$this->isMedia($item_id)) ||
-                Regex::VINCENT_VOICE($loc) ||
-                !Regex::AVAILABLE($stat)
-            )) {
+        # only show if all items are on reserve, non-circulating, or checked out
+        if ($this->isAllReserveNonCircOut()) {
             return true;
         }
         return false;
+
     }
 }
