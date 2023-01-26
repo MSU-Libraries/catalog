@@ -186,11 +186,15 @@ class Folio extends \VuFind\ILS\Driver\Folio
     {
         $retVal = [];
         $idType = $this->getBibIdType();
+        $query = [
+            'query' => 'copiedItem.instanceDiscoverySuppress==false'
+        ];
 
         // Results can be paginated, so let's loop until we've gotten everything:
         foreach ($this->getPagedResults(
             'reserves',
-            '/coursereserves/reserves'
+            '/coursereserves/reserves',
+            $query
         ) as $item) {
             if ($idType == 'hrid') {
                 $bibId = $item->copiedItem->instanceHrid ?? null;
