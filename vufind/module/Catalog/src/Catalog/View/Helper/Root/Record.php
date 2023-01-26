@@ -30,15 +30,20 @@ class Record extends \VuFind\View\Helper\Root\Record
      *
      * @return array
      */
-    public function getLinkTargetLabel($link) {
+    public function getLinkTargetLabel($link)
+    {
         $label = null;
         foreach ($this->linkLabels as $mat) {
+            # Skip entries missing the 'label' field
+            if (!array_key_exists('label', $mat)) {
+                continue;
+            }
             # Must have one of the regex patterns, otherwise false
-            $found = ($mat['desc'] !== null || $mat['url'] !== null);
-            if ($mat['desc'] !== null) {
+            $found = ($mat['desc'] ?? null) || ($mat['url'] ?? null);
+            if ($mat['desc'] ?? null) {
                 $found &= preg_match($mat['desc'], $link['desc']);
             }
-            if ($mat['url'] !== null) {
+            if ($mat['url'] ?? null) {
                 $found &= preg_match($mat['url'], $link['url']);
             }
             if ($found) {
@@ -46,7 +51,9 @@ class Record extends \VuFind\View\Helper\Root\Record
                 break;
             }
         }
-        if ($label !== null) { $link['desc'] .= " ({$label})"; }
+        if ($label !== null) {
+            $link['desc'] .= " ({$label})";
+        }
         return $link;
     }
 
