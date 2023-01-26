@@ -112,7 +112,7 @@ labels:
     url: "#https://([a-z0-9.-]*\\.)?gale(group)?\\.com/#"
   - label: "De Gruyter"
     desc: null
-    url: "#https://www\\.de|sk)gruyter\\.com/#"
+    url: "#https://www\\.degruyter\\.com/#"
   - label: "Project MUSE @ John Hopkins University"
     desc: null
     url: "#https://muse\\.jhu\\.edu/#"
@@ -124,7 +124,7 @@ labels:
     url: "#https://((www|gateway|search)\\.)?proquest\\.com/#"
   - label: "ProQuest"
     desc: null
-    url: "#http://proquest\.umi\.com/#"
+    url: "#https?://proquest\\.umi\\.com/#"
   - label: "ProQuest Congressional"
     desc: null
     url: "#https?://congressional\\.proquest\\.com/#"
@@ -233,9 +233,9 @@ labels:
   - label: "Digital Collections @ Cornell University Library"
     desc: null
     url: "#https://digital\\.library\\.cornell\\.edu/#"
-  - label: "Massachusetts Institute of Technology Press Direct"
+  - label: "Massachusetts Institute of Technology Press"
     desc: null
-    url: "#https://direct\\.mit\\.edu/#"
+    url: "#https://(direct|mitpress)\\.mit\\.edu/#"
   - label: "Digital Repository @ Michigan State University"
     desc: null
     url: "#https://d\\.lib\\.msu\\.edu/#"
@@ -485,6 +485,9 @@ labels:
   - label: "Society of Photographic Instrumentation Engineers Digital Library"
     desc: null
     url: "#https://www\\.spiedigitallibrary\\.org/#"
+  - label: "Society of Photographic Instrumentation Engineers"
+    desc: null
+    url: "#https://spie\\.org/#"
   - label: "Wageningen Academic Publishers"
     desc: null
     url: "#https://www\\.wageningenacademic\\.com/#"
@@ -563,3 +566,30 @@ labels:
   - label: "astrophysics data system @ Harvard"
     desc: null
     url: "#https://ui\\.adsabs\\.harvard\\.edu/#"
+  - label: "ASTM International"
+    desc: null
+    url: "#https://www\\.astm\\.org/#"
+  - label: "Chronicle of Higher Education"
+    desc: null
+    url: "#https://www\\.chronicle\\.com/#"
+  - label: "GovInfo @ U.S. Government Publishing Office"
+    desc: null
+    url: "#https://www\\.govinfo\\.gov/#"
+  - label: "PressReader"
+    desc: null
+    url: "#https://www\\.pressreader\\.com/#"
+  - label: "European Central Bank"
+    desc: null
+    url: "#https://www\\.ecb\\.europa\\.eu/#"
+  - label: "Economic Commission for Latin America and the Caribbean"
+    desc: null
+    url: "#https://repositorio\\.cepal\\.org/#"
+  - label: "Asian Development Bank"
+    desc: null
+    url: "#https://www\\.adb\\.org/#"
+  - label: "Numdam"
+    desc: null
+    url: "#https?://www\\.numdam\\.org/#"
+  - label: "John Benjamins e-Platform"
+    desc: null
+    url: "#https://www\\.jbe-platform\\.com/#"
