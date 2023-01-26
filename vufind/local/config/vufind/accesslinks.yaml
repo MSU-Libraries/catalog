@@ -10,16 +10,19 @@ labels:
   #   url: "#https://search\\.ebscohost\\.com/#"
   - label: "EBSCO"
     desc: null
-    url: "#https://search\\.ebscohost\\.com/#"
+    url: "#https?://search\\.ebscohost\\.com/#"
+  - label: "EBSCO"
+    desc: null
+    url: "#https?://www\\.net[Ll]ibrary\\.com/#"
   - label: "Alexander Street"
     desc: null
     url: "#https?://www\\.aspresolver\\.com/#"
   - label: "Ebook Central @ Proquest"
     desc: null
-    url: "#https://ebookcentral\\.proquest\\.com/lib/michstate-ebooks#"
+    url: "#https://ebookcentral\\.proquest\\.com/#"
   - label: "Hein Online"
     desc: null
-    url: "#https://heinonline\\.org/#"
+    url: "#https://(www\\.)?heinonline\\.org/#"
   - label: "Springer Link"
     desc: null
     url: "#https://link\\.springer\\.com/#"
@@ -31,7 +34,7 @@ labels:
     url: "#https://www\\.ncbi\\.nlm\\.nih\\.gov/#"
   - label: "Digital Object Identifier Permalink"
     desc: null
-    url: "#https://(dx\\.)?doi\\.org/#"
+    url: "#https?://((www|dx)\\.)?doi\\.org/#"
   - label: "FRASER @ Federal Reserve Bank of St. Louis"
     desc: null
     url: "#https://fraser\\.stlouisfed\\.org/#"
@@ -41,6 +44,9 @@ labels:
   - label: "Brill"
     desc: null
     url: "#https://brill\\.com/#"
+  - label: "Brill"
+    desc: null
+    url: "#https://([a-z0-9.-]*\\.)?brillonline\\.com/#"
   - label: "Firenze University Press"
     desc: null
     url: "#https://www\\.fupress\\.com/#"
@@ -49,7 +55,7 @@ labels:
     url: "#https://hdl\\.handle\\.net/#"
   - label: "Wiley Online Library"
     desc: null
-    url: "#https://onlinelibrary\\.wiley\\.com/#"
+    url: "#https://([a-z0-9.-]*\\.)?onlinelibrary\\.wiley\\.com/#"
   - label: "University of California Press E-Books Collection"
     desc: null
     url: "#https://publishing\\.cdlib\\.org/ucpressebooks/#"
@@ -76,7 +82,7 @@ labels:
     url: "#https://www\\.elibrary\\.imf\\.org/#"
   - label: "Adam Matthew Digital"
     desc: null
-    url: "#http://([a-z0-9.-]*)?amdigital\\.co\\.uk/#"
+    url: "#https?://([a-z0-9.-]*\\.)?amdigital\\.co\\.uk/#"
   - label: "World Bank eLibrary"
     desc: null
     url: "#https://elibrary\\.worldbank\\.org/#"
@@ -101,12 +107,12 @@ labels:
   - label: "Emerald Insight"
     desc: null
     url: "#https://www\\.emerald\\.com/insight/#"
-  - label: "Gale OneFile"
+  - label: "Gale"
     desc: null
-    url: "#https://link\\.gale\\.com/#"
+    url: "#https://([a-z0-9.-]*\\.)?gale(group)?\\.com/#"
   - label: "De Gruyter"
     desc: null
-    url: "#https://www\\.degruyter\\.com/#"
+    url: "#https://www\\.de|sk)gruyter\\.com/#"
   - label: "Project MUSE @ John Hopkins University"
     desc: null
     url: "#https://muse\\.jhu\\.edu/#"
@@ -115,10 +121,445 @@ labels:
     url: "#https://digitalcommons\\.usu\\.edu/#"
   - label: "ProQuest"
     desc: null
-    url: "#https://www\\.proquest\\.com/publication/#"
+    url: "#https://((www|gateway|search)\\.)?proquest\\.com/#"
+  - label: "ProQuest"
+    desc: null
+    url: "#http://proquest\.umi\.com/#"
+  - label: "ProQuest Congressional"
+    desc: null
+    url: "#https?://congressional\\.proquest\\.com/#"
   - label: "Knovel"
     desc: null
     url: "#https://app\\.knovel\\.com/#"
   - label: "Oxford Academic"
     desc: null
     url: "#https://academic\\.oup\\.com/#"
+  - label: "Oxford Academic"
+    desc: null
+    url: "#https://oxford\\.universitypressscholarship\\.com/#"
+  - label: "Oxford Academic"
+    desc: null
+    url: "#https://www\\.oxfordclinicalpsych\\.com/#"
+  - label: "Astrophysics Data System"
+    desc: null
+    url: "#https?://ads\\.harvard\\.edu/books/#"
+  - label: "Cataloging @ Library of Congress"
+    desc: null
+    url: "#https?://catdir\\.loc\\.gov/catdir/#"
+  - label: "RERO doc Ditial Library"
+    desc: null
+    url: "#https?://doc\\.rero\\.ch/record/#"
+  - label: "Center for Research Libraries Digital Delivery System"
+    desc: null
+    url: "#https?://dds(next)?\\.crl\\.edu/#"
+  - label: "NewsBank"
+    desc: null
+    url: "#https?://([a-z0-9.-]*\\.)?newsbank\\.com/#"
+  - label: "Law Library Microform Consortium"
+    desc: null
+    url: "#https?://llmc\\.com/#"
+  - label: "Law Library Microform Consortium"
+    desc: null
+    url: "#https?://www\\.llmcdigital\\.org/#"
+  - label: "Naxos Music Library"
+    desc: null
+    url: "#https?://michiganstate\\.naxosmusiclibrary\\.com/#"
+  - label: "The HistoryMakers"
+    desc: null
+    url: "#https://da\\.thehistorymakers\\.org/#"
+  - label: "Cambridge Core"
+    desc: null
+    url: "#https?://www\\.cambridge\\.org/#"
+  - label: "medici.tv EDU"
+    desc: null
+    url: "#https://edu\\.medici\\.tv/#"
+  - label: "Encyclopedia of Social Work"
+    desc: null
+    url: "#https?://socialwork\\.oxfordre\\.com/#"
+  - label: "West Academic"
+    desc: null
+    url: "#https://subscription\\.westacademic\\.com/#"
+  - label: "Gallica @ Bibliothèque nationale de France"
+    desc: null
+    url: "#https?://gallica\\.bnf\\.fr/#"
+  - label: "University of Michigan Permalink"
+    desc: null
+    url: "#https?://name\\.umdl\\.umich\\.edu/#"
+  - label: "The Online Books Page @ University of Pennsylvania"
+    desc: null
+    url: "#https?://onlinebooks\\.library\\.upenn\\.edu/#"
+  - label: "U.S. Government Publishing Office Permalink"
+    desc: null
+    url: "#https?://permanent\\.access\\.gpo\\.gov/#"
+  - label: "Federal Depository Library Program Persistant URL"
+    desc: null
+    url: "#https?://purl\\.access\\.gpo\\.gov/#"
+  - label: "Federal Depository Library Program Persistant URL"
+    desc: null
+    url: "#https?://purl\\.fdlp\\.gov/#"
+  - label: "Indiana University Libraries Persistant URL"
+    desc: null
+    url: "#https?://purl\\.dlib\\.indiana\\.edu/#"
+  - label: "University of Minnesota Persistant URL"
+    desc: null
+    url: "#https?://purl\\.umn\\.edu/#"
+  - label: "Idaho Office of the Administrative Rules Coordinator"
+    desc: null
+    url: "#https://adminrules\\.idaho\\.gov/#"
+  - label: "Internet Archive"
+    desc: null
+    url: "#https://(www\\.)?archive\\.org/#"
+  - label: "Biblioteca Digital @ Real Jardín Botánico de Madrid"
+    desc: null
+    url: "#https://bibdigital\\.rjb\\.csic\\.es/#"
+  - label: "OpenEdition"
+    desc: null
+    url: "#https://(books\\.)?openedition.org/#"
+  - label: "TU Delft OPEN Books"
+    desc: null
+    url: "#https://books\\.open\\.tudelft\\.nl/#"
+  - label: "Scientific Electronic Library Online"
+    desc: null
+    url: "#https://books\\.scielo\\.org/#"
+  - label: "Bologna University Press"
+    desc: null
+    url: "#https://buponline\\.com/#"
+  - label: "Centre for Agriculture and Bioscience International Digital Library"
+    desc: null
+    url: "#https://(www\\.)?cabi(digitallibrary)?\\.org/#"
+  - label: "Centro de Estudios Montañeses"
+    desc: null
+    url: "#https://centrodeestudiosmontaneses\\.com/#"
+  - label: "Digital Collections @ Cornell University Library"
+    desc: null
+    url: "#https://digital\\.library\\.cornell\\.edu/#"
+  - label: "Massachusetts Institute of Technology Press Direct"
+    desc: null
+    url: "#https://direct\\.mit\\.edu/#"
+  - label: "Digital Repository @ Michigan State University"
+    desc: null
+    url: "#https://d\\.lib\\.msu\\.edu/#"
+  - label: "ePublishing @ EKT National Documentation Centre, Greece"
+    desc: null
+    url: "#https://(ebooks\\.)?epublishing\\.ekt\\.gr/#"
+  - label: "European Commission"
+    desc: null
+    url: "#https://ec\\.europa\\.eu/#"
+  - label: "Universitaria Agustiniana"
+    desc: null
+    url: "#https://editorial\\.uniagustiniana\\.edu\\.co/#"
+  - label: "Geological Survey of Denmark and Greenland"
+    desc: null
+    url: "#https://eng\\.geus\\.dk/#"
+  - label: "European Network for Rural Development"
+    desc: null
+    url: "#https://enrd\\.ec\\.europa\\.eu/#"
+  - label: "UNESCO"
+    desc: null
+    url: "#https://en\\.unesco\\.org/#"
+  - label: "EUR-Lex"
+    desc: null
+    url: "#https://eur-lex\\.europa\\.eu/#"
+  - label: "Academic Reference @ China National Knowledge Infrastructure"
+    desc: null
+    url: "#https?://ar\\.cnki\\.net/#"
+  - label: "China Data Insights @ China National Knowledge Infrastructure"
+    desc: null
+    url: "#https?://cdi\\.cnki\\.net/#"
+  - label: "Reference Works @ China National Knowledge Infrastructure"
+    desc: null
+    url: "#https?://gongjushu\\.oversea\\.cnki\\.net/#"
+  - label: "Yearbooks Database @ China National Knowledge Infrastructure"
+    desc: null
+    url: "#https?://tongji\\.oversea\\.cnki\\.net//#"
+  - label: "China National Knowledge Infrastructure"
+    desc: null
+    url: "#https?://oversea\\.cnki\\.net/#"
+  - label: "China National Knowledge Infrastructure"
+    desc: null
+    url: "##https?://gb\\.global\\.cnki\\.net/#"
+  - label: "Bibliothèque et Archives nationales du Québec"
+    desc: null
+    url: "#https?://collections\\.banq\\.qc\\.ca/#"
+  - label: "Hindawi"
+    desc: null
+    url: "#https?://downloads\\.hindawi\\.com/#"
+  - label: "SAGE Knowledge"
+    desc: null
+    url: "#https?://(knowledge|sk)\\.sagepub\\.com/#"
+  - label: "SAGE Research Methods"
+    desc: null
+    url: "#https?://methods\\.sagepub\\.com/#"
+  - label: "Nationallizenzen @ Deutsche Forschungsgemeinschaft"
+    desc: null
+    url: "#https?://nl\\.sub\\.uni-goettingen\\.de/#"
+  - label: "Salem Press"
+    desc: null
+    url: "#https?://online\\.salempress\\.com/#"
+  - label: "Georg-August-Universität Göttingen Permanent URL"
+    desc: null
+    url: "#https?://resolver\\.sub\\.uni-goettingen\\.de/#"
+  - label: "McGraw Hill Medical"
+    desc: null
+    url: "#https://([a-z0-9.-]*\\.)?mhmedical\\.com/#"
+  - label: "Nexis Uni @ LexisNexis"
+    desc: null
+    url: "#https://advance\\.lexis\\.com/#"
+  - label: "American Institute of Physics Publishing"
+    desc: null
+    url: "#https://aip\\.scitation\\.org/#"
+  - label: "Wiley Digital Archives"
+    desc: null
+    url: "#https://app\\.wileydigitalarchives\\.com/#"
+  - label: "American Phytopathological Society Publications"
+    desc: null
+    url: "#https://apsjournals\\.apsnet\\.org/#"
+  - label: "Datapages, Inc Archives @ American Association of Petroleum Geologists"
+    desc: null
+    url: "#https://archives\\.datapages\\.com/#"
+  - label: "American Society of Mechanical Engineers Digital Collection"
+    desc: null
+    url: "#https://asmedigitalcollection.asme.org/#"
+  - label: "BioOne Complete"
+    desc: null
+    url: "#https://bioone\\.org/#"
+  - label: "Canada Commons"
+    desc: null
+    url: "#https://canadacommons\\.ca/#"
+  - label: "O’Reilly"
+    desc: null
+    url: "#https://cdn\\.oreillystatic\\.com/#"
+  - label: "O’Reilly"
+    desc: null
+    url: "#https://(www\\.)?oreilly\\.com/#"
+  - label: "Library of Congress"
+    desc: null
+    url: "#https://([a-z0-9.-]*\\.)?loc\\.gov/#"
+  - label: "LWW Health Library"
+    desc: null
+    url: "#https://([a-z0-9.-]*\\.)?lwwhealthlibrary\\.com/#"
+  - label: "Digital Repository @ American Museum of Natural History Research Library"
+    desc: null
+    url: "#https://digitallibrary\\.amnh\\.org/#"
+  - label: "Digital Collections @ University of Pittsburgh Library System"
+    desc: null
+    url: "#https://digital\\.library\\.pitt\\.edu/#"
+  - label: "Institution of Engineering and Technology Digital Library"
+    desc: null
+    url: "#https://digital-library\\.theiet\\.org/#"
+  - label: "Association for Computing Machinery Digital Library"
+    desc: null
+    url: "#https://dl\\.acm\\.org/#"
+  - label: "Czech Digital Mathematics Library"
+    desc: null
+    url: "#https://dml\\.cz/#"
+  - label: "Docuseek"
+    desc: null
+    url: "#https://docuseek2\\.com/#"
+  - label: "DSM Library @ Psychiatry Online"
+    desc: null
+    url: "#https://dsm\\.psychiatryonline\\.org/#"
+  - label: "Psychiatry Online"
+    desc: null
+    url: "#https://psychiatryonline\\.org/#"
+  - label: "IOS Press Ebooks"
+    desc: null
+    url: "#https://ebooks\\.iospress\\.nl/#"
+  - label: "Ditigal Theatre+"
+    desc: null
+    url: "#https://edu\\.digitaltheatreplus\\.com/#"
+  - label: "American Society of Agricultural and Biological Engineers"
+    desc: null
+    url: "#https://elibrary\\.asabe\\.org/#"
+  - label: "European Mathematical Press"
+    desc: null
+    url: "#https://ems\\.press/#"
+  - label: "Films On Demand @ Infobase"
+    desc: null
+    url: "#https://fod\\.infobase\\.com/#"
+  - label: "Feature Films for Education @ Infobase"
+    desc: null
+    url: "#https://ffusa\\.infobase\\.com/#"
+  - label: "GeoScienceWorld"
+    desc: null
+    url: "#https://(pubs\\.)?geoscienceworld\\.org/#"
+  - label: "Dow Jones Factivia"
+    desc: null
+    url: "#https://global\\.factiva\\.com/#"
+  - label: "East View Global Press Archive"
+    desc: null
+    url: "#https://gpa\\.eastview\\.com/#"
+  - label: "IOPscience @ Institute of Physics"
+    desc: null
+    url: "#https://iopscience\\.iop\\.org/#"
+  - label: "Welsh Journals @ The National Library of Wales"
+    desc: null
+    url: "#https://journals\\.library\\.wales/#"
+  - label: "jove"
+    desc: null
+    url: "#https://www\\.jove\\.com/#"
+  - label: "MedOne ComSci @ Thieme"
+    desc: null
+    url: "#https://medone-comsci\\.thieme\\.com/#"
+  - label: "MedOne Education @ Thieme"
+    desc: null
+    url: "#https://medone-education\\.thieme\\.com/#"
+  - label: "MedOne Radiology @ Thieme"
+    desc: null
+    url: "#https://medone-radiology\\.thieme\\.com/#"
+  - label: "McGraw-Hill eBookLibrary"
+    desc: null
+    url: "#https://mhebooklibrary\\.com/#"
+  - label: "kanopy"
+    desc: null
+    url: "#https://msu\\.kanopy\\.com/#"
+  - label: "TDS Health"
+    desc: null
+    url: "#https://online\\.statref\\.com/#"
+  - label: "Open Research Library"
+    desc: null
+    url: "#https://openresearchlibrary\\.org/#"
+  - label: "OpenStax"
+    desc: null
+    url: "#https://openstax\\.org/#"
+  - label: "Publications Office of the European Union"
+    desc: null
+    url: "#https://op\\.europa\\.eu/#"
+  - label: "Ovid"
+    desc: null
+    url: "#https://ovidsp\\.ovid\\.com/#"
+  - label: "Swank Motion Pictures"
+    desc: null
+    url: "#https://permalinks\\.swankmp\\.net/#"
+  - label: "perspectivia.net"
+    desc: null
+    url: "#https://perspectivia\\.net/#"
+  - label: "Wolters Kluwer Resource Link"
+    desc: null
+    url: "#https://prod\\.resource\\.cch\\.com/#"
+  - label: "Project Euclid"
+    desc: null
+    url: "#https://projecteuclid\\.org/#"
+  - label: "American Psychological Association PsycNet"
+    desc: null
+    url: "#https://psycnet\\.apa\\.org/#"
+  - label: "American Academy of Pediatrics Books"
+    desc: null
+    url: "#https://publications\\.aap\\.org/aapbooks/#"
+  - label: "eBooks @ ABC-CLIO"
+    desc: null
+    url: "#https://publisher\\.abc-clio\\.com/#"
+  - label: "Royal Society of Chemistry"
+    desc: null
+    url: "#https://pubs\\.rsc\\.org/#"
+  - label: "uO Research @ University of Ottawa"
+    desc: null
+    url: "#https://ruor\\.uottawa\\.ca/#"
+  - label: "Universitätsbibliothek Frankfurt am Main"
+    desc: null
+    url: "#https://sammlungen\\.ub\\.uni-frankfurt\\.de/#"
+  - label: "Sciendo"
+    desc: null
+    url: "#https://sciendo\\.com/#"
+  - label: "IGI Global"
+    desc: null
+    url: "#https://services\\.igi-global\\.com/#"
+  - label: "Multidisciplinary Digital Publishing Institute"
+    desc: null
+    url: "#https://(www\\.)?mdpi\\.com/#"
+  - label: "National Academies Press"
+    desc: null
+    url: "#https://www\\.nap\\.edu/#"
+  - label: "National Film Board of Canada"
+    desc: null
+    url: "#https://www\\.(nfb|onf)\\.ca/#"
+  - label: "Oxford Bibliographies"
+    desc: null
+    url: "#https://www\\.oxfordbibliographies\\.com/#"
+  - label: "Oxford Reference"
+    desc: null
+    url: "#https://www\\.oxfordreference\\.com/#"
+  - label: "Peter Lang"
+    desc: null
+    url: "#https://www\\.peterlang\\.com/#"
+  - label: "Society of Photographic Instrumentation Engineers Digital Library"
+    desc: null
+    url: "#https://www\\.spiedigitallibrary\\.org/#"
+  - label: "Wageningen Academic Publishers"
+    desc: null
+    url: "#https://www\\.wageningenacademic\\.com/#"
+  - label: "Ambrose Video Publishing"
+    desc: null
+    url: "#https?://videos\\.ambrosevideo\\.com/#"
+  - label: "American Mathematical Society"
+    desc: null
+    url: "#https?://www\\.ams\\.org/#"
+  - label: "British History Online"
+    desc: null
+    url: "#https://www\\.british-history\\.ac\\.uk/#"
+  - label: "Botanicus"
+    desc: null
+    url: "#https?://www\\.botanicus\\.org/#"
+  - label: "University of Michigan"
+    desc: null
+    url: "#https?://www\\.hti\\.umich\\.edu/#"
+  - label: "Michigan State University Libraries"
+    desc: null
+    url: "#https?://(www\\.)?lib\\.msu\\.edu/#"
+  - label: "U.S. Department of Energy Office of Scientific and Technical Information"
+    desc: null
+    url: "#https?://www\\.osti\\.gov/#"
+  - label: "A&AePortal"
+    desc: null
+    url: "#https://www\\.aaeportal\\.com/#"
+  - label: "McGraw-Hill AccessEngineering"
+    desc: null
+    url: "#https://www\\.accessengineeringlibrary\\.com/#"
+  - label: "Columbia International Affairs Online"
+    desc: null
+    url: "#https://www\\.ciaonet\\.org/#"
+  - label: "Elgar Online"
+    desc: null
+    url: "#https://www\\.elgaronline\\.com/#"
+  - label: "University of Hawaii Open Access"
+    desc: null
+    url: "#https://www\\.hawaiiopen\\.org/#"
+  - label: "International Atomic Energy Agency"
+    desc: null
+    url: "#https://www\\.iaea\\.org/#"
+  - label: "Loeb Classical Library"
+    desc: null
+    url: "#https://www\\.loebclassics\\.com/#"
+  - label: "Lyell Collection"
+    desc: null
+    url: "#https://(www|sp)\\.lyellcollection\\.org/#"
+  - label: "Richard K. Miller & Associates"
+    desc: null
+    url: "#https://www\\.rkma\\.com/#"
+  - label: "Routledge Handbooks Online"
+    desc: null
+    url: "#https://www\\.routledgehandbooks\\.com/#"
+  - label: "Southern Poverty Law Center"
+    desc: null
+    url: "#https://www\\.splcenter\\.org/#"
+  - label: "Accessible Archives"
+    desc: null
+    url: "#https?://www\\.accessible\\.com/#"
+  - label: "LearnTechLib"
+    desc: null
+    url: "#https?://www\\.learntechlib\\.org/#"
+  - label: "Morgan & Claypool"
+    desc: null
+    url: "#https?://www\\.morganclaypool\\.com/#"
+  - label: "Begell House"
+    desc: null
+    url: "#https://www\\.begellhouse\\.com/#"
+  - label: "British Small Animal Vetrinary Association Library"
+    desc: null
+    url: "#https://www\\.bsavalibrary\\.com/#"
+  - label: "Human Kinetics Library"
+    desc: null
+    url: "#https://www\\.humankineticslibrary\\.com/#"
+  - label: "astrophysics data system @ Harvard"
+    desc: null
+    url: "#https://ui\\.adsabs\\.harvard\\.edu/#"
