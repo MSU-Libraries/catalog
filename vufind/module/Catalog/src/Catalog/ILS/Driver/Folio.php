@@ -240,14 +240,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
      */
     protected function isHoldable($locationName)
     {
-        $setSubSt = (bool)$this->config['Holds']['excludeHoldLocationsBySubString']
-                    ?? false;
+        $mode = $this->config['Holds']['excludeHoldLocationsCompareMode'] ?? 'exact';
         $excludeLocs = (array)$this->config['Holds']['excludeHoldLocations'] ?? [];
 
         // Exclude Checking by substring match
-        if ($setSubSt) {
-            foreach ($excludeLocs as $exclude) {
-                if (strpos($locationName, $exclude) !== false) {
+        if ($mode == "regex") {
+            foreach ($excludeLocs as $pattern) {
+                if (preg_match($pattern, $locationName) === 1) {
                     return false;
                 }
             }
