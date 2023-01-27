@@ -188,7 +188,7 @@ main() {
     envsubst < docker-compose.mariadb-cloud-force.yml | sponge docker-compose.mariadb-cloud-force.yml;
     envsubst < docker-compose.mariadb-cloud.yml | sponge docker-compose.mariadb-cloud.yml;
     envsubst < docker-compose.internal.yml | sponge docker-compose.internal.yml;
-    GO="\$GO" envsubst < docker-compose.traefik.yml | sponge docker-compose.traefik.yml;
+    envsubst < docker-compose.traefik.yml | sponge docker-compose.traefik.yml;
     envsubst < docker-compose.monitoring.yml | sponge docker-compose.monitoring.yml;
 
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191

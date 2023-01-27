@@ -3,6 +3,12 @@
 SHARED_STORAGE="/mnt/shared/local"
 TIMESTAMP=$( date +%Y%m%d%H%M%S )
 
+if [[ "${STACK_NAME}" != catalog-prod ]]; then
+    echo "Replacing robots.txt file with disallow contents"
+    echo "User-agent: *" > ${VUFIND_HOME}/public/robots.txt
+    echo "Disallow: /" >> ${VUFIND_HOME}/public/robots.txt
+fi
+
 # Create symlinks to the shared storage for non-production environments
 # Populating the shared storage if empty
 if [[ "${STACK_NAME}" != catalog-* ]]; then

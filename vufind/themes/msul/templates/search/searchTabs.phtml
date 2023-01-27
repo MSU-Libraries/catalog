@@ -1,0 +1,20 @@
+<?php if (count($searchTabs) > 0): ?>
+  <ul class="nav nav-tabs">
+    <?php foreach ($searchTabs as $tab): ?>
+        <?php if ($this->permission()->allowDisplay($tab['permission'])): ?>
+          <li<?=$tab['selected'] ? ' class="active"' : ''?><?=$this->showCounts ? ' data-show-counts' : ''?>>
+            <a <?=$tab['selected'] ? '' : 'href="' . $this->escapeHtmlAttr($tab['url']) . '"' ?> data-source="<?=$this->escapeHtmlAttr($tab['class'])?>"><?=$this->transEsc($tab['label']); ?></a>
+          </li>
+        <?php elseif ($block = $this->permission()->getAlternateContent($tab['permission'])): ?>
+            <?=$block?>
+        <?php endif; ?>
+    <?php endforeach; ?>
+    <!-- MSUL Add in publication finder link -->
+    <li class="navtab-pubfinder">
+      <a target="_blank" href="https://search.ebscohost.com/login.aspx?authtype=ip,guest&custid=s8364774&groupid=main&direct=true&db=edspub&profile=eds&plp=1"><i class="fa fa-sign-in" aria-hidden="true"></i> eJournal Finder</a>
+    </li>
+  </ul>
+  <?php if ($this->showCounts): ?>
+    <?php $this->headScript()->appendFile('resultcount.js'); ?>
+  <?php endif; ?>
+<?php endif; ?>

@@ -83,6 +83,7 @@
 <?php
   $truncateSettings = [
     'rows' => $this->config()->getHoldingsItemLimit(),
+    'btn-class' => 'btn-primary'
   ];
 ?>
 <table class="truncate-field" data-truncate="<?=$this->escapeHtmlAttr(json_encode($truncateSettings))?>">
@@ -97,7 +98,7 @@
         <?php else: ?>
           <?=$this->escapeHtml($callNo['display'])?>
         <?php endif; ?>
-        <br />
+        <br/>
       <?php endforeach; ?>
     </td>
   </tr>
@@ -113,6 +114,8 @@
       </td>
     </tr>
   <?php endforeach; ?>
+  <?php
+  ?>
   <?php foreach ($holding['items'] as $row): ?>
     <?php
         try {
