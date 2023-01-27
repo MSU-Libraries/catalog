@@ -42,8 +42,12 @@
       // RTL styling
       $this->headLink()->appendStylesheet('vendor/bootstrap-rtl.min.css');
     } ?>
+    <?php  
+      $this->headLink()->appendStylesheet('//cloud.typography.com/7054272/766168/css/fonts.css');
+    ?>
     <?=$this->headLink()?>
     <?=$this->headStyle()?>
+
     <?php
       // Collect small scripts together and append as one block:
       $appendScripts = [];

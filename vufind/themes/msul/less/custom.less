@@ -52,7 +52,6 @@ margin-bottom:3rem;
         .navbar-msul {
           font-size:2rem;
           font-weight:500;
-          letter-spacing:0.1rem;
           
           margin-bottom:0.25rem;
             a {
@@ -67,7 +66,6 @@ margin-bottom:3rem;
         .navbar-catalog {
           font-size:2.5rem;
           font-weight:500;
-          letter-spacing:0.2rem;
             a {
               padding:0.5rem;
             }
@@ -118,6 +116,74 @@ margin-bottom:3rem;
 
 
 /* --- Footer --- */
+
+/* MSUL Prefooter */
+
+.msul-prefooter {
+  margin-left:-1.2rem;
+  margin-right:-1rem;
+  margin-bottom:2rem;
+  padding-top:2rem;
+  padding-bottom:2rem;
+  padding-left:2rem;
+  background-color: @parakeetgreen;
+  color:#fff;
+  img {
+    max-width:240px;
+    margin-bottom:1rem;
+  }
+  ul {
+    list-style:none;
+    line-height:2.5em;
+  }
+  a, a:visited {
+    color:#fff;
+    text-decoration:none;
+  }
+  a:hover, a:active {
+    color:#fff;
+    text-decoration:underline;
+  }
+  a:focus {
+    outline: 1px dashed #fff;
+  }
+  .msul-address-icon, .msul-address, .msul-phone-icon, .msul-phone {
+    display: inline-flex;
+    vertical-align:top;
+    margin-bottom:1rem;
+  }
+  @media only screen and (min-width : 768px) {
+  .footer-column:nth-child(2) {
+    border-left:1px solid #fff;
+  }
+}
+
+  #preFooterSocial {
+    a, a:hover, a:active {
+      text-decoration:none;
+    }
+
+    svg {
+    margin-right:1rem;
+    margin-top:1rem;
+
+
+
+  }
+
+}
+}
+
+
+
+
+/* End MSUL Prefooter */
+
+
+
+
+
+
 footer {
   .vf-footer {
       ul {
@@ -152,7 +218,6 @@ footer {
             position:relative;
               &.small-text {
                  font-size:.8125rem;
-                  letter-spacing:0.01rem;
                   color:#000;
                   font-weight:400
               }
@@ -326,7 +391,7 @@ body.template-dir-record, body.template-dir-combined, body.template-dir-content,
   -moz-border-radius: 7rem;
   border-radius: 7rem;
 
-    &:hover {
+    a:hover {
       text-decoration:none;
       color:@darkparakeetgreen;
     }
@@ -768,3 +833,10 @@ label {
       margin-top:1.5rem;
         }
 }
+
+//monospace font for staff view
+.tab-content .details-tab {
+  font-family: @font-family-monospace;
+}
+
+
