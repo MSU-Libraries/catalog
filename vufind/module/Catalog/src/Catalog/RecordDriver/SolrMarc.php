@@ -88,10 +88,13 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 
     public function getNotes()
     {
-	    return array_merge($this->getNotesMarcFields('541'),
+	    return array_merge(
+            $this->getNotesMarcFields('515'),
+            $this->getNotesMarcFields('541'),
 		    $this->getNotesMarcFields('561'),
             $this->getNotesMarcFields('563'),
-            $this->getNotesMarcFields('590'));
+            $this->getNotesMarcFields('590')
+        );
     }
 
     public function getPublisher()
