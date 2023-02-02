@@ -18,7 +18,6 @@ if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
         </b>
         We deliver MSU materials to your on-campus office,
         free of charge, typically within 3-5 business days. (MSU Staff and Faculty only)
-
         <ul>
             <li>
                 <a href="https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:<?= $this->escapeHtml($bibnum) ?>&LO=EYM%2CGZM%2CMUN&rft.title=<?= $this->escapeHtml($title) ?>&rft.au=<?= $this->escapeHtml($author) ?>&rft.pub=<?= $this->escapeHtml($pubname) ?>&rft.isbn=<?= $this->escapeHtml($isbn) ?>&loc=<?= $this->escapeHtml($loc) ?>&callno=<?= $this->escapeHtml($callnum) ?>&CAT=1" target="_blank">

@@ -185,10 +185,7 @@ class GetThisLoader {
             }
         }
         else {
-            if (Regex::UNIV_ARCH($loc)) {
-                $this->msgTemplate = 'univarch.phtml';
-            }
-            elseif (Regex::ART($loc) && Regex::PERM($loc)) {
+            if (Regex::ART($loc) && Regex::PERM($loc)) {
                 $this->msgTemplate = 'reserve.phtml';
             }
             elseif (Regex::ART($loc) || Regex::REFERENCE($loc)) {
@@ -414,4 +411,16 @@ class GetThisLoader {
         return false;
 
     }
+
+    public function showUahc($item_id=null) {
+        # only show if any of the items in the instance are held by UAHC
+        foreach ($this->items as $item) {
+            $loc = $this->getLocation($item['item_id']);
+            if (Regex::UNIV_ARCH($loc)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
