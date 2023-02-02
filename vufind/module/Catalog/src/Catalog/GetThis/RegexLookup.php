@@ -69,7 +69,7 @@ class RegexLookup {
     const THESES_REMOTE_MICRO   = ['/THESES REMOTE MICROFORMS/i'];
     const TRAVEL                = ['/TRAVEL/i'];
     const TURFGRASS             = ['/^MSU TURFGRASS/i', '/MSU BEARD/i'];
-    const UNIV_ARCH             = ['/UNIV ARCH/i'];
+    const UNIV_ARCH             = ['/UNIV ARCH/i', '/MSU UNIVERSITY ARCHIVES/i'];
     const VIDEO_GAME            = ['/VIDEO GAME/i'];
     const VINCENT_VOICE         = ['/^MSU VINCENT VOICE/i'];
 }
