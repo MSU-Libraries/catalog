@@ -58,9 +58,9 @@ class RegexLookup {
     const READING_ROOM          = ['/READING ROOM/i'];
     const REFERENCE             = ['/REFERENCE/i'];
     const REF                   = ['/REF/i'];
-    const REMOTE                = ['/^MSU REMOTE/i'];
+    const REMOTE                = ['/^MSU REMOTE/i', '/- REMOTE/i'];
     const RESERV                = ['/RESERV/i'];
-    const RESERVE_DIGITAL       = ['/RESERVE DIGITAL/i'];
+    const RESERVE_DIGITAL       = ['/RESERVE DIGITAL/i', '/DIGITAL RESERVES/i'];
     const ROVI                  = ['/^MSU ROVI/i'];
     const SCHAEFER              = ['/^MSU SCHAEFER/i'];
     const SPEC_COLL             = ['/^MSU SPEC COLL/i', '/SPECIAL COLLECTION/i'];

@@ -214,14 +214,6 @@ class GetThisLoader {
             elseif (Regex::SCHAEFER($loc) && !Regex::AVAILABLE($stat)) {
                 $this->msgTemplate = 'law.phtml';
             }
-            elseif (Regex::MICROFORMS($loc)) {
-                if (Regex::REMOTE($loc)) {
-                    $this->msgTemplate = 'mfremote.phtml';
-                }
-                else {
-                    $this->msgTemplate = 'ask.phtml';
-                }
-            }
             elseif (Regex::MAKERSPACE($loc)) {
                 $this->msgTemplate = 'maker.phtml';
             }
@@ -232,9 +224,6 @@ class GetThisLoader {
                 elseif (!Regex::CIRCULATING($loc)) {
                     $this->msgTemplate = 'mappickup.phtml';
                 }
-            }
-            elseif (Regex::RESERV($loc)) {
-                $this->msgTemplate = 'reserve3day.phtml';
             }
             elseif (Regex::TURFGRASS($loc)) {
                 $this->msgTemplate = 'turfgrass.phtml';
@@ -298,31 +287,6 @@ class GetThisLoader {
 
         if ( (Regex::REMOTE($loc)) && !Regex::VINYL($desc) ||
              (Regex::THESES_REMOTE($loc))
-           ) {
-            return true;
-        }
-        return false;
-    }
-
-    public function showScanCopy($item_id=null) {
-        $stat = $this->getStatus($item_id);
-        $loc = $this->getLocation($item_id);
-        $desc = $this->getDescription();
-
-        if ( (Regex::ART($loc) && !Regex::PERM($loc) && !$this->isLibUseOnly()) ||
-             (Regex::BUSINESS($loc)) ||
-             (Regex::CAREER($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::CESAR_CHAVEZ($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::KLINE_DMC($loc)) ||
-             (Regex::FACULTY_BOOK($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::GOV($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::MAP($loc) && Regex::CIRCULATING($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::MUSIC($loc) && (Regex::RESERV($loc) || Regex::BOOK($loc))) ||
-             (Regex::REMOTE($loc)) && !Regex::VINYL($desc) ||
-             (Regex::TRAVEL($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::TURFGRASS($loc) && !$this->isMedia($item_id)) ||
-             (Regex::MAIN($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::AVAILABLE($stat))
            ) {
             return true;
         }
@@ -414,10 +378,36 @@ class GetThisLoader {
 
     public function showUahc($item_id=null) {
         # only show if any of the items in the instance are held by UAHC
-        foreach ($this->items as $item) {
-            $loc = $this->getLocation($item['item_id']);
+        if ($item_id === null) {
+            $loc = $this->getLocation($item_id);
             if (Regex::UNIV_ARCH($loc)) {
                 return true;
+            }
+        }
+        else {
+            foreach ($this->items as $item) {
+                $loc = $this->getLocation($item['item_id']);
+                if (Regex::UNIV_ARCH($loc)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public function showMicrofiche($item_id=null) {
+        if ($item_id === null) {
+            $loc = $this->getLocation($item_id);
+            if (Regex::MICROFORMS($loc)) {
+                return true;
+            }
+        }
+        else {
+            foreach ($this->items as $item) {
+                $loc = $this->getLocation($item['item_id']);
+                if (Regex::MICROFORMS($loc)) {
+                    return true;
+                }
             }
         }
         return false;
