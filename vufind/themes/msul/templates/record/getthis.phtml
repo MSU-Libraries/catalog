@@ -20,6 +20,10 @@ else {
         echo $this->render('record/getthis/uahc.phtml');
     }
 
+    if ($this->getthis->showMicrofiche()) {
+        echo $this->render('record/getthis/microfiche.phtml');
+    }
+
     # servMsg(); // Accepts two arguments: a header string, some inline HTML to display under the header
     if ($this->getthis->showServMsg()) {
         echo $this->render('record/getthis/messages/' . $this->getthis->msgTemplate);
@@ -35,19 +39,9 @@ else {
         echo $this->render('record/getthis/getrovi.phtml');
     }
 
-    # lockerPick();
-    if ($this->getthis->showLockerPick()) {
-        echo $this->render('record/getthis/lockerpick.phtml');
-    }
-
     # rsRequest($rovi);
     if ($this->getthis->showRemRequest()) {
         echo $this->render('record/getthis/remrequest.phtml');
-    }
-
-    # scanCopy($ismedia);
-    if ($this->getthis->showScanCopy()) {
-        echo $this->render('record/getthis/scancopy.phtml');
     }
 
     # remForm();
