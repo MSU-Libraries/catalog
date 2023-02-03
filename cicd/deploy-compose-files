@@ -98,6 +98,10 @@ apply_devel_changes() {
 
 apply_prod_changes() {
     ## Apply to both catalog-beta and catalog-prod ##
+
+    # Build extra environment suffix for image tag
+    export EXTRA_TAG_SUFFIX="-main";
+
     # Use httpchallenge cert resolver (instead of dnschallenge)
     ./yq -i \
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt\"" \

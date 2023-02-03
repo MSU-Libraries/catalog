@@ -39,7 +39,7 @@ x-solr-deploy: &solr_deploy
 version: "3.8"
 services:
   solr:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:${CI_COMMIT_SHORT_SHA}
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     volumes:
       - bitnami:/bitnami
       - /mnt/shared/backups/solr_dropbox:/mnt/solr_backups
@@ -60,7 +60,7 @@ services:
       <<: *solr_deploy
 
   zk:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:${CI_COMMIT_SHORT_SHA}
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     volumes:
       - zk-bitnami:/bitnami
     hostname: zk{{slice .Node.Hostname 8 9}}
@@ -86,7 +86,7 @@ services:
         window: 15s
 
   cron:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:${CI_COMMIT_SHORT_SHA}
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     command: /startup-cron.sh
     user: "0"
     volumes:
