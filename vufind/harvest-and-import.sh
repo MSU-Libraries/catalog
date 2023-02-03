@@ -272,12 +272,51 @@ oai_harvest_combiner() {
     fi
     COMBINE_TS=$(date +%Y%m%d_%H%M%S)
     COMBINE_TARGET="combined_${COMBINE_TS}.xml"
-    verbose "Combining ${#COMBINE_FILES[@]} files into ${COMBINE_TARGET}"
+    verbose "Combining ${#COMBINE_FILES[@]} xml files into ${COMBINE_TARGET}"
     xml_grep --wrap collection --cond "marc:record" "${COMBINE_FILES[@]}" > "${ARGS[VUFIND_HARVEST_DIR]}/${COMBINE_TARGET}"
-    verbose "Done combining ${COMBINE_TARGET}; removing pre-combined files."
-    rm -v "${COMBINE_FILES[@]}"
+    verbose_inline "Done combining ${COMBINE_TARGET}; now removing pre-combined files "
+    while read -r LINE; do verbose_inline "."
+    done < <( rm -v "${COMBINE_FILES[@]}" )
+    verbose_inline "\n"
     verbose "Done removing ${#COMBINE_FILES[@]} files."
     COMBINE_FILES=()
+}
+
+append_hrid_given_uuid(){
+    UUID="$1"
+    APPEND_FILE="$2"
+    if [[ -z "$UUID" ]]; then return; fi
+    if [[ -z "$APPEND_FILE" ]]; then
+        echo "ERROR: No append file given when converting a delete UUID: $UUID"
+        exit 1
+    fi
+    HRID=$( curl -s "${ARGS[SOLR_URL]}/biblio/select?q=uuid_str:${UUID}&wt=json" | jq -r '.response.docs[0].id' )
+    JQ_EC="$?"
+    if [[ "$JQ_EC" -ne 0 || -z "$HRID" || "$HRID" == "null" ]]; then
+        verbose "MISSING: The UUID $UUID was not found in Solr; ignoring it."
+        return
+    fi
+    echo "$HRID" >> "$APPEND_FILE"
+}
+
+oai_delete_combiner() {
+    if [[ "${#DELETE_FILES[@]}" -eq 0 ]]; then
+        return
+    fi
+    COMBINE_TS=$(date +%Y%m%d_%H%M%S)
+    COMBINE_TARGET="combined_${COMBINE_TS}.delete"
+    verbose "Combining and converting ${#DELETE_FILES[@]} delete files into ${COMBINE_TARGET}"
+    for DFILE in "${DELETE_FILES[@]}"; do
+        while read -r UUID; do
+            append_hrid_given_uuid "$UUID" "$COMBINE_TARGET"
+        done < "$DFILE"
+    done
+    verbose_inline "Done combining ${COMBINE_TARGET}; now removing pre-combined files "
+    while read -r LINE; do verbose_inline "."
+    done < <( rm -v "${DELETE_FILES[@]}" )
+    verbose_inline "\n"
+    verbose "Done removing ${#DELETE_FILES[@]} files."
+    DELETE_FILES=()
 }
 
 # Reset the biblio Solr collection by clearing all records
@@ -350,6 +389,15 @@ oai_harvest() {
         fi
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_oai_*.xml')
     oai_harvest_combiner
+
+    declare -g -a DELETE_FILES=()
+    while read -r FILE; do
+        DELETE_FILES+=("$FILE")
+        if [[ "${#DELETE_FILES[@]}" -ge 100 ]]; then
+            oai_delete_combiner
+        fi
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_oai_*.delete')
+    oai_delete_combiner
 
     if [[ "${ARGS[FULL]}" -eq 1 ]]; then
         archive_current_harvest
