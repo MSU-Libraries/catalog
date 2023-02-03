@@ -398,6 +398,8 @@ main() {
     declare -g LOG_FILE
     LOG_FILE=$(mktemp)
     verbose "Logging to ${LOG_FILE}"
+    verbose "Using VUFIND_HOME of ${VUFIND_HOME}"
+    pushd "${VUFIND_HOME}" 2> /dev/null
     verbose "Starting processing"
 
     if [[ "${ARGS[HARVEST]}" -eq 1 ]]; then
@@ -409,6 +411,7 @@ main() {
         import
     fi
 
+    popd 2> /dev/null
     verbose "All processing complete!"
 }
 
