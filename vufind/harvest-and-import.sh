@@ -249,7 +249,7 @@ archive_current_harvest() {
         ARCHIVE_LIST+=("$FILE")
     done < <( find ./ -mindepth 1 -maxdepth 1 \
         -name 'combined_*.xml' -o \
-        -name '*_oai_*.delete' -o \
+        -name 'combined_*.delete' -o \
         -name 'last_harvest.txt' -o \
         -name 'harvest.log'
     )
@@ -336,7 +336,7 @@ clear_harvest_files() {
     find "${1}" -mindepth 1 -maxdepth 1 \
       \( \
         -name '*.xml' -o \
-        -name '*_oai_*.delete' -o \
+        -name '*.delete' -o \
         -name 'last_harvest.txt' -o \
         -name 'last_state.txt' -o \
         -name 'harvest.log' \
@@ -387,7 +387,7 @@ oai_harvest() {
         if [[ "${#COMBINE_FILES[@]}" -ge 100 ]]; then
             oai_harvest_combiner
         fi
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_oai_*.xml')
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_*_*_*.xml')
     oai_harvest_combiner
 
     declare -g -a DELETE_FILES=()
@@ -396,7 +396,7 @@ oai_harvest() {
         if [[ "${#DELETE_FILES[@]}" -ge 100 ]]; then
             oai_delete_combiner
         fi
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_oai_*.delete')
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_*_*_*.delete')
     oai_delete_combiner
 
     if [[ "${ARGS[FULL]}" -eq 1 ]]; then
