@@ -296,7 +296,7 @@ append_hrid_given_uuid(){
         verbose "MISSING: The UUID $UUID was not found in Solr; ignoring it."
         return
     fi
-    echo "$HRID" >> "$APPEND_FILE"
+    echo "$HRID" >> "${ARGS[VUFIND_HARVEST_DIR]}/${APPEND_FILE}"
 }
 
 oai_delete_combiner() {
@@ -307,6 +307,8 @@ oai_delete_combiner() {
     COMBINE_TARGET="combined_${COMBINE_TS}.delete"
     verbose "Combining and converting ${#DELETE_FILES[@]} delete files into ${COMBINE_TARGET}"
     for DFILE in "${DELETE_FILES[@]}"; do
+        # Ensure file ends in newline
+        sed -i '$a\' "$DFILE"
         while read -r UUID; do
             append_hrid_given_uuid "$UUID" "$COMBINE_TARGET"
         done < "$DFILE"
