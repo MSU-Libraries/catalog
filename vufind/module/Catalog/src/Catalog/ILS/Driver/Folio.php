@@ -172,6 +172,95 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
+     * This method queries the ILS for a patron's current checked out items
+     *
+     * Input: Patron array returned by patronLogin method
+     * Output: Returns an array of associative arrays.
+     *         Each associative array contains these keys:
+     *         duedate - The item's due date (a string).
+     *         dueTime - The item's due time (a string, optional).
+     *         dueStatus - A special status – may be 'due' (for items due very soon)
+     *                     or 'overdue' (for overdue items). (optional).
+     *         id - The bibliographic ID of the checked out item.
+     *         source - The search backend from which the record may be retrieved
+     *                  (optional - defaults to Solr). Introduced in VuFind 2.4.
+     *         barcode - The barcode of the item (optional).
+     *         renew - The number of times the item has been renewed (optional).
+     *         renewLimit - The maximum number of renewals allowed
+     *                      (optional - introduced in VuFind 2.3).
+     *         request - The number of pending requests for the item (optional).
+     *         volume – The volume number of the item (optional).
+     *         publication_year – The publication year of the item (optional).
+     *         renewable – Whether or not an item is renewable
+     *                     (required for renewals).
+     *         message – A message regarding the item (optional).
+     *         title - The title of the item (optional – only used if the record
+     *                                        cannot be found in VuFind's index).
+     *         item_id - this is used to match up renew responses and must match
+     *                   the item_id in the renew response.
+     *         institution_name - Display name of the institution that owns the item.
+     *         isbn - An ISBN for use in cover image loading
+     *                (optional – introduced in release 2.3)
+     *         issn - An ISSN for use in cover image loading
+     *                (optional – introduced in release 2.3)
+     *         oclc - An OCLC number for use in cover image loading
+     *                (optional – introduced in release 2.3)
+     *         upc - A UPC for use in cover image loading
+     *               (optional – introduced in release 2.3)
+     *         borrowingLocation - A string describing the location where the item
+     *                         was checked out (optional – introduced in release 2.4)
+     *
+     * @param array $patron Patron login information from $this->patronLogin
+     *
+     * @return array Transactions associative arrays
+     */
+    public function getMyTransactions($patron)
+    {
+        // MSUL -- overridden to add sortby
+        $query = ['query' => 'userId==' . $patron['id'] . ' and status.name==Open sortby dueDate/sort.ascending'];
+        $transactions = [];
+        foreach ($this->getPagedResults(
+            'loans',
+            '/circulation/loans',
+            $query
+        ) as $trans) {
+            $date = new DateTime($trans->dueDate, new DateTimeZone('UTC'));
+            $localTimezone = (new DateTime)->getTimezone();
+            $date->setTimezone($localTimezone);
+
+            $dueStatus = false;
+            $dueDateTimestamp = $date->getTimestamp();
+
+            $now = time();
+            if ($now > $dueDateTimestamp) {
+                $dueStatus = 'overdue';
+            } elseif ($now > $dueDateTimestamp - (1 * 24 * 60 * 60)) {
+                $dueStatus = 'due';
+            }
+            $transactions[] = [
+                'duedate' =>
+                    $this->dateConverter->convertToDisplayDate(
+                        'U',
+                        $dueDateTimestamp
+                    ),
+                'dueTime' =>
+                    $this->dateConverter->convertToDisplayTime(
+                        'U',
+                        $dueDateTimestamp
+                    ),
+                'dueStatus' => $dueStatus,
+                'id' => $this->getBibId($trans->item->instanceId),
+                'item_id' => $trans->item->id,
+                'barcode' => $trans->item->barcode,
+                'renew' => $trans->renewalCount ?? 0,
+                'renewable' => true,
+                'title' => $trans->item->title,
+            ];
+        }
+        return $transactions;
+    }
+
+    /**
      * Find Reserves
      *
      * Obtain information on course reserves.
