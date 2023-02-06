@@ -2,6 +2,8 @@
 Set Prod Stack Name:
   stage: Deploy
   extends: Set Stack Name
+  needs:
+    - Verify Vufind Image
   variables:
     PROD: "true"
   rules:
