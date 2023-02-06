@@ -36,8 +36,19 @@
           <a class="<?=$checkILLRequest ? 'checkILLRequest ' : ''?>placeILLRequest" data-lightbox href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($holding['ILLRequestLink']))?>"><i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($checkILLRequest ? "ill_request_check_text" : "ill_request_place_text")?></a>
         <?php endif; ?>
       <?php else: ?>
-        <?php /* Begin Unavailable Items (Requests) */ ?>
-        <span class="text-danger"><?=$this->transEsc($holding['status'])?><link property="availability" href="http://schema.org/OutOfStock" /></span>
+        <?php /* Begin Unavailable Items (Requests) */
+            $status=$holding['status'];
+            if (in_array($status, array('Aged to lost', 'Claimed returned', 'Declared lost', 'In process (non-requestable)',
+                'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed', 'Unknown', 'Withdrawn')))
+              $status = 'Unavailable';
+            else if (in_array($status, array('Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out')))
+              $status = 'Checked Out';
+            else if ($status == 'Restricted')
+              $status = 'Lib Use Only';
+            else if (!in_array($status, array('Available', 'Unavailable')))
+              $status = 'Unknown status';
+        ?>
+        <span class="text-danger"><?=$this->transEsc($status)?><link property="availability" href="http://schema.org/OutOfStock" /></span>
         <?php if ($holding['returnDate'] ?? false): ?>&ndash; <span class="small"><?=$this->escapeHtml($holding['returnDate'])?></span><?php endif; ?>
         <?php if ($holding['duedate'] ?? false): ?>
           &ndash; <span class="small"><?=$this->transEsc("Due")?>: <?=$this->escapeHtml($holding['duedate'])?></span>
