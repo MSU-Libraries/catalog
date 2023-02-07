@@ -2,10 +2,9 @@ FROM bitnami/solr:8
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Detroit
-
 USER root
 
-# Perform updates and install packages, including zk-shell
+# Install additional packages, including zk-shell
 RUN \
     apt update && \
     apt install -y wget vim-nox htop rsyslog cron moreutils gettext-base jq \
