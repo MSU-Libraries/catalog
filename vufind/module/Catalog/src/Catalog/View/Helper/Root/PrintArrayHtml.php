@@ -45,31 +45,45 @@ class PrintArrayHtml extends AbstractHelper
      * Function uses recursion to achieve desired results, so entry can be
      * either an array or a value to display.
      *
-     * @param array|string $entry  An array or string to output.
+     * @param array|string $entry  An array or string to output
+     * @param int $indentLevel How many spaces to indent output
+     * @param bool $indentFirst Whether the first item in an array should be indented
      *
      * @return string
      */
-    public function __invoke($entry, $recurse=0)
+    public function __invoke($entry, $indentLevel=0, $indentFirst=true) {
         $html = "";
         if (is_array($entry)) {
-            # Prevent excessive recursion
-            if ($recurse > 12) {
-                return print_r($entry, true);
-            }
-
+            $first = true;
             foreach ($entry as $key => $value) {
-                $html .= str_repeat("&ensp;", $recurse * 2) .
-                         "<strong>" . $this->view->escapeHtml($key) .
-                         "</strong> =&gt;";
+                $nextIndentLevel = $indentLevel;
+                if ($indentFirst || !$first) {
+                    $html .= str_repeat("&ensp;", $indentLevel);
+                }
+
+                if (is_int($key)) {
+                    $html .= "&ndash;&ensp;";
+                    $nextIndentLevel += 2;
+                }
+                else {
+                    $html .= "<strong>".$this->view->escapeHtml($key)."</strong> ";
+                }
+
                 if (is_array($value)) {
-                    $html .= "[<br/>" .
-                             $this->__invoke($value, $recurse + 1) .
-                             str_repeat("&ensp;", $recurse * 2) .
-                             "]<br/>";
+                    if (is_int($key)) {
+                        # If our key is int, don't indent (continue from hyphen)
+                        $html .= $this->__invoke($value, $nextIndentLevel, false);
+                    }
+                    else {
+                        # Only indent when key in value being passed is not an int
+                        $html .= "<br/>" .
+                                 $this->__invoke($value, $nextIndentLevel + 2);
+                    }
                 }
                 else {
                     $html .= $this->__invoke($value);
                 }
+                $first = false;
             }
         }
         else {

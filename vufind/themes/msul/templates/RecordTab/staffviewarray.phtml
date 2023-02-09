@@ -7,9 +7,13 @@
     <tr>
       <th><?=$this->escapeHtml($field)?></th>
       <td>
-        <?php foreach ((array)$values as $value): ?>
-          <?= $this->printArrayHtml($value); ?>
-        <?php endforeach; ?>
+        <?php
+          $values = (array)$values;
+          if (count($values) == 1 && is_int(array_key_first($values))) {
+            $values = array_shift($values);
+          }
+        ?>
+        <?=$this->printArrayHtml($values)?>
       </td>
     </tr>
   <?php endforeach; ?>
