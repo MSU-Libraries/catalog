@@ -54,36 +54,25 @@ class PrintArrayHtml extends AbstractHelper
     public function __invoke($entry, $indentLevel=0, $indentFirst=true) {
         $html = "";
         if (is_array($entry)) {
-            $first = true;
             foreach ($entry as $key => $value) {
-                $nextIndentLevel = $indentLevel;
-                if ($indentFirst || !$first) {
+                if ($indentFirst || $key != array_key_first($entry)) {
                     $html .= str_repeat("&ensp;", $indentLevel);
                 }
 
+                # Increase indent if entering new array
+                $nextIndentLevel = is_array($value) ? $indentLevel + 2 : 0;
+                # Indent first line in values unless we're continuing from hypen
+                $nextIndentFirst = !is_int($key) || !is_array($value);
+
                 if (is_int($key)) {
+                    # Integer keyed arrays use a hypen list
                     $html .= "&ndash;&ensp;";
-                    $nextIndentLevel += 2;
-                }
-                else {
-                    $html .= "<strong>".$this->view->escapeHtml($key)."</strong>: ";
+                } else {
+                    $html .= "<strong>".$this->view->escapeHtml($key)."</strong>: "
+                             . (is_array($value) ? "<br />" : "");
                 }
 
-                if (is_array($value)) {
-                    if (is_int($key)) {
-                        # If our key is int, don't indent (continue from hyphen)
-                        $html .= $this->__invoke($value, $nextIndentLevel, false);
-                    }
-                    else {
-                        # Only indent when key in value being passed is not an int
-                        $html .= "<br/>" .
-                                 $this->__invoke($value, $nextIndentLevel + 2);
-                    }
-                }
-                else {
-                    $html .= $this->__invoke($value);
-                }
-                $first = false;
+                $html .= $this->__invoke($value, $nextIndentLevel, $nextIndentFirst);
             }
         }
         else {
