@@ -1,0 +1,20 @@
+<?php
+    // Set page title.
+    $this->headTitle($this->translate('Staff View') . ': ' . $this->driver->getBreadcrumb());
+?>
+<table class="citation table table-striped">
+  <?php foreach ($this->driver->getRawData() as $field => $values): ?>
+    <tr>
+      <th><?=$this->escapeHtml($field)?></th>
+      <td>
+        <?php
+          $values = (array)$values;
+          if (count($values) == 1 && is_int(array_key_first($values))) {
+            $values = array_shift($values);
+          }
+        ?>
+        <?=$this->printArrayHtml($values)?>
+      </td>
+    </tr>
+  <?php endforeach; ?>
+</table>
