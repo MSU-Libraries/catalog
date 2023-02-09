@@ -27,6 +27,9 @@
  */
 namespace Catalog\ILS\Driver;
 
+use DateTime;
+use DateTimeZone;
+
 /**
  * FOLIO REST API driver
  *
@@ -216,8 +219,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
      */
     public function getMyTransactions($patron)
     {
-        // MSUL -- overridden to add sortby
-        $query = ['query' => 'userId==' . $patron['id'] . ' and status.name==Open sortby dueDate/sort.ascending'];
+        // MSUL -- overridden to add sortBy
+        $query = ['query' => 'userId==' . $patron['id'] . ' and status.name==Open sortBy dueDate/sort.ascending'];
         $transactions = [];
         foreach ($this->getPagedResults(
             'loans',
