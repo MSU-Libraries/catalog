@@ -66,7 +66,7 @@ class PrintArrayHtml extends AbstractHelper
                     $nextIndentLevel += 2;
                 }
                 else {
-                    $html .= "<strong>".$this->view->escapeHtml($key)."</strong> ";
+                    $html .= "<strong>".$this->view->escapeHtml($key)."</strong>: ";
                 }
 
                 if (is_array($value)) {
