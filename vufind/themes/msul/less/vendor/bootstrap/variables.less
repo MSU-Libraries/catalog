@@ -16,6 +16,10 @@
 @msugreen:				#18453B;
 @lightsage:				#C0E0D9;
 @medgray:				#c1c1c1;
+@darkgray:				#535054;
+@lavendergray:			#ACB3C9;
+@lavendergray-dark:		darken(@lavendergray, 20%);
+@lavendernew:			#3b53a9;
 
 
 //## Gray and brand colors for use across Bootstrap.
@@ -28,8 +32,8 @@
 @gray-lighter:           lighten(@gray-base, 93.5%); // #eee
 
 @brand-primary:         @darkparakeetgreen;  // darken(#428bca, 6.5%); // #337ab7
-@brand-success:         #48a139; // #5cb85c;
-@brand-info:            #617cc0; // #5bc0de;
+@brand-success:         @parakeetgreen; // #48a139 #5cb85c;
+@brand-info:            @lavendernew;  // #617cc0 #5bc0de;
 @brand-warning:         #f0ad4e;
 @brand-danger:          #952400; // #d9534f;
 
@@ -512,7 +516,7 @@
 //
 //## Define colors for form feedback states and, by default, alerts.
 
-@state-success-text:             #3c763d;
+@state-success-text:             @parakeetgreen; // #3c763d;
 @state-success-bg:               #dff0d8;
 @state-success-border:           darken(spin(@state-success-bg, -10), 5%);
 
