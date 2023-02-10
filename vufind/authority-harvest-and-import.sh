@@ -18,8 +18,11 @@ default_args() {
     ARGS[SOLR_URL]="http://solr:8983/solr"
     ARGS[RESET_SOLR]=0
     ARGS[VERBOSE]=0
+    ARGS[BYPASS_PREPROCESS]=0
+    declare -g -a TAGS=( 100 110 111 130 150 151 155 )
 }
 default_args
+
 
 # Script help text
 runhelp() {
@@ -56,6 +59,11 @@ runhelp() {
     echo "  -l|--limit COPY_COUNT"
     echo "      Usable with --copy-shared only. This will limit the number"
     echo "      of files copied from SHARED_DIR to VUFIND_HARVEST_DIR."
+    echo "  -B|--bypass-preprocess"
+    echo "      Bypass the preprocessing step of this script which splits"
+    echo "      the files into separate tag files. NOTE: the import will"
+    echo "      still rely on the .{TAG}.xml in the filename to determine"
+    echo "      what record type to import the file as."
     echo "  -X|--limit-by-delete IMPORT_COUNT"
     echo "      Usable with --batch-import only. This will limit the number"
     echo "      of files imported from VUFIND_HARVEST_DIR by deleting XML"
@@ -154,6 +162,9 @@ parse_args() {
             shift; shift ;;
         -r|--reset-solr)
             ARGS[RESET_SOLR]=1
+            shift;;
+        -B|--bypass-preprocess)
+            ARGS[BYPASS_PREPROCESS]=1
             shift;;
         -v|--verbose)
             ARGS[VERBOSE]=1
@@ -275,6 +286,15 @@ clear_harvest_files() {
     find "${1}" -mindepth 1 -maxdepth 1 -name '*.MRC' -delete
 }
 
+is_bigger_than_50mb() {
+    # shellcheck disable=SC2012
+    if [[ "$(ls -s --block-size=1048576 "$1" | cut -d' ' -f1)" -ge 50 ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 # Perform an harvest of HLM Records
 harvest() {
     assert_vufind_harvest_dir_writable
@@ -284,7 +304,7 @@ harvest() {
     if [[ "${ARGS[FULL]}" -eq 1 ]]; then
         verbose "Clearing VuFind harvest directory for new full harvest."
         clear_harvest_files "${ARGS[VUFIND_HARVEST_DIR]}/"
-        
+
         archive_current_harvest
 
         verbose "Clearing shared current directory before we sync the new full harvest."
@@ -293,23 +313,32 @@ harvest() {
 
     # Check FTP server to compare files for ones we don't have
     OLD_PWD=$(pwd)
-    cd ${ARGS[VUFIND_HARVEST_DIR]}
+    if ! cd ${ARGS[VUFIND_HARVEST_DIR]}; then
+        verbose "Failed to change directory into the harvest dir" 1
+        exit 1
+    fi
     while IFS= read -r AUTH_FILE
     do
         # If it is not in the harvest dir and it is an zip file, then get it
         if [ ! -f "${ARGS[SHARED_DIR]}/current/${AUTH_FILE}" ] && [[ ${AUTH_FILE} == *.zip ]]; then
-            if ! wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${AUTH_FILE} > /dev/null 2>&1; then
+            if ! wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/"${AUTH_FILE}" > /dev/null 2>&1; then
                 verbose "ERROR: Failed to retrieve ${AUTH_FILE} from FTP server" 1
                 exit 1
             fi
             mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/tmp
-            unzip -qq ${AUTH_FILE} -d ${ARGS[VUFIND_HARVEST_DIR]}/tmp
+            unzip -qq "${AUTH_FILE}" -d ${ARGS[VUFIND_HARVEST_DIR]}/tmp
             for F in tmp/* ; do if [[ ${F} == *.MRC ]]; then mv "${F}" "${AUTH_FILE%.zip}"_"${F#tmp/}"; fi done
             rm -rf ${ARGS[VUFIND_HARVEST_DIR]}/tmp
+
+            # Remove the files we don't currently import
+            find ${ARGS[VUFIND_HARVEST_DIR]} -maxdepth 1 \( -name "*FAST*" -o -name "*MESH.GENRE*" -o -name "*MESH.NAME*" \
+                -o -name "*NAME.CHG*" -o -name "*NAME.NEW*" \) -delete
         fi
     done < <(curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]} -l -s)
-    cd ${OLD_PWD}
-
+    if ! cd "${OLD_PWD}"; then
+        verbose "Failed to change directory to original path" 1
+        exit 1
+    fi
 
     verbose "Syncing harvest files to shared storage."
     if ! rsync -ai --exclude "processed" --exclude "log" --exclude ".gitkeep" "${ARGS[VUFIND_HARVEST_DIR]}"/ "${ARGS[SHARED_DIR]}/current/" > /dev/null 2>&1; then
@@ -358,45 +387,71 @@ import() {
     else
         countdown 5
     fi
-    
-    # TODO -- can remove once https://github.com/vufind-org/vufind/pull/2623 is included
-    # in a release (remember to also update the while loop find below too to)
-    verbose "Pre-processing import files to rename from .MRC to .mrc"
-    mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/processed # needed in case it doesn't already exist
+
+    # Create required sub directories in case they don't already exist on the container
+    mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/processed
+
+    # Convert each file from .MRC to .xml
+    verbose "Pre-processing files to convert from .MRC to .xml"
     while read -r FILE; do
-        mv ${FILE} ${FILE%.MRC}.mrc
+        marc2xml "${FILE}" > "${FILE%.MRC}".xml
+        mv "${FILE}" ${ARGS[VUFIND_HARVEST_DIR]}/processed/
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.MRC')
 
-    ## TODO -- Pre-process the LC.SUBJ* files to split out the subject data from the names
+    # Pre-process xml files to split contents by type placing each in separate subdirs
+    if [[ "${ARGS[BYPASS_PREPROCESS]}" -eq 0 ]]; then
+        slice_marc_files
+    fi
 
-    find "${ARGS[VUFIND_HARVEST_DIR]}/" -maxdepth 1 -iname "*.mrc" ! -name '*_FAST*' \
-      ! -name '*_MESH.GENRE*' ! -name '*_MESH.NAME*' ! -name '*_NAME*' ! -name '*_LC.SUBJ*' \
-      -type f -print0 | while read -d $'\0' file; do
-        
-        # Determine which properties file to use
-        PROP_FILE="marc_auth_fast_topical.properties"
-        if [[ "${file}" == *_LC.NAME* ]]; then
-            PROP_FILE="marc_auth_fast_personal.properties"
-        fi
-        if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
-            $VUFIND_HOME/import-marc-auth.sh $file ${PROP_FILE}
-            EXIT_CODE=$?
-        else
-            $VUFIND_HOME/import-marc-auth.sh $file ${PROP_FILE} >> "$LOG_FILE" 2>&1
-            EXIT_CODE=$?
-        fi
-        if [[ ${EXIT_CODE} -eq 0 ]]; then
-            mv $file "${ARGS[VUFIND_HARVEST_DIR]}"/processed/$(basename $file)
-        else
-            verbose "ERROR: Batch import failed with code: ${EXIT_CODE}" 1
-            exit 1
-        fi
+    # Import each tag with the appropriate property file
+    for TAG in "${TAGS[@]}"; do
+        # Determine property file for current tag
+        PROP_FILE="" # safe to have no default since TAG can't be empty
+        case ${TAG} in
+            100)
+                PROP_FILE="marc_auth_fast_personal.properties"
+                ;;
+            110)
+                PROP_FILE="marc_auth_fast_corporate.properties"
+                ;;
+            111)
+                PROP_FILE="marc_auth_fast_meeting.properties"
+                ;;
+            130)
+                PROP_FILE="marc_auth_fast_title.properties"
+                ;;
+            150)
+                PROP_FILE="marc_auth_fast_topical.properties"
+                ;;
+            151)
+                PROP_FILE="marc_auth_fast_geographic.properties"
+                ;;
+            155)
+                PROP_FILE="marc_auth_fast_formgenre.properties"
+                ;;
+        esac
+        verbose "Importing files for tag ${TAG} with property file: ${PROP_FILE}"
+
+        while read -r FILE; do
+            if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
+                "$VUFIND_HOME"/import-marc-auth.sh "${FILE}" ${PROP_FILE}
+                EXIT_CODE=$?
+            else
+                "$VUFIND_HOME"/import-marc-auth.sh "${FILE}" "${PROP_FILE}" >> "$LOG_FILE" 2>&1
+                EXIT_CODE=$?
+            fi
+            if [[ ${EXIT_CODE} -eq 0 ]]; then
+                mv "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}"/processed/"$(basename "${FILE}")"
+            else
+                verbose "ERROR: Batch import failed with code: ${EXIT_CODE}" 1
+                exit 1
+            fi
+        done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name "*${TAG}.xml")
     done
 
     verbose "Completed batch import"
 
     # We don't get deletions from Backstage, eventually we will get them from catalogers
-    # TODO -- manually test this to make sure it will delete from authority index, and not biblio
     verbose "Processing delete records from harvest."
     countdown 5
     if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
@@ -411,6 +466,84 @@ import() {
         fi
     fi
     verbose "Completed processing records to be deleted."
+
+    verbose "Syncing imported files to shared storage."
+    mkdir -p "${ARGS[SHARED_DIR]}/current/processed/"
+    if ! rsync -ai "${ARGS[VUFIND_HARVEST_DIR]}"/processed/ "${ARGS[SHARED_DIR]}/current/processed/" > /dev/null 2>&1; then
+        verbose "ERROR: Failed to sync imported files to shared storage from ${ARGS[VUFIND_HARVEST_DIR]}/processed" 1
+        exit 1
+    fi
+}
+
+slice_marc_files() {
+    verbose "Pre-processing files to split into parts by tag attribute"
+    while read -r FILE; do
+        # Split each file into small chunks so we don't run out of memory
+        if is_bigger_than_50mb "${FILE}"; then
+            verbose "Splitting ${FILE} into 50MB chunks"
+            xml_split -s 50MB "${FILE}"
+
+            # Now split each part into separate files based on the tag attribute
+            while read -r PART_FILE; do
+                split_by_tag "${PART_FILE}"
+            done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*-[[:digit:]]*.xml')
+
+            # Next, merge the parts for each tag together
+            for TAG in "${TAGS[@]}"; do
+                OUT_FILE=${FILE%.xml}.${TAG}.xml
+                verbose "Merging parts for tag ${TAG} back into ${OUT_FILE}"
+                find "${ARGS[VUFIND_HARVEST_DIR]}" -mindepth 1 -maxdepth 1 -name "*.${TAG}.xml" -print0 | xargs xml_merge -o "${OUT_FILE}"
+                # If the file is empty, just delete it
+                if [[ ! -s ${OUT_FILE} ]]; then
+                    verbose "Removing empty merge file ${OUT_FILE}"
+                    rm "${OUT_FILE}"
+                fi
+            done
+
+            # Finally, remove the part files
+            verbose "Cleaning up remaining unmerged part files"
+            find "${ARGS[VUFIND_HARVEST_DIR]}/" -name '*-[[:digit:]]*.xml' -delete
+        else
+            # We only need to split each part into separate files based on the tag attribute
+            split_by_tag "${FILE}"
+
+            # Remove the non-tag files
+            verbose "Cleaning up non tag file ${FILE}"
+            rm "${FILE}"
+        fi
+
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.xml')
+
+   verbose "Completed pre-processing"
+}
+
+split_by_tag() {
+    SOURCE_FILE="$1"
+
+    # Split each part into separate files based on the tag attribute
+    for TAG in "${TAGS[@]}"; do
+        NEW_PATH=${SOURCE_FILE%.xml}.${TAG}.xml
+
+        verbose "Running xpath on tag ${TAG} to with ${SOURCE_FILE} to ${NEW_PATH}"
+        if ! xpath -q -e "//record[datafield[@tag=\"${TAG}\"]]" "${SOURCE_FILE}" > "${NEW_PATH}"; then
+            verbose "Failed to split out ${TAG} tag on ${SOURCE_FILE}" 1
+            exit 1
+        fi
+
+        # Run sed on it to wrap it in <collection>
+        if [[ -f ${NEW_PATH} ]]; then
+            if ! sed -i -e '1 i\<collection>' -e '$a\</collection>' "${NEW_PATH}"; then
+                verbose "Failed to wrap ${NEW_PATH} in <collection> element" 1
+                exit 1
+            fi
+        fi
+
+        # If the file is empty, just delete it
+        if [[ ! -s ${NEW_PATH} ]]; then
+            verbose "Removing empty tag file ${NEW_PATH}"
+            rm "${NEW_PATH}"
+        fi
+    done
 }
 
 # Reset the authority Solr collection by clearing all records
@@ -432,7 +565,10 @@ main() {
     LOG_FILE=$(mktemp)
     verbose "Logging to ${LOG_FILE}"
     verbose "Using VUFIND_HOME of ${VUFIND_HOME}"
-    pushd "${VUFIND_HOME}" 2> /dev/null
+    if ! pushd "${VUFIND_HOME}" 2> /dev/null; then
+        verbose "Could change directory to VUFIND_HOME!" 1
+        exit 1
+    fi
     verbose "Starting processing"
 
     if [[ "${ARGS[HARVEST]}" -eq 1 ]]; then
@@ -447,7 +583,10 @@ main() {
         import
     fi
 
-    popd 2> /dev/null
+    if ! popd 2> /dev/null; then
+        verbose "Warning: could not change directory back to prior directory" 1
+        exit 0
+    fi
     verbose "All processing complete!"
 }
 
