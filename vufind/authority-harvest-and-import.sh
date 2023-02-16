@@ -434,7 +434,7 @@ import() {
 
         while read -r FILE; do
             if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
-                "$VUFIND_HOME"/import-marc-auth.sh "${FILE}" ${PROP_FILE}
+                "$VUFIND_HOME"/import-marc-auth.sh "${FILE}" ${PROP_FILE} | tee "$LOG_FILE"
                 EXIT_CODE=$?
             else
                 "$VUFIND_HOME"/import-marc-auth.sh "${FILE}" "${PROP_FILE}" >> "$LOG_FILE" 2>&1
