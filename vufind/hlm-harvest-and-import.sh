@@ -358,6 +358,7 @@ import() {
         DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/$(basename ${FILE})
         marc2xml ${FILE} > ${DEL_FILE%.mrc}.xml
         xmllint --xpath "//*[@tag = '001']/text()" ${DEL_FILE%.mrc}.xml > ${DEL_FILE%.mrc}.delete
+        sed -i 's/^/hlm./' ${DEL_FILE%.mrc}.delete
         # Cleanup the other files that the batch-delete.sh script won't move to the processed dir
         rm ${DEL_FILE%.mrc}.xml
         mv ${FILE} ${ARGS[VUFIND_HARVEST_DIR]}/processed
@@ -365,7 +366,7 @@ import() {
 
     verbose "Running batch import"
     if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
-        if ! /usr/local/vufind/harvest/batch-import-marc.sh hlm; then
+        if ! /usr/local/vufind/harvest/batch-import-marc.sh hlm | tee "$LOG_FILE"; then
             verbose "ERROR: Batch import failed with code: $?" 1
             exit 1
         fi
