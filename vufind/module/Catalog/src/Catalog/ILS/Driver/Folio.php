@@ -337,22 +337,106 @@ class Folio extends \VuFind\ILS\Driver\Folio
     protected function isHoldable($locationName)
     {
         $mode = $this->config['Holds']['excludeHoldLocationsCompareMode'] ?? 'exact';
-        $excludeLocs = (array)$this->config['Holds']['excludeHoldLocations'] ?? [];
+        $excludeLocs = (array)($this->config['Holds']['excludeHoldLocations'] ?? []);
 
-        // Exclude Checking by substring match
-        if ($mode == "regex") {
+        // Exclude checking by regex match
+        if (trim(strtolower($mode)) == "regex") {
             foreach ($excludeLocs as $pattern) {
-                if (preg_match($pattern, $locationName) === 1) {
+                $match = @preg_match($pattern, $locationName);
+                // Invalid regex, skip this pattern
+                if ($match === false) {
+                    $this->logWarning(
+                        'Invalid regex found in excludeHoldLocations: ' .
+                        $pattern
+                    );
+                    continue;
+                }
+                if ($match === 1) {
                     return false;
                 }
             }
             return true;
-        } else {
-            // Otherwise exclude checking by exact match
-            return !in_array(
-                $locationName,
-                $excludeLocs
-            );
         }
+        // Otherwise exclude checking by exact match
+        return !in_array($locationName, $excludeLocs);
+    }
+    /**
+     * Get Pick Up Locations
+     *
+     * This is responsible get a list of valid locations for holds / recall
+     * retrieval
+     *
+     * @param array $patron   Patron information returned by $this->patronLogin
+     * @param array $holdInfo Optional array, only passed in when getting a list
+     * in the context of placing or editing a hold.  When placing a hold, it contains
+     * most of the same values passed to placeHold, minus the patron data.  When
+     * editing a hold it contains all the hold information returned by getMyHolds.
+     * May be used to limit the pickup options or may be ignored.  The driver must
+     * not add new options to the return array based on this data or other areas of
+     * VuFind may behave incorrectly.
+     *
+     * @return array An array of associative arrays with locationID and
+     * locationDisplay keys
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
+    public function getPickupLocations($patron, $holdInfo = null)
+    {
+        $query = ['query' => 'pickupLocation=true'];
+        $locations = [];
+        foreach ($this->getPagedResults(
+            'servicepoints',
+            '/service-points',
+            $query
+        ) as $servicepoint) {
+            if (isPickupable($servicepoint->discoveryDisplayName) {
+                $locations[] = [
+                    'locationID' => $servicepoint->id,
+                    'locationDisplay' => $servicepoint->discoveryDisplayName
+                ];
+            }
+        }
+        return $locations;
+    }
+
+    /*
+     * Determine if the provided pickup service point is excluded or not
+     * based on the configurations set.
+     *
+     * TODO -- This is nearly identical to isHoldable. Would it be a terrible
+     * idea to add an optional extra parameter to that function to be able to
+     * merge this in with that one?
+     *
+     * @param string $servicepoint servicepoint discover display name from
+     * getPickupLocations
+     *
+     * @return bool
+    */
+    public function isPickupable($servicepoint)
+    {
+        $mode = $this->config['Holds']['excludePickupLocationsCompareMode'] ?? 'exact';
+        $excludeLocs = (array)($this->config['Holds']['excludePickupLocations'] ?? []);
+
+        // Exclude checking by regex match
+        if (trim(strtolower($mode)) == "regex") {
+            foreach ($excludeLocs as $pattern) {
+                $match = @preg_match($pattern, $servicepoint);
+                // Invalid regex, skip this pattern
+                if ($match === false) {
+                    $this->logWarning(
+                        'Invalid regex found in excludePickupLocations: ' .
+                        $pattern
+                    );
+                    continue;
+                }
+                if ($match === 1) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        // Otherwise exclude checking by exact match
+        return !in_array($servicepoint, $excludeLocs);
+
     }
 }
