@@ -389,7 +389,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             '/service-points',
             $query
         ) as $servicepoint) {
-            if (isPickupable($servicepoint->discoveryDisplayName) {
+            if (isPickupable($servicepoint->discoveryDisplayName)) {
                 $locations[] = [
                     'locationID' => $servicepoint->id,
                     'locationDisplay' => $servicepoint->discoveryDisplayName
