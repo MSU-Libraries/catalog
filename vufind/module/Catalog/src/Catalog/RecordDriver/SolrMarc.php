@@ -150,6 +150,17 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getLocation() {
         return $this->getLocations()[0] ?? '';
     }
+    /**
+     * Get text that can be displayed to represent this record in
+     * breadcrumbs.
+     *
+     * @return string Breadcrumb text to represent this record.
+     */
+    public function getBreadcrumb()
+    {
+        return $this->getSolrField('title_full');
+    }
+
 
 }
 
