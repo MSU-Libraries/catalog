@@ -94,6 +94,9 @@ apply_devel_changes() {
     ./yq -i "del(.services.catalog.deploy.update_config.failure_action)" docker-compose.yml;
     ./yq -i "del(.services.cachecron.deploy.update_config.failure_action)" docker-compose.yml;
     ./yq -i "del(.services.cron.deploy.update_config.failure_action)" docker-compose.yml;
+
+    # Disable healthchecks on catalog service
+    ./yq -i ".services.catalog.healthcheck.disable=true" docker-compose.yml
 }
 
 apply_prod_changes() {
