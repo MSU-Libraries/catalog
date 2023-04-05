@@ -3,6 +3,8 @@
 
 secret_detection:
   interruptible: true
+  tags:
+    - msul-shared
 
 Shellcheck CI:
   stage: test
