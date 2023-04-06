@@ -7,7 +7,7 @@ Set Prod Stack Name:
   variables:
     PROD: "true"
   rules:
-    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $PROD == "true"'
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $PROD == "true" && $CI_DEPLOY_FREEZE == null'
       when: manual
 
 Deploy Prod Compose Files:
