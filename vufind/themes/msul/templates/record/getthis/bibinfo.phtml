@@ -16,7 +16,7 @@ $link = $this->getthis->getLink();
                    <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
                    target="_blank"
                    href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
-                   <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place a Hold")?>
+                   <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place Request")?>
                 </a>
             <?php
             } ?>
@@ -27,7 +27,7 @@ $link = $this->getthis->getLink();
                    <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
                    target="_blank"
                    href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
-                   <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Request" : "Request This")?>
+                   <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place Request")?>
                 </a>
             <?php
             } ?>

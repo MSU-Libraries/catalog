@@ -218,6 +218,17 @@ Verify Stack Health:
   script:
     - bash ./cicd/verify-stack-health
 
+Scale Down Catalog Service:
+  extends: .stack_template
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Verify Stack Health
+  script:
+    - bash ./cicd/scale-down-catalog-service
+
 Remove Environment:
   stage: Cleanup
   extends: .stack_template

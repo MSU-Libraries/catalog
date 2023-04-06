@@ -439,4 +439,79 @@ class Folio extends \VuFind\ILS\Driver\Folio
         return !in_array($servicepoint, $excludeLocs);
 
     }
+
+    /*
+     * https://github.com/vufind-org/vufind/pull/2739 has been merged to fix the issue we
+     * were having. Once it is included in a release, we can remove this extended function.
+     */
+    public function placeHold($holdDetails)
+    {
+        $default_request = $this->config['Holds']['default_request'] ?? 'Hold';
+        if (
+            !empty($holdDetails['requiredByTS'])
+            && !is_int($holdDetails['requiredByTS'])
+        ) {
+            throw new ILSException('hold_date_invalid');
+        }
+        $requiredBy = !empty($holdDetails['requiredByTS'])
+            ? gmdate('Y-m-d', $holdDetails['requiredByTS']) : null;
+
+        $isTitleLevel = ($holdDetails['level'] ?? '') === 'title';
+        if ($isTitleLevel) {
+            $instance = $this->getInstanceByBibId($holdDetails['id']);
+            $baseParams = [
+                'instanceId' => $instance->id,
+                'requestLevel' => 'Title',
+            ];
+        } else {
+            // Note: early Lotus releases require instanceId and holdingsRecordId
+            // to be set here as well, but the requirement was lifted in a hotfix
+            // to allow backward compatibility. If you need compatibility with one
+            // of those versions, you can add additional identifiers here, but
+            // applying the latest hotfix is a better solution!
+            $baseParams = ['itemId' => $holdDetails['item_id']];
+        }
+        $requestBody = $baseParams + [
+            'requestType' => $holdDetails['status'] == 'Available'
+                ? 'Page' : $default_request,
+            'requesterId' => $holdDetails['patron']['id'],
+            'requestDate' => date('c'),
+            'fulfilmentPreference' => 'Hold Shelf',
+            'requestExpirationDate' => $requiredBy,
+            'pickupServicePointId' => $holdDetails['pickUpLocation'],
+        ];
+        if (!empty($holdDetails['proxiedUser'])) {
+            $requestBody['requesterId'] = $holdDetails['proxiedUser'];
+            $requestBody['proxyUserId'] = $holdDetails['patron']['id'];
+        }
+        if (!empty($holdDetails['comment'])) {
+            $requestBody['patronComments'] = $holdDetails['comment'];
+        }
+        $response = $this->makeRequest(
+            'POST',
+            '/circulation/requests',
+            json_encode($requestBody),
+            [],
+            true
+        );
+        if ($response->isSuccess()) {
+            $json = json_decode($response->getBody());
+            $result = [
+                'success' => true,
+                'status' => $json->status,
+            ];
+        } else {
+            try {
+                $json = json_decode($response->getBody());
+                $result = [
+                    'success' => false,
+                    'status' => $json->errors[0]->message,
+                ];
+            } catch (Exception $e) {
+                $this->throwAsIlsException($e, $response->getBody());
+            }
+        }
+        return $result;
+    }
+
 }

@@ -37,7 +37,19 @@ class GetThisLoader {
      * @return string The status string
      */
     public function getStatus($item_id=null) {
-        return $this->getItem($item_id)['status'] ?? "Unknown";
+        $status = $this->getItem($item_id)['status'] ?? "Unknown";
+
+        if (in_array($status, array('Aged to lost', 'Claimed returned', 'Declared lost', 'In process (non-requestable)',
+            'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed', 'Unknown', 'Withdrawn')))
+          $status = 'Unavailable';
+        else if (in_array($status, array('Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out')))
+          $status = 'Checked Out';
+        else if ($status == 'Restricted')
+          $status = 'Lib Use Only';
+        else if (!in_array($status, array('Available', 'Unavailable')))
+          $status = 'Unknown status';
+
+        return $status;
     }
 
     /**
@@ -285,6 +297,11 @@ class GetThisLoader {
         $loc = $this->getLocation($item_id);
         $desc = $this->getDescription();
 
+        # Never show on Remote SPC items (PC-439)
+        if (Regex::SPEC_COLL_REMOTE($loc)) {
+            return false;
+        }
+
         if ( (Regex::REMOTE($loc)) && !Regex::VINYL($desc) ||
              (Regex::THESES_REMOTE($loc))
            ) {
@@ -308,11 +325,16 @@ class GetThisLoader {
             return false;
         }
 
+        # Never show on Remote SPC items (PC-439)
+        if (Regex::SPEC_COLL_REMOTE($loc)) {
+            return false;
+        }
+
         if ( (Regex::ART($loc) && !Regex::PERM($loc) && !$this->isLibUseOnly()) ||
              (Regex::BUSINESS($loc) && !Regex::RESERV($loc)) ||
              (Regex::MAP($loc) && Regex::CIRCULATING($loc) && Regex::AVAILABLE($stat)) ||
              (Regex::MUSIC($loc) && !(Regex::REF($loc) || Regex::RESERV($loc))) ||
-             (Regex::REMOTE($loc)) && !Regex::VINYL($desc) ||
+             (Regex::REMOTE($loc)) && !Regex::VINYL($desc) && !Regex::SPEC_COLL_REMOTE($loc) ||
              (Regex::ROVI($loc)) ||
              (Regex::THESES_REMOTE_MICRO($loc)) ||
              (Regex::MAIN($loc) && Regex::AVAILABLE($stat)) ||
@@ -330,6 +352,11 @@ class GetThisLoader {
 
         # If all the items are on reserve, return false
         if (!$this->isAllReserve()) {
+            return false;
+        }
+
+        # Never show on Remote SPC items (PC-439)
+        if (Regex::SPEC_COLL_REMOTE($loc)) {
             return false;
         }
 
@@ -368,7 +395,14 @@ class GetThisLoader {
     }
 
     public function showOtherLib($item_id=null) {
-        # only show if all items are on reserve, non-circulating, or checked out
+        $loc = $this->getLocation($item_id);
+
+        # Never show on Remote SPC items (PC-439)
+        if (Regex::SPEC_COLL_REMOTE($loc)) {
+            return false;
+        }
+
+        # only show if all items are on reserve, non-circulating (lib use only), or checked out
         if ($this->isAllReserveNonCircOut()) {
             return true;
         }

@@ -1,0 +1,35 @@
+#!/bin/bash
+
+source "${CI_PROJECT_DIR}"/cicd/before-script
+
+runhelp() {
+    echo ""
+    echo "Purpose: Scale down the Catalog service to 1 replica"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - STACK_NAME: Name of the stack"
+    echo "  - DEPLOY_HOST_A: The first host in the cluster"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - If any of the node is not running the service"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+main() {
+    HOST="${DEPLOY_HOST_A}";
+
+    EC=$(ssh deploy@"${HOST}" "docker service scale ${STACK_NAME}-catalog_catalog=1");
+    if [[ ${EC} -ne 0 ]]; then
+        echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): Failed to scale down catalog service for stack ${STACK_NAME}!";
+        exit 1;
+    fi
+}
+
+beforescript
+main
+
