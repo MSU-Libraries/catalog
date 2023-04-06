@@ -97,6 +97,10 @@ apply_devel_changes() {
 
     # Disable healthchecks on catalog service
     ./yq -i ".services.catalog.healthcheck.disable=true" docker-compose.yml
+
+    # Reduce replicas of the catalog service to 1
+    ./yq -i ".services.catalog.deploy.replicas=1" docker-compose.yml
+
 }
 
 apply_prod_changes() {

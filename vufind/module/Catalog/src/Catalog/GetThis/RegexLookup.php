@@ -64,7 +64,7 @@ class RegexLookup {
     const ROVI                  = ['/^MSU ROVI/i'];
     const SCHAEFER              = ['/^MSU SCHAEFER/i'];
     const SPEC_COLL             = ['/^MSU SPEC COLL/i', '/SPECIAL COLLECTION/i'];
-    const SPEC_COLL_REMOTE      = ['/SPEC COLL REMOTE/i'];
+    const SPEC_COLL_REMOTE      = ['/SPEC COLL REMOTE/i', '/SPECIAL COLLECTIONS.*REMOTE/i'];
     const THESES_REMOTE         = ['/THESES REMOTE/i'];
     const THESES_REMOTE_MICRO   = ['/THESES REMOTE MICROFORMS/i'];
     const TRAVEL                = ['/TRAVEL/i'];
