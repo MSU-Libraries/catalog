@@ -1,9 +1,9 @@
 <?php
   // Set up page title:
-  $this->headTitle($this->translate('My Holds'));
+  $this->headTitle($this->translate('My Requests'));
 
   // Set up breadcrumbs:
-  $this->layout()->breadcrumbs = '<li><a href="' . $this->url('myresearch-home') . '">' . $this->transEsc('Your Account') . '</a></li> <li class="active">' . $this->transEsc('My Holds') . '</li>';
+  $this->layout()->breadcrumbs = '<li><a href="' . $this->url('myresearch-home') . '">' . $this->transEsc('Your Account') . '</a></li> <li class="active">' . $this->transEsc('My Requests') . '</li>';
 
   $this->headScript()->appendFile('requests.js');
 ?>
@@ -13,7 +13,7 @@
 </a>
 
 <div class="<?=$this->layoutClass('mainbody')?>">
-  <h2><?=$this->transEsc('Your Holds') ?></h2>
+  <h2><?=$this->transEsc('Your Requests') ?></h2>
 
   <?=$this->flashmessages()?>
 
@@ -224,7 +224,7 @@
     </ul>
     <?php if ($this->cancelForm): ?></form><?php endif; ?>
   <?php else: ?>
-    <?=$this->transEsc('You do not have any holds placed') ?>.
+    <?=$this->transEsc('You do not have any requests placed') ?>.
   <?php endif; ?>
 </div>
 

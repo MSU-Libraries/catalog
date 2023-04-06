@@ -23,7 +23,7 @@ fi
 main() {
     HOST="${DEPLOY_HOST_A}";
 
-    EC=$(ssh deploy@"${HOST}" "docker service scale ${STACK_NAME}_catalog=1");
+    EC=$(ssh deploy@"${HOST}" "docker service scale ${STACK_NAME}-catalog_catalog=1");
     if [[ ${EC} -ne 0 ]]; then
         echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): Failed to scale down catalog service for stack ${STACK_NAME}!";
         exit 1;

@@ -25,7 +25,7 @@
   <?php endif; ?>
   <?php if ($ilsOnline && $this->ils()->checkCapability('getMyHolds', $capabilityParams)): ?>
     <a href="<?=$this->url('holds-list')?>" class="flex<?=$this->active == 'holds' ? ' active' : ''?>">
-      <span class="flex-col"><i class="fa fa-fw fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc('Holds')?></span>
+      <span class="flex-col"><i class="fa fa-fw fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc('Requests')?></span>
       <span class="holds-status status hidden"><?=$this->icon('spinner') ?></span>
     </a>
   <?php endif; ?>
