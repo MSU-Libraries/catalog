@@ -5,20 +5,49 @@ use Catalog\GetThis\RegexLookup as Regex;
 class GetThisLoader {
     public $record;  // record driver
     public $items;   // holding items
+    public $item_id; // current item
+    public $item;   // holding item for set item_id
     public $msgTemplate; // template to use for servMsg
 
-    function __construct($record, $items) {
+    function __construct($record, $items, $item_id=null) {
         $this->record = $record;
         $this->items = $items;
+        $this->item_id = $item_id;
         $this->msgTemplate = null;
+        if (!is_null($this->item_id)) {
+            $this->item = $this->getItem($this->item_id);
+        }
     }
 
     public function isHLM() {
         return str_starts_with($this->record->getUniqueId(), "hlm.");
     }
 
-    //TODO when item_id == null, get first available item, if exists; otherwise first item ??
+    /**
+     * Logic used to determine which item id to use
+     *
+     * @param string $item_id   The holding item UUID.
+     * 
+     * @param string $item_id   The holding item UUID.
+     */
+    private function getItemId($item_id=null) {
+        if (!is_null($item_id)) return $item_id; # use the one passed as a parameter first
+        elseif (!is_null($this->item_id)) return $this->item_id; # get the one set by the loader
+        elseif (count($this->items) > 0) return $this->items[0]['item_id']; # grab the first holding record
+        else return null; # This shouldn't happen, but we have no item id!
+    }
+
+    /**
+     * Get the holding record for the given item id. If none is provided, the first holding
+     * record will be returned.
+     * 
+     * @param string $item_id   The holding item UUID. If null (default) will return for what is set
+     *                          in the class if available, else the first item
+     * 
+     * @return array The data for with the holding information of the given item
+     */
     public function getItem($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $item = null;
         foreach ($this->items as $hold_item) {
             if ($item_id === null || $hold_item['item_id'] == $item_id) {
@@ -37,6 +66,7 @@ class GetThisLoader {
      * @return string The status string
      */
     public function getStatus($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $status = $this->getItem($item_id)['status'] ?? "Unknown";
 
         if (in_array($status, array('Aged to lost', 'Claimed returned', 'Declared lost', 'In process (non-requestable)',
@@ -60,6 +90,7 @@ class GetThisLoader {
      * @return string The location string
      */
     public function getLocation($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         return $this->getItem($item_id)['location'] ?? "";
     }
 
@@ -71,6 +102,7 @@ class GetThisLoader {
      * @return array The data required to build a request URL for the item
      */
     public function getLink($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $linkdata = ['link' => ''];
 
         # If $item_id is null, call getItem just in case $items returns the items in a different order
@@ -106,6 +138,7 @@ class GetThisLoader {
     }
 
     public function isSerial($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $is_serial = false;
         foreach ($this->record->getFormats() as $format){
             if (preg_match('/SERIAL/i', $format)) $is_serial = true;
@@ -114,6 +147,7 @@ class GetThisLoader {
     }
 
     public function isOut($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $status = $this->getStatus($item_id);
         return (
             preg_match('/CHECKED/i', $status) ||
@@ -125,6 +159,7 @@ class GetThisLoader {
     }
 
     public function isMedia($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $callNum = strtolower($this->getItem($item_id)['callnumber'] ?? "");
         return (
             preg_match('/fiche/', $callNum) ||
@@ -136,6 +171,7 @@ class GetThisLoader {
     }
 
     public function isLibUseOnly($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         return Regex::LIB_USE_ONLY($stat);
     }
@@ -188,6 +224,7 @@ class GetThisLoader {
     }
 
     public function showServMsg($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
 
@@ -248,6 +285,7 @@ class GetThisLoader {
     }
 
     public function showReqItem($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $loc = $this->getLocation($item_id);
         if (Regex::BUSINESS($loc) && !Regex::RESERV($loc)) {
             return true;
@@ -256,6 +294,7 @@ class GetThisLoader {
     }
 
     public function showReqBusiness($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $loc = $this->getLocation($item_id);
         if (Regex::BUSINESS($loc) && !Regex::RESERV($LOC)) {
             return true;
@@ -269,6 +308,7 @@ class GetThisLoader {
     }
 
     public function showLockerPick($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
 
@@ -293,6 +333,7 @@ class GetThisLoader {
     }
 
     public function showRemRequest($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
         $desc = $this->getDescription();
@@ -316,6 +357,7 @@ class GetThisLoader {
     }
 
     public function showFacDel($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
         $desc = $this->getDescription();
@@ -346,6 +388,7 @@ class GetThisLoader {
     }
 
     public function showRemotePat($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
         $desc = $this->getDescription();
@@ -384,6 +427,7 @@ class GetThisLoader {
     }
 
     public function showSpcAeon($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
 
@@ -395,6 +439,7 @@ class GetThisLoader {
     }
 
     public function showOtherLib($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         $loc = $this->getLocation($item_id);
 
         # Never show on Remote SPC items (PC-439)
@@ -411,6 +456,7 @@ class GetThisLoader {
     }
 
     public function showUahc($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         # only show if any of the items in the instance are held by UAHC
         if ($item_id === null) {
             $loc = $this->getLocation($item_id);
@@ -430,6 +476,7 @@ class GetThisLoader {
     }
 
     public function showMicrofiche($item_id=null) {
+        $item_id = $this->getItemId($item_id);
         if ($item_id === null) {
             $loc = $this->getLocation($item_id);
             if (Regex::MICROFORMS($loc)) {

@@ -6,10 +6,21 @@ $link = $this->getthis->getLink();
 
 ?>
 <div>
-    <b><?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?></b><br/>
+    <b>Title:</b> <?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?><br/>
+    <b>Call Number:</b>
+    <?php if ($item['callnumber'] ?? false): ?>
+          <span><?=$this->escapeHtml($item['callnumber'])?></span>
+        <?php endif; ?>
+        <?php if ($item['enumchron'] ?? false): ?>
+          <span class="enumchron"><?=$this->escapeHtml($item['enumchron'])?></span>
+        <?php endif; ?>
+        <?php if ($item['number'] > 1): ?>
+          &nbsp;(Copy <?=$this->escapeHtml(($item['number']))?>)
+        <?php endif; ?>
     <br/>
+    <hr/>
     <p class="text-left">
-        Status: <?= $this->getthis->getStatus() ?>
+        <b>Status:</b> <?= $this->getthis->getStatus() ?>
         <?php if ($item['availability'] ?? false) { ?>
             <?php if ($link ?? false) { ?>
                 <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
