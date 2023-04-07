@@ -17,8 +17,7 @@ $link = $this->getthis->getLink();
         <?php if ($item['number'] > 1): ?>
           &nbsp;(Copy <?=$this->escapeHtml(($item['number']))?>)
         <?php endif; ?>
-    <br/>
-    <hr/>
+    <br/><br/>
     <p class="text-left">
         <b>Status:</b> <?= $this->getthis->getStatus() ?>
         <?php if ($item['availability'] ?? false) { ?>
