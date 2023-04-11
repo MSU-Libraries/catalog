@@ -1,4 +1,6 @@
 <?php
+  $id=$holding['id'];
+  $item_id=$holding['item_id'];
   $check = $holding['check'] ?? false;
   $checkStorageRetrievalRequest = $holding['checkStorageRetrievalRequest'] ?? false;
   $checkILLRequest = $holding['checkILLRequest'] ?? false;
@@ -27,7 +29,9 @@
         <?php /* Begin Available Items (Holds) */ ?>
           <span class="text-success"><?=$this->transEsc("Available")?><link property="availability" href="http://schema.org/InStock" /></span>
         <?php if ($holding['link'] ?? false): ?>
-          <a class="<?=$check ? 'checkRequest ' : ''?>placehold" <?php if (!empty($holding['linkLightbox'])): ?>data-lightbox <?php endif; ?>href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($holding['link']))?>"><i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place Request")?></a>
+          <?php if (! $this->driver instanceof VuFind\RecordDriver\EDS): ?>
+            <a class="<?=$check ? 'checkRequest' : ''?> placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow"><?=$this->transEsc('Get this')?></a>
+         <?php endif; ?>
         <?php endif; ?>
         <?php if ($holding['storageRetrievalRequestLink'] ?? false): ?>
           <a class="<?=$checkStorageRetrievalRequest ? 'checkStorageRetrievalRequest ' : ''?> placeStorageRetrievalRequest" data-lightbox href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($holding['storageRetrievalRequestLink']))?>"><i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($checkStorageRetrievalRequest ? "storage_retrieval_request_check_text" : "storage_retrieval_request_place_text")?></a>
@@ -57,7 +61,9 @@
           <span><?=$this->transEsc("Requests")?>: <?=$this->escapeHtml($holding['requests_placed'])?></span>
         <?php endif; ?>
         <?php if ($holding['link'] ?? false): ?>
-          <a class="<?=$check ? 'checkRequest' : ''?> placehold" <?php if (!empty($holding['linkLightbox'])): ?>data-lightbox <?php endif; ?>href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($holding['link']))?>"><i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Request" : "Request This")?></a>
+          <?php if (! $this->driver instanceof VuFind\RecordDriver\EDS): ?>
+            <a class="<?=$check ? 'checkRequest' : ''?> placehold" data-lightbox href="<?= $this->escapeHtmlAttr('/GetThis?item_id=' . $holding['item_id']) ?>" rel="nofollow"><?=$this->transEsc('Get this')?></a>
+         <?php endif; ?>
         <?php endif; ?>
         <?=$this->relais()->renderButtonIfActive($this->driver ?? null)?>
       <?php endif; ?>

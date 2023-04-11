@@ -20,9 +20,10 @@ class RecordController extends \VuFind\Controller\RecordController
     {
         //TODO check hasILS(), otherwise HLM?
         $items = $this->getILS()->getHolding($this->params()->fromRoute('id'));
+        $item_id = $this->params()->fromQuery('item_id');
         $view = $this->createViewModel();
         $user = $this->getUser();
-        $view->setVariable('getthis', new GetThisLoader($view->driver, $items['holdings']));
+        $view->setVariable('getthis', new GetThisLoader($view->driver, $items['holdings'], $item_id));
         $view->setVariable('userrow', $user);  // VuFind\Db\Row\User
         if ($user === false) {
             $view->setTemplate('record/getthis/login');
@@ -39,10 +40,11 @@ class RecordController extends \VuFind\Controller\RecordController
     {
         //TODO check hasILS(), otherwise HLM?
         $items = $this->getILS()->getHolding($this->params()->fromRoute('id'));
+        $item_id = $this->params()->fromQuery('item_id');
         $view = $this->createViewModel();
         $user = $this->getUser();
         $user_email = $this->params()->fromPost('email', $user->email); // default to user email in db
-        $getthis = new GetThisLoader($view->driver, $items['holdings']);
+        $getthis = new GetThisLoader($view->driver, $items['holdings'], $item_id);
         $view->setVariable('getthis', $getthis);
         $view->setVariable('userrow', $user);  // VuFind\Db\Row\User
         if ($user === false) {
