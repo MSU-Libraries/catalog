@@ -6,6 +6,9 @@ return [
         'active' => true,
         'compiled.less'
     ),
+    'js' => [
+        ['file' => 'get-this-dropdown.js', 'priority' => 450],
+    ],
 
     'helpers' => [
         'factories' => [
@@ -16,7 +19,7 @@ return [
         'aliases' => [
             'record' => 'Catalog\View\Helper\Root\Record',
             'printArrayHtml' => 'Catalog\View\Helper\Root\PrintArrayHtml',
-        ]
+        ],
     ],
 
 ];
