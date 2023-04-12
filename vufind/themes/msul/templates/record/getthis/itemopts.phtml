@@ -1,0 +1,55 @@
+<!-- Get-this: Itemopts -->
+<?php
+$sel_item = $this->getthis->getItem();
+$items = $this->getthis->items;
+
+function getDisplay($view, $item) {
+    $display = "";
+
+    if ($item['callnumber'] ?? false) {
+      $display .= $view->escapeHtml($item['callnumber']);
+    }
+    if ($item['enumchron'] ?? false) {
+      $display .= $view->escapeHtml($item['enumchron']);
+    }
+    if ($item['number'] > 1) {
+      $display .= "&nbsp;(Copy " . $view->escapeHtml($item['number']) . ")";
+    }
+
+    return $display;
+}
+
+?>
+
+<b>Items:</b>
+<nav role="navigation" class="get-this-dropdown">
+    <ul>
+        <li><a><?= getDisplay($this, $sel_item) ?></a>
+        <div>
+            <ul class="dropdown">
+                <?php foreach ($items as $item) {
+                    $item_class = ($sel_item['item_id'] == $item['item_id'])
+                        ? "current" : "";
+                    ?><li>
+                        <a href="<?= $this->url(
+                            'record-getthis',
+                            [
+                                'id'     => $this->driver->getUniqueId(),
+                                'action' => 'GetThis',
+                            ],
+                            [
+                                'query' => [
+                                    "item_id" => $item['item_id'],
+                                ],
+                            ]
+                            ) ?>" class="<?= $this->escapeHtml($item_class) ?>" rel="nofollow">
+                            <?= getDisplay($this, $item) ?>
+                        </a>
+                    </li>
+                <?php } ?>
+            </ul>
+        </div>
+        </li>
+    </ul>
+</nav>
+<br/>
