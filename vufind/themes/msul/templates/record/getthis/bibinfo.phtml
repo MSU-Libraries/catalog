@@ -18,30 +18,32 @@ $link = $this->getthis->getLink();
           &nbsp;(Copy <?=$this->escapeHtml(($item['number']))?>)
         <?php endif; ?>
     <br/><br/>
-    <p class="text-left">
-        <b>Status:</b> <?= $this->getthis->getStatus() ?>
-        <?php if ($item['availability'] ?? false) { ?>
-            <?php if ($link ?? false) { ?>
-                <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
-                   <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
-                   target="_blank"
-                   href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
-                   <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place Request")?>
-                </a>
+    <?php if ($item['link'] ?? false): ?>
+        <p class="text-left">
+            <b>Status:</b> <?= $this->getthis->getStatus() ?>
+            <?php if ($item['availability'] ?? false) { ?>
+                <?php if ($link ?? false) { ?>
+                    <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
+                       <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
+                       target="_blank"
+                       href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
+                       <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place Request")?>
+                    </a>
+                <?php
+                } ?>
+            <?php
+            } else { ?>
+                <?php if ($link ?? false) { ?>
+                    <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
+                       <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
+                       target="_blank"
+                       href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
+                       <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place Request")?>
+                    </a>
+                <?php
+                } ?>
             <?php
             } ?>
-        <?php
-        } else { ?>
-            <?php if ($link ?? false) { ?>
-                <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
-                   <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
-                   target="_blank"
-                   href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
-                   <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place Request")?>
-                </a>
-            <?php
-            } ?>
-        <?php
-        } ?>
-    </p><br/>
+        </p><br/>
+    <?php endif; ?>
 </div>
