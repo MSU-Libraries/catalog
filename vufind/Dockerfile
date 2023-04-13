@@ -206,6 +206,7 @@ RUN \
     echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
     echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR" >> /etc/environment && \
     echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment && \
+    echo VUFIND_LOCAL_MODULES="Catalog" >> /etc/environment && \
     echo FTP_USER="$FTP_USER" >> /etc/environment && \
     echo FTP_PASSWORD="$FTP_PASSWORD" >> /etc/environment && \
     echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment && \
