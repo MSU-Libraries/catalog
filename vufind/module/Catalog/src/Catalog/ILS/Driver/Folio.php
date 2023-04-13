@@ -153,7 +153,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         # Sort by enumchron (volume) and set the number (copy) field
         uasort($items, function($item1, $item2) {
             return $item2['location'] <=> $item1['location'] ?: # reverse sort
-                   $item1['enumchron'] <=> $item2['enumchron'] ?:
+                   version_compare($item1['enumchron'], $item2['enumchron']) ?:
                    $item1['id'] <=> $item2['id'];
         });
         $prev_enumchron = 'INVALID';
