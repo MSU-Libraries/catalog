@@ -376,7 +376,7 @@ class GetThisLoader {
              (Regex::BUSINESS($loc) && !Regex::RESERV($loc)) ||
              (Regex::MAP($loc) && Regex::CIRCULATING($loc) && Regex::AVAILABLE($stat)) ||
              (Regex::MUSIC($loc) && !(Regex::REF($loc) || Regex::RESERV($loc))) ||
-             (Regex::REMOTE($loc)) && !Regex::VINYL($desc) && !Regex::SPEC_COLL_REMOTE($loc) ||
+             (Regex::REMOTE($loc) && !Regex::VINYL($desc) && !Regex::SPEC_COLL_REMOTE($loc) && !Regex::MICROFORMS($loc)) ||
              (Regex::ROVI($loc)) ||
              (Regex::THESES_REMOTE_MICRO($loc)) ||
              (Regex::MAIN($loc) && Regex::AVAILABLE($stat)) ||
