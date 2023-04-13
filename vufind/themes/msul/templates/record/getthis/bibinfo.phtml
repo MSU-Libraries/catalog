@@ -3,7 +3,6 @@
 $item = $this->getthis->getItem();
 $check = $item['check'] ?? false;
 $link = $this->getthis->getLink();
-
 ?>
 <div>
     <b>Title:</b> <?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?><br/>
@@ -18,7 +17,7 @@ $link = $this->getthis->getLink();
           &nbsp;(Copy <?=$this->escapeHtml(($item['number']))?>)
         <?php endif; ?>
     <br/><br/>
-    <?php if ($item['link'] ?? false): ?>
+    <?php if ($item['is_holdable'] ?? false): ?>
         <p class="text-left">
             <b>Status:</b> <?= $this->getthis->getStatus() ?>
             <?php if ($item['availability'] ?? false) { ?>
