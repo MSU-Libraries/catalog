@@ -398,6 +398,11 @@ class GetThisLoader {
         $loc = $this->getLocation($item_id);
         $desc = $this->getDescription();
 
+        # Never show if the item is out
+        if ($this->isOut($item_id)) {
+            return false;
+        }
+
         # If all the items are on reserve, return false
         if (!$this->isAllReserve()) {
             return false;
