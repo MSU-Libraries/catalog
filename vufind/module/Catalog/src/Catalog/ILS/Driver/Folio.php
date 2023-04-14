@@ -598,11 +598,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 'status' => $hold->status,
                 // last_pickup_date,
             ];
-            if (!$available) {
-                $rec['position'] = $hold->status === 'Open - Awaiting delivery' || $hold->status === 'Open - In transit'
-                    ? $this->translate('hold_in_process')
-                    : (int)($hold->position ?? 1);
-            }
             if ($hold->status === 'Open - In transit') {
                 $rec['in_transit'] = true;
             }
