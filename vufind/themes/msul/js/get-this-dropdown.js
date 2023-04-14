@@ -19,6 +19,17 @@ $(document).ready(function() {
             }
         }, 1);
     });
+    $(".modal").on("keydown", ".get-this-dropdown > ul > li > a", function(e) {
+        // Down arrow opens dropdown and focuses on first option
+        if (e.keyCode == 40) {
+            $(".get-this-dropdown div").addClass('active');
+            $(".get-this-dropdown > ul > li > a").attr("aria-expanded", "true");
+            setTimeout(function () {
+                $(".get-this-dropdown div a").first().focus();
+            }, 1);
+            return false;
+        }
+    });
     $(".modal").on("keydown", function(e) {
         // Handle arrow key navidation of dropdown selection
         var dropdown = $(".get-this-dropdown div").get(0);
