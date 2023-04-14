@@ -1,84 +1,38 @@
-<?php
-  // Load search actions and settings (if any):
-  $options = $this->searchOptions($searchClassId);
-  $basicSearch = $options->getSearchAction();
-  $advSearch = $options->getAdvancedSearchAction();
-  $noJsSupport = $this->config()->nonJavascriptSupportEnabled();
-?>
-<?php if (!empty($facetList)): ?>
-  <div class="search-home-facets">
-    <?php foreach ($facetList as $field => $details): ?>
-      <?php $labelHeading = $this->transEsc('home_browse_by_facet', ['%%facet%%' => $this->translate($details['label'])]); ?>
-      <?php if ($isHierarchy = in_array($field, $hierarchicalFacets ?? [])):
-          $this->headScript()->appendFile('vendor/jsTree/jstree.min.js');
-          $this->headScript()->appendFile('facets.js');
-          $sort = $hierarchicalFacetSortOptions[$field] ?? $hierarchicalFacetSortOptions['*'] ?? 'all';
-          $script = <<<JS
-$(document).ready(function() {
-  $('#facet_{$this->escapeHtml($field)}_container').removeClass('hide');
-  initFacetTree($('#facet_{$this->escapeHtml($field)}'), false);
-});
-JS;
-          echo $this->inlineScript(\Laminas\View\Helper\HeadScript::SCRIPT, $script, 'SET');
-        ?>
-        <div id="facet_<?=$this->escapeHtml($field)?>_container" class="home-facet <?=$this->escapeHtmlAttr($field)?> hide">
-          <h2><?=$labelHeading?></h2>
-          <div id="facet_<?=$this->escapeHtml($field)?>" class="jstree-facet"
-              data-source="<?=$this->escapeHtml($this->searchClassId)?>"
-              data-facet="<?=$this->escapeHtml($field)?>"
-              data-path="<?=$this->url($basicSearch)?>"
-              data-exclude="0"
-              data-operator="AND"
-              data-exclude-title="<?=$this->transEscAttr('exclude_facet')?>"
-              data-sort="<?=$sort?>">
+<div class="search-home-facets">
+
+    <div class="home-facet">
+      <h2>Browse Alphabetically</h2>
+      <div class="home-facet-container">
+
+          <?php $alphaBrowseTypes = $this->config()->get('config')->AlphaBrowse_Types; ?>
+          <?=$this->context($this)->renderInContext('alphabrowse/home.phtml', ['alphaBrowseTypes' => $alphaBrowseTypes])?>
+
+      </div>
+    </div>
+    <div class="home-facet home-reserves">
+      <h2>Course Reserves</h2>
+      <div class="home-facet-container">
+  <!--    <p><?=$this->transEsc('Search for items on reserve:')?></p> -->
+          <form class="form-inline" method="get" name="reservesSearchForm" action="Search/Reserves">
+            <label for="reservesSearchForm_lookfor"><?=$this->transEsc("Your search terms")?></label>
+            <input id="reservesSearchForm_lookfor" placeholder="Search terms" type="text" name="lookfor" size="40" value="" <?=$this->searchOptions('SolrReserves')->autocompleteEnabled() ? ' class="form-control autocomplete searcher:SolrReserves type:Reserves"' : ''?> />
+            <input class="btn btn-primary" type="submit" name="submit" value="<?=$this->transEscAttr("Find")?>"/>
+          </form>
+      </div>
+    </div>
+        <div class="home-facet home-askalib">
+      <div class="home-facet-container">
+<a href="https://lib.msu.edu/contact/askalib" class="d-block d-block text-center py-3 px-md-2 h-100">
+        <div class="row g-0 justify-content-center align-items-center h-100 px-3 px-md-4 px-lg-0">
+          <div class="col-9 col-lg-12 text-start text-lg-center">
+            <span class="need-help">Need help getting started?</span>
+            <br>
+            <img class="ask-icon d-none d-lg-block" alt="" role="presentation" aria-hidden="true" src="/themes/msul/images/Icons_AskALib_Default.svg" onmouseover="this.src='/themes/msul/images/Icons_AskALib_Hover.svg';" onmouseout="this.src='/themes/msul/images/Icons_AskALib_Default.svg';">
+            <br>
+            <span class="askalibrarian">Ask a Librarian</span>
           </div>
         </div>
-        <noscript>
-          <?php if (!$noJsSupport): ?>
-            <h2><?=$labelHeading?></h2>
-            <?=$this->transEsc('Please enable JavaScript.')?>
-          <?php endif; ?>
-      <?php endif; ?>
-      <?php if (!$isHierarchy || $noJsSupport): // do we need regular display? ?>
-        <?php $sortedList = $this->sortFacetList($results, $field, $details['list'], $basicSearch); ?>
-        <div class="home-facet <?=$this->escapeHtmlAttr($field) ?>">
-          <h2><?=$labelHeading?></h2>
-          <div class="home-facet-container">
-            <ul class="home-facet-list">
-              <?php
-                // Special case: two columns for LC call numbers...
-                $maxListLength = $field == 'callnumber-first'
-                  ? $columnSize * 2 : $columnSize;
-
-                // Special case: custom URLs for collections...
-                $moreUrl = $field == 'hierarchy_top_title'
-                  ? $this->url('collections-home') : $this->url($advSearch);
-
-                // Convenience variable:
-                $currentListLength = count($sortedList);
-              ?>
-              <?php $i = 0; foreach ($sortedList as $url => $value):
-                  // Special case: custom URLs for collections...
-                  if ($field == 'hierarchy_top_title') {
-                      $url = $this->url('collections-bytitle') . '?title=' . urlencode($value);
-                  }
-                ?>
-                <li><a href="<?=$url?>"><?=$this->escapeHtml(empty($value) ? '-' : $value)?></a></li>
-                <?php if (++$i >= $currentListLength) break; // end of list? bail out! ?>
-                <?php if ($i >= $maxListLength): // list too long? show more link! ?>
-                  <li><a href="<?=$moreUrl?>"><strong><?=$this->transEsc("more_options_ellipsis")?></strong></a></li>
-                  <?php break; ?>
-                <?php elseif ($i % $columnSize === 0): // end of column? insert break! ?>
-                  </ul><ul class="home-facet-list">
-                <?php endif; ?>
-              <?php endforeach; ?>
-            </ul>
-          </div>
-        </div>
-      <?php endif; ?>
-      <?php if ($isHierarchy): // close tag opened in matching if above ?>
-        </noscript>
-      <?php endif; ?>
-    <?php endforeach; ?>
-  </div>
-<?php endif; ?>
+      </a>
+      </div>
+    </div>
+</div>

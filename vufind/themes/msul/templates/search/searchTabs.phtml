@@ -9,11 +9,9 @@
             <?=$block?>
         <?php endif; ?>
     <?php endforeach; ?>
-    <!-- MSUL Add in publication finder link -->
-    <li class="navtab-pubfinder">
-      <a target="_blank" href="https://search.ebscohost.com/login.aspx?authtype=ip,guest&custid=s8364774&groupid=main&direct=true&db=edspub&profile=eds&plp=1"><i class="fa fa-sign-in" aria-hidden="true"></i> eJournal Finder</a>
-    </li>
-  </ul>
+<li class="navtab-digrepo">
+      <a target="_blank" href="https://d.lib.msu.edu/"><i class="fa fa-sign-in" aria-hidden="true"></i> Digital Respository</a>
+    </li>  </ul>
   <?php if ($this->showCounts): ?>
     <?php $this->headScript()->appendFile('resultcount.js'); ?>
   <?php endif; ?>
