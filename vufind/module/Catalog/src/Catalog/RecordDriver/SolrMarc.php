@@ -161,6 +161,13 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         return $this->getSolrField('title_full');
     }
 
+    /**
+     * Get the Folio unique identifier
+     */
+    public function getUUID()
+    {
+        return $this->getSolrField('uuid_str');
+    }
 
 }
 
