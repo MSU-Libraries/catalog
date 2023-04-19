@@ -514,4 +514,112 @@ class Folio extends \VuFind\ILS\Driver\Folio
         return $result;
     }
 
+    /**
+     * This method queries the ILS for a patron's current holds
+     *
+     * Input: Patron array returned by patronLogin method
+     * Output: Returns an array of associative arrays, one for each hold associated
+     * with the specified account. Each associative array contains these keys:
+     *     type - A string describing the type of hold – i.e. hold vs. recall
+     * (optional).
+     *     id - The bibliographic record ID associated with the hold (optional).
+     *     source - The search backend from which the record may be retrieved
+     * (optional - defaults to Solr). Introduced in VuFind 2.4.
+     *     location - A string describing the pickup location for the held item
+     * (optional). In VuFind 1.2, this should correspond with a locationID value from
+     * getPickUpLocations. In VuFind 1.3 and later, it may be either
+     * a locationID value or a raw ready-to-display string.
+     *     reqnum - A control number for the request (optional).
+     *     expire - The expiration date of the hold (a string).
+     *     create - The creation date of the hold (a string).
+     *     position – The position of the user in the holds queue (optional)
+     *     available – Whether or not the hold is available (true/false) (optional)
+     *     item_id – The item id the request item (optional).
+     *     volume – The volume number of the item (optional)
+     *     publication_year – The publication year of the item (optional)
+     *     title - The title of the item
+     * (optional – only used if the record cannot be found in VuFind's index).
+     *     isbn - An ISBN for use in cover image loading (optional)
+     *     issn - An ISSN for use in cover image loading (optional)
+     *     oclc - An OCLC number for use in cover image loading (optional)
+     *     upc - A UPC for use in cover image loading (optional)
+     *     cancel_details - The cancel token, or a blank string if cancel is illegal
+     * for this hold; if omitted, this will be dynamically generated using
+     * getCancelHoldDetails(). You should only fill this in if it is more efficient
+     * to calculate the value up front; if it is an expensive calculation, you should
+     * omit the value entirely and let getCancelHoldDetails() do its job on demand.
+     * This optional feature was introduced in release 3.1.
+     *
+     * @param array $patron Patron login information from $this->patronLogin
+     *
+     * @return array Associative array of holds information
+     */
+    public function getMyHolds($patron)
+    {
+        // MSUL customization to add fields (including multi backend prefix) and sorting to query
+        $query = [
+            'query' => '(requesterId == "' . $patron['id'] . '"  ' .
+            'and status == Open*) sortBy requestDate/sort.ascending title/sort.ascending'
+        ];
+        $holds = [];
+        $allowCancelingAvailableRequests
+            = $this->config['Holds']['allowCancelingAvailableRequests'] ?? true;
+        foreach ($this->getPagedResults(
+            'requests',
+            '/request-storage/requests',
+            $query
+        ) as $hold) {
+            $requestDate = date_create($hold->requestDate);
+            // Set expire date if it was included in the response
+            $expireDate = isset($hold->requestExpirationDate)
+                ? date_create($hold->requestExpirationDate) : null;
+            $available = (string)$hold->status === 'Open - Awaiting pickup';
+            $servicePoint = isset($hold->pickupServicePointId)
+                ? $this->getPickupLocation($hold->pickupServicePointId) : null;
+            $location = isset($servicePoint) && count($servicePoint) == 1
+                ? $servicePoint[0]['locationDisplay'] : "";
+            $request_id = $this->getBibId(null, null, $hold->itemId);
+            $updateDetails = (!$available || $allowCancelingAvailableRequests)
+                ? (string)$request_id : '';
+            $rec = [
+                'type' => $hold->requestType,
+                'create' => date_format($requestDate, "j M Y"),
+                'expire' => isset($expireDate)
+                    ? date_format($expireDate, "j M Y") : "",
+                'id' => 'folio.' . $request_id,
+                'available' => $available,
+                'processed' => $hold->status !== 'Open - Not yet filled',
+                'location' => $location,
+                'updateDetails' => $updateDetails,
+                'item_id' => $hold->itemId,
+                'reqnum' => $hold->id,
+                // Title moved from item to instance in Lotus release:
+                'title' => $hold->instance->title ?? $hold->item->title ?? '',
+                'status' => $hold->status,
+                // last_pickup_date,
+            ];
+            if ($hold->status === 'Open - In transit') {
+                $rec['in_transit'] = true;
+            }
+            $holds[] = $rec;
+        }
+        return $holds;
+    }
+
+    public function getPickupLocation($locationId)
+    {
+        $query = ['query' => 'id == "' . $locationId . '"  '];
+        $locations = [];
+        foreach ($this->getPagedResults(
+            'servicepoints',
+            '/service-points',
+            $query
+        ) as $servicepoint) {
+            $locations[] = [
+                'locationID' => $servicepoint->id,
+                'locationDisplay' => $servicepoint->discoveryDisplayName
+            ];
+        }
+        return $locations;
+    }
 }
