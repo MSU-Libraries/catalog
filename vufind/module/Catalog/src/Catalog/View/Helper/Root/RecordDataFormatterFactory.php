@@ -21,6 +21,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
             'data-notes.phtml'
         );
         $spec->setLine('Physical Description', 'getPhysicalDescriptions');
+        $spec->setLine('Cartographic Data', 'getCartographicData');
 
         # Reorder the fields to get Genre next to Subjects
         $spec->reorderKeys(["Published in", "New Title", "Previous Title", "Authors",

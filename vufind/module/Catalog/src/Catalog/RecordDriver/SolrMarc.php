@@ -169,5 +169,12 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         return $this->getSolrField('uuid_str');
     }
 
+    /**
+     * Get the Cartographic Data
+     */
+    public function getCartographicData()
+    {
+        return $this->getMarcField('255', ['a', 'b', 'c', 'd']);
+    }
 }
 
