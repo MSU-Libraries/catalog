@@ -880,9 +880,16 @@ body.template-dir-myresearch.template-name-profile {
   &.disabled,
   &[disabled],
   fieldset[disabled] & {
-      &:hover {
-        background-color: @gray-darker;
-        color: white;
-      }
+    &:hover {
+      background-color: @gray-darker;
+      color: white;
+   }
+  }
+}
+
+// Fix checkboxes disapearing on account page
+@media (max-width: 767px) {
+  .result .checkbox {
+    display:block;
   }
 }
