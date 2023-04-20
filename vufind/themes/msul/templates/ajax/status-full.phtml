@@ -18,7 +18,7 @@ if ($selected != '') {
   else if (in_array($status, array('Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out')))
     $status = 'Checked Out';
   else if ($status == 'Restricted')
-    $status = 'Lib Use Only';
+    $status = 'Library Use Only';
   else if (!in_array($status, array('Available', 'Unavailable')))
     $status = 'Unknown status';
 }
@@ -29,7 +29,7 @@ if ($selected != '') {
     <span class="fullAvailability">
       <?php if ($selected['availability']): ?>
         <strong class="text-success"><?=($selected['reserve'] == 'Y') ? $this->transEsc("On Reserve") : $this->transEsc("Available")?></strong>
-      <?php elseif ($status == 'Lib Use Only'): ?>
+      <?php elseif ($status == 'Library Use Only'): ?>
         <strong class="text-warning"><?=$this->transEsc($status)?></strong>
       <?php else: ?>
         <strong class="text-danger"><?=$this->transEsc($status)?></strong>

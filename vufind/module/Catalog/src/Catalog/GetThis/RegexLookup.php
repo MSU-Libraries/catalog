@@ -28,7 +28,7 @@ class RegexLookup {
     // Status
     const AVAILABLE             = ['/AVAILABLE/i'];
     const IN_PROCESS            = ['/IN PROCESS/i'];
-    const LIB_USE_ONLY          = ['/LIB USE ONLY/i'];
+    const LIB_USE_ONLY          = ['/LIB USE ONLY/i', '/LIBRARY USE ONLY/i'];
     const ON_DISPLAY            = ['/ON DISPLAY/i'];
     // Description
     const VINYL                 = ['/VINYL/i'];

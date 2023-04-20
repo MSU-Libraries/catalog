@@ -75,7 +75,7 @@ class GetThisLoader {
         else if (in_array($status, array('Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out')))
           $status = 'Checked Out';
         else if ($status == 'Restricted')
-          $status = 'Lib Use Only';
+          $status = 'Library Use Only';
         else if (!in_array($status, array('Available', 'Unavailable')))
           $status = 'Unknown status';
 
