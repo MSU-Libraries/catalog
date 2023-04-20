@@ -874,3 +874,15 @@ body.template-dir-myresearch.template-name-profile {
     }
   }
 }
+
+// Fix visibility of text for on-hover of disabled buttons
+.btn-group input {
+  &.disabled,
+  &[disabled],
+  fieldset[disabled] & {
+      &:hover {
+        background-color: @gray-darker;
+        color: white;
+      }
+  }
+}
