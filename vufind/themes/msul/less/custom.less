@@ -297,53 +297,125 @@ body.template-dir-search.template-name-results, body.template-dir-eds.template-n
   }
 }
 //hide back to catalog link
-body.template-dir-record, body.template-dir-combined, body.template-dir-content, body.template-dir-browse, body.template-dir-alphabrowse, body.template-dir-channels {
+body.template-name-home, body.template-dir-record, body.template-dir-combined, body.template-dir-content, body.template-dir-browse, body.template-dir-alphabrowse, body.template-dir-channels {
   .backtocat {
     display:none;
   }
+}
+
+//hide 2nd searchbox on home page (brought in with Browse Alphabetically template)
+body.template-dir-search.template-name-home .searchHomeContent {
+  display:none;
+}
+//hide filters on home page (don't know why showing up now)
+body.template-dir-search.template-name-home .active-filters {
+  display:none;
 }
 
 .mainbody .container .searchbox {
   margin-bottom:0;
 }
 
-// Main content and sidebar widths and float
-.home-facet-list a {
-  text-decoration:none;
+@media only screen and (min-width : 768px) {
+  body.template-name-home .searchbox, .footer-container {
+    padding-left:5%;
+  }
 }
-.home-facet-list a:hover, a:active {
-  text-decoration:underline;
+@media only screen and (max-width : 767px) {
+  .searchbox {
+    label, input, select {
+      margin-bottom:1rem;
+    }
+  }
 }
-.search-home-facets li a, .vf-footer li a {
-  text-decoration:none;
-}
+
 .searchHomeContent form .active-filters {
   display:none;
 }
 @media only screen and (min-width : 768px) {
-  .home-facet.language, .home-facet.format {
-    border-left:1px solid @medgray;
+  .home-facet {
+    padding-right:5%;
     padding-left:5%;
+
+    &.home-reserves,
+    &.home-askalib {
+      border-left:1px solid @medgray;
+    }
   }
 }
 
-.home-facet.language ul li:last-child, .home-facet.format ul li:last-child {
-  text-align:center;
-  width:9.5rem;
-  margin-top:1rem;
-  padding:0.1rem;
-  text-decoration: none;
-  border: 2px solid @parakeetgreen;
-  -webkit-border-radius: 7rem;
-  -moz-border-radius: 7rem;
-  border-radius: 7rem;
+.search-home-facets {
+  margin-top:5rem;
+  margin-bottom:5rem;
+  .home-facet {
+    form, label, select, input {
+      display:block;
+    }
+    form {
+      margin-bottom:3rem;
+    }
+    label {
+      margin-bottom:0.5rem;
+      font-weight:normal;
+      color:@gray-darker;
+    }
+    input, select {
+      margin-bottom:1.5rem;
+    }
+    h2 {
+      margin-bottom:2rem;
+    }
+  }
 
-  a:hover {
-    text-decoration:none;
-    color:@darkparakeetgreen;
+  .home-facet.home-reserves {
+    label {
+      visibility:hidden;
+      position:relative;
+      margin-bottom:2rem;
+    }
+    label:after {
+      visibility: visible;
+      position: absolute;
+      top: 0;
+      left: 0;
+      content: "Search for items on reserve:";
+    }
+    #reservesSearchForm_lookfor {
+      width:100%;
+    }
+  }
+
+  .home-facet.home-askalib {
+    padding-top:3rem;
+    a, a:active, a:hover, a:visited {
+      text-decoration:none;
+      color:#fff;
+      width:100%;
+      padding:1.5rem;
+    }
+
+    .home-facet-container {
+      margin:0 auto;
+      background-color:@parakeetgreen;
+      -webkit-border-radius: 0.5rem;
+      -moz-border-radius: 0.5rem;
+      border-radius: 0.5rem;
+
+      .ask-icon {
+        content:url("/themes/msul/images/Icons_AskALib_Default.svg");
+        height:8rem;
+      }
+      &:hover .ask-icon {
+        content:url("/themes/msul/images/Icons_AskALib_Hover.svg");
+        height:8rem;
+      }
+
+      .need-help, .askalibrarian {
+        font-size:1.3rem;
+      }
+    }
   }
 }
-
 
 form.searchForm, .record-tabs, .navbar-form {
   ul.nav-tabs {
@@ -351,6 +423,7 @@ form.searchForm, .record-tabs, .navbar-form {
 
     li {
       font-size:larger;
+      height:2.75rem;
     }
     a, &:active a, &:hover a {
       border:0;
@@ -361,7 +434,7 @@ form.searchForm, .record-tabs, .navbar-form {
       padding:0;
       margin:0 0.7rem;
     }
-    .navtab-pubfinder {
+    .navtab-digrepo {
       border-left:0.2rem solid @eggplant;
       padding-left:0.5rem;
       margin-left:0.5rem;
@@ -904,5 +977,4 @@ body.template-dir-myresearch.template-name-profile {
   .result .checkbox {
     display:block;
   }
-
 }
