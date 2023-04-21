@@ -176,5 +176,13 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         return $this->getMarcField('255', ['a', 'b', 'c', 'd']);
     }
+
+    /**
+     * Get the record description
+     */
+    public function getSummary()
+    {
+        return $this->getMarcField('520', ['a', 'b', 'c', 'd']);
+    }
 }
 
