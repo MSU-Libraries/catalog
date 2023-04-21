@@ -69,6 +69,13 @@ class Record extends \VuFind\View\Helper\Root\Record
     {
         $links = parent::getLinkDetails($openUrlActive);
         $links = $this->deduplicateLinks($links);
+        # Remove cover image
+        foreach ($links as $idx => $link) {
+            if (strcasecmp($link['desc'], "cover image") === 0) {
+                unset($links[$idx]);
+                break;
+            }
+        }
         return array_map([$this,'getLinkTargetLabel'], $links);
     }
 
@@ -86,4 +93,31 @@ class Record extends \VuFind\View\Helper\Root\Record
     {
         return array_values(array_unique($links, SORT_REGULAR));
     }
+
+    /**
+     * Generate a thumbnail URL (return false if unsupported).
+     * Overriding getThumbnail to use link with label "Cover image" when available
+     *
+     * @param string $size Size of thumbnail (small, medium or large -- small is
+     * default).
+     *
+     * @return string|bool
+     */
+    public function getThumbnail($size = 'small')
+    {
+        $url = false;
+        // Check if a link is provided with "Cover image" as the label
+        $links = parent::getLinkDetails();
+        foreach ($links as $link) {
+            if (strcasecmp($link['desc'], "cover image") === 0) {
+                $url = $link['url'];
+            }
+        }
+        // When no "Cover image" link is available, fall pack to default
+        if (!$url) {
+            $url = parent::getThumbnail($size);
+        }
+        return $url;
+    }
+
 }
