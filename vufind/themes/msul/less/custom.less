@@ -888,8 +888,21 @@ body.template-dir-myresearch.template-name-profile {
 }
 
 // Fix checkboxes disapearing on account page
+.result .record-checkbox {
+  display:block;
+  flex: 0;
+  cursor: pointer;
+}
+
+.result .record-number {
+  display: block;
+  flex: 0 2rem;
+  text-align: center;
+}
+
 @media (max-width: 767px) {
   .result .checkbox {
     display:block;
   }
+
 }
