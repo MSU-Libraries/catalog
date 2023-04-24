@@ -184,5 +184,13 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         return $this->getMarcField('520', ['a', 'b', 'c', 'd']);
     }
+
+    /**
+     * Get the eJournal date coverage
+     */
+    public function getDateCoverage()
+    {
+        return $this->getMarcField('856', ['u','z']);
+    }
 }
 

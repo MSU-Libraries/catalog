@@ -53,6 +53,7 @@ class Record extends \VuFind\View\Helper\Root\Record
         }
         if ($label !== null) {
             $link['desc'] .= " ({$label})";
+           # $link['desc'] .= " " . $this->getDateCoverage();
         }
         return $link;
     }
