@@ -22,7 +22,6 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         );
         $spec->setLine('Physical Description', 'getPhysicalDescriptions');
         $spec->setLine('Cartographic Data', 'getCartographicData');
-        $spec->setLine('Online Access', 'getDateCoverage');
 
         # Reorder the fields to get Genre next to Subjects
         $spec->reorderKeys(["Published in", "New Title", "Previous Title", "Authors",

@@ -53,7 +53,6 @@ class Record extends \VuFind\View\Helper\Root\Record
         }
         if ($label !== null) {
             $link['desc'] .= " ({$label})";
-           # $link['desc'] .= " " . $this->getDateCoverage();
         }
         return $link;
     }
@@ -68,9 +67,7 @@ class Record extends \VuFind\View\Helper\Root\Record
      */
     public function getLinkDetails($openUrlActive = false)
     {
-        $links = parent::getLinkDetails($openUrlActive);
-        $links = $this->deduplicateLinks($links);
-        # Remove cover image
+        $links = $this->driver->geteJournalLinks();
         foreach ($links as $idx => $link) {
             if (strcasecmp($link['desc'], "cover image") === 0) {
                 unset($links[$idx]);
