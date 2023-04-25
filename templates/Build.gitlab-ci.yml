@@ -18,6 +18,8 @@ Build Ansible Image:
   variables:
      COMPONENT: ansible
   extends: .build_template
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
 Build Monitoring Image:
   variables:
@@ -34,7 +36,7 @@ Build Vufind Image:
     action: prepare
   interruptible: true
   rules:
-    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   variables:
     LATEST: $CI_REGISTRY_IMAGE/vufind:latest
@@ -57,7 +59,7 @@ Build Vufind Image:
   retry: 2
   interruptible: true
   rules:
-    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   variables:
     LATEST: $CI_REGISTRY_IMAGE/$COMPONENT:latest

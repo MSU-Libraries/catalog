@@ -24,8 +24,8 @@ Set Stack Name:
   tags:
     - msul-shared
   rules:
-    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_PIPELINE_SOURCE == "schedule") && $PROD == "false"'
-    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $PROD == "true"'
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $PROD == "false" && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $PROD == "true"'
       when: manual
   before_script:
     - apk add --no-cache bash
@@ -39,7 +39,7 @@ Create DNS:
   extends: .stack_template
   image: $CI_REGISTRY_IMAGE/ansible:latest
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
+    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -49,7 +49,7 @@ Create DNS:
 Deploy Compose Files:
   extends: .stack_template
   rules:
-    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   needs:
     - job: Set Stack Name
@@ -100,7 +100,7 @@ Bootstrap Stacks:
 Deploy Solr:
   extends: .stack_template
   rules:
-    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   needs:
     - job: Set Stack Name
@@ -123,7 +123,7 @@ Deploy Swarm Cron:
 Deploy DB:
   extends: .stack_template
   rules:
-    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   needs:
     - job: Set Stack Name
@@ -144,7 +144,7 @@ Deploy Vufind:
     url: $URL
     on_stop: Remove Environment
   rules:
-    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   needs:
     - job: Set Stack Name
@@ -165,7 +165,7 @@ Deploy Vufind:
 Deploy Monitoring:
   extends: .stack_template
   rules:
-    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   needs:
     - job: Set Stack Name
@@ -187,28 +187,6 @@ Verify Vufind Image:
   script:
     - bash ./cicd/verify-vufind-image
 
-Vufind Upgrade:
-  extends: .stack_template
-  needs:
-    - job: Set Stack Name
-      artifacts: true
-    - job: Deploy Vufind
-      artifacts: true
-    - Verify Vufind Image
-  script:
-    - bash ./cicd/vufind-upgrade
-
-Populate Vufind Environment:
-  extends: .stack_template
-  rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
-  needs:
-    - job: Set Stack Name
-      artifacts: true
-    - Vufind Upgrade
-  script:
-    - bash ./cicd/populate-vufind-environment
-
 Verify Stack Health:
   extends: .stack_template
   needs:
@@ -218,14 +196,36 @@ Verify Stack Health:
   script:
     - bash ./cicd/verify-stack-health
 
-Scale Down Catalog Service:
+Vufind Upgrade:
   extends: .stack_template
-  rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   needs:
     - job: Set Stack Name
       artifacts: true
+    - job: Deploy Vufind
+      artifacts: true
     - Verify Stack Health
+  script:
+    - bash ./cicd/vufind-upgrade
+
+Populate Vufind Environment:
+  extends: .stack_template
+  rules:
+    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Vufind Upgrade
+  script:
+    - bash ./cicd/populate-vufind-environment
+
+Scale Down Catalog Service:
+  extends: .stack_template
+  rules:
+    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Populate Vufind Environment
   script:
     - bash ./cicd/scale-down-catalog-service
 
@@ -237,7 +237,7 @@ Remove Environment:
     name: $CI_COMMIT_BRANCH
     action: stop
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
+    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
       when: manual
   needs:
     - job: Set Stack Name
@@ -258,7 +258,7 @@ Remove Environment:
     ENCODED_PRIVATE_KEY: $DEPLOY_PRIVATE_KEY
     SERVER: $DEPLOY_HOST_A
   rules:
-    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "schedule") && $CI_DEPLOY_FREEZE == null'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
   needs:
     - job: Set Stack Name
