@@ -156,22 +156,14 @@ class Folio extends \VuFind\ILS\Driver\Folio
 
         // Check if there are any bound-with items that need to be added
         // and then merge them into the list if we don't already have that item
-        $this->debug("NUMBER OF ITEMS FOUND BEFORE BOUND WITH");
-        $this->debug(count($items));
-        $item_ids = [];
-        foreach ($items as $item) {
-            array_push($item_ids, $item['item_id']);
-            $this->debug("HOLDING ITEM: " . $item['item_id']);
-        }
+        $item_ids = array_column($items, 'item_id');
         foreach ($this->getBoundwithHoldings($bibId, $instance->id) as $bound_item) {
-            $this->debug("CHECKING ITEM: " . $bound_item['item_id']);
             if (!in_array($bound_item['item_id'], $item_ids)) {
-                $this->debug("Adding item");
                 array_push($items, $bound_item);
             }
         }
 
-        # Sort by enumchron (volume) and set the number (copy) field
+        // Sort by enumchron (volume) and set the number (copy) field
         uasort($items, function($item1, $item2) {
             return $item2['location'] <=> $item1['location'] ?: # reverse sort
                    version_compare($item1['enumchron'], $item2['enumchron']) ?:
@@ -190,7 +182,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $prev_enumchron = $item['enumchron'];
             $prev_location = $item['location'];
         }
-
 
         return $items;
     }
@@ -214,7 +205,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
             '/holdings-storage/holdings',
             $query
         ) as $bound_holding) {
-            $this->debug("FOUNT BOUND WITH ITEMS");
             $query = [
                 'query' => 'holdingsRecordId=="' . $bound_holding->id . '"'
             ];
@@ -223,9 +213,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 '/inventory-storage/bound-with-parts',
                 $query
             ) as $bound) {
-                $this->debug("DEBUG!!!");
-                $this->debug($bound->itemId);
-                $this->debug($bound->id);
                 $response = $this->makeRequest(
                     'GET',
                     '/item-storage/items/' . $bound->itemId
