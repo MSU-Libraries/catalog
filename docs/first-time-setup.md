@@ -103,6 +103,7 @@ The `vufind` application user (set in `local/confing/vufind/folio.ini`) requires
 following permissions within FOLIO. They need to be created as a permission set with the FOLIO API, with a `POST` request to `/perms/permissions`.
 
 * `inventory.instances.item.get`
+* `inventory-storage.bound-with-parts.collection.get`
 * `inventory-storage.holdings.collection.get`
 * `inventory-storage.holdings.item.get`
 * `inventory-storage.instances.collection.get`
