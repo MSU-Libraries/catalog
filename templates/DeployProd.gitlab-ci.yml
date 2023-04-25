@@ -3,7 +3,7 @@ Set Prod Stack Name:
   stage: Deploy
   extends: Set Stack Name
   needs:
-    - Verify Vufind Image
+    - Verify Stack Health
   variables:
     PROD: "true"
   rules:
