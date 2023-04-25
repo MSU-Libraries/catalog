@@ -113,6 +113,12 @@ resources such as Solr and the Traefik dashboard
 * `REGISTRY_ACCESS_TOKEN`: Read-only registry access token used by deploy user
 * `RW_CICD_TOKEN`: Read-Write access token to this repository used to create release tags 
 
+## Scheduled Pipelines
+For the Ansible image to build overnight, saving time on regular daily builds, we can set up a scheduled pipeline to
+run off-hours in GitLab. This is done in the [Schedules](https://gitlab.msu.edu/msu-libraries/devops/catalog/-/pipeline_schedules)
+tab in the CI/CD page of GitLab. You should configure it for the `main` branch and set it to run at whatever time is convienient
+for your team.
+
 ## Deploy Freezes
 If you want to prevent deployments to the production environment during certain times, you
 can make use of GitLab's [Deploy Freeze](https://gitlab.msu.edu/help/ci/environments/deployment_safety.md#prevent-deployments-during-deploy-freeze-windows)

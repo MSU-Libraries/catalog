@@ -127,6 +127,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
                         ]
                     )
                 );
+                $enum = str_ends_with($holdingCallNumber, $enum) ? '' : $enum;
+
                 $items[] = $callNumberData + [
                     'id' => $bibId,
                     'item_id' => $item->id,
@@ -145,12 +147,23 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     'location' => $locationName,
                     'location_code' => $locationCode,
                     'reserve' => 'TODO',
-                    'addLink' => true                ];
+                    'addLink' => true
+                ];
+
             }
 
         }
 
-        # Sort by enumchron (volume) and set the number (copy) field
+        // Check if there are any bound-with items that need to be added
+        // and then merge them into the list if we don't already have that item
+        $item_ids = array_column($items, 'item_id');
+        foreach ($this->getBoundwithHoldings($bibId, $instance->id) as $bound_item) {
+            if (!in_array($bound_item['item_id'], $item_ids)) {
+                array_push($items, $bound_item);
+            }
+        }
+
+        // Sort by enumchron (volume) and set the number (copy) field
         uasort($items, function($item1, $item2) {
             return $item2['location'] <=> $item1['location'] ?: # reverse sort
                    version_compare($item1['enumchron'], $item2['enumchron']) ?:
@@ -170,7 +183,117 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $prev_location = $item['location'];
         }
 
+        return $items;
+    }
 
+    /**
+     * Get the bound-with items associated with the instance ID
+     * @param string $bibId         Bib-level id
+     * @param string $instanceId    Instance-level id
+     *
+     * @return array An array of associative holding arrays
+     */
+    public function getBoundwithHoldings($bibId, $instanceId)
+    {
+        $items = [];
+
+        $query = [
+            'query' => 'instanceId==' . $instanceId
+        ];
+        foreach ($this->getPagedResults(
+            'holdingsRecords',
+            '/holdings-storage/holdings',
+            $query
+        ) as $bound_holding) {
+            $query = [
+                'query' => 'holdingsRecordId=="' . $bound_holding->id . '"'
+            ];
+            foreach ($this->getPagedResults(
+                'boundWithParts',
+                '/inventory-storage/bound-with-parts',
+                $query
+            ) as $bound) {
+                $response = $this->makeRequest(
+                    'GET',
+                    '/item-storage/items/' . $bound->itemId
+                );
+                $bound_item = json_decode($response->getBody());
+
+                // Formatter helper functions
+                $notesFormatter = function ($note) {
+                    return !($note->staffOnly ?? false)
+                        && !empty($note->note) ? $note->note : '';
+                };
+                $textFormatter = function ($supplement) {
+                    $format = '%s %s';
+                    $supStat = $supplement->statement ?? '';
+                    $supNote = $supplement->note ?? '';
+                    $statement = trim(sprintf($format, $supStat, $supNote));
+                    return $statement ?? '';
+                };
+
+                $holdingNotes = array_filter(
+                    array_map($notesFormatter, $bound_holding->notes ?? [])
+                );
+                $hasHoldingNotes = !count($holdingNotes) > 0;
+                $holdingsStatements = array_map(
+                    $textFormatter,
+                    $bound_holding->holdingsStatements ?? []
+                );
+                $holdingsSupplements = array_map(
+                    $textFormatter,
+                    $bound_holding->holdingsStatementsForSupplements ?? []
+                );
+                $holdingsIndexes = array_map(
+                    $textFormatter,
+                    $bound_holding->holdingsStatementsForIndexes ?? []
+                );
+                $locationId = $bound_item->effectiveLocationId;
+                $locationData = $this->getLocationData($locationId);
+                $locationName = $locationData['name'];
+                $locationCode = $locationData['code'];
+                $holdingCallNumber = $bound_holding->callNumber ?? '';
+                $holdingCallNumberPrefix = $bound_holding->callNumberPrefix ?? '';
+                $callNumberData = $this->chooseCallNumber(
+                    $holdingCallNumberPrefix,
+                    $holdingCallNumber,
+                    $bound_item->itemLevelCallNumberPrefix ?? '',
+                    $bound_item->itemLevelCallNumber ?? ''
+                );
+                // concatenate enumeration fields if present
+                $enum = implode(
+                    ' ', array_filter(
+                        [
+                            $bound_item->volume ?? null,
+                            $bound_item->enumeration ?? null,
+                            $bound_item->chronology ?? null
+                        ]
+                    )
+                );
+                $enum = str_ends_with($holdingCallNumber, $enum) ? '' : $enum;
+
+                $items[] = $callNumberData + [
+                    'id' => $bibId,
+                    'item_id' => $bound->itemId,
+                    'holding_id' => $bound_holding->id,
+                    'number' => 0, # will be set afterwards
+                    'enumchron' => $enum,
+                    'barcode' => $bound_item->barcode ?? '',
+                    'status' => $bound_item->status->name,
+                    'availability' => $bound_item->status->name == 'Available',
+                    'is_holdable' => $this->isHoldable($locationName),
+                    'holdings_notes'=> $hasHoldingNotes ? $holdingNotes : null,
+                    'item_notes' => !empty($itemNotes) ? $itemNotes : null,
+                    'issues' => $holdingsStatements,
+                    'supplements' => $holdingsSupplements,
+                    'indexes' => $holdingsIndexes,
+                    'location' => $locationName,
+                    'location_code' => $locationCode,
+                    'reserve' => 'TODO',
+                    'addLink' => true
+                ];
+            }
+        }
         return $items;
     }
 
