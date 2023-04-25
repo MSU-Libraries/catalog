@@ -44,6 +44,9 @@ main() {
     HOSTS="$DEPLOY_HOST_A $DEPLOY_HOST_B $DEPLOY_HOST_C";
     check galera
     check solr
+    check zk
+    check folio
+    check docker
 }
 
 beforescript
