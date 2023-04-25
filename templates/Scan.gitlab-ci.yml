@@ -12,6 +12,8 @@ Shellcheck CI:
   tags:
     - msul-shared
   interruptible: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
   before_script:
     - apk add shellcheck || apt install shellcheck
   script:
