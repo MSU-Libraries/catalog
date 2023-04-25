@@ -177,22 +177,13 @@ Deploy Monitoring:
   script:
     - bash ./cicd/deploy-monitoring
 
-Verify Vufind Image:
-  extends: .stack_template
-  needs:
-    - job: Set Stack Name
-      artifacts: true
-    - job: Deploy Vufind
-      artifacts: true
-  script:
-    - bash ./cicd/verify-vufind-image
-
 Verify Stack Health:
   extends: .stack_template
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Verify Vufind Image
+    - Deploy Monitoring
+    - Deploy Vufind
   script:
     - bash ./cicd/verify-stack-health
 
