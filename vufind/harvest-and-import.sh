@@ -37,6 +37,9 @@ runhelp() {
     echo "     Only run the OAI harvest, but do not proceed to import"
     echo "     the data into VuFind"
     echo ""
+    echo "Note: Harvests can be disabled by adding a file named 'disabled'"
+    echo "(case insensitive) at the top of the SHARED_DIR path."
+    echo ""
     echo "FLAGS:"
     echo "  -o|--oai-harvest"
     echo "      Run an OAI harvest into VUFIND_HARVEST_DIR. Will attempt"
@@ -470,12 +473,21 @@ batch_import() {
     verbose "Completed processing records to be deleted."
 }
 
+check_harvest_disabled() {
+    DISABLED=$( find "${ARGS[SHARED_DIR]}" -mindepth 1 -maxdepth 1 -type f -iname 'disabled' | wc -l )
+    if [[ "$DISABLED" -gt 0 ]]; then
+        verbose "Not starting OAI harvest - detected file named 'disabled' in ${ARGS[SHARED_DIR]}"
+        exit 0
+    fi
+}
+
 # Main logic for the script
 main() {
     declare -g LOG_FILE
     LOG_FILE=$(mktemp)
     verbose "Logging to ${LOG_FILE}"
     verbose "Using VUFIND_HOME of ${VUFIND_HOME}"
+    check_harvest_disabled
     pushd "${VUFIND_HOME}" 2> /dev/null
     verbose "Starting processing"
 
