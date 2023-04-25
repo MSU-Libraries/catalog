@@ -474,7 +474,7 @@ batch_import() {
 }
 
 check_harvest_disabled() {
-    DISABLED=$( find "${ARGS[SHARED_DIR]}" -mindepth 1 -maxdepth 1 -type f -iname 'disabled' | wc -l )
+    DISABLED=$( find -L "${ARGS[SHARED_DIR]}" -mindepth 1 -maxdepth 1 -type f -iname 'disabled' | wc -l )
     if [[ "$DISABLED" -gt 0 ]]; then
         verbose "Not starting OAI harvest - detected file named 'disabled' in ${ARGS[SHARED_DIR]}"
         exit 0
