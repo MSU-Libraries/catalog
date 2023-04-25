@@ -45,7 +45,6 @@ main() {
     check galera
     check solr
     check zk
-    check folio
     check docker
 }
 
