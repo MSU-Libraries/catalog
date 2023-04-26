@@ -184,5 +184,38 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         return $this->getMarcField('520', ['a', 'b', 'c', 'd']);
     }
+
+    /**
+     * Get the eJournal links with date coverage from the z subfield if available
+     */
+    public function geteJournalLinks()
+    {
+        $data = [];
+        $idx = 0;
+        $marc = $this->getMarcReader();
+
+        $marc856s = $marc->getFields('856', ['u', 'z', 'y']);
+        $marc773s = $marc->getFields('773', ['t']);
+
+        foreach ($marc856s as $marc856) {
+            $subfields = $marc856['subfields'];
+            $rec = [];
+
+            foreach ($subfields as $subfield) {
+                $sfvals[$subfield['code']] = $subfield['data'];
+                if ($subfield['code'] == 'u') $rec['url'] = $subfield['data'];
+                elseif ($subfield['code'] == 'z') $rec['desc'] = $subfield['data'];
+            }
+
+            // Fall back to 773 field if we can't find description in the '856z' field
+            if (in_array('z', $subfields) || empty($rec['desc'])) {
+                $rec['desc'] = $marc773s[$idx]['subfields'][0]['data'];
+            }
+
+            $data[] = $rec;
+            $idx += 1;
+        }
+        return $data;
+    }
 }
 
