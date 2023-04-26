@@ -28,7 +28,7 @@ return array (
   'controllers' => [
     'factories' => [
       'Catalog\\Controller\\RecordController' => 'VuFind\\Controller\\AbstractBaseWithConfigFactory',
-      'Catalog\\\Controller\\MyResearchController' => 'VuFind\\Controller\\AbstractBaseFactory',
+      'Catalog\\Controller\\MyResearchController' => 'VuFind\\Controller\\AbstractBaseFactory',
     ],
     'aliases' => [
       'VuFind\\Controller\\RecordController' => 'Catalog\\Controller\\RecordController',
