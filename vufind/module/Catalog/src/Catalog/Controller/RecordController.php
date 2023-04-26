@@ -1,5 +1,7 @@
 <?php
+
 namespace Catalog\Controller;
+
 use VuFind\Exception\Mail as MailException;
 use VuFind\Mailer\Mailer;
 use Catalog\GetThis\GetThisLoader;
