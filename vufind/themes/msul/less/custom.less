@@ -7,15 +7,62 @@
 //container width
 .container {
   width: 100%;
-  margin-left:0.2rem;
-  margin-right:0.2rem;
+/*  margin-left:0.2rem;
+  margin-right:0.2rem; */
 }
 /* ------ Layout ------ */
 
 /* --- Header --- */
+
+.template-name-home header {
+    background-color:@msugreen;
+    background-image: 
+    linear-gradient(
+      rgba(24, 69, 59, 0.8), 
+      rgba(24, 69, 59, 0.8)
+    ),
+    url(/vufind/themes/msul/images/banner-image.jpg);
+    background-repeat: no-repeat;
+    background-attachment: fixed;  
+    background-position: 50% 80%;
+    background-size: cover;
+    margin-bottom: 3rem;
+  .banner.container {
+    background: none;
+    margin-bottom:0;
+    }  
+  }
+  //home page search form appearance
+.template-name-home form.searchForm {
+  background: rgba(255,255,255,0.8);
+  border-radius: 0.5rem;
+  padding: 2rem 2rem 3rem 2rem;
+}
+  //center on home page at medium width
+  .template-name-home header .search.container {
+      @media only screen and (min-width : 768px) {
+        margin-left:auto;
+        margin-right:auto;
+        width:80%;
+    }
+        @media only screen and (min-width : 992px) {
+        width:70rem;
+        text-align:center;
+    }
+  }
+
 header {
   .banner.container {
-    background: @msugreen url('/vufind/themes/msul/images/newHeader.jpg') no-repeat;
+    background-color:@msugreen;
+    background-image: 
+    linear-gradient(
+      rgba(24, 69, 59, 0.8), 
+      rgba(24, 69, 59, 0.8)
+    ),
+    url(/vufind/themes/msul/images/banner-image.jpg);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 50% 110%;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
@@ -29,6 +76,7 @@ header {
     margin-bottom: 3rem;
   }
 
+
   .navbar-header {
     a,  a:hover, a:active, a:visited {
       color:#fff;
@@ -36,6 +84,10 @@ header {
     }
     a:focus {
       outline:1px dotted #fff;
+    }
+    .fa {
+      font-size:2rem;
+      color:#fff;
     }
     padding:1rem;
   }
@@ -81,7 +133,7 @@ header {
   }
   a:hover, a:active, a:focus {
     color:@msugreen;
-    .fa {
+    & .fa {
       color:@msugreen;
     }
   }
@@ -317,17 +369,47 @@ body.template-dir-search.template-name-home .active-filters {
 }
 
 @media only screen and (min-width : 768px) {
-  body.template-name-home .searchbox, .footer-container {
+ .footer-container {
     padding-left:5%;
   }
 }
-@media only screen and (max-width : 767px) {
+//searchbox responsive styling
   .searchbox {
-    label, input, select {
+  @media only screen and (max-width : 767px) {
+    label, input, select, button {
+      width:100%;
+    }
+
+  }
+  @media only screen and (max-width : 991px) {
+    label, input, select, button {
+      display:block;
+      margin-bottom:0.3rem;
+    }
+
+  }
+    @media only screen and (max-width : 1228px) {
+      input {
       margin-bottom:1rem;
     }
   }
+  @media only screen and (min-width : 992px) {
+    .btn-link {
+      margin-top:1rem;
+    }
+  }
 }
+  .template-dir-search.template-name-results .searchbox {
+  @media only screen and (max-width : 767px) {
+
+  }
+  @media only screen and (max-width : 1228px) {
+    label, input, select, button {
+      display:block;
+    }
+  }
+}
+
 
 .searchHomeContent form .active-filters {
   display:none;
@@ -460,6 +542,7 @@ form.searchForm {
     margin-bottom:2rem;
   }
 }
+
 
 .record-tabs {
   ul.nav-tabs {
@@ -973,7 +1056,7 @@ body.template-dir-myresearch.template-name-profile {
   text-align: center;
 }
 
-@media (max-width: 767px) {
+@media only screen and (max-width : 767px) {
   .result .checkbox {
     display:block;
   }

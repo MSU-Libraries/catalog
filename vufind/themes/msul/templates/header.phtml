@@ -84,33 +84,6 @@
     </div>
   <?php endif; ?>
 </div>
-<?php if ($isTestTenant): ?>
-  <div class="collapse navbar-collapse" id="navbar-warning">
-    <p>
-      <b>Notice:</b> This catalog is connected to the FOLIO test tenant, and should be used for testing purposes only.
-      The information here is not up-to-date, and item availability will not be accurate.
-      <a href="https://catalog-prod.lib.msu.edu" target="_blank">
-        <i class="fa fa-sign-in" aria-hidden="true"></i>
-        Go to the production catalog
-      </a>
-    </p>
-  </div>
-<?php else: ?>
-  <div class="collapse navbar-collapse" id="navbar-warning">
-    <p>
-      Welcome to the new interface for the MSU Libraries catalog,
-      expected to launch in May 2023. While
-      <a href="https://catalog.lib.msu.edu/" target="_blank">
-        <i class="fa fa-sign-in" aria-hidden="true"></i> EDS
-      </a>
-      remains the official catalog, you can use this site as an alternative, and
-      <em>
-        help us improve it by providing
-        <a data-lightbox href="<?=$this->url('feedback-home') ?>">feedback and suggestions</a>!
-      </em>
-    </p>
-  </div>
-<?php endif; ?>
 <?php if ($this->layout()->searchbox !== false): ?>
   <div class="search container navbar">
     <div class="backtocat"><p><a style="text-decoration:none;" href="/Search">&#8592;&nbsp;&nbsp;Back to the catalog</a></p></div>
