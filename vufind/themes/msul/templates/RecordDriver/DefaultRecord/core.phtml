@@ -55,7 +55,7 @@
         for ($i=0; $i < count($summary); $i++):
           $this->escapeHtml($summary[$i]);
         endfor;
-        $summary = implode("</br>", $summary);
+        $summary = implode(" ", $summary);
       else:
         $summary = false;
       endif;

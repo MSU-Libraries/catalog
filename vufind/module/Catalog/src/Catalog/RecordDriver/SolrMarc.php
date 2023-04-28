@@ -169,6 +169,12 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         return $this->getSolrField('uuid_str');
     }
 
+    public function getFullCallNumber()
+    {
+        #return $this->getSolrField('099', ['f', 'a']);
+        return $this->getSolrField('952', ['f', 'e']);
+    }
+
     /**
      * Get the Cartographic Data
      */

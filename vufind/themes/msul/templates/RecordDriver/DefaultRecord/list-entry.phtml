@@ -47,7 +47,7 @@
 
         <div class="resultItemLine2">
           <?php if($this->driver->isCollection()): ?>
-            <?=implode('<br>', array_map([$this, 'escapeHtml'], $this->driver->getSummary())); ?>
+            <?=implode(' ', array_map([$this, 'escapeHtml'], $this->driver->getSummary())); ?>
           <?php else: ?>
             <?php $summAuthors = $this->driver->getPrimaryAuthors(); if (!empty($summAuthors)): ?>
               <?=$this->transEsc('by')?>

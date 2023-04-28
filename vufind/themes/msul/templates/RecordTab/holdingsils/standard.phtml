@@ -8,7 +8,7 @@
 <tr vocab="http://schema.org/" typeof="Offer">
   <th class="copy-number">
     <?php if ($holding['callnumber'] ?? false): ?>
-      <span><?=$this->escapeHtml($holding['callnumber'])?></span>
+      <span><?=$holding['callnumber_prefix'] ? $this->escapeHtml($holding['callnumber_prefix']) . ' ' : '' ?><?=$this->escapeHtml($holding['callnumber'])?></span>
     <?php endif; ?>
     <?php if ($holding['enumchron'] ?? false): ?>
       <span class="enumchron"><?=$this->escapeHtml($holding['enumchron'])?></span>
