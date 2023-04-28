@@ -38,6 +38,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
 
         # Remove Physical Description
         $spec->setLine('Physical Description', null);
+        $spec->setLine('Call Number', 'getFullCallnumber');
 
         return $spec->getArray();
     }
