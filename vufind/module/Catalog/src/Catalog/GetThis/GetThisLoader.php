@@ -332,25 +332,6 @@ class GetThisLoader {
         return false;
     }
 
-    public function showRemRequest($item_id=null) {
-        $item_id = $this->getItemId($item_id);
-        $stat = $this->getStatus($item_id);
-        $loc = $this->getLocation($item_id);
-        $desc = $this->getDescription();
-
-        # Never show on Remote SPC items (PC-439)
-        if (Regex::SPEC_COLL_REMOTE($loc)) {
-            return false;
-        }
-
-        if ( (Regex::REMOTE($loc)) && !Regex::VINYL($desc) ||
-             (Regex::THESES_REMOTE($loc))
-           ) {
-            return true;
-        }
-        return false;
-    }
-
     public function showRemForm($item_id=null) {
         //XXX Not implementing for now
         return false;

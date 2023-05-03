@@ -44,11 +44,6 @@ else {
         echo $this->render('record/getthis/getrovi.phtml');
     }
 
-    # rsRequest($rovi);
-    if ($this->getthis->showRemRequest()) {
-        echo $this->render('record/getthis/remrequest.phtml');
-    }
-
     # remForm();
     if ($this->getthis->showRemForm()) {
         echo $this->render('record/getthis/remform.phtml');
