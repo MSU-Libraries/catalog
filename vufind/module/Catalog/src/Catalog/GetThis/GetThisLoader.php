@@ -293,6 +293,16 @@ class GetThisLoader {
         return false;
     }
 
+    public function showReqScan($item_id=null) {
+        $item_id = $this->getItemId($item_id);
+        $stat = $this->getStatus($item_id);
+
+        if (Regex::AVAILABLE($stat)) {
+            return true;
+        }
+        return false;
+    }
+
     public function showReqBusiness($item_id=null) {
         $item_id = $this->getItemId($item_id);
         $loc = $this->getLocation($item_id);

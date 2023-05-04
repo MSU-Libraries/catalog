@@ -74,6 +74,11 @@ else {
         echo $this->render('record/getthis/otherlib.phtml');
     }
 
+    # otherLib();
+    if ($this->getthis->showReqScan()) {
+        echo $this->render('record/getthis/reqscan.phtml');
+    }
+
     # circForm(); // Hidden forms; always displayed, but not sure if needed to always be displayed
     echo $this->render('record/getthis/circform.phtml');
 }
