@@ -272,7 +272,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 );
                 $enum = str_ends_with($holdingCallNumber, $enum) ? '' : $enum;
 
-                $items[] = $callNumberData + [
+                $hold_item = $callNumberData + [
                     'id' => $bibId,
                     'item_id' => $bound->itemId,
                     'holding_id' => $bound_holding->id,
@@ -292,6 +292,10 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     'reserve' => 'TODO',
                     'addLink' => true
                 ];
+
+                if ($hold_item['is_holdable']) {
+                    $items[] = $hold_item;
+                }
             }
         }
         return $items;
