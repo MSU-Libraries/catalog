@@ -291,6 +291,7 @@ JournalTitle:
 #    DismaxFields:
 #      - title_full_unstemmed^450
 #    FilterQuery: "format:Journal OR format:Article"
+
 NewspaperTitle:
   DismaxFields:
     - title_short^500
