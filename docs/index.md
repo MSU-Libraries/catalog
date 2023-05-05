@@ -13,3 +13,4 @@ It describes how to setup and configure the containerized Vufind.
 ## Administration
 * [Backup & Restore](backup-and-restore.md)
 * [Upgrading](upgrading.md)
+* [Solr](solr.md)

@@ -122,7 +122,7 @@ class GetThisLoader {
                 }
             }
         }
-        return $linkdata['link'];
+        return array_key_exists('link', $linkdata) ? $linkdata['link']: '';
     }
 
     /**
