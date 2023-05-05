@@ -122,7 +122,7 @@ class GetThisLoader {
                 }
             }
         }
-        return $linkdata['link'];
+        return array_key_exists('link', $linkdata) ? $linkdata['link']: '';
     }
 
     /**
@@ -293,6 +293,16 @@ class GetThisLoader {
         return false;
     }
 
+    public function showReqScan($item_id=null) {
+        $item_id = $this->getItemId($item_id);
+        $stat = $this->getStatus($item_id);
+
+        if (Regex::AVAILABLE($stat)) {
+            return true;
+        }
+        return false;
+    }
+
     public function showReqBusiness($item_id=null) {
         $item_id = $this->getItemId($item_id);
         $loc = $this->getLocation($item_id);
@@ -326,25 +336,6 @@ class GetThisLoader {
              (Regex::TRAVEL($loc) && Regex::AVAILABLE($stat)) ||
              (Regex::MAIN($loc) && Regex::AVAILABLE($stat)) ||
              (Regex::AVAILABLE($stat))
-           ) {
-            return true;
-        }
-        return false;
-    }
-
-    public function showRemRequest($item_id=null) {
-        $item_id = $this->getItemId($item_id);
-        $stat = $this->getStatus($item_id);
-        $loc = $this->getLocation($item_id);
-        $desc = $this->getDescription();
-
-        # Never show on Remote SPC items (PC-439)
-        if (Regex::SPEC_COLL_REMOTE($loc)) {
-            return false;
-        }
-
-        if ( (Regex::REMOTE($loc)) && !Regex::VINYL($desc) ||
-             (Regex::THESES_REMOTE($loc))
            ) {
             return true;
         }

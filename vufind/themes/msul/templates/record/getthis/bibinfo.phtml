@@ -8,7 +8,7 @@ $link = $this->getthis->getLink();
     <b>Title:</b> <?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?><br/>
     <b>Call Number:</b>
     <?php if ($item['callnumber'] ?? false): ?>
-          <span><?=$this->escapeHtml($item['callnumber'])?></span>
+          <span><?=$item['callnumber_prefix'] ? $this->escapeHtml($item['callnumber_prefix']) . ' ' : '' ?><?=$this->escapeHtml($item['callnumber'])?></span>
         <?php endif; ?>
         <?php if ($item['enumchron'] ?? false): ?>
           <span class="enumchron"><?=$this->escapeHtml($item['enumchron'])?></span>
