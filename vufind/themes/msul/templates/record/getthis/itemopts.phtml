@@ -6,6 +6,9 @@ $items = $this->getthis->items;
 function getDisplay($view, $item) {
     $display = "";
 
+    if ($item['callnumber_prefix'] ?? false) {
+      $display .= $view->escapeHtml($item['callnumber_prefix']) . ' ';
+    }
     if ($item['callnumber'] ?? false) {
       $display .= " " . $view->escapeHtml($item['callnumber']);
     }
