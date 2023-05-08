@@ -214,7 +214,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             }
 
             // Fall back to 773 field if we can't find description in the '856z' field
-            if (in_array('z', $subfields) || empty($rec['desc'])) {
+            if ((in_array('z', $subfields) || empty($rec['desc'])) && count($marc773s) >= $idx) {
                 $rec['desc'] = $marc773s[$idx]['subfields'][0]['data'];
             }
 
