@@ -13,7 +13,7 @@ the cluster, auto-provisioning DNS CNAMES as part of the pipeline.
   stack prefix: `catalog-beta` (`catalog-beta-catalog`, `catalog-beta-internal`, `catalog-beta-solr`, `catalog-beta-mariadb`),  
   url: https://catalog-beta.aws.lib.msu.edu (local DNS https://catalog-beta.lib.msu.edu)
   stack prefix: `catalog-prod` (`catalog-prod-catalog`, `catalog-prod-internal`, `catalog-prod-solr`, `catalog-prod-mariadb`),  
-  url: https://catalog-prod.aws.lib.msu.edu (local DNS https://catalog-prod.lib.msu.edu)
+  url: https://catalog.aws.lib.msu.edu (local DNS https://catalog.lib.msu.edu)
 
 * branch: `review-some-feature`,  
   stack prefix: `review-some-feature` (`review-some-feature-catalog`, `review-some-feature-internal`, `review-some-feature-solr`, `review-some-feature-mariadb`),  
