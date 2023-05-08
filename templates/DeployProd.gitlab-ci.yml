@@ -106,16 +106,6 @@ Deploy Prod Monitoring:
       artifacts: true
     - Deploy Prod Internal Network
 
-Prod Vufind Upgrade:
-  stage: Deploy Prod
-  extends: Vufind Upgrade
-  rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-  needs:
-    - job: Set Prod Stack Name
-      artifacts: true
-    - Deploy Prod Vufind
-
 Verify Prod Stack Health:
   stage: Deploy Prod
   extends: Verify Stack Health
@@ -124,4 +114,15 @@ Verify Prod Stack Health:
   needs:
     - job: Set Prod Stack Name
       artifacts: true
-    - Prod Vufind Upgrade
+    - Deploy Prod Monitoring
+    - Deploy Prod Vufind
+
+Prod Vufind Upgrade:
+  stage: Deploy Prod
+  extends: Vufind Upgrade
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+  needs:
+    - job: Set Prod Stack Name
+      artifacts: true
+    - Verify Prod Stack Health
