@@ -54,6 +54,7 @@ class RegexLookup {
     const MAP                   = ['/^MSU MAP/i'];
     const MICROFORMS            = ['/^MSU MICROFORMS/i'];
     const MUSIC                 = ['/^MSU MUSIC LIBRARY/i'];
+    const ONLINE                = ['/ONLINE RESOURCE/i', '/ELECTRONIC RESOURCES/i'];
     const PERM                  = ['/PERM/i'];        # Legacy note: used for Art Reserves
     const READING_ROOM          = ['/READING ROOM/i'];
     const REFERENCE             = ['/REFERENCE/i'];
