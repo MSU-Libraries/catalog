@@ -495,4 +495,9 @@ class GetThisLoader {
         return false;
     }
 
+    public function isOnlineResource($item_id=null) {
+        $item_id = $this->getItemId($item_id);
+        $loc = $this->getLocation($item_id);
+        return Regex::ONLINE($loc);
+    }
 }
