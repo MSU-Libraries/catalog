@@ -127,34 +127,7 @@ JS;
       <a class="sr-only" href="#content"><?=$this->transEsc('Skip to content') ?></a>
       <?=$this->render('header.phtml')?>
     </header>
-   <?php if ($isTestTenant): ?>
-  <div class="collapse navbar-collapse" id="navbar-warning">
-    <p>
-      <b>Notice:</b> This catalog is connected to the FOLIO test tenant, and should be used for testing purposes only.
-      The information here is not up-to-date, and item availability will not be accurate.
-      <a href="https://catalog-prod.lib.msu.edu" target="_blank">
-        <i class="fa fa-sign-in" aria-hidden="true"></i>
-        Go to the production catalog
-      </a>
-    </p>
-  </div>
-<?php else: ?>
-  <div class="collapse navbar-collapse" id="navbar-warning">
-    <p>
-      Welcome to the new interface for the MSU Libraries catalog! The EDS
-      interface will remain available at
-      <a href="https://eds.lib.msu.edu/" target="_blank">
-        <i class="fa fa-sign-in" aria-hidden="true"></i> https://eds.lib.msu.edu/
-      </a>
-      as an alternative.
-      <em>
-        You can help us improve our new interface by providing
-        <a data-lightbox href="<?=$this->url('feedback-home') ?>">feedback and suggestions</a>!
-      </em>
-    </p>
-  </div>
-<?php endif; ?>
-   <nav class="breadcrumbs" aria-label="<?=$this->transEscAttr('Breadcrumbs') ?>">
+    <nav class="breadcrumbs" aria-label="<?=$this->transEscAttr('Breadcrumbs') ?>">
       <div class="container">
         <?php if((!isset($this->layout()->showBreadcrumbs) || $this->layout()->showBreadcrumbs == true)
           && !empty($this->layout()->breadcrumbs)
