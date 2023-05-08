@@ -25,6 +25,8 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
     exit 0
 fi
 
+declare -a -g HTTPS_MIDDLEWARES=(remove-prefix)
+
 apply_devel_changes() {
     # Use dnschallenge cert resolver (instead of httpchallenge)
     ./yq -i \
@@ -152,6 +154,16 @@ apply_prod_changes() {
         ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`)\"" \
         docker-compose.yml;
         ./yq -i \
+        ".services.catalog.deploy.labels += \"traefik.http.middlewares.${STACK_NAME}-redirect.redirectregex.regex=^https://catalog-prod.lib.msu.edu/(.*)\"" \
+        docker-compose.yml;
+        ./yq -i \
+        ".services.catalog.deploy.labels += \"traefik.http.middlewares.${STACK_NAME}-redirect.redirectregex.replacement=https://catalog.lib.msu.edu/\$\${1}\"" \
+        docker-compose.yml;
+        ./yq -i \
+        ".services.catalog.deploy.labels += \"traefik.http.middlewares.${STACK_NAME}-redirect.redirectregex.permanent=true\"" \
+        docker-compose.yml;
+        HTTPS_MIDDLEWARES+=("${STACK_NAME}-redirect")
+        ./yq -i \
         ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
@@ -181,6 +193,11 @@ main() {
     if [[ "${STACK_NAME}" == catalog-* ]]; then
         apply_prod_changes;
     fi
+
+    # Add in middlewares
+    ./yq -i \
+    ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.middlewares=$(IFS=, ; echo "${HTTPS_MIDDLEWARES[*]}")\"" \
+    docker-compose.yml;
 
     # Authentication environment changes
     if [[ "${STACK_NAME}" == catalog-* ]] || [ "${STACK_NAME}" == "devel-authentication" ]; then
