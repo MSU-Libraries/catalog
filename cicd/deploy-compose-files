@@ -144,25 +144,24 @@ apply_prod_changes() {
     fi
 
     ## Changes for catalog-prod
-    # TODO add catalog.lib at launch
     if [ "${STACK_NAME}" == "catalog-prod" ]; then
         ./yq -i \
-        ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" \
+        ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`)\"" \
         docker-compose.yml;
         ./yq -i \
-        ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" \
+        ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`)\"" \
         docker-compose.yml;
         ./yq -i \
-        ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
+        ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
-        ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
+        ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
-        ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`catalog-prod.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
+        ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
         docker-compose.monitoring.yml;
         ./yq -i \
-        ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-https-router.rule=Host(\`catalog-prod.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
+        ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
         docker-compose.monitoring.yml;
     fi
 }
