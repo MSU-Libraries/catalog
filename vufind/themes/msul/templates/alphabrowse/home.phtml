@@ -98,7 +98,7 @@
               <?php
                 // MSUL override to use CN with prefix in the 1st column only
                 $label = $this->escapeHtml($item['heading']);
-                if (array_key_exists('callnumber-full_str_mv', $item['extras'])):
+                if ($item['extras'] != null && array_key_exists('callnumber-full_str_mv', $item['extras'])):
                   foreach ($item['extras']['callnumber-full_str_mv'] as $arr => $cns):
                     foreach ($cns as $cn):
                       if (str_contains($cn, $item['heading'])):
