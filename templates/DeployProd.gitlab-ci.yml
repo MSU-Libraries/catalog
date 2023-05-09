@@ -125,4 +125,6 @@ Prod Vufind Upgrade:
   needs:
     - job: Set Prod Stack Name
       artifacts: true
+    - job: Deploy Prod Vufind
+      artifacts: true
     - Verify Prod Stack Health
