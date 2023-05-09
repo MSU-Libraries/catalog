@@ -39,6 +39,15 @@ apply_devel_changes() {
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
     docker-compose.yml;
     ./yq -i \
+    ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.certresolver=msul-letsencrypt-dns\"" \
+    docker-compose.yml;
+    ./yq -i \
+    ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.domains[0].main=aws.lib.msu.edu\"" \
+    docker-compose.yml;
+    ./yq -i \
+    ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
+    docker-compose.yml;
+    ./yq -i \
     ".services.mail.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.tls.certresolver=msul-letsencrypt-dns\"" \
     docker-compose.yml;
     ./yq -i \
@@ -57,7 +66,7 @@ apply_devel_changes() {
     ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
     docker-compose.solr-cloud.yml;
 
-    # Remove the cron service if the stack name is NOT catalog-beta
+    # Remove the cron service if the stack name is NOT catalog beta or prod
     ./yq -i "del(.services.cron)" docker-compose.yml;
 
     # Unset parallelism limit for non-production to speed up redeployments on devel stacks
@@ -69,6 +78,12 @@ apply_devel_changes() {
     docker-compose.yml;
     ./yq -i \
     ".services.mail.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/mail\`)\"" \
+    docker-compose.yml;
+    ./yq -i \
+    ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-links.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
+    docker-compose.yml;
+    ./yq -i \
+    ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
     docker-compose.yml;
     ./yq -i \
     ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
@@ -113,6 +128,9 @@ apply_prod_changes() {
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt\"" \
     docker-compose.yml;
     ./yq -i \
+    ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.certresolver=msul-letsencrypt\"" \
+    docker-compose.yml;
+    ./yq -i \
     ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls.certresolver=msul-letsencrypt\"" \
     docker-compose.solr-cloud.yml;
 
@@ -130,6 +148,12 @@ apply_prod_changes() {
         docker-compose.yml;
         ./yq -i \
         ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" \
+        docker-compose.yml;
+        ./yq -i \
+        ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-links.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
+        docker-compose.yml;
+        ./yq -i \
+        ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
         docker-compose.yml;
         ./yq -i \
         ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-solr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
@@ -152,6 +176,12 @@ apply_prod_changes() {
         docker-compose.yml;
         ./yq -i \
         ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`)\"" \
+        docker-compose.yml;
+        ./yq -i \
+        ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-links.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
+        docker-compose.yml;
+        ./yq -i \
+        ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
         docker-compose.yml;
         ./yq -i \
         ".services.catalog.deploy.labels += \"traefik.http.middlewares.${STACK_NAME}-redirect.redirectregex.regex=^https://catalog-prod.lib.msu.edu/(.*)\"" \
