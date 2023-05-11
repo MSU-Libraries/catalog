@@ -111,13 +111,14 @@
     </p>
   </div>
 <?php endif; ?>
+<?php /* Below is the search bar that appears in the header of the search home pages */ ?>
 <?php if ($this->layout()->searchbox !== false): ?>
   <div class="search container navbar">
     <div class="backtocat"><p><a style="text-decoration:none;" href="/Search">&#8592;&nbsp;&nbsp;Back to the catalog</a></p></div>
     <div class="nav searchbox hidden-print" role="search">
-      <?=$this->layout()->searchbox ?>
+      <?php $this->slot('search-home-hero')->start() ?>
+        <?=$this->context($this)->renderInContext("search/searchbox.phtml", ['ignoreHiddenFilterMemory' => true])?>
+      <?=$this->slot('search-home-hero')->end() ?>
     </div>
   </div>
 <?php endif; ?>
-
-

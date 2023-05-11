@@ -45,14 +45,11 @@
 
     //center on home page at medium width
 .template-dir-search.template-name-home .search.container, .template-dir-eds.template-name-home .search.container, .template-dir-combined.template-name-home .search.container {
-      @media only screen and (min-width : 768px) {
-        margin-left:auto;
-        margin-right:auto;
-        width:80%;
-    }
-        @media only screen and (min-width : 992px) {
-        width:75rem;
-        text-align:center;
+    @media only screen and (min-width : 992px) {
+      text-align:center;
+      margin-left:auto;
+      margin-right:auto;
+      width:90%;
     }
   }
 
@@ -64,17 +61,16 @@
   margin-top:1.25rem;
   margin-bottom:3rem;
   width:100%;
-  @media only screen and (min-width : 768px) {
-    .searchForm_lookfor.form-control {
-      vertical-align:top;
-      width:25rem;
-    }
-  }
   @media only screen and (min-width : 992px) {
-    .searchForm_lookfor.form-control {
-      width:30%;
+    .searchForm_lookfor {
+      width:20rem;
     }
   }
+  @media only screen and (min-width : 1080px) {
+   .searchForm_lookfor {
+    width:150rem;
+      }
+    }
 }
 
 header {
@@ -381,13 +377,18 @@ body.template-name-home, body.template-dir-record, body.template-dir-combined, b
   }
 }
 
-//hide 2nd searchbox on home page (brought in with Browse Alphabetically template)
-body.template-dir-search.template-name-home .searchHomeContent /*, body.template-dir-eds.template-name-home .searchHomeContent, body.template-dir-combined.template-name-home .searchHomeContent */ {
-  display:none;
-}
-//hide filters on home page (don't know why showing up now)
-body.template-dir-search.template-name-home .active-filters {
-  display:none;
+.template-dir-search.template-name-home,
+.template-dir-eds.template-name-home,
+.template-dir-combined.template-name-home
+{
+  // hide 2nd searchbox on home page (brought in with Browse Alphabetically template)
+  .searchHomeContent{
+    display:none;
+  }
+  // hide filters on home page
+  .active-filters {
+    display:none !important;
+  }
 }
 
 .mainbody .container .searchbox {
@@ -412,6 +413,9 @@ body.template-dir-search.template-name-home .active-filters {
       display:block;
       margin-bottom:0.3rem;
     }
+    input, select {
+      width:100% !important;
+    }
 
   }
     @media only screen and (max-width : 1228px) {
@@ -422,6 +426,9 @@ body.template-dir-search.template-name-home .active-filters {
   @media only screen and (min-width : 992px) {
     .btn-link {
       margin-top:1rem;
+    }
+    input, select {
+      vertical-align:top !important;
     }
   }
 }
@@ -492,10 +499,13 @@ body.template-dir-search.template-name-home .active-filters {
       width:100%;
     }
   }
-
+.home-facet.home-askalib::after {
+      position:absolute; width:0; height:0; overflow:hidden; z-index:-1; /* hide images */
+      content:url("/themes/msul/images/Icons_AskALib_Default.svg") url("/themes/msul/images/Icons_AskALib_Hover.svg"); /* load images */
+      }
   .home-facet.home-askalib {
-    padding-top:3rem;
-    a, a:active, a:hover, a:visited {
+      padding-top:3rem;
+      a, a:active, a:hover, a:visited {
       text-decoration:none;
       color:#fff;
       width:100%;
@@ -1095,3 +1105,4 @@ body.template-dir-myresearch.template-name-profile {
     display:block;
   }
 }
+
