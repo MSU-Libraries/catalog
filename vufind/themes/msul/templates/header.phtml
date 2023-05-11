@@ -1,4 +1,8 @@
-<?php $account = $this->auth()->getManager(); $isTestTenant = str_contains(getenv("FOLIO_URL"), 'test'); ?>
+<?php
+$account = $this->auth()->getManager();
+$isTestTenant = str_contains(getenv("FOLIO_URL"), 'test');
+$isProduction = getenv("STACK_NAME") == 'catalog-prod';
+?>
 <div class="banner container navbar">
   <div class="navbar-header">
     <div class="navbar-msubrand"><a href="https://msu.edu/" rel="nofollow"><img alt="Michigan State University" src="/themes/msul/images/masthead-helmet-white.png"></a></div>
@@ -93,6 +97,21 @@
         <i class="fa fa-sign-in" aria-hidden="true"></i>
         Go to the production catalog
       </a>
+    </p>
+  </div>
+<?php elseif (!$isProduction): ?>
+  <div class="collapse navbar-collapse" id="navbar-warning">
+    <p>
+      <b>Notice:</b> This site is for previewing changes coming to the MSU Libraries catalog. It is
+      connected to live data and can be used as you would use the
+      <a href="https://catalog.lib.msu.edu/" target="_blank">
+        <i class="fa fa-sign-in" aria-hidden="true"></i> production catalog
+      </a>.
+      However, features may not be finalized and could be unstable.
+      <em>
+        You can help us improve it by providing
+        <a data-lightbox href="<?=$this->url('feedback-home') ?>">feedback and suggestions</a>!
+      </em>
     </p>
   </div>
 <?php else: ?>
