@@ -26,6 +26,11 @@ Build Monitoring Image:
      COMPONENT: monitoring
   extends: .build_template
 
+Build LegacyLinks Image:
+  variables:
+     COMPONENT: legacylinks
+  extends: .build_template
+
 Build Vufind Image:
   stage: Build
   tags:
