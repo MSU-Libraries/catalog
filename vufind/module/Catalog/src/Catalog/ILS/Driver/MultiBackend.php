@@ -139,6 +139,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
         'getCourses',
         'getDepartments',
         'getFunds',
+        'getInstanceByBibId',
         'getInstructors',
         'getNewItems',
         'getOfflineMode',
@@ -459,14 +460,24 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
      */
     public function findReserves($course, $inst, $dept)
     {
+        // Get all the reserves from the default driver
         if ($driver = $this->getDriver($this->defaultDriver)) {
-            return $this->addIdPrefixes(
-                $driver->findReserves($course, $inst, $dept),
-                $this->defaultDriver,
-                ['BIB_ID']
-            );
+            $reserves = $driver->findReserves($course, $inst, $dept);
+        } else {
+            throw new ILSException('No suitable backend driver found');
         }
-        throw new ILSException('No suitable backend driver found');
+        return $reserves;
+    }
+
+    public function getInstanceByBibId($bibId)
+    {
+        // Get all the reserves from the default driver
+        if ($driver = $this->getDriver($this->defaultDriver)) {
+            $instance = $driver->getInstanceByBibId($bibId);
+        } else {
+            throw new ILSException('No suitable backend driver found');
+        }
+        return $instance;
     }
 
     /**
