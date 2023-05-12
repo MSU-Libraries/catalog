@@ -39,13 +39,13 @@ apply_devel_changes() {
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
     docker-compose.yml;
     ./yq -i \
-    ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.certresolver=msul-letsencrypt-dns\"" \
+    ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.certresolver=msul-letsencrypt-dns\"" \
     docker-compose.yml;
     ./yq -i \
-    ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.domains[0].main=aws.lib.msu.edu\"" \
+    ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.domains[0].main=aws.lib.msu.edu\"" \
     docker-compose.yml;
     ./yq -i \
-    ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
+    ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
     docker-compose.yml;
     ./yq -i \
     ".services.mail.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.tls.certresolver=msul-letsencrypt-dns\"" \
