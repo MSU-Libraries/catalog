@@ -147,7 +147,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     'location' => $locationName,
                     'location_code' => $locationCode,
                     'reserve' => 'TODO',
-                    'addLink' => true
+                    'addLink' => true,
+                    'electronic_access' => $item->electronicAccess
                 ];
             }
         }
@@ -415,6 +416,25 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 $bibId = $item->copiedItem->instanceId ?? null;
             }
             if ($bibId !== null) {
+                $bibId = "folio." . $bibId;
+            }
+
+            // Get the electronic access links from the item record if possible
+            // electronicAccess will be an array with keys: uri, linkText, publicNote, relationshipId
+            $itemId = $item->itemId ?? null;
+            $electronicAccess = null;
+            $urlPattern = '/https?:\/\/catalog\.lib\.msu\.edu\/Record\/([.a-zA-Z0-9]+)/i';
+            if ($itemId !== null) {
+                $links = $this->getElectronicAccessLinks($itemId);
+                foreach ($links as $link) {
+                    if ($link->uri !== null && preg_match($urlPattern, $link->uri, $matches) && count($matches) > 1) {
+                        $bibId = $matches[1]; // this gives us the VuFind ID with the prefix it has in the Biblio index
+                        break;
+                    }
+                }
+            }
+
+            if ($bibId !== null) {
                 $courseData = $this->getCourseDetails(
                     $item->courseListingId ?? null
                 );
@@ -445,6 +465,16 @@ class Folio extends \VuFind\ILS\Driver\Folio
             return array_filter($retVal, $filter);
         }
         return $retVal;
+    }
+
+    protected function getElectronicAccessLinks($itemId)
+    {
+        $response = $this->makeRequest(
+            'GET',
+            '/item-storage/items/' . $itemId
+        );
+        $item = json_decode($response->getBody());
+        return $item->electronicAccess;
     }
 
     /**
