@@ -199,6 +199,8 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
         // Verify Folio records exist in Solr
         $idx = 0;
         foreach ($reserves as $reserve) {
+            $output->writeln("-- Progress:" . $idex . "/" . count($reserves) . " --");
+
             // Skip HLM records
             if (str_contains($reserve['BIB_ID'],'hlm.')) {
                 $output->writeln("Skipping HLM record " . $reserve['BIB_ID']);
@@ -218,7 +220,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
                 1,
                 $params
             );
-            
+
             $searchService = $this->getProperty($this->solr, 'searchService');
             $response = $searchService->invoke($command)->getResult();
 
@@ -226,7 +228,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             // replacing the prefix
             if ($response->response->numFound == 0 || str_contains($response->response->docs[0]->id, 'local.')) {
                 $reserves[$idx]['BIB_ID'] = str_replace('folio.', 'local.', $reserve['BIB_ID']);
-                $output->writeln("updating/creating solr record for professor owned copy with id " . $reserves[$idx]['BIB_ID']);
+                $output->writeln("Updating/creating solr record for professor owned copy with id " . $reserves[$idx]['BIB_ID']);
                 $this->createLocalSolrRecord($reserves[$idx], $output);
             }
             else {
@@ -242,6 +244,12 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
         $instanceHrid = str_replace('local.', '', $reserve['BIB_ID']);
         $item = $this->catalog->getInstanceByBibId($instanceHrid);
         $holding = $this->catalog->getHolding($instanceHrid)['holdings'][0];
+
+        $pubYear = is_array($item->publication) && count($item->publication) > 0 ? $item->publication[0]->dateOfPublication : '';
+        $authors = is_array($item->contributors) ? array_column($item->contributors, 'name') : [];
+        $alternativeTitles = is_array($item->alternativeTitles) ? array_column($item->alternativeTitles, 'alternativeTitle') : [];
+        $firstAuthor = empty($authors) ? "" : $authors[0]->name;
+
         $index = [
             'id' => $reserve['BIB_ID'],
             'ctrlnum' => [],
@@ -251,19 +259,19 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
                 '0/MSU Main Library/',
                 '1/MSU Main Library/Reserve - Circulation, 1 Center/'
             ],
-            'fullrecord' => 
+            'fullrecord' =>
                 '<oai_dc:dc>
                 <dc:identifier>' . $reserve['BIB_ID'] . '</dc:identifier
                 <dc:title>' . $item->title . '</dc:title>
                 <dc:type>Book</dc:type>
-                <dc:creator>' . (is_array($item->contributors) ? array_column($item->contributors, 'name') : '') . '</dc:creator>
-                <dc:date>' . (is_array($item->publication) ? $item->publication[0]->dateOfPublication : '')  . '</dc:date>
+                <dc:creator>' . ($authors) . '</dc:creator>
+                <dc:date>' . $pubYear  . '</dc:date>
                 </oai_dc:dc>',
             'record_format' => 'oai_dc',
             'spelling' => [],
             'language' => '', //$item->languages, (need to see if this an object or array)
             'format' => ['Book'],
-            'author' => is_array($item->contributors) ? array_column($item->contributors, 'name') : [],
+            'author' => $authors,
             'spellingShingle' => [],
             'author_facet' => [],
             'author_varient' => [],
@@ -271,17 +279,17 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             'author2' => [],
             'author2_variant' => [],
             'author2_role' => [],
-            'author_sort' => is_array($item->contributors) ? $item->contributors[0]->name : '',
+            'author_sort' => $firstAuthor,
             'title' => $item->title,
             'title_short' => $item->title . " /",
-            'title_full' => $item->title . " / " . (is_array($item->contributors) ? $item->contributors[0]->name : '') ,
-            'title_fullStr' => $item->title . " / " . (is_array($item->contributors) ? $item->contributors[0]->name : ''),
-            'title_full_unstemmed' => $item->title . " / " . (is_array($item->contributors) ? $item->contributors[0]->name : ''),
+            'title_full' => $item->title . " / " . $firstAuthor,
+            'title_fullStr' => $item->title . " / " . $firstAuthor,
+            'title_full_unstemmed' => $item->title . " / " . $firstAuthor,
             'title_auth' => $item->title . " /",
-            'title_alt' => $item->alternativeTitles,
+            'title_alt' => $alternativeTitles,
             'title_sort' => $item->title,
             'publisher' => [],
-            'publishDate' => is_array($item->publication) ? [$item->publication[0]->dateOfPublication] : [],
+            'publishDate' => [$pubYear],
             'physical' => [],
             'edition' => is_array($item->editions) ? implode(' ', $item->editions) : [],
             'contents' =>  [],
@@ -360,9 +368,14 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             try {
                 // Connect to ILS and load data:
                 $instructors = $this->catalog->getInstructors();
+                $output->writeln("Found instructor count: " . count($instructors));
                 $courses = $this->catalog->getCourses();
+                $output->writeln("Found course count: " . count($courses));
                 $departments = $this->catalog->getDepartments();
+                $output->writeln("Found department count: " . count($department));
                 $reserves = $this->catalog->findReserves('', '', '');
+                $output->writeln("Found reserve count: " . count($reserve));
+                $output->writeln("Validating and mapping reserves to correct Solr record");
                 $reserves = $this->validateReserves($reserves, $output);
             } catch (\Exception $e) {
                 $output->writeln($e->getMessage());

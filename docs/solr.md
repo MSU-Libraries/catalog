@@ -16,3 +16,15 @@ solr zk cp zk:/solr/configs/biblio/solrconfig.xml /tmp/solrconfig.xml -z zk1:218
 # Finally, copy those updated files back onto Zookeeper
 solr zk cp /tmp/solrconfig.xml zk:/solr/configs/biblio/solrconfig.xml -z zk1:2181
 ```
+
+## Deleting documents from the Solr index
+In the event that you need to manually remove items from one of the Solr collections
+you can connect to one of the in the swarm that have `curl` installed and are within
+the `internal` network (such as one of the VuFind containers) and run the following
+command.
+
+```bash
+# Deletes the document with the id of folio.in00006795294 from the biblio collection
+curl 'http://solr1:8983/solr/biblio/update' --data '<delete><query>id:folio.in00006795294</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl 'http://solr1:8983/solr/biblio/update' --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+```
