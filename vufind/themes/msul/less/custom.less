@@ -12,9 +12,11 @@
 }
 /* ------ Layout ------ */
 
-/* --- Header --- */
+/* --- Header ---- */
 
-.template-name-home header {
+.template-dir-search.template-name-home header, .template-dir-eds.template-name-home header, .template-dir-combined.template-name-home header {
+    display:flex;
+    flex-direction:column;
     background-color:@msugreen;
     background-image: 
     linear-gradient(
@@ -30,26 +32,46 @@
   .banner.container {
     background: none;
     margin-bottom:0;
-    }  
+    order:1;
+    }
+    .search.container.navbar {
+      order:2;
+    }
+    .collapse.navbar-collapse {
+      order:3;
+      margin:0;
+    }
   }
+
+    //center on home page at medium width
+.template-dir-search.template-name-home .search.container, .template-dir-eds.template-name-home .search.container, .template-dir-combined.template-name-home .search.container {
+    @media only screen and (min-width : 992px) {
+      text-align:center;
+      margin-left:auto;
+      margin-right:auto;
+      width:90%;
+    }
+  }
+
   //home page search form appearance
-.template-name-home form.searchForm {
+.template-dir-search.template-name-home form.searchForm, .template-dir-eds.template-name-home form.searchForm, .template-dir-combined.template-name-home form.searchForm  {
   background: rgba(255,255,255,0.8);
   border-radius: 0.5rem;
   padding: 2rem 2rem 3rem 2rem;
-}
-  //center on home page at medium width
-  .template-name-home header .search.container {
-      @media only screen and (min-width : 768px) {
-        margin-left:auto;
-        margin-right:auto;
-        width:80%;
-    }
-        @media only screen and (min-width : 992px) {
-        width:70rem;
-        text-align:center;
+  margin-top:1.25rem;
+  margin-bottom:3rem;
+  width:100%;
+  @media only screen and (min-width : 992px) {
+    .searchForm_lookfor {
+      width:20rem;
     }
   }
+  @media only screen and (min-width : 1080px) {
+   .searchForm_lookfor {
+      width:100rem;
+    }
+  }
+}
 
 header {
   .banner.container {
@@ -128,6 +150,8 @@ header {
 }
 
 .navbar-collapse {
+  margin-top: -3rem;
+  margin-bottom: 3rem;
   a, a:visited {
     color:#fff;
   }
@@ -140,8 +164,6 @@ header {
 }
 
 #navbar-warning {
-  margin-top: -3rem;
-  margin-bottom: 3rem;
   background-color:@alert-warning-bg;
   color:@eggplant;
 
@@ -355,13 +377,18 @@ body.template-name-home, body.template-dir-record, body.template-dir-combined, b
   }
 }
 
-//hide 2nd searchbox on home page (brought in with Browse Alphabetically template)
-body.template-dir-search.template-name-home .searchHomeContent {
-  display:none;
-}
-//hide filters on home page (don't know why showing up now)
-body.template-dir-search.template-name-home .active-filters {
-  display:none;
+.template-dir-search.template-name-home,
+.template-dir-eds.template-name-home,
+.template-dir-combined.template-name-home
+{
+  // hide 2nd searchbox on home page (brought in with Browse Alphabetically template)
+  .searchHomeContent{
+    display:none;
+  }
+  // hide filters on home page
+  .active-filters {
+    display:none !important;
+  }
 }
 
 .mainbody .container .searchbox {
@@ -386,6 +413,9 @@ body.template-dir-search.template-name-home .active-filters {
       display:block;
       margin-bottom:0.3rem;
     }
+    input, select {
+      width:100% !important;
+    }
 
   }
     @media only screen and (max-width : 1228px) {
@@ -396,6 +426,9 @@ body.template-dir-search.template-name-home .active-filters {
   @media only screen and (min-width : 992px) {
     .btn-link {
       margin-top:1rem;
+    }
+    input, select {
+      vertical-align:top !important;
     }
   }
 }
@@ -466,10 +499,13 @@ body.template-dir-search.template-name-home .active-filters {
       width:100%;
     }
   }
-
+.home-facet.home-askalib::after {
+      position:absolute; width:0; height:0; overflow:hidden; z-index:-1; /* hide images */
+      content:url("/themes/msul/images/Icons_AskALib_Default.svg") url("/themes/msul/images/Icons_AskALib_Hover.svg"); /* load images */
+      }
   .home-facet.home-askalib {
-    padding-top:3rem;
-    a, a:active, a:hover, a:visited {
+      padding-top:3rem;
+      a, a:active, a:hover, a:visited {
       text-decoration:none;
       color:#fff;
       width:100%;
@@ -482,6 +518,9 @@ body.template-dir-search.template-name-home .active-filters {
       -webkit-border-radius: 0.5rem;
       -moz-border-radius: 0.5rem;
       border-radius: 0.5rem;
+      &:hover, &:active {
+        background-color:@darkparakeetgreen;
+      }
 
       .ask-icon {
         content:url("/themes/msul/images/Icons_AskALib_Default.svg");
@@ -504,8 +543,11 @@ form.searchForm, .record-tabs, .navbar-form {
     border-bottom:0;
 
     li {
-      font-size:larger;
-      height:2.75rem;
+      height:3rem;
+      @media only screen and (min-width : 992px) {   
+        font-size:larger;
+        height:2rem;
+      }
     }
     a, &:active a, &:hover a {
       border:0;
@@ -517,9 +559,11 @@ form.searchForm, .record-tabs, .navbar-form {
       margin:0 0.7rem;
     }
     .navtab-digrepo {
-      border-left:0.2rem solid @eggplant;
-      padding-left:0.5rem;
-      margin-left:0.5rem;
+      @media only screen and (min-width : 998px) {    
+        border-left:0.2rem solid @eggplant;
+        padding-left:0.5rem;
+        margin-left:0.5rem;
+        }
     }
     a:focus {
       outline: 1px dashed @eggplant;
@@ -757,9 +801,9 @@ label {
   color:@eggplant;
 }
 
-.searchHomeContent, .nav.searchbox {
+/*.searchHomeContent, .nav.searchbox {
   margin-bottom:3rem;
-}
+}*/
 
 // Pagination
 
@@ -1061,3 +1105,4 @@ body.template-dir-myresearch.template-name-profile {
     display:block;
   }
 }
+

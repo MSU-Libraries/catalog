@@ -1,4 +1,8 @@
-<?php $account = $this->auth()->getManager(); $isTestTenant = str_contains(getenv("FOLIO_URL"), 'test'); ?>
+<?php
+$account = $this->auth()->getManager();
+$isTestTenant = str_contains(getenv("FOLIO_URL"), 'test');
+$isProduction = getenv("STACK_NAME") == 'catalog-prod';
+?>
 <div class="banner container navbar">
   <div class="navbar-header">
     <div class="navbar-msubrand"><a href="https://msu.edu/" rel="nofollow"><img alt="Michigan State University" src="/themes/msul/images/masthead-helmet-white.png"></a></div>
@@ -84,11 +88,56 @@
     </div>
   <?php endif; ?>
 </div>
+<?php if ($isTestTenant): ?>
+  <div class="collapse navbar-collapse" id="navbar-warning">
+    <p>
+      <b>Notice:</b> This catalog is connected to the FOLIO test tenant, and should be used for testing purposes only.
+      The information here is not up-to-date, and item availability will not be accurate.
+      <a href="https://catalog.lib.msu.edu" target="_blank">
+        <i class="fa fa-sign-in" aria-hidden="true"></i>
+        Go to the production catalog
+      </a>
+    </p>
+  </div>
+<?php elseif (!$isProduction): ?>
+  <div class="collapse navbar-collapse" id="navbar-warning">
+    <p>
+      <b>Notice:</b> This site is for previewing changes coming to the MSU Libraries catalog. It is
+      connected to live data and can be used as you would use the
+      <a href="https://catalog.lib.msu.edu/" target="_blank">
+        <i class="fa fa-sign-in" aria-hidden="true"></i> production catalog
+      </a>.
+      However, features may not be finalized and could be unstable.
+      <em>
+        You can help us improve it by providing
+        <a data-lightbox href="<?=$this->url('feedback-home') ?>">feedback and suggestions</a>!
+      </em>
+    </p>
+  </div>
+<?php else: ?>
+  <div class="collapse navbar-collapse" id="navbar-warning">
+    <p>
+      Welcome to the new interface for the MSU Libraries catalog! The EDS
+      interface will remain available at
+      <a href="https://eds.lib.msu.edu/" target="_blank">
+        <i class="fa fa-sign-in" aria-hidden="true"></i> https://eds.lib.msu.edu/
+      </a>
+      as an alternative.
+      <em>
+        You can help us improve our new interface by providing
+        <a data-lightbox href="<?=$this->url('feedback-home') ?>">feedback and suggestions</a>!
+      </em>
+    </p>
+  </div>
+<?php endif; ?>
+<?php /* Below is the search bar that appears in the header of the search home pages */ ?>
 <?php if ($this->layout()->searchbox !== false): ?>
   <div class="search container navbar">
     <div class="backtocat"><p><a style="text-decoration:none;" href="/Search">&#8592;&nbsp;&nbsp;Back to the catalog</a></p></div>
     <div class="nav searchbox hidden-print" role="search">
-      <?=$this->layout()->searchbox ?>
+      <?php $this->slot('search-home-hero')->start() ?>
+        <?=$this->context($this)->renderInContext("search/searchbox.phtml", ['ignoreHiddenFilterMemory' => true])?>
+      <?=$this->slot('search-home-hero')->end() ?>
     </div>
   </div>
 <?php endif; ?>

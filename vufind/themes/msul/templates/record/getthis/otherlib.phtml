@@ -37,7 +37,7 @@ if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
     <ul>
         <?php
         echo "<li><a href='https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:" .
-            $this->escapeHtml($status) . ":" . $this->escapeHtml($item['barcode']) .
+            $this->escapeHtml($status) . ":" . $this->escapeHtml($item == null ? '' : $item['barcode']) .
             "&rft.genre=book&LO=EYM%2CGZM%2CMUN&rft.title=" .
             $this->escapeHtml($title) . "&rft.au=" . $this->escapeHtml($author) . "&rft.pub=" . $this->escapeHtml($pubname) .
             "&rft.isbn=" . $this->escapeHtml($isbn) . "&loc=" .

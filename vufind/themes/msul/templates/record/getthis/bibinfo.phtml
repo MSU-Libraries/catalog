@@ -13,34 +13,19 @@ $link = $this->getthis->getLink();
         <?php if ($item['enumchron'] ?? false): ?>
           <span class="enumchron"><?=$this->escapeHtml($item['enumchron'])?></span>
         <?php endif; ?>
-        <?php if ($item['number'] > 1): ?>
+        <?php if ($item != null && $item['number'] > 1): ?>
           &nbsp;(Copy <?=$this->escapeHtml(($item['number']))?>)
         <?php endif; ?>
     <br/><br/>
     <p class="text-left">
         <b>Status:</b> <?= $this->getthis->getStatus() ?>
-        <?php if ($item['availability'] ?? false) { ?>
-            <?php if ($link ?? false) { ?>
-                <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
-                   <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
-                   target="_blank"
-                   href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
-                   <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place Request")?>
-                </a>
-            <?php
-            } ?>
-        <?php
-        } else { ?>
-            <?php if ($link ?? false) { ?>
-                <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
-                   <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
-                   target="_blank"
-                   href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
-                   <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place Request")?>
-                </a>
-            <?php
-            } ?>
-        <?php
-        } ?>
+        <?php if ($item !=null && !$this->getthis->isOnlineResource() && $item['is_holdable'] && $link ?? false) { ?>
+            <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
+               <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
+               target="_blank"
+               href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
+               <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place Request")?>
+            </a>
+        <?php } ?>
     </p><br/>
 </div>

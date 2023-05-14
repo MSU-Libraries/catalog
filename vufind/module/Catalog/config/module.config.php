@@ -40,9 +40,11 @@ return array (
       'recorddriver' => [
         'factories' => [
           'Catalog\\RecordDriver\\SolrMarc' => 'VuFind\\RecordDriver\\SolrDefaultFactory',
+          'Catalog\\RecordDriver\\SolrDefault' => 'VuFind\\RecordDriver\\SolrDefaultFactory',
         ],
         'aliases' => [
           'VuFind\\RecordDriver\\SolrMarc' => 'Catalog\\RecordDriver\\SolrMarc',
+          'VuFind\\RecordDriver\\SolrDefault' => 'Catalog\\RecordDriver\\SolrDefault',
         ],
         'delegators' => [
           'Catalog\\RecordDriver\\SolrMarc' => [
@@ -73,9 +75,11 @@ return array (
       'command' => [
         'factories' => [
           'Catalog\\VuFindConsole\\Command\\Util\\IndexReservesCommand' => 'VuFindConsole\\Command\\Util\\AbstractSolrAndIlsCommandFactory',
+          'Catalog\\Command\\Util\\IndexReservesCommand' => 'VuFindConsole\\Command\\Util\\AbstractSolrAndIlsCommandFactory',
         ],
         'aliases' => [
-          'util/index_reserves' => 'Catalog\\VuFindConsole\\Command\\Util\\IndexReservesCommand',
+          'util/index_reserves' => 'Catalog\\Command\\Util\\IndexReservesCommand',
+          'VuFindConsole\\Command\\Util\\IndexReservesCommand' => 'Catalog\\Command\\Util\\IndexReservesCommand',
         ],
       ],
     ],
