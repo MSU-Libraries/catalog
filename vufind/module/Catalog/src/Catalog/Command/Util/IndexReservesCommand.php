@@ -199,7 +199,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
         // Verify Folio records exist in Solr
         $idx = 0;
         foreach ($reserves as $reserve) {
-            $output->writeln("-- Progress:" . $idex . "/" . count($reserves) . " --");
+            $output->writeln("-- Progress: " . $idx . "/" . count($reserves) . " --");
 
             // Skip HLM records
             if (str_contains($reserve['BIB_ID'],'hlm.')) {
@@ -232,6 +232,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
                 $this->createLocalSolrRecord($reserves[$idx], $output);
             }
             else {
+                $output->writeln("Using found record in biblio index with folio prefix."):
                 $reserves[$idx]['BIB_ID'] = $response->response->docs[0]->id;
             }
             $idx += 1;
@@ -247,8 +248,8 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
 
         $pubYear = is_array($item->publication) && count($item->publication) > 0 ? $item->publication[0]->dateOfPublication : '';
         $authors = is_array($item->contributors) ? array_column($item->contributors, 'name') : [];
+        $firstAuthor = empty($authors) ? "" : $authors[0];
         $alternativeTitles = is_array($item->alternativeTitles) ? array_column($item->alternativeTitles, 'alternativeTitle') : [];
-        $firstAuthor = empty($authors) ? "" : $authors[0]->name;
 
         $index = [
             'id' => $reserve['BIB_ID'],
@@ -264,7 +265,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
                 <dc:identifier>' . $reserve['BIB_ID'] . '</dc:identifier
                 <dc:title>' . $item->title . '</dc:title>
                 <dc:type>Book</dc:type>
-                <dc:creator>' . ($authors) . '</dc:creator>
+                <dc:creator>' . ($firstAuthor) . '</dc:creator>
                 <dc:date>' . $pubYear  . '</dc:date>
                 </oai_dc:dc>',
             'record_format' => 'oai_dc',
@@ -339,6 +340,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $output->writeln("Starting reserves processing");
         // Check time limit; increase if necessary:
         if (ini_get('max_execution_time') < 3600) {
             ini_set('max_execution_time', '3600');
@@ -372,9 +374,9 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
                 $courses = $this->catalog->getCourses();
                 $output->writeln("Found course count: " . count($courses));
                 $departments = $this->catalog->getDepartments();
-                $output->writeln("Found department count: " . count($department));
+                $output->writeln("Found department count: " . count($departments));
                 $reserves = $this->catalog->findReserves('', '', '');
-                $output->writeln("Found reserve count: " . count($reserve));
+                $output->writeln("Found reserve count: " . count($reserves));
                 $output->writeln("Validating and mapping reserves to correct Solr record");
                 $reserves = $this->validateReserves($reserves, $output);
             } catch (\Exception $e) {
