@@ -2,7 +2,7 @@
 
 ## Vufind
 [Vufind's troubleshooting page](https://vufind.org/wiki/development:troubleshooting)
-is a good reference for debugging options, but we'll highlight a few 
+is a good reference for debugging options, but we'll highlight a few
 specifics we've found helpful.
 
 * The first spot to check for errors is the Docker service logs which
@@ -23,14 +23,14 @@ For example: `file = /var/log/vufind/vufind.log:alert,error,notice,debug`
     You can set `debug=true` in the main `config.ini` file to have debug messages
     to be printed to the page instead of the service logs, but be warned that sometime
     too much information is printed to the page
-    when `debug` is set to `true`, such as passwords used for ILS calls 
+    when `debug` is set to `true`, such as passwords used for ILS calls
     (hopefully this can be fixed to remove that from debug messages entirely).
 
 * To enable higher verbosity in the Apache logging, you can update the
 `LogLevel` in the `/etc/apache2/sites-enabled/000-default.conf` file and
 then run `apachectl graceful` to apply the changes.
 
-* To enable stack traces to be shown on the page when ever any 
+* To enable stack traces to be shown on the page when ever any
 exception is thrown, edit the `local/httpd-vufind.conf` file and
 uncomment the line that says: `SetEnv VUFIND_ENV development`. Write
 the changes to the file and then run `apachectl graceful` to apply
@@ -108,7 +108,7 @@ docker exec $(docker ps -q -f name=${STACK_NAME}-solr_solr) /healthcheck.sh
 In the event that you find a Solr replica that appears to be stuck in a "down" state
 despite all efforts to bring it back online, it may be easiest to just discard that replica and recreate it.
 
-This can be accomplished via the `DELETEREPLICA` and `ADDREPLICA` Solr API calls. 
+This can be accomplished via the `DELETEREPLICA` and `ADDREPLICA` Solr API calls.
 See [https://solr.apache.org/guide/8_10/replica-management.html](https://solr.apache.org/guide/8_10/replica-management.html).
 
 For example, if one node in a replica is stuck down, you can simply remove the downed replicas
@@ -125,6 +125,38 @@ curl 'http://solr:8983/solr/admin/collections?action=ADDREPLICA&collection=bibli
 
 Note, the new replica may take a few minutes to "recover" while it comes up. This is the
 process where it gets current collection data from the other replicas.
+
+### Fixing Count Differences
+Occassionaly the replicas can get out of sync and have slightly different counts between the replicas. If the leader
+is the one with the off-number and the other replicas are in-sync, then the solution is just to stop the container
+on the leader node to force the leadership to change to one of the other nodes. This will trigger the out-of-sync
+replica to re-sync with the new leader.
+
+You can verify current leadership status via the Solr Admin interface in Cloud -> Graph.
+
+You can verify counts on each replica by doing a curl call (or viewing in your browser, replacing with your site's url):
+
+```bash
+curl 'http://solr:8983/solr/admin/metrics?nodes=solr1:8983_solr,solr2:8983_solr,solr3:8983_solr&prefix=SEARCHER.searcher.numDocs,SEARCHER.searcher.deletedDocs&wt=json'
+```
+
+If every node is out of sync, then you will want to look at the volume file timestamps to determine the most
+recently modified as well as determining which has the highest index count. Then, to force that node to become
+leader, you will need to pause the other docker nodes (the ones NOT the one you want to be the new leader)
+from accepting containers, stop the ones you don't want to be leader one at a time, so the container remaining
+becomes leader. Once complete, un-pause the docker nodes so they can accept new containers again. You can watch
+the service logs to ensure they are recovering from the leader node and the counts sync back up over a period of
+time.
+
+```bash
+docker node ls
+# Do this for both nodes you need to pause
+docker node update [ID or hostname] --availability pause
+# Verify their state
+docker node ls
+# Re-enable them after you bring your containers back up
+docker node update [ID or hostname] --availability active
+```
 
 ## MariaDB
 

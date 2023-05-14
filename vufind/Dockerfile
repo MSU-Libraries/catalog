@@ -153,7 +153,7 @@ ENV SITE_HOSTNAME=$SITE_HOSTNAME \
     AUTH_FTP_USER=$AUTH_FTP_USER \
     AUTH_FTP_PASSWORD=$AUTH_FTP_PASSWORD \
     DEPLOY_KEY=$DEPLOY_KEY \
-    VUFIND_LOCAL_MODULES=$VUFIND_LOCAL_MODULES
+    VUFIND_LOCAL_MODULES=Catalog
 
 # Setup Apache
 RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-default.conf && \

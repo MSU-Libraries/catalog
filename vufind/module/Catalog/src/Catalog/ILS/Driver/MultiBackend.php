@@ -471,7 +471,6 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
 
     public function getInstanceByBibId($bibId)
     {
-        // Get all the reserves from the default driver
         if ($driver = $this->getDriver($this->defaultDriver)) {
             $instance = $driver->getInstanceByBibId($bibId);
         } else {

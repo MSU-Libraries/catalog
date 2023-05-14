@@ -28,7 +28,7 @@ check() {
     HEALTHY=0;
     for HOST in ${HOSTS}; do
         ATTEMPTS=0;
-        while [[ "${ATTEMPTS}" -le 20 ]]; do
+        while [[ "${ATTEMPTS}" -le 60 ]]; do
             echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): Checking ${SERVICE} health...";
             if ssh deploy@"${HOST}" "/usr/local/ncpa/plugins/check_${SERVICE}.sh ${STACK_NAME}"; then
                 echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} is healthy!";

@@ -469,12 +469,16 @@ class Folio extends \VuFind\ILS\Driver\Folio
 
     protected function getElectronicAccessLinks($itemId)
     {
-        $response = $this->makeRequest(
-            'GET',
-            '/item-storage/items/' . $itemId
-        );
-        $item = json_decode($response->getBody());
-        return $item->electronicAccess;
+        try {
+            $response = $this->makeRequest(
+                'GET',
+                '/item-storage/items/' . $itemId
+            );
+            $item = json_decode($response->getBody());
+            return $item->electronicAccess;
+        } catch (\VuFind\Exception\RecordMissing $e) {
+            return [];
+        }
     }
 
     /**
@@ -772,5 +776,26 @@ class Folio extends \VuFind\ILS\Driver\Folio
             ];
         }
         return $locations;
+    }
+
+    public function getInstanceByBibId($bibId)
+    {
+        // MSUL override to make publicly available to reserve index command
+
+        // Figure out which ID type to use in the CQL query; if the user configured
+        // instance IDs, use the 'id' field, otherwise pass the setting through
+        // directly:
+        $idType = $this->getBibIdType();
+        $idField = $idType === 'instance' ? 'id' : $idType;
+
+        $query = [
+            'query' => '(' . $idField . '=="' . $this->escapeCql($bibId) . '")'
+        ];
+        $response = $this->makeRequest('GET', '/instance-storage/instances', $query);
+        $instances = json_decode($response->getBody());
+        if (count($instances->instances) == 0) {
+            throw new ILSException("Item Not Found");
+        }
+        return $instances->instances[0];
     }
 }
