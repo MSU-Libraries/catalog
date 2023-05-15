@@ -232,7 +232,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
                 $this->createLocalSolrRecord($reserves[$idx], $output);
             }
             else {
-                $output->writeln("Using found record in biblio index with folio prefix."):
+                $output->writeln("Using found record in biblio index with folio prefix.");
                 $reserves[$idx]['BIB_ID'] = $response->response->docs[0]->id;
             }
             $idx += 1;
