@@ -8,7 +8,7 @@ $callnum = $this->driver->getCallNumber();
 <div>
     <p>
         <b>
-            <a href='https://lib.msu.edu/cdl/' target='_blank'>
+            <a href='https://lib.msu.edu/cdl?&TI=<?= $this->escapeUrl($title) ?>&CN=<?= $this->escapeUrl($callnum) ?>&AU=<?= $this->escapeUrl($author) ?>&BIBNUM=<?= $this->escapeUrl($bibnum) ?>' target='_blank'>
                 Request Digital Lending:
             </a>
         </b>
