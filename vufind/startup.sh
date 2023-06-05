@@ -11,7 +11,7 @@ fi
 
 # Create symlinks to the shared storage for non-production environments
 # Populating the shared storage if empty
-if [[ "${STACK_NAME}" != catalog-* ]]; then
+if [[ "${STACK_NAME}" == devel-* ]]; then
     echo "Setting up links for module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
     mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/local-confs
     mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/repo
