@@ -13,7 +13,7 @@ if ($selected != '') {
   $location = $selected['location'];
   $callnumber = $selected['callnumber'];
   $callNumPrefix = !empty($selected['callnumber_prefix']) ? $selected['callnumber_prefix'] . ' ' : '';
-  if (in_array($status, array('Aged to lost', 'Claimed returned', 'Declared lost', 'In process (non-requestable)',
+  if (in_array($status, array('Aged to lost', 'Claimed returned', 'Declared lost', 'In process', 'In process (non-requestable)',
       'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed', 'Unknown', 'Withdrawn')))
     $status = 'Unavailable';
   else if (in_array($status, array('Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out')))

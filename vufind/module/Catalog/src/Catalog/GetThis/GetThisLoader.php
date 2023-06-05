@@ -69,8 +69,9 @@ class GetThisLoader {
         $item_id = $this->getItemId($item_id);
         $status = $this->getItem($item_id)['status'] ?? "Unknown";
 
-        if (in_array($status, array('Aged to lost', 'Claimed returned', 'Declared lost', 'In process (non-requestable)',
-            'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed', 'Unknown', 'Withdrawn')))
+        if (in_array($status, array('Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
+            'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
+            'Unknown', 'Withdrawn')))
           $status = 'Unavailable';
         else if (in_array($status, array('Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out')))
           $status = 'Checked Out';
