@@ -42,15 +42,16 @@
       <?php else: ?>
         <?php /* Begin Unavailable Items (Requests) */
             $status=$holding['status'];
-            if (in_array($status, array('Aged to lost', 'Claimed returned', 'Declared lost', 'In process (non-requestable)',
-                'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed', 'Unknown', 'Withdrawn')))
-              $status = 'Unavailable';
-            else if (in_array($status, array('Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out')))
-              $status = 'Checked Out';
+            if (in_array($status, array('Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
+                'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
+                'Unknown', 'Withdrawn')))
+              $status = 'Unavailable ('.$status.')';
+            else if (in_array($status, array('Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged')))
+              $status = 'Checked Out ('.$status.')';
             else if ($status == 'Restricted')
               $status = 'Library Use Only';
-            else if (!in_array($status, array('Available', 'Unavailable')))
-              $status = 'Unknown status';
+            else if (!in_array($status, array('Available', 'Unavailable', 'Checked out')))
+              $status = 'Unknown status ('.$status.')';
         ?>
         <span class="text-danger"><?=$this->transEsc($status)?><link property="availability" href="http://schema.org/OutOfStock" /></span>
         <?php if ($holding['returnDate'] ?? false): ?>&ndash; <span class="small"><?=$this->escapeHtml($holding['returnDate'])?></span><?php endif; ?>
