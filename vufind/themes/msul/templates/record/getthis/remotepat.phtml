@@ -3,12 +3,10 @@
 $item = $this->getthis->getItem();
 $loc = $this->getthis->getLocation();
 $title = $this->driver->getTitle();
-$bibnum = $this->driver->getSierraBN();
 $author = $this->driver->getPrimaryAuthor();
 $status = $this->getthis->getStatus();
 $isbn = $this->driver->getCleanISBN();
 $callnum = $this->driver->getCallNumber();
-$bibnum = $this->driver->getSierraBN();
 $pubname = $this->driver->getPublisher();
 if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
 ?>
@@ -19,7 +17,7 @@ if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
         via UPS. Shipping is limited to anywhere in the US or Canada. (MSU Students, Faculty and Staff only)
         <ul>
             <li>
-                <a href="https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:distance:<?= $this->escapeHtml($bibnum) ?>&rft.genre=Book3&LO=EYM%2CGZM%2CMUN&rft.title=<?= $this->escapeHtml($title) ?>&rft.au=<?= $this->escapeHtml($author) ?>&rft.pub=<?= $this->escapeHtml($pubname) ?>&rft.isbn=<?= $this->escapeHtml($isbn) ?>&loc=<?= $this->escapeHtml($loc) ?>&callno=<?= $this->escapeHtml($callnum) ?>&CAT=1" target="_blank">
+                <a href="https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:distance&rft.genre=Book3&LO=EYM%2CGZM%2CMUN&rft.title=<?= $this->escapeHtml($title) ?>&rft.au=<?= $this->escapeHtml($author) ?>&rft.pub=<?= $this->escapeHtml($pubname) ?>&rft.isbn=<?= $this->escapeHtml($isbn) ?>&loc=<?= $this->escapeHtml($loc) ?>&callno=<?= $this->escapeHtml($callnum) ?>&CAT=1" target="_blank">
                     Request Item as Distance User
                 </a>
             </li>
