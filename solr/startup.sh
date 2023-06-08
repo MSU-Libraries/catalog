@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Java security manager is incompatible with AlphaBrowse handler
+export SOLR_SECURITY_MANAGER_ENABLED="false"
+
 COLLEX_CONFIGS=/solr_confs/
 
 # Give Zookeeper time to startup
