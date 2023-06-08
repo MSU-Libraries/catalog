@@ -53,12 +53,13 @@ RUN \
     yq -i '.require.vufind-org/vufindharvest="5.0.0"' /usr/local/vufind/composer.json && \
     composer --working-dir=/usr/local/vufind/ update && \
     # Remove unused dependencies after Vufind is installed
-    mv /usr/local/vufind/solr /tmp && \
-    mkdir -p /usr/local/vufind/solr/vendor/dist && \
-    mkdir -p /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
-    mv /tmp/solr/vendor/dist/solr* /usr/local/vufind/solr/vendor/dist/ && \
-    mv /tmp/solr/vendor/contrib/analysis-extras/lib /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
-    rm -rf /tmp/solr && \
+    # Disabled for upgrade to Solr 9
+    # mv /usr/local/vufind/solr /tmp && \
+    # mkdir -p /usr/local/vufind/solr/vendor/dist && \
+    # mkdir -p /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
+    # mv /tmp/solr/vendor/dist/solr* /usr/local/vufind/solr/vendor/dist/ && \
+    # mv /tmp/solr/vendor/contrib/analysis-extras/lib /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
+    # rm -rf /tmp/solr && \
     # Create user for grunt
     groupadd -g 1000 msuldevs && \
     useradd msuldevs -u 1000 -g 1000 && \
