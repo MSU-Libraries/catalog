@@ -35,6 +35,8 @@ RUN mkdir /solr_confs && \
     mkdir /solr_confs/import && \
     chown 1001 /solr_confs/import && \
     cp /vufind-${VUFIND_VERSION}/import/browse-indexing.jar /solr_confs/import/ && \
+    mkdir -p /solr_confs/vufind_libs/import/lib && \
+    cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /solr_confs/vufind_libs/import/lib/ && \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION} && \
     cp -r /opt/bitnami/solr/modules/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/
