@@ -29,6 +29,7 @@ namespace Catalog\ILS\Driver;
 
 use DateTime;
 use DateTimeZone;
+use VuFind\Exception\ILS as ILSException;
 
 /**
  * FOLIO REST API driver
