@@ -67,7 +67,7 @@ class Record extends \VuFind\View\Helper\Root\Record
      */
     public function getLinkDetails($openUrlActive = false)
     {
-        $links = $this->driver->geteJournalLinks();
+        $links = $this->driver->tryMethod('geteJournalLinks') ?? [];
         foreach ($links as $idx => $link) {
             if (strcasecmp($link['desc'], "cover image") === 0) {
                 unset($links[$idx]);
