@@ -118,7 +118,7 @@ Deploy Solr:
 Deploy Swarm Cron:
   extends: .stack_template
   script:
-    - bash ./cicd/deploy-swarm-cron
+    - bash ./cicd/deploy-swarm-cleanup
 
 Deploy DB:
   extends: .stack_template
