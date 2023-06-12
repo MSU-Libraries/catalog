@@ -22,4 +22,16 @@ return [
         ],
     ],
 
+    'icons' => [
+        'aliases' => [
+            /**
+             * Icons can be assigned or overriden here
+             *
+             * Format: 'icon' => [set:]icon[:extra_classes]
+             * Icons assigned without set will use the defaultSet.
+             * In order to specify extra CSS classes, you must also specify a set.
+             */
+        ],
+    ],
+
 ];
