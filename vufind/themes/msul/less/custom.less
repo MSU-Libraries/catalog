@@ -161,6 +161,13 @@ header {
       color:@msugreen;
     }
   }
+  .nav > li > a {
+    &:hover,
+    &:focus {
+      color: @msugreen;
+      background-color: @nav-link-hover-bg;
+    }
+  }
 }
 
 #navbar-warning {
@@ -713,6 +720,9 @@ table tr {
   }
   a {
     text-decoration:none;
+    .icon-link__label {
+      text-decoration:none;
+    }
   }
 }
 
@@ -756,7 +766,7 @@ table tr {
         width:15rem;
       }
       .view-buttons {
-        a, a:visited {
+        > a, > a:visited {
           text-align:center;
           padding:0.5rem;
           text-decoration: none;
@@ -767,7 +777,7 @@ table tr {
           border-radius: 0.5rem;
         }
 
-        a:hover, a:active, span {
+        > a:hover, > a:active, > span {
           text-align:center;
           padding:0.5rem;
           text-decoration: none;
@@ -776,6 +786,10 @@ table tr {
           -webkit-border-radius: 0.5rem;
           -moz-border-radius: 0.5rem;
           border-radius: 0.5rem;
+        }
+
+        .icon-link__label {
+          text-decoration: none;
         }
       }
     }
@@ -786,7 +800,10 @@ table tr {
   text-decoration:none;
 }
 
-//filter hover color
+// filter remove button
+.active-filters .search-filter-remove {
+  color: #fff;
+}
 .active-filters .search-filter-remove:hover {
   color: @medgray;
 }
