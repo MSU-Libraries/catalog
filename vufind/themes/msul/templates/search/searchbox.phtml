@@ -70,7 +70,7 @@
   <form id="searchForm" class="searchForm navbar-form navbar-left flip" method="get" action="<?=$this->url($basicSearch)?>" name="searchForm" autocomplete="off">
     <?= $this->context($this)->renderInContext('search/searchTabs', ['searchTabs' => $tabConfig['tabs'], 'showCounts' => $tabConfig['showCounts']]); ?>
     <?php $placeholder = $this->searchbox()->getPlaceholderText($tabConfig['selected']['id'] ?? null); ?>
-    <label for="searchForm_lookfor">&nbsp;for&nbsp;</label>
+    <label for="searchForm_type">Search&nbsp;</label>
     <?php if ($handlerCount > 1): ?>
       <select id="searchForm_type" class="searchForm_type form-control" name="type" data-native-menu="false" aria-label="<?=$this->transEscAttr("Search type")?>">
         <?php $currentGroup = $insideGroup = false; ?>
