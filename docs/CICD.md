@@ -62,7 +62,7 @@ hosted on the swarm) and the internal network used by the MariaDB Galera service
 within the indivudual environment)
 * Will bootstrap the `solr` and `mariadb` stacks if they have not already been (i.e. this is the first time
 running this job for this branch)
-* Deploys the `catalog`, `solr`, `swarm-cron`, and `mariadb` stacks. If this is a devel or review environment, it will
+* Deploys the `catalog`, `solr`, `swarm-cleanup`, and `mariadb` stacks. If this is a devel or review environment, it will
 import a single marc file into the vufind instance as test data
 * Runs VuFind version upgrades, if applicable
 * If it is a `devel-` or `review-` branch, it will populate the environment with sample data
