@@ -238,7 +238,6 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             if ($doc_response->response->numFound == 1) {
                 $output->writeln("Found matching folio prefixed record in solr. deleting  " . $doc->id);
                 $this->solr->deleteRecords('Solr', [$doc->id]);
-                $this->solr->save('Solr', $updates);
                 $this->solr->commit('Solr');
             }
         }
