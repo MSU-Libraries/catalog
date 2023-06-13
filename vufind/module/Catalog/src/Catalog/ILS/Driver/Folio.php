@@ -375,12 +375,15 @@ class Folio extends \VuFind\ILS\Driver\Folio
                         $dueDateTimestamp
                     ),
                 'dueStatus' => $dueStatus,
-                'id' => $this->getBibId($trans->item->instanceId),
+                'id' => "folio." . $this->getBibId($trans->item->instanceId),
                 'item_id' => $trans->item->id,
                 'barcode' => $trans->item->barcode,
                 'renew' => $trans->renewalCount ?? 0,
                 'renewable' => true,
                 'title' => $trans->item->title,
+                'borrowingLocation' => $trans->item->location->name,
+                'volume' => $trans->item->volume,
+                'callNumber' => $trans->item->callNumber
             ];
         }
         return $transactions;
