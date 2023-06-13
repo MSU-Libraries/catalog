@@ -44,6 +44,16 @@ if [[ $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
     exit 0
 fi
 
+# Avoid running alpha-browse on prod and beta on the same node
+if [[ "${STACK_NAME}" == "catalog-prod" && "${NODE}" == "3" ]]; then
+    echo "Stack is prod: not running alpha-browse on node 3."
+    exit 0
+fi
+if [[ "${STACK_NAME}" != "catalog-prod" && "${NODE}" != "3" ]]; then
+    echo "Stack is not prod: not running alpha-browse on node 1 or 2."
+    exit 0
+fi
+
 # Set defaults
 default_args() {
     declare -g -A ARGS
