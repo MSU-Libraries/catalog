@@ -106,6 +106,7 @@ verbose() {
 }
 
 check_skip() {
+    declare -g SKIP_BUILD
     SKIP_BUILD=0
     # Avoid running alpha-browse on prod and beta on the same node
     if [[ "${STACK_NAME}" == "catalog-prod" && "${NODE}" == "3" ]]; then
