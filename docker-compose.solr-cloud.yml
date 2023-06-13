@@ -42,7 +42,7 @@ services:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     volumes:
       - bitnami:/bitnami
-      - /mnt/shared/backups/solr_dropbox:/mnt/solr_backups
+      - /mnt/shared/backups/${STACK_NAME}/solr_dropbox:/mnt/solr_backups
     hostname: solr{{slice .Node.Hostname 8 9}}
     networks:
       - public

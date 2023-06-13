@@ -3,7 +3,7 @@
 # Set defaults
 default_args() {
     declare -g -A ARGS
-    ARGS[SHARED_DIR]=/mnt/shared/backups
+    ARGS[SHARED_DIR]=/mnt/backups
     ARGS[SOLR]=0
     ARGS[DB]=0
     ARGS[ROTATIONS]=3
@@ -105,6 +105,8 @@ backup_solr() {
     backup_collection "biblio"
 
     backup_collection "authority"
+    
+    backup_collection "reserves"
 }
 
 backup_collection() {
@@ -117,8 +119,8 @@ backup_collection() {
     # Trigger the backup in Solr
     verbose "Starting backup of '${COLL}' index"
     SNAPSHOT="$(date +%Y%m%d%H%M%S)"
-    if ! curl "http://solr2:8983/solr/${COLL}/replication?command=backup&location=/mnt/solr_backups/${COLL}&name=${SNAPSHOT}" > /dev/null 2>&1; then
-        verbose "ERROR: Failed to trigger a backup of the '${COLL}' collection in Solr. Exit code: $?" 1
+    if ! OUTPUT=$(curl -sS "http://solr2:8983/solr/${COLL}/replication?command=backup&location=/mnt/solr_backups/${COLL}&name=${SNAPSHOT}"); then
+        verbose "ERROR: Failed to trigger a backup of the '${COLL}' collection in Solr. Exit code: $?. ${OUTPUT}" 1
         exit 1
     fi
 
@@ -144,7 +146,7 @@ backup_collection() {
             verbose "Backup still in progress (${ACTUAL}/${EXPECTED} files copied)"
         fi
         sleep 3
-        EXPECTED="$(curl -s "http://solr2:8983/solr/${COLL}/replication?command=details&wt=json" | jq '.details.commits[0][5]|length')"
+        EXPECTED="$(curl -sS "http://solr2:8983/solr/${COLL}/replication?command=details&wt=json" | jq '.details.commits[0][5]|length')"
         ACTUAL="$(find ${ARGS[SHARED_DIR]}/solr_dropbox/"${COLL}"/"${SNAPSHOT}" -type f 2>/dev/null | wc -l)"
         CUR_WAIT=$((CUR_WAIT+1))
     done
@@ -182,12 +184,15 @@ backup_collection() {
 backup_db() {
     mkdir -p ${ARGS[SHARED_DIR]}/db
 
+    verbose "Removing leftover uncompressed sql files"
+    rm ${ARGS[SHARED_DIR]}/db/*.sql 2>/dev/null
+
     verbose "Temporarily setting Galera node to desychronized state"
-    if ! mysql -h galera2 -u root -p12345 -e "SET GLOBAL wsrep_desync = ON" 2>/dev/null; then
+    if ! OUTPUT=$(mysql -h galera2 -u root -p12345 -e "SET GLOBAL wsrep_desync = ON" 2>&1); then
         # Check if it was a false negative and the state was actually set
         if ! mysql -h galera2 -u root -p12345 -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
           | grep 1 > /dev/null 2>&1; then
-            verbose "ERROR: Failed to set node to desychronized state. Unsafe to continue backup." 1
+            verbose "ERROR: Failed to set node to desychronized state. Unsafe to continue backup. ${OUTPUT}" 1
             exit 1
         fi
     fi
@@ -198,18 +203,18 @@ backup_db() {
     TIMESTAMP=$( date +%Y%m%d%H%M%S )
     DBS=( galera1 galera2 galera3 )
     for DB in "${DBS[@]}"; do
-        if ! mysqldump -h "${DB}" -u root -p12345 --triggers --routines --column-statistics=0 vufind > ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql 2>/dev/null; then
-            verbose "ERROR: Failed to successfully backup the database from ${DB}" 1
+        if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p12345 --triggers --routines --column-statistics=0 vufind > ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql 2>&1); then
+            verbose "ERROR: Failed to successfully backup the database from ${DB}. ${OUTPUT}" 1
             exit 1
         fi
     done
 
     verbose "Re-enabling Galera node to sychronized state"
-    if ! mysql -h galera2 -u root -p12345 -e "SET GLOBAL wsrep_desync = OFF" 2>/dev/null; then
+    if ! OUTPUT=$(mysql -h galera2 -u root -p12345 -e "SET GLOBAL wsrep_desync = OFF" 2>&1); then
         # Check if it was a false negative and the state was actually set
         if ! mysql -h galera2 -u root -p12345 -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
           | grep 0 > /dev/null 2>&1; then
-            verbose "ERROR: Failed to re-set node to synchronized state after dump was complete." 1
+            verbose "ERROR: Failed to re-set node to synchronized state after dump was complete. ${OUTPUT}" 1
             exit 1
         fi
     fi
