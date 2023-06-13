@@ -25,11 +25,6 @@ return array (
       'VuFind\\Controller\\MyResearchController' => 'Catalog\\Controller\\MyResearchController',
     ],
   ],
-  'view_manager' => [
-    'template_map' => [
-      'record/getthis/login' => __DIR__ . '/../../../themes/msul/templates/record/getthis/login.phtml',
-    ],
-  ],
   'vufind' => [
     'plugin_managers' => [
       'search_backend' => [
