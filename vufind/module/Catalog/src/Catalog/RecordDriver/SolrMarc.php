@@ -223,5 +223,13 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         }
         return $data;
     }
-}
 
+    /**
+     * Get the video game platform
+     */
+    public function getPlatform()
+    {
+        return $this->getMarcField('753', ['a']);
+    }
+
+}
