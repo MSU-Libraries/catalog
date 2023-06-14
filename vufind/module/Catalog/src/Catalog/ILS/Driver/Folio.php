@@ -134,7 +134,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     'id' => $bibId,
                     'item_id' => $item->id,
                     'holding_id' => $holding->id,
-                    'number' => 0, # will be set afterwards
+                    'number' => $item->copyNumber,
                     'enumchron' => $enum,
                     'barcode' => $item->barcode ?? '',
                     'status' => $item->status->name,
@@ -163,25 +163,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
             }
         }
 
-        // Sort by enumchron (volume) and set the number (copy) field
+        // Sort by location, enumchron (volume) and copy number
         uasort($items, function($item1, $item2) {
             return $item2['location'] <=> $item1['location'] ?: # reverse sort
                    version_compare($item1['enumchron'], $item2['enumchron']) ?:
+                   $item1['number'] <=> $item2['number'] ?:
                    $item1['id'] <=> $item2['id'];
         });
-        $prev_enumchron = 'INVALID';
-        $prev_location = 'INVALID';
-        $number = 1;
-        foreach ($items as &$item) {
-            if ($item['enumchron'] == $prev_enumchron && $item['location'] == $prev_location){
-                $number += 1;
-            } else {
-                $number = 1;
-            }
-            $item['number'] = $number;
-            $prev_enumchron = $item['enumchron'];
-            $prev_location = $item['location'];
-        }
 
         return $items;
     }
