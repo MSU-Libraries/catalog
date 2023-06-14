@@ -18,6 +18,9 @@ mkdir -p /mnt/logs/vufind /mnt/logs/harvests
 ln -sf /mnt/logs/vufind /var/log/vufind
 touch /mnt/logs/vufind/vufind.log
 
+# Create backups dir symlink
+ln -s /mnt/shared/backups/${STACK_NAME}/ /mnt/backups
+
 # Set custom cron minute offsets for OAI harvesting
 FOLIO_CRON_MINS="0,30"  # catalog-prod
 HARV_CRON_MINS="30"
