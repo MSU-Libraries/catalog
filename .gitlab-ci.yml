@@ -209,6 +209,17 @@ Populate Vufind Environment:
   script:
     - bash ./cicd/populate-vufind-environment
 
+Run Functional Tests:
+  extends: .stack_template
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Verify Stack Health
+  script:
+    - bash ./cicd/run-functional-tests
+
 Scale Down Catalog Service:
   extends: .stack_template
   rules:

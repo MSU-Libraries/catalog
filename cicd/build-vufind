@@ -66,7 +66,15 @@ main() {
     if [[ ${EC} -ne 0 ]]; then
         echo "Failed to build. Sleeping to add delay before potential retry.";
         sleep 3;
-        exit 1;
+        exit ${EC};
+    fi;
+
+    echo "Running PHP unit tests"
+    docker run --rm "${CURR}" vendor/bin/phing phpunitfaster -Dphpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/;
+    EC=$?;
+    if [[ ${EC} -ne 0 ]]; then
+        echo "One or more unit tests failed.";
+        exit ${EC};
     fi;
 
     echo "Pushing image"
@@ -76,7 +84,7 @@ main() {
     if [[ ${EC} -ne 0 ]]; then
         echo "Failed to push. Sleeping to add delay before potential retry.";
         sleep 3;
-        exit 1;
+        exit ${EC};
     fi;
 
     if [[ ${CI_DEFAULT_BRANCH} == "${CI_COMMIT_BRANCH}" ]]; then
@@ -92,7 +100,7 @@ main() {
     if [[ ${EC} -ne 0 ]]; then
         echo "Failed to add latest tag. Sleeping to add delay before potential retry.";
         sleep 3;
-        exit 1;
+        exit ${EC};
     fi;
 }
 
