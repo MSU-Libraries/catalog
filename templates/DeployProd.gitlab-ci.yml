@@ -130,7 +130,7 @@ Prod Vufind Upgrade:
     - Verify Prod Stack Health
 
 Prod Run Functional Tests:
-  extends: .stack_template
+  extends: Run Functional Tests
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
