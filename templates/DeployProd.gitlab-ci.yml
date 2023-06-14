@@ -137,4 +137,4 @@ Prod Run Functional Tests:
   needs:
     - job: Set Prod Stack Name
       artifacts: true
-    - Verify Stack Health
+    - Verify Prod Stack Health
