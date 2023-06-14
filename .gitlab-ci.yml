@@ -198,16 +198,16 @@ Vufind Upgrade:
   script:
     - bash ./cicd/vufind-upgrade
 
-Vufind Upgrade:
+Populate Vufind Environment:
   extends: .stack_template
+  rules:
+    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Set Stack Name
       artifacts: true
-    - job: Deploy Vufind
-      artifacts: true
-    - Verify Stack Health
+    - Vufind Upgrade
   script:
-    - bash ./cicd/vufind-upgrade
+    - bash ./cicd/populate-vufind-environment
 
 Run Functional Tests:
   extends: .stack_template
