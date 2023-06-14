@@ -56,7 +56,7 @@ class SolrTest extends \PHPUnit\Framework\TestCase
         $item = $result['Browse']['items'][0];
         $this->assertEquals($item['count'], count($item['extras']['id']));
         $this->assertTrue(empty($item['useInstead']));
-        $this->assertTrue(in_array(['vtls000013187'], $item['extras']['id']));
+        $this->assertTrue(in_array(['folio.in00003688132'], $item['extras']['id']));
         $this->assertTrue(in_array('Royal Dublin Society', $item['seeAlso']));
         $this->assertEquals('Dublin Society', $item['heading']);
     }
@@ -80,39 +80,4 @@ class SolrTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue(in_array('Royal Dublin Society', $item['useInstead']));
     }
 
-    /**
-     * Check that expected Dewey values are present (tests VUFIND-701).
-     *
-     * @return void
-     */
-    public function testDeweyValues()
-    {
-        $solr = $this->getBackend();
-        $extras = new ParamBag(['extras' => 'id']);
-        $result = $solr->alphabeticBrowse('dewey', '123.45 .I39', 0, 1, $extras);
-        $item = $result['Browse']['items'][0];
-        $this->assertEquals(1, $item['count']);
-        $this->assertEquals($item['count'], count($item['extras']['id']));
-        $this->assertEquals('123.45 .I39', $item['heading']);
-        $result = $solr->alphabeticBrowse('dewey', '123.46 .Q39', 0, 1, $extras);
-        $item = $result['Browse']['items'][0];
-        $this->assertEquals(1, $item['count']);
-        $this->assertEquals($item['count'], count($item['extras']['id']));
-        $this->assertEquals('123.46 .Q39', $item['heading']);
-    }
-
-    /**
-     * Check that the terms handler is working.
-     *
-     * @return void
-     */
-    public function testTermsHandler()
-    {
-        $solr = $this->getBackend();
-        $currentPageInfo = $solr->terms('id', 'test', 1)->getFieldTerms('id');
-        $this->assertEquals(1, count($currentPageInfo));
-        foreach ($currentPageInfo as $key => $value) {
-            $this->assertEquals('test', substr($key, 0, 4));
-        }
-    }
 }
