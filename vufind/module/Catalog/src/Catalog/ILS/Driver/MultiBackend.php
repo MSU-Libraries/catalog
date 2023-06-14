@@ -29,6 +29,7 @@
 namespace Catalog\ILS\Driver;
 
 use VuFind\ILS\Driver\PluginManager;
+use VuFind\Exception\ILS as ILSException;
 
 /**
  * Multiple Backend Driver.

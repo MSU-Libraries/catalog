@@ -194,6 +194,56 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
         return new CsvReader($files, $delimiter, $template);
     }
 
+    protected function revalidateLocalRecords($output)
+    {
+        $output->writeln("Validating all locally prefixed Solr records to ensure there are no duplicate folio prefixed records");
+
+        // Query all local prefixed Solr records
+        $params = new \VuFindSearch\ParamBag();
+        $query = new \VuFindSearch\Query\Query(
+            'id:local\.*'
+        );
+        $params->set('fl', 'id');
+        $command = new RawJsonSearchCommand(
+            'Solr',
+            $query,
+            0,
+            10000, // TODO -- don't love that this is an arbitrary number
+            $params
+        );
+
+        $searchService = $this->getProperty($this->solr, 'searchService');
+        $response = $searchService->invoke($command)->getResult();
+
+        $output->writeln("Found local record count: " . $response->response->numFound);
+
+        foreach ($response->response->docs as $doc) {
+            // Check and see if there is an equivilent folo prefixed Solr record
+            $doc_params = new \VuFindSearch\ParamBag();
+            $doc_query = new \VuFindSearch\Query\Query(
+                'id:folio\.' . str_replace("local.", "", $doc->id)
+            );
+            $doc_params->set('fl', 'id');
+            $doc_command = new RawJsonSearchCommand(
+                'Solr',
+                $doc_query,
+                0,
+                1,
+                $doc_params
+            );
+
+            $doc_response = $searchService->invoke($doc_command)->getResult();
+
+            // If so, delete the local prefixed Solr record
+            if ($doc_response->response->numFound == 1) {
+                $output->writeln("Found matching folio prefixed record in solr. deleting  " . $doc->id);
+                $this->solr->deleteRecords('Solr', [$doc->id]);
+                $this->solr->commit('Solr');
+            }
+        }
+        $output->writeln("Completed validation of locally prefixed records");
+    }
+
     protected function validateReserves($reserves, $output)
     {
         // Verify Folio records exist in Solr
@@ -368,13 +418,21 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             return 1;
         } else {
             try {
-                // Connect to ILS and load data:
+                $this->revalidateLocalRecords($output);
+                // Connect to ILS and load data
+                $instructors = [];
+                $courses = [];
+                $departments = [];
+                $output->writeln("Retrieving instructors");
                 $instructors = $this->catalog->getInstructors();
                 $output->writeln("Found instructor count: " . count($instructors));
+                $output->writeln("Retrieving courses");
                 $courses = $this->catalog->getCourses();
                 $output->writeln("Found course count: " . count($courses));
+                $output->writeln("Retrieving departments");
                 $departments = $this->catalog->getDepartments();
                 $output->writeln("Found department count: " . count($departments));
+                $output->writeln("Retrieving course reserves");
                 $reserves = $this->catalog->findReserves('', '', '');
                 $output->writeln("Found reserve count: " . count($reserves));
                 $output->writeln("Validating and mapping reserves to correct Solr record");

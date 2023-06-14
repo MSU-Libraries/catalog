@@ -118,7 +118,7 @@ Deploy Solr:
 Deploy Swarm Cron:
   extends: .stack_template
   script:
-    - bash ./cicd/deploy-swarm-cron
+    - bash ./cicd/deploy-swarm-cleanup
 
 Deploy DB:
   extends: .stack_template
@@ -208,6 +208,17 @@ Populate Vufind Environment:
     - Vufind Upgrade
   script:
     - bash ./cicd/populate-vufind-environment
+
+Run Functional Tests:
+  extends: .stack_template
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Verify Stack Health
+  script:
+    - bash ./cicd/run-functional-tests
 
 Scale Down Catalog Service:
   extends: .stack_template

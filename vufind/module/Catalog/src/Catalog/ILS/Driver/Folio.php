@@ -29,6 +29,7 @@ namespace Catalog\ILS\Driver;
 
 use DateTime;
 use DateTimeZone;
+use VuFind\Exception\ILS as ILSException;
 
 /**
  * FOLIO REST API driver
@@ -341,7 +342,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
      */
     public function getMyTransactions($patron)
     {
-        // MSUL -- overridden to add sortBy
+        // MSUL -- overridden to add sortBy and add fields to response
+        $dateConverter = new \VuFind\Date\Converter(
+            [
+                'displayDateFormat' => 'm/d/Y',
+                'displayTimeFormat' => 'h:i a'
+            ]
+        );
         $query = ['query' => 'userId==' . $patron['id'] . ' and status.name==Open sortBy dueDate/sort.ascending'];
         $transactions = [];
         foreach ($this->getPagedResults(
@@ -364,22 +371,25 @@ class Folio extends \VuFind\ILS\Driver\Folio
             }
             $transactions[] = [
                 'duedate' =>
-                    $this->dateConverter->convertToDisplayDate(
+                    $dateConverter->convertToDisplayDate(
                         'U',
                         $dueDateTimestamp
                     ),
                 'dueTime' =>
-                    $this->dateConverter->convertToDisplayTime(
+                    $dateConverter->convertToDisplayTime(
                         'U',
                         $dueDateTimestamp
                     ),
                 'dueStatus' => $dueStatus,
-                'id' => $this->getBibId($trans->item->instanceId),
+                'id' => "folio." . $this->getBibId($trans->item->instanceId),
                 'item_id' => $trans->item->id,
                 'barcode' => $trans->item->barcode,
                 'renew' => $trans->renewalCount ?? 0,
                 'renewable' => true,
                 'title' => $trans->item->title,
+                'borrowingLocation' => $trans->item->location->name,
+                'volume' => $trans->item->volume ?? null,
+                'callNumber' => $trans->item->callNumber
             ];
         }
         return $transactions;
