@@ -198,16 +198,27 @@ Vufind Upgrade:
   script:
     - bash ./cicd/vufind-upgrade
 
-Populate Vufind Environment:
+Vufind Upgrade:
   extends: .stack_template
-  rules:
-    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Vufind Upgrade
+    - job: Deploy Vufind
+      artifacts: true
+    - Verify Stack Health
   script:
-    - bash ./cicd/populate-vufind-environment
+    - bash ./cicd/vufind-upgrade
+
+Run Functional Tests:
+  extends: .stack_template
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Verify Stack Health
+  script:
+    - bash ./cicd/run-functional-tests
 
 Scale Down Catalog Service:
   extends: .stack_template

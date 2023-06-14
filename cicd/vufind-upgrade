@@ -32,7 +32,7 @@ setconfig() {
     # shellcheck disable=SC2034
     NEWVAL=$2;
     for HOST in ${HOSTS}; do
-        CONTAINER=$(ssh deploy@"${HOST}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "NOT ONLINE";
+        CONTAINER=$(ssh deploy@"${HOST}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "";
         if [ -z "${CONTAINER}" ]; then
           echo "Could not find container for ${STACK_NAME}-catalog_catalog!";
           exit 1;
