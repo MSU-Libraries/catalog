@@ -13,8 +13,8 @@ $link = $this->getthis->getLink();
         <?php if ($item['enumchron'] ?? false): ?>
           <span class="enumchron"><?=$this->escapeHtml($item['enumchron'])?></span>
         <?php endif; ?>
-        <?php if ($item != null && $item['number'] > 1): ?>
-          &nbsp;(Copy <?=$this->escapeHtml(($item['number']))?>)
+        <?php if ($item != null && isset($item['number']) && $item['number'] > 1): ?>
+          &nbsp;(Copy #<?=$this->escapeHtml(($item['number']))?>)
         <?php endif; ?>
     <br/><br/>
     <p class="text-left">
