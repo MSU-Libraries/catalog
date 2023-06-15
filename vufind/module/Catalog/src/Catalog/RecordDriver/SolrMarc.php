@@ -30,6 +30,22 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+    * Takes a Marc field (ex: 950) and a list of sub fields (ex: ['a','b'])
+    * and returns the unique values inside those fields in an array
+    * (ex: ['val 1', 'val 2'])
+    *
+    * args:
+    *    string field: Marc field to search within
+    *    array subfield: sub-fields to return or empty for all
+    * return:
+    *   array: the unique values within the subfields under the field
+    */
+    public function getMarcFieldUnique(string $field, ?array $subfield = null)
+    {
+        return array_unique($this->getMarcField($field, $subfield));
+    }
+
+    /**
     * Takes a Marc field that notes are stored in (ex: 950) and a list of
     * sub fields (ex: ['a','b']) optionally
     * and concatonates the subfields together and returns the fields back
@@ -229,7 +245,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getPlatform()
     {
-        return $this->getMarcField('753', ['a']);
+        return $this->getMarcFieldUnique('753', ['a']);
     }
 
 }
