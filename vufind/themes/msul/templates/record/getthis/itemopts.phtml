@@ -15,8 +15,8 @@ function getDisplay($view, $item) {
     if ($item['enumchron'] ?? false) {
       $display .= " " . $view->escapeHtml($item['enumchron']);
     }
-    if ($item['number'] > 1) {
-      $display .= "&nbsp;(Copy " . $view->escapeHtml($item['number']) . ")";
+    if (isset($item['number']) && $item['number'] > 1) {
+      $display .= "&nbsp;(Copy #" . $view->escapeHtml($item['number']) . ")";
     }
 
     return $display;
