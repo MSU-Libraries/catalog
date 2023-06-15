@@ -15,8 +15,8 @@
     <?php if ($holding['enumchron'] ?? false): ?>
       <span class="enumchron"><?=$this->escapeHtml($holding['enumchron'])?></span>
     <?php endif; ?>
-    <?php if ($holding['number'] > 1): ?>
-      &nbsp;(Copy <?=$this->escapeHtml(($holding['number']))?>)
+    <?php if (isset($holding['number']) && $holding['number'] > 1): ?>
+      &nbsp;(Copy #<?=$this->escapeHtml(($holding['number']))?>)
     <?php endif; ?>
   </th>
   <td>
