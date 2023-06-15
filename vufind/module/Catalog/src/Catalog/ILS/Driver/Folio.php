@@ -134,7 +134,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     'id' => $bibId,
                     'item_id' => $item->id,
                     'holding_id' => $holding->id,
-                    'number' => $item->copyNumber,
+                    'number' => $item->copyNumber ?? null,
                     'enumchron' => $enum,
                     'barcode' => $item->barcode ?? '',
                     'status' => $item->status->name,
