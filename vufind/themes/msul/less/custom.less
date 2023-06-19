@@ -416,6 +416,7 @@ body.template-dir-search.template-name-home, body.template-dir-eds.template-name
       display:block;
       margin-bottom:0.3rem;
     }
+
     input, select {
       width:100% !important;
     }
@@ -1115,5 +1116,22 @@ body.template-dir-myresearch.template-name-profile {
 .template-dir-eds.template-name-advanced {
   label[for=limit_FC], label[for=limit_LB], #limit_LB {
     display:none;
+  }
+}
+
+
+// Make See also (.authoritybox) display inline
+
+.authoritybox {display:inline-flex;}
+.authoritybox div {
+  margin-right:1rem;
+}
+
+// Remove color background from alert-info on results pages
+
+.template-dir-search.template-name-results, .template-dir-eds.template-name-search, .template-dir-combined.template-name-results {
+  .alert-info {
+    background:none;
+    border:none;
   }
 }
