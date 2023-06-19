@@ -1,5 +1,6 @@
 import pathlib
 import asyncio
+import gzip
 import flask
 import aiohttp
 
@@ -24,12 +25,34 @@ def node_logs(service):
         'backups/solr':            '/mnt/logs/backups/solr.log',
         'backups/db':              '/mnt/logs/backups/db.log',
     }
-    if service in paths:
-        path = pathlib.Path(paths[service])
-        if path.is_file():
-            return path.read_text(encoding="utf8")
+    if service not in paths:
+        return 'Error: unknown service.'
+
+    path = pathlib.Path(paths[service])
+    if not path.is_file():
         return 'Log file does not exist on this node.'
-    return 'Error: unknown service.'
+
+    full_log = path.read_text(encoding="utf8")
+
+    rotated_1 = pathlib.Path(f'{paths[service]}.1')
+    if not rotated_1.is_file():
+        return full_log
+
+    log_text = rotated_1.read_text(encoding="utf8")
+    if log_text != '':
+        if full_log != '':
+            full_log = '\n---------------------------\n\n' + full_log
+        full_log = log_text + full_log
+    for i in range(2, 4):
+        rotated_gz = pathlib.Path(f'{paths[service]}.{i}.gz')
+        if rotated_gz.is_file():
+            with gzip.open(rotated_gz, 'rt') as rotated_gz_file:
+                gz_log_text = rotated_gz_file.read()
+                if gz_log_text != '':
+                    if full_log != '':
+                        full_log = '\n---------------------------\n\n' + full_log
+                    full_log = gz_log_text + full_log
+    return full_log
 
 def logs_vufind(service):
     urls = []
