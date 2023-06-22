@@ -57,7 +57,8 @@ class FormTest extends \PHPUnit\Framework\TestCase
     {
         $form = new Form(
             new YamlReader(),
-            $this->createMock(\Laminas\View\HelperPluginManager::class)
+            $this->createMock(\Laminas\View\HelperPluginManager::class),
+            $this->createMock(\VuFind\Form\Handler\PluginManager::class)
         );
         $this->assertTrue($form->isEnabled());
         $this->assertTrue($form->useCaptcha());
