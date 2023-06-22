@@ -187,6 +187,9 @@ header {
   }
 }
 
+
+
+
 /* --- Footer --- */
 
 /* MSUL Prefooter */
@@ -366,7 +369,7 @@ input[type="checkbox"] {
 }
 
 // hide searchbox
-body.template-dir-myresearch.template-name-mylist, body.template-dir-myresearch.template-name-checkedout, body.template-dir-holds.template-name-list, body.template-dir-myresearch.template-name-fines, body.template-dir-myresearch.template-name-profile, body.template-dir-search.template-name-history, body.template-dir-myresearch.template-name-editlist, body.template-dir-myresearch.template-name-login, .template-dir-search.template-name-newitem, .template-dir-search.template-name-reservessearch, .template-dir-feedback.template-name-form {
+body.template-dir-myresearch.template-name-mylist, body.template-dir-myresearch.template-name-checkedout, body.template-dir-holds.template-name-list, body.template-dir-myresearch.template-name-fines, body.template-dir-myresearch.template-name-profile, body.template-dir-search.template-name-history, body.template-dir-myresearch.template-name-editlist, body.template-dir-myresearch.template-name-login, .template-dir-search.template-name-newitem, .template-dir-search.template-name-reservessearch, .template-dir-feedback.template-name-form, body.template-dir-alphabrowse.template-name-home, body.template-dir-browse.template-name-home {
   header .nav.searchbox {
     display:none;
   }
@@ -378,7 +381,7 @@ body.template-dir-search.template-name-results, body.template-dir-eds.template-n
   }
 }
 //hide back to catalog link
-body.template-name-home, body.template-dir-record, body.template-dir-combined, body.template-dir-content, body.template-dir-browse, body.template-dir-alphabrowse, body.template-dir-channels {
+body.template-dir-search.template-name-home, body.template-dir-eds.template-name-home, body.template-dir-record, body.template-dir-combined, body.template-dir-content, body.template-dir-channels {
   .backtocat {
     display:none;
   }
@@ -420,6 +423,7 @@ body.template-name-home, body.template-dir-record, body.template-dir-combined, b
       display:block;
       margin-bottom:0.3rem;
     }
+
     input, select {
       width:100% !important;
     }
@@ -1123,3 +1127,28 @@ body.template-dir-myresearch.template-name-profile {
   }
 }
 
+
+//Remove catalog only checkbox & location options from EDS Advanced Search
+
+.template-dir-eds.template-name-advanced {
+  label[for=limit_FC], label[for=limit_LB], #limit_LB {
+    display:none;
+  }
+}
+
+
+// Make See also (.authoritybox) display inline
+
+.authoritybox {display:inline-flex;}
+.authoritybox div {
+  margin-right:1rem;
+}
+
+// Remove color background from alert-info on results pages
+
+.template-dir-search.template-name-results, .template-dir-eds.template-name-search, .template-dir-combined.template-name-results {
+  .alert-info {
+    background:none;
+    border:none;
+  }
+}

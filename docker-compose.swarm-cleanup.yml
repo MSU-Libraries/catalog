@@ -1,0 +1,19 @@
+---
+version: "3.8"
+
+services:
+  prune-nodes:
+    image: docker
+    command: ["docker", "system", "prune", "-a", "-f"]
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "var_lib_docker:/var/lib/docker"
+    deploy:
+      mode: global
+      restart_policy:
+        delay: 30m
+      update_config:
+        failure_action: rollback
+
+volumes:
+  var_lib_docker:

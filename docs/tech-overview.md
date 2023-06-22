@@ -109,7 +109,5 @@ a read-only access key to the registry to pull from
     **traefik**:  Runs Traefik and handles external traffic and routes it to the appropriate `catalog` service
 depending on the host name of the request (since multiple environments run in separate stacks on the same Docker
 swarm)  
-* **swarm-cron**:  
-    **swarm-cronjob**: Runs an image of [swarm-cronjob](https://crazymax.dev/swarm-cronjob/) that will
-    kick off cron services as specified in service labels  
+* **swarm-cleanup**:  
     **prune-nodes**: Runs a `docker system prune` with flags on each of the nodes in the swarm  

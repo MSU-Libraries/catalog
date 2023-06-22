@@ -29,6 +29,7 @@ namespace Catalog\ILS\Driver;
 
 use DateTime;
 use DateTimeZone;
+use VuFind\Exception\ILS as ILSException;
 
 /**
  * FOLIO REST API driver
@@ -133,7 +134,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     'id' => $bibId,
                     'item_id' => $item->id,
                     'holding_id' => $holding->id,
-                    'number' => 0, # will be set afterwards
+                    'number' => $item->copyNumber ?? null,
                     'enumchron' => $enum,
                     'barcode' => $item->barcode ?? '',
                     'status' => $item->status->name,
@@ -162,25 +163,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
             }
         }
 
-        // Sort by enumchron (volume) and set the number (copy) field
+        // Sort by location, enumchron (volume) and copy number
         uasort($items, function($item1, $item2) {
             return $item2['location'] <=> $item1['location'] ?: # reverse sort
                    version_compare($item1['enumchron'], $item2['enumchron']) ?:
+                   $item1['number'] <=> $item2['number'] ?:
                    $item1['id'] <=> $item2['id'];
         });
-        $prev_enumchron = 'INVALID';
-        $prev_location = 'INVALID';
-        $number = 1;
-        foreach ($items as &$item) {
-            if ($item['enumchron'] == $prev_enumchron && $item['location'] == $prev_location){
-                $number += 1;
-            } else {
-                $number = 1;
-            }
-            $item['number'] = $number;
-            $prev_enumchron = $item['enumchron'];
-            $prev_location = $item['location'];
-        }
 
         return $items;
     }
@@ -341,7 +330,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
      */
     public function getMyTransactions($patron)
     {
-        // MSUL -- overridden to add sortBy
+        // MSUL -- overridden to add sortBy and add fields to response
+        $dateConverter = new \VuFind\Date\Converter(
+            [
+                'displayDateFormat' => 'm/d/Y',
+                'displayTimeFormat' => 'h:i a'
+            ]
+        );
         $query = ['query' => 'userId==' . $patron['id'] . ' and status.name==Open sortBy dueDate/sort.ascending'];
         $transactions = [];
         foreach ($this->getPagedResults(
@@ -364,22 +359,25 @@ class Folio extends \VuFind\ILS\Driver\Folio
             }
             $transactions[] = [
                 'duedate' =>
-                    $this->dateConverter->convertToDisplayDate(
+                    $dateConverter->convertToDisplayDate(
                         'U',
                         $dueDateTimestamp
                     ),
                 'dueTime' =>
-                    $this->dateConverter->convertToDisplayTime(
+                    $dateConverter->convertToDisplayTime(
                         'U',
                         $dueDateTimestamp
                     ),
                 'dueStatus' => $dueStatus,
-                'id' => $this->getBibId($trans->item->instanceId),
+                'id' => "folio." . $this->getBibId($trans->item->instanceId),
                 'item_id' => $trans->item->id,
                 'barcode' => $trans->item->barcode,
                 'renew' => $trans->renewalCount ?? 0,
                 'renewable' => true,
                 'title' => $trans->item->title,
+                'borrowingLocation' => $trans->item->location->name,
+                'volume' => $trans->item->volume ?? null,
+                'callNumber' => $trans->item->callNumber
             ];
         }
         return $transactions;

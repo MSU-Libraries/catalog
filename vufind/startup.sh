@@ -83,6 +83,10 @@ while [[ "$SOLR_CLUSTER_SIZE" -lt 1 ]]; do
     SOLR_CLUSTER_SIZE=$(curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.live_nodes | length")
 done
 
+# Temporary change to prevent creating collections in the wrong environment
+# TODO: remove this after PC-587
+sleep 2
+
 # Sleep before creating collections so all
 # nodes don't try at the same time
 let SLEEP_TIME=${NODE}*2

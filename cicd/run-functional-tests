@@ -1,0 +1,43 @@
+#!/bin/bash
+
+source "${CI_PROJECT_DIR}"/cicd/before-script
+
+runhelp() {
+    echo ""
+    echo "Purpose: Run the vufind functional tests"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - STACK_NAME: Name of the stack"
+    echo "  - DEPLOY_HOST_A: The first host in the cluster"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - If the functional tests fail"
+    echo "  - The catalog container is not online on the node"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+main() {
+    echo "Finding container to run tests against on ${DEPLOY_HOST_A} for stack ${STACK_NAME}-catalog_catalog..."
+    CONTAINER=$(ssh deploy@"${DEPLOY_HOST_A}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "";
+    if [ -z "${CONTAINER}" ]; then
+      echo "Could not find container for ${STACK_NAME}-catalog_catalog!";
+      exit 1;
+    fi;
+    echo "Found container ${CONTAINER}!";
+
+    echo "Running Vufind functional tests...";
+    ssh deploy@"${DEPLOY_HOST_A}" "docker exec ${CONTAINER} vendor/bin/phing phpunitfaster -Dphpunit_extra_params=/usr/local/vufind/module/Catalog/tests/integration-tests/";
+    EC=$?;
+    echo "Tests complete with exit code ${EC}";
+    exit ${EC};
+}
+
+
+beforescript
+main
+

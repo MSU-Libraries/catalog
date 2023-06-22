@@ -94,16 +94,8 @@
   <?php /* End Listing Options */ ?>
 
   <?php if ($recordTotal < 1): ?>
-    <p>
-      <?php
-        $default = $this->translate('nohit_lookfor_html', ['%%lookfor%%' => $this->escapeHtml($lookfor)]);
-        $emptyMessage = $this->slot('empty-message')->get($default);
-        $this->layout()->srmessage = $emptyMessage;
-        echo $emptyMessage;
-      ?>
-    </p>
     <?php if (isset($this->parseError)): ?>
-      <p class="alert alert-danger"><?=$this->transEsc('nohit_parse_error')?></p>
+      <p class="alert"><?=$this->transEsc('nohit_parse_error')?></p>
     <?php endif; ?>
     <?php foreach (($top = $this->results->getRecommendations('top')) as $index => $current): ?>
       <?=$this->recommend($current, 'top', $index)?>

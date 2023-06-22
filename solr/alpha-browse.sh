@@ -105,6 +105,24 @@ verbose() {
     echo "${MSG}" >> "$LOG_FILE"
 }
 
+check_skip() {
+    declare -g SKIP_BUILD
+    SKIP_BUILD=0
+    # Avoid running alpha-browse on prod and beta on the same node
+    if [[ "${STACK_NAME}" == "catalog-prod" && "${NODE}" == "3" ]]; then
+        echo "Stack is prod: not building alpha-browse on node 3."
+        SKIP_BUILD=1
+    fi
+    if [[ "${STACK_NAME}" != "catalog-prod" && "${NODE}" != "3" ]]; then
+        echo "Stack is not prod: not building alpha-browse on node 1 or 2."
+        SKIP_BUILD=1
+    fi
+    if [[ "${SKIP_BUILD}" -eq 1 ]]; then
+        # Wait for another node to start building, so we can copy results afterwards
+        sleep 10
+    fi
+}
+
 # Call the rebuild script to generate new database files
 rebuild_databases() {
     verbose "Running database rebuild script..."
@@ -225,10 +243,14 @@ main() {
     # Ensure the directory exists on the shared path
     mkdir -p "${ARGS[SHARED_PATH]}"
 
+    check_skip
+
     # All nodes will acquire building lock before checking if they need to perform a build.
     # If a build is necessary, the build will happen here before releasing lock.
     # This includes cleaning up old db files and copying new files to shared location.
-    build_browse
+    if [[ "${SKIP_BUILD}" -eq 0 ]]; then
+        build_browse
+    fi
 
     # All nodes will acquire copying lock before checking for new DB files in the shared location.
     # If new files exist, the copy will happen here before releasing the lock.

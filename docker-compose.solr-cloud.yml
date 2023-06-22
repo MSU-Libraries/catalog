@@ -24,17 +24,17 @@ x-solr-deploy: &solr_deploy
     monitor: 10s
   placement:
     max_replicas_per_node: 1
-  labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.${STACK_NAME}-msul-solr-router.entrypoints=msul-http-ent"
-    - "traefik.http.routers.${STACK_NAME}-msul-solr-router.service=${STACK_NAME}-msul-solr-app"
-    - "traefik.http.services.${STACK_NAME}-msul-solr-app.loadbalancer.server.port=8983"
-    - "traefik.http.routers.${STACK_NAME}-msul-solr-router.middlewares=http-redirect"
-    - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.entrypoints=msul-https-ent"
-    - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.service=${STACK_NAME}-https-msul-solr-app"
-    - "traefik.http.services.${STACK_NAME}-https-msul-solr-app.loadbalancer.server.port=8983"
-    - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.middlewares=restrict-auth"
-    - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls=true"
+  #labels:
+  #  - "traefik.enable=true"
+  #  - "traefik.http.routers.${STACK_NAME}-msul-solr-router.entrypoints=msul-http-ent"
+  #  - "traefik.http.routers.${STACK_NAME}-msul-solr-router.service=${STACK_NAME}-msul-solr-app"
+  #  - "traefik.http.services.${STACK_NAME}-msul-solr-app.loadbalancer.server.port=8983"
+  #  - "traefik.http.routers.${STACK_NAME}-msul-solr-router.middlewares=http-redirect"
+  #  - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.entrypoints=msul-https-ent"
+  #  - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.service=${STACK_NAME}-https-msul-solr-app"
+  #  - "traefik.http.services.${STACK_NAME}-https-msul-solr-app.loadbalancer.server.port=8983"
+  #  - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.middlewares=restrict-auth"
+  #  - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls=true"
 
 version: "3.8"
 services:
@@ -42,10 +42,9 @@ services:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     volumes:
       - bitnami:/bitnami
-      - /mnt/shared/backups/solr_dropbox:/mnt/solr_backups
+      - /mnt/shared/backups/${STACK_NAME}/solr_dropbox:/mnt/solr_backups
     hostname: solr{{slice .Node.Hostname 8 9}}
     networks:
-      - public
       - internal
     logging:
       driver: "json-file"
@@ -120,9 +119,6 @@ services:
 networks:
   internal:
     name: ${STACK_NAME}-internal
-    external: true
-  public:
-    name: public
     external: true
 
 volumes:
