@@ -32,7 +32,6 @@ services:
       - bitnami:/bitnami
     hostname: solr{{slice .Node.Hostname 8 9}}
     networks:
-      - public
       - internal
     logging:
       driver: "json-file"
@@ -75,9 +74,6 @@ services:
 networks:
   internal:
     name: ${STACK_NAME}-internal
-    external: true
-  public:
-    name: public
     external: true
 
 volumes:
