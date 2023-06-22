@@ -34,7 +34,7 @@ main() {
     ssh deploy@"${DEPLOY_HOST_A}" sudo mkdir -p /mnt/shared/backups/"${STACK_NAME}"/solr_dropbox
     ssh deploy@"${DEPLOY_HOST_A}" sudo mkdir -p /mnt/shared/local/"${STACK_NAME}"/deploy/proxysolr
     # Temporarily stash proxysolr.conf in compose directory for permissions reasons
-    scp deploy@"${DEPLOY_HOST_A}" solr/proxysolr/proxysolr.conf "${COMPOSE_PATH}"/
+    scp solr/proxysolr/proxysolr.conf deploy@"${DEPLOY_HOST_A}":"${COMPOSE_PATH}"/
     ssh deploy@"${DEPLOY_HOST_A}" sudo mv "${COMPOSE_PATH}"/proxysolr.conf /mnt/shared/local/"${STACK_NAME}"/deploy/proxysolr/
 
     echo "Issuing deploy command now"
