@@ -33,10 +33,10 @@ main() {
     echo "Preparing $STACK_NAME deploy at $COMPOSE_PATH"
     ssh deploy@"${DEPLOY_HOST_A}" sudo mkdir -p /mnt/shared/backups/"${STACK_NAME}"/solr_dropbox
     ssh deploy@"${DEPLOY_HOST_A}" sudo mkdir -p /mnt/shared/backups/"${STACK_NAME}"/deploy/proxysolr
-    ssh deploy@"${DEPLOY_HOST_A}" sudo mkdir -p /home/deploy/"${STACK_NAME}"/deploy/proxysolr
+    ssh deploy@"${DEPLOY_HOST_A}" mkdir -p /home/deploy/"${STACK_NAME}"/deploy/proxysolr
     # Only temporarily stash proxysolr.conf in compose directory
-    scp deploy@"${DEPLOY_HOST_A}" ../solr/proxysolr/proxysolr.conf $COMPOSE_PATH/
-    ssh deploy@"${DEPLOY_HOST_A}" sudo mv $COMPOSE_PATH/proxysolr.conf /mnt/shared/backups/"${STACK_NAME}"/deploy/proxysolr/
+    scp deploy@"${DEPLOY_HOST_A}" ../solr/proxysolr/proxysolr.conf "${COMPOSE_PATH}"/
+    ssh deploy@"${DEPLOY_HOST_A}" sudo mv "${COMPOSE_PATH}"/proxysolr.conf /mnt/shared/backups/"${STACK_NAME}"/deploy/proxysolr/
 
     echo "Issuing deploy command now"
     ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr";
