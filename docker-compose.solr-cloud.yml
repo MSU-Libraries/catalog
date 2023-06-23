@@ -12,7 +12,7 @@ x-zookeeper-envs: &zookeeper_envs
   ZOO_LISTEN_ALLIPS_ENABLED: "yes"
   ZOO_4LW_COMMANDS_WHITELIST: srvr,mntr,conf,ruok,stat
 
-x-solr-deploy: &solr_deploy
+x-solrproxy-deploy: &solrproxy_deploy
   mode: replicated
   replicas: 3
   restart_policy:
@@ -24,17 +24,17 @@ x-solr-deploy: &solr_deploy
     monitor: 10s
   placement:
     max_replicas_per_node: 1
-  #labels:
-  #  - "traefik.enable=true"
-  #  - "traefik.http.routers.${STACK_NAME}-msul-solr-router.entrypoints=msul-http-ent"
-  #  - "traefik.http.routers.${STACK_NAME}-msul-solr-router.service=${STACK_NAME}-msul-solr-app"
-  #  - "traefik.http.services.${STACK_NAME}-msul-solr-app.loadbalancer.server.port=8983"
-  #  - "traefik.http.routers.${STACK_NAME}-msul-solr-router.middlewares=http-redirect"
-  #  - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.entrypoints=msul-https-ent"
-  #  - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.service=${STACK_NAME}-https-msul-solr-app"
-  #  - "traefik.http.services.${STACK_NAME}-https-msul-solr-app.loadbalancer.server.port=8983"
-  #  - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.middlewares=restrict-auth"
-  #  - "traefik.http.routers.${STACK_NAME}-https-msul-solr-router.tls=true"
+  labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.entrypoints=msul-http-ent"
+    - "traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.service=${STACK_NAME}-msul-proxysolr-app"
+    - "traefik.http.services.${STACK_NAME}-msul-proxysolr-app.loadbalancer.server.port=8080"
+    - "traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.middlewares=http-redirect"
+    - "traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.entrypoints=msul-https-ent"
+    - "traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.service=${STACK_NAME}-https-msul-proxysolr-app"
+    - "traefik.http.services.${STACK_NAME}-https-msul-proxysolr-app.loadbalancer.server.port=8080"
+    - "traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.middlewares=restrict-auth"
+    - "traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls=true"
 
 version: "3.8"
 services:
@@ -56,7 +56,17 @@ services:
       SOLR_HOST: solr{{slice .Node.Hostname 8 9}}
       <<: *solr_envs
     deploy:
-      <<: *solr_deploy
+      mode: replicated
+      replicas: 3
+      restart_policy:
+        window: 15s
+      update_config:
+        parallelism: 1
+        failure_action: rollback
+        delay: 10s
+        monitor: 10s
+      placement:
+        max_replicas_per_node: 1
 
   zk:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
@@ -116,9 +126,27 @@ services:
       placement:
         max_replicas_per_node: 1
 
+  proxysolr:
+    image: bitnami/nginx
+    networks:
+      - public
+      - internal
+    volumes:
+      - /mnt/shared/local/${STACK_NAME}/deploy/proxysolr/proxysolr.conf:/opt/bitnami/nginx/conf/server_blocks/proxysolr.conf:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    deploy:
+      <<: *solrproxy_deploy
+
 networks:
   internal:
     name: ${STACK_NAME}-internal
+    external: true
+  public:
+    name: public
     external: true
 
 volumes:
