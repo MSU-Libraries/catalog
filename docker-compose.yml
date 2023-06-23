@@ -137,7 +137,7 @@ services:
         failure_action: rollback
         delay: 10s
 
-  mail-${STACK_NAME}:
+  mail-$STACK_NAME:
     image: sj26/mailcatcher
     command: [
         "--no-quit",
