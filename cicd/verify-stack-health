@@ -49,17 +49,18 @@ check() {
 main() {
     HOSTS="$DEPLOY_HOST_A $DEPLOY_HOST_B $DEPLOY_HOST_C";
 
-    # Update the services before running checks
-    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-catalog_legacylinks"
-    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-monitoring_monitoring"
-    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-solr_cron"
-    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-solr_proxysolr"
-    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-solr_zk"
-    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-catalog_catalog"
-    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-solr_solr"
-    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-mariadb_galera"
+    echo "Update the services before running checks"
+    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-catalog_legacylinks" &
+    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-monitoring_monitoring" &
+    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-solr_cron" &
+    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-solr_proxysolr" &
+    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-solr_zk" &
+    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-catalog_catalog" &
+    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-solr_solr" &
+    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-mariadb_galera";
+    wait
 
-    # Run checks using the NCPA scripts
+    echo "Run checks using the NCPA scripts"
     check solr
     check zk
     check galera
