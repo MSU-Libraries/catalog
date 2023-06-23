@@ -127,5 +127,5 @@ of the CI/CD Settings of the repository.
 
 [^1]: 
     There are many ways to generate this password hash, such as online generators or command
-    line tools (like `htpasswd` in the `apache-utils` package, for example: `htpasswd -B -C 8 -n [username]`).
-    For Traefik performance reasons, we recommend you use a brcypt cost value of 8.
+    line tools (like `htpasswd` in the `apache-utils` package, for example: `htpasswd -B -C 10 -n [username]`).
+    For Traefik performance reasons, we recommend you use a brcypt cost value of 10.
