@@ -57,13 +57,13 @@ apply_devel_changes() {
     ".services.mail.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
     docker-compose.yml;
     ./yq -i \
-    ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls.certresolver=msul-letsencrypt-dns\"" \
+    ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls.certresolver=msul-letsencrypt-dns\"" \
     docker-compose.solr-cloud.yml;
     ./yq -i \
-    ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls.domains[0].main=aws.lib.msu.edu\"" \
+    ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls.domains[0].main=aws.lib.msu.edu\"" \
     docker-compose.solr-cloud.yml;
     ./yq -i \
-    ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
+    ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
     docker-compose.solr-cloud.yml;
 
     # Remove the cron service if the stack name is NOT catalog beta or prod
@@ -86,10 +86,10 @@ apply_devel_changes() {
     ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
     docker-compose.yml;
     ./yq -i \
-    ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
+    ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
     docker-compose.solr-cloud.yml;
     ./yq -i \
-    ".x-solr-deploy.labels +=\"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
+    ".x-solrproxy-deploy.labels +=\"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
     docker-compose.solr-cloud.yml;
     ./yq -i \
     ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
@@ -100,9 +100,9 @@ apply_devel_changes() {
 
     # Disable container rollback
     ./yq -i "del(.services.monitoring.deploy.update_config.failure_action)" docker-compose.monitoring.yml;
-    ./yq -i "del(.x-solr-deploy.update_config.failure_action)" docker-compose.solr-cloud-bootstrap.yml;
+    ./yq -i "del(.x-solrproxy-deploy.update_config.failure_action)" docker-compose.solr-cloud-bootstrap.yml;
     ./yq -i "del(.services.zk.deploy.update_config.failure_action)" docker-compose.solr-cloud-bootstrap.yml;
-    ./yq -i "del(.x-solr-deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
+    ./yq -i "del(.x-solrproxy-deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
     ./yq -i "del(.services.zk.deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
     ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud.yml;
     ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud-force.yml;
@@ -131,7 +131,7 @@ apply_prod_changes() {
     ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.certresolver=msul-letsencrypt\"" \
     docker-compose.yml;
     ./yq -i \
-    ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls.certresolver=msul-letsencrypt\"" \
+    ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls.certresolver=msul-letsencrypt\"" \
     docker-compose.solr-cloud.yml;
 
     # Remove the cachecron service if the stack name is production
@@ -156,10 +156,10 @@ apply_prod_changes() {
         ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
         docker-compose.yml;
         ./yq -i \
-        ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
+        ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
-        ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
+        ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
         ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
@@ -194,10 +194,10 @@ apply_prod_changes() {
         docker-compose.yml;
         HTTPS_MIDDLEWARES+=("${STACK_NAME}-redirect")
         ./yq -i \
-        ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
+        ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
-        ".x-solr-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
+        ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
         ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
