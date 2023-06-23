@@ -131,7 +131,7 @@ services:
     networks:
       - public
       - internal
-    volume:
+    volumes:
       - /mnt/shared/local/${STACK_NAME}/deploy/proxysolr/proxysolr.conf:/opt/bitnami/nginx/conf/server_blocks/proxysolr.conf:ro
     logging:
       driver: "json-file"
