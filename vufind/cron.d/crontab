@@ -31,7 +31,7 @@ MAILTO=$EMAIL
 # Harvest updates
 ${FOLIO_CRON_MINS} 3-23 * * *	root    cron-folio.sh
 ${HARV_CRON_MINS} 2    * * *	root    cron-hlm.sh
-${HARV_CRON_MINS} 4    * * 0	root    cron-authority.sh
+${HARV_CRON_MINS} 4    * * *	root    cron-authority.sh
 
 # Course reserves update
 ${HARV_CRON_MINS} 2	* * *	root    cron-reserves.sh
