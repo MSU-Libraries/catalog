@@ -55,7 +55,6 @@ main() {
     ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-solr_cron"
     ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-solr_proxysolr"
     ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-solr_zk"
-    ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-catalog_cron"
     ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-catalog_catalog"
     ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-solr_solr"
     ssh deploy@"${DEPLOY_HOST_A}" "docker service update ${STACK_NAME}-mariadb_galera"
