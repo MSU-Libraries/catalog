@@ -48,6 +48,8 @@ check() {
 
 main() {
     HOSTS="$DEPLOY_HOST_A $DEPLOY_HOST_B $DEPLOY_HOST_C";
+
+    echo "Run checks using the NCPA scripts"
     check solr
     check zk
     check galera

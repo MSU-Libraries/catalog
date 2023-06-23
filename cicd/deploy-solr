@@ -24,13 +24,20 @@ fi
 
 main() {
     # Pull images now to save time with stack deploy
+    echo "Pre-pulling Docker images"
     ssh deploy@"${DEPLOY_HOST_A}" "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA" &
     ssh deploy@"${DEPLOY_HOST_B}" "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA" &
     ssh deploy@"${DEPLOY_HOST_C}" "docker pull $CI_REGISTRY_IMAGE/solr:$CI_COMMIT_SHORT_SHA";
     wait
 
+    echo "Preparing $STACK_NAME deploy at $COMPOSE_PATH"
     ssh deploy@"${DEPLOY_HOST_A}" sudo mkdir -p /mnt/shared/backups/"${STACK_NAME}"/solr_dropbox
+    ssh deploy@"${DEPLOY_HOST_A}" sudo mkdir -p /mnt/shared/local/"${STACK_NAME}"/deploy/proxysolr
+    # Temporarily stash proxysolr.conf in compose directory for permissions reasons
+    scp solr/proxysolr/proxysolr.conf deploy@"${DEPLOY_HOST_A}":"${COMPOSE_PATH}"/
+    ssh deploy@"${DEPLOY_HOST_A}" sudo mv "${COMPOSE_PATH}"/proxysolr.conf /mnt/shared/local/"${STACK_NAME}"/deploy/proxysolr/
 
+    echo "Issuing deploy command now"
     ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.solr-cloud.yml ${STACK_NAME}-solr";
 }
 

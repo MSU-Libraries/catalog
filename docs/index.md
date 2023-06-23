@@ -6,7 +6,7 @@ It describes how to setup and configure the containerized Vufind.
 ## Getting Started
 * [Technical Overview](tech-overview.md)
 * [First Time Setup](first-time-setup.md)
-* [Harvesting](harvesting.md)
+* [Harvesting & Importing](harvesting-and-importing.md)
 * [CI/CD](CICD.md)
 * [Troubleshooting](troubleshooting.md)
 
