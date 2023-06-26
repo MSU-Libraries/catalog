@@ -48,6 +48,7 @@ when you are done with it
 ### Build
 **branches**: `main`, `devel-`*, and `review-`*  
 * Builds all of the images in this repository, tagging them with `latest` only if it the `main` branch
+* When building the VuFind image, it will also perform unit testing of the `Catalog` module
 
 ### Deploy
 **branches**: `main`, `devel-`*, and `review-`*  
@@ -65,6 +66,7 @@ running this job for this branch)
 * Deploys the `catalog`, `solr`, `swarm-cleanup`, and `mariadb` stacks. If this is a devel or review environment, it will
 import a single marc file into the vufind instance as test data
 * Runs VuFind version upgrades, if applicable
+* If on a the `main` branch, it will run functional testing with the tests in the `Catalog` module
 * If it is a `devel-` or `review-` branch, it will populate the environment with sample data
 * Evaluate the health of the services on all nodes
 
@@ -127,5 +129,5 @@ of the CI/CD Settings of the repository.
 
 [^1]: 
     There are many ways to generate this password hash, such as online generators or command
-    line tools (like `htpasswd` in the `apache-utils` package, for example: `htpasswd -B -C 8 -n [username]`).
-    For Traefik performance reasons, we recommend you use a brcypt cost value of 8.
+    line tools (like `htpasswd` in the `apache-utils` package, for example: `htpasswd -B -C 10 -n [username]`).
+    For Traefik performance reasons, we recommend you use a brcypt cost value of 10.

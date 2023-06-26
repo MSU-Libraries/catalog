@@ -25,7 +25,7 @@ nav:
 - Getting Started:
     - Technical Overview: tech-overview.md
     - First Time Setup: first-time-setup.md
-    - Harvesting: harvesting.md
+    - Harvesting &amp; Importing: harvesting-and-importing.md
     - CI/CD: CICD.md
     - Troubleshooting: troubleshooting.md
 - Administration:

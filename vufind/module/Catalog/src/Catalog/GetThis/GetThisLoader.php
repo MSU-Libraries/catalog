@@ -127,6 +127,32 @@ class GetThisLoader {
     }
 
     /**
+     * Get the call number for the record
+     *
+     * @return string The description string
+     */
+    public function getCallNumber($item_id=null) {
+        $item_id = $this->getItemId($item_id);
+        $item = $this->getItem($item_id);
+
+        $callnum = "";
+        if ($item['callnumber'] ?? false) {
+            $callnum .= ($item['callnumber_prefix'] ? $item['callnumber_prefix'] . ' ' : '') .
+                        $item['callnumber'];
+        }
+
+        if ($item['enumchron'] ?? false) {
+            $callnum .= " " . $item['enumchron'];
+        }
+
+        if ($item != null && isset($item['number']) && $item['number'] > 1) {
+            $callnum .= " (Copy #" . ($item['number']) . ")";
+        }
+
+        return $callnum;
+    }
+
+    /**
      * Get the description for the record
      *
      * @return string The description string
@@ -175,46 +201,6 @@ class GetThisLoader {
         $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         return Regex::LIB_USE_ONLY($stat);
-    }
-
-    public function isAllReserve() {
-        $count_reserve = 0;
-        foreach ($this->items as $item) {
-            $loc = $this->getLocation($item['item_id']);
-            if (Regex::LIB_OF_MICH($loc)) {
-                continue;
-            }
-
-            if (Regex::RESERV($loc)) {
-                $count_reserve += 1;
-            }
-        }
-        if ($count_reserve == count($this->items)) {
-            return false;
-        }
-        else return true;
-    }
-
-    /* Check if all items are on either: on reserve, non-circulating, or checked out
-     *
-     */
-    public function isAllReserveNonCircOut() {
-        $count_out = 0;
-
-        foreach ($this->items as $item) {
-            $loc = $this->getLocation($item['item_id']);
-            if (Regex::LIB_OF_MICH($loc)) {
-                continue;
-            }
-
-            if (Regex::RESERV($loc) || $this->isOut($item['item_id']) || $this->isLibUseOnly($item['item_id'])) {
-                $count_out += 1;
-            }
-        }
-        if ($count_out == count($this->items)) {
-            return true;
-        }
-        else return false;
     }
 
     public function showInProcess($item_id=null) {
@@ -359,8 +345,8 @@ class GetThisLoader {
             return false;
         }
 
-        # If all the items are on reserve, return false
-        if (!$this->isAllReserve()) {
+        # If the item is on reserve, return false (PC-539)
+        if (Regex::RESERV($loc)) {
             return false;
         }
 
@@ -395,8 +381,8 @@ class GetThisLoader {
             return false;
         }
 
-        # If all the items are on reserve, return false
-        if (!$this->isAllReserve()) {
+        # If the item is on reserve, return false (PC-539)
+        if (Regex::RESERV($loc)) {
             return false;
         }
 
@@ -449,10 +435,11 @@ class GetThisLoader {
             return false;
         }
 
-        # only show if all items are on reserve, non-circulating (lib use only), or checked out
-        if ($this->isAllReserveNonCircOut()) {
+        # only if the item is on reserve, non-circulating (lib use only), or checked out
+        if (Regex::RESERV($loc) || $this->isOut($item_id) || $this->isLibUseOnly($item_id)) {
             return true;
         }
+
         return false;
 
     }

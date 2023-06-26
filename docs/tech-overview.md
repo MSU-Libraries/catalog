@@ -81,7 +81,10 @@ just traditional Solr, distributing index data accross multiple nodes
 * **MariaDB Galera**:  A synchronous database cluster providing higher availability and more
 fault tolerance  
 * **Traefik**: Use to route traffic externally to the appropriate vufind container; and
-also used for an internal network of the MariaDB service
+also used for an internal network of the MariaDB service  
+* **Nginx**: Handles proxying requests to `/solr` to the Solr container. Allowing us to keep
+the Solr containers only on the internal network but still being able to access the Solr interface
+via the web  
 * **LetsEncypt**: Provides automatically provissioned SSL certificates based on settings in
 our Docker swarm configuration file  
 * **GitLab CI/CD**:  The key tool our tool belt that allows us to define highly customized
@@ -101,6 +104,8 @@ a read-only access key to the registry to pull from
     **zk**: Runs 3 ZooKeeper replicas, one on each node of the cluster  
     **cron**: A 3-replica service that runs automated jobs using the SolrCloud image on each node in the cluster.
     Currently the only job being run is to update the alphabetical browse Solr databases.  
+    **proxysolr**:  Has 3 replicas, one on each node in the cluster, running Nginx to proxy requests from the public
+network to the Solr container  
 * **mariadb**:  
     **galera**: Runs MariaDB Galera with 3 replicas, one on each node on in the cluster
 * **internal**:  
