@@ -102,7 +102,9 @@ $isProduction = getenv("STACK_NAME") == 'catalog-prod';
 <?php elseif (!$isProduction): ?>
   <div class="collapse navbar-collapse" id="navbar-warning">
     <p>
-      <b>Notice:</b> This site is for previewing changes coming to the MSU Libraries catalog. It is
+      <b>Notice: Certain functionality temporarily unavailable until mid-day Tuesday the 26th while
+      backend services are being upgraded.</b><br/>
+      This site is for previewing changes coming to the MSU Libraries catalog. It is
       connected to live data and can be used as you would use the
       <a href="https://catalog.lib.msu.edu/" target="_blank">
         <i class="fa fa-sign-in" aria-hidden="true"></i> production catalog
@@ -117,6 +119,8 @@ $isProduction = getenv("STACK_NAME") == 'catalog-prod';
 <?php else: ?>
   <div class="collapse navbar-collapse" id="navbar-warning">
     <p>
+      <b>Notice: Certain functionality temporarily unavailable until mid-day Tuesday the 26th while
+      backend services are being upgraded.</b><br/>
       Welcome to the new interface for the MSU Libraries catalog! The EDS
       interface will remain available at
       <a href="https://eds.lib.msu.edu/" target="_blank">
