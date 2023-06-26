@@ -74,6 +74,15 @@ Deploy Internal Network:
   extends: .stack_template
   script:
     - bash ./cicd/deploy-internal-network
+  needs:
+    - Deploy Compose Files
+
+Deploy Public Network:
+  extends: .stack_template
+  script:
+    - bash ./cicd/deploy-public-network
+  needs:
+    - Deploy Compose Files
 
 Deploy Traefik:
   extends: .stack_template
@@ -81,6 +90,7 @@ Deploy Traefik:
     - job: Set Stack Name
       artifacts: true
     - Deploy Compose Files
+    - Deploy Public Network
   script:
     - bash ./cicd/deploy-traefik
 
@@ -110,7 +120,7 @@ Deploy Solr:
     - Bootstrap Stacks
     - Deploy Compose Files
     - Deploy Internal Network
-    - Deploy Traefik
+    - Deploy Public Network
     - Perform Database Backup
   script:
     - bash ./cicd/deploy-solr
@@ -149,7 +159,7 @@ Deploy Vufind:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Deploy Traefik
+    - Deploy Public Network
     - Deploy Internal Network
     - Build Vufind Image
     - Deploy DB
@@ -173,7 +183,7 @@ Deploy Monitoring:
     - Build Monitoring Image
     - Deploy Compose Files
     - Deploy Internal Network
-    - Deploy Traefik
+    - Deploy Public Network
   script:
     - bash ./cicd/deploy-monitoring
 

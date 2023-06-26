@@ -1,6 +1,5 @@
 ---
 version: "3.8"
-
 services:
   traefik:
     image: traefik:v2.8
@@ -14,9 +13,11 @@ services:
       - target: 80
         published: 80
         protocol: tcp
+        mode: host
       - target: 443
         published: 443
         protocol: tcp
+        mode: host
     environment:
       # XXX: The environment will be replaced by traefik-env.yml during deploy
     command:
@@ -63,8 +64,7 @@ services:
         max-file: "5"
         max-size: "10m"
     deploy:
-      mode: replicated
-      replicas: 1
+      mode: global
       placement:
         max_replicas_per_node: 1
       update_config:
@@ -107,10 +107,7 @@ services:
 networks:
   public:
     name: public
-    driver: overlay
-    ipam:
-      config:
-        - subnet: 192.168.0.0/24
+    external: true
 
 volumes:
   traefik:
