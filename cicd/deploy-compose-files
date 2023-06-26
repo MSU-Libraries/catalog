@@ -109,7 +109,7 @@ apply_devel_changes() {
     ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud-bootstrap.yml;
     ./yq -i "del(.services.cron.deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
     ./yq -i "del(.services.catalog.deploy.update_config.failure_action)" docker-compose.yml;
-    ./yq -i "del(.services.cachecron.deploy.update_config.failure_action)" docker-compose.yml;
+    ./yq -i "del(.services.croncache.deploy.update_config.failure_action)" docker-compose.yml;
     ./yq -i "del(.services.cron.deploy.update_config.failure_action)" docker-compose.yml;
 
     # Disable healthchecks on catalog service
@@ -134,8 +134,8 @@ apply_prod_changes() {
     ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls.certresolver=msul-letsencrypt\"" \
     docker-compose.solr-cloud.yml;
 
-    # Remove the cachecron service if the stack name is production
-    ./yq -i "del(.services.cachecron)" docker-compose.yml;
+    # Remove the croncache service if the stack name is production
+    ./yq -i "del(.services.croncache)" docker-compose.yml;
 
     # Remove mailcatcher service
     ./yq -i "del(.services.mail-*)" docker-compose.yml;
