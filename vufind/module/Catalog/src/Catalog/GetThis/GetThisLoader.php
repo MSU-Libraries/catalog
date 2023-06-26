@@ -127,6 +127,32 @@ class GetThisLoader {
     }
 
     /**
+     * Get the call number for the record
+     *
+     * @return string The description string
+     */
+    public function getCallNumber($item_id=null) {
+        $item_id = $this->getItemId($item_id);
+        $item = $this->getItem($item_id);
+
+        $callnum = "";
+        if ($item['callnumber'] ?? false) {
+            $callnum .= ($item['callnumber_prefix'] ? $item['callnumber_prefix'] . ' ' : '') .
+                        $item['callnumber'];
+        }
+
+        if ($item['enumchron'] ?? false) {
+            $callnum .= " " . $item['enumchron'];
+        }
+
+        if ($item != null && isset($item['number']) && $item['number'] > 1) {
+            $callnum .= " (Copy #" . ($item['number']) . ")";
+        }
+
+        return $callnum;
+    }
+
+    /**
      * Get the description for the record
      *
      * @return string The description string
