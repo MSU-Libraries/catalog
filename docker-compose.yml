@@ -80,7 +80,7 @@ services:
         - "traefik.http.routers.${STACK_NAME}-https-links.service=${STACK_NAME}-https-links-app"
         - "traefik.http.services.${STACK_NAME}-https-links-app.loadbalancer.server.port=80"
 
-  cachecron:
+  croncache:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     command: /startup-cachecron.sh
     volumes:
@@ -137,7 +137,7 @@ services:
         failure_action: rollback
         delay: 10s
 
-  mail:
+  mail-$STACK_NAME:
     image: sj26/mailcatcher
     command: [
         "--no-quit",
