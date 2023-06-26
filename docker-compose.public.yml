@@ -1,0 +1,25 @@
+---
+version: "3.8"
+services:
+  # Stack deploys require a network be used by at least 1 service
+  # or Swarm will skip creating that network. Hence this service.
+  health:
+    image: alpine:latest
+    command: sleep inf
+    networks:
+      - public
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        window: 15s
+      update_config:
+        failure_action: rollback
+
+networks:
+  public:
+    name: public
+    driver: overlay
+    ipam:
+      config:
+        - subnet: 192.168.0.0/24
