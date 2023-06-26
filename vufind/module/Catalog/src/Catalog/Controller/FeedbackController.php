@@ -84,7 +84,7 @@ class FeedbackController extends \VuFind\Controller\FeedbackController
         # MSUL: Add in user id if logged in
         $messageParams[] = [
             "type" => "hidden",
-            "label" => "User ID",
+            "label" => "VFUserID",
             "value" => $user->id ?? "none",
         ];
         $emailMessage = $this->getViewRenderer()->partial(
