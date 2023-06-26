@@ -1054,7 +1054,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
      *
      * @return array An array with key-value pairs.
      */
-    public function getConfig($function, $params = null)
+    public function getConfig($function, $params = [])
     {
         $source = null;
         if (!empty($params)) {
