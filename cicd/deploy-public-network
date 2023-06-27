@@ -22,7 +22,7 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
-    ssh -v deploy@"${DEPLOY_HOST_A}" "docker stack deploy --prune -c ${COMPOSE_PATH}/docker-compose.public.yml public"
+    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --prune -c ${COMPOSE_PATH}/docker-compose.public.yml public"
 
     sleep 15
 }

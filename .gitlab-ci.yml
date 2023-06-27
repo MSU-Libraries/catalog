@@ -76,6 +76,8 @@ Deploy Internal Network:
     - bash ./cicd/deploy-internal-network
   needs:
     - Deploy Compose Files
+    - job: Set Stack Name
+      artifacts: true
 
 Deploy Public Network:
   extends: .stack_template
@@ -83,6 +85,8 @@ Deploy Public Network:
     - bash ./cicd/deploy-public-network
   needs:
     - Deploy Compose Files
+    - job: Set Stack Name
+      artifacts: true
 
 Deploy Traefik:
   extends: .stack_template
