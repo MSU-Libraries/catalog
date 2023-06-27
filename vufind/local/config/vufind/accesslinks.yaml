@@ -398,5 +398,7 @@ labels:
     url: "#https://www\\.adb\\.org/#"
   - label: "Numdam"
     url: "#https?://www\\.numdam\\.org/#"
+  - label: "Library of the Friedrich-Ebert-Stiftung"
+    url: "#https?://library\\.fes\\.de/#"
   - label: "John Benjamins e-Platform"
     url: "#https://www\\.jbe-platform\\.com/#"
