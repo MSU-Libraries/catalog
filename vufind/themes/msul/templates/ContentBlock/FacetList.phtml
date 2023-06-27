@@ -15,8 +15,8 @@
   <!--    <p><?=$this->transEsc('Search for items on reserve:')?></p> -->
           <form class="form-inline" method="get" name="reservesSearchForm" action="Search/Reserves">
             <label for="reservesSearchForm_lookfor"><?=$this->transEsc("Your search terms")?></label>
-            <input id="reservesSearchForm_lookfor" placeholder="Search terms" type="text" name="lookfor" size="40" value="" <?=$this->searchOptions('SolrReserves')->autocompleteEnabled() ? ' class="form-control autocomplete searcher:SolrReserves type:Reserves"' : ''?> />
-            <input class="btn btn-primary" type="submit" name="submit" value="<?=$this->transEscAttr("Find")?>"/>
+            <input id="reservesSearchForm_lookfor" placeholder="Search terms" type="text" name="lookfor" size="40" value="" <?=$this->searchOptions('SolrReserves')->autocompleteEnabled() ? ' class="form-control autocomplete searcher:SolrReserves type:Reserves"' : ''?> >
+            <input class="btn btn-primary" type="submit" name="submit" value="<?=$this->transEscAttr("Find")?>">
           </form>
       </div>
     </div>

@@ -6,12 +6,12 @@ $link = $this->getthis->getLink();
 $callnum = $this->getthis->getCallNumber();
 ?>
 <div>
-    <b>Title:</b> <?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?><br/>
+    <b>Title:</b> <?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?><br>
     <b>Call Number:</b>
     <?php if ($callnum ?? false): ?>
           <span><?=$this->escapeHtml($callnum) ?></span>
     <?php endif; ?>
-    <br/><br/>
+    <br><br>
     <p class="text-left">
         <b>Status:</b> <?= $this->getthis->getStatus() ?>
         <?php if ($item !=null && !$this->getthis->isOnlineResource() && $item['is_holdable'] && $link ?? false) { ?>
@@ -22,5 +22,5 @@ $callnum = $this->getthis->getCallNumber();
                <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place Request")?>
             </a>
         <?php } ?>
-    </p><br/>
+    </p><br>
 </div>
