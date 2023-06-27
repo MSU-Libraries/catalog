@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "Sourcing beforescript"
 source "${CI_PROJECT_DIR}"/cicd/before-script
 
 runhelp() {
@@ -22,10 +23,12 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
-    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --prune -c ${COMPOSE_PATH}/docker-compose.internal.yml ${STACK_NAME}-internal"
+    ssh -v deploy@"${DEPLOY_HOST_A}" "docker stack deploy --prune -c ${COMPOSE_PATH}/docker-compose.internal.yml ${STACK_NAME}-internal"
 
     sleep 15
 }
 
+echo "Running beforescript"
 beforescript
+echo "Running main"
 main
