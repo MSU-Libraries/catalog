@@ -74,7 +74,9 @@ class Record extends \VuFind\View\Helper\Root\Record
                 break;
             }
         }
-        return array_map([$this,'getLinkTargetLabel'], $links);
+        return $this->deduplicateLinks(
+            array_map([$this,'getLinkTargetLabel'], $links)
+        );
     }
 
     /**
