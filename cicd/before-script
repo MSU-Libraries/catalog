@@ -27,6 +27,7 @@ beforescript() {
     set -e
 
     # Check for STACK_NAME
+    echo "Testing for STACK_NAME (is '$STACK_NAME')"
     test -n "${STACK_NAME}"
 
     # Before script before SSH template
