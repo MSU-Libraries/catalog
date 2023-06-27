@@ -95,6 +95,7 @@ COPY apache2/conf-available/ /etc/apache2/conf-available/
 COPY simplesamlphp/local/ ${SIMPLESAMLPHP_CUSTOM_DIR}/
 RUN envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW}' < ${SIMPLESAMLPHP_CONFIG_DIR}/config.php | sponge ${SIMPLESAMLPHP_CONFIG_DIR}/config.php && \
     envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \
+    a2enmod remoteip && \
     a2enconf simplesamlphp.conf && \
     chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR} && \
     a2enconf catalog.conf
@@ -155,15 +156,13 @@ ENV SITE_HOSTNAME=$SITE_HOSTNAME \
     DEPLOY_KEY=$DEPLOY_KEY \
     VUFIND_LOCAL_MODULES=Catalog
 
-# Setup Apache
+# Setup Apache logging to both stdout/stderr and log files (needed for monitoring app)
 RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-default.conf && \
     echo "<VirtualHost *:80>" >> /etc/apache2/sites-available/000-default.conf && \
     echo "    LogLevel warn" >> /etc/apache2/sites-enabled/000-default.conf && \
     echo '    ErrorLog "|/usr/bin/tee /var/log/apache2/error.log"' >> /etc/apache2/sites-enabled/000-default.conf && \
     echo '    CustomLog "|/usr/bin/tee /var/log/apache2/access.log" combined' >> /etc/apache2/sites-enabled/000-default.conf && \
-    echo "</VirtualHost>" >> /etc/apache2/sites-enabled/000-default.conf && \
-    # enable simplesamlphp at /simplesamlphp
-    a2enconf simplesamlphp
+    echo "</VirtualHost>" >> /etc/apache2/sites-enabled/000-default.conf
 
 # Add file customizations
 COPY local/ /usr/local/vufind/local
