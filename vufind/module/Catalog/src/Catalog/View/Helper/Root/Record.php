@@ -51,8 +51,8 @@ class Record extends \VuFind\View\Helper\Root\Record
                 break;
             }
         }
-        if ($label !== null) {
-            $link['desc'] = $link['desc'] ?? "" . " ({$label})";
+        if ($label !== null && array_key_exists('desc', $link)) {
+            $link['desc'] .= " ({$label})";
         }
         return $link;
     }
