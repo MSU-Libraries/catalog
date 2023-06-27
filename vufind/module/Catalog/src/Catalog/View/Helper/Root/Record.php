@@ -52,7 +52,7 @@ class Record extends \VuFind\View\Helper\Root\Record
             }
         }
         if ($label !== null) {
-            $link['desc'] .= " ({$label})";
+            $link['desc'] = $link['desc'] ?? "" . " ({$label})";
         }
         return $link;
     }
@@ -69,7 +69,7 @@ class Record extends \VuFind\View\Helper\Root\Record
     {
         $links = $this->driver->tryMethod('geteJournalLinks') ?? [];
         foreach ($links as $idx => $link) {
-            if (strcasecmp($link['desc'], "cover image") === 0) {
+            if (strcasecmp($link['desc'] ?? "", "cover image") === 0) {
                 unset($links[$idx]);
                 break;
             }
