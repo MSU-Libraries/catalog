@@ -6,17 +6,12 @@
   $checkStorageRetrievalRequest = $holding['checkStorageRetrievalRequest'] ?? false;
   $checkILLRequest = $holding['checkILLRequest'] ?? false;
   $getthis = new \Catalog\GetThis\GetThisLoader($record, [$holding]);
+  $callnum = $getthis->getCallNumber($item_id);
 ?>
 <tr vocab="http://schema.org/" typeof="Offer">
   <th class="copy-number">
-    <?php if ($holding['callnumber'] ?? false): ?>
-      <span><?=$holding['callnumber_prefix'] ? $this->escapeHtml($holding['callnumber_prefix']) . ' ' : '' ?><?=$this->escapeHtml($holding['callnumber'])?></span>
-    <?php endif; ?>
-    <?php if ($holding['enumchron'] ?? false): ?>
-      <span class="enumchron"><?=$this->escapeHtml($holding['enumchron'])?></span>
-    <?php endif; ?>
-    <?php if (isset($holding['number']) && $holding['number'] > 1): ?>
-      &nbsp;(Copy #<?=$this->escapeHtml(($holding['number']))?>)
+    <?php if ($callnum ?? false): ?>
+      <span><?=$this->escapeHtml($callnum) ?></span>
     <?php endif; ?>
   </th>
   <td>
