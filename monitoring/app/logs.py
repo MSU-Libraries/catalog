@@ -32,13 +32,13 @@ def node_logs(service):
     if not path.is_file():
         return 'Log file does not exist on this node.'
 
-    full_log = path.read_text(encoding="utf8")
+    full_log = path.read_text(encoding="utf8", errors="ignore")
 
     rotated_1 = pathlib.Path(f'{paths[service]}.1')
     if not rotated_1.is_file():
         return full_log
 
-    log_text = rotated_1.read_text(encoding="utf8")
+    log_text = rotated_1.read_text(encoding="utf8", errors="ignore")
     if log_text != '':
         if full_log != '':
             full_log = '\n---------------------------\n\n' + full_log

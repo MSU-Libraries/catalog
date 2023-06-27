@@ -3,19 +3,14 @@
 $item = $this->getthis->getItem();
 $check = $item['check'] ?? false;
 $link = $this->getthis->getLink();
+$callnum = $this->getthis->getCallNumber();
 ?>
 <div>
     <b>Title:</b> <?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?><br/>
     <b>Call Number:</b>
-    <?php if ($item['callnumber'] ?? false): ?>
-          <span><?=$item['callnumber_prefix'] ? $this->escapeHtml($item['callnumber_prefix']) . ' ' : '' ?><?=$this->escapeHtml($item['callnumber'])?></span>
-        <?php endif; ?>
-        <?php if ($item['enumchron'] ?? false): ?>
-          <span class="enumchron"><?=$this->escapeHtml($item['enumchron'])?></span>
-        <?php endif; ?>
-        <?php if ($item != null && isset($item['number']) && $item['number'] > 1): ?>
-          &nbsp;(Copy #<?=$this->escapeHtml(($item['number']))?>)
-        <?php endif; ?>
+    <?php if ($callnum ?? false): ?>
+          <span><?=$this->escapeHtml($callnum) ?></span>
+    <?php endif; ?>
     <br/><br/>
     <p class="text-left">
         <b>Status:</b> <?= $this->getthis->getStatus() ?>

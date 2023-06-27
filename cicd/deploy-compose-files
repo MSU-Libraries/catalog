@@ -48,13 +48,13 @@ apply_devel_changes() {
     ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
     docker-compose.yml;
     ./yq -i \
-    ".services.mail.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.tls.certresolver=msul-letsencrypt-dns\"" \
+    ".services.mail-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.tls.certresolver=msul-letsencrypt-dns\"" \
     docker-compose.yml;
     ./yq -i \
-    ".services.mail.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.tls.domains[0].main=aws.lib.msu.edu\"" \
+    ".services.mail-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.tls.domains[0].main=aws.lib.msu.edu\"" \
     docker-compose.yml;
     ./yq -i \
-    ".services.mail.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
+    ".services.mail-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
     docker-compose.yml;
     ./yq -i \
     ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls.certresolver=msul-letsencrypt-dns\"" \
@@ -74,10 +74,10 @@ apply_devel_changes() {
 
     # Add host router rules
     ./yq -i \
-    ".services.mail.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-mail.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/mail\`)\"" \
+    ".services.mail-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-mail.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/mail\`)\"" \
     docker-compose.yml;
     ./yq -i \
-    ".services.mail.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/mail\`)\"" \
+    ".services.mail-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/mail\`)\"" \
     docker-compose.yml;
     ./yq -i \
     ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-links.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
@@ -109,7 +109,7 @@ apply_devel_changes() {
     ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud-bootstrap.yml;
     ./yq -i "del(.services.cron.deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
     ./yq -i "del(.services.catalog.deploy.update_config.failure_action)" docker-compose.yml;
-    ./yq -i "del(.services.cachecron.deploy.update_config.failure_action)" docker-compose.yml;
+    ./yq -i "del(.services.croncache.deploy.update_config.failure_action)" docker-compose.yml;
     ./yq -i "del(.services.cron.deploy.update_config.failure_action)" docker-compose.yml;
 
     # Disable healthchecks on catalog service
@@ -134,11 +134,11 @@ apply_prod_changes() {
     ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls.certresolver=msul-letsencrypt\"" \
     docker-compose.solr-cloud.yml;
 
-    # Remove the cachecron service if the stack name is production
-    ./yq -i "del(.services.cachecron)" docker-compose.yml;
+    # Remove the croncache service if the stack name is production
+    ./yq -i "del(.services.croncache)" docker-compose.yml;
 
     # Remove mailcatcher service
-    ./yq -i "del(.services.mail)" docker-compose.yml;
+    ./yq -i "del(.services.mail-*)" docker-compose.yml;
 
     ## Changes for catalog-beta
     if [ "${STACK_NAME}" == "catalog-beta" ]; then

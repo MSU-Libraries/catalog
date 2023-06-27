@@ -148,6 +148,8 @@ forms:
         label: Comments
         required: true
         settings:
+        help:
+          post: feedback_comment_help
         # help: message_help
 
   # Example for an acquisition request form

@@ -9,7 +9,7 @@ $author = $this->driver->getPrimaryAuthor();
 $bibnum = $this->driver->getSierraBN();
 $edition = $this->driver->getEdition();
 $pubname = $this->driver->getPublisher();
-$callnum = $this->driver->getCallNumber();
+$callnum = $this->getthis->getCallNumber();
 $barcode = $item['barcode'];
 if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
 

@@ -14,4 +14,4 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 # VuFund cache clear on start
 @reboot root chronic clear-vufind-cache 2>&1 | logger -t CACHE_CLEAR
 # Periodic cache clear
-0,15,30,45 * * * * root chronic clear-vufind-cache 2>&1 | logger -t CACHE_CLEAR
+*/5 * * * * root chronic clear-vufind-cache 2>&1 | logger -t CACHE_CLEAR

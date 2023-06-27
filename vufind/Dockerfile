@@ -172,7 +172,7 @@ COPY robots.txt /usr/local/vufind/public/robots.txt
 COPY scripts /usr/local/bin
 COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
-COPY startup-cachecron.sh /startup-cachecron.sh
+COPY startup-croncache.sh /startup-croncache.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
 COPY hlm-harvest-and-import.sh /hlm-harvest-and-import.sh
 COPY authority-harvest-and-import.sh /authority-harvest-and-import.sh
@@ -183,7 +183,7 @@ COPY msmtp/msmtprc /etc/msmtprc
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
-COPY cachecron.d/ /etc/cachecron.d/
+COPY croncache.d/ /etc/croncache.d/
 RUN chmod -R g-w,o-w /etc/cron.d/ && \
     sed -i "/imklog/d" /etc/rsyslog.conf && \
     sed -i "/PrivDrop/d" /etc/rsyslog.conf && \
