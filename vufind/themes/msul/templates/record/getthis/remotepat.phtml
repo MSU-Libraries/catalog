@@ -6,7 +6,7 @@ $title = $this->driver->getTitle();
 $author = $this->driver->getPrimaryAuthor();
 $status = $this->getthis->getStatus();
 $isbn = $this->driver->getCleanISBN();
-$callnum = $this->driver->getCallNumber();
+$callnum = $this->getthis->getCallNumber();
 $pubname = $this->driver->getPublisher();
 if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
 ?>

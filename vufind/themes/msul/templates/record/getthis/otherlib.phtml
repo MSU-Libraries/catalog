@@ -10,7 +10,7 @@ $title_full = $this->driver->getRawData()['title_full'];
 $pubname = $this->driver->getPublisher();
 $author = $this->driver->getPrimaryAuthor();
 $isbn = $this->driver->getCleanISBN();
-$callnum = $this->driver->getCallNumber();
+$callnum = $this->getthis->getCallNumber();
 if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
 ?>
 <div>
