@@ -23,12 +23,19 @@ to update the `VUFIND_VERSION` variable to be the new release you are updating t
 * Create a new branch with these changes named either `review-`* or `devel-`* to trigger a pipeline with
 a new environment.
 
-* Once the pipeline completes successfully, verify that the site loads and works correctly.
+* Once the pipeline completes successfully, connect to the `catalog` container and modify the `config.ini`
+file to set the `autoConfigure` value to `true` temporarily. This will enable the [URL]/Update/Home
+url to be accessible to run the database migration manually. It will likely prompt for the database
+credentials, which can be found in the
+[docker-compose.mariadb-cloud.yml](https://github.com/MSU-Libraries/catalog/blob/main/docker-compose.mariadb-cloud.yml)
+file within the environment variables. **Remember to disable the `autoConfigure` once complete**.
+
+* Verify that the site loads and works correctly.
 
 * In order to test that a database migration will work correctly, take a fresh database dump of an
-environment at the older version and load it into the new release environment. Now re-run the Upgrade Vufind
-job in the pipline and check the site again to ensure that everything still works post-upgrade with your
-production database.
+environment at the older version and load it into the new release environment. Now re-run the database migration steps
+from [URL]/Update/Home (temporarily re-enabling `autoConfigure`) to ensure that everything still works post-upgrade
+and that data is preserved.
 
 * Once thurough testing is complete, take a backup of the database on `main`, merge the branch into `main`,
 then repeat the database migration steps once the pipeline completes.
