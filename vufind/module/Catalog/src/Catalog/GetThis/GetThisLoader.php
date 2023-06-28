@@ -149,6 +149,14 @@ class GetThisLoader {
             $callnum .= " (Copy #" . ($item['number']) . ")";
         }
 
+        if ($this->isOnlineResource($item_id)) {
+            $callnum = "Online";
+        }
+
+        if (empty($callnum)) {
+            $callnum = "Access";
+        }
+
         return $callnum;
     }
 

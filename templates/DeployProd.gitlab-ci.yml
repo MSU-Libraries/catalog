@@ -117,18 +117,6 @@ Verify Prod Stack Health:
     - Deploy Prod Monitoring
     - Deploy Prod Vufind
 
-Prod Vufind Upgrade:
-  stage: Deploy Prod
-  extends: Vufind Upgrade
-  rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-  needs:
-    - job: Set Prod Stack Name
-      artifacts: true
-    - job: Deploy Prod Vufind
-      artifacts: true
-    - Verify Prod Stack Health
-
 Prod Run Functional Tests:
   stage: Deploy Prod
   extends: Run Functional Tests
