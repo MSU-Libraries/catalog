@@ -34,7 +34,7 @@ ${HARV_CRON_MINS} 2    * * *	root    cron-hlm.sh
 ${HARV_CRON_MINS} 4    * * *	root    cron-authority.sh
 
 # Course reserves update
-${HARV_CRON_MINS} 2	* * *	root    cron-reserves.sh
+${HARV_CRON_MINS} 0	* * *	root    cron-reserves.sh
 
 # Cleanup data
 0 0     * * *   root    cron-searches.sh
