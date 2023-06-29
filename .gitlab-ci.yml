@@ -7,7 +7,7 @@ stages:
   - Release
 
 variables:
-  VUFIND_VERSION: "9.0.1"
+  VUFIND_VERSION: "9.0.2"
   # Used during upgrade, which needs to know previous version
   PREV_VUFIND_VERSION: "8.1.2"
   SIMPLESAMLPHP_VERSION: "1.19.6"
