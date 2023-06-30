@@ -10,7 +10,7 @@ $title_full = $this->driver->getRawData()['title_full'];
 $pubname = $this->driver->getPublisher();
 $author = $this->driver->getPrimaryAuthor();
 $isbn = $this->driver->getCleanISBN();
-$callnum = $this->driver->getCallNumber();
+$callnum = $this->getthis->getCallNumber();
 if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
 ?>
 <div>
@@ -33,7 +33,7 @@ if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
      <?php
       } ?>
     <p><b><a href='https://lib.msu.edu/ils/' target="_blank">Inter-library Loan</a>:</b> Request materials through the Inter-library Loan Request Form.
-        Typically available for pickup in 3-14 business days (MSU Students, Staff and Facaulty only)</p>
+        Typically available for pickup in 3-14 business days (MSU Students, Staff and Faculty only)</p>
     <ul>
         <?php
         echo "<li><a href='https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:" .

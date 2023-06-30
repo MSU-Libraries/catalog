@@ -796,4 +796,43 @@ class Folio extends \VuFind\ILS\Driver\Folio
         }
         return $instances->instances[0];
     }
+
+    /**
+     * Helper function to retrieve paged results from FOLIO API
+     *
+     * @param string $responseKey Key containing values to collect in response
+     * @param string $interface   FOLIO api interface to call
+     * @param array  $query       CQL query
+     *
+     * @return array
+     */
+    protected function getPagedResults($responseKey, $interface, $query = [])
+    {
+        /// MSUL Override to fix pagination when more than 1000 results
+        $limit = 1000;
+        $offset = 0;
+
+        do {
+            $combinedQuery = array_merge($query, compact('offset', 'limit'));
+            $response = $this->makeRequest(
+                'GET',
+                $interface,
+                $combinedQuery
+            );
+            $json = json_decode($response->getBody());
+            if (!$response->isSuccess() || !$json) {
+                $msg = $json->errors[0]->message ?? json_last_error_msg();
+                throw new ILSException($msg);
+            }
+            $numFound = 0;
+            foreach ($json->$responseKey ?? [] as $item) {
+                $numFound++;
+                yield $item ?? '';
+            }
+            $offset += $limit;
+
+            //print_r("\nURL: " . $interface . " offset: " . $offset . " limit: " . $limit . " currentcount: " . $numFound . "\n");
+            // Continue until the results are not the limit value (i.e. the last page of results)
+        } while ($numFound == $limit);
+    }
 }

@@ -28,6 +28,7 @@ services:
       - '--providers.docker.defaultRule=Host(`{{ index .Labels "com.docker.stack.namespace" | trimSuffix "-catalog" }}.aws.lib.msu.edu`)'
       - "--entrypoints.msul-http-ent.address=:80"
       - "--entrypoints.msul-https-ent.address=:443"
+      - "--entryPoints.msul-https-ent.forwardedHeaders.trustedIPs=10.0.0.0/16"
       - "--log"
       - "--log.level=ERROR"
       - "--log.filepath=/mnt/logs/traefik.log"
@@ -92,15 +93,16 @@ services:
         # Traefik Dashboard HTTP
         - "traefik.http.routers.dashboard-http-router.entrypoints=msul-http-ent"
         - "traefik.http.routers.dashboard-http-router.middlewares=http-redirect"
-        - "traefik.http.routers.dashboard-http-router.rule=Host(`catalog-proxy.aws.lib.msu.edu`)"
+        - "traefik.http.routers.dashboard-http-router.rule=\
+            Host(`catalog-1.aws.lib.msu.edu`,`catalog-2.aws.lib.msu.edu`,`catalog-3.aws.lib.msu.edu`)"
         - "traefik.http.routers.dashboard-http-router.service=api@internal"
         # Traefik Dashboard HTTPS
         - "traefik.http.routers.dashboard-https-router.entrypoints=msul-https-ent"
         - "traefik.http.routers.dashboard-https-router.middlewares=restrict-auth"
         - "traefik.http.routers.dashboard-https-router.tls=true"
-        - "traefik.http.routers.dashboard-https-router.tls.certresolver=msul-letsencrypt"
+        - "traefik.http.routers.dashboard-https-router.tls.certresolver=msul-letsencrypt-dns"
         - "traefik.http.routers.dashboard-https-router.rule=\
-            Host(`catalog-proxy.aws.lib.msu.edu`) && \
+            Host(`catalog-1.aws.lib.msu.edu`,`catalog-2.aws.lib.msu.edu`,`catalog-3.aws.lib.msu.edu`) && \
             (PathPrefix(`/dashboard`) || PathPrefix(`/api`) || PathPrefix(`/debug`))"
         - "traefik.http.routers.dashboard-https-router.service=api@internal"
 

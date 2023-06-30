@@ -4,24 +4,8 @@ $sel_item = $this->getthis->getItem();
 $items = $this->getthis->items;
 
 function getDisplay($view, $item) {
-    $display = "";
-
-    if ($item['callnumber_prefix'] ?? false) {
-      $display .= $view->escapeHtml($item['callnumber_prefix']) . ' ';
-    }
-    if ($item['callnumber'] ?? false) {
-      $display .= " " . $view->escapeHtml($item['callnumber']);
-    }
-    if ($item['enumchron'] ?? false) {
-      $display .= " " . $view->escapeHtml($item['enumchron']);
-    }
-    if (isset($item['number']) && $item['number'] > 1) {
-      $display .= "&nbsp;(Copy #" . $view->escapeHtml($item['number']) . ")";
-    }
-
-    return $display;
+    return $view->getthis->getCallNumber($item['item_id']);
 }
-
 ?>
 
 <b>Items:</b>

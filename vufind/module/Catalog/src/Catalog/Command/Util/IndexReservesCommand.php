@@ -162,7 +162,10 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
                     'department' => $departments[$departmentId] ?? ''
                 ];
             }
-            $index[$id]['bib_id'][] = $record['BIB_ID'];
+            // MSUL override to only include unique instance IDs
+            if (!in_array($record['BIB_ID'], $index[$id]['bib_id'])) {
+                $index[$id]['bib_id'][] = $record['BIB_ID'];
+            }
         }
 
         $updates = new UpdateDocument();

@@ -51,7 +51,7 @@ class Record extends \VuFind\View\Helper\Root\Record
                 break;
             }
         }
-        if ($label !== null) {
+        if ($label !== null && array_key_exists('desc', $link)) {
             $link['desc'] .= " ({$label})";
         }
         return $link;
@@ -69,12 +69,14 @@ class Record extends \VuFind\View\Helper\Root\Record
     {
         $links = $this->driver->tryMethod('geteJournalLinks') ?? [];
         foreach ($links as $idx => $link) {
-            if (strcasecmp($link['desc'], "cover image") === 0) {
+            if (strcasecmp($link['desc'] ?? "", "cover image") === 0) {
                 unset($links[$idx]);
                 break;
             }
         }
-        return array_map([$this,'getLinkTargetLabel'], $links);
+        return $this->deduplicateLinks(
+            array_map([$this,'getLinkTargetLabel'], $links)
+        );
     }
 
     /**

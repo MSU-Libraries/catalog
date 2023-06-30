@@ -15,7 +15,7 @@ $pass_params["ISSN"] = count($isxns) == 1 ? $isxns[0] : "";
 if ($pos = strpos($pass_params["ISSN"], ' ')) {
     $pass_params["ISSN"] = substr($pass_params["ISSN"], 0, $pos);
 }
-$pass_params["CallNumber"] = $this->driver->getCallNumber();
+$pass_params["CallNumber"] = $this->getthis->getCallNumber();
 $pass_params["PhotoJournalVolume"] = $item['enumchron'] ?? "";
 $param_str = "";
 foreach ($pass_params as $pkey => $pval) {

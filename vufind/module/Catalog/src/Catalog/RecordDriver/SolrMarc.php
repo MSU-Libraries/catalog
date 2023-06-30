@@ -216,7 +216,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         $idx = 0;
         $marc = $this->getMarcReader();
 
-        $marc856s = $marc->getFields('856', ['u', 'z', 'y']);
+        $marc856s = $marc->getFields('856', ['u', 'y', 'z']);
         $marc773s = $marc->getFields('773', ['t']);
 
         foreach ($marc856s as $marc856) {
@@ -225,8 +225,12 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 
             foreach ($subfields as $subfield) {
                 $sfvals[$subfield['code']] = $subfield['data'];
-                if ($subfield['code'] == 'u') $rec['url'] = $subfield['data'];
-                elseif ($subfield['code'] == 'z') $rec['desc'] = $subfield['data'];
+                if ($subfield['code'] == 'u') {
+                    $rec['url'] = $subfield['data'];
+                }
+                elseif (in_array($subfield['code'], ['y','z'])) {
+                    $rec['desc'] = $subfield['data'];
+                }
             }
 
             // Fall back to 773 field if we can't find description in the '856z' field
