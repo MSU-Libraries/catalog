@@ -394,7 +394,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $output->writeln(date('Y-m-d H:i:s') . " Starting reserves processing");
-        $strartTime = microtime(true);
+        $startTime = date('Y-m-d H:i:s');
 
         // Check time limit; increase if necessary:
         if (ini_get('max_execution_time') < 3600) {
@@ -476,6 +476,8 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             $this->solr->optimize('SolrReserves');
 
             $output->writeln(date('Y-m-d H:i:s') . ' Successfully loaded ' . count($reserves) . ' rows.');
+            $endTime = date('Y-m-d H:i:s');
+            $output->writeln(date('Y-m-d H:i:s') . " Stated at: " . $startTime . " Completed at: " . $endTime);
             return 0;
         }
         $missing = array_merge(
@@ -487,9 +489,6 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
         $output->writeln(
             date('Y-m-d H:i:s') . ' Unable to load data. No data found for: ' . implode(', ', $missing)
         );
-        $endTime = microtime(true);
-        $runTime = ($endTime - $startTime) / 60; # divide by 60 to convert to minutes
-        $output->writeln(date('Y-m-d H:i:s') . " Total Run Time: " . $runTime . " minutes.");
         return 1;
     }
 }
