@@ -199,7 +199,8 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
 
     protected function revalidateLocalRecords($output)
     {
-        $output->writeln("Validating all locally prefixed Solr records to ensure there are no duplicate folio prefixed records");
+        $output->writeln(date('Y-m-d H:i:s') .
+            " Validating all locally prefixed Solr records to ensure there are no duplicate folio prefixed records");
 
         // Query all local prefixed Solr records
         $params = new \VuFindSearch\ParamBag();
@@ -218,7 +219,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
         $searchService = $this->getProperty($this->solr, 'searchService');
         $response = $searchService->invoke($command)->getResult();
 
-        $output->writeln("Found local record count: " . $response->response->numFound);
+        $output->writeln(date('Y-m-d H:i:s') . " Found local record count: " . $response->response->numFound);
 
         foreach ($response->response->docs as $doc) {
             // Check and see if there is an equivilent folo prefixed Solr record
@@ -239,12 +240,12 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
 
             // If so, delete the local prefixed Solr record
             if ($doc_response->response->numFound == 1) {
-                $output->writeln("Found matching folio prefixed record in solr. deleting  " . $doc->id);
+                $output->writeln(date('Y-m-d H:i:s') . " Found matching folio prefixed record in solr. Deleting: " . $doc->id);
                 $this->solr->deleteRecords('Solr', [$doc->id]);
                 $this->solr->commit('Solr');
             }
         }
-        $output->writeln("Completed validation of locally prefixed records");
+        $output->writeln(date('Y-m-d H:i:s') . " Completed validation of locally prefixed records");
     }
 
     protected function validateReserves($reserves, $output)
@@ -252,11 +253,11 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
         // Verify Folio records exist in Solr
         $idx = 0;
         foreach ($reserves as $reserve) {
-            $output->writeln("-- Progress: " . $idx . "/" . count($reserves) . " --");
+            $output->writeln(date('Y-m-d H:i:s') . " -- Progress: " . $idx . "/" . count($reserves) . " --");
 
             // Skip HLM records
             if (str_contains($reserve['BIB_ID'],'hlm.')) {
-                $output->writeln("Skipping HLM record " . $reserve['BIB_ID']);
+                $output->writeln(date('Y-m-d H:i:s') . " Skipping HLM record " . $reserve['BIB_ID']);
                 $idx += 1;
                 continue;
             }
@@ -281,11 +282,12 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             // replacing the prefix
             if ($response->response->numFound == 0 || str_contains($response->response->docs[0]->id, 'local.')) {
                 $reserves[$idx]['BIB_ID'] = str_replace('folio.', 'local.', $reserve['BIB_ID']);
-                $output->writeln("Updating/creating solr record for professor owned copy with id " . $reserves[$idx]['BIB_ID']);
+                $output->writeln(date('Y-m-d H:i:s') .
+                                 " Updating/creating solr record for professor owned copy with id: " . $reserves[$idx]['BIB_ID']);
                 $this->createLocalSolrRecord($reserves[$idx], $output);
             }
             else {
-                $output->writeln("Using found record in biblio index with folio prefix.");
+                $output->writeln(date('Y-m-d H:i:s') . " Using found record in biblio index with folio prefix.");
                 $reserves[$idx]['BIB_ID'] = $response->response->docs[0]->id;
             }
             $idx += 1;
@@ -371,9 +373,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
         ];
         $updates = new UpdateDocument();
         $updates->addRecord(new SerializableRecord($index));
-        $this->solr->deleteRecords('Solr', [$reserve['BIB_ID']]);
         $response = $this->solr->save('Solr', $updates);
-        $commit_response = $this->solr->commit('Solr');
     }
 
     protected function getProperty($object, $property)
@@ -393,7 +393,9 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln("Starting reserves processing");
+        $output->writeln(date('Y-m-d H:i:s') . " Starting reserves processing");
+        $strartTime = microtime(true);
+
         // Check time limit; increase if necessary:
         if (ini_get('max_execution_time') < 3600) {
             ini_set('max_execution_time', '3600');
@@ -410,7 +412,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
                 $departments = $reader->getDepartments();
                 $reserves = $reader->getReserves();
             } catch (\Exception $e) {
-                $output->writeln($e->getMessage());
+                $output->writeln(date('Y-m-d H:i:s') . " " . $e->getMessage());
                 return 1;
             }
         } elseif ($delimiter !== $this->defaultDelimiter) {
@@ -426,22 +428,22 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
                 $instructors = [];
                 $courses = [];
                 $departments = [];
-                $output->writeln("Retrieving instructors");
+                $output->writeln(date('Y-m-d H:i:s') . " Retrieving instructors");
                 $instructors = $this->catalog->getInstructors();
-                $output->writeln("Found instructor count: " . count($instructors));
-                $output->writeln("Retrieving courses");
+                $output->writeln(date('Y-m-d H:i:s') . " Found instructor count: " . count($instructors));
+                $output->writeln(date('Y-m-d H:i:s') . " Retrieving courses");
                 $courses = $this->catalog->getCourses();
-                $output->writeln("Found course count: " . count($courses));
-                $output->writeln("Retrieving departments");
+                $output->writeln(date('Y-m-d H:i:s') . " Found course count: " . count($courses));
+                $output->writeln(date('Y-m-d H:i:s') . " Retrieving departments");
                 $departments = $this->catalog->getDepartments();
-                $output->writeln("Found department count: " . count($departments));
-                $output->writeln("Retrieving course reserves");
+                $output->writeln(date('Y-m-d H:i:s') . " Found department count: " . count($departments));
+                $output->writeln(date('Y-m-d H:i:s') . " Retrieving course reserves");
                 $reserves = $this->catalog->findReserves('', '', '');
-                $output->writeln("Found reserve count: " . count($reserves));
-                $output->writeln("Validating and mapping reserves to correct Solr record");
+                $output->writeln(date('Y-m-d H:i:s') . " Found reserve count: " . count($reserves));
+                $output->writeln(date('Y-m-d H:i:s') . " Validating and mapping reserves to correct Solr record");
                 $reserves = $this->validateReserves($reserves, $output);
             } catch (\Exception $e) {
-                $output->writeln($e->getMessage());
+                $output->writeln(date('Y-m-d H:i:s') . " " . $e->getMessage());
                 return 1;
             }
         }
@@ -452,11 +454,11 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             && !empty($reserves)
         ) {
             // Delete existing records
-            $output->writeln("Clearing existing reserves");
+            $output->writeln(date('Y-m-d H:i:s') . " Clearing existing reserves");
             $this->solr->deleteAll('SolrReserves');
 
             // Build and Save the index
-            $output->writeln("Building new reserves");
+            $output->writeln(date('Y-m-d H:i:s') . " Building new reserves");
             $index = $this->buildReservesIndex(
                 $instructors,
                 $courses,
@@ -465,14 +467,15 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             );
 
             // Build and Save the index
-            $output->writeln("Writing new reserves");
+            $output->writeln(date('Y-m-d H:i:s') . " Writing new reserves");
             $this->solr->save('SolrReserves', $index);
 
             // Commit and Optimize the Solr Index
             $this->solr->commit('SolrReserves');
+            $this->solr->commit('Solr');
             $this->solr->optimize('SolrReserves');
 
-            $output->writeln('Successfully loaded ' . count($reserves) . ' rows.');
+            $output->writeln(date('Y-m-d H:i:s') . ' Successfully loaded ' . count($reserves) . ' rows.');
             return 0;
         }
         $missing = array_merge(
@@ -482,8 +485,11 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             empty($reserves) ? ['reserves'] : []
         );
         $output->writeln(
-            'Unable to load data. No data found for: ' . implode(', ', $missing)
+            date('Y-m-d H:i:s') . ' Unable to load data. No data found for: ' . implode(', ', $missing)
         );
+        $endTime = microtime(true);
+        $runTime = ($endTime - $startTime) / 60; # divide by 60 to convert to minutes
+        $output->writeln(date('Y-m-d H:i:s') . " Total Run Time: " . $runTime . " minutes.");
         return 1;
     }
 }
