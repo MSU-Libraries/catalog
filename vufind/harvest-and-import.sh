@@ -12,6 +12,7 @@ default_args() {
     ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/folio
     ARGS[SHARED_DIR]=/mnt/oai
     ARGS[SOLR_URL]="http://solr:8983/solr"
+    ARGS[SOLR_COLLECTION]="biblio"
     ARGS[RESET_SOLR]=0
     ARGS[VERBOSE]=0
     ARGS[TEST_HARVEST]=
@@ -69,8 +70,11 @@ runhelp() {
     echo "  -S|--solr SOLR_URL"
     echo "      Base URL for accessing Solr (only used for --reset-solr)."
     echo "      Default: ${ARGS[SOLR_URL]}"
+    echo "  -n|--collection COLLECTION"
+    echo "      Collection in Solr to index records to."
+    echo "      Default: ${ARGS[SOLR_COLLECTION]}"
     echo "  -r|--reset-solr"
-    echo "      Clear out the biblio Solr collection prior to importing."
+    echo "      Clear out the Solr collection prior to importing."
     echo "  -v|--verbose"
     echo "      Show verbose output."
     echo "  -T|--test-harvest HARVEST_TGZ"
@@ -134,6 +138,9 @@ parse_args() {
             shift; shift ;;
         -S|--solr)
             ARGS[SOLR_URL]="$2"
+            shift; shift ;;
+        -n|--collection)
+            ARGS[SOLR_COLLECTION]="$2"
             shift; shift ;;
         -r|--reset-solr)
             ARGS[RESET_SOLR]=1
@@ -293,7 +300,7 @@ append_hrid_given_uuid(){
         echo "ERROR: No append file given when converting a delete UUID: $UUID"
         exit 1
     fi
-    HRID=$( curl -s "${ARGS[SOLR_URL]}/biblio/select?q=uuid_str:${UUID}&wt=json" | jq -r '.response.docs[0].id' )
+    HRID=$( curl -s "${ARGS[SOLR_URL]}/${ARGS[SOLR_COLLECTION]}/select?q=uuid_str:${UUID}&wt=json" | jq -r '.response.docs[0].id' )
     JQ_EC="$?"
     if [[ "$JQ_EC" -ne 0 || -z "$HRID" || "$HRID" == "null" ]]; then
         verbose "MISSING: The UUID $UUID was not found in Solr; ignoring it."
@@ -324,15 +331,15 @@ oai_delete_combiner() {
     DELETE_FILES=()
 }
 
-# Reset the biblio Solr collection by clearing all records
+# Reset the Solr collection by clearing all records
 reset_solr() {
     if [[ "${ARGS[RESET_SOLR]}" -eq 0 ]]; then
         return
     fi
-    verbose "Clearing the biblio Solr index."
+    verbose "Clearing the ${ARGS[SOLR_COLLECTION]} Solr index."
     countdown 5
-    curl "${ARGS[SOLR_URL]}/biblio/update" -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
-    curl "${ARGS[SOLR_URL]}/biblio/update" -H "Content-type: text/xml" --data-binary '<commit />'
+    curl "${ARGS[SOLR_URL]}/${ARGS[SOLR_COLLECTION]}/update" -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
+    curl "${ARGS[SOLR_URL]}/${ARGS[SOLR_COLLECTION]}/update" -H "Content-type: text/xml" --data-binary '<commit />'
     verbose "Done clearing the Solr index."
 }
 
