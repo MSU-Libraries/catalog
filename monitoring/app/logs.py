@@ -1,10 +1,32 @@
 import pathlib
 import asyncio
 import gzip
+import re
 import flask
 import aiohttp
 
 import util
+
+
+MAX_FILE_SIZE = 100*1024*1024 # arbitrary 100 MB
+
+
+def add_file_to_log(path, full_log):
+    if path.stat().st_size > MAX_FILE_SIZE:
+        log_text = f'Log file is too large to load: {path.name}'
+    else:
+        if path.name.endswith('.gz'):
+            with gzip.open(path, 'rt') as gz_file:
+                log_text = path.name + ':\n' + gz_file.read()
+        else:
+            log_text = path.name + ':\n' + path.read_text(encoding="utf8", errors="ignore")
+
+    if log_text != '':
+        if full_log != '':
+            full_log = '\n---------------------------\n\n' + full_log
+        full_log = log_text + full_log
+
+    return full_log
 
 
 def node_logs(service):
@@ -29,30 +51,28 @@ def node_logs(service):
         return 'Error: unknown service.'
 
     path = pathlib.Path(paths[service])
-    if not path.is_file():
-        return 'Log file does not exist on this node.'
+    full_log = ''
 
-    full_log = path.read_text(encoding="utf8", errors="ignore")
+    latest_matching_paths = path.parent.glob(re.sub(r"\.log", "_latest.log.*", path.name))
+    for latest_path in latest_matching_paths:
+        full_log = add_file_to_log(latest_path, full_log)
+
+    if not path.is_file():
+        return f'Log file does not exist on this node: {path.name}'
+    full_log = add_file_to_log(path, full_log)
 
     rotated_1 = pathlib.Path(f'{paths[service]}.1')
     if not rotated_1.is_file():
         return full_log
+    full_log = add_file_to_log(rotated_1, full_log)
 
-    log_text = rotated_1.read_text(encoding="utf8", errors="ignore")
-    if log_text != '':
-        if full_log != '':
-            full_log = '\n---------------------------\n\n' + full_log
-        full_log = log_text + full_log
     for i in range(2, 4):
         rotated_gz = pathlib.Path(f'{paths[service]}.{i}.gz')
         if rotated_gz.is_file():
-            with gzip.open(rotated_gz, 'rt') as rotated_gz_file:
-                gz_log_text = rotated_gz_file.read()
-                if gz_log_text != '':
-                    if full_log != '':
-                        full_log = '\n---------------------------\n\n' + full_log
-                    full_log = gz_log_text + full_log
+            full_log = add_file_to_log(rotated_gz, full_log)
+
     return full_log
+
 
 def logs_vufind(service):
     urls = []
