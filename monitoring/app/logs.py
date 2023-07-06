@@ -13,15 +13,16 @@ MAX_FILE_SIZE = 100*1024*1024 # arbitrary 100 MB
 
 def add_file_to_log(path, full_log):
     if path.stat().st_size > MAX_FILE_SIZE:
-        log_text = f'Log file is too large to load: {path.name}'
+        log_text = 'Log file is too large to load.'
     else:
         if path.name.endswith('.gz'):
             with gzip.open(path, 'rt') as gz_file:
-                log_text = path.name + ':\n' + gz_file.read()
+                log_text = gz_file.read()
         else:
-            log_text = path.name + ':\n' + path.read_text(encoding="utf8", errors="ignore")
+            log_text = path.read_text(encoding="utf8", errors="ignore")
 
     if log_text != '':
+        log_text = path.name + ':\n' + log_text
         if full_log != '':
             full_log = '\n---------------------------\n\n' + full_log
         full_log = log_text + full_log
