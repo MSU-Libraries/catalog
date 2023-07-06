@@ -61,7 +61,7 @@ the solr container to a temp directory. For example:
 ```
 mkdir /tmp/biblio9
 cd /tmp/biblio9
-cp /solr_confs/biblio/confs/* /tmp/biblio9/
+cp -r /solr_confs/biblio/conf/* /tmp/biblio9/
 rm /tmp/biblio9/s*.xml
 wget https://raw.githubusercontent.com/vufind-org/vufind/v9.0.2/solr/vufind/biblio/conf/solrconfig.xml
 wget https://raw.githubusercontent.com/vufind-org/vufind/v9.0.2/solr/vufind/biblio/conf/schema.xml
@@ -72,13 +72,10 @@ wget https://raw.githubusercontent.com/vufind-org/vufind/v9.0.2/solr/vufind/bibl
 <dataDir>${solr.solr.home:./solr}/biblio</dataDir>
 ```
 
-* Update the location in the local `import.properties` as well on the `catalog_cron` container, modifying
-the `local/import/import.properties` file replacing the `biblio` collection references to the 
-new collection (i.e. `biblio9` for example). The references should be in the `solr.core.name` and the `solr.hosturl`.
 
 * Upload the config to the Zookeepers:
 ```
-solr zk upconfig -confname biblio9 -confdir /tmp/biblio9/conf -z $SOLR_ZK_HOSTS/solr
+solr zk upconfig -confname biblio9 -confdir /tmp/biblio9 -z $SOLR_ZK_HOSTS/solr
 ```
 
 * Create the new collection:
@@ -86,7 +83,12 @@ solr zk upconfig -confname biblio9 -confdir /tmp/biblio9/conf -z $SOLR_ZK_HOSTS/
 curl "http://solr:8983/solr/admin/collections?action=CREATE&name=biblio9&numShards=1&replicationFactor=3&wt=xml&collection.configName=biblio9"
 ```
 
-* Index data into the new collection from the cron container where you modified the `import.properties` file earlier.
+* Update the location in the local `import.properties` as well on the `catalog_cron` container, modifying
+the `local/import/import.properties` file replacing the `biblio` collection references to the 
+new collection (i.e. `biblio9` for example). The references should be in the `solr.core.name` and the `solr.hosturl`.
+
+* Index data into the new collection from the cron container where you modified the `import.properties` file in the
+previous step.
 ```
 /harvest-and-import.sh --verbose --collection biblio9 --batch-import
 ```
