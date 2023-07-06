@@ -3,7 +3,7 @@ x-solr-envs: &solr_envs
   SOLR_ENABLE_CLOUD_MODE: "yes"
   SOLR_NUMBER_OF_NODES: 3
   SOLR_ZK_HOSTS: zk1:2181,zk2:2181,zk3:2181
-  SOLR_JAVA_MEM: -Xms1g -Xmx4g
+  SOLR_JAVA_MEM: -Xms512m -Xmx512m
 
 x-zookeeper-envs: &zookeeper_envs
   ALLOW_ANONYMOUS_LOGIN: "yes"

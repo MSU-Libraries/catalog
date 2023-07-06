@@ -118,10 +118,15 @@ apply_devel_changes() {
 }
 
 apply_prod_changes() {
-    ## Apply to both catalog-beta and catalog-prod ##
+    ## Apply to catalog-preview, catalog-beta, and catalog-prod ##
 
     # Build extra environment suffix for image tag
     export EXTRA_TAG_SUFFIX="-main";
+
+    # Increase Solr RAM to 3 GB (note: prod is further increased below)
+    ./yq -i \
+    ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms3072m -Xmx3072m\"" \
+    docker-compose.solr-cloud.yml;
 
     # Use httpchallenge cert resolver (instead of dnschallenge)
     ./yq -i \
@@ -171,6 +176,11 @@ apply_prod_changes() {
 
     ## Changes for catalog-prod
     if [ "${STACK_NAME}" == "catalog-prod" ]; then
+        # Increase Solr RAM to 4 GB (prod is granted slightly more than non-prod envs)
+        ./yq -i \
+        ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms4096m -Xmx4096m\"" \
+        docker-compose.solr-cloud.yml;
+        # Override default router rule
         ./yq -i \
         ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`)\"" \
         docker-compose.yml;
