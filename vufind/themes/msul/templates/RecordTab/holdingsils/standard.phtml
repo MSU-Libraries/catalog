@@ -27,9 +27,8 @@
           <?php /* Begin Available Items (Holds) */ ?>
           <span class="text-success"><?=$this->transEsc("Available")?><link property="availability" href="http://schema.org/InStock"></span>
           <?php if (! $this->driver instanceof VuFind\RecordDriver\EDS && ! $getthis->isOnlineResource($item_id)): ?>
-            <a class="<?=$check ? 'checkRequest' : ''?> placehold icon-link" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
-              <?=$this->icon('place-hold', 'icon-link__icon') ?>
-              <span class="icon-link__label"><?=$this->transEsc('Get this')?></span>
+            <a class="<?=$check ? 'checkRequest' : ''?> placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
+              <?=$this->transEsc('Get this')?>
             </a>
           <?php endif; ?>
           <?php if ($holding['storageRetrievalRequestLink'] ?? false): ?>
@@ -67,9 +66,8 @@
             <span><?=$this->transEsc("Requests")?>: <?=$this->escapeHtml($holding['requests_placed'])?></span>
           <?php endif; ?>
           <?php if (! $this->driver instanceof VuFind\RecordDriver\EDS && ! $getthis->isOnlineResource($item_id)): ?>
-            <a class="<?=$check ? 'checkRequest' : ''?> placehold icon-link" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
-              <?=$this->icon('place-recall', 'icon-link__icon') ?>
-              <span class="icon-link__label"><?=$this->transEsc('Get this')?></span>
+            <a class="<?=$check ? 'checkRequest' : ''?> placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
+              <?=$this->transEsc('Get this')?>
             </a>
           <?php endif; ?>
           <?=$this->relais()->renderButtonIfActive($this->driver ?? null)?>
