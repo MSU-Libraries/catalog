@@ -88,9 +88,11 @@ the `local/import/import.properties` file replacing the `biblio` collection refe
 new collection (i.e. `biblio9` for example). The references should be in the `solr.core.name` and the `solr.hosturl`.
 
 * Index data into the new collection from the cron container where you modified the `import.properties` file in the
-previous step.
+previous step. Be sure to prepare the data you wish to import as descirbed in the
+[full import documentaion](https://msu-libraries.github.io/catalog/harvesting-and-importing/#full-data-imports).
 ```
 /harvest-and-import.sh --verbose --collection biblio9 --batch-import
+/hlm-harvest-and-import.sh -i
 ```
 
 * Then verfy the index in Solr and in VuFind by manually updating
