@@ -11,6 +11,9 @@ x-zookeeper-envs: &zookeeper_envs
   ZOO_SERVERS: zk1:2888:3888::1 zk2:2888:3888::2 zk3:2888:3888::3
   ZOO_LISTEN_ALLIPS_ENABLED: "yes"
   ZOO_4LW_COMMANDS_WHITELIST: srvr,mntr,conf,ruok,stat
+  ZOO_HEAP_SIZE: 512
+  ZOO_AUTOPURGE_INTERVAL: 24
+  ZOO_AUTOPURGE_RETAIN_COUNT: 8
 
 x-solrproxy-deploy: &solrproxy_deploy
   mode: replicated
