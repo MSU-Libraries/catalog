@@ -67,6 +67,8 @@ Validate VuFind Build:
   variables:
     CURR: $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA
   needs:
+    - job: Set Stack Name
+      artifacts: true
     - Build Vufind Image
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
