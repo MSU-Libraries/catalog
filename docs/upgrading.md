@@ -95,17 +95,21 @@ previous step. Be sure to prepare the data you wish to import as descirbed in th
 /hlm-harvest-and-import.sh -i
 ```
 
-* Then verfy the index in Solr and in VuFind by manually updating
+* You can optionally re-run the reserves cron at this time too in order to get that up to date with the current
+set of instance IDs, otherwise it may potentially be out of sync until the nightly run and some course reserve
+search results may have inconsistant counts.
+
+* Then verify the index in Solr and in VuFind by manually updating
 the `config.ini` to point to the new collection name temporarily. Once satisfied with the output, move
 on to the next step.
 
-* Create a new alias with the name `biblio` pointing to the new collection which will direct all
-queries to the new collection instead of the original one
-```
-curl "http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio9"
-```
-
-* Once you are confident in the new index, remove the original index
+* Once you are confident in the new index, remove the original index:
 ```
 curl "http://solr:8983/solr/admin/collections?action=DELETE&name=biblio"
+```
+
+* Create a new alias with the name `biblio` pointing to the new collection which will direct all
+queries to the new collection instead of the original one:
+```
+curl "http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio9"
 ```
