@@ -55,7 +55,7 @@ Build Vufind Image:
   script:
     - bash ./cicd/build-vufind
 
-Validate VuFind Build:
+Validate Vufind Build:
   stage: Build
   tags:
     - msul-shared
@@ -67,8 +67,6 @@ Validate VuFind Build:
   variables:
     CURR: $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA
   needs:
-    - job: Set Stack Name
-      artifacts: true
     - Build Vufind Image
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY

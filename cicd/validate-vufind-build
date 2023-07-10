@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source "${CI_PROJECT_DIR}"/cicd/before-script;
-
 runhelp() {
     echo ""
     echo "Purpose: Run validation on the VuFind image"

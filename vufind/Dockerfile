@@ -169,7 +169,9 @@ RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-def
 COPY local/ /usr/local/vufind/local
 COPY themes/msul /usr/local/vufind/themes/msul
 COPY module/Catalog /usr/local/vufind/module/Catalog
+COPY tests/ /usr/local/vufind/tests
 COPY robots.txt /usr/local/vufind/public/robots.txt
+COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
 COPY startup.sh /startup.sh
 COPY startup-cron.sh /startup-cron.sh
@@ -227,6 +229,12 @@ RUN \
     # Set permissions on Robots.txt
     chown 1000:1000 ${VUFIND_HOME}/public/robots.txt && \
     chmod 664 ${VUFIND_HOME}/public/robots.txt && \
+    # Set permissions on build.xml
+    chown 1000:1000 ${VUFIND_HOME}/build.xml && \
+    chmod 664 ${VUFIND_HOME}/build.xml && \
+    # Set permissions on tests dir
+    chown -R 1000:1000 ${VUFIND_HOME}/tests && \
+    chmod -R 664 ${VUFIND_HOME}/tests && \
     # Install grunt
     npm install -g grunt-cli && \
     grunt less
