@@ -16,11 +16,11 @@ if ($selected != '') {
   if (in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process', 'In process (non-requestable)',
       'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed', 'Unknown', 'Withdrawn']))
     $status = 'Unavailable';
-  else if (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out']))
+  elseif (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out']))
     $status = 'Checked Out';
-  else if ($status == 'Restricted')
+  elseif ($status == 'Restricted')
     $status = 'Library Use Only';
-  else if (!in_array($status, ['Available', 'Unavailable']))
+  elseif (!in_array($status, ['Available', 'Unavailable']))
     $status = 'Unknown status';
 }
 ?>

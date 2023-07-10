@@ -50,13 +50,13 @@
             if (in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
                 'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
                 'Unknown', 'Withdrawn']))
-              $status = 'Unavailable ('.$status.')';
+              $status = 'Unavailable ('. $status . ')';
             else if (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged']))
-              $status = 'Checked Out ('.$status.')';
+              $status = 'Checked Out (' . $status . ')';
             else if ($status == 'Restricted')
               $status = 'Library Use Only';
             else if (!in_array($status, ['Available', 'Unavailable', 'Checked out']))
-              $status = 'Unknown status ('.$status.')';
+              $status = 'Unknown status (' . $status . ')';
           ?>
           <span class="text-danger"><?=$this->transEsc($status)?><link property="availability" href="http://schema.org/OutOfStock"></span>
           <?php if ($holding['returnDate'] ?? false): ?>&ndash; <span class="small"><?=$this->escapeHtml($holding['returnDate'])?></span><?php endif; ?>

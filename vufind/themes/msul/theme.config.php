@@ -4,7 +4,7 @@ return [
 
     'less' => [
         'active' => true,
-        'compiled.less'
+        'compiled.less',
     ],
     'js' => [
         ['file' => 'get-this-dropdown.js', 'priority' => 450],

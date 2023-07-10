@@ -21,7 +21,7 @@ function getDisplay($view, $item) {
                         <a href="<?= $this->url(
                         'record-getthis',
                         [
-                                'id'     => $this->driver->getUniqueId(),
+                                'id' => $this->driver->getUniqueId(),
                                 'action' => 'GetThis',
                             ],
                         [
@@ -29,7 +29,7 @@ function getDisplay($view, $item) {
                                     "item_id" => $item['item_id'],
                                 ],
                             ]
-                        ) ?>" class="<?= $this->escapeHtml($item_class) ?>" rel="nofollow">
+                    ) ?>" class="<?= $this->escapeHtml($item_class) ?>" rel="nofollow">
                             <?= getDisplay($this, $item) ?>
                         </a>
                     </li>
