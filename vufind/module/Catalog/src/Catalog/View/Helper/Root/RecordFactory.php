@@ -14,8 +14,8 @@
 
 namespace Catalog\View\Helper\Root;
 
-use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * Factory class for the Record implementing the FactoryInterface
