@@ -79,7 +79,6 @@ return array (
       ],
       'command' => [
         'factories' => [
-          'Catalog\\VuFindConsole\\Command\\Util\\IndexReservesCommand' => 'VuFindConsole\\Command\\Util\\AbstractSolrAndIlsCommandFactory',
           'Catalog\\Command\\Util\\IndexReservesCommand' => 'VuFindConsole\\Command\\Util\\AbstractSolrAndIlsCommandFactory',
         ],
         'aliases' => [
