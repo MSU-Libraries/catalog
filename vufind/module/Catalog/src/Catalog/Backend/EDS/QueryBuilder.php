@@ -15,10 +15,7 @@
 
 namespace Catalog\Backend\EDS;
 
-use VuFindSearch\ParamBag;
-use VuFindSearch\Query\AbstractQuery;
 use VuFindSearch\Query\Query;
-use VuFindSearch\Query\QueryGroup;
 
 /**
  * Class that represents queries to the EDS API

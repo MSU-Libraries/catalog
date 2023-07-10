@@ -42,7 +42,5 @@ main() {
     echo "All validations have passed";
 }
 
-beforescript;
-# or if not using beforescript be sure to add this to ensure failed commands
-# fail the script: set -e
+set -e;
 main;

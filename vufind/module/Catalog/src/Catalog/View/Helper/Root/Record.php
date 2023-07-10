@@ -33,7 +33,7 @@ class Record extends \VuFind\View\Helper\Root\Record
      *   desc : Regex must match against the 'desc' field for label to match; or null to ignore
      *   url  : Regex must match against the 'url' field for label to match; or null to ignore
      */
-    private $linkLabels = array();
+    private $linkLabels = [];
 
     /**
      * Config for the access links

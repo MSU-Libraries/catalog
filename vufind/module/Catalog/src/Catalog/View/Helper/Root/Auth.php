@@ -14,8 +14,8 @@
 
 namespace Catalog\View\Helper\Root;
 
-use Laminas\Config\Reader\Ini as IniReader;
 use Laminas\Config\Config;
+use Laminas\Config\Reader\Ini as IniReader;
 use VuFind\Config\Locator as Locator;
 
 /**

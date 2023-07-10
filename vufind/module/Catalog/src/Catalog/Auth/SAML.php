@@ -53,7 +53,7 @@ class SAML extends \VuFind\Auth\AbstractBase
      */
     protected $attribsToCheck = [
         'cat_username', 'cat_password', 'email', 'lastname', 'firstname',
-        'college', 'major', 'home_library'
+        'college', 'major', 'home_library',
     ];
 
     /**

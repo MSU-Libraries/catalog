@@ -15,11 +15,7 @@
 
 namespace Catalog\Controller;
 
-use Laminas\Mail\Address;
-use Laminas\View\Model\ViewModel;
-use VuFind\Exception\Mail as MailException;
 use VuFind\Form\Form;
-use VuFind\Form\Handler\Email;
 
 /**
  * Controller for configurable forms (feedback etc).

@@ -28,9 +28,13 @@ use Catalog\GetThis\RegexLookup as Regex;
 class GetThisLoader
 {
     public $record;  // record driver
+
     public $items;   // holding items
+
     public $item_id; // current item
+
     public $item;   // holding item for set item_id
+
     public $msgTemplate; // template to use for servMsg
 
     /**
@@ -46,7 +50,7 @@ class GetThisLoader
         $this->items = $items;
         $this->item_id = $item_id;
         $this->msgTemplate = null;
-        if (!is_null($this->item_id)) {
+        if (null !== $this->item_id) {
             $this->item = $this->getItem($this->item_id);
         }
     }
@@ -70,9 +74,9 @@ class GetThisLoader
      */
     private function getItemId($item_id = null)
     {
-        if (!is_null($item_id)) {
+        if (null !== $item_id) {
             return $item_id; // use the one passed as a parameter first
-        } elseif (!is_null($this->item_id)) {
+        } elseif (null !== $this->item_id) {
             return $this->item_id; // get the one set by the loader
         } elseif (count($this->items) > 0) {
             return $this->items[0]['item_id']; // grab the first holding record
@@ -116,21 +120,21 @@ class GetThisLoader
         $status = $this->getItem($item_id)['status'] ?? "Unknown";
 
         if (
-            in_array($status, array('Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
+            in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
             'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
-            'Unknown', 'Withdrawn'))
+            'Unknown', 'Withdrawn'])
         ) {
             $status = 'Unavailable';
         } elseif (
             in_array(
                 $status,
-                array('Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out')
+                ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out']
             )
         ) {
             $status = 'Checked Out';
         } elseif ($status == 'Restricted') {
             $status = 'Library Use Only';
-        } elseif (!in_array($status, array('Available', 'Unavailable'))) {
+        } elseif (!in_array($status, ['Available', 'Unavailable'])) {
             $status = 'Unknown status';
         }
 
@@ -170,7 +174,7 @@ class GetThisLoader
         if (array_key_exists('holdings', $holdings)) {
             foreach ($holdings['holdings'] as $location) {
                 if (array_key_exists('items', $location)) {
-                    foreach ((array) $location['items'] as $item) {
+                    foreach ((array)$location['items'] as $item) {
                         if ($item_id === null || (array_key_exists('item_id', $item) && $item['item_id'] == $item_id)) {
                             $linkdata = $item;
                             break;
@@ -277,13 +281,13 @@ class GetThisLoader
     {
         $item_id = $this->getItemId($item_id);
         $status = $this->getStatus($item_id);
-        return (
+        return
             preg_match('/CHECKED/i', $status) ||
             preg_match('/BILLED/i', $status) ||
             preg_match('/ON SEARCH/i', $status) ||
             preg_match('/LOST/i', $status) ||
             preg_match('/HOLD/i', $status)
-        );
+        ;
     }
 
     /**
@@ -297,13 +301,13 @@ class GetThisLoader
     {
         $item_id = $this->getItemId($item_id);
         $callNum = strtolower($this->getItem($item_id)['callnumber'] ?? "");
-        return (
+        return
             preg_match('/fiche/', $callNum) ||
             preg_match('/disc/', $callNum) ||
             preg_match('/video/', $callNum) ||
             preg_match('/cd/', $callNum) ||
             preg_match('/dvd/', $callNum)
-        );
+        ;
     }
 
     /**

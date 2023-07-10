@@ -30,7 +30,6 @@
 
 namespace CatalogTest\Form;
 
-use Symfony\Component\Yaml\Yaml;
 use VuFind\Config\YamlReader;
 use VuFind\Form\Form;
 

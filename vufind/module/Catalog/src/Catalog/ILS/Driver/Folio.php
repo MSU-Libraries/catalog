@@ -61,7 +61,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $instance = $this->getInstanceByBibId($bibId);
         $query = [
             'query' => '(instanceId=="' . $instance->id
-                . '" NOT discoverySuppress==true)'
+                . '" NOT discoverySuppress==true)',
         ];
         $items = [];
         foreach (
@@ -73,7 +73,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         ) {
             $query = [
                 'query' => 'holdingsRecordId=="' . $holding->id
-                    . '" NOT discoverySuppress==true sortBy volume'
+                    . '" NOT discoverySuppress==true sortBy volume',
             ];
             $notesFormatter = function ($note) {
                 return !($note->staffOnly ?? false)
@@ -131,7 +131,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                         [
                             $item->volume ?? null,
                             $item->enumeration ?? null,
-                            $item->chronology ?? null
+                            $item->chronology ?? null,
                         ]
                     )
                 );
@@ -156,7 +156,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     'location_code' => $locationCode,
                     'reserve' => 'TODO',
                     'addLink' => true,
-                    'electronic_access' => $item->electronicAccess
+                    'electronic_access' => $item->electronicAccess,
                 ];
             }
         }
@@ -194,7 +194,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $items = [];
 
         $query = [
-            'query' => 'instanceId==' . $instanceId
+            'query' => 'instanceId==' . $instanceId,
         ];
         foreach (
             $this->getPagedResults(
@@ -204,7 +204,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             ) as $bound_holding
         ) {
             $query = [
-                'query' => 'holdingsRecordId=="' . $bound_holding->id . '"'
+                'query' => 'holdingsRecordId=="' . $bound_holding->id . '"',
             ];
             foreach (
                 $this->getPagedResults(
@@ -267,7 +267,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                         [
                             $bound_item->volume ?? null,
                             $bound_item->enumeration ?? null,
-                            $bound_item->chronology ?? null
+                            $bound_item->chronology ?? null,
                         ]
                     )
                 );
@@ -291,7 +291,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     'location' => $locationName,
                     'location_code' => $locationCode,
                     'reserve' => 'TODO',
-                    'addLink' => true
+                    'addLink' => true,
                 ];
             }
         }
@@ -347,7 +347,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $dateConverter = new \VuFind\Date\Converter(
             [
                 'displayDateFormat' => 'm/d/Y',
-                'displayTimeFormat' => 'h:i a'
+                'displayTimeFormat' => 'h:i a',
             ]
         );
         $query = ['query' => 'userId==' . $patron['id'] . ' and status.name==Open sortBy dueDate/sort.ascending'];
@@ -392,7 +392,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 'title' => $trans->item->title,
                 'borrowingLocation' => $trans->item->location->name,
                 'volume' => $trans->item->volume ?? null,
-                'callNumber' => $trans->item->callNumber
+                'callNumber' => $trans->item->callNumber,
             ];
         }
         return $transactions;
@@ -414,7 +414,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $retVal = [];
         $idType = $this->getBibIdType();
         $query = [
-            'query' => 'copiedItem.instanceDiscoverySuppress==false'
+            'query' => 'copiedItem.instanceDiscoverySuppress==false',
         ];
 
         // Results can be paginated, so let's loop until we've gotten everything:
@@ -537,6 +537,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         // Otherwise exclude checking by exact match
         return !in_array($locationName, $excludeLocs);
     }
+
     /**
      * Get Pick Up Locations
      *
@@ -571,7 +572,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             if ($this->isPickupable($servicepoint->discoveryDisplayName)) {
                 $locations[] = [
                     'locationID' => $servicepoint->id,
-                    'locationDisplay' => $servicepoint->discoveryDisplayName
+                    'locationDisplay' => $servicepoint->discoveryDisplayName,
                 ];
             }
         }
@@ -810,7 +811,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         ) {
             $locations[] = [
                 'locationID' => $servicepoint->id,
-                'locationDisplay' => $servicepoint->discoveryDisplayName
+                'locationDisplay' => $servicepoint->discoveryDisplayName,
             ];
         }
         return $locations;
@@ -834,7 +835,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $idField = $idType === 'instance' ? 'id' : $idType;
 
         $query = [
-            'query' => '(' . $idField . '=="' . $this->escapeCql($bibId) . '")'
+            'query' => '(' . $idField . '=="' . $this->escapeCql($bibId) . '")',
         ];
         $response = $this->makeRequest('GET', '/instance-storage/instances', $query);
         $instances = json_decode($response->getBody());

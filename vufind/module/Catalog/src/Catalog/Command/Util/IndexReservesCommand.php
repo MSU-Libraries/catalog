@@ -34,10 +34,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use VuFind\Reserves\CsvReader;
+use VuFindSearch\Backend\Solr\Command\RawJsonSearchCommand;
 use VuFindSearch\Backend\Solr\Document\UpdateDocument;
 use VuFindSearch\Backend\Solr\Record\SerializableRecord;
-use VuFindSearch\Backend\Solr\Command\RawJsonSearchCommand;
-use VuFind\Search\Factory\SolrDefaultBackendFactory;
 
 /**
  * Console command: index course reserves into Solr.
@@ -160,7 +159,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
                     'course_id' => $courseId,
                     'course' => $courses[$courseId] ?? '',
                     'department_id' => $departmentId,
-                    'department' => $departments[$departmentId] ?? ''
+                    'department' => $departments[$departmentId] ?? '',
                 ];
             }
             // MSUL override to only include unique instance IDs
@@ -177,7 +176,6 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
         }
         return $updates;
     }
-
 
     /**
      * Construct a CSV reader.
@@ -343,7 +341,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             'institution' => ['Michigan State University'],
             'building' => [
                 '0/MSU Main Library/',
-                '1/MSU Main Library/Reserve - Circulation, 1 Center/'
+                '1/MSU Main Library/Reserve - Circulation, 1 Center/',
             ],
             'fullrecord' =>
                 '<oai_dc:dc>
@@ -351,7 +349,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
                 <dc:title>' . $item->title . '</dc:title>
                 <dc:type>Book</dc:type>
                 <dc:creator>' . ($firstAuthor) . '</dc:creator>
-                <dc:date>' . $pubYear  . '</dc:date>
+                <dc:date>' . $pubYear . '</dc:date>
                 </oai_dc:dc>',
             'record_format' => 'oai_dc',
             'spelling' => [],
