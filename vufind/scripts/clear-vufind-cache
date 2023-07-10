@@ -2,7 +2,7 @@
 
 rm -r "${VUFIND_CACHE_DIR}"/*
 
-# Re-initialize cli cache dir
-mkdir -p ${VUFIND_CACHE_DIR}/cli
-chown 33:33 ${VUFIND_CACHE_DIR}/cli
-chmod g+sw ${VUFIND_CACHE_DIR}/cli
+# Re-initialize cli, covers and yamls cache dir
+mkdir -p ${VUFIND_CACHE_DIR}/cli ${VUFIND_CACHE_DIR}/covers ${VUFIND_CACHE_DIR}/yamls
+chown 33:33 ${VUFIND_CACHE_DIR}/cli ${VUFIND_CACHE_DIR}/covers ${VUFIND_CACHE_DIR}/yamls
+chmod g+sw ${VUFIND_CACHE_DIR}/cli ${VUFIND_CACHE_DIR}/covers ${VUFIND_CACHE_DIR}/yamls
