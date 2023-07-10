@@ -67,7 +67,7 @@ Validate VuFind Build:
   variables:
     CURR: $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA
   needs:
-    - Build VuFind Image
+    - Build Vufind Image
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - apk add --no-cache bash
