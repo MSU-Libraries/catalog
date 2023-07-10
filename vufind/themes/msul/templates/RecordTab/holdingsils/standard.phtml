@@ -50,7 +50,7 @@
             if (in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
                 'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
                 'Unknown', 'Withdrawn']))
-              $status = 'Unavailable ('. $status . ')';
+              $status = 'Unavailable (' . $status . ')';
             elseif (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged']))
               $status = 'Checked Out (' . $status . ')';
             elseif ($status == 'Restricted')
