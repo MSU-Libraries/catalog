@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Multiple Backend Driver.
  *
@@ -26,6 +27,7 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:ils_drivers Wiki
  */
+
 namespace Catalog\ILS\Driver;
 
 use VuFind\ILS\Driver\PluginManager;
@@ -307,7 +309,8 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
             // If the patron belongs to another source, just pass on an empty array
             // to indicate that the patron has logged in but is not available for the
             // current catalog.
-            if ($patron
+            if (
+                $patron
                 && !$this->driverSupportsSource($source, $patron['cat_username'])
             ) {
                 $patron = [];
@@ -470,6 +473,13 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
         return $reserves;
     }
 
+    /**
+     * Find and instance record by the bib ID
+     *
+     * @param string $bibId Sierra bib number
+     *
+     * @return mixed An array of associative arrays representing instance
+     */
     public function getInstanceByBibId($bibId)
     {
         if ($driver = $this->getDriver($this->defaultDriver)) {
@@ -600,7 +610,8 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
     {
         $source = $this->getSource($patron['cat_username']);
         if ($driver = $this->getDriver($source)) {
-            if (!$this->driverSupportsSource($source, $id)
+            if (
+                !$this->driverSupportsSource($source, $id)
                 || !is_callable([$driver, 'checkStorageRetrievalRequestIsValid'])
             ) {
                 return false;
@@ -715,7 +726,8 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
                 $this->stripIdPrefixes($patron, $source),
                 $this->stripIdPrefixes($holdDetails, $source)
             ];
-            if (!$this->driverSupportsSource($source, $id)
+            if (
+                !$this->driverSupportsSource($source, $id)
                 || !$this->driverSupportsMethod($driver, __FUNCTION__, $params)
             ) {
                 // Return empty array since the sources don't match or the method
@@ -751,7 +763,8 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
                 $this->stripIdPrefixes($holdDetails, $source)
             ];
             if (!empty($holdDetails)) {
-                if (!$this->driverSupportsSource($source, $holdDetails['id'])
+                if (
+                    !$this->driverSupportsSource($source, $holdDetails['id'])
                     || !$this->driverSupportsMethod($driver, __FUNCTION__, $params)
                 ) {
                     // Return false since the sources don't match or the method
@@ -838,7 +851,8 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
     {
         $source = $this->getSource($details['patron']['cat_username']);
         $driver = $this->getDriver($source);
-        if ($driver
+        if (
+            $driver
             && is_callable([$driver, 'placeStorageRetrievalRequest'])
         ) {
             if (!$this->driverSupportsSource($source, $details['id'])) {
@@ -1058,7 +1072,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
     {
         $source = null;
         if (!empty($params)) {
-            $source = $this->getSourceForMethod($function, $params ?? []);
+            $source = $this->getSourceForMethod($function, $params);
         }
         if (!$source) {
             try {
@@ -1101,7 +1115,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
             return true;
         }
 
-        $source = $this->getSourceForMethod($method, $params ?? []);
+        $source = $this->getSourceForMethod($method, $params);
         if (!$source && $this->defaultDriver) {
             $source = $this->defaultDriver;
         }
@@ -1330,7 +1344,8 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
                     $modifyFields
                 );
             } else {
-                if (!ctype_digit((string)$key)
+                if (
+                    !ctype_digit((string)$key)
                     && $value !== ''
                     && in_array($key, $modifyFields)
                 ) {
@@ -1376,7 +1391,8 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
                 );
             } else {
                 $prefixLen = strlen($source) + 1;
-                if ((!is_array($data)
+                if (
+                    (!is_array($data)
                     || (!ctype_digit((string)$key) && in_array($key, $modifyFields)))
                     && strncmp("$source.", $value, $prefixLen) == 0
                 ) {

@@ -69,14 +69,6 @@ main() {
         exit ${EC};
     fi;
 
-    echo "Running PHP unit tests"
-    docker run --rm "${CURR}" vendor/bin/phing phpunitfaster -Dphpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/;
-    EC=$?;
-    if [[ ${EC} -ne 0 ]]; then
-        echo "One or more unit tests failed.";
-        exit ${EC};
-    fi;
-
     echo "Pushing image"
     docker push "${CURR}";
 

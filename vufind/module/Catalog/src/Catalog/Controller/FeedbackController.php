@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Controller for configurable forms (feedback etc).
  *
@@ -11,12 +12,14 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org Main Site
  */
+
 namespace Catalog\Controller;
 
 use Laminas\Mail\Address;
 use Laminas\View\Model\ViewModel;
 use VuFind\Exception\Mail as MailException;
 use VuFind\Form\Form;
+use VuFind\Form\Handler\Email;
 
 /**
  * Controller for configurable forms (feedback etc).
@@ -81,7 +84,7 @@ class FeedbackController extends \VuFind\Controller\FeedbackController
 
         [$messageParams, $template]
             = $form->formatEmailMessage($this->params()->fromPost());
-        # MSUL: Add in user id if logged in
+        // MSUL: Add in user id if logged in
         $messageParams[] = [
             "type" => "hidden",
             "label" => "VFUserID",
@@ -104,7 +107,7 @@ class FeedbackController extends \VuFind\Controller\FeedbackController
         );
 
         $recipients = $form->getRecipient($params->fromPost());
-        # MSUL: Copy feedback to user if they are logged in
+        // MSUL: Copy feedback to user if they are logged in
         if ($replyToEmail !== null && $user) {
             $recipients[] = [
                 "name" => $replyToName ?? $replyToEmail,

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Console command: index course reserves into Solr.
  *
@@ -25,6 +26,7 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development Wiki
  */
+
 namespace Catalog\Command\Util;
 
 use Symfony\Component\Console\Command\Command;
@@ -48,7 +50,6 @@ use VuFind\Search\Factory\SolrDefaultBackendFactory;
  */
 class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesCommand
 {
-
     /**
      * The name of the command (the part after "public/index.php")
      *
@@ -197,6 +198,14 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
         return new CsvReader($files, $delimiter, $template);
     }
 
+    /**
+     * Query Solr for all locally prefixed records and see if there are now
+     * equivilent folio prefixed records. If so, remove the local prefixed records
+     *
+     * @param OutputInterface $output Output object
+     *
+     * @return void
+     */
     protected function revalidateLocalRecords($output)
     {
         $output->writeln(date('Y-m-d H:i:s') .
@@ -240,7 +249,8 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
 
             // If so, delete the local prefixed Solr record
             if ($doc_response->response->numFound == 1) {
-                $output->writeln(date('Y-m-d H:i:s') . " Found matching folio prefixed record in solr. Deleting: " . $doc->id);
+                $output->writeln(date('Y-m-d H:i:s') .
+                                 " Found matching folio prefixed record in solr. Deleting: " . $doc->id);
                 $this->solr->deleteRecords('Solr', [$doc->id]);
                 $this->solr->commit('Solr');
             }
@@ -248,6 +258,15 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
         $output->writeln(date('Y-m-d H:i:s') . " Completed validation of locally prefixed records");
     }
 
+    /**
+     * Parses all course reserves and checks to see if there is already a record
+     * in our solr index for it, and if not, creates one
+     *
+     * @param array           $reserves Array containing course reserve data
+     * @param OutputInterface $output   Output object
+     *
+     * @return array Validated course reserve data
+     */
     protected function validateReserves($reserves, $output)
     {
         // Verify Folio records exist in Solr
@@ -256,7 +275,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             $output->writeln(date('Y-m-d H:i:s') . " -- Progress: " . $idx . "/" . count($reserves) . " --");
 
             // Skip HLM records
-            if (str_contains($reserve['BIB_ID'],'hlm.')) {
+            if (str_contains($reserve['BIB_ID'], 'hlm.')) {
                 $output->writeln(date('Y-m-d H:i:s') . " Skipping HLM record " . $reserve['BIB_ID']);
                 $idx += 1;
                 continue;
@@ -264,7 +283,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             // Check Biblio index in Solr for the record, continue if found
             $params = new \VuFindSearch\ParamBag();
             $query = new \VuFindSearch\Query\Query(
-                'id:*' . str_replace('folio.', '', $reserve['BIB_ID']), # Match any prefix in solr
+                'id:*' . str_replace('folio.', '', $reserve['BIB_ID']), // Match any prefix in solr
             );
             $params->set('fl', 'id');
             $command = new RawJsonSearchCommand(
@@ -283,10 +302,10 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             if ($response->response->numFound == 0 || str_contains($response->response->docs[0]->id, 'local.')) {
                 $reserves[$idx]['BIB_ID'] = str_replace('folio.', 'local.', $reserve['BIB_ID']);
                 $output->writeln(date('Y-m-d H:i:s') .
-                                 " Updating/creating solr record for professor owned copy with id: " . $reserves[$idx]['BIB_ID']);
+                                 " Updating/creating solr record for professor owned copy with id: " .
+                                 $reserves[$idx]['BIB_ID']);
                 $this->createLocalSolrRecord($reserves[$idx], $output);
-            }
-            else {
+            } else {
                 $output->writeln(date('Y-m-d H:i:s') . " Using found record in biblio index with folio prefix.");
                 $reserves[$idx]['BIB_ID'] = $response->response->docs[0]->id;
             }
@@ -295,16 +314,27 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
         return $reserves;
     }
 
+    /**
+     * Creates a new solr record for locally indexed records
+     *
+     * @param array           $reserve Course reserve data
+     * @param OutputInterface $output  Output object
+     *
+     * @return void
+     */
     protected function createLocalSolrRecord($reserve, $output)
     {
         $instanceHrid = str_replace('local.', '', $reserve['BIB_ID']);
         $item = $this->catalog->getInstanceByBibId($instanceHrid);
         $holding = $this->catalog->getHolding($instanceHrid)['holdings'][0];
 
-        $pubYear = is_array($item->publication) && count($item->publication) > 0 ? $item->publication[0]->dateOfPublication : '';
-        $authors = is_array($item->contributors) ? array_column($item->contributors, 'name') : [];
+        $pubYear = is_array($item->publication) && count($item->publication) > 0 ?
+                   $item->publication[0]->dateOfPublication : '';
+        $authors = is_array($item->contributors) ?
+                   array_column($item->contributors, 'name') : [];
         $firstAuthor = empty($authors) ? "" : $authors[0];
-        $alternativeTitles = is_array($item->alternativeTitles) ? array_column($item->alternativeTitles, 'alternativeTitle') : [];
+        $alternativeTitles = is_array($item->alternativeTitles) ?
+                             array_column($item->alternativeTitles, 'alternativeTitle') : [];
 
         $index = [
             'id' => $reserve['BIB_ID'],
@@ -376,6 +406,14 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
         $response = $this->solr->save('Solr', $updates);
     }
 
+    /**
+     * Get the private property of an object
+     *
+     * @param object $object   Object to get the property from
+     * @param string $property Private property to retrieve the value for
+     *
+     * @return The value of the private property
+     */
     protected function getProperty($object, $property)
     {
         $reflectionProperty = new \ReflectionProperty($object, $property);
@@ -450,7 +488,8 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
 
         // Make sure we have reserves and at least one of: instructors, courses,
         // departments:
-        if ((!empty($instructors) || !empty($courses) || !empty($departments))
+        if (
+            (!empty($instructors) || !empty($courses) || !empty($departments))
             && !empty($reserves)
         ) {
             // Delete existing records
@@ -492,4 +531,3 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
         return 1;
     }
 }
-

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SAML authentication module.
  *
@@ -21,10 +22,11 @@
  *
  * @category VuFind
  * @package  Authentication
- * @author  Damien Guillaume <damieng@msu.edu>
+ * @author   Damien Guillaume <damieng@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org Main Page
  */
+
 namespace Catalog\Auth;
 
 use Laminas\Http\PhpEnvironment\Request;
@@ -35,7 +37,7 @@ use VuFind\Exception\Auth as AuthException;
  *
  * @category VuFind
  * @package  Authentication
- * @author  Damien Guillaume <damieng@msu.edu>
+ * @author   Damien Guillaume <damieng@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org Main Page
  */
@@ -69,18 +71,26 @@ class SAML extends \VuFind\Auth\AbstractBase
     protected $request;
 
     /**
+     * Simple SAMPLE Auth handler
+     *
+     * @var \SimpleSAML\Auth\Simple
+     */
+    protected $auth;
+
+    /**
      * Constructor
      *
-     * @param \Laminas\Session\ManagerInterface    $sessionManager      Session
-     * manager
-     * @param \Laminas\Http\PhpEnvironment\Request $request             Http
-     * request object
+     * @param \Laminas\Session\ManagerInterface    $sessionManager Session
+     *                                                             manager
+     * @param \Laminas\Http\PhpEnvironment\Request $request        Http
+     *                                                             request
+     *                                                             object
      */
     public function __construct(
         \Laminas\Session\ManagerInterface $sessionManager,
         \Laminas\Http\PhpEnvironment\Request $request
     ) {
-        require_once(getenv('SIMPLESAMLPHP_HOME').'/lib/_autoload.php');
+        require_once(getenv('SIMPLESAMLPHP_HOME') . '/lib/_autoload.php');
         $this->sessionManager = $sessionManager;
         $this->request = $request;
         $this->auth = new \SimpleSAML\Auth\Simple('default-sp');
@@ -173,14 +183,15 @@ class SAML extends \VuFind\Auth\AbstractBase
                 $value = $this->getAttribute($config[$attribute]);
                 if ($attribute == 'email') {
                     $user->updateEmail($value);
-                } elseif ($attribute == 'cat_username' && isset($config['prefix'])
+                } elseif (
+                    $attribute == 'cat_username' && isset($config['prefix'])
                     && !empty($value)
                 ) {
                     $user->cat_username = $config['prefix'] . '.' . $value;
                 } elseif ($attribute == 'cat_password') {
                     $catPassword = $value;
                 } else {
-                    $user->$attribute = $value ?? '';
+                    $user->$attribute = $value;
                 }
             }
         }
@@ -233,7 +244,8 @@ class SAML extends \VuFind\Auth\AbstractBase
     public function isExpired()
     {
         $config = $this->config->SAML;
-        if (!($config->singleLogout ?? false)
+        if (
+            !($config->singleLogout ?? false)
             || !($config->checkExpiredSession ?? true)
         ) {
             return false;
@@ -333,10 +345,11 @@ class SAML extends \VuFind\Auth\AbstractBase
         $attrs = $this->auth->getAttributes();
         $value = $attrs[$attribute];
         if (is_array($value)) {
-            if (count($value) > 0)
+            if (count($value) > 0) {
                 $value = $value[0];
-            else
+            } else {
                 $value = null;
+            }
         }
         return $value;
     }

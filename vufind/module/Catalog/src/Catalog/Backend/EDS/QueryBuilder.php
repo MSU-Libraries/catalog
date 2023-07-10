@@ -1,12 +1,34 @@
 <?php
 
+/**
+ * Overrides for the Articles & More search tab searching
+ * the EDS API
+ *
+ * PHP version 7
+ *
+ * @category VuFind
+ * @package  Backend_EDS
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/vufind/ Main page
+ */
+
 namespace Catalog\Backend\EDS;
+
 use VuFindSearch\ParamBag;
 use VuFindSearch\Query\AbstractQuery;
 use VuFindSearch\Query\Query;
 use VuFindSearch\Query\QueryGroup;
 
-
+/**
+ * Class that represents queries to the EDS API
+ *
+ * @category VuFind
+ * @package  Backend_EDS
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/vufind/ Main page
+ */
 class QueryBuilder extends \VuFindSearch\Backend\EDS\QueryBuilder
 {
     /**

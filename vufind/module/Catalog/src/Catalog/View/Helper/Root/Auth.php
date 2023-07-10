@@ -1,16 +1,38 @@
 <?php
+
+/**
+ * Authentication handler
+ *
+ * PHP version 7
+ *
+ * @category VuFind
+ * @package  View_Helper
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/vufind/ Main page
+ */
+
 namespace Catalog\View\Helper\Root;
 
 use Laminas\Config\Reader\Ini as IniReader;
 use Laminas\Config\Config;
 use VuFind\Config\Locator as Locator;
 
+/**
+ * Authentication handler to add additional data to the view
+ *
+ * @category VuFind
+ * @package  View_Helper
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/vufind/ Main page
+ */
 class Auth extends \VuFind\View\Helper\Root\Auth
 {
     /**
-     * Determines if the given patron is a community borrower based 
+     * Determines if the given patron is a community borrower based
      * on the username field from their patron data.
-     * 
+     *
      * @return bool
      */
     public function isCommunityBorrower()
@@ -19,7 +41,7 @@ class Auth extends \VuFind\View\Helper\Root\Auth
         $patron = $this->getILSPatron();
 
         if ($patron != null && array_key_exists('username', $patron)) {
-            # If the username is a 9-digit string (barcode) then they are a community borrower
+            // If the username is a 9-digit string (barcode) then they are a community borrower
             if (preg_match('/[0-9]{9}/', $patron['username'])) {
                 $isCommunityBorrower = true;
             }
@@ -27,12 +49,12 @@ class Auth extends \VuFind\View\Helper\Root\Auth
 
         return $isCommunityBorrower;
     }
-    
+
     /**
      * Determines if the current request is comming from on campus
      * based on the client IP as compared to the configured IP ranges in
      * the permissions.ini for the EDS module.
-     * 
+     *
      * @return bool
      */
     public function isOnCampus()
@@ -44,9 +66,10 @@ class Auth extends \VuFind\View\Helper\Root\Auth
         $fullpath = Locator::getConfigPath('permissions.ini', 'config/vufind');
         $config = new Config((new IniReader())->fromFile($fullpath, true));
 
-        if ($config["default"]["EDSModule"] != null &&
-            $config["default"]["EDSModule"]["ipRange"] != null) {
-
+        if (
+            $config["default"]["EDSModule"] != null &&
+            $config["default"]["EDSModule"]["ipRange"] != null
+        ) {
             $ranges = $config["default"]["EDSModule"]["ipRange"];
             foreach ($ranges as $range) {
                 $ipParts = explode("-", $range);
@@ -62,4 +85,3 @@ class Auth extends \VuFind\View\Helper\Root\Auth
         return $isOnCampus;
     }
 }
-

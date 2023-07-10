@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Solr Connection Test Class
  *
@@ -25,6 +26,7 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:testing:unit_tests Wiki
  */
+
 namespace CatalogTest\Integration\Connection;
 
 use VuFindSearch\ParamBag;
@@ -79,5 +81,4 @@ class SolrTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue(empty($item['seeAlso']));
         $this->assertTrue(in_array('Royal Dublin Society', $item['useInstead']));
     }
-
 }

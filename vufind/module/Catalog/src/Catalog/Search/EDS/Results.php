@@ -1,11 +1,29 @@
 <?php
 
+/**
+ * EDS Search Result
+ *
+ * PHP version 7
+ *
+ * @category VuFind
+ * @package  EDS_Result
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org Main Page
+ */
+
 namespace Catalog\Search\EDS;
 
 use VuFindSearch\Command\SearchCommand;
 
 /**
  * This will no longer be needed with Vufind 9.0.3.
+ *
+ * @category VuFind
+ * @package  EDS_Result
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org Main Page
  */
 class Results extends \VuFind\Search\EDS\Results
 {
