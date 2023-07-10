@@ -1,4 +1,5 @@
 <?php
+
 /**
  * View helper to print an array formatted for HTML display.
  *
@@ -25,6 +26,7 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development Wiki
  */
+
 namespace Catalog\View\Helper\Root;
 
 use Laminas\View\Helper\AbstractHelper;
@@ -45,13 +47,14 @@ class PrintArrayHtml extends AbstractHelper
      * Function uses recursion to achieve desired results, so entry can be
      * either an array or a value to display.
      *
-     * @param array|string $entry  An array or string to output
-     * @param int $indentLevel How many spaces to indent output
-     * @param bool $indentFirst Whether the first item in an array should be indented
+     * @param array|string $entry       An array or string to output
+     * @param int          $indentLevel How many spaces to indent output
+     * @param bool         $indentFirst Whether the first item in an array should be indented
      *
      * @return string
      */
-    public function __invoke($entry, $indentLevel=0, $indentFirst=true) {
+    public function __invoke($entry, $indentLevel = 0, $indentFirst = true)
+    {
         $html = "";
         if (is_array($entry)) {
             foreach ($entry as $key => $value) {
@@ -59,26 +62,24 @@ class PrintArrayHtml extends AbstractHelper
                     $html .= str_repeat("&ensp;", $indentLevel);
                 }
 
-                # Increase indent if entering new array
+                // Increase indent if entering new array
                 $nextIndentLevel = is_array($value) ? $indentLevel + 2 : 0;
-                # Indent first line in values unless we're continuing from hypen
+                // Indent first line in values unless we're continuing from hypen
                 $nextIndentFirst = !is_int($key) || !is_array($value);
 
                 if (is_int($key)) {
-                    # Integer keyed arrays use a hypen list
+                    // Integer keyed arrays use a hypen list
                     $html .= "&ndash;&ensp;";
                 } else {
-                    $html .= "<strong>".$this->view->escapeHtml($key)."</strong>: "
+                    $html .= "<strong>" . $this->view->escapeHtml($key) . "</strong>: "
                              . (is_array($value) ? "<br />" : "");
                 }
 
                 $html .= $this->__invoke($value, $nextIndentLevel, $nextIndentFirst);
             }
-        }
-        else {
+        } else {
             $html = $this->view->escapeHtml($entry) . "<br />";
         }
         return $html;
     }
-
 }

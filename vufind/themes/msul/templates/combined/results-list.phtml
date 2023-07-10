@@ -69,7 +69,7 @@
     $viewParams = [
       'results' => $results,
       'params' => $params,
-      'showCheckboxes' => $this->showCartControls || $this->showBulkOptions
+      'showCheckboxes' => $this->showCartControls || $this->showBulkOptions,
     ];
   ?>
   <?=$this->render('search/list-' . $viewType . '.phtml', $viewParams)?>

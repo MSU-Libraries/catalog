@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Solr Connection Test Class
  *
@@ -25,6 +26,7 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:testing:unit_tests Wiki
  */
+
 namespace CatalogTest\Integration\Connection;
 
 use VuFindSearch\ParamBag;
@@ -55,7 +57,7 @@ class SolrTest extends \PHPUnit\Framework\TestCase
         $result = $solr->alphabeticBrowse('author', 'Dublin Society', 0, 1, $extras);
         $item = $result['Browse']['items'][0];
         $this->assertEquals($item['count'], count($item['extras']['id']));
-        $this->assertTrue(empty($item['useInstead']));
+        $this->assertTrue($item['useInstead']);
         $this->assertTrue(in_array(['folio.in00003688132'], $item['extras']['id']));
         $this->assertTrue(in_array('Royal Dublin Society', $item['seeAlso']));
         $this->assertEquals('Dublin Society', $item['heading']);
@@ -76,8 +78,7 @@ class SolrTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(0, $item['count']);
         $this->assertEquals($item['count'], count($item['extras']['id']));
         $this->assertEquals('Dublin Society, Royal', $item['heading']);
-        $this->assertTrue(empty($item['seeAlso']));
+        $this->assertTrue($item['seeAlso']);
         $this->assertTrue(in_array('Royal Dublin Society', $item['useInstead']));
     }
-
 }

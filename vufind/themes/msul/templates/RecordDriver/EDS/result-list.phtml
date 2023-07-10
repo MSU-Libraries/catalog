@@ -5,7 +5,7 @@
   $coverDetails = $this->record($this->driver)->getCoverDetails('result-list', 'medium', $this->recordLinker()->getUrl($this->driver));
   $cover = $coverDetails['html'];
   $user = $this->auth()->isLoggedIn();
-  $isCommunityBorrower = $user != null ? $this->auth()->isCommunityBorrower(): false;
+  $isCommunityBorrower = $user != null ? $this->auth()->isCommunityBorrower() : false;
   $isOnCampus = $this->auth()->isOnCampus();
 ?>
 <?php
@@ -21,7 +21,7 @@
 <?php ob_end_clean(); ?>
 <input type="hidden" value="<?=$this->escapeHtmlAttr($this->driver->getUniqueID())?>" class="hiddenId" />
 <input type="hidden" value="<?=$this->escapeHtmlAttr($this->driver->getSourceIdentifier())?>" class="hiddenSource" />
-<div class="media<?=$this->driver->supportsAjaxStatus()?' ajaxItem':''?>">
+<div class="media<?=$this->driver->supportsAjaxStatus() ? ' ajaxItem' : ''?>">
   <?php if ($thumbnail && $thumbnailAlignment == 'left'): ?>
     <?=$thumbnail ?>
   <?php endif; ?>
@@ -153,7 +153,7 @@
         <?php endforeach; ?>
       <?php endif; ?>
 
-      <?=(!$restrictedView && $this->driver->supportsCoinsOpenUrl())?'<span class="Z3988" title="' . $this->escapeHtmlAttr($this->driver->getCoinsOpenUrl()) . '"></span>':''?>
+      <?=(!$restrictedView && $this->driver->supportsCoinsOpenUrl()) ? '<span class="Z3988" title="' . $this->escapeHtmlAttr($this->driver->getCoinsOpenUrl()) . '"></span>' : ''?>
     </div>
   </div>
   <?php if ($thumbnail && $thumbnailAlignment == 'right'): ?>

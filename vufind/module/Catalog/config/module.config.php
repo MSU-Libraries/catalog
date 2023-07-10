@@ -1,6 +1,6 @@
 <?php
 
-return array (
+return [
   'router' => [
     'routes' => [
       'record-getthis' => [
@@ -79,12 +79,10 @@ return array (
       ],
       'command' => [
         'factories' => [
-          'Catalog\\VuFindConsole\\Command\\Util\\IndexReservesCommand' => 'VuFindConsole\\Command\\Util\\AbstractSolrAndIlsCommandFactory',
           'Catalog\\Command\\Util\\IndexReservesCommand' => 'VuFindConsole\\Command\\Util\\AbstractSolrAndIlsCommandFactory',
         ],
         'aliases' => [
           'util/index_reserves' => 'Catalog\\Command\\Util\\IndexReservesCommand',
-          'VuFindConsole\\Command\\Util\\IndexReservesCommand' => 'Catalog\\Command\\Util\\IndexReservesCommand',
         ],
       ],
     ],
@@ -98,4 +96,4 @@ return array (
   #    'VuFind\\Mailer\\Mailer' => 'Catalog\\Mailer\\Mailer',
   #  ],
   #],
-);
+];

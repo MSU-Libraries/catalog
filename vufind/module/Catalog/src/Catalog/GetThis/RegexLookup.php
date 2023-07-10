@@ -1,15 +1,47 @@
 <?php
+
+/**
+ * Helper class for the GetThis Loader containing
+ * Regex patterns to match on for locations and statuses
+ *
+ * PHP version 7
+ *
+ * @category VuFind
+ * @package  Backend_EDS
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/vufind/ Main page
+ */
+
 namespace Catalog\GetThis;
 
-/******************************
+/**
  * RegexLookup use example to check if $search matches the given regex patterns.
  *
  *  RegexLookup::STAT_AVAILABLE($search)
  *
  *  Returns true if at least 1 pattern matches, false otherwise
- *****************************/
-class RegexLookup {
-    public static function __callStatic($name, $args) {
+ *
+ * @category VuFind
+ * @package  Backend_EDS
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/vufind/ Main page
+ */
+class RegexLookup
+{
+    /**
+     * Called when making a call to RegexLookup::[contant]($val), for example,
+     * RegexLookup::AVAILABLE("available") and will perform the regex check on the
+     * passed value against the set constant value
+     *
+     * @param string $name Constant name to use for regex matching
+     * @param string $args Values to perform the regex matching against
+     *
+     * @return bool           If there was a match found
+     */
+    public static function __callStatic($name, $args)
+    {
         $patterns = constant('self::' . $name);
         if (count($args) !== 1) {
             throw new ArgumentCountError("RegexLookup::$name() calls take exactly one argument.");
@@ -26,51 +58,51 @@ class RegexLookup {
     }
 
     // Status
-    const AVAILABLE             = ['/AVAILABLE/i'];
-    const IN_PROCESS            = ['/IN PROCESS/i'];
-    const LIB_USE_ONLY          = ['/LIB USE ONLY/i', '/LIBRARY USE ONLY/i'];
-    const ON_DISPLAY            = ['/ON DISPLAY/i'];
+    public const AVAILABLE             = ['/AVAILABLE/i'];
+    public const IN_PROCESS            = ['/IN PROCESS/i'];
+    public const LIB_USE_ONLY          = ['/LIB USE ONLY/i', '/LIBRARY USE ONLY/i'];
+    public const ON_DISPLAY            = ['/ON DISPLAY/i'];
     // Description
-    const VINYL                 = ['/VINYL/i'];
+    public const VINYL                 = ['/VINYL/i'];
     // Location
-    const MAIN                  = ['/^MSU MAIN/i'];
-    const AFRICANA              = ['/^MSU AFRICANA/i'];
-    const ART                   = ['/^MSU ART LIBRARY/i'];
-    const BOOK                  = ['/BOOK/i'];
-    const BROWSING              = ['/BROWSING/i'];
-    const BUSINESS              = ['/MSU BUSINESS/i'];
-    const CAREER                = ['/CAREER/i'];
-    const CESAR_CHAVEZ          = ['/CESAR CHAVEZ/i'];
-    const CIRCULATING           = ['/CIRCULATING/i', '/FOLD/i'];
-    const DIGITAL_MEDIA         = ['/DIGITAL\/MEDIA\./i'];
-    const FACULTY_BOOK          = ['/FACULTY BOOK/i'];
-    const GOV                   = ['/^MSU GOV/i'];
-    const GULL                  = ['/^MSU GULL/i'];
-    const KLINE_DMC             = ['/^MSU G\.M\.KLINE DIGITAL/i'];
-    const LAW_RARE_BOOK         = ['/LAW LIB RARE BOOK/i'];
-    const LAW_RESERVE           = ['/LAW LIBRARY RESERVE/i'];
-    const LIB_OF_MICH           = ['/LIB OF MICH/i'];
-    const MAKERSPACE            = ['/MAKERSPACE/i'];
-    const MAP                   = ['/^MSU MAP/i'];
-    const MICROFORMS            = ['/^MSU MICROFORMS/i'];
-    const MUSIC                 = ['/^MSU MUSIC LIBRARY/i'];
-    const ONLINE                = ['/ONLINE RESOURCE/i', '/ELECTRONIC RESOURCES/i'];
-    const PERM                  = ['/PERM/i'];        # Legacy note: used for Art Reserves
-    const READING_ROOM          = ['/READING ROOM/i'];
-    const REFERENCE             = ['/REFERENCE/i'];
-    const REF                   = ['/REF/i'];
-    const REMOTE                = ['/^MSU REMOTE/i', '/- REMOTE/i'];
-    const RESERV                = ['/RESERV/i'];
-    const RESERVE_DIGITAL       = ['/RESERVE DIGITAL/i', '/DIGITAL RESERVES/i'];
-    const ROVI                  = ['/^MSU ROVI/i'];
-    const SCHAEFER              = ['/^MSU SCHAEFER/i'];
-    const SPEC_COLL             = ['/^MSU SPEC COLL/i', '/SPECIAL COLLECTION/i'];
-    const SPEC_COLL_REMOTE      = ['/SPEC COLL REMOTE/i', '/SPECIAL COLLECTIONS.*REMOTE/i'];
-    const THESES_REMOTE         = ['/THESES REMOTE/i'];
-    const THESES_REMOTE_MICRO   = ['/THESES REMOTE MICROFORMS/i'];
-    const TRAVEL                = ['/TRAVEL/i'];
-    const TURFGRASS             = ['/^MSU TURFGRASS/i', '/MSU BEARD/i'];
-    const UNIV_ARCH             = ['/UNIV ARCH/i', '/MSU UNIVERSITY ARCHIVES/i'];
-    const VIDEO_GAME            = ['/VIDEO GAME/i'];
-    const VINCENT_VOICE         = ['/^MSU VINCENT VOICE/i'];
+    public const MAIN                  = ['/^MSU MAIN/i'];
+    public const AFRICANA              = ['/^MSU AFRICANA/i'];
+    public const ART                   = ['/^MSU ART LIBRARY/i'];
+    public const BOOK                  = ['/BOOK/i'];
+    public const BROWSING              = ['/BROWSING/i'];
+    public const BUSINESS              = ['/MSU BUSINESS/i'];
+    public const CAREER                = ['/CAREER/i'];
+    public const CESAR_CHAVEZ          = ['/CESAR CHAVEZ/i'];
+    public const CIRCULATING           = ['/CIRCULATING/i', '/FOLD/i'];
+    public const DIGITAL_MEDIA         = ['/DIGITAL\/MEDIA\./i'];
+    public const FACULTY_BOOK          = ['/FACULTY BOOK/i'];
+    public const GOV                   = ['/^MSU GOV/i'];
+    public const GULL                  = ['/^MSU GULL/i'];
+    public const KLINE_DMC             = ['/^MSU G\.M\.KLINE DIGITAL/i'];
+    public const LAW_RARE_BOOK         = ['/LAW LIB RARE BOOK/i'];
+    public const LAW_RESERVE           = ['/LAW LIBRARY RESERVE/i'];
+    public const LIB_OF_MICH           = ['/LIB OF MICH/i'];
+    public const MAKERSPACE            = ['/MAKERSPACE/i'];
+    public const MAP                   = ['/^MSU MAP/i'];
+    public const MICROFORMS            = ['/^MSU MICROFORMS/i'];
+    public const MUSIC                 = ['/^MSU MUSIC LIBRARY/i'];
+    public const ONLINE                = ['/ONLINE RESOURCE/i', '/ELECTRONIC RESOURCES/i'];
+    public const PERM                  = ['/PERM/i'];        // Legacy note: used for Art Reserves
+    public const READING_ROOM          = ['/READING ROOM/i'];
+    public const REFERENCE             = ['/REFERENCE/i'];
+    public const REF                   = ['/REF/i'];
+    public const REMOTE                = ['/^MSU REMOTE/i', '/- REMOTE/i'];
+    public const RESERV                = ['/RESERV/i'];
+    public const RESERVE_DIGITAL       = ['/RESERVE DIGITAL/i', '/DIGITAL RESERVES/i'];
+    public const ROVI                  = ['/^MSU ROVI/i'];
+    public const SCHAEFER              = ['/^MSU SCHAEFER/i'];
+    public const SPEC_COLL             = ['/^MSU SPEC COLL/i', '/SPECIAL COLLECTION/i'];
+    public const SPEC_COLL_REMOTE      = ['/SPEC COLL REMOTE/i', '/SPECIAL COLLECTIONS.*REMOTE/i'];
+    public const THESES_REMOTE         = ['/THESES REMOTE/i'];
+    public const THESES_REMOTE_MICRO   = ['/THESES REMOTE MICROFORMS/i'];
+    public const TRAVEL                = ['/TRAVEL/i'];
+    public const TURFGRASS             = ['/^MSU TURFGRASS/i', '/MSU BEARD/i'];
+    public const UNIV_ARCH             = ['/UNIV ARCH/i', '/MSU UNIVERSITY ARCHIVES/i'];
+    public const VIDEO_GAME            = ['/VIDEO GAME/i'];
+    public const VINCENT_VOICE         = ['/^MSU VINCENT VOICE/i'];
 }

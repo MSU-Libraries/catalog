@@ -5,7 +5,7 @@
     $customLinks = $this->driver->getCustomLinks();
     $accessLevel = $this->driver->getAccessLevel();
     $user = $this->auth()->isLoggedIn();
-    $isCommunityBorrower = $user != null ? $this->auth()->isCommunityBorrower(): false;
+    $isCommunityBorrower = $user != null ? $this->auth()->isCommunityBorrower() : false;
     $isOnCampus = $this->auth()->isOnCampus();
     $restrictedView = empty($accessLevel) ? false : true;
     $coverDetails = $this->record($this->driver)->getCoverDetails('core', 'medium');

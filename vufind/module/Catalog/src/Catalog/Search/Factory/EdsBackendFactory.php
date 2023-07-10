@@ -28,11 +28,20 @@
  */
 
 namespace Catalog\Search\Factory;
+
 use Catalog\Backend\EDS\QueryBuilder;
 
+/**
+ * Extending the backend to customize the builder for our query param overrides
+ *
+ * @category VuFind
+ * @package  Search
+ * @author   David Maus <maus@hab.de>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org Main Site
+ */
 class EdsBackendFactory extends \VuFind\Search\Factory\EdsBackendFactory
 {
-
     /**
      * Create the EDS query builder.
      *
@@ -44,4 +53,3 @@ class EdsBackendFactory extends \VuFind\Search\Factory\EdsBackendFactory
         return $builder;
     }
 }
-

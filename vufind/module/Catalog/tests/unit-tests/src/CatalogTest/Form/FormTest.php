@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Form Test Class
  *
@@ -26,9 +27,9 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:testing:unit_tests Wiki
  */
+
 namespace CatalogTest\Form;
 
-use Symfony\Component\Yaml\Yaml;
 use VuFind\Config\YamlReader;
 use VuFind\Form\Form;
 
@@ -81,5 +82,4 @@ class FormTest extends \PHPUnit\Framework\TestCase
             get_class($form->getInputFilter())
         );
     }
-
 }

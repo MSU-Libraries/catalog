@@ -122,12 +122,12 @@
         try {
             echo $this->context($this)->renderInContext(
                 'RecordTab/holdingsils/' . $this->tab->getTemplate() . '.phtml',
-                ['holding' => $row, 'record'=>$this->record($this->driver)]
+                ['holding' => $row, 'record' => $this->record($this->driver)]
             );
         } catch (Exception $e) {
             echo $this->context($this)->renderInContext(
                 'RecordTab/holdingsils/standard.phtml',
-                ['holding' => $row, 'record'=>$this->record($this->driver)]
+                ['holding' => $row, 'record' => $this->record($this->driver)]
             );
         }
     ?>

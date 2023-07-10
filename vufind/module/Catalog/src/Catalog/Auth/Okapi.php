@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Okapi authentication module.
  *
@@ -25,6 +26,7 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:authentication_handlers Wiki
  */
+
 namespace Catalog\Auth;
 
 use Laminas\Http\PhpEnvironment\Request;
@@ -46,13 +48,20 @@ use VuFind\Exception\Auth as AuthException;
  * @link     https://vufind.org/wiki/development:plugins:authentication_handlers Wiki
  */
 class Okapi extends \VuFind\Auth\AbstractBase
-{ 
+{
     /**
      * The Folio driver.
      *
      * @var object
      */
     protected $driver = null;
+
+    /**
+     * Catalog connection
+     *
+     * @var \Catalog\Auth\Okapi
+     */
+    protected $catalog;
 
     /**
      * Constructor
@@ -173,5 +182,4 @@ class Okapi extends \VuFind\Auth\AbstractBase
 
         return $user;
     }
-
 }

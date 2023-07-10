@@ -14,7 +14,7 @@ $callnum = $this->getthis->getCallNumber();
     <br><br>
     <p class="text-left">
         <b>Status:</b> <?= $this->getthis->getStatus() ?>
-        <?php if ($item !=null && !$this->getthis->isOnlineResource() && $item['is_holdable'] && $link ?? false) { ?>
+        <?php if ($item != null && !$this->getthis->isOnlineResource() && $item['is_holdable'] && $link ?? false) { ?>
             <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
                <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
                target="_blank"

@@ -1,8 +1,30 @@
 <?php
+
+/**
+ * Default values for the record
+ *
+ * PHP version 7
+ *
+ * @category VuFind
+ * @package  View_Helper
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/wiki/development:plugins:record_drivers Wiki
+ */
+
 namespace Catalog\View\Helper\Root;
 
 use VuFind\Config\YamlReader;
 
+/**
+ * Extend the Record data available to the View
+ *
+ * @category VuFind
+ * @package  View_Helper
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/wiki/development:plugins:record_drivers Wiki
+ */
 class Record extends \VuFind\View\Helper\Root\Record
 {
     /**
@@ -11,9 +33,22 @@ class Record extends \VuFind\View\Helper\Root\Record
      *   desc : Regex must match against the 'desc' field for label to match; or null to ignore
      *   url  : Regex must match against the 'url' field for label to match; or null to ignore
      */
-    private $linkLabels = array();
+    private $linkLabels = [];
 
-    function __construct($config = null) {
+    /**
+     * Config for the access links
+     *
+     * @var \Catalog\View\Helper\Root\Record
+     */
+    private $accessLinksConfig;
+
+    /**
+     * Initialize the record driver
+     *
+     * @param string $config Name of the config to load
+     */
+    public function __construct($config = null)
+    {
         parent::__construct($config);
         $yamlReader = new YamlReader();
         $this->accessLinksConfig = $yamlReader->get("accesslinks.yaml");
@@ -34,11 +69,11 @@ class Record extends \VuFind\View\Helper\Root\Record
     {
         $label = null;
         foreach ($this->linkLabels as $mat) {
-            # Skip entries missing the 'label' field
+            // Skip entries missing the 'label' field
             if (!array_key_exists('label', $mat)) {
                 continue;
             }
-            # Must have one of the regex patterns, otherwise false
+            // Must have one of the regex patterns, otherwise false
             $found = ($mat['desc'] ?? null) || ($mat['url'] ?? null);
             if ($mat['desc'] ?? null) {
                 $found &= preg_match($mat['desc'], $link['desc']);
@@ -119,5 +154,4 @@ class Record extends \VuFind\View\Helper\Root\Record
         }
         return $url;
     }
-
 }
