@@ -22,24 +22,14 @@ RUN \
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
 RUN apt install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
 
-ARG GITHUB_USER_TOKEN
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
 
-COPY install-composer.sh /install-composer.sh
-
 RUN \
-    # Install yq
-    wget --header="Authorization: token ${GITHUB_USER_TOKEN}" https://github.com/mikefarah/yq/releases/download/v4.30.4/yq_linux_amd64 -O /usr/local/bin/yq && \
-    chmod +x /usr/local/bin/yq && \
     # Setup Timezone
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
-    # Install Composer
-    /install-composer.sh && \
-    mv /composer.phar /usr/local/bin/composer && \
-    rm /install-composer.sh && \
-    # Get VuFind the package
+    # Get the VuFind package
     wget https://github.com/vufind-org/vufind/releases/download/v${VUFIND_VERSION}/vufind_${VUFIND_VERSION}.deb && \
     # Install the package
     service apache2 restart && \
@@ -47,11 +37,6 @@ RUN \
         ./vufind_${VUFIND_VERSION}.deb && \
     apt clean && \
     rm vufind_${VUFIND_VERSION}.deb && \
-    # Update vufindharvest library to version 5.0.0 (fixes last_harvest.txt issue)
-    yq -i '.config.platform.php="7.4.1"' /usr/local/vufind/composer.json && \
-    yq -i '.require.php=">=7.4.1"' /usr/local/vufind/composer.json && \
-    yq -i '.require.vufind-org/vufindharvest="5.0.0"' /usr/local/vufind/composer.json && \
-    composer --working-dir=/usr/local/vufind/ update && \
     # Remove unused dependencies after Vufind is installed
     # Disabled for upgrade to Solr 9
     # mv /usr/local/vufind/solr /tmp && \
