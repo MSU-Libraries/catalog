@@ -49,6 +49,13 @@ use VuFind\Search\Factory\SolrDefaultBackendFactory;
 class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesCommand
 {
     /**
+     * The name of the command (the part after "public/index.php")
+     *
+     * @var string
+     */
+    protected static $defaultName = 'util/index_reserves';
+
+    /**
      * Default delimiter for reading files
      *
      * @var string
