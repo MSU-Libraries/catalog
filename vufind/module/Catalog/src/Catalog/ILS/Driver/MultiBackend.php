@@ -831,7 +831,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
                 $source,
                 self::HOLD_ID_FIELDS,
             ),
-            $this->stripIdPrefixes($patron, $source)
+            $this->stripIdPrefixes($patron, $source),
         ];
         return $this->callMethodIfSupported($source, __FUNCTION__, $params, false);
     }

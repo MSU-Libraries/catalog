@@ -742,7 +742,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         // MSUL customization to add fields (including multi backend prefix) and sorting to query
         $query = [
             'query' => '(requesterId == "' . $patron['id'] . '"  ' .
-            'and status == Open*) sortBy requestDate/sort.ascending title/sort.ascending'
+            'and status == Open*) sortBy requestDate/sort.ascending title/sort.ascending',
         ];
         $holds = [];
         $allowCancelingAvailableRequests
