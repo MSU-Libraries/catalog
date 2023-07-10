@@ -43,8 +43,131 @@ use VuFind\Exception\ILS as ILSException;
 class Folio extends \VuFind\ILS\Driver\Folio
 {
     /**
+     * Support method for getHolding(): extract details from the holding record that
+     * will be needed by formatHoldingItem() below.
+     * 
+     * See https://github.com/vufind-org/vufind/pull/2983
+     *
+     * @param object $holding FOLIO holding record (decoded from JSON)
+     *
+     * @return array
+     */
+    protected function getHoldingDetailsForItem($holding): array
+    {
+        $textFormatter = function ($supplement) {
+            $format = '%s %s';
+            $supStat = $supplement->statement ?? '';
+            $supNote = $supplement->note ?? '';
+            $statement = trim(sprintf($format, $supStat, $supNote));
+            return $statement;
+        };
+        $id = $holding->id;
+        $holdingNotes = array_filter(
+            array_map([$this, 'formatNote'], $holding->notes ?? [])
+        );
+        $hasHoldingNotes = !empty(implode($holdingNotes));
+        $holdingsStatements = array_filter(array_map(
+            $textFormatter,
+            $holding->holdingsStatements ?? []
+        ));
+        $holdingsSupplements = array_filter(array_map(
+            $textFormatter,
+            $holding->holdingsStatementsForSupplements ?? []
+        ));
+        $holdingsIndexes = array_filter(array_map(
+            $textFormatter,
+            $holding->holdingsStatementsForIndexes ?? []
+        ));
+        $holdingCallNumber = $holding->callNumber ?? '';
+        $holdingCallNumberPrefix = $holding->callNumberPrefix ?? '';
+        return compact(
+            'id',
+            'holdingNotes',
+            'hasHoldingNotes',
+            'holdingsStatements',
+            'holdingsSupplements',
+            'holdingsIndexes',
+            'holdingCallNumber',
+            'holdingCallNumberPrefix'
+        );
+    }
+
+    /**
+     * Support method for getHolding() -- given a few key details, format an item
+     * for inclusion in the return value.
+     *
+     * @param string $bibId          Current bibliographic ID
+     * @param array  $holdingDetails Holding details produced by
+     * getHoldingDetailsForItem()
+     * @param object $item           FOLIO item record (decoded from JSON)
+     * @param int    $number         The current item number (position within
+     * current holdings record)
+     * @param string $dueDateValue   The due date to display to the user
+     *
+     * @return array
+     */
+    protected function formatHoldingItem(
+        string $bibId,
+        array $holdingDetails,
+        $item,
+        $number,
+        string $dueDateValue
+    ): array {
+        $itemNotes = array_filter(
+            array_map([$this, 'formatNote'], $item->notes ?? [])
+        );
+        $locationId = $item->effectiveLocationId;
+        $locationData = $this->getLocationData($locationId);
+        $locationName = $locationData['name'];
+        $locationCode = $locationData['code'];
+        // concatenate enumeration fields if present
+        $enum = implode(
+            ' ',
+            array_filter(
+                [
+                    $item->volume ?? null,
+                    $item->enumeration ?? null,
+                    $item->chronology ?? null,
+                ]
+            )
+        );
+        $enum = str_ends_with($holdingDetails['holdingCallNumber'], $enum) ? '' : $enum;
+        $callNumberData = $this->chooseCallNumber(
+            $holdingDetails['holdingCallNumberPrefix'],
+            $holdingDetails['holdingCallNumber'],
+            $item->effectiveCallNumberComponents->prefix
+                ?? $item->itemLevelCallNumberPrefix ?? '',
+            $item->effectiveCallNumberComponents->callNumber
+                ?? $item->itemLevelCallNumber ?? ''
+        );
+
+        return $callNumberData + [
+            'id' => $bibId,
+            'item_id' => $item->id,
+            'holding_id' => $holdingDetails['id'],
+            'number' => $number,
+            'enumchron' => $enum,
+            'barcode' => $item->barcode ?? '',
+            'status' => $item->status->name,
+            'duedate' => $dueDateValue,
+            'availability' => $item->status->name == 'Available',
+            'is_holdable' => $this->isHoldable($locationName),
+            'holdings_notes' => $holdingDetails['hasHoldingNotes']
+                ? $holdingDetails['holdingNotes'] : null,
+            'item_notes' => !empty(implode($itemNotes)) ? $itemNotes : null,
+            'issues' => $holdingDetails['holdingsStatements'],
+            'supplements' => $holdingDetails['holdingsSupplements'],
+            'indexes' => $holdingDetails['holdingsIndexes'],
+            'location' => $locationName,
+            'location_code' => $locationCode,
+            'reserve' => 'TODO',
+            'addLink' => true,
+            'electronic_access' => $item->electronicAccess,
+        ];
+    }
+
+    /**
      * This method queries the ILS for holding information.
-     * This extends the original by adding enumchron from $item->volume.
      *
      * @param string $bibId   Bib-level id
      * @param array  $patron  Patron login information from $this->patronLogin
@@ -56,102 +179,69 @@ class Folio extends \VuFind\ILS\Driver\Folio
      */
     public function getHolding($bibId, array $patron = null, array $options = [])
     {
+        $showDueDate = $this->config['Availability']['showDueDate'] ?? true;
+        $showTime = $this->config['Availability']['showTime'] ?? false;
+        $maxNumDueDateItems = $this->config['Availability']['maxNumberItems'] ?? 5;
+        $dueDateItemCount = 0;
+
         $instance = $this->getInstanceByBibId($bibId);
         $query = [
             'query' => '(instanceId=="' . $instance->id
-                . '" NOT discoverySuppress==true)'
+                . '" NOT discoverySuppress==true)',
         ];
         $items = [];
-        foreach ($this->getPagedResults(
-            'holdingsRecords',
-            '/holdings-storage/holdings',
-            $query
-        ) as $holding) {
-            $query = [
-                'query' => 'holdingsRecordId=="' . $holding->id
-                    . '" NOT discoverySuppress==true sortBy volume'
-            ];
-            $notesFormatter = function ($note) {
-                return !($note->staffOnly ?? false)
-                    && !empty($note->note) ? $note->note : '';
-            };
-            $textFormatter = function ($supplement) {
-                $format = '%s %s';
-                $supStat = $supplement->statement ?? '';
-                $supNote = $supplement->note ?? '';
-                $statement = trim(sprintf($format, $supStat, $supNote));
-                return $statement ?? '';
-            };
-            $holdingNotes = array_filter(
-                array_map($notesFormatter, $holding->notes ?? [])
-            );
-            $hasHoldingNotes = !empty(implode($holdingNotes));
-            $holdingsStatements = array_filter(array_map(
-                $textFormatter,
-                $holding->holdingsStatements ?? []
-            ));
-            $holdingsSupplements = array_filter(array_map(
-                $textFormatter,
-                $holding->holdingsStatementsForSupplements ?? []
-            ));
-            $holdingsIndexes = array_filter(array_map(
-                $textFormatter,
-                $holding->holdingsStatementsForIndexes ?? []
-            ));
-            $holdingCallNumber = $holding->callNumber ?? '';
-            $holdingCallNumberPrefix = $holding->callNumberPrefix ?? '';
-            foreach ($this->getPagedResults(
-                'items',
-                '/item-storage/items',
+        $folioItemSort = $this->config['Holdings']['folio_sort'] ?? '';
+        $vufindItemSort = $this->config['Holdings']['vufind_sort'] ?? '';
+        foreach (
+            $this->getPagedResults(
+                'holdingsRecords',
+                '/holdings-storage/holdings',
                 $query
-            ) as $item) {
-                $itemNotes = array_filter(
-                    array_map($notesFormatter, $item->notes ?? [])
-                );
-                $locationId = $item->effectiveLocationId;
-                $locationData = $this->getLocationData($locationId);
-                $locationName = $locationData['name'];
-                $locationCode = $locationData['code'];
-                $callNumberData = $this->chooseCallNumber(
-                    $holdingCallNumberPrefix,
-                    $holdingCallNumber,
-                    $item->itemLevelCallNumberPrefix ?? '',
-                    $item->itemLevelCallNumber ?? ''
-                );
-                // concatenate enumeration fields if present
-                $enum = implode(
-                    ' ', array_filter(
-                        [
-                            $item->volume ?? null,
-                            $item->enumeration ?? null,
-                            $item->chronology ?? null
-                        ]
-                    )
-                );
-                $enum = str_ends_with($holdingCallNumber, $enum) ? '' : $enum;
-
-                $items[] = $callNumberData + [
-                    'id' => $bibId,
-                    'item_id' => $item->id,
-                    'holding_id' => $holding->id,
-                    'number' => $item->copyNumber ?? null,
-                    'enumchron' => $enum,
-                    'barcode' => $item->barcode ?? '',
-                    'status' => $item->status->name,
-                    'availability' => $item->status->name == 'Available',
-                    'is_holdable' => $this->isHoldable($locationName),
-                    'holdings_notes'=> $hasHoldingNotes ? $holdingNotes : null,
-                    'item_notes' => !empty(implode($itemNotes)) ? $itemNotes : null,
-                    'issues' => $holdingsStatements,
-                    'supplements' => $holdingsSupplements,
-                    'indexes' => $holdingsIndexes,
-                    'location' => $locationName,
-                    'location_code' => $locationCode,
-                    'reserve' => 'TODO',
-                    'addLink' => true,
-                    'electronic_access' => $item->electronicAccess
-                ];
+            ) as $holding
+        ) {
+            $rawQuery = '(holdingsRecordId=="' . $holding->id
+                . '" NOT discoverySuppress==true)';
+            if (!empty($folioItemSort)) {
+                $rawQuery .= ' sortby ' . $folioItemSort;
             }
+            $query = ['query' => $rawQuery];
+            $holdingDetails = $this->getHoldingDetailsForItem($holding);
+            $nextBatch = [];
+            $sortNeeded = false;
+            foreach (
+                $this->getPagedResults(
+                    'items',
+                    '/item-storage/items',
+                    $query
+                ) as $item
+            ) {
+                $number = $item->copyNumber ?? null;
+                $dueDateValue = '';
+                if (
+                    $item->status->name == 'Checked out'
+                    && $showDueDate
+                    && $dueDateItemCount < $maxNumDueDateItems
+                ) {
+                    $dueDateValue = $this->getDueDate($item->id, $showTime);
+                    $dueDateItemCount++;
+                }
+                $nextItem = $this->formatHoldingItem(
+                    $bibId,
+                    $holdingDetails,
+                    $item,
+                    $number,
+                    $dueDateValue
+                );
+                if (!empty($vufindItemSort) && !empty($nextItem[$vufindItemSort])) {
+                    $sortNeeded = true;
+                }
+                $nextBatch[] = $nextItem;
+            }
+            $items = array_merge(
+                $items,
+                $sortNeeded
+                    ? $this->sortHoldings($nextBatch, $vufindItemSort) : $nextBatch
+            );
         }
 
         // Check if there are any bound-with items that need to be added
@@ -183,6 +273,11 @@ class Folio extends \VuFind\ILS\Driver\Folio
      */
     public function getBoundwithHoldings($bibId, $instanceId)
     {
+        $showDueDate = $this->config['Availability']['showDueDate'] ?? true;
+        $showTime = $this->config['Availability']['showTime'] ?? false;
+        $maxNumDueDateItems = $this->config['Availability']['maxNumberItems'] ?? 5;
+        $dueDateItemCount = 0;
+
         $items = [];
 
         $query = [
@@ -196,6 +291,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $query = [
                 'query' => 'holdingsRecordId=="' . $bound_holding->id . '"'
             ];
+            $holdingDetails = $this->getHoldingDetailsForItem($bound_holding);
             foreach ($this->getPagedResults(
                 'boundWithParts',
                 '/inventory-storage/bound-with-parts',
@@ -206,80 +302,23 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     '/item-storage/items/' . $bound->itemId
                 );
                 $bound_item = json_decode($response->getBody());
-
-                // Formatter helper functions
-                $notesFormatter = function ($note) {
-                    return !($note->staffOnly ?? false)
-                        && !empty($note->note) ? $note->note : '';
-                };
-                $textFormatter = function ($supplement) {
-                    $format = '%s %s';
-                    $supStat = $supplement->statement ?? '';
-                    $supNote = $supplement->note ?? '';
-                    $statement = trim(sprintf($format, $supStat, $supNote));
-                    return $statement ?? '';
-                };
-
-                $holdingNotes = array_filter(
-                    array_map($notesFormatter, $bound_holding->notes ?? [])
+                $number = $item->copyNumber ?? null;
+                $dueDateValue = '';
+                if (
+                    $bound_item->status->name == 'Checked out'
+                    && $showDueDate
+                    && $dueDateItemCount < $maxNumDueDateItems
+                ) {
+                    $dueDateValue = $this->getDueDate($bound_item->id, $showTime);
+                    $dueDateItemCount++;
+                }
+                $items[] = $this->formatHoldingItem(
+                    $bibId,
+                    $holdingDetails,
+                    $bound_item,
+                    $number,
+                    $dueDateValue
                 );
-                $hasHoldingNotes = !count($holdingNotes) > 0;
-                $holdingsStatements = array_map(
-                    $textFormatter,
-                    $bound_holding->holdingsStatements ?? []
-                );
-                $holdingsSupplements = array_map(
-                    $textFormatter,
-                    $bound_holding->holdingsStatementsForSupplements ?? []
-                );
-                $holdingsIndexes = array_map(
-                    $textFormatter,
-                    $bound_holding->holdingsStatementsForIndexes ?? []
-                );
-                $locationId = $bound_item->effectiveLocationId;
-                $locationData = $this->getLocationData($locationId);
-                $locationName = $locationData['name'];
-                $locationCode = $locationData['code'];
-                $holdingCallNumber = $bound_holding->callNumber ?? '';
-                $holdingCallNumberPrefix = $bound_holding->callNumberPrefix ?? '';
-                $callNumberData = $this->chooseCallNumber(
-                    $holdingCallNumberPrefix,
-                    $holdingCallNumber,
-                    $bound_item->itemLevelCallNumberPrefix ?? '',
-                    $bound_item->itemLevelCallNumber ?? ''
-                );
-                // concatenate enumeration fields if present
-                $enum = implode(
-                    ' ', array_filter(
-                        [
-                            $bound_item->volume ?? null,
-                            $bound_item->enumeration ?? null,
-                            $bound_item->chronology ?? null
-                        ]
-                    )
-                );
-                $enum = str_ends_with($holdingCallNumber, $enum) ? '' : $enum;
-
-                $items[] = $callNumberData + [
-                    'id' => $bibId,
-                    'item_id' => $bound->itemId,
-                    'holding_id' => $bound_holding->id,
-                    'number' => 0, # will be set afterwards
-                    'enumchron' => $enum,
-                    'barcode' => $bound_item->barcode ?? '',
-                    'status' => $bound_item->status->name,
-                    'availability' => $bound_item->status->name == 'Available',
-                    'is_holdable' => $this->isHoldable($locationName),
-                    'holdings_notes'=> $hasHoldingNotes ? $holdingNotes : null,
-                    'item_notes' => !empty($itemNotes) ? $itemNotes : null,
-                    'issues' => $holdingsStatements,
-                    'supplements' => $holdingsSupplements,
-                    'indexes' => $holdingsIndexes,
-                    'location' => $locationName,
-                    'location_code' => $locationCode,
-                    'reserve' => 'TODO',
-                    'addLink' => true
-                ];
             }
         }
         return $items;
@@ -331,12 +370,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
     public function getMyTransactions($patron)
     {
         // MSUL -- overridden to add sortBy and add fields to response
-        $dateConverter = new \VuFind\Date\Converter(
-            [
-                'displayDateFormat' => 'm/d/Y',
-                'displayTimeFormat' => 'h:i a'
-            ]
-        );
         $query = ['query' => 'userId==' . $patron['id'] . ' and status.name==Open sortBy dueDate/sort.ascending'];
         $transactions = [];
         foreach ($this->getPagedResults(
@@ -344,11 +377,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
             '/circulation/loans',
             $query
         ) as $trans) {
-            $date = new DateTime($trans->dueDate, new DateTimeZone('UTC'));
-            $localTimezone = (new DateTime)->getTimezone();
-            $date->setTimezone($localTimezone);
-
             $dueStatus = false;
+            $date = $this->getDateTimeFromString($trans->dueDate);
             $dueDateTimestamp = $date->getTimestamp();
 
             $now = time();
@@ -359,12 +389,12 @@ class Folio extends \VuFind\ILS\Driver\Folio
             }
             $transactions[] = [
                 'duedate' =>
-                    $dateConverter->convertToDisplayDate(
+                    $this->dateConverter->convertToDisplayDate(
                         'U',
                         $dueDateTimestamp
                     ),
                 'dueTime' =>
-                    $dateConverter->convertToDisplayTime(
+                    $this->dateConverter->convertToDisplayTime(
                         'U',
                         $dueDateTimestamp
                     ),
@@ -397,7 +427,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
     public function findReserves($course, $inst, $dept)
     {
         $retVal = [];
-        $idType = $this->getBibIdType();
         $query = [
             'query' => 'copiedItem.instanceDiscoverySuppress==false'
         ];
@@ -408,11 +437,9 @@ class Folio extends \VuFind\ILS\Driver\Folio
             '/coursereserves/reserves',
             $query
         ) as $item) {
-            if ($idType == 'hrid') {
-                $bibId = $item->copiedItem->instanceHrid ?? null;
-            } else {
-                $bibId = $item->copiedItem->instanceId ?? null;
-            }
+            $idProperty = $this->getBibIdType() === 'hrid'
+                ? 'instanceHrid' : 'instanceId';
+            $bibId = $item->copiedItem->$idProperty ?? null;
             if ($bibId !== null) {
                 $bibId = "folio." . $bibId;
             }
@@ -480,40 +507,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
-     * Check item location against list of configured locations
-     * where holds should be offered
-     *
-     * @param string $locationName locationName from getHolding
-     *
-     * @return bool
-     */
-    protected function isHoldable($locationName)
-    {
-        $mode = $this->config['Holds']['excludeHoldLocationsCompareMode'] ?? 'exact';
-        $excludeLocs = (array)($this->config['Holds']['excludeHoldLocations'] ?? []);
-
-        // Exclude checking by regex match
-        if (trim(strtolower($mode)) == "regex") {
-            foreach ($excludeLocs as $pattern) {
-                $match = @preg_match($pattern, $locationName);
-                // Invalid regex, skip this pattern
-                if ($match === false) {
-                    $this->logWarning(
-                        'Invalid regex found in excludeHoldLocations: ' .
-                        $pattern
-                    );
-                    continue;
-                }
-                if ($match === 1) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        // Otherwise exclude checking by exact match
-        return !in_array($locationName, $excludeLocs);
-    }
-    /**
      * Get Pick Up Locations
      *
      * This is responsible get a list of valid locations for holds / recall
@@ -537,11 +530,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
     {
         $query = ['query' => 'pickupLocation=true'];
         $locations = [];
-        foreach ($this->getPagedResults(
-            'servicepoints',
-            '/service-points',
-            $query
-        ) as $servicepoint) {
+        foreach (
+            $this->getPagedResults(
+                'servicepoints',
+                '/service-points',
+                $query
+            ) as $servicepoint
+        ) {
             if ($this->isPickupable($servicepoint->discoveryDisplayName)) {
                 $locations[] = [
                     'locationID' => $servicepoint->id,
@@ -591,80 +586,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
         // Otherwise exclude checking by exact match
         return !in_array($servicepoint, $excludeLocs);
 
-    }
-
-    /*
-     * https://github.com/vufind-org/vufind/pull/2739 has been merged to fix the issue we
-     * were having. Once it is included in a release, we can remove this extended function.
-     */
-    public function placeHold($holdDetails)
-    {
-        $default_request = $this->config['Holds']['default_request'] ?? 'Hold';
-        if (
-            !empty($holdDetails['requiredByTS'])
-            && !is_int($holdDetails['requiredByTS'])
-        ) {
-            throw new ILSException('hold_date_invalid');
-        }
-        $requiredBy = !empty($holdDetails['requiredByTS'])
-            ? gmdate('Y-m-d', $holdDetails['requiredByTS']) : null;
-
-        $isTitleLevel = ($holdDetails['level'] ?? '') === 'title';
-        if ($isTitleLevel) {
-            $instance = $this->getInstanceByBibId($holdDetails['id']);
-            $baseParams = [
-                'instanceId' => $instance->id,
-                'requestLevel' => 'Title',
-            ];
-        } else {
-            // Note: early Lotus releases require instanceId and holdingsRecordId
-            // to be set here as well, but the requirement was lifted in a hotfix
-            // to allow backward compatibility. If you need compatibility with one
-            // of those versions, you can add additional identifiers here, but
-            // applying the latest hotfix is a better solution!
-            $baseParams = ['itemId' => $holdDetails['item_id']];
-        }
-        $requestBody = $baseParams + [
-            'requestType' => $holdDetails['status'] == 'Available'
-                ? 'Page' : $default_request,
-            'requesterId' => $holdDetails['patron']['id'],
-            'requestDate' => date('c'),
-            'fulfilmentPreference' => 'Hold Shelf',
-            'requestExpirationDate' => $requiredBy,
-            'pickupServicePointId' => $holdDetails['pickUpLocation'],
-        ];
-        if (!empty($holdDetails['proxiedUser'])) {
-            $requestBody['requesterId'] = $holdDetails['proxiedUser'];
-            $requestBody['proxyUserId'] = $holdDetails['patron']['id'];
-        }
-        if (!empty($holdDetails['comment'])) {
-            $requestBody['patronComments'] = $holdDetails['comment'];
-        }
-        $response = $this->makeRequest(
-            'POST',
-            '/circulation/requests',
-            json_encode($requestBody),
-            [],
-            true
-        );
-        if ($response->isSuccess()) {
-            $json = json_decode($response->getBody());
-            $result = [
-                'success' => true,
-                'status' => $json->status,
-            ];
-        } else {
-            try {
-                $json = json_decode($response->getBody());
-                $result = [
-                    'success' => false,
-                    'status' => $json->errors[0]->message,
-                ];
-            } catch (Exception $e) {
-                $this->throwAsIlsException($e, $response->getBody());
-            }
-        }
-        return $result;
     }
 
     /**
@@ -787,7 +708,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $idField = $idType === 'instance' ? 'id' : $idType;
 
         $query = [
-            'query' => '(' . $idField . '=="' . $this->escapeCql($bibId) . '")'
+            'query' => '(' . $idField . '=="' . $this->escapeCql($bibId) . '")',
         ];
         $response = $this->makeRequest('GET', '/instance-storage/instances', $query);
         $instances = json_decode($response->getBody());
@@ -822,7 +743,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $json = json_decode($response->getBody());
             if (!$response->isSuccess() || !$json) {
                 $msg = $json->errors[0]->message ?? json_last_error_msg();
-                throw new ILSException($msg);
+                throw new ILSException("Error: '$msg' fetching '$responseKey'");
             }
             $numFound = 0;
             foreach ($json->$responseKey ?? [] as $item) {
@@ -831,7 +752,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
             }
             $offset += $limit;
 
-            //print_r("\nURL: " . $interface . " offset: " . $offset . " limit: " . $limit . " currentcount: " . $numFound . "\n");
             // Continue until the results are not the limit value (i.e. the last page of results)
         } while ($numFound == $limit);
     }
