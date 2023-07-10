@@ -198,7 +198,7 @@
               : $this->url('userList', ['id' => $list_id]);
           $deleteUrlGet = $deleteUrl . '?delete=' . urlencode($id) . '&amp;source=' . urlencode($source);
 
-          $dLabel = 'delete-label-' . preg_replace('[\W]', '-', str_replace('.','_', $id));
+          $dLabel = 'delete-label-' . preg_replace('[\W]', '-', str_replace('.', '_', $id));
         ?>
         <div class="dropdown">
           <a class="dropdown-toggle icon-link" id="<?=$dLabel ?>" role="button" data-toggle="dropdown" href="<?=$deleteUrlGet ?>">
@@ -219,24 +219,24 @@
     <?php endif; ?>
   </div>
   <?php
-    $escId = str_replace('.','_', $this->escapeJs($id));
+    $escId = str_replace('.', '_', $this->escapeJs($id));
     $escSource = $this->escapeJs($source);
     $script = <<<JS
-$(document).ready(function() {
-  $('#confirm_delete_item_${escId}').click(function() {
-    //e.preventDefault();
-    $.post('${deleteUrl}', {
-        'delete':'${escId}'.replace(/_/g,'.'),
-        'source':'${escSource}',
-        'confirm':true
-      },
-      function(){
-        location.reload()
-      }
-    );
-  });
-});
-JS;
+        $(document).ready(function() {
+          $('#confirm_delete_item_${escId}').click(function() {
+            //e.preventDefault();
+            $.post('${deleteUrl}', {
+                'delete':'${escId}'.replace(/_/g,'.'),
+                'source':'${escSource}',
+                'confirm':true
+              },
+              function(){
+                location.reload()
+              }
+            );
+          });
+        });
+        JS;
   ?>
   <?=$this->inlineScript(\Laminas\View\Helper\HeadScript::SCRIPT, $script, 'SET');?>
 </li>

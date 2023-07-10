@@ -43,7 +43,7 @@
       $searchClass = preg_replace('/([a-zA-Z])(?=[A-Z])/', '$1-', $searchClass);
     }
     $this->resultsClass = 'search-results-' . strtolower($searchClass);
-  
+
   $this->render('search/results-scripts.phtml', ['displayVersions' => !empty($this->params->getOptions()->getVersionsAction())]);
 
   // Load only if list view parameter is NOT full:

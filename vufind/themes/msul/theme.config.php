@@ -2,10 +2,10 @@
 return [
     'extends' => 'bootstrap3',
 
-    'less' => array(
+    'less' => [
         'active' => true,
         'compiled.less'
-    ),
+    ],
     'js' => [
         ['file' => 'get-this-dropdown.js', 'priority' => 450],
     ],

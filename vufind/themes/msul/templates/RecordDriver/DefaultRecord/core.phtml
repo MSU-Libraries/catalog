@@ -60,7 +60,7 @@
 
     <?php $summary = $this->driver->getSummary();
       if (isset($summary)):
-        for ($i=0; $i < count($summary); $i++):
+        for ($i = 0; $i < count($summary); $i++):
           $this->escapeHtml($summary[$i]);
         endfor;
         $summary = implode(" ", $summary);

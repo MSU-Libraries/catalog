@@ -3,7 +3,7 @@ $selected = '';
 foreach ($this->statusItems as $item) {
   if ($selected == '') {
     $selected = $item;
-  } else if ($selected['status'] != 'Available') {
+  } elseif ($selected['status'] != 'Available') {
     if ($item['status'] == 'Available' || ($selected['status'] != 'Restricted' && $item['status'] == 'Restricted'))
       $selected = $item;
   }
@@ -13,14 +13,14 @@ if ($selected != '') {
   $location = $selected['location'];
   $callnumber = $selected['callnumber'];
   $callNumPrefix = !empty($selected['callnumber_prefix']) ? $selected['callnumber_prefix'] . ' ' : '';
-  if (in_array($status, array('Aged to lost', 'Claimed returned', 'Declared lost', 'In process', 'In process (non-requestable)',
-      'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed', 'Unknown', 'Withdrawn')))
+  if (in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process', 'In process (non-requestable)',
+      'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed', 'Unknown', 'Withdrawn']))
     $status = 'Unavailable';
-  else if (in_array($status, array('Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out')))
+  else if (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out']))
     $status = 'Checked Out';
   else if ($status == 'Restricted')
     $status = 'Library Use Only';
-  else if (!in_array($status, array('Available', 'Unavailable')))
+  else if (!in_array($status, ['Available', 'Unavailable']))
     $status = 'Unknown status';
 }
 ?>
