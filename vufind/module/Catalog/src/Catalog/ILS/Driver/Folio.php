@@ -29,8 +29,6 @@
 
 namespace Catalog\ILS\Driver;
 
-use DateTime;
-use DateTimeZone;
 use VuFind\Exception\ILS as ILSException;
 
 /**
