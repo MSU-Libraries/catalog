@@ -33,6 +33,9 @@ return [
              * Icons assigned without set will use the defaultSet.
              * In order to specify extra CSS classes, you must also specify a set.
              */
+            'send-sms' => 'FontAwesome:mobile',
+            'user-list-add' => 'FontAwesome:star',
+
         ],
     ],
 
