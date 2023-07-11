@@ -44,6 +44,8 @@ RUN \
         ./vufind_${VUFIND_VERSION}.deb && \
     apt clean && \
     rm vufind_${VUFIND_VERSION}.deb && \
+    # Install VuFind dev dependencies, for the tests
+    composer --working-dir=/usr/local/vufind/ update && \
     # Remove unused dependencies after Vufind is installed
     # Disabled for upgrade to Solr 9
     # mv /usr/local/vufind/solr /tmp && \
