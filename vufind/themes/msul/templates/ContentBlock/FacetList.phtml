@@ -20,11 +20,11 @@
     <div class="home-facet home-reserves">
       <h2>Course Reserves</h2>
       <div class="home-facet-container">
-  <!--    <p><?=$this->transEsc('Search for items on reserve:')?></p> -->
           <form class="form-inline" method="get" name="reservesSearchForm" action="Search/Reserves">
-            <label for="reservesSearchForm_lookfor"><?=$this->transEsc("Your search terms")?></label>
+            <label class="mb-2" for="reservesSearchForm_lookfor">Search by <strong>Instructor</strong> or by <strong>Course</strong></label>
             <input id="reservesSearchForm_lookfor" placeholder="Search terms" type="text" name="lookfor" size="40" value="" <?=$this->searchOptions('SolrReserves')->autocompleteEnabled() ? ' class="form-control autocomplete searcher:SolrReserves type:Reserves"' : ''?> >
             <input class="btn btn-primary" type="submit" name="submit" value="<?=$this->transEscAttr("Find")?>">
+            <p><small>Course codes must be entered with a space between the course and code (e.g.&nbsp;acc&nbsp;341)</small></p>
           </form>
       </div>
     </div>

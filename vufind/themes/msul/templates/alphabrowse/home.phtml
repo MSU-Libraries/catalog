@@ -51,6 +51,7 @@
 <?php if (true || !$this->searchbox()->alphaBrowseOptionsEnabled() || empty($this->source)): ?>
   <div class="search container navbar">
     <div class="backtocat"><p><a style="text-decoration:none;" href="/Search">&#8592;&nbsp;&nbsp;Back to the catalog</a></p></div>
+  <h2 class="mb-5">Browse Alphabetically</h2>
   <form class="form-inline" method="get" action="<?=$this->url('alphabrowse-home')?>" name="alphaBrowseForm" id="alphaBrowseForm">
     <label for="alphaBrowseForm_source"><?=$this->transEsc('Browse Alphabetically') ?></label>
     <select id="alphaBrowseForm_source" name="source" class="form-control">
