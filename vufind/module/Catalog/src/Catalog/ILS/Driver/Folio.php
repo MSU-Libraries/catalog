@@ -47,7 +47,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
     /**
      * Support method for getHolding(): extract details from the holding record that
      * will be needed by formatHoldingItem() below.
-     * 
+     *
      * See https://github.com/vufind-org/vufind/pull/2983
      *
      * @param object $holding FOLIO holding record (decoded from JSON)
@@ -268,9 +268,9 @@ class Folio extends \VuFind\ILS\Driver\Folio
 
     /**
      * Get the bound-with items associated with the instance ID
-     * 
-     * @param string $bibId         Bib-level id
-     * @param string $instanceId    Instance-level id
+     *
+     * @param string $bibId      Bib-level id
+     * @param string $instanceId Instance-level id
      *
      * @return array An array of associative holding arrays
      */
@@ -651,7 +651,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
             . 'or proxyUserId == "' . $patron['id'] . '")';
         $query = [
             // MSU customization: sorting
-            'query' => '(' . $userQuery . ' and status == Open*) sortBy requestDate/sort.ascending title/sort.ascending',
+            'query' => '(' . $userQuery . ' and status == Open*) '
+            . 'sortBy requestDate/sort.ascending title/sort.ascending',
         ];
         $holds = [];
         $allowCancelingAvailableRequests
