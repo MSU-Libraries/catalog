@@ -19,12 +19,10 @@ return [
     'factories' => [
       'Catalog\\Controller\\RecordController' => 'VuFind\\Controller\\AbstractBaseWithConfigFactory',
       'Catalog\\Controller\\MyResearchController' => 'VuFind\\Controller\\AbstractBaseFactory',
-      'Catalog\\Controller\\FeedbackController' => 'VuFind\\Controller\\AbstractBaseFactory',
     ],
     'aliases' => [
       'VuFind\\Controller\\RecordController' => 'Catalog\\Controller\\RecordController',
       'VuFind\\Controller\\MyResearchController' => 'Catalog\\Controller\\MyResearchController',
-      'VuFind\\Controller\\FeedbackController' => 'Catalog\\Controller\\FeedbackController',
     ],
   ],
   'vufind' => [
@@ -83,6 +81,14 @@ return [
         ],
         'aliases' => [
           'util/index_reserves' => 'Catalog\\Command\\Util\\IndexReservesCommand',
+        ],
+      ],
+      'form_handler' => [
+        'factories' => [
+          'Catalog\\Form\\Handler\\Email' => 'VuFind\\Form\\Handler\\EmailFactory'
+        ],
+        'aliases' => [
+          'VuFind\\Form\\Handler\\Email' => 'Catalog\\Form\\Handler\\Email',
         ],
       ],
     ],
