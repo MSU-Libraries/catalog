@@ -630,24 +630,40 @@ class Folio extends \VuFind\ILS\Driver\Folio
      */
     public function getMyHolds($patron)
     {
-        // MSUL customization to add fields (including multi backend prefix) and sorting to query
+        $userQuery = '(requesterId == "' . $patron['id'] . '" '
+            . 'or proxyUserId == "' . $patron['id'] . '")';
         $query = [
-            'query' => '(requesterId == "' . $patron['id'] . '"  ' .
-            'and status == Open*) sortBy requestDate/sort.ascending title/sort.ascending'
+            // MSU customization: sorting
+            'query' => '(' . $userQuery . ' and status == Open*) sortBy requestDate/sort.ascending title/sort.ascending'
         ];
         $holds = [];
         $allowCancelingAvailableRequests
             = $this->config['Holds']['allowCancelingAvailableRequests'] ?? true;
-        foreach ($this->getPagedResults(
-            'requests',
-            '/request-storage/requests',
-            $query
-        ) as $hold) {
-            $requestDate = date_create($hold->requestDate);
+        foreach (
+            $this->getPagedResults(
+                'requests',
+                '/request-storage/requests',
+                $query
+            ) as $hold
+        ) {
+            $requestDate = $this->dateConverter->convertToDisplayDate(
+                "Y-m-d H:i",
+                $hold->requestDate
+            );
             // Set expire date if it was included in the response
             $expireDate = isset($hold->requestExpirationDate)
-                ? date_create($hold->requestExpirationDate) : null;
-            $available = (string)$hold->status === 'Open - Awaiting pickup';
+                ? $this->dateConverter->convertToDisplayDate(
+                    "Y-m-d H:i",
+                    $hold->requestExpirationDate
+                )
+                : null;
+            // Set lastPickup Date if provided, format to j M Y
+            $lastPickup = isset($hold->holdShelfExpirationDate)
+                ? $this->dateConverter->convertToDisplayDate(
+                    "Y-m-d H:i",
+                    $hold->holdShelfExpirationDate
+                )
+                : null;
             $servicePoint = isset($hold->pickupServicePointId)
                 ? $this->getPickupLocation($hold->pickupServicePointId) : null;
             $location = isset($servicePoint) && count($servicePoint) == 1
@@ -655,27 +671,54 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $request_id = $this->getBibId(null, null, $hold->itemId);
             $updateDetails = (!$available || $allowCancelingAvailableRequests)
                 ? (string)$request_id : '';
-            $rec = [
+            $currentHold = [
                 'type' => $hold->requestType,
-                'create' => date_format($requestDate, "j M Y"),
-                'expire' => isset($expireDate)
-                    ? date_format($expireDate, "j M Y") : "",
+                'create' => $requestDate,
+                'expire' => $expireDate ?? "",
+                // MSU customization: id changed for multi-backend
                 'id' => 'folio.' . $request_id,
-                'available' => $available,
-                'processed' => $hold->status !== 'Open - Not yet filled',
-                'location' => $location,
-                'updateDetails' => $updateDetails,
                 'item_id' => $hold->itemId,
                 'reqnum' => $hold->id,
                 // Title moved from item to instance in Lotus release:
                 'title' => $hold->instance->title ?? $hold->item->title ?? '',
+                'available' => in_array(
+                    $hold->status,
+                    $this->config['Holds']['available']
+                    ?? $this->defaultAvailabilityStatuses
+                ),
+                'in_transit' => in_array(
+                    $hold->status,
+                    $this->config['Holds']['in_transit']
+                    ?? $this->defaultInTransitStatuses
+                ),
+                'last_pickup_date' => $lastPickup,
+                'position' => $hold->position ?? null,
+                // MSU customization: fields added:
+                'processed' => $hold->status !== 'Open - Not yet filled',
+                'location' => $location,
+                'updateDetails' => $updateDetails,
+                'item_id' => $hold->itemId,
                 'status' => $hold->status,
-                // last_pickup_date,
             ];
-            if ($hold->status === 'Open - In transit') {
-                $rec['in_transit'] = true;
+            // If this request was created by a proxy user, and the proxy user
+            // is not the current user, we need to indicate their name.
+            if (
+                ($hold->proxyUserId ?? $patron['id']) !== $patron['id']
+                && isset($hold->proxy)
+            ) {
+                $currentHold['proxiedBy']
+                    = $this->userObjectToNameString($hold->proxy);
             }
-            $holds[] = $rec;
+            // If this request was not created for the current user, it must be
+            // a proxy request created by the current user. We should indicate this.
+            if (
+                ($hold->requesterId ?? $patron['id']) !== $patron['id']
+                && isset($hold->requester)
+            ) {
+                $currentHold['proxiedFor']
+                    = $this->userObjectToNameString($hold->requester);
+            }
+            $holds[] = $currentHold;
         }
         return $holds;
     }
