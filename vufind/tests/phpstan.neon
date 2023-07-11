@@ -13,7 +13,6 @@ parameters:
         - '#Call to an undefined static method Catalog\\GetThis\\RegexLookup::[A-Z0-9_]+\(\).#'
         - '#Instantiated class SimpleSAML\\Auth\\Simple not found.#'
         - '#Instantiated class [A-Za-z\\]+ArgumentCountError not found.#'
-        - '#Caught class [A-Za-z\\]+Exception not found.#'
         - '#Call to an undefined method Catalog\\Controller\\FeedbackController::[A-Za-z0-9_]+\(\).#'
     bootstrapFiles:
         - phpstan-constants.php
