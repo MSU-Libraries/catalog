@@ -14,7 +14,6 @@ parameters:
         - '#Instantiated class SimpleSAML\\Auth\\Simple not found.#'
         - '#Instantiated class [A-Za-z\\]+ArgumentCountError not found.#'
         - '#Caught class [A-Za-z\\]+Exception not found.#'
-        - '#Call to an undefined method Catalog\\Controller\\FeedbackController::[A-Za-z0-9_]+\(\).#'
     bootstrapFiles:
         - phpstan-constants.php
     level: 1
