@@ -38,7 +38,7 @@ RUN \
     apt clean && \
     rm vufind_${VUFIND_VERSION}.deb && \
     # Link to phpunit where Vufind expects it, without installing all composer dev dependencies
-    ln -s /usr/local/vufind/vendor/bin/phpunit /usr/bin/phpunit && \
+    ln -s /usr/bin/phpunit /usr/local/vufind/vendor/bin/phpunit && \
     # Remove unused dependencies after Vufind is installed
     # Disabled for upgrade to Solr 9
     # mv /usr/local/vufind/solr /tmp && \
