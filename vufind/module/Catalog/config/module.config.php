@@ -85,7 +85,7 @@ return [
       ],
       'form_handler' => [
         'factories' => [
-          'Catalog\\Form\\Handler\\Email' => 'VuFind\\Form\\Handler\\EmailFactory'
+          'Catalog\\Form\\Handler\\Email' => 'VuFind\\Form\\Handler\\EmailFactory',
         ],
         'aliases' => [
           'VuFind\\Form\\Handler\\Email' => 'Catalog\\Form\\Handler\\Email',
