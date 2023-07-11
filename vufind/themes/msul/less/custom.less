@@ -3,6 +3,44 @@
 @import "components/variables";
 @import "components/sidebar";
 
+//Utility Classes from Bootstrap 5
+
+.mb-1 {
+  margin-bottom:0.25rem !important;
+}
+.mb-2 {
+  margin-bottom:0.5rem !important;
+}
+.mb-3 {
+  margin-bottom:1rem !important;
+}
+.mb-4 {
+  margin-bottom:1.5rem !important;
+}
+.mb-5 {
+  margin-bottom:3rem !important;
+}
+.fw-light {
+  font-weight:300 !important;
+}
+.fw-normal {
+  font-weight:400 !important;
+}
+.fw-medium {
+  font-weight:500 !important;
+}
+.fw-semibold {
+  font-weight:600 !important;
+}
+.fw-bold {
+  font-weight:700 !important;
+}
+.fw-bolder {
+  font-weight:bolder !important;
+}
+
+
+
 //container width
 .container {
   width: 100%;
@@ -512,22 +550,10 @@ input[type="checkbox"] {
   }
 
   .home-facet.home-reserves {
-    label {
-      visibility:hidden;
-      position:relative;
-      margin-bottom:2rem;
+    input {
+      display:inline-block;
     }
-    label:after {
-      visibility: visible;
-      position: absolute;
-      top: 0;
-      left: 0;
-      content: "Search for items on reserve:";
-    }
-    #reservesSearchForm_lookfor {
-      width:100%;
-    }
-  }
+  } 
 .home-facet.home-askalib::after {
       position:absolute; width:0; height:0; overflow:hidden; z-index:-1; /* hide images */
       content:url("/themes/msul/images/Icons_AskALib_Default.svg") url("/themes/msul/images/Icons_AskALib_Hover.svg"); /* load images */

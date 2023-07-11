@@ -29,8 +29,6 @@
 
 namespace Catalog\ILS\Driver;
 
-use DateTime;
-use DateTimeZone;
 use VuFind\Exception\ILS as ILSException;
 
 /**
@@ -309,7 +307,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     '/item-storage/items/' . $bound->itemId
                 );
                 $bound_item = json_decode($response->getBody());
-                $number = $item->copyNumber ?? null;
+                $number = $bound_item->copyNumber ?? null;
                 $dueDateValue = '';
                 if (
                     $bound_item->status->name == 'Checked out'
@@ -682,6 +680,11 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $hold->holdShelfExpirationDate
                 )
                 : null;
+            $available = in_array(
+                $hold->status,
+                $this->config['Holds']['available']
+                ?? $this->defaultAvailabilityStatuses
+            );
             $servicePoint = isset($hold->pickupServicePointId)
                 ? $this->getPickupLocation($hold->pickupServicePointId) : null;
             $location = isset($servicePoint) && count($servicePoint) == 1
@@ -699,11 +702,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 'reqnum' => $hold->id,
                 // Title moved from item to instance in Lotus release:
                 'title' => $hold->instance->title ?? $hold->item->title ?? '',
-                'available' => in_array(
-                    $hold->status,
-                    $this->config['Holds']['available']
-                    ?? $this->defaultAvailabilityStatuses
-                ),
+                'available' => $available,
                 'in_transit' => in_array(
                     $hold->status,
                     $this->config['Holds']['in_transit']
@@ -715,7 +714,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 'processed' => $hold->status !== 'Open - Not yet filled',
                 'location' => $location,
                 'updateDetails' => $updateDetails,
-                'item_id' => $hold->itemId,
                 'status' => $hold->status,
             ];
             // If this request was created by a proxy user, and the proxy user
