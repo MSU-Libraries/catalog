@@ -15,20 +15,27 @@ RUN \
         gettext-base locales msmtp-mta rsync screen libxml-xpath-perl \
         nodejs npm git pigz libxml2-utils libmarc-xml-perl \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
-        mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-codesniffer \
-        php-curl php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml phpunit && \
+        mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php \
+        php-curl php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
 RUN apt install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
 
+ARG GITHUB_USER_TOKEN
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
+
+COPY install-composer.sh /install-composer.sh
 
 RUN \
     # Setup Timezone
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
+    # Install Composer
+    /install-composer.sh && \
+    mv /composer.phar /usr/local/bin/composer && \
+    rm /install-composer.sh && \
     # Get the VuFind package
     wget https://github.com/vufind-org/vufind/releases/download/v${VUFIND_VERSION}/vufind_${VUFIND_VERSION}.deb && \
     # Install the package
@@ -37,9 +44,6 @@ RUN \
         ./vufind_${VUFIND_VERSION}.deb && \
     apt clean && \
     rm vufind_${VUFIND_VERSION}.deb && \
-    # Link to phpunit where Vufind expects it, without installing all composer dev dependencies
-    ln -s /usr/bin/phpunit /usr/local/vufind/vendor/bin/phpunit && \
-    ln -s /usr/bin/phpcs /usr/local/vufind/vendor/bin/phpcs && \
     # Remove unused dependencies after Vufind is installed
     # Disabled for upgrade to Solr 9
     # mv /usr/local/vufind/solr /tmp && \
