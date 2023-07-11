@@ -15,8 +15,8 @@ RUN \
         gettext-base locales msmtp-mta rsync screen libxml-xpath-perl \
         nodejs npm git pigz libxml2-utils libmarc-xml-perl \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
-        mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-curl \
-        php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml phpunit && \
+        mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php php-codesniffer \
+        php-curl php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml phpunit && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
@@ -39,6 +39,7 @@ RUN \
     rm vufind_${VUFIND_VERSION}.deb && \
     # Link to phpunit where Vufind expects it, without installing all composer dev dependencies
     ln -s /usr/bin/phpunit /usr/local/vufind/vendor/bin/phpunit && \
+    ln -s /usr/bin/phpcs /usr/local/vufind/vendor/bin/phpcs && \
     # Remove unused dependencies after Vufind is installed
     # Disabled for upgrade to Solr 9
     # mv /usr/local/vufind/solr /tmp && \
