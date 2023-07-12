@@ -226,7 +226,7 @@ backup_db() {
     verbose "Starting backup of database"
     TIMESTAMP=$( date +%Y%m%d%H%M%S )
     for DB in "${DBS[@]}"; do
-        if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p12345 --triggers --routines --column-statistics=0 vufind > ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql 2>&1); then
+        if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p12345 --triggers --routines --column-statistics=0 --compress vufind 2>&1 > >(gzip > ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql.gz )); then
             verbose "ERROR: Failed to successfully backup the database from ${DB}. ${OUTPUT}" 1
             exit 1
         fi
@@ -242,11 +242,11 @@ backup_db() {
         verbose "ERROR: Could not navigate into database backup directory (${ARGS[SHARED_DIR]}/db)" 1
         exit 1
     fi
-    if ! tar -cf "${TIMESTAMP}".tar ./*"${TIMESTAMP}".sql; then
+    if ! tar -cf "${TIMESTAMP}".tar ./*"${TIMESTAMP}".sql.gz; then
         verbose "ERROR: Failed to compress the database dumps." 1
         exit 1
     else
-        if ! rm ./*"${TIMESTAMP}.sql"; then
+        if ! rm ./*"${TIMESTAMP}.sql.gz"; then
             verbose "ERROR: Failed to remove the uncompressed database dumps" 1 # Not exiting
         fi
     fi
