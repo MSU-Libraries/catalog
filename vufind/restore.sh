@@ -126,6 +126,10 @@ verbose() {
 }
 
 restore_collection() {
+    # Select one Solr node to perform backups on
+    SOLR_NODES=(solr1 solr2 solr3)
+    SOLR_IDX="$(( RANDOM % ${#SOLR_NODES[@]} ))"
+    SOLR_NODE="${SOLR_NODES[$SOLR_IDX]}"
     COLL="$1"
     BACKUP_PATH="$2"
     BACKUP_FILE="$(basename "${BACKUP_PATH}")"
@@ -144,7 +148,7 @@ restore_collection() {
 
     # Trigger the backup in Solr
     verbose "Starting restore of '${COLL}' index"
-    if ! curl "http://solr2:8983/solr/${COLL}/replication?command=restore&location=/mnt/solr_backups/${COLL}&name=${BACKUP_FILE//snapshot.}" > /dev/null 2>&1; then
+    if ! curl "http://${SOLR_NODE}:8983/solr/${COLL}/replication?command=restore&location=/mnt/solr_backups/${COLL}&name=${BACKUP_FILE//snapshot.}" > /dev/null 2>&1; then
         verbose "ERROR: Failed to trigger a restore of the '${COLL}' collection in Solr!" 1
         exit 1
     fi
@@ -153,7 +157,7 @@ restore_collection() {
     sleep 3
     MAX_WAITS=500
     CUR_WAIT=1
-    URL="http://solr2:8983/solr/${COLL}/replication?command=restorestatus&wt=json"
+    URL="http://${SOLR_NODE}:8983/solr/${COLL}/replication?command=restorestatus&wt=json"
     STAT=""
     ACTUAL=""
     verbose "Waiting until restore is complete of ${BACKUP_FILE}"
@@ -177,38 +181,58 @@ restore_collection() {
     fi
 }
 
+cleanup() {
+    if ! rm -rf /tmp/restore; then
+        verbose "ERROR: could not remove temporary restore location /tmp/restore" 1 # won't exit
+    fi
+}
+
 restore_db() {
+    DBS=( galera1 galera2 galera3 )
+    DB_IDX="$(( RANDOM % ${#DBS[@]} ))"
+    declare -g DB_NODE="${DBS[$DB_IDX]}"
     mkdir -p /tmp/restore
+
+    # If interrupted, we'll try to clean up temp files
+    trap cleanup SIGTERM SIGINT EXIT
 
     verbose "Extracting the backup"
     if ! tar -xf ${ARGS[DB]} -C /tmp/restore; then
         verbose "ERROR: could not extract ${ARGS[DB]} to /tmp/restore" 1
         exit 1
     fi
-    BACKUP="$(find /tmp/restore -type f -name "galera${NODE}-*.sql")"
+    BACKUP="$(find /tmp/restore -type f -name "galera${NODE}-*.sql.gz")"
 
     verbose "Temporarily setting Galera node to desychronized state"
-    if ! mysql -h galera2 -u root -p12345 -e "SET GLOBAL wsrep_desync = ON" 2>/dev/null; then
-        verbose "ERROR: Failed to set node to desychronized state. Unsafe to continue backup." 1
-        exit 1
+    if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p12345 -e "SET GLOBAL wsrep_desync = ON" 2>&1); then
+        # Check if it was a false negative and the state was actually set
+        if ! mysql -h "$DB_NODE" -u root -p12345 -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
+          | grep 1 > /dev/null 2>&1; then
+            verbose "ERROR: Failed to set node to desychronized state. Unsafe to continue restore. ${OUTPUT}" 1
+            exit 1
+        fi
     fi
 
     verbose "Starting restore of database using ${BACKUP}"
-    if ! mysql -h galera2 -u root -p12345 vufind < "${BACKUP}" 2>/dev/null; then
-        verbose "ERROR: Failed to successfully restore the database" 1
+    if ! OUTPUT=$(gunzip < "${BACKUP}" | mysql -h "$DB_NODE" -u root -p12345 vufind 2>&1); then
+        verbose "ERROR: Failed to successfully restore the database. ${OUTPUT}" 1
         exit 1
     fi
 
     verbose "Re-enabling Galera node to sychronized state"
-    if ! mysql -h galera2 -u root -p12345 -e "SET GLOBAL wsrep_desync = OFF" 2>/dev/null; then
-        verbose "ERROR: Failed to re-set node to synchronized state after restore was complete." 1
-        exit 1
+    if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p12345 -e "SET GLOBAL wsrep_desync = OFF" 2>&1); then
+        # Check if it was a false negative and the state was actually set
+        if ! mysql -h "$DB_NODE" -u root -p12345 -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
+          | grep 0 > /dev/null 2>&1; then
+            verbose "ERROR: Failed to re-set node to synchronized state after restore was complete. ${OUTPUT}" 1
+            exit 1
+        fi
     fi
 
     verbose "Removing temporary uncompressed backup"
-    if ! rm -rf /tmp/restore; then
-        verbose "ERROR: could not remove temporary restore location /tmp/restore" 1 # won't exit
-    fi
+    # Reset the database and unset our trap
+    cleanup
+    trap - SIGTERM SIGINT EXIT
 
     verbose "Completed restore of database"
 }
