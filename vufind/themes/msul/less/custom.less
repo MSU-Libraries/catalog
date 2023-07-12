@@ -539,10 +539,12 @@ input[type="checkbox"] {
     label {
       margin-bottom:0.5rem;
       font-weight:normal;
-      color:@gray-darker;
     }
     input, select {
       margin-bottom:1.5rem;
+    }
+    #reservesSearchForm_lookfor, #alphaBrowseForm_from {
+      width:100%;
     }
     h2 {
       margin-bottom:2rem;
@@ -554,6 +556,8 @@ input[type="checkbox"] {
       display:inline-block;
     }
   } 
+
+
 .home-facet.home-askalib::after {
       position:absolute; width:0; height:0; overflow:hidden; z-index:-1; /* hide images */
       content:url("/themes/msul/images/Icons_AskALib_Default.svg") url("/themes/msul/images/Icons_AskALib_Hover.svg"); /* load images */
@@ -1197,5 +1201,17 @@ body.template-dir-myresearch.template-name-profile {
   .alert-info {
     background:none;
     border:none;
+  }
+}
+
+//Align sidebar facets 'start' instead of align-items:center
+
+.facet,
+.facet-group .title,
+.user-list-link {
+  align-items: start;
+
+  .text, .hierarchical-facet-anchor {
+    align-items: start;
   }
 }
