@@ -119,6 +119,7 @@ else
     local FILES=$1
     local LOGFILE
     if [ $MAX_BATCH_COUNT -eq "1" ]
+    then
       LOGFILE=$BASEPATH/log/`basename $FILES`.log
     else
       TIMESTAMP=$( date +%Y%m%d%H%M%S )
@@ -135,7 +136,7 @@ find $BASEPATH -maxdepth 1 \( -iname "*.xml" -o -iname "*.mrc" -o -iname "*.marc
 do
   # Logging output handled by log() function
   # PROPERTIES_FILE passed via environment
-  $VUFIND_HOME/import-marc.sh $files 2> >(log $files)
+  /import-marc.sh $files 2> >(log $files)
   if [ "$?" -eq "0" ] && [ $MOVE_DATA == true ]
   then
     for file in $files
