@@ -136,7 +136,7 @@ find $BASEPATH -maxdepth 1 \( -iname "*.xml" -o -iname "*.mrc" -o -iname "*.marc
 do
   # Logging output handled by log() function
   # PROPERTIES_FILE passed via environment
-  /import-marc.sh $files 2> >(log $files)
+  $VUFIND_HOME/import-marc.sh $files 2> >(log $files)
   if [ "$?" -eq "0" ] && [ $MOVE_DATA == true ]
   then
     for file in $files
