@@ -366,12 +366,12 @@ import() {
 
     verbose "Running batch import"
     if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
-        if ! /usr/local/vufind/harvest/batch-import-marc.sh hlm/ | tee "$LOG_FILE"; then
+        if ! /batch-import-marc.sh hlm/ | tee "$LOG_FILE"; then
             verbose "ERROR: Batch import failed with code: $?" 1
             exit 1
         fi
     else
-        if ! /usr/local/vufind/harvest/batch-import-marc.sh hlm/ >> "$LOG_FILE"; then
+        if ! /batch-import-marc.sh hlm/ >> "$LOG_FILE"; then
             verbose "ERROR: Batch import failed with code: $?" 1
             exit 1
         fi
