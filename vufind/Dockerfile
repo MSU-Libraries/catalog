@@ -172,7 +172,7 @@ COPY startup-cron.sh /startup-cron.sh
 COPY startup-croncache.sh /startup-croncache.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
 COPY import-marc.sh /usr/local/vufind/import-marc.sh
-COPY batch-import-marc.sh /batch-import-marc.sh
+COPY batch-import-marc.sh /usr/local/vufind/harvest/batch-import-marc.sh
 COPY hlm-harvest-and-import.sh /hlm-harvest-and-import.sh
 COPY authority-harvest-and-import.sh /authority-harvest-and-import.sh
 COPY backup.sh /backup.sh

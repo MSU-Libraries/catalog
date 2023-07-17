@@ -465,7 +465,7 @@ batch_import() {
         countdown 5
     fi
 
-    if ! /batch-import-marc.sh folio/; then
+    if ! /usr/local/vufind/harvest/batch-import-marc.sh folio/; then
         echo "ERROR: Batch import failed with code: $?"
         exit 1
     fi
