@@ -121,11 +121,12 @@ else
     if [ $MAX_BATCH_COUNT -eq "1" ]
     then
       LOGFILE=$BASEPATH/log/`basename $FILES`.log
+      > $LOGFILE
     else
       TIMESTAMP=$( date +%Y%m%d%H%M%S )
       LOGFILE=$BASEPATH/log/$TIMESTAMP.log
+      echo -e "This log is for the following files: \n$FILES\n" > $LOGFILE
     fi
-    echo -e "This log is for the following files: \n$FILES\n" > $LOGFILE
     cat -u - >> $LOGFILE
   }
 fi
