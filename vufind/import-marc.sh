@@ -27,6 +27,17 @@ done
 #Decrement the argument pointer so it points to next argument
 shift $(($OPTIND - 1))
 
+#####################################################
+# Print usage when called with no argument
+#####################################################
+E_BADARGS=65
+
+if [ $# -eq 0 ]
+then
+  echo "    Usage: `basename $0` [-p ./path/to/import.properties] ./path/to/marc.mrc ..."
+  exit $E_BADARGS
+fi
+
 ##################################################
 # Set INDEX_OPTIONS
 #   Tweak these in accordance to your needs
