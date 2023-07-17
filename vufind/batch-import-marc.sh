@@ -116,7 +116,7 @@ then
   }
 else
   function log {
-    local FILES=$1
+    local FILES=$@
     local LOGFILE
     if [ $MAX_BATCH_COUNT -eq "1" ]
     then
@@ -125,7 +125,7 @@ else
       TIMESTAMP=$( date +%Y%m%d%H%M%S )
       LOGFILE=$BASEPATH/log/$TIMESTAMP.log
     fi
-    echo "This log is for the following files: \n$FILES\n" > $LOGFILE
+    echo -e "This log is for the following files: \n$FILES\n" > $LOGFILE
     cat -u - >> $LOGFILE
   }
 fi
