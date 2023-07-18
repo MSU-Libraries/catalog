@@ -252,11 +252,21 @@ main() {
     # This includes cleaning up old db files and copying new files to shared location.
     if [[ "${SKIP_BUILD}" -eq 0 ]]; then
         build_browse
+        RCODE=$?
+        if [[ "$RCODE" -ne 0 ]]; then
+            verbose "Rebuild failed. Exiting without copying to Solr."
+            exit $RCODE
+        fi
     fi
 
     # All nodes will acquire copying lock before checking for new DB files in the shared location.
     # If new files exist, the copy will happen here before releasing the lock.
     copy_to_solr
+    RCODE=$?
+    if [[ "$RCODE" -ne 0 ]]; then
+        verbose "Copy to Solr failed."
+        exit $RCODE
+    fi
 
     verbose "All processing complete!"
 }
