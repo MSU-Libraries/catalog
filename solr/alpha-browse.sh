@@ -139,7 +139,9 @@ rebuild_databases() {
         ln -s /bitnami/solr/server/solr/jars ${ARGS[BUILD_PATH]}/jars
     fi
     if [[ ! -h ${ARGS[BUILD_PATH]}/biblio ]]; then
-        ln -s /bitnami/solr/server/solr/biblio ${ARGS[BUILD_PATH]}/biblio
+        # Get the biblio collection path in case we are using a "biblio" alias pointing to a collection named "biblioSomething"
+        BIBLIO_COLLECTION_PATH=`ls -d /bitnami/solr/server/solr/biblio* | grep -v shard | head -1`
+        ln -s $BIBLIO_COLLECTION_PATH ${ARGS[BUILD_PATH]}/biblio
     fi
     if [[ ! -h ${ARGS[BUILD_PATH]}/authority ]]; then
         ln -s /bitnami/solr/server/solr/authority ${ARGS[BUILD_PATH]}/authority
