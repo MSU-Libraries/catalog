@@ -79,25 +79,6 @@ Deploy Internal Network:
     - job: Set Stack Name
       artifacts: true
 
-Deploy Public Network:
-  extends: .stack_template
-  script:
-    - bash ./cicd/deploy-public-network
-  needs:
-    - Deploy Compose Files
-    - job: Set Stack Name
-      artifacts: true
-
-Deploy Traefik:
-  extends: .stack_template
-  needs:
-    - job: Set Stack Name
-      artifacts: true
-    - Deploy Compose Files
-    - Deploy Public Network
-  script:
-    - bash ./cicd/deploy-traefik
-
 Bootstrap Stacks:
   extends: .stack_template
   needs:
@@ -128,11 +109,6 @@ Deploy Solr:
     - Perform Database Backup
   script:
     - bash ./cicd/deploy-solr
-
-Deploy Swarm Cron:
-  extends: .stack_template
-  script:
-    - bash ./cicd/deploy-swarm-cleanup
 
 Deploy DB:
   extends: .stack_template
