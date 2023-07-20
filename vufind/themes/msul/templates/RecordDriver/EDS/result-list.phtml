@@ -75,14 +75,13 @@
         <?php endif; ?>
       </div>
 
+    <?php
+      $pLink = $this->driver->getPLink();
+      $ftLink = $this->driver->getLinkedFullTextLink();
+      $pdfLink = $this->driver->getPdfLink();
+      $epubLink = $this->driver->getEpubLink();
+    ?>
     <?php if (($isCommunityBorrower && $isOnCampus) || ($user && !$isCommunityBorrower)): ?>
-
-      <?php if ($this->driver->hasHTMLFullTextAvailable()): ?>
-        <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getUrl($this->driver)) ?>#html" class="icon html fulltext _record_link" target="_blank">
-          <?=$this->transEsc('HTML Full Text')?>
-        </a>
-        &nbsp; &nbsp;
-      <?php endif; ?>
 
       <?php if ($this->driver->hasLinkedFullTextAvailable()): ?>
         <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getTabUrl($this->driver, 'LinkedText')) ?>" class="fulltext" target="_blank">
@@ -102,6 +101,10 @@
         </a>
       <?php endif; ?>
 
+    <?php elseif (($pLink || $ftLink || $pdfLink || $epubLink) && !empty($item)): ?>
+        <a class="login" href="<?=$this->url('myresearch-userlogin')?>">
+            <strong><?=$this->transEsc('Login for full access')?></strong>
+        </a>
     <?php endif; ?>
 
       <?php /* Links from DOI linker */ ?>

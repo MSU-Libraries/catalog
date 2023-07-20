@@ -28,7 +28,7 @@ a new environment.
 * In order to test that a database migration will work correctly, take a fresh database dump of an
 environment at the older version and load it into the new release environment. Now connect to the `catalog`
 container and modify the `config.ini` file to set the `autoConfigure` value to `true` temporarily.
-This will enable the [URL]/Update/Home url to be accessible to run the database migration manually.
+This will enable the [URL]/Upgrade/Home url to be accessible to run the database migration manually.
 It will likely prompt for the database credentials, which can be found in the
 [docker-compose.mariadb-cloud.yml](https://github.com/MSU-Libraries/catalog/blob/main/docker-compose.mariadb-cloud.yml)
 file within the environment variables. **Remember to disable the `autoConfigure` once complete**.
