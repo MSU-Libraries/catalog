@@ -105,7 +105,6 @@ Deploy Solr:
     - Bootstrap Stacks
     - Deploy Compose Files
     - Deploy Internal Network
-    - Deploy Public Network
     - Perform Database Backup
   script:
     - bash ./cicd/deploy-solr
@@ -139,7 +138,6 @@ Deploy Vufind:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Deploy Public Network
     - Deploy Internal Network
     - Build Vufind Image
     - Deploy DB
@@ -163,7 +161,6 @@ Deploy Monitoring:
     - Build Monitoring Image
     - Deploy Compose Files
     - Deploy Internal Network
-    - Deploy Public Network
   script:
     - bash ./cicd/deploy-monitoring
 
