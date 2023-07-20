@@ -17,9 +17,15 @@
       <?=$cover?>
     <?php endif; ?>
 
+    <?php
+      $pLink = $this->driver->getPLink();
+      $ftLink = $this->driver->getLinkedFullTextLink();
+      $pdfLink = $this->driver->getPdfLink();
+      $epubLink = $this->driver->getEpubLink();
+    ?>
     <?php if (($isCommunityBorrower && $isOnCampus) || ($user && !$isCommunityBorrower)): ?>
       <div class="external-links">
-        <?php $pLink = $this->driver->getPLink();
+        <?php
             if($pLink): ?>
           <span>
             <a href="<?=$this->escapeHtmlAttr($pLink)?>">
@@ -27,7 +33,7 @@
             </a>
           </span><br />
         <?php endif; ?>
-        <?php $ftLink = $this->driver->getLinkedFullTextLink();
+        <?php
             if ($ftLink): ?>
           <span>
             <a href="<?=$ftLink?>" class="fulltext">
@@ -35,7 +41,7 @@
             </a>
           </span><br />
         <?php endif; ?>
-        <?php $pdfLink = $this->driver->getPdfLink();
+        <?php
             if ($pdfLink): ?>
           <span>
             <a href="<?=$pdfLink?>" class="icon pdf fulltext">
@@ -43,7 +49,7 @@
             </a>
           </span><br />
         <?php endif; ?>
-        <?php $epubLink = $this->driver->getEpubLink();
+        <?php
             if ($epubLink): ?>
           <span>
             <a href="<?=$epubLink?>" class="icon epub fulltext">
@@ -51,14 +57,13 @@
             </a>
           </span><br />
         <?php endif; ?>
-        <?php if ($this->driver->hasHTMLFullTextAvailable()): ?>
-          <span>
-            <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getUrl($this->driver))?>#html" class="icon html fulltext">
-              <?=$this->transEsc('HTML Full Text')?>
-            </a>
-          </span><br />
-        <?php endif; ?>
       </div>
+    <?php elseif ($pLink || $ftLink || $pdfLink || $epubLink): ?>
+       <span>
+        <a class="login" href="<?=$this->url('myresearch-userlogin')?>">
+            <strong><?=$this->transEsc('Login for full access')?></strong>
+        </a>
+       </span><br />
     <?php endif; ?>
   </div>
   <div class="media-body info-col">
@@ -82,25 +87,6 @@
         </tr>
       <?php endif; ?>
 
-      <?php if ($this->driver->hasHTMLFullTextAvailable() && !$restrictedView): ?>
-        <?php $fullText = $this->driver->getHtmlFullText(); ?>
-        <tr id="html">
-          <td colspan="2">
-            <?=$fullText?>
-          </td>
-        </tr>
-      <?php elseif ($this->driver->hasHTMLFullTextAvailable() && $restrictedView): ?>
-        <tr id="html">
-          <td>
-            <?=$this->transEsc('Full text is not displayed to guests')?>
-          </td>
-          <td>
-            <a class="login" href="<?=$this->url('myresearch-userlogin')?>" rel="nofollow">
-              <strong><?=$this->transEsc('Login for full access')?></strong>
-            </a>
-          </td>
-        </tr>
-      <?php endif; ?>
     </table>
 
     <div class="resultItemLine4 custom-links">
