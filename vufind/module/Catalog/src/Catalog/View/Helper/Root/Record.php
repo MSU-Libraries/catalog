@@ -68,6 +68,13 @@ class Record extends \VuFind\View\Helper\Root\Record
     public function getLinkTargetLabel($link)
     {
         $label = null;
+
+        // Add prefix to bookplate URLs
+        if (str_contains($link['url'], 'bookplate')) {
+            $link['desc'] = 'Book Plate: ' . $link['desc'];
+        }
+
+        // Add labels to links
         foreach ($this->linkLabels as $mat) {
             // Skip entries missing the 'label' field
             if (!array_key_exists('label', $mat)) {
@@ -105,6 +112,10 @@ class Record extends \VuFind\View\Helper\Root\Record
         $links = $this->driver->tryMethod('geteJournalLinks') ?? [];
         foreach ($links as $idx => $link) {
             if (strcasecmp($link['desc'] ?? "", "cover image") === 0) {
+                unset($links[$idx]);
+                break;
+            }
+            if (str_contains($link['url'] ?? "", "bookplate")) {
                 unset($links[$idx]);
                 break;
             }

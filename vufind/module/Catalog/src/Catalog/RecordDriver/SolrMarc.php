@@ -128,13 +128,62 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getNotes()
     {
-        return array_merge(
+        $notes = array_merge(
             $this->getNotesMarcFields('515'),
             $this->getNotesMarcFields('541'),
             $this->getNotesMarcFields('561'),
-            $this->getNotesMarcFields('563'),
-            $this->getNotesMarcFields('590')
+            $this->getNotesMarcFields('563')
         );
+        $allNotes = array_merge($notes, $this->getLocalNotes());
+        return $allNotes;
+    }
+
+    /**
+     * Get the 590 local notes field
+     *
+     * @return array Content from Solr
+     */
+    public function getLocalNotes()
+    {
+        $notes = [];
+        $marc = $this->getMarcReader();
+        $marcArr856 = $marc->getFields('856', ['u','y']);
+        $bookplates = [];
+
+        // Get bookplate data from 856u & y, where 'u' contains "bookplate"
+        foreach ($marcArr856 as $marc856) {
+            $sfvals = [];
+            foreach ($marc856['subfields'] as $subfield) {
+                $sfvals[$subfield['code']] = $subfield['data'];
+            }
+            if (str_contains($sfvals['u'], "bookplate")) {
+                $bookplates[] = ["note" => $sfvals['y'], "url" => $sfvals['u']];
+            }
+        }
+
+        // Process local notes from 590a
+        $marcArr590 = $marc->getFields('590', ['a']);
+        foreach ($marcArr590 as $marc590) {
+            $subfields = $marc590['subfields'];
+            $sfvals = [];
+            foreach ($marc590['subfields'] as $subfield) {
+                $sfvals[$subfield['code']] = $subfield['data'];
+            }
+            // Check if the local note exists in the bookplate notes,
+            // if so, use the bookplate values instead
+            $bookplateMatch = false;
+            foreach ($bookplates as $bookplate) {
+                if (strcasecmp($bookplate['note'] ?? "", $sfvals['a']) === 0) {
+                    $notes[] = ["note" => $sfvals['a'], "url" => $bookplate['url']];
+                    $bookplateMatch = true;
+                    break;
+                }
+            }
+            if (!$bookplateMatch) {
+                $notes[] = ["note" => $sfvals['a']];
+            }
+        }
+        return $notes;
     }
 
     /**
@@ -252,6 +301,16 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         // return $this->getSolrField('099', ['f', 'a']);
         return $this->getMarcField('952', ['f', 'e']);
+    }
+
+    /**
+     * Get the barcode
+     *
+     * @return array Content from Solr
+     */
+    public function getBarcode()
+    {
+        return $this->getMarcField('952', ['m']);
     }
 
     /**
