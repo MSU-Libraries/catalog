@@ -32,14 +32,6 @@ return [
           'EDS' => 'Catalog\\Search\\Factory\\EdsBackendFactory',
         ],
       ],
-      'search_results' => [
-        'factories' => [
-          'Catalog\\Search\\EDS\\Results' => 'VuFind\\Search\\Results\\ResultsFactory',
-        ],
-        'aliases' => [
-          'eds' => 'Catalog\\Search\\EDS\\Results',
-        ],
-      ],
       'recorddriver' => [
         'factories' => [
           'Catalog\\RecordDriver\\SolrMarc' => 'VuFind\\RecordDriver\\SolrDefaultFactory',
