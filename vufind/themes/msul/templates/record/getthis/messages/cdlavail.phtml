@@ -3,12 +3,14 @@ $item = $this->getthis->getItem();
 $title = $this->driver->getTitle();
 $author = $this->driver->getPrimaryAuthor();
 $bibnum = $this->driver->getSierraBN();
+$barcode = $this->driver->getBarcode();
+$barcode = (is_array($barcode) && count($barcode) == 1) ? $barcode[0] : $barcode;
 $callnum = $this->getthis->getCallNumber();
 ?>
 <div>
     <p>
         <b>
-            <a href='https://lib.msu.edu/cdl?&TI=<?= $this->escapeUrl($title) ?>&CN=<?= $this->escapeUrl($callnum) ?>&AU=<?= $this->escapeUrl($author) ?>&BIBNUM=<?= $this->escapeUrl($bibnum) ?>' target='_blank'>
+            <a href='https://lib.msu.edu/cdl?&TI=<?= $this->escapeUrl($title) ?>&CN=<?= $this->escapeUrl($callnum) ?>&AU=<?= $this->escapeUrl($author) ?>&BARCODE=<?= $this->escapeUrl($barcode) ?>&BIBNUM=<?= $this->escapeUrl($bibnum) ?>' target='_blank'>
                 Request Digital Lending:
             </a>
         </b>
@@ -19,7 +21,7 @@ $callnum = $this->getthis->getCallNumber();
         (MSU Students, Staff and Faculty only).
         <ul>
             <li>
-                <a href='https://lib.msu.edu/cdl?&TI=<?= $this->escapeUrl($title) ?>&CN=<?= $this->escapeUrl($callnum) ?>&AU=<?= $this->escapeUrl($author) ?>&BIBNUM=<?= $this->escapeUrl($bibnum) ?>' target='_blank'>
+                <a href='https://lib.msu.edu/cdl?&TI=<?= $this->escapeUrl($title) ?>&CN=<?= $this->escapeUrl($callnum) ?>&AU=<?= $this->escapeUrl($author) ?>&BARCODE=<?= $this->escapeUrl($barcode) ?>&BIBNUM=<?= $this->escapeUrl($bibnum) ?>' target='_blank'>
                     Request via Digital Lending
                 </a>
             </li>
