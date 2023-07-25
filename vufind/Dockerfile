@@ -60,6 +60,20 @@ RUN \
     mkdir /home/msuldevs && \
     chown 1000:1000 /home/msuldevs
 
+# TEMP: Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/99
+COPY patches/ /tmp/patches/
+RUN \
+    git clone --depth 1 --branch 2.9.4 https://github.com/marc4j/marc4j.git /tmp/marc4j && \
+    pushd /tmp/marc4j/ && \
+    git apply /tmp/patches/marc4j_fieldMatches_LNK.patch && \
+    apt install -y ant && \
+    ant jar && \
+    rm /usr/local/vufind/import/lib/marc4j*.jar && \
+    mv /tmp/marc4j/build/marc4j*.jar /usr/local/vufind/import/lib/ && \
+    apt purge -y ant && \
+    apt clean && \
+    rm -r /tmp/marc4j/
+
 # User configs for root
 COPY .vimrc /root/.vimrc
 

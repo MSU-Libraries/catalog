@@ -1,0 +1,13 @@
+diff --git a/src/org/marc4j/marc/impl/RecordImpl.java b/src/org/marc4j/marc/impl/RecordImpl.java
+index b18c501..05c8d60 100644
+--- a/src/org/marc4j/marc/impl/RecordImpl.java
++++ b/src/org/marc4j/marc/impl/RecordImpl.java
+@@ -205,7 +205,7 @@ public class RecordImpl implements Record {
+         if (tag.startsWith("LNK") && field.getTag().equals("880")) {
+             final DataField df = (DataField) field;
+             final Subfield link = df.getSubfield('6');
+-            if (link != null && link.getData().equals(tag.substring(3))) {
++            if (link != null && link.getData().startsWith(tag.substring(3))) {
+                 return true;
+             }
+         }
