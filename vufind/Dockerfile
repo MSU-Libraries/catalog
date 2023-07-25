@@ -64,7 +64,7 @@ RUN \
 COPY patches/ /tmp/patches/
 RUN \
     git clone --depth 1 --branch 2.9.4 https://github.com/marc4j/marc4j.git /tmp/marc4j && \
-    pushd /tmp/marc4j/ && \
+    cd /tmp/marc4j/ && \
     git apply /tmp/patches/marc4j_fieldMatches_LNK.patch && \
     apt install -y ant && \
     ant jar && \
@@ -72,6 +72,7 @@ RUN \
     mv /tmp/marc4j/build/marc4j*.jar /usr/local/vufind/import/lib/ && \
     apt purge -y ant && \
     apt clean && \
+    cd /tmp && \
     rm -r /tmp/marc4j/
 
 # User configs for root
