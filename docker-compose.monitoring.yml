@@ -9,7 +9,6 @@ services:
       - logs:/mnt/logs
       - traefik_logs:/mnt/traefik_logs
     networks:
-      - public
       - internal
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -32,21 +31,41 @@ services:
         parallelism: 1
         failure_action: rollback
         monitor: 10s
+
+  proxymonitoring-$STACK_NAME:
+    image: bitnami/nginx
+    networks:
+      - public
+      - internal
+    volumes:
+      - /mnt/shared/local/${STACK_NAME}/deploy/proxysolr/proxymonitoring.conf:/opt/bitnami/nginx/conf/server_blocks/proxymonitoring.conf:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    deploy:
+      mode: replicated
+      replicas: 3
+      placement:
+        max_replicas_per_node: 1
+      restart_policy:
+        window: 15s
+      update_config:
+        parallelism: 1
+        failure_action: rollback
+        monitor: 10s
       labels:
-        # XXX: More rules (for the prefix redirect) are added in .gitlab-ci.yml
         - "traefik.enable=true"
-        - "traefik.http.routers.${STACK_NAME}-monitor-http-router.entrypoints=msul-http-ent"
-        - "traefik.http.routers.${STACK_NAME}-monitor-http-router.middlewares=http-redirect"
-        - "traefik.http.routers.${STACK_NAME}-monitor-http-router.service=${STACK_NAME}-monitor-http-app"
-        - "traefik.http.services.${STACK_NAME}-monitor-http-app.loadbalancer.server.port=80"
-        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.middlewares=restrict-auth"
-        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.tls=true"
-        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.tls.certresolver=msul-letsencrypt-dns"
-        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.tls.domains[0].main=aws.lib.msu.edu"
-        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.tls.domains[0].sans=*.aws.lib.msu.edu"
-        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.entrypoints=msul-https-ent"
-        - "traefik.http.routers.${STACK_NAME}-monitor-https-router.service=${STACK_NAME}-monitor-https-app"
-        - "traefik.http.services.${STACK_NAME}-monitor-https-app.loadbalancer.server.port=80"
+        - "traefik.http.routers.${STACK_NAME}-msul-proxymonitoring-router.entrypoints=msul-http-ent"
+        - "traefik.http.routers.${STACK_NAME}-msul-proxymonitoring-router.service=${STACK_NAME}-msul-proxymonitoring-app"
+        - "traefik.http.services.${STACK_NAME}-msul-proxymonitoring-app.loadbalancer.server.port=8080"
+        - "traefik.http.routers.${STACK_NAME}-msul-proxymonitoring-router.middlewares=http-redirect"
+        - "traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.entrypoints=msul-https-ent"
+        - "traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.service=${STACK_NAME}-https-msul-proxymonitoring-app"
+        - "traefik.http.services.${STACK_NAME}-https-msul-proxymonitoring-app.loadbalancer.server.port=8080"
+        - "traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.middlewares=restrict-auth"
+        - "traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.tls=true"
 
 networks:
   internal:
