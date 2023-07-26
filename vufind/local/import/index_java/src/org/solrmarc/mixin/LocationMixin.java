@@ -22,8 +22,8 @@ public class LocationMixin extends SolrIndexerMixin {
         List<VariableField> locationFields = record.getVariableFields("952");
         List<Subfield> cSubfields = getSubfieldsMatching(locationFields, "c");
         List<Subfield> dSubfields = getSubfieldsMatching(locationFields, "d");
-        List<String> cValues = cSubfields.stream().map(f -> f.getData().replace("/", " ")).collect(Collectors.toList());
-        List<String> dValues = dSubfields.stream().map(f -> f.getData().replace("/", " ")).collect(Collectors.toList());
+        List<String> cValues = cSubfields.stream().map(f -> f.getData().replace("/", " ").trim()).collect(Collectors.toList());
+        List<String> dValues = dSubfields.stream().map(f -> f.getData().replace("/", " ").trim()).collect(Collectors.toList());
         cValues.forEach(c -> {
             result.add("0/" + c + "/");
         });
