@@ -399,7 +399,7 @@ oai_harvest() {
         if [[ "${#COMBINE_FILES[@]}" -ge 100 ]]; then
             oai_harvest_combiner
         fi
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_*_*_*.xml')
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_*_*_*.xml' | sort)
     oai_harvest_combiner
 
     declare -g -a DELETE_FILES=()
@@ -408,7 +408,7 @@ oai_harvest() {
         if [[ "${#DELETE_FILES[@]}" -ge 100 ]]; then
             oai_delete_combiner
         fi
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_*_*_*.delete')
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_*_*_*.delete' | sort)
     oai_delete_combiner
 
     if [[ "${ARGS[FULL]}" -eq 1 ]]; then
