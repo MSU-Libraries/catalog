@@ -137,16 +137,6 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get full call number
-     *
-     * @return array
-     */
-    public function getFullCallNumber()
-    {
-        return [];
-    }
-
-    /**
      * Get cartographic data
      *
      * @return array
