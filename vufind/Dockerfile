@@ -8,6 +8,9 @@ ENV VUFIND_HOME=/usr/local/vufind
 ENV JAVA_HOME=/usr/lib/jvm/default-java
 ENV VUFIND_CACHE_DIR=/mnt/vufind_cache
 
+# TEMP(PART1): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/99
+COPY patches/ /tmp/patches/
+# END TEMP(PART1)
 RUN \
     # Perform updates
     apt update && \
@@ -17,6 +20,15 @@ RUN \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php \
         php-curl php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml && \
+    # TEMP(PART2): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/99
+    apt install -y ant && \
+    git clone --depth 1 --branch 2.9.4 https://github.com/marc4j/marc4j.git /tmp/marc4j && \
+    cd /tmp/marc4j/ && \
+    git apply /tmp/patches/marc4j_fieldMatches_LNK.patch && \
+    rm -r /tmp/patches && \
+    ant jar && \
+    apt purge -y ant && \
+    # END TEMP(PART2)
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
@@ -59,6 +71,13 @@ RUN \
     useradd msuldevs -u 1000 -g 1000 && \
     mkdir /home/msuldevs && \
     chown 1000:1000 /home/msuldevs
+
+# TEMP(PART3): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/99
+RUN \
+    rm /usr/local/vufind/import/lib/marc4j*.jar && \
+    mv /tmp/marc4j/build/marc4j*.jar /usr/local/vufind/import/lib/ && \
+    rm -r /tmp/marc4j/
+# END TEMP(PART3)
 
 # User configs for root
 COPY .vimrc /root/.vimrc

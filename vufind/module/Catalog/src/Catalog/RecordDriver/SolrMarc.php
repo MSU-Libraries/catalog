@@ -14,6 +14,8 @@
 
 namespace Catalog\RecordDriver;
 
+use VuFind\RecordDriver\Response;
+
 /**
  * Extends the record driver with additional data from Solr
  *
@@ -300,7 +302,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getFullCallNumber()
     {
         // return $this->getSolrField('099', ['f', 'a']);
-        return $this->getMarcField('952', ['f', 'e']);
+        return array_unique(
+            $this->getMarcField('952', ['f', 'e'])
+        );
     }
 
     /**
