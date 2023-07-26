@@ -794,18 +794,18 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
+     * MSUL Customization that was merged in as a PR and will be in v9.1
      * Helper function to retrieve paged results from FOLIO API
      *
      * @param string $responseKey Key containing values to collect in response
      * @param string $interface   FOLIO api interface to call
      * @param array  $query       CQL query
+     * @param int    $limit       How many results to retrieve from FOLIO per call
      *
      * @return array
      */
-    protected function getPagedResults($responseKey, $interface, $query = [])
+    protected function getPagedResults($responseKey, $interface, $query = [], $limit = 1000)
     {
-        /// MSUL Override to fix pagination when more than 1000 results
-        $limit = 1000;
         $offset = 0;
 
         do {
@@ -820,14 +820,14 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 $msg = $json->errors[0]->message ?? json_last_error_msg();
                 throw new ILSException("Error: '$msg' fetching '$responseKey'");
             }
-            $numFound = 0;
+            $totalEstimate = $json->totalRecords ?? 0;
             foreach ($json->$responseKey ?? [] as $item) {
-                $numFound++;
                 yield $item ?? '';
             }
             $offset += $limit;
 
-            // Continue until the results are not the limit value (i.e. the last page of results)
-        } while ($numFound == $limit);
+            // Continue until the current offset is greater than the totalRecords value returned
+            // from the API (which could be an estimate if more than 1000 results are returned).
+        } while ($offset <= $totalEstimate);
     }
 }
