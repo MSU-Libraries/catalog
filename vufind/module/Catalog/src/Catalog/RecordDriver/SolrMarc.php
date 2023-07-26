@@ -323,44 +323,4 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         return $this->getMarcFieldUnique('753', ['a']);
     }
-
-    /**
-     * Get an array of publication detail lines combining information from
-     * getPublicationDates(), getPublishers() and getPlacesOfPublication().
-     *
-     * @return array
-     */
-    public function getPublicationDetails()
-    {
-        $places = $this->getPlacesOfPublication();
-        $names = $this->getPublishers();
-        $dates = $this->getHumanReadablePublicationDates();
-
-        $i = 0;
-        $retval = [];
-        while (isset($places[$i]) || isset($names[$i]) || isset($dates[$i])) {
-            // Build objects to represent each set of data; these will
-            // transform seamlessly into strings in the view layer.
-            $retval[] = new Response\PublicationDetails(
-                $places[$i] ?? '',
-                $names[$i] ?? '',
-                $dates[$i] ?? ''
-            );
-            $i++;
-        }
-
-        foreach ($this->getMarcReader()
-                    ->getLinkedFields('880', '264', ['a','b','c'])
-            as $field
-        ) {
-            $retval[] = new Response\PublicationDetails(
-                $this->getSubfields($field, 'a')[0] ?? '',
-                $this->getSubfields($field, 'b')[0] ?? '',
-                $this->getSubfields($field, 'c')[0] ?? ''
-            );
-            $i++;
-        }
-
-        return $retval;
-    }
 }
