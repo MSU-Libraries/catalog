@@ -86,7 +86,7 @@
       text-align:center;
       margin-left:auto;
       margin-right:auto;
-      width:90%;
+      width:95%;
     }
   }
 
@@ -102,6 +102,7 @@
     .searchForm_lookfor {
       width:20rem;
     }
+
   }
   @media only screen and (min-width : 1080px) {
    .searchForm_lookfor {
@@ -456,6 +457,7 @@ input[type="checkbox"] {
   }
 }
 //searchbox responsive styling
+
   .searchbox {
   @media only screen and (max-width : 767px) {
     label, input, select, button {
@@ -486,6 +488,10 @@ input[type="checkbox"] {
     input, select {
       vertical-align:top !important;
     }
+    .btn-primary {
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin-left: -1rem;
+    }
   }
 }
   .template-dir-search.template-name-results .searchbox {
@@ -499,10 +505,39 @@ input[type="checkbox"] {
   }
 }
 
+.mainbody.right {
+  .searchbox {
+    @media only screen and (max-width : 1226px) {
+      label, input, select, button {
+        display:block;
+        margin-bottom:0.3rem;
+      }
+      input, select {
+        width:100% !important;
+      }
+      input {
+        margin-bottom:1rem;
+      }
+    }
+    @media only screen and (min-width : 992px) {
+      .btn-primary {
+        border-radius: 2rem;
+        margin-left:0;
+      }
+    }
+    @media only screen and (min-width : 1227px) {
+      .btn-primary {
+        border-radius: 0 0.5rem 0.5rem 0;
+        margin-left: -1rem;
+      }
+    }
+  }
+}
 
 .searchHomeContent form .active-filters {
   display:none;
 }
+
 @media only screen and (min-width : 768px) {
   .home-facet {
     padding-right:5%;
@@ -532,7 +567,9 @@ input[type="checkbox"] {
     input, select {
       margin-bottom:1.5rem;
     }
-    #reservesSearchForm_lookfor, #alphaBrowseForm_from {
+    #reservesSearchForm_lookfor,
+    #alphaBrowseForm_from,
+    #alphaBrowseForm_source {
       width:100%;
     }
     h2 {
@@ -566,8 +603,11 @@ input[type="checkbox"] {
       -webkit-border-radius: 0.5rem;
       -moz-border-radius: 0.5rem;
       border-radius: 0.5rem;
-      &:hover, &:active {
+      &:hover {
         background-color:@darkparakeetgreen;
+      }
+      &:active {
+        background-color:@msugreen;
       }
 
       .ask-icon {
@@ -598,7 +638,10 @@ form.searchForm, .record-tabs, .navbar-form {
       }
     }
     a, &:active a, &:hover a {
-      border:0;
+      border-left:0;
+      border-top:0;
+      border-right:0.4rem solid transparent;
+      border-bottom:0.4rem solid transparent;
       outline:0;
       background:none;
       text-decoration:none;
@@ -615,6 +658,12 @@ form.searchForm, .record-tabs, .navbar-form {
     }
     a:focus {
       outline: 1px dashed @eggplant;
+    }
+    a:hover {
+      border-bottom: 0.4rem solid #ACB3C9;
+      border-right: 0.4rem solid transparent;
+      border-left:0;
+      border-top:0;
     }
     .active a {
       border-bottom: 0.4rem solid @eggplant;
@@ -701,16 +750,23 @@ table tr {
 
 .placehold {
   text-decoration: none;
+  color:@parakeetgreen;
   border: 2px solid @parakeetgreen;
   -webkit-border-radius: 7rem;
   -moz-border-radius: 7rem;
   border-radius: 7rem;
   padding: 0.2rem 0.75rem 0.2rem 0.65rem;
   margin-left:1rem;
-
   &:hover {
     text-decoration:none;
     color:@darkparakeetgreen;
+    border: 2px solid @darkparakeetgreen;
+  }
+  &:active,
+  &:focus {
+    text-decoration:none;
+    color:@msugreen;
+    border: 2px solid @msugreen;
   }
   i {
     display:none;
@@ -1202,5 +1258,22 @@ body.template-dir-myresearch.template-name-profile {
 
   .text, .hierarchical-facet-anchor {
     align-items: start;
+  }
+}
+
+// Button btn-primary
+
+.btn-primary {
+  line-height:1.375;
+    &:hover {
+      background-color:@darkparakeetgreen;
+      border-color:@darkparakeetgreen;
+      color:#fff;
+  }
+    &:active,
+    &:focus {
+      background-color:@msugreen !important;
+      border-color:@msugreen !important;
+      color:#fff;
   }
 }

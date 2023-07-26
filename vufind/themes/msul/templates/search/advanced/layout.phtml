@@ -153,7 +153,7 @@
       </div>
       <div class="adv-submit">
         <input class="clear-btn btn btn-default" type="button" value="<?= $this->transEscAttr('Clear')?>">
-        <input class="btn btn-primary" type="submit" value="<?= $this->transEscAttr('Find')?>">
+        <button type="submit" class="btn btn-primary"><?=$this->icon('search') ?> <?=$this->transEsc("Search")?></button>
       </div>
       <?php if (isset($this->extraAdvancedControls)): ?>
         <div class="clearfix">
@@ -161,7 +161,7 @@
         </div>
         <div class="adv-submit">
           <input class="clear-btn btn btn-default" type="button" value="<?= $this->transEscAttr('Clear')?>">
-          <input class="btn btn-primary" type="submit" value="<?= $this->transEscAttr('Find')?>">
+          <button type="submit" class="btn btn-primary"><?=$this->icon('search') ?> <?=$this->transEsc("Search")?></button>
         </div>
       <?php endif; ?>
     </div>
