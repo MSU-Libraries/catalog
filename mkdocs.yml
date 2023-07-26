@@ -32,3 +32,4 @@ nav:
     - Backup &amp; Restore: backup-and-restore.md
     - Upgrading: upgrading.md
     - Solr: solr.md
+    - Load Testing: load-testing.md
