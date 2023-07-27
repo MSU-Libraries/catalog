@@ -81,7 +81,6 @@ class Okapi extends \VuFind\Auth\AbstractBase
         $driverConfig = is_object($config) ? $config->toArray() : [];
         $driverConfig['User']['okapi_login'] = true;
         $this->driver->setConfig($driverConfig);
-        $this->driver->init();
     }
 
     /**
@@ -94,6 +93,7 @@ class Okapi extends \VuFind\Auth\AbstractBase
      */
     public function authenticate($request)
     {
+        $this->driver->init();
         $username = trim($request->getPost()->get('username'));
         $password = trim($request->getPost()->get('password'));
         $loginMethod = 'password';
