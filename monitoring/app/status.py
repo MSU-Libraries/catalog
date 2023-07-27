@@ -143,7 +143,7 @@ def _check_vufind_home_page(node):
 
 def _check_vufind_record_page(node):
     try:
-        req = requests.get(f'http://vufind{node}/Record/folio.in00001912238', timeout=TIMEOUT)
+        req = requests.get(f'http://vufind{node}/Record/folio.in00006782951', timeout=TIMEOUT)
         req.raise_for_status()
         text = req.text
     except requests.exceptions.Timeout:
@@ -151,13 +151,13 @@ def _check_vufind_record_page(node):
     except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
         return f'Error reading vufind record page: {err}'
     if '</html>' not in text:
-        return 'Vufind record page folio.in00001912238 not complete'
+        return 'Vufind record page folio.in00006782951 not complete'
     if '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
-        return 'An error is reported in Vufind record page folio.in00001912238'
+        return 'An error is reported in Vufind record page folio.in00006782951'
     if 'CR-186011' not in text:
-        return 'Vufind record page folio.in00001912238 not complete'
+        return 'Vufind record page folio.in00006782951 not complete'
     if 'NAS 1.26:186011' not in text:
-        return 'Vufind record page folio.in00001912238 not complete'
+        return 'Vufind record page folio.in00006782951 not complete'
     return 'OK'
 
 def _check_vufind_search_page(node):
@@ -175,7 +175,7 @@ def _check_vufind_search_page(node):
         return 'Vufind search page not complete'
     if '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
         return 'An error is reported in Vufind search page'
-    if 'folio.in00001912238' not in text:
+    if 'folio.in00006782951' not in text:
         return 'Vufind search page not complete'
     return 'OK'
 
