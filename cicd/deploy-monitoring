@@ -32,7 +32,7 @@ main() {
     echo "Preparing $STACK_NAME deploy at $COMPOSE_PATH"
     ssh deploy@"${DEPLOY_HOST_A}" sudo mkdir -p /mnt/shared/local/"${STACK_NAME}"/deploy/proxymonitoring
     # Temporarily stash proxymonitoring.conf in compose directory for permissions reasons
-    scp solr/proxymonitoring/proxymonitoring.conf deploy@"${DEPLOY_HOST_A}":"${COMPOSE_PATH}"/
+    scp monitoring/proxymonitoring/proxymonitoring.conf deploy@"${DEPLOY_HOST_A}":"${COMPOSE_PATH}"/
     ssh deploy@"${DEPLOY_HOST_A}" sudo mv "${COMPOSE_PATH}"/proxymonitoring.conf /mnt/shared/local/"${STACK_NAME}"/deploy/proxymonitoring/
 
     echo "Issuing deploy command now"
