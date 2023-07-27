@@ -56,6 +56,29 @@ class GetThisLoader
     }
 
     /**
+     * Instantiate class pulling driver and record from current view
+     *
+     * @param object $view
+     * @return GetThisLoader|null
+     */
+    public static function fromView($view) {
+        $getthis = null;
+        try {
+            $record = $view->record($view->driver);
+            $holdings = $view->driver->getRealTimeHoldings()['holdings'];
+            $items = [];
+            foreach ($holdings as $key => $item_arr) {
+                $items = array_merge($items, $item_arr['items']);
+            }
+            $getthis = new \Catalog\GetThis\GetThisLoader($record, $items);
+        }
+        catch (\Throwable $e) {
+            // Allow empty getthis when ILS is unavailable
+        }
+        return $getthis;
+    }
+
+    /**
      * Returns if the current record is an HLM record or not
      *
      * @return bool  Depending on if the current record has the hlm prefix or not
