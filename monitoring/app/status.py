@@ -154,9 +154,9 @@ def _check_vufind_record_page(node):
         return 'Vufind record page folio.in00006782951 not complete'
     if '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
         return 'An error is reported in Vufind record page folio.in00006782951'
-    if 'CR-186011' not in text:
+    if 'Edward R. Barton' not in text:
         return 'Vufind record page folio.in00006782951 not complete'
-    if 'NAS 1.26:186011' not in text:
+    if 'PS3611.O586 O98 2014' not in text:
         return 'Vufind record page folio.in00006782951 not complete'
     return 'OK'
 
