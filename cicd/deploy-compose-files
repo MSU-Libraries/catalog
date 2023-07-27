@@ -184,12 +184,6 @@ apply_prod_changes() {
         ./yq -i \
         ".services.proxymonitoring-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
         docker-compose.monitoring.yml;
-        ./yq -i \
-        ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
-        docker-compose.monitoring.yml;
-        ./yq -i \
-        ".services.monitoring.deploy.labels += \"traefik.http.routers.${STACK_NAME}-monitor-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
-        docker-compose.monitoring.yml;
     fi
 
     ## Changes for catalog-prod
