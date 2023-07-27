@@ -149,7 +149,7 @@ apply_prod_changes() {
     docker-compose.solr-cloud.yml;
     ./yq -i \
     ".services.proxymonitoring-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.tls.certresolver=msul-letsencrypt\"" \
-    docker-compose.monitor.yml;
+    docker-compose.monitoring.yml;
 
     # Remove the croncache service if the stack name is production
     ./yq -i "del(.services.croncache)" docker-compose.yml;
