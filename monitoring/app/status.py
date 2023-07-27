@@ -14,20 +14,6 @@ import util
 TIMEOUT = 10
 
 
-# Traefik
-
-def get_traefik_status():
-    try:
-        req = requests.get('http://traefik:8081/ping', timeout=TIMEOUT)
-        req.raise_for_status()
-        contents = req.text
-        if contents != 'OK':
-            return f'Strange reply from traefik ping: {contents}'
-        return 'OK'
-    except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
-        return f'Error with traefik ping: {err}'
-
-
 # Galera
 
 def _node_cluster_state_uuid():
@@ -163,7 +149,7 @@ def _check_vufind_record_page(node):
 def _check_vufind_search_page(node):
     try:
         req = requests.get(
-            f'http://vufind{node}/Search/Results?limit=5&dfApplied=1&lookfor=+Automated+flight+test&type=AllFields',
+            f'http://vufind{node}/Search/Results?limit=5&dfApplied=1&lookfor=Out+of+the+pocket&type=AllFields',
             timeout=TIMEOUT)
         req.raise_for_status()
         text = req.text
