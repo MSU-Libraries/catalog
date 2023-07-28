@@ -1,10 +1,33 @@
 <?php
 
+/**
+ * Retrieves data for the page asynchronously
+ *
+ * PHP version 7
+ *
+ * @category VuFind
+ * @package  Ajax_Handler
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/vufind/ Main page
+ */
+
 namespace Catalog\AjaxHandler;
 
 use Laminas\Mvc\Controller\Plugin\Params;
 use VuFind\Exception\ILS as ILSException;
 
+/**
+ * Retrieves data for the item status
+ *
+ * PHP version 7
+ *
+ * @category VuFind
+ * @package  Ajax_Handler
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/vufind/ Main page
+ */
 class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
 {
     /**
