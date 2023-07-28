@@ -3,8 +3,7 @@ $item = $this->getthis->getItem();
 $title = $this->driver->getTitle();
 $author = $this->driver->getPrimaryAuthor();
 $bibnum = $this->driver->getSierraBN();
-$barcode = $this->driver->getBarcode();
-$barcode = (is_array($barcode) && count($barcode) == 1) ? $barcode[0] : $barcode;
+$barcode = $item['barcode'];
 $callnum = $this->getthis->getCallNumber();
 ?>
 <div>
