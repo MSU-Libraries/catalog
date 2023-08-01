@@ -8,7 +8,7 @@ import aiohttp
 import util
 
 
-MAX_FILE_SIZE = 100*1024*1024 # arbitrary 100 MB
+MAX_FILE_SIZE = 50*1024*1024 # arbitrary 50 MB
 
 
 def add_file_to_log(path, full_log):
