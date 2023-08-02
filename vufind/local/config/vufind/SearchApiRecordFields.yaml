@@ -393,3 +393,7 @@ urls:
   type: array
   items:
     $ref: '#/components/schemas/Url'
+bibnum:
+  vufind.method: getSierraBN
+  description: Sierra Bibnumber
+  type: string
