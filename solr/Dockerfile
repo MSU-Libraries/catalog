@@ -62,6 +62,7 @@ USER 1001
 RUN cp -r /solr_confs/jars /opt/bitnami/solr/server/solr/jars
 
 COPY browse-handler.jar /opt/bitnami/solr/server/solr/jars/browse-handler.jar
+COPY solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
 COPY alpha-browse.sh /alpha-browse.sh
 COPY lock-state.sh /lock-state.sh
 
