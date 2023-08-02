@@ -59,11 +59,13 @@ HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
 
 COPY browse-handler.jar /solr_confs/jars/browse-handler.jar
 COPY solrmarc_core.jar /solr_confs/jars/solrmarc_core.jar
-RUN chmod g-w,o-w /solr_confs/jars/*.jar
+RUN chmod g-w,o-w /solr_confs/jars/*.jar && \
+    mkdir -p /bitnami/solr/server/solr/jars && \
+    chown 1001 /bitnami/solr/server /bitnami/solr/server/solr && \
+    cp /solr_confs/jars/*.jar /bitnami/solr/server/solr/jars/ && \
+    chown -R 1001 /bitnami/solr/server/solr/jars
 
 USER 1001
-
-RUN cp /solr_confs/jars/*.jar /bitnami/solr/server/solr/jars/
 
 COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
 COPY alpha-browse.sh /alpha-browse.sh
