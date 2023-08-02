@@ -14,6 +14,7 @@ default_args() {
     ARGS[SOLR_URL]="http://solr:8983/solr"
     ARGS[SOLR_COLLECTION]="biblio"
     ARGS[RESET_SOLR]=0
+    ARGS[BYPASS_DISABLED]=0
     ARGS[VERBOSE]=0
     ARGS[TEST_HARVEST]=
 }
@@ -75,6 +76,8 @@ runhelp() {
     echo "      Default: ${ARGS[SOLR_COLLECTION]}"
     echo "  -r|--reset-solr"
     echo "      Clear out the Solr collection prior to importing."
+    echo "  -B|--bypass-disabled"
+    echo "      Runs script even if the 'disabled' file exists in SHARED_DIR."
     echo "  -v|--verbose"
     echo "      Show verbose output."
     echo "  -T|--test-harvest HARVEST_TGZ"
@@ -144,6 +147,9 @@ parse_args() {
             shift; shift ;;
         -r|--reset-solr)
             ARGS[RESET_SOLR]=1
+            shift;;
+        -B|--bypass-disabled)
+            ARGS[BYPASS_DISABLED]=1
             shift;;
         -v|--verbose)
             ARGS[VERBOSE]=1
@@ -482,7 +488,7 @@ batch_import() {
 
 check_harvest_disabled() {
     DISABLED=$( find -L "${ARGS[SHARED_DIR]}" -mindepth 1 -maxdepth 1 -type f -iname 'disabled' | wc -l )
-    if [[ "$DISABLED" -gt 0 ]]; then
+    if [[ "$DISABLED" -gt 0 && "${ARGS[BYPASS_DISABLED]}" -ne 1 ]]; then
         verbose "Not starting OAI harvest - detected file named 'disabled' in ${ARGS[SHARED_DIR]}"
         exit 0
     fi
