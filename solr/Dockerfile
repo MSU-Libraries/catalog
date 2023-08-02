@@ -57,11 +57,12 @@ COPY cron-alphabrowse.sh /cron-alphabrowse.sh
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
   CMD /healthcheck.sh
 
-USER 1001
-
 COPY browse-handler.jar /solr_confs/jars/browse-handler.jar
 COPY solrmarc_core.jar /solr_confs/jars/solrmarc_core.jar
-RUN cp -r /solr_confs/jars /opt/bitnami/solr/server/solr/jars
+RUN chmod g-w,o-w /solr_confs/jars/*.jar
+RUN cp /solr_confs/jars/*.jar /opt/bitnami/solr/server/solr/jars/
+
+USER 1001
 
 COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
 COPY alpha-browse.sh /alpha-browse.sh
