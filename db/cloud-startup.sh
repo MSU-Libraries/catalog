@@ -374,7 +374,9 @@ galera_slow_shutdown() {
 
     verbose "Scanning to see if other nodes are online."
     # Scan other nodes to see if they are up
-    mapfile -t NODES_ONLINE < <(scan_for_online_nodes)
+    # Disabling shellcehck to avoid empty element entering array when mapfile is used
+    # shellcheck disable=SC2207
+    NODES_ONLINE=($(scan_for_online_nodes))
     verbose "Lowest online node number: ${NODES_ONLINE[0]:-None}"
 
     # Wait to give other node scans time to complete
