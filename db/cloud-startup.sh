@@ -12,7 +12,7 @@
 
 GALERA_STATE_FILE=/bitnami/mariadb/data/grastate.dat
 NODES_STR="${MARIADB_GALERA_CLUSTER_ADDRESS##gcomm://}"
-NODES_ARR=(${NODES_STR//,/ })
+NODES_ARR=("${NODES_STR//,/ }")
 declare -g -A NODE_IPS
 declare -g GALERA_PID
 
@@ -31,7 +31,7 @@ node_number() {
 ## Returns 0 if an element matches the value to find
 array_contains() {
     local ARRNAME="$1[@]"
-    local HAYSTACK=( ${!ARRNAME} )
+    local HAYSTACK=( "${!ARRNAME}" )
     local NEEDLE="$2"
     for VAL in "${HAYSTACK[@]}"; do
         if [[ "$NEEDLE" == "$VAL" ]]; then
@@ -64,7 +64,7 @@ hostname_from_ip() {
 to_hostname() {
     ARG="$1"
     HOST=$( hostname_from_ip "$ARG" )
-    if [[ "$?" -ne 0 ]]; then
+    if ! HOST=$( hostname_from_ip "$ARG" ); then
         HOST="$ARG" # Assuming ARG isn't some other random value; we could check NODES_ARR here
     fi
     echo "$HOST"
@@ -193,7 +193,7 @@ galera_cluster_membership_is_okay() {
     for NODE_NAME in "${NODES_ARR[@]}"; do
         NFOUND=0
         for ((IDX=0; IDX<ROWS; IDX++)); do
-            NNVAR="ROW_$IDX[2]"
+            NNVAR="ROW_${IDX[2]}"
             if [[ "$NODE_NAME" == "${!NNVAR}" ]]; then
                 (( NFOUND += 1 ))
             fi
@@ -306,6 +306,8 @@ scan_for_online_nodes() {
         # Using IPs as Docker Swarm has removed hostnames by this point of shutdown
         NODE_IP="${NODE_IPS[$NODE]}"
         if galera_node_online "$NODE_IP"; then
+            # See: https://github.com/koalaman/shellcheck/issues/1476
+            # shellcheck disable=SC2207
             NODES_UP+=($(node_number "$NODE"))
         fi
     done
@@ -370,7 +372,7 @@ galera_slow_shutdown() {
 
     verbose "Scanning to see if other nodes are online."
     # Scan other nodes to see if they are up
-    NODES_ONLINE=($(scan_for_online_nodes))
+    mapfile -t NODES_ONLINE < <(scan_for_online_nodes)
     verbose "Lowest online node number: ${NODES_ONLINE[0]:-None}"
 
     # Wait to give other node scans time to complete
