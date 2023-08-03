@@ -193,7 +193,9 @@ galera_cluster_membership_is_okay() {
     for NODE_NAME in "${NODES_ARR[@]}"; do
         NFOUND=0
         for ((IDX=0; IDX<ROWS; IDX++)); do
-            NNVAR="ROW_${IDX[2]}"
+            # We indentionally want to get index 2 for the name
+            # shellcheck disable=SC1087
+            NNVAR="ROW_$IDX[2]"
             if [[ "$NODE_NAME" == "${!NNVAR}" ]]; then
                 (( NFOUND += 1 ))
             fi
