@@ -57,6 +57,14 @@ return [
           'okapi' => 'Catalog\\Auth\\Okapi',
         ],
       ],
+      'ajaxhandler' => [
+        'factories' => [
+          'Catalog\\AjaxHandler\\GetItemStatuses' => 'VuFind\\AjaxHandler\\GetItemStatusesFactory',
+        ],
+        'aliases' => [
+          'getItemStatuses' => 'Catalog\\AjaxHandler\\GetItemStatuses',
+        ],
+      ],
       'ils_driver' => [
         'factories' => [
           'Catalog\\ILS\\Driver\\Folio' => 'VuFind\\ILS\\Driver\\FolioFactory',

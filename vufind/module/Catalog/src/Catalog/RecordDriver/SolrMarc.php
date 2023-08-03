@@ -14,8 +14,6 @@
 
 namespace Catalog\RecordDriver;
 
-use VuFind\RecordDriver\Response;
-
 /**
  * Extends the record driver with additional data from Solr
  *

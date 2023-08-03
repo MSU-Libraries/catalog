@@ -29,6 +29,13 @@ main() {
     ssh deploy@"${DEPLOY_HOST_C}" "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA";
     wait
 
+    echo "Preparing $STACK_NAME deploy at $COMPOSE_PATH"
+    ssh deploy@"${DEPLOY_HOST_A}" sudo mkdir -p /mnt/shared/local/"${STACK_NAME}"/deploy/proxymonitoring
+    # Temporarily stash proxymonitoring.conf in compose directory for permissions reasons
+    scp monitoring/proxymonitoring/proxymonitoring.conf deploy@"${DEPLOY_HOST_A}":"${COMPOSE_PATH}"/
+    ssh deploy@"${DEPLOY_HOST_A}" sudo mv "${COMPOSE_PATH}"/proxymonitoring.conf /mnt/shared/local/"${STACK_NAME}"/deploy/proxymonitoring/
+
+    echo "Issuing deploy command now"
     ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --prune --with-registry-auth -c $COMPOSE_PATH/docker-compose.monitoring.yml ${STACK_NAME}-monitoring";
 }
 

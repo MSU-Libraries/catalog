@@ -6,7 +6,7 @@
  * PHP version 7
  *
  * @category VuFind
- * @package  Backend_EDS
+ * @package  Get_This
  * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/vufind/ Main page
@@ -53,6 +53,30 @@ class GetThisLoader
         if (null !== $this->item_id) {
             $this->item = $this->getItem($this->item_id);
         }
+    }
+
+    /**
+     * Instantiate class pulling driver and record from current view
+     *
+     * @param object $view The view to retrieve the driver from
+     *
+     * @return GetThisLoader|null
+     */
+    public static function fromView($view)
+    {
+        $getthis = null;
+        try {
+            $record = $view->record($view->driver);
+            $holdings = $view->driver->getRealTimeHoldings()['holdings'];
+            $items = [];
+            foreach ($holdings as $key => $item_arr) {
+                $items = array_merge($items, $item_arr['items']);
+            }
+            $getthis = new \Catalog\GetThis\GetThisLoader($record, $items);
+        } catch (\Throwable $e) {
+            // Allow empty getthis when ILS is unavailable
+        }
+        return $getthis;
     }
 
     /**

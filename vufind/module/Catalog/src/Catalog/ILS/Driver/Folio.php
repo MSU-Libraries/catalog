@@ -517,7 +517,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             );
             $item = json_decode($response->getBody());
             return $item->electronicAccess;
-        } catch (\VuFind\Exception\RecordMissing $e) {
+        } catch (ILSException $e) {
             return [];
         }
     }
