@@ -62,13 +62,10 @@ COPY solrmarc_core.jar /solr_confs/jars/solrmarc_core.jar
 COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
 RUN chmod g-w,o-w /solr_confs/jars/*.jar /solr_confs/biblio/conf/solrconfig.xml && \
     chown 1001 /solr_confs/jars/*.jar /solr_confs/biblio/conf/solrconfig.xml
-# RUN chmod g-w,o-w /solr_confs/jars/*.jar /solr_confs/biblio/conf/solrconfig.xml && \
-#     mkdir -p /bitnami/solr/server/solr/jars && \
-#     chown 1001 /bitnami/solr/server /bitnami/solr/server/solr && \
-#     cp /solr_confs/jars/*.jar /bitnami/solr/server/solr/jars/ && \
-#     chown -R 1001 /bitnami/solr/server/solr/jars
 
 USER 1001
+
+RUN cp -r /solr_confs/jars /opt/bitnami/solr/server/solr/jars
 
 COPY alpha-browse.sh /alpha-browse.sh
 COPY lock-state.sh /lock-state.sh
