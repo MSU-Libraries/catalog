@@ -34,7 +34,7 @@ RUN mkdir /solr_confs && \
     chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
     mkdir /solr_confs/import && \
     chown 1001 /solr_confs/import && \
-    cp /vufind-${VUFIND_VERSION}/import/browse-indexing.jar /solr_confs/import/ && \
+#    cp /vufind-${VUFIND_VERSION}/import/browse-indexing.jar /solr_confs/import/ && \
     mkdir -p /solr_confs/vufind_libs/import/lib && \
     cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /solr_confs/vufind_libs/import/lib/ && \
     rm v${VUFIND_VERSION}.tar.gz && \
@@ -58,10 +58,11 @@ HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
   CMD /healthcheck.sh
 
 COPY browse-handler.jar /solr_confs/jars/browse-handler.jar
+COPY browse-indexing.jar /solr_confs/import/browse-indexing.jar
 COPY solrmarc_core.jar /solr_confs/jars/solrmarc_core.jar
 COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
 RUN chmod g-w,o-w /solr_confs/jars/*.jar /solr_confs/biblio/conf/solrconfig.xml && \
-    chown 1001 /solr_confs/jars/*.jar /solr_confs/biblio/conf/solrconfig.xml
+    chown 1001 /solr_confs/jars/*.jar /solr_confs/import/browse-indexing.jar /solr_confs/biblio/conf/solrconfig.xml
 
 USER 1001
 
