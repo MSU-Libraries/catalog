@@ -304,6 +304,34 @@ scan_for_online_nodes() {
     echo "${NODES_SORTED[@]}"
 }
 
+# Check if the current galera node already has a
+# running container on the host node joined to the
+# cluster
+current_galera_node_is_running() {
+    SELF_NUMBER=$(node_number "$GALERA_HOST")
+    # Row indices => 0:Index,1:Uuid,2:Name,3:Address
+    GALERA_HOST_IP=$( to_ip "$GALERA_HOST" )
+    if galera_node_query "$GALERA_HOST_IP" "SHOW WSREP_MEMBERSHIP"; then  # return is number of rows, so 0 is failure
+        verbose "No response to SHOW WSREP_MEMBERSHIP on $GALERA_HOST"
+        return 1
+    fi
+    ROWS=$?
+
+    # See if SELF_NUMBER is already in the cluster
+    NFOUND=0
+    for ((IDX=0; IDX<ROWS; IDX++)); do
+        # We indentionally want to get index 2 for the name
+        # shellcheck disable=SC1087
+        NNVAR="ROW_$IDX[2]"
+        if [[ "$SELF_NUMBER" == "${!NNVAR}" ]]; then
+            (( NFOUND += 1 ))
+        fi
+    done
+    if [[ "$NFOUND" -ge 1 ]]; then
+        verbose "Duplicate $SELF_NUMBER nodes (found ${NFOUND}) in cluster"
+        return 1
+    fi
+}
 galera_slow_startup() {
     # Proceed to start Galera if:
     # - Another galera node is online
@@ -312,7 +340,10 @@ galera_slow_startup() {
     while true; do
         verbose "Checking if safe to start."
         update_node_ips
-        if another_galera_node_is_primary_synced; then
+        if current_galera_node_is_running; then
+            verbose "Current node is still running in another container (likely still trying to shutdown)."
+            sleep 4
+        elif another_galera_node_is_primary_synced; then
             verbose "Found another node already online and synced."
             break
         elif will_bootstrap; then
