@@ -310,12 +310,17 @@ scan_for_online_nodes() {
 current_galera_node_is_running() {
     SELF_NUMBER=$(node_number "$GALERA_HOST")
     # Row indices => 0:Index,1:Uuid,2:Name,3:Address
-    GALERA_HOST_IP=$( to_ip "$GALERA_HOST" )
-    if galera_node_query "$GALERA_HOST_IP" "SHOW WSREP_MEMBERSHIP"; then  # return is number of rows, so 0 is failure
-        verbose "No response to SHOW WSREP_MEMBERSHIP on $GALERA_HOST"
+    for NODE in "${NODES_ARR[@]}"; do
+        GALERA_HOST_IP=$( to_ip "$NODE" )
+        if ! galera_node_query "$GALERA_HOST_IP" "SHOW WSREP_MEMBERSHIP"; then  # return is number of rows, so 0 is failure
+            ROWS=$?
+            break
+        fi
+    done
+    if [[ ${ROWS} -eq 0 ]]; then
+        verbose "No response to SHOW WSREP_MEMBERSHIP on any host"
         return 1
     fi
-    ROWS=$?
 
     # See if SELF_NUMBER is already in the cluster
     NFOUND=0
