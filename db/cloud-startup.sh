@@ -317,8 +317,9 @@ current_galera_node_is_running() {
     for NODE in "${NODES_ARR[@]}"; do
         GALERA_HOST_IP=$( to_ip "$NODE" )
         verbose "Querying membership status on $NODE at $GALERA_HOST_IP"
-        if ! galera_node_query "$GALERA_HOST_IP" "SHOW WSREP_MEMBERSHIP"; then  # return is number of rows, so 0 is failure
-            ROWS=$?
+        galera_node_query "$GALERA_HOST_IP" "SHOW WSREP_MEMBERSHIP"
+        ROWS=$?
+        if [[ ${ROWS} -gt 0 ]]; then # We found a node that returned data, we can stop!
             break
         fi
     done
