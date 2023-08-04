@@ -35,7 +35,7 @@ services:
       update_config:
         parallelism: 1
         failure_action: pause
-        delay: 140s
+        delay: 15s
         monitor: 20s
       placement:
         max_replicas_per_node: 1

@@ -12,7 +12,7 @@
 
 GALERA_STATE_FILE=/bitnami/mariadb/data/grastate.dat
 NODES_STR="${MARIADB_GALERA_CLUSTER_ADDRESS##gcomm://}"
-NODES_ARR=("${NODES_STR//,/ }")
+NODES_ARR=(${NODES_STR//,/ })
 declare -g -A NODE_IPS
 declare -g GALERA_PID
 
@@ -31,7 +31,7 @@ node_number() {
 ## Returns 0 if an element matches the value to find
 array_contains() {
     local ARRNAME="$1[@]"
-    local HAYSTACK=( "${!ARRNAME}" )
+    local HAYSTACK=( ${!ARRNAME} )
     local NEEDLE="$2"
     for VAL in "${HAYSTACK[@]}"; do
         if [[ "$NEEDLE" == "$VAL" ]]; then
@@ -64,7 +64,7 @@ hostname_from_ip() {
 to_hostname() {
     ARG="$1"
     HOST=$( hostname_from_ip "$ARG" )
-    if ! HOST=$( hostname_from_ip "$ARG" ); then
+    if [[ "$?" -ne 0 ]]; then
         HOST="$ARG" # Assuming ARG isn't some other random value; we could check NODES_ARR here
     fi
     echo "$HOST"
@@ -254,27 +254,13 @@ will_bootstrap() {
     return $WILL_BOOTSTRAP
 }
 
-###############################
-## Wait for local safe_to_bootstrap: 1 in grastate.dat up to a limit
-##  $1 -> The maximum time to wait in seconds (should be divisible by 5)
-wait_for_grastate_safe_to_bootstrap() {
-    local MAX_SLEEP="$1"
-    local CUR_SLEEP=0
-    while ! grastate_safe_to_bootstrap && [[ "$CUR_SLEEP" -le "$MAX_SLEEP" ]]; do
-        sleep 5
-        (( CUR_SLEEP += 5 ))
-        verbose "Waiting for safe_to_bootstrap: 1"
-    done
-    verbose "Wait limit exceeded (${MAX_SLEEP} secs); proceeding while not safe to bootstrap."
-}
-
 wait_for_other_node_synced_or_safe_to_bootstrap() {
-    sleep 5 # pre-sleep to give other nodes an extra head start
+    sleep 2 # pre-sleep to give other nodes an extra head start
     local MAX_SLEEP="$1"
-    local CUR_SLEEP=5
+    local CUR_SLEEP=2
     while [[ "$CUR_SLEEP" -le "$MAX_SLEEP" ]]; do
-        sleep 5
-        (( CUR_SLEEP += 5 ))
+        sleep 2
+        (( CUR_SLEEP += 2 ))
 
         if galera_node_is_donor "$GALERA_HOST"; then
             verbose "Unsafe. I am currently a donor for another node's syncing and must remain"
@@ -374,13 +360,11 @@ galera_slow_shutdown() {
 
     verbose "Scanning to see if other nodes are online."
     # Scan other nodes to see if they are up
-    # Disabling shellcehck to avoid empty element entering array when mapfile is used
-    # shellcheck disable=SC2207
     NODES_ONLINE=($(scan_for_online_nodes))
     verbose "Lowest online node number: ${NODES_ONLINE[0]:-None}"
 
     # Wait to give other node scans time to complete
-    sleep 5
+    sleep 2
 
     # If self is the lowest numbered node that is up, we wait to let other nodes stop first
     SELF_NUMBER=$(node_number "$GALERA_HOST")
