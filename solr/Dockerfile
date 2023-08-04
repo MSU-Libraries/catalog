@@ -59,6 +59,7 @@ HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
   CMD /healthcheck.sh
 
 COPY index-alphabetic-browse.sh /solr_confs/
+# Custom browse-handler.jar and browse-indexing.jar should not be needed after VuFind 9.1
 COPY browse-handler.jar /solr_confs/jars/browse-handler.jar
 COPY browse-indexing.jar /solr_confs/import/browse-indexing.jar
 COPY solrmarc_core.jar /solr_confs/jars/solrmarc_core.jar
