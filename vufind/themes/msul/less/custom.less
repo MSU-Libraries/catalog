@@ -1277,3 +1277,54 @@ body.template-dir-myresearch.template-name-profile {
       color:#fff;
   }
 }
+
+// Alignment for flipped advanced search
+
+.adv-term-type {
+  float:none;
+  margin-bottom:1%;
+}
+.adv-term-input,
+.adv-term-op {
+  max-width:80%;
+  float:left;
+  }
+.eds-adv,
+.adv-submit {
+  margin-bottom:1rem;
+}
+
+@media (min-width: 768px) {
+  .eds-adv .adv-search:first-of-type .adv-term-input {
+    margin-left: 0;
+  }
+  .eds-adv .adv-search:first-of-type .adv-term-type {
+    margin-left: 17%;
+  }
+  .adv-search .adv-term-type {
+    margin-right:1%;
+  }
+  .adv-search .adv-term-input {
+    margin-right:0;
+  }
+}
+
+//spacing between selection boxes on catalog advanced search
+#advSearchForm {
+  .solr-adv-facet {
+    .form-control {
+      padding: 0.1rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .solr-adv-facet {
+      flex: 1 23%;
+      margin: 0.2rem;
+    }
+  }
+}
+//reduce spacing below headers on advanced search
+fieldset.eds legend {
+  margin-bottom:0.2rem;
+  font-size:20px;
+}
