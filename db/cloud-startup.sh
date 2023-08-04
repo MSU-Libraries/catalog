@@ -113,9 +113,13 @@ any_galera_node_online() {
 galera_node_query() {
     NODE="$1"
     QUERY="$2"
+    verbose "Debugging node query: $QUERY"
     declare -g ROW_CNT=0
     declare -g -a ROW_$ROW_CNT=
     while read -r -a ROW_$ROW_CNT; do
+        verbose "ROW_0: $ROW_0"
+        verbose "ROW_1: $ROW_1"
+        verbose "ROW_2: $ROW_2"
         (( ROW_CNT+=1 ))
         declare -g -a ROW_$ROW_CNT
     done < <( timeout 2 mysql -h "$NODE" -u root -p"$MARIADB_ROOT_PASSWORD" --silent -e "$QUERY" )
@@ -312,6 +316,7 @@ current_galera_node_is_running() {
     # Row indices => 0:Index,1:Uuid,2:Name,3:Address
     for NODE in "${NODES_ARR[@]}"; do
         GALERA_HOST_IP=$( to_ip "$NODE" )
+        verbose "Querying membership status on $NODE at $GALERA_HOST_IP"
         if ! galera_node_query "$GALERA_HOST_IP" "SHOW WSREP_MEMBERSHIP"; then  # return is number of rows, so 0 is failure
             ROWS=$?
             break
