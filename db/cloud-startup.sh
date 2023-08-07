@@ -375,10 +375,6 @@ galera_slow_startup() {
     # Add symlink to log file for monitoring
     touch /mnt/logs/mariadb/mysqld.log
     ln -sf /mnt/logs/mariadb/mysqld.log /opt/bitnami/mariadb/logs/mysqld.log
-    # Output the log for docker
-    # Removing for now because it is likely interferring with the `wait` causing the
-    # `mysqld` service to not exit
-    #tail -f /mnt/logs/mariadb/mysqld.log &
 
     # Start Galera as a background process so we can listen for the shutdown signal
     if [[ "$MARIADB_GALERA_CLUSTER_BOOTSTRAP" == "yes" ]]; then
@@ -389,6 +385,9 @@ galera_slow_startup() {
         /opt/bitnami/scripts/mariadb-galera/run.sh &
     fi
     GALERA_PID=$!
+    
+    # Output the log for docker
+    tail -f --pid=$GALERA_PID /mnt/logs/mariadb/mysqld.log &
 
     while true; do
         update_node_ips
