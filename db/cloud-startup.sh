@@ -17,7 +17,8 @@ declare -g -A NODE_IPS
 declare -g GALERA_PID
 
 verbose() {
-    1>&2 echo "::${GALERA_HOST}: $1"
+    LOG_TS=$(date +%Y-%m-%d\ %H:%M:%S)
+    1>&2 echo "::${GALERA_HOST} [${LOG_TS}]: $1"
 }
 
 node_number() {
@@ -336,7 +337,7 @@ current_galera_node_is_running() {
             (( NFOUND += 1 ))
         fi
     done
-    verbose "After checking cluster, found $SELF_NUMBER $NFOUND time(s) in the cluster"
+    verbose "After checking cluster, found node $SELF_NUMBER $NFOUND time(s) in the cluster"
     if [[ "$NFOUND" -ge 1 ]]; then
         verbose "Duplicate $SELF_NUMBER nodes (found ${NFOUND}) in cluster"
         return 0
