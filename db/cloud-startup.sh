@@ -113,17 +113,12 @@ any_galera_node_online() {
 galera_node_query() {
     NODE="$1"
     QUERY="$2"
-    verbose "($NODE) Debugging node query: $QUERY"
     declare -g ROW_CNT=0
     declare -g -a ROW_$ROW_CNT=
     while read -r -a ROW_$ROW_CNT; do
-        verbose "ROW_0: $ROW_0"
-        verbose "ROW_1: $ROW_1"
-        verbose "ROW_2: $ROW_2"
         (( ROW_CNT+=1 ))
         declare -g -a ROW_$ROW_CNT
     done < <( timeout 2 mysql -h "$NODE" -u root -p"$MARIADB_ROOT_PASSWORD" --silent -e "$QUERY" )
-    verbose "ROW_CNT: $ROW_CNT"
     return $ROW_CNT
 }
 
