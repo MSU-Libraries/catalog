@@ -344,6 +344,7 @@ current_galera_node_is_running() {
     fi
     return 1
 }
+
 galera_slow_startup() {
     # Proceed to start Galera if:
     # - Another galera node is online
