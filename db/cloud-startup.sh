@@ -376,6 +376,8 @@ galera_slow_startup() {
     touch /mnt/logs/mariadb/mysqld.log
     ln -sf /mnt/logs/mariadb/mysqld.log /opt/bitnami/mariadb/logs/mysqld.log
     # Output the log for docker
+    # Removing for now because it is likely interferring with the `wait` causing the
+    # `mysqld` service to not exit
     #tail -f /mnt/logs/mariadb/mysqld.log &
 
     # Start Galera as a background process so we can listen for the shutdown signal
