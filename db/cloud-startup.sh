@@ -327,7 +327,7 @@ current_galera_node_is_running() {
     done
     if [[ ${ROWS} -eq 0 ]]; then
         verbose "No response to SHOW WSREP_MEMBERSHIP on any host"
-        return 1
+        return 0
     fi
 
     # See if SELF_NUMBER is already in the cluster
@@ -344,8 +344,9 @@ current_galera_node_is_running() {
     verbose "After checking cluster, found $SELF_NUMBER $NFOUND time(s) in the cluster"
     if [[ "$NFOUND" -ge 1 ]]; then
         verbose "Duplicate $SELF_NUMBER nodes (found ${NFOUND}) in cluster"
-        return 1
+        return 0
     fi
+    return 1
 }
 galera_slow_startup() {
     # Proceed to start Galera if:
