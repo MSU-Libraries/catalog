@@ -41,7 +41,7 @@ set -e
 set -x
 
 cd "`dirname $0`/import"
-CLASSPATH="browse-indexing.jar:${VUFIND_HOME}/import/lib/*:${SOLR_HOME}/jars/*:${BITNAMI_SOLR_HOME}/modules/analysis-extras/lib/*:${BITNAMI_SOLR_HOME}/server/solr-webapp/webapp/WEB-INF/lib/*:${BITNAMI_SOLR_HOME}/server/lib/ext/log4j*.jar"
+CLASSPATH="browse-indexing.jar:${VUFIND_HOME}/import/lib/*:${SOLR_HOME}/jars/*:${BITNAMI_SOLR_HOME}/modules/analysis-extras/lib/*:${BITNAMI_SOLR_HOME}/server/solr-webapp/webapp/WEB-INF/lib/*:${BITNAMI_SOLR_HOME}/server/lib/ext/*"
 
 # make index work with replicated index
 # current index is stored in the last line of index.properties
