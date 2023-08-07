@@ -15,6 +15,72 @@ provided by Backstage.
 Used to update the refresh the `reserves` index in Solr with data from FOLIO's API, replacing it entirely each run.  
 
 
+## Full Data Harvests
+This section describes the steps needed to re-harvest all of the data from each source.
+
+### FOLIO
+1. Ensure that your OAI settings on the FOLIO tennant are what you want them to be for this particular
+harvest. For example, if you wish to include storage and inventory records (i.e. the records without a MARC source)
+then you will need to modify the "Record Source" field in the OAI Settings.
+
+2. Next you will need to clear out the contents of the `harvest_folio` directory before the next cron job will run.
+Assuming you want to preserve the last harvest for the time being, you can simply move those directories somewhere
+else and rename them. Below is an example, but certainly not the only option. The only goal is that the `harvest_folio`
+directory has no files in it, but can have the `log` and `processed` directories within it as long as they are empty
+(they technically can have files in them, you just will not want them to have files since they will get mixed in with
+your new harvest).
+```
+cd /mnt/shared/oai/[STACK_NAME]/harvest_folio/
+mv processed processed_old
+mv log log_old
+mv last_state.txt last_state.txt.old
+mv harvest.log harvest.log.old
+```
+
+3. Monitor progress after it starts via the cron job in the monitoring app or in the log file on the container or volume
+(`/mnt/logs/harvests/`).
+
+### HLM
+This can just be done with the script's `--full` `--harvest` flags in a one off run, but if you prefer to have
+it run via the cron job use it's normal flags, here are the steps you would need to do in order to prepare
+the environment.
+
+1. Remove all files from the `/mnt/shared/hlm/[STACK_NAME]/current/` directory and remove all files from the
+container's `local/harvest/hlm`. You can also just move them somewhere else if you want to preserve a copy
+of them.
+```
+find /mnt/shared/hlm/[STACK_NAME]/current/ -maxdepth 1 -name '*.marc' -print0 | tar -czf archive_[SOME_DATE].tar.gz --null -T -
+find /mnt/shared/hlm/[STACK_NAME]/current/ -maxdepth 1 -name '*.marc' -delete
+
+# exec in to the container and run
+find /usr/local/vufind/local/harvest/hlm -mindepth 1 -maxdepth 1 -name '*.marc' -delete
+rm /usr/local/vufind/local/harvest/hlm/processed/*
+```
+
+2. Monitor progress after it starts via the cron job in the monitoring app or in the log file on the container or volume
+(`/mnt/logs/harvests/`).
+
+### Backstage (Authority records)
+This can just be done with the script's `--full` `--harvest` flags in a one off run, but if you prefer to have
+it run via the cron job use it's normal flags, here are the steps you would need to do in order to prepare
+the environment.
+
+1. Remove all files from the `/mnt/shared/authority/[STACK_NAME]/current/` directory and remove all files from the
+container's `local/authority/hlm`. You can also just move them somewhere else if you want to preserve a copy
+of them.
+```
+tar -czf archive_[SOME_DATE].tar.gz /mnt/shared/authority/[STACK_NAME]/current/
+rm /mnt/shared/authority/[STACK_NAME]/current/processed/*
+rm /mnt/shared/authority/[STACK_NAME]/current/*
+
+# exec in to the container and run
+rm /usr/local/vufind/local/harvest/authority/*
+rm /usr/local/vufind/local/harvest/authority/processed/*
+```
+
+2. Monitor progress after it starts via the cron job in the monitoring app or in the log file on the container or volume
+(`/mnt/logs/harvests/`).
+
 ## Full Data Imports
 This section will describe the process needed to run a full re-import of the data since 
 that is frequently required to update the Solr index with new field updates. If other tasks are required (such as full
