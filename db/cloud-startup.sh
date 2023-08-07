@@ -386,7 +386,7 @@ galera_slow_startup() {
     fi
     GALERA_PID=$!
     
-    # Output the log for docker
+    # Output the log for docker, telling it to exit when the galera process exits
     tail -f --pid=$GALERA_PID /mnt/logs/mariadb/mysqld.log &
 
     while true; do
