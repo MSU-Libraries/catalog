@@ -113,7 +113,7 @@ any_galera_node_online() {
 galera_node_query() {
     NODE="$1"
     QUERY="$2"
-    verbose "Debugging node query: $QUERY"
+    verbose "($NODE) Debugging node query: $QUERY"
     declare -g ROW_CNT=0
     declare -g -a ROW_$ROW_CNT=
     while read -r -a ROW_$ROW_CNT; do
@@ -123,6 +123,7 @@ galera_node_query() {
         (( ROW_CNT+=1 ))
         declare -g -a ROW_$ROW_CNT
     done < <( timeout 2 mysql -h "$NODE" -u root -p"$MARIADB_ROOT_PASSWORD" --silent -e "$QUERY" )
+    verbose "ROW_CNT: $ROW_CNT"
     return $ROW_CNT
 }
 
@@ -319,6 +320,7 @@ current_galera_node_is_running() {
         verbose "Querying membership status on $NODE at $GALERA_HOST_IP"
         galera_node_query "$GALERA_HOST_IP" "SHOW WSREP_MEMBERSHIP"
         ROWS=$?
+        verbose "Number of rows returned from $NODE: $ROWS"
         if [[ ${ROWS} -gt 0 ]]; then # We found a node that returned data, we can stop!
             break
         fi
@@ -331,13 +333,15 @@ current_galera_node_is_running() {
     # See if SELF_NUMBER is already in the cluster
     NFOUND=0
     for ((IDX=0; IDX<ROWS; IDX++)); do
-        # We indentionally want to get index 2 for the name
+        # We specifically want to get index 2 for the name
         # shellcheck disable=SC1087
         NNVAR="ROW_$IDX[2]"
         if [[ "$SELF_NUMBER" == "${!NNVAR}" ]]; then
+            verbose "Found $SELF_NUMBER in the cluster at WSREP_MEMBERSHIP row index $IDX"
             (( NFOUND += 1 ))
         fi
     done
+    verbose "After checking cluster, found $SELF_NUMBER $NFOUND time(s) in the cluster"
     if [[ "$NFOUND" -ge 1 ]]; then
         verbose "Duplicate $SELF_NUMBER nodes (found ${NFOUND}) in cluster"
         return 1
