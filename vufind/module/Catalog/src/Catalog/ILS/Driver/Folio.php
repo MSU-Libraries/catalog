@@ -209,7 +209,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $nextBatch = [];
             $sortNeeded = false;
 
-
             foreach (
                 $this->getPagedResults(
                     'items',
