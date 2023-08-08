@@ -32,10 +32,9 @@ node_number() {
 ## Returns 0 if an element matches the value to find
 array_contains() {
     local ARRNAME="$1[@]"
-    local HAYSTACK=( ${!ARRNAME} )
     local NEEDLE="$2"
-    for VAL in "${HAYSTACK[@]}"; do
-        if [[ "$NEEDLE" == "$VAL" ]]; then
+    for HAY in "${!ARRNAME}"; do
+        if [[ "$NEEDLE" == "$HAY" ]]; then
             return 0
         fi
     done
@@ -317,11 +316,11 @@ current_galera_node_is_running() {
         galera_node_query "$GALERA_HOST_IP" "SHOW WSREP_MEMBERSHIP"
         ROWS=$?
         verbose "Number of rows returned from $NODE: $ROWS"
-        if [[ ${ROWS} -gt 0 ]]; then # We found a node that returned data, we can stop!
+        if [[ "${ROWS}" -gt 0 ]]; then # We found a node that returned data, we can stop!
             break
         fi
     done
-    if [[ ${ROWS} -eq 0 ]]; then
+    if [[ "${ROWS}" -eq 0 ]]; then
         verbose "No response to SHOW WSREP_MEMBERSHIP on any host"
         return 0
     fi
@@ -385,7 +384,7 @@ galera_slow_startup() {
         /opt/bitnami/scripts/mariadb-galera/run.sh &
     fi
     GALERA_PID=$!
-    
+
     # Output the log for docker, telling it to exit when the galera process exits
     tail -f --pid=$GALERA_PID /mnt/logs/mariadb/mysqld.log &
 
@@ -428,7 +427,6 @@ galera_slow_shutdown() {
 
     # As this might NOT be a global stop for all nodes, there is no need to re-scan to confirm.
     # We must continue to shutdown after our delay, even if other nodes remain up.
-    # Send a TERM signal to self, which will also be sent through to the Galera run.sh as well
     verbose "Shutting down now!"
     kill -s SIGTERM "$GALERA_PID"
     wait
