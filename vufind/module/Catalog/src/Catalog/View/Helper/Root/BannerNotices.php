@@ -29,9 +29,8 @@
 
 namespace Catalog\View\Helper\Root;
 
-use Laminas\View\Helper\AbstractHelper;
-use Laminas\Validator\File\NotExists;
 use Laminas\Diactoros\ServerRequestFilter\IPRange;
+use Laminas\View\Helper\AbstractHelper;
 
 /**
  * View helper to display banner notices loaded from a Yaml config
@@ -124,7 +123,7 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
             $notice["message"],
             [
                 "class" => "banner-notice" . ($notice["classes"] ?? ""),
-                "style" => $style
+                "style" => $style,
             ],
             ["escapeContent" => $escapeContent]
         );
