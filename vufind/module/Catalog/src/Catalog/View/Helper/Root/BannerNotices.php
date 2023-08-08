@@ -70,9 +70,9 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
     /**
      * Constructor
      *
-     * @param array                                 $noticesConfig Banner notices configuration
-     * @param UserIpReader                          $userIpReader IP reader for client
-     * @param \Laminas\Http\PhpEnvironment\Request  $request
+     * @param array                                $noticesConfig Banner notices configuration
+     * @param UserIpReader                         $userIpReader  IP reader for client
+     * @param \Laminas\Http\PhpEnvironment\Request $request       Request object
      */
     public function __construct(array $noticesConfig, $userIpReader, $request)
     {
@@ -94,10 +94,10 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
         foreach ($this->noticesConfig['notices'] ?? [] as $notice) {
             if (empty($notice['message'])) {
                 $this->logWarning(
-                    "BannerNotices config has notice with ".
-                    "empty or missing 'message'");
-            }
-            elseif ($this->evaluateConditions($notice)) {
+                    "BannerNotices config has notice with " .
+                    "empty or missing 'message'"
+                );
+            } elseif ($this->evaluateConditions($notice)) {
                 $html .= $this->renderNotice($notice);
             }
         }
@@ -107,8 +107,9 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
     /**
      * Given a notice configuration, render and return HTML as appropriate
      *
-     * @param array     $notice A single banner notice configuration
-     * @return string   The rendered banner notice div, or empty string
+     * @param array $notice A single banner notice configuration
+     *
+     * @return string       The rendered banner notice div, or empty string
      */
     protected function renderNotice(array $notice)
     {
@@ -118,10 +119,13 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
         foreach ($notice['style'] ?? [] as $key => $val) {
             $style .= "{$key}:{$val};";
         }
-        return $makeTag("div", $notice["message"],
-            ["class" => "banner-notice"
-                . ($notice["classes"] ?? ""),
-             "style" => $style],
+        return $makeTag(
+            "div",
+            $notice["message"],
+            [
+                "class" => "banner-notice" . ($notice["classes"] ?? ""),
+                "style" => $style
+            ],
             ["escapeContent" => $escapeContent]
         );
     }
@@ -129,7 +133,8 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
     /**
      * Evaluate all conditions appropriate to a single notice configuration
      *
-     * @param array     $notice A single banner notice configuration
+     * @param array $notice A single banner notice configuration
+     *
      * @return boolean
      */
     protected function evaluateConditions(array $notice)
@@ -141,28 +146,34 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
                 array_key_exists('value', $condition) ? [$condition['value']] : [],
                 $condition['values'] ?? []
             );
-            switch($condition['type'] ?? "") {
+            switch ($condition['type'] ?? "") {
                 case 'string':
                     $baseVal = $condition['string'] ?? "";
                     break;
                 case 'datetime':
                     $baseVal = (new \DateTime())->format("c");
                     $compVals = array_map(
-                        function ($val) { return (new \DateTime($val))->format("c"); },
+                        function ($val) {
+                            return (new \DateTime($val))->format("c");
+                        },
                         $compVals
                     );
                     break;
                 case 'date':
                     $baseVal = (new \DateTime())->setTime(0, 0)->format("Y-m-d");
                     $compVals = array_map(
-                        function ($val) { return (new \DateTime($val))->format("Y-m-d"); },
+                        function ($val) {
+                            return (new \DateTime($val))->format("Y-m-d");
+                        },
                         $compVals
                     );
                     break;
                 case 'time':
                     $baseVal = (new \DateTime())->format("H:i:s");
                     $compVals = array_map(
-                        function ($val) { return (new \DateTime($val))->format("H:i:s"); },
+                        function ($val) {
+                            return (new \DateTime($val))->format("H:i:s");
+                        },
                         $compVals
                     );
                     break;
@@ -175,17 +186,19 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
                 case 'remoteip':
                     $baseVal = $this->userIpReader->getUserIp();
                     break;
-                default;
+                default:
                     $this->logWarning(
-                        "BannerNotices config has invalid type for ".
+                        "BannerNotices config has invalid type for " .
                         "condition index of {$idx} with message starting '" .
-                        mb_substr($condition['message'] ?? "", 0, 10) . "'");
+                        mb_substr($condition['message'] ?? "", 0, 10) . "'"
+                    );
             }
 
             $success &= $this->handleComparison(
                 $condition['comp'] ?? "",
                 $baseVal,
-                $compVals);
+                $compVals
+            );
         }
         return $success;
     }
@@ -193,9 +206,10 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
     /**
      * Evaluate a single set of comparison conditions
      *
-     * @param string    $comp     The type of comparison to evaluate
-     * @param string    $checkVal The value to valiate
-     * @param array     $matchAny Values for the comparison which will result in success
+     * @param string $comp     The type of comparison to evaluate
+     * @param string $checkVal The value to valiate
+     * @param array  $matchAny Values for the comparison which will result in success
+     *
      * @return boolean
      */
     protected function handleComparison(
@@ -235,9 +249,12 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
                     break;
                 default:
                     $this->logWarning(
-                        "BannerNotices config has invalid comparison type '{$comp}'");
+                        "BannerNotices config has invalid comparison type '{$comp}'"
+                    );
             }
-            if ($matched) { break; }
+            if ($matched) {
+                break;
+            }
         }
         return $matched;
     }

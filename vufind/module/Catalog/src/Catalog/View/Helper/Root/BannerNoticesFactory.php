@@ -75,7 +75,8 @@ class BannerNoticesFactory implements FactoryInterface
         } catch (\Exception $e) {
             $logger = $container->get(\VuFind\Log\Logger::class);
             $logger->err(
-                'Could not parse BannerNotices.yaml:  ' . $e->getMessage());
+                'Could not parse BannerNotices.yaml: ' . $e->getMessage()
+            );
         }
         return new $requestedName(
             $noticesConfig ?? [],
