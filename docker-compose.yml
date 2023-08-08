@@ -8,6 +8,7 @@ services:
     volumes:
       - logs:/mnt/logs
       - /mnt/shared:/mnt/shared:rw
+      - /mnt/shared/config/BannerNotices.yaml:/mnt/shared/config/BannerNotices.yaml:ro
       - vufind_cache:/mnt/vufind_cache
     networks:
       - public

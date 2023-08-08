@@ -71,6 +71,9 @@ touch /mnt/logs/vufind/vufind.log
 touch /var/log/simplesamlphp/simplesamlphp.log
 chown www-data:www-data /mnt/logs/vufind/vufind.log /var/log/simplesamlphp/simplesamlphp.log
 
+# Link to shared BannerNotices.yaml
+ln -f -s /mnt/shared/config/BannerNotices.yaml /usr/local/vufind/local/config/vufind/BannerNotices.yaml
+
 # Prepare cache cli dir (volume only exists after start)
 clear-vufind-cache
 
