@@ -28,7 +28,8 @@ main() {
     EC=$?;
 
     if [[ ${EC} -ne 0 ]]; then
-        echo "One or more unit tests failed.";
+        echo "One or more unit tests failed. Run the following command to debug";
+        echo "docker run --rm \"${CURR}\" vendor/bin/phing phpunitfaster -Dphpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/";
         exit ${EC};
     fi;
     
@@ -37,7 +38,8 @@ main() {
     docker run --rm "${CURR}" vendor/bin/phing eslint jshint phpcs-console php-cs-fixer-dryrun checkLessToSass phpstan-console;
     EC=$?;
     if [[ ${EC} -ne 0 ]]; then
-        echo "One or more of the style checks failed.";
+        echo "One or more of the style checks failed. Run the following command to debug";
+        echo "docker run --rm \"${CURR}\" vendor/bin/phing eslint jshint phpcs-console php-cs-fixer-dryrun checkLessToSass phpstan-console"
         exit ${EC};
     fi;
 
