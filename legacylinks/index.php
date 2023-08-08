@@ -29,31 +29,47 @@ function compute_check_digit(string $id): string {
     }
 }
 
+function api_json(string $url) {
+    $json = null;
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_HTTPGET, true);
+    curl_setopt($ch, CURLOPT_HEADER, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 8);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    $response = curl_exec($ch);
+    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($httpcode == 200) {
+        $json = json_decode($response, true);
+    }
+    return [$httpcode, $json];
+}
+
+
 if ($_SERVER["REQUEST_URI"] === "/ping")  {
     echo "pong\n";
     exit;
 }
 
-$config = @parse_ini_file(__DIR__ . "/../app.ini");
-if ($config === false) {
-    throw new \Exception("Failed to parse INI file.");
-}
-
 $matches = [];
 $r = preg_match(
-    pattern: $config["pattern"],
+    pattern: "/^\/record=([a-z0-9][0-9]*)/",
     subject: $_SERVER["REQUEST_URI"],
     matches: $matches
 );
 
 if ($r === 1) {
     $record = $matches[1] . compute_check_digit($matches[1]);
-    $target = str_replace(
-        subject: $config["target"],
-        search: '${record}',
-        replace: $record
+    list($httpcode, $json) = api_json(
+        "http://" . getenv("STACK_NAME") . "-catalog_catalog/api/v1/search?lookfor=." .
+        rawurlencode($record) . "&type=Bibnum&field[]=id"
     );
-    header("Location: " . $target);
-} else {
-    header("Location: " . $config["default_target"]);
+
+    $hrid = $json["records"][0]["id"] ?? null;
+    if ($httpcode == 200 && !empty($hrid)) {
+        header("Location: https://" . getenv("SITE_HOSTNAME") . "/Record/" . $hrid);
+        exit(0);
+    }
 }
+header("Location: https://" . getenv("SITE_HOSTNAME") . "/");

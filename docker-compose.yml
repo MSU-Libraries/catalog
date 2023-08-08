@@ -54,7 +54,7 @@ services:
     networks:
       - public
     environment:
-      # SITE_HOSTNAME could be used to help handle redirects going to VuFind instead of EDS
+      STACK_NAME: "${STACK_NAME}"
       SITE_HOSTNAME: "${SITE_HOSTNAME}"
     deploy:
       mode: replicated

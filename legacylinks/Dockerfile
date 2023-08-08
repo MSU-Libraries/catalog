@@ -18,5 +18,4 @@ FROM base AS build
 
 RUN mkdir web
 COPY index.php web/
-COPY app.ini .
 RUN chmod -R u=rwX,go=rX .
