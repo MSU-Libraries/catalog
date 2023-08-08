@@ -16,11 +16,13 @@ return [
             'Catalog\View\Helper\Root\Record' => 'Catalog\View\Helper\Root\RecordFactory',
             'Catalog\View\Helper\Root\Auth' => 'VuFind\View\Helper\Root\AuthFactory',
             'Catalog\View\Helper\Root\PrintArrayHtml' => 'Laminas\ServiceManager\Factory\InvokableFactory',
+            'Catalog\View\Helper\Root\BannerNotices' => 'Catalog\View\Helper\Root\BannerNoticesFactory',
         ],
         'aliases' => [
             'record' => 'Catalog\View\Helper\Root\Record',
             'printArrayHtml' => 'Catalog\View\Helper\Root\PrintArrayHtml',
             'auth' => 'Catalog\View\Helper\Root\Auth',
+            'bannerNotices' => 'Catalog\View\Helper\Root\BannerNotices',
         ],
     ],
 
