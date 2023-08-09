@@ -27,6 +27,7 @@
         <ul>
           <li><a href="<?=$this->url('help-home')?>?topic=search&amp;_=<?=time() ?>" data-lightbox class="help-link"><?=$this->transEsc('Search Tips')?></a></li>
           <li><a href="https://lib.msu.edu/contact/askalib/">Ask a Librarian</a></li>
+          <li><a href="<?=$this->url('help-home')?>?topic=z3950" data-lightbox><?=$this->transEsc('Z39.50 Access')?></a></li>
 <!--         <li><a href="<?=$this->url('content-page', ['page' => 'faq']) ?>"><?=$this->transEsc('FAQs')?></a></li> -->
           <?php if ($this->cookieConsent()->isEnabled()): ?>
             <li><a href="#" data-cc="show-preferencesModal" aria-haspopup="dialog"><?=$this->transEsc('Cookie Settings')?></a></li>
@@ -79,18 +80,17 @@
       <li><a id="preFooterA11yStatement" href="https://lib.msu.edu/accessibility/">Accessibility</a></li>
 
    <!--  <li><a id="preFooterReportA11y" href="/">Report an accessibility issue</a></li> -->
-      <li><a id="preFooterPrivacy" href="https://lib.msu.edu/about/privacystmt/">Privacy statement</a></li>
-   <!--  <li><a id="preFooterLibraryUnits" href="/">Library units</a></li> -->
-      <li><a id="preFooterStaffDirectory" href="https://lib.msu.edu/staffdir/">Staff directory</a></li>
+      <li><a id="preFooterPrivacy" href="https://lib.msu.edu/policies/privacy-statement">Privacy statement</a></li>
+      <li><a id="preFooterLibraryUnits" href="https://lib.msu.edu/orgchart">Library units</a></li> 
+      <li><a id="preFooterStaffDirectory" href="https://lib.msu.edu/staff">Staff directory</a></li>
     </ul>
   </div>
 
   <div class="footer-column">
     <ul>
-      <li><a id="preFooterSpaces" href="https://lib.msu.edu/library-spaces/">Discover Library spaces</a></li>
-      <li><a id="preFooterEmployment" href="https://lib.msu.edu/human-resources/employment/">Employment</a></li>
-      <li><a id="preFooterSupport" href="https://lib.msu.edu/support/">Support the Libraries</a></li>
-      <li><a id="preFooterSitemap" href="https://lib.msu.edu/atoz/">Site map</a></li>
+      <li><a id="preFooterSpaces" href="https://lib.msu.edu/spaces">Discover Library spaces</a></li>
+      <li><a id="preFooterEmployment" href="https://lib.msu.edu/human-resources/employment">Employment</a></li>
+      <li><a id="preFooterSupport" href="https://lib.msu.edu/support">Support the Libraries</a></li>
       <li id="preFooterSocial">
         <a href="https://www.facebook.com/msu.libraries" class="pe-2" aria-label="Michigan State University Libraries Facebook account">
           <svg role="img" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-facebook"><title>Michigan State University Libraries Facebook account</title><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
