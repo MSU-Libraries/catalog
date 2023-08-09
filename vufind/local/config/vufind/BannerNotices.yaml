@@ -2,8 +2,8 @@
 # In this file you can configure notices which appear in a banner
 # near the top of the page in VuFind. Each notice will be placed
 # within its own `<div>` tag. Multiple notices are permitted
-# and each notice can be conditional displayed based on multiple
-# configuration defined factors.
+# and each notice can be conditionally displayed based on multiple
+# configurable factors.
 #
 # The basic structure is a top level key of `notices` which contain
 # a list of notice definitions.
@@ -60,7 +60,7 @@
 # condition definitions. Each condition definition is an array
 # and can have the following keys defined:
 # - type    (required)
-# - cond    (required)
+# - comp    (required)
 # - value
 # - values
 # - (additionally there can be type specific keys)
@@ -139,6 +139,9 @@
 #         values:
 #           - file
 #           - link
+#        - type: remoteip
+#          comp: cidr
+#          value: 35.8.220.0/22
 #     classes: "indexing-banner"
 #     message: >
 #       We are currently updating our data. You may experience slower
