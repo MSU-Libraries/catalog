@@ -104,7 +104,7 @@ files in the `/usr/local/harvest/hlm/` directoy and by re-attaching to the `scre
 to see if the command has completed.
 ```
 # Done inside the container
-cp /mnt/shared/hlm/[STACK_NAME]/current/* /usr/local/harvest/hlm/
+cp /mnt/shared/hlm/[STACK_NAME]/current/* /usr/local/vufind/local/harvest/hlm/
 
 # You will want to kick off this command in a screen session, since it can take many hours to run
 /hlm-harvest-and-import.sh -i
@@ -119,7 +119,7 @@ container is stopped due to a deploy. Process can be monitored by seeing the rem
 command has completed.
 ```
 # Done inside the container
-cp /mnt/shared/authority/[STACK_NAME]/current/processed/*.xml /usr/local/harvest/authority/
+cp /mnt/shared/authority/[STACK_NAME]/current/processed/*.xml /usr/local/vufind/local/harvest/authority/
 
 # You will want to kick off this command in a screen session, since it can take many hours to run
 /authority-harvest-and-import.sh -i
@@ -164,6 +164,3 @@ mv *oai*.xml unmerged/
 cd /usr/local/vufind/harvest
 ./batch-import-marc.sh folio
 ```
-
-
-
