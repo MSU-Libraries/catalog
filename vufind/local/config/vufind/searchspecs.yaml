@@ -243,6 +243,11 @@ Author:
     - author2_variant
   DismaxHandler: edismax
 
+Bibnum:
+  DismaxFields:
+    - bibnum_str
+  DismaxHandler: edismax
+
 ISN:
   DismaxFields:
     - isbn

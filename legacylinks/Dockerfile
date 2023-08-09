@@ -9,7 +9,7 @@ RUN \
 
 WORKDIR /var/www/html/
 
-HEALTHCHECK --interval=10s --timeout=30s --retries=1 --start-period=5s \
+HEALTHCHECK --interval=20s --timeout=30s --retries=1 --start-period=5s \
     CMD curl --fail http://localhost/ping
 
 ################################################################################
@@ -18,5 +18,4 @@ FROM base AS build
 
 RUN mkdir web
 COPY index.php web/
-COPY app.ini .
 RUN chmod -R u=rwX,go=rX .
