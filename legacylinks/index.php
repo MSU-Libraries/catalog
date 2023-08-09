@@ -33,7 +33,6 @@ function api_json(string $url) {
     $json = null;
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPGET, true);
-    curl_setopt($ch, CURLOPT_HEADER, true);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 8);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -45,7 +44,6 @@ function api_json(string $url) {
     }
     return [$httpcode, $json];
 }
-
 
 if ($_SERVER["REQUEST_URI"] === "/ping")  {
     echo "pong\n";
