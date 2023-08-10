@@ -142,6 +142,7 @@ ARG AUTH_FTP_USER
 ARG AUTH_FTP_PASSWORD
 ARG DEPLOY_KEY
 ARG LIBRARY_ID
+ARG BROWZINE_TOKEN
 
 ENV SITE_HOSTNAME=$SITE_HOSTNAME \
     FOLIO_URL=$FOLIO_URL \
@@ -170,7 +171,8 @@ ENV SITE_HOSTNAME=$SITE_HOSTNAME \
     AUTH_FTP_PASSWORD=$AUTH_FTP_PASSWORD \
     DEPLOY_KEY=$DEPLOY_KEY \
     VUFIND_LOCAL_MODULES=Catalog \
-    LIBRARY_ID=$LIBRARY_ID
+    LIBRARY_ID=$LIBRARY_ID \
+    BROWZINE_TOKEN=$BROWZINE_TOKEN
 
 # Setup Apache logging to both stdout/stderr and log files (needed for monitoring app)
 RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-default.conf && \
@@ -233,6 +235,7 @@ RUN \
     echo AUTH_FTP_PASSWORD="$AUTH_FTP_PASSWORD" >> /etc/environment && \
     echo DEPLOY_KEY="$DEPLOY_KEY" >> /etc/environment && \
     echo LIBRARY_ID="$LIBRARY_ID" >> /etc/environment && \
+    echo BROWZINE_TOKEN="$BROWZINE_TOKEN" >> /etc/environment && \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \

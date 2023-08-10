@@ -158,10 +158,25 @@
           <?=$doi->renderTemplate()?>
         <?php endif; ?>
         <?php if ($doiStr): ?>
-          <?=$this->icon('external-link', 'icon-link__icon') ?>
+          <?php
+            $url = "https://public-api.thirdiron.com/public/v1/libraries/" . 
+                    getenv("LIBRARY_ID") . "/articles/doi/" .  $doiStr . 
+                    "?access_token=" . getenv("BROWZINE_TOKEN");
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_HEADER, true);    // we want headers
+            curl_setopt($ch, CURLOPT_NOBODY, true);    // we don't need body
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+            $output = curl_exec($ch);
+            $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+          ?>
+          <?php if ($httpcode == '200'): ?>
+            <?=$this->icon('external-link', 'icon-link__icon') ?>
             <a class="icon-link" target="new" href="https://libkey.io/libraries/<?=getenv("LIBRARY_ID")?>/<?=$doiStr?>">
               <span class="icon-link__label">Access Content Online (LibKey)</span>
             </a><br>
+          <?php endif; ?>
         <?php endif; ?>
         <?php if (!is_array($urls)) $urls = [];
           if (!$this->driver->isCollection()):
