@@ -143,6 +143,7 @@
         $openUrl = $this->openUrl($this->driver, 'results');
         $openUrlActive = $openUrl->isActive();
         $doi = $this->doi($this->driver, 'results');
+        $doiStr = $this->escapeHtmlAttr($this->driver->getCleanDOI());
         $doiActive = $doi->isActive();
         // Account for replace_other_urls setting
         $urls = $this->record($this->driver)->getLinkDetails($openUrlActive);
@@ -155,6 +156,12 @@
         <?php if ($doiActive): ?>
           <br>
           <?=$doi->renderTemplate()?>
+        <?php endif; ?>
+        <?php if ($doiStr): ?>
+          <?=$this->icon('external-link', 'icon-link__icon') ?>
+            <a class="icon-link" target="new" href="https://libkey.io/libraries/<?=getenv("LIBRARY_ID")?>/<?=$doiStr?>">
+              <span class="icon-link__label">Access Content Online (LibKey)</span>
+            </a><br>
         <?php endif; ?>
         <?php if (!is_array($urls)) $urls = [];
           if (!$this->driver->isCollection()):

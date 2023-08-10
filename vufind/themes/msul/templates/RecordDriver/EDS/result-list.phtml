@@ -111,6 +111,13 @@
       <?php $doi = $this->doi($this->driver, 'results'); if ($doi->isActive()):?>
         <div><?=$doi->renderTemplate()?></div>
       <?php endif; ?>
+      <?php $doiStr = $this->escapeHtmlAttr($this->driver->getCleanDOI());?>
+      <?php if ($doiStr): ?>
+        <?=$this->icon('external-link', 'icon-link__icon') ?>
+          <a class="icon-link" target="new" href="https://libkey.io/libraries/<?=getenv("LIBRARY_ID")?>/<?=$doiStr?>">
+            <span class="icon-link__label">Access Content Online (LibKey)</span>
+          </a><br>
+      <?php endif; ?>
     </div>
     <div class="result-links hidden-print">
       <?php /* Display qrcode if appropriate: */ ?>

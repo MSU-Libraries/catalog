@@ -58,6 +58,7 @@ main() {
         --build-arg AUTH_FTP_USER="${AUTH_FTP_USER}" \
         --build-arg AUTH_FTP_PASSWORD="${AUTH_FTP_PASSWORD}" \
         --build-arg DEPLOY_KEY="${DEPLOY_KEY}" \
+        --build-arg LIBRARY_ID="${LIBRARY_ID}" \
         --tag "${CURR}" \
         --cache-from "${LATEST}" \
         vufind/;
