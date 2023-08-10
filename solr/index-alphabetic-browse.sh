@@ -31,17 +31,18 @@ then
   SOLR_HOME="$VUFIND_HOME/solr/vufind"
 fi
 
-# BITNAMI_SOLR_HOME would be /opt/bitnami/solr on a solr docker container
-if [ -z "$BITNAMI_SOLR_HOME" ]
+# This would be /opt/bitnami/solr on a solr docker container
+if [ -z "$SOLR_JAR_PATH" ]
 then
-  BITNAMI_SOLR_HOME="${SOLR_HOME}/../vendor"
+  SOLR_JAR_PATH="${SOLR_HOME}/../vendor"
 fi
 
 set -e
 set -x
 
 cd "`dirname $0`/import"
-CLASSPATH="browse-indexing.jar:${VUFIND_HOME}/import/lib/*:${SOLR_HOME}/jars/*:${BITNAMI_SOLR_HOME}/modules/analysis-extras/lib/*:${BITNAMI_SOLR_HOME}/server/solr-webapp/webapp/WEB-INF/lib/*:${BITNAMI_SOLR_HOME}/server/lib/ext/*"
+LOG4J_CLASSPATH=$(find "${SOLR_JAR_PATH}/server/lib/ext" -name 'log4j*.jar' -printf '%p:' | sed 's/:$//')
+CLASSPATH="browse-indexing.jar:${VUFIND_HOME}/import/lib/*:${SOLR_HOME}/jars/*:${SOLR_JAR_PATH}/modules/analysis-extras/lib/*:${SOLR_JAR_PATH}/server/solr-webapp/webapp/WEB-INF/lib/*:${LOG4J_CLASSPATH}"
 
 # make index work with replicated index
 # current index is stored in the last line of index.properties
