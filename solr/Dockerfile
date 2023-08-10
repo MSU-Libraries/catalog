@@ -33,11 +33,10 @@ RUN mkdir /solr_confs && \
 # We might be able to copy index-alphabetic-browse.sh again from VuFind after 9.1
 #    cp /vufind-${VUFIND_VERSION}/index-alphabetic-browse.sh /solr_confs/ && \
 #    chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
-    mkdir /solr_confs/import && \
-    chown 1001 /solr_confs/import && \
+    mkdir -p /solr_confs/import/lib && \
 #    cp /vufind-${VUFIND_VERSION}/import/browse-indexing.jar /solr_confs/import/ && \
-    mkdir -p /solr_confs/vufind_libs/import/lib && \
-    cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /solr_confs/vufind_libs/import/lib/ && \
+    cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /solr_confs/import/lib/ && \
+#    cp /vufind-${VUFIND_VERSION}/import/solrmarc_core*.jar /solr_confs/import/ && \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION} && \
     cp -r /opt/bitnami/solr/modules/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/
@@ -62,12 +61,13 @@ COPY index-alphabetic-browse.sh /solr_confs/
 # Custom browse-handler.jar and browse-indexing.jar should not be needed after VuFind 9.1
 COPY browse-handler.jar /solr_confs/jars/browse-handler.jar
 COPY browse-indexing.jar /solr_confs/import/browse-indexing.jar
-COPY solrmarc_core.jar /solr_confs/jars/solrmarc_core.jar
+COPY solrmarc_core.jar /solr_confs/import/solrmarc_core.jar
 COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
-RUN chmod go-w /solr_confs/index-alphabetic-browse.sh /solr_confs/jars/*.jar /solr_confs/biblio/conf/solrconfig.xml && \
+RUN chmod go-w /solr_confs/index-alphabetic-browse.sh /solr_confs/import/*.jar /solr_confs/jars/*.jar \
+        /solr_confs/biblio/conf/solrconfig.xml && \
     chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
-    chown 1001 /solr_confs/index-alphabetic-browse.sh /solr_confs/jars/*.jar \
-        /solr_confs/import/browse-indexing.jar /solr_confs/biblio/conf/solrconfig.xml
+    chown -R 1001 /solr_confs/index-alphabetic-browse.sh /solr_confs/import /solr_confs/jars \
+        /solr_confs/biblio/conf/solrconfig.xml
 
 USER 1001
 

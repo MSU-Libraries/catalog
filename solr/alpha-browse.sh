@@ -144,7 +144,7 @@ rebuild_databases() {
         ln -s /bitnami/solr/server/solr/authority ${ARGS[BUILD_PATH]}/authority
     fi
 
-    if ! JAVA_HOME=/opt/bitnami/java SOLR_HOME=${ARGS[BUILD_PATH]} SOLR_JAR_PATH=/opt/bitnami/solr VUFIND_HOME=/solr_confs/vufind_libs /solr_confs/index-alphabetic-browse.sh; then
+    if ! JAVA_HOME=/opt/bitnami/java SOLR_HOME=${ARGS[BUILD_PATH]} SOLR_JAR_PATH=/opt/bitnami/solr VUFIND_HOME=/solr_confs /solr_confs/index-alphabetic-browse.sh; then
         verbose "Error occured while running index-alphabetic-browse.sh script!"
         RCODE=1
     else
