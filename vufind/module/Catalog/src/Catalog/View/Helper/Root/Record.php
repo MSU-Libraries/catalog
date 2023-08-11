@@ -165,7 +165,7 @@ class Record extends \VuFind\View\Helper\Root\Record
 
         if ($doi) {
             $checkUrl = "https://public-api.thirdiron.com/public/v1/libraries/" .
-                  getenv("LIBRARY_ID") . "/articles/doi/" .  $doi .
+                  getenv("LIBRARY_ID") . "/articles/doi/" . $doi .
                   "?access_token=" . getenv("BROWZINE_TOKEN");
             $ch = curl_init($checkUrl);
             curl_setopt($ch, CURLOPT_HTTPGET, 1);
