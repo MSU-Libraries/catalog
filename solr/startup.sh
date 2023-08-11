@@ -45,6 +45,9 @@ for COLL_DIR in "${COLLEX_CONFIGS}/"*; do
     fi
 done
 
+# DEBUG : Where are our permissions at?
+ls -l /solr_confs/jars/ /solr_confs/biblio/conf/
+
 # Call base image CMD
 echo "Running Solr start script: $@"
 exec "$@"
