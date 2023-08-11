@@ -150,4 +150,38 @@ class Record extends \VuFind\View\Helper\Root\Record
         }
         return $url;
     }
+
+    /**
+     * Generate a URL to the LibKey system if a 200 response would be returned for
+     * the item (based on a query to another URL)
+     *
+     * @param string $doi the DOI to validate with LibKey and build the URL with
+     *
+     * @return string|bool
+     */
+    public function getLibKeyUrl($doi)
+    {
+        $url = false;
+
+        if ($doi) {
+            $checkUrl = "https://public-api.thirdiron.com/public/v1/libraries/" .
+                  getenv("LIBRARY_ID") . "/articles/doi/" .  $doi .
+                  "?access_token=" . getenv("BROWZINE_TOKEN");
+            $ch = curl_init($checkUrl);
+            curl_setopt($ch, CURLOPT_HTTPGET, 1);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($ch, CURLOPT_HEADER, 1);    // we want headers
+            curl_setopt($ch, CURLOPT_NOBODY, 0);    // we don't need body
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 8);
+            $output = curl_exec($ch);
+            $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpcode == 200) {
+                $url = "https://libkey.io/libraries/" . getenv("LIBRARY_ID") . "/" . $doi;
+            }
+        }
+        return $url;
+    }
 }

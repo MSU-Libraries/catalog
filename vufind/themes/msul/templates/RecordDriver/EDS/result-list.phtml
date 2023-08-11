@@ -111,27 +111,12 @@
       <?php $doi = $this->doi($this->driver, 'results'); if ($doi->isActive()):?>
         <div><?=$doi->renderTemplate()?></div>
       <?php endif; ?>
-      <?php $doiStr = $this->escapeHtmlAttr($this->driver->getCleanDOI());?>
-      <?php if ($doiStr): ?>
-        <?php
-          $url = "https://public-api.thirdiron.com/public/v1/libraries/" . 
-                  getenv("LIBRARY_ID") . "/articles/doi/" .  $doiStr . 
-                  "?access_token=" . getenv("BROWZINE_TOKEN");
-          $ch = curl_init($url);
-          curl_setopt($ch, CURLOPT_HEADER, true);    // we want headers
-          curl_setopt($ch, CURLOPT_NOBODY, true);    // we don't need body
-          curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-          curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-          $output = curl_exec($ch);
-          $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-          curl_close($ch);
-        ?>
-        <?php if ($httpcode == '200'): ?>
+      <?php $libkey = $this->record($this->driver)->getLibKeyUrl($this->driver->getCleanDOI()); ?>
+      <?php if ($libkey): ?>
           <?=$this->icon('external-link', 'icon-link__icon') ?>
-          <a class="icon-link" target="new" href="https://libkey.io/libraries/<?=getenv("LIBRARY_ID")?>/<?=$doiStr?>">
+          <a class="icon-link" target="new" href="<?= $libkey ?>">
             <span class="icon-link__label">Access Content Online (LibKey)</span>
           </a><br>
-        <?php endif; ?>
       <?php endif; ?>
     </div>
     <div class="result-links hidden-print">
