@@ -24,7 +24,7 @@ mkdir -p "${PERSISTENT_DIR}/old-jars" "${PERSISTENT_DIR}/jars"
 for OLD_JAR in "${PERSISTENT_DIR}/jars/"*.jar; do
     mv "${OLD_JAR}" "${PERSISTENT_DIR}/old-jars/"
 done
-cp "${COLLEX_CONFIGS}/jars/*.jar" "${PERSISTENT_DIR}/jars/"
+cp "${COLLEX_CONFIGS}/jars/"*.jar "${PERSISTENT_DIR}/jars/"
 
 echo "Creating required VuFind Solr collections..."
 for COLL_DIR in "${COLLEX_CONFIGS}/"*; do
