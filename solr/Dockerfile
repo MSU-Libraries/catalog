@@ -37,6 +37,7 @@ RUN mkdir /solr_confs && \
 #    cp /vufind-${VUFIND_VERSION}/import/browse-indexing.jar /solr_confs/import/ && \
     cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /solr_confs/import/lib/ && \
 #    cp /vufind-${VUFIND_VERSION}/import/solrmarc_core*.jar /solr_confs/import/ && \
+    chown -R /solr_confs && \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION} && \
     cp -r /opt/bitnami/solr/modules/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/
@@ -54,25 +55,20 @@ COPY healthcheck.sh /healthcheck.sh
 COPY clusterhealth.sh /clusterhealth.sh
 COPY cron-alphabrowse.sh /cron-alphabrowse.sh
 
-HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
-  CMD /healthcheck.sh
-
-COPY index-alphabetic-browse.sh /solr_confs/
+COPY --chown=1001:1001 --chmod=755 index-alphabetic-browse.sh /solr_confs/index-alphabetic-browse.sh
 # Custom browse-handler.jar and browse-indexing.jar should not be needed after VuFind 9.1
-COPY browse-handler.jar /solr_confs/jars/browse-handler.jar
-COPY browse-indexing.jar /solr_confs/import/browse-indexing.jar
-COPY solrmarc_core.jar /solr_confs/import/solrmarc_core.jar
-COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
-RUN chmod go-w /solr_confs/index-alphabetic-browse.sh /solr_confs/import/*.jar /solr_confs/jars/*.jar \
-        /solr_confs/biblio/conf/solrconfig.xml && \
-    chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
-    chown -R 1001 /solr_confs/index-alphabetic-browse.sh /solr_confs/import /solr_confs/jars \
-        /solr_confs/biblio/conf/solrconfig.xml
+COPY --chown=1001:1001 --chmod=755 browse-handler.jar /solr_confs/jars/browse-handler.jar
+COPY --chown=1001:1001 --chmod=755 browse-indexing.jar /solr_confs/import/browse-indexing.jar
+COPY --chown=1001:1001 --chmod=755 solrmarc_core.jar /solr_confs/import/solrmarc_core.jar
+COPY --chown=1001:1001 --chmod=755 biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
 
 USER 1001
 
 COPY alpha-browse.sh /alpha-browse.sh
 COPY lock-state.sh /lock-state.sh
+
+HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
+  CMD /healthcheck.sh
 
 # Run start-up script
 CMD ["/startup.sh", "/opt/bitnami/scripts/solr/run.sh"]
