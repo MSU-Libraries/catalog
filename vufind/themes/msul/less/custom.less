@@ -52,33 +52,33 @@
 /* --- Header ---- */
 
 .template-dir-search.template-name-home header, .template-dir-eds.template-name-home header, .template-dir-combined.template-name-home header {
-    display:flex;
-    flex-direction:column;
-    background-color:@msugreen;
-    background-image: 
-    linear-gradient(
-      rgba(24, 69, 59, 0.8), 
-      rgba(24, 69, 59, 0.8)
-    ),
-    url(/vufind/themes/msul/images/banner-image.jpg);
-    background-repeat: no-repeat;
-    background-attachment: fixed;  
-    background-position: 50% 80%;
-    background-size: cover;
-    margin-bottom: 3rem;
+  display:flex;
+  flex-direction:column;
+  background-color:@msugreen;
+  background-image:
+  linear-gradient(
+    rgba(24, 69, 59, 0.8),
+    rgba(24, 69, 59, 0.8)
+  ),
+  url(/vufind/themes/msul/images/banner-image.jpg);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: 50% 80%;
+  background-size: cover;
+  margin-bottom: 3rem;
   .banner.container {
     background: none;
     margin-bottom:0;
     order:1;
-    }
-    .search.container.navbar {
-      order:2;
-    }
-    .collapse.navbar-collapse {
-      order:3;
-      margin:0;
-    }
   }
+  .search.container.navbar {
+    order:2;
+  }
+  .banner-notice {
+    order:3;
+    margin:0;
+  }
+}
 
     //center on home page at medium width
 .template-dir-search.template-name-home .search.container, .template-dir-eds.template-name-home .search.container, .template-dir-combined.template-name-home .search.container {
@@ -208,12 +208,15 @@ header {
   }
 }
 
-#navbar-warning {
-  background-color:@alert-warning-bg;
-  color:@eggplant;
+.banner-notice {
+  margin-top: -3rem;
+  margin-bottom: 2rem;
+  background-color: @alert-warning-bg;
+  color: @eggplant;
+  padding: 0.3rem 1rem 0.3rem 1rem;
 
   p {
-    padding-top: 0.5rem;
+    margin: 0.4rem 0 0.5rem 0;
   }
   a, i {
     color: @msugreen;
@@ -224,9 +227,6 @@ header {
     text-decoration: underline;
   }
 }
-
-
-
 
 /* --- Footer --- */
 
@@ -241,7 +241,7 @@ header {
   padding-left:2rem;
   background-color: @parakeetgreen;
   color:#fff;
-  img {
+  img.msul_logo {
     max-width:240px;
     margin-bottom:1rem;
   }
@@ -272,13 +272,19 @@ header {
   }
 
   #preFooterSocial {
+      background-color:#fff;
+      border-radius: 5rem;
+      width: 12rem;
+      padding-bottom: 0.2rem;
+padding-top: 0.05rem;
+padding-right: 0.3rem;
+padding-left: 0.3rem;
     a, a:hover, a:active {
       text-decoration:none;
     }
 
-    svg {
-      margin-right:1rem;
-      margin-top:1rem;
+    img {
+      width:2.5rem;
     }
   }
 }
@@ -1277,3 +1283,86 @@ body.template-dir-myresearch.template-name-profile {
       color:#fff;
   }
 }
+
+// Alignment for flipped advanced search select & input fields
+
+.adv-term-type {
+  float:none;
+  margin-bottom:1%;
+}
+.adv-term-input,
+.adv-term-op,
+.adv-group-match {
+  max-width:80%;
+  float:left;
+}
+.add_search_link {
+  margin-top:0 !important;
+  padding-top:0;
+}
+
+@media (min-width: 768px) {
+  .eds-adv {
+    .adv-search:first-of-type {
+      .adv-term-input {
+        margin-left: 0;
+       }
+      .adv-term-type {
+        margin-left: 17%;
+      }
+    }
+  }
+  .adv-search {
+    .adv-term-type {
+      margin-right:1%;
+    }
+  .adv-term-input {
+    margin-right:0;
+    }
+  }
+}
+
+// space below advanced search button mobile and up
+
+fieldset.eds,
+fieldset.solr-facets {
+  margin-top:1rem;
+}
+
+// spacing below advanced search items
+
+#groupPlaceHolder,
+.adv-submit,
+.eds-adv {
+  margin-bottom:1rem;
+}
+
+
+//spacing between selection boxes on catalog advanced search
+
+#advSearchForm {
+  .solr-adv-facet {
+    .form-control {
+      padding: 0.1rem;
+      margin-bottom:1rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .solr-adv-facet {
+      flex: 1 23%;
+      margin: 0.2rem;
+    }
+  }
+}
+//reduce font size and spacing below headers on catalog advanced search
+
+#advSearchForm {
+  fieldset {
+    margin-bottom:1rem;
+  legend {
+    margin-bottom:1rem;
+    font-size:20px;
+    }
+  }
+}
+
