@@ -3,7 +3,8 @@
 # Java security manager is incompatible with AlphaBrowse handler
 export SOLR_SECURITY_MANAGER_ENABLED="false"
 
-COLLEX_CONFIGS=/solr_confs/
+COLLEX_CONFIGS=/solr_confs
+PERSISTENT_DIR=/bitnami/solr/server/solr
 
 # Give Zookeeper time to startup
 echo "Waiting for Zookeeper to come online..."
@@ -18,9 +19,15 @@ else
     echo "Found /solr already in Zookeeper."
 fi
 
+echo "Updating persistent Solr jars..."
+mkdir -p "${PERSISTENT_DIR}/old-jars" "${PERSISTENT_DIR}/jars"
+for OLD_JAR in "${PERSISTENT_DIR}/jars/"*.jar; do
+    mv "${OLD_JAR}" "${PERSISTENT_DIR}/old-jars/"
+done
+cp "${COLLEX_CONFIGS}/jars/*.jar" "${PERSISTENT_DIR}/jars/"
+
 echo "Creating required VuFind Solr collections..."
-for COLL_DIR in ${COLLEX_CONFIGS}*
-do
+for COLL_DIR in "${COLLEX_CONFIGS}/"*; do
     COLL=$(basename $COLL_DIR)
     if [[ -d "$COLL_DIR" && "$COLL" != "jars" ]]; then
         echo "Attempting to upload Solr config for $COLL collection..."

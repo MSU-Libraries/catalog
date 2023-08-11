@@ -71,8 +71,6 @@ RUN chmod go-w /solr_confs/index-alphabetic-browse.sh /solr_confs/import/*.jar /
 
 USER 1001
 
-RUN cp -r /solr_confs/jars /opt/bitnami/solr/server/solr/jars
-
 COPY alpha-browse.sh /alpha-browse.sh
 COPY lock-state.sh /lock-state.sh
 
