@@ -60,14 +60,14 @@ HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
 COPY index-alphabetic-browse.sh /solr_confs/
 # Custom browse-handler.jar and browse-indexing.jar should not be needed after VuFind 9.1
 COPY browse-handler.jar /solr_confs/jars/browse-handler.jar
-COPY browse-indexing.jar /solr_confs/import/browse-indexing.jar
-COPY solrmarc_core.jar /solr_confs/import/solrmarc_core.jar
+COPY browse-indexing.jar solrmarc_core.jar /solr_confs/import/
 COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
 RUN chmod go-w /solr_confs/index-alphabetic-browse.sh /solr_confs/import/*.jar /solr_confs/jars/*.jar \
         /solr_confs/biblio/conf/solrconfig.xml && \
     chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
     chown -R 1001 /solr_confs/index-alphabetic-browse.sh /solr_confs/import /solr_confs/jars \
-        /solr_confs/biblio/conf/solrconfig.xml
+        /solr_confs/biblio/conf/solrconfig.xml && \
+    ln -s /solr_confs/import /opt/bitnami/solr/import
 
 USER 1001
 
