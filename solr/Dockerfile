@@ -39,7 +39,10 @@ RUN mkdir /solr_confs && \
 #    cp /vufind-${VUFIND_VERSION}/import/solrmarc_core*.jar /solr_confs/import/ && \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION} && \
-    cp -r /opt/bitnami/solr/modules/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/
+    cp -r /opt/bitnami/solr/modules/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/ && \
+# Let 1001 user modify biblio config to update collection name to bilio9
+    chown 1001:root /solr_confs/biblio/conf/solrconfig.xml && \
+    ls -l /solr_confs/biblio/conf/
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
@@ -67,7 +70,8 @@ RUN chmod go-w /solr_confs/index-alphabetic-browse.sh /solr_confs/import/*.jar /
     chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
     chown -R 1001 /solr_confs/index-alphabetic-browse.sh /solr_confs/import /solr_confs/jars \
         /solr_confs/biblio/conf/solrconfig.xml && \
-    ln -s /solr_confs/import /opt/bitnami/solr/import
+    ln -s /solr_confs/import /opt/bitnami/solr/import && \
+    ls -l /solr_confs/jars/
 
 USER 1001
 
