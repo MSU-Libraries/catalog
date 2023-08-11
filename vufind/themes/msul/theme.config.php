@@ -8,6 +8,7 @@ return [
     ],
     'js' => [
         ['file' => 'get-this-dropdown.js', 'priority' => 450],
+        ['file' => 'check_item_statuses.js', 'priority' => 450],
     ],
 
     'helpers' => [

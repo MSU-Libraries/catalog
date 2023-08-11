@@ -208,6 +208,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $holdingDetails = $this->getHoldingDetailsForItem($holding);
             $nextBatch = [];
             $sortNeeded = false;
+
             foreach (
                 $this->getPagedResults(
                     'items',
@@ -242,14 +243,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 $sortNeeded
                     ? $this->sortHoldings($nextBatch, $vufindItemSort) : $nextBatch
             );
-        }
 
-        // Check if there are any bound-with items that need to be added
-        // and then merge them into the list if we don't already have that item
-        $item_ids = array_column($items, 'item_id');
-        foreach ($this->getBoundwithHoldings($bibId, $instance->id) as $bound_item) {
-            if (!in_array($bound_item['item_id'], $item_ids)) {
-                array_push($items, $bound_item);
+            // Add any bound items associated with the holding
+            $item_ids = array_column($items, 'item_id');
+            foreach ($this->getBoundwithHoldings($holding, $bibId, $instance->id) as $bound_item) {
+                if (!in_array($bound_item['item_id'], $item_ids)) {
+                    array_push($items, $bound_item);
+                }
             }
         }
 
@@ -267,12 +267,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
     /**
      * Get the bound-with items associated with the instance ID
      *
-     * @param string $bibId      Bib-level id
-     * @param string $instanceId Instance-level id
+     * @param string $bound_holding Holding data to use to populate the item with
+     * @param string $bibId         Bib-level id
+     * @param string $instanceId    Instance-level id
      *
      * @return array An array of associative holding arrays
      */
-    public function getBoundwithHoldings($bibId, $instanceId)
+    public function getBoundwithHoldings($bound_holding, $bibId, $instanceId)
     {
         $showDueDate = $this->config['Availability']['showDueDate'] ?? true;
         $showTime = $this->config['Availability']['showTime'] ?? false;
@@ -282,49 +283,38 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $items = [];
 
         $query = [
-            'query' => 'instanceId==' . $instanceId,
+            'query' => 'holdingsRecordId=="' . $bound_holding->id . '"',
         ];
+        $holdingDetails = $this->getHoldingDetailsForItem($bound_holding);
         foreach (
             $this->getPagedResults(
-                'holdingsRecords',
-                '/holdings-storage/holdings',
+                'boundWithParts',
+                '/inventory-storage/bound-with-parts',
                 $query
-            ) as $bound_holding
+            ) as $bound
         ) {
-            $query = [
-                'query' => 'holdingsRecordId=="' . $bound_holding->id . '"',
-            ];
-            $holdingDetails = $this->getHoldingDetailsForItem($bound_holding);
-            foreach (
-                $this->getPagedResults(
-                    'boundWithParts',
-                    '/inventory-storage/bound-with-parts',
-                    $query
-                ) as $bound
+            $response = $this->makeRequest(
+                'GET',
+                '/item-storage/items/' . $bound->itemId
+            );
+            $bound_item = json_decode($response->getBody());
+            $number = $bound_item->copyNumber ?? null;
+            $dueDateValue = '';
+            if (
+                $bound_item->status->name == 'Checked out'
+                && $showDueDate
+                && $dueDateItemCount < $maxNumDueDateItems
             ) {
-                $response = $this->makeRequest(
-                    'GET',
-                    '/item-storage/items/' . $bound->itemId
-                );
-                $bound_item = json_decode($response->getBody());
-                $number = $bound_item->copyNumber ?? null;
-                $dueDateValue = '';
-                if (
-                    $bound_item->status->name == 'Checked out'
-                    && $showDueDate
-                    && $dueDateItemCount < $maxNumDueDateItems
-                ) {
-                    $dueDateValue = $this->getDueDate($bound_item->id, $showTime);
-                    $dueDateItemCount++;
-                }
-                $items[] = $this->formatHoldingItem(
-                    $bibId,
-                    $holdingDetails,
-                    $bound_item,
-                    $number,
-                    $dueDateValue
-                );
+                $dueDateValue = $this->getDueDate($bound_item->id, $showTime);
+                $dueDateItemCount++;
             }
+            $items[] = $this->formatHoldingItem(
+                $bibId,
+                $holdingDetails,
+                $bound_item,
+                $number,
+                $dueDateValue
+            );
         }
         return $items;
     }

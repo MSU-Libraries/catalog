@@ -30,13 +30,13 @@ RUN mkdir /solr_confs && \
     wget https://github.com/vufind-org/vufind/archive/refs/tags/v${VUFIND_VERSION}.tar.gz && \
     tar -xf v${VUFIND_VERSION}.tar.gz  && \
     cp -r /vufind-${VUFIND_VERSION}/solr/vufind/* /solr_confs && \
-    cp /vufind-${VUFIND_VERSION}/index-alphabetic-browse.sh /solr_confs/ && \
-    chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
-    mkdir /solr_confs/import && \
-    chown 1001 /solr_confs/import && \
-    cp /vufind-${VUFIND_VERSION}/import/browse-indexing.jar /solr_confs/import/ && \
-    mkdir -p /solr_confs/vufind_libs/import/lib && \
-    cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /solr_confs/vufind_libs/import/lib/ && \
+# We might be able to copy index-alphabetic-browse.sh again from VuFind after 9.1
+#    cp /vufind-${VUFIND_VERSION}/index-alphabetic-browse.sh /solr_confs/ && \
+#    chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
+    mkdir -p /solr_confs/import/lib && \
+#    cp /vufind-${VUFIND_VERSION}/import/browse-indexing.jar /solr_confs/import/ && \
+    cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /solr_confs/import/lib/ && \
+#    cp /vufind-${VUFIND_VERSION}/import/solrmarc_core*.jar /solr_confs/import/ && \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION} && \
     cp -r /opt/bitnami/solr/modules/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/
@@ -57,12 +57,20 @@ COPY cron-alphabrowse.sh /cron-alphabrowse.sh
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
   CMD /healthcheck.sh
 
+COPY index-alphabetic-browse.sh /solr_confs/
+# Custom browse-handler.jar and browse-indexing.jar should not be needed after VuFind 9.1
+COPY browse-handler.jar /solr_confs/jars/browse-handler.jar
+COPY browse-indexing.jar /solr_confs/import/browse-indexing.jar
+COPY solrmarc_core.jar /solr_confs/import/solrmarc_core.jar
+COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
+RUN chmod go-w /solr_confs/index-alphabetic-browse.sh /solr_confs/import/*.jar /solr_confs/jars/*.jar \
+        /solr_confs/biblio/conf/solrconfig.xml && \
+    chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
+    chown -R 1001 /solr_confs/index-alphabetic-browse.sh /solr_confs/import /solr_confs/jars \
+        /solr_confs/biblio/conf/solrconfig.xml
+
 USER 1001
 
-RUN cp -r /solr_confs/jars /opt/bitnami/solr/server/solr/jars
-
-# Not needed at this point with VuFind 9
-#COPY browse-handler.jar /opt/bitnami/solr/server/solr/jars/browse-handler.jar
 COPY alpha-browse.sh /alpha-browse.sh
 COPY lock-state.sh /lock-state.sh
 
