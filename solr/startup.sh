@@ -19,12 +19,20 @@ else
     echo "Found /solr already in Zookeeper."
 fi
 
+# Symlink for compatability with VuFind's solrconfig.xml
+ln -s /solr_confs/import /bitnami/solr/import
+
 echo "Updating persistent Solr jars..."
 mkdir -p "${PERSISTENT_DIR}/old-jars" "${PERSISTENT_DIR}/jars"
 for OLD_JAR in "${PERSISTENT_DIR}/jars/"*.jar; do
     mv "${OLD_JAR}" "${PERSISTENT_DIR}/old-jars/"
 done
 cp "${COLLEX_CONFIGS}/jars/"*.jar "${PERSISTENT_DIR}/jars/"
+
+# Modify `biblio` config as we are using `biblio9` which uses an alias of `biblio`
+if [[ "${STACK_NAME}" == "catalog-"* ]]; then
+    sed -i "s/\\bbiblio\\b/biblio9/" "${COLLEX_CONFIGS}/biblio/conf/solrconfig.xml"
+fi
 
 echo "Creating required VuFind Solr collections..."
 for COLL_DIR in "${COLLEX_CONFIGS}/"*; do
