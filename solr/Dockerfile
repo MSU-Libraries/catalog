@@ -6,7 +6,8 @@ USER root
 
 # Install additional packages, including zk-shell
 RUN \
-    useradd --uid 1001 --gid 1001 solrcont && \
+    groupadd --gid 1001 solrcontgroup && \
+    useradd --uid 1001 --gid 1001 solrcontuser && \
     apt update && \
     apt install -y wget vim-nox htop rsyslog cron moreutils gettext-base jq \
                    python3 python3-distutils python3-pip && \
