@@ -6,6 +6,7 @@ USER root
 
 # Install additional packages, including zk-shell
 RUN \
+    df && \
     apt update && \
     apt install -y wget vim-nox htop rsyslog cron moreutils gettext-base jq \
                    python3 python3-distutils python3-pip && \
