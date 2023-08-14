@@ -20,7 +20,7 @@ RUN \
     (umask 0133; touch /.zk_shell/config) && \
     (umask 0177; touch /.zk_shell/history) && \
     touch /test && \
-    chown solrcont /test && \
+    chown solrcontuser /test && \
     ls -l /test && \
     chown -R 1001 /.zk_shell
 
