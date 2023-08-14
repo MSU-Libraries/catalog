@@ -6,8 +6,7 @@ USER root
 
 # Install additional packages, including zk-shell
 RUN \
-    groupadd --gid 1001 solrcontgroup && \
-    useradd --uid 1001 --gid 1001 solrcontuser && \
+    useradd --uid 1001 solrcontuser && \
     apt update && \
     apt install -y wget vim-nox htop rsyslog cron moreutils gettext-base jq \
                    python3 python3-distutils python3-pip && \
@@ -46,7 +45,7 @@ RUN mkdir /solr_confs && \
     rm -rf /vufind-${VUFIND_VERSION} && \
     cp -r /opt/bitnami/solr/modules/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/ && \
 # Let solrcontuser user modify biblio config to update collection name to bilio9
-    chown solrcontuser:solrcontgroup /solr_confs/biblio/conf/solrconfig.xml && \
+    chown solrcontuser /solr_confs/biblio/conf/solrconfig.xml && \
     ls -l /solr_confs/biblio/conf/
 
 # Setup cron and logging for cron
@@ -78,7 +77,7 @@ RUN chmod go-w /solr_confs/index-alphabetic-browse.sh /solr_confs/import/*.jar /
     ln -s /solr_confs/import /opt/bitnami/solr/import && \
     ls -l /solr_confs/jars/
 
-USER solrcontuser:solrcontgroup
+USER solrcontuser
 
 COPY alpha-browse.sh /alpha-browse.sh
 COPY lock-state.sh /lock-state.sh
