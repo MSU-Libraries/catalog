@@ -22,7 +22,7 @@ RUN \
     touch /test && \
     chown solrcontuser /test && \
     ls -l /test && \
-    chown -R 1001 /.zk_shell
+    chown -R solrcontuser /.zk_shell
 
 # Setup Timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
@@ -45,8 +45,8 @@ RUN mkdir /solr_confs && \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION} && \
     cp -r /opt/bitnami/solr/modules/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/ && \
-# Let 1001 user modify biblio config to update collection name to bilio9
-    chown 1001:root /solr_confs/biblio/conf/solrconfig.xml && \
+# Let solrcontuser user modify biblio config to update collection name to bilio9
+    chown solrcontuser:solrcontgroup /solr_confs/biblio/conf/solrconfig.xml && \
     ls -l /solr_confs/biblio/conf/
 
 # Setup cron and logging for cron
@@ -73,12 +73,12 @@ COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
 RUN chmod go-w /solr_confs/index-alphabetic-browse.sh /solr_confs/import/*.jar /solr_confs/jars/*.jar \
         /solr_confs/biblio/conf/solrconfig.xml && \
     chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
-    chown -R 1001 /solr_confs/index-alphabetic-browse.sh /solr_confs/import /solr_confs/jars \
+    chown -R solrcontuser /solr_confs/index-alphabetic-browse.sh /solr_confs/import /solr_confs/jars \
         /solr_confs/biblio/conf/solrconfig.xml && \
     ln -s /solr_confs/import /opt/bitnami/solr/import && \
     ls -l /solr_confs/jars/
 
-USER 1001
+USER solrcontuser:solrcontgroup
 
 COPY alpha-browse.sh /alpha-browse.sh
 COPY lock-state.sh /lock-state.sh
