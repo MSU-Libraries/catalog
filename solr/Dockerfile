@@ -6,7 +6,7 @@ USER root
 
 # Install additional packages, including zk-shell
 RUN \
-    df && \
+    useradd --uid 1001 --gid 1001 solrcont && \
     apt update && \
     apt install -y wget vim-nox htop rsyslog cron moreutils gettext-base jq \
                    python3 python3-distutils python3-pip && \
@@ -18,6 +18,9 @@ RUN \
     (umask 0022; mkdir /.zk_shell) && \
     (umask 0133; touch /.zk_shell/config) && \
     (umask 0177; touch /.zk_shell/history) && \
+    touch /test && \
+    chown solrcont /test && \
+    ls -l /test && \
     chown -R 1001 /.zk_shell
 
 # Setup Timezone
@@ -78,6 +81,8 @@ USER 1001
 
 COPY alpha-browse.sh /alpha-browse.sh
 COPY lock-state.sh /lock-state.sh
+
+RUN ls -l /test
 
 # Run start-up script
 CMD ["/startup.sh", "/opt/bitnami/scripts/solr/run.sh"]
