@@ -7,7 +7,7 @@ USER root
 # Install additional packages, including zk-shell
 RUN \
     groupadd -r -g 10001 group10001 && \
-    useradd -r -u 10001 -G 10001 -g 10001 user10001 && \
+    useradd -r -u 10001 -G 0 -g 10001 user10001 && \
     apt update && \
     apt install -y wget vim-nox htop rsyslog cron moreutils gettext-base jq \
                    python3 python3-distutils python3-pip && \
@@ -78,7 +78,7 @@ RUN chmod go-w /solr_confs/index-alphabetic-browse.sh /solr_confs/import/*.jar /
     ln -s /solr_confs/import /opt/bitnami/solr/import && \
     ls -l /solr_confs/jars/
 
-USER user10001
+USER user10001:root
 
 COPY alpha-browse.sh /alpha-browse.sh
 COPY lock-state.sh /lock-state.sh
