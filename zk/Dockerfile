@@ -6,7 +6,8 @@ USER root
 
 # Install additional packages, including zk-shell
 RUN \
-    useradd --uid 1001 solrcontuser && \
+    groupadd --gid 1001 solrcontgroup && \
+    useradd --uid 1001 --gid 1001 solrcontuser && \
     apt update && \
     apt install -y htop moreutils gettext-base jq \
                    python3 python3-distutils python3-pip && \
@@ -24,6 +25,6 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
 
 # Set volume permissions
-RUN chown -R solrcontuser /bitnami
+RUN chown -R 1001:1001 /bitnami
 
-USER solrcontuser
+USER 1001
