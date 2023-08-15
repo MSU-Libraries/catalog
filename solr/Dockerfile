@@ -19,9 +19,13 @@ RUN \
     (umask 0022; mkdir /.zk_shell) && \
     (umask 0133; touch /.zk_shell/config) && \
     (umask 0177; touch /.zk_shell/history) && \
-    touch /test && \
-    chown user10001 /test && \
-    ls -l /test && \
+    touch /test1 && \
+    chown user10001 /test1 && \
+    touch /test2 && \
+    chown 1234 /test2 && \
+    touch /test3 && \
+    chown 1000 /test3 && \
+    ls -l /test1 /test2 /test3 && \
     chown -R user10001 /.zk_shell
 
 # Setup Timezone
@@ -47,7 +51,11 @@ RUN mkdir /solr_confs && \
     cp -r /opt/bitnami/solr/modules/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/ && \
 # Let user10001 user modify biblio config to update collection name to bilio9
     chown user10001 /solr_confs/biblio/conf/solrconfig.xml && \
-    ls -l /solr_confs/biblio/conf/
+    ls -l /solr_confs/biblio/conf/ && \
+    touch /solr_confs/test4 && \
+    chown 1000 /solr_confs/test4 && \
+    touch /solr_confs/test5 && \
+    chown 1234 /solr_confs/test5
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
@@ -56,11 +64,7 @@ RUN chmod -R g-w,o-w /etc/cron.d/ && \
     sed -i "/PrivDrop/d" /etc/rsyslog.conf && \
     echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf
 
-COPY startup.sh /startup.sh
-COPY startup-cron.sh /startup-cron.sh
-COPY healthcheck.sh /healthcheck.sh
-COPY clusterhealth.sh /clusterhealth.sh
-COPY cron-alphabrowse.sh /cron-alphabrowse.sh
+COPY startup.sh startup-cron.sh healthcheck.sh clusterhealth.sh cron-alphabrowse.sh /
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
   CMD /healthcheck.sh
@@ -71,7 +75,7 @@ COPY browse-handler.jar /solr_confs/jars/browse-handler.jar
 COPY browse-indexing.jar solrmarc_core.jar /solr_confs/import/
 COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
 RUN chmod go-w /solr_confs/index-alphabetic-browse.sh /solr_confs/import/*.jar /solr_confs/jars/*.jar \
-        /solr_confs/biblio/conf/solrconfig.xml && \
+        /solr_confs/biblio/conf/solrconfig.xml /*.sh && \
     chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
     chown -R user10001 /solr_confs/index-alphabetic-browse.sh /solr_confs/import /solr_confs/jars \
         /solr_confs/biblio/conf/solrconfig.xml && \
@@ -83,7 +87,7 @@ USER user10001:root
 COPY alpha-browse.sh /alpha-browse.sh
 COPY lock-state.sh /lock-state.sh
 
-RUN ls -l /test
+RUN ls -l /test1 /test2 /test3 /solr_confs/test4 /solr_confs/test5
 
 # Run start-up script
 CMD ["/startup.sh", "/opt/bitnami/scripts/solr/run.sh"]

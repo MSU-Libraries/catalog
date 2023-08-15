@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "startup.sh"
+ls -l /test* /solr_confs/test*
+
 # Java security manager is incompatible with AlphaBrowse handler
 export SOLR_SECURITY_MANAGER_ENABLED="false"
 
