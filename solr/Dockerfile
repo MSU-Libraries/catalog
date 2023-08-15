@@ -6,6 +6,7 @@ USER root
 
 # Install additional packages, including zk-shell
 RUN \
+    useradd -N solrcontuser && \
     apt update && \
     apt install -y wget vim-nox htop rsyslog cron moreutils gettext-base jq \
                    python3 python3-distutils python3-pip && \
@@ -18,9 +19,9 @@ RUN \
     (umask 0133; touch /.zk_shell/config) && \
     (umask 0177; touch /.zk_shell/history) && \
     touch /test && \
-    chown 1002 /test && \
+    chown solrcontuser /test && \
     ls -l /test && \
-    chown -R 1002 /.zk_shell
+    chown -R solrcontuser /.zk_shell
 
 # Setup Timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
@@ -43,8 +44,8 @@ RUN mkdir /solr_confs && \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION} && \
     cp -r /opt/bitnami/solr/modules/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/ && \
-# Let 1002 user modify biblio config to update collection name to bilio9
-    chown 1002 /solr_confs/biblio/conf/solrconfig.xml && \
+# Let solrcontuser user modify biblio config to update collection name to bilio9
+    chown solrcontuser /solr_confs/biblio/conf/solrconfig.xml && \
     ls -l /solr_confs/biblio/conf/
 
 # Setup cron and logging for cron
@@ -71,12 +72,12 @@ COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
 RUN chmod go-w /solr_confs/index-alphabetic-browse.sh /solr_confs/import/*.jar /solr_confs/jars/*.jar \
         /solr_confs/biblio/conf/solrconfig.xml && \
     chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
-    chown -R 1002 /solr_confs/index-alphabetic-browse.sh /solr_confs/import /solr_confs/jars \
+    chown -R solrcontuser /solr_confs/index-alphabetic-browse.sh /solr_confs/import /solr_confs/jars \
         /solr_confs/biblio/conf/solrconfig.xml && \
     ln -s /solr_confs/import /opt/bitnami/solr/import && \
     ls -l /solr_confs/jars/
 
-USER 1002
+USER solrcontuser
 
 COPY alpha-browse.sh /alpha-browse.sh
 COPY lock-state.sh /lock-state.sh

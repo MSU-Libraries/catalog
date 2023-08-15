@@ -16,13 +16,13 @@ RUN \
     (umask 0022; mkdir /.zk_shell) && \
     (umask 0133; touch /.zk_shell/config) && \
     (umask 0177; touch /.zk_shell/history) && \
-    chown -R 1002 /.zk_shell
+    chown -R 1001 /.zk_shell
 
 # Setup Timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
 
 # Set volume permissions
-RUN chown -R 1002:1002 /bitnami
+RUN chown -R 1001:1001 /bitnami
 
-USER 1002
+USER 1001
