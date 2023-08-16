@@ -87,7 +87,7 @@ USER user10001:root
 COPY alpha-browse.sh /alpha-browse.sh
 COPY lock-state.sh /lock-state.sh
 
-RUN ls -l /test1 /test2 /test3 /solr_confs/test4 /solr_confs/test5
+RUN ls -l /test1 /test2 /test3 /solr_confs/test4 /solr_confs/test5 /opt/bitnami/solr
 
 # Run start-up script
 CMD ["/startup.sh", "/opt/bitnami/scripts/solr/run.sh"]
