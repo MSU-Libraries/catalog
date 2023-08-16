@@ -19,9 +19,6 @@ else
     echo "Found /solr already in Zookeeper."
 fi
 
-# Symlink for compatability with VuFind's solrconfig.xml
-ln -s /solr_confs/import /bitnami/solr/import
-
 echo "Updating persistent Solr jars..."
 mkdir -p "${PERSISTENT_DIR}/old-jars" "${PERSISTENT_DIR}/jars"
 for OLD_JAR in "${PERSISTENT_DIR}/jars/"*.jar; do
