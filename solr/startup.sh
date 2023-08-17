@@ -20,7 +20,8 @@ fi
 
 # Modify `biblio` config as we are using `biblio9` which uses an alias of `biblio`
 if [[ "${STACK_NAME}" == "catalog-"* ]]; then
-    sed -i "s/\\bbiblio\\b/biblio9/" "${COLLEX_CONFIGS}/biblio/conf/solrconfig.xml"
+    cp -r /solr_confs/biblio /solr_confs/biblio9
+    sed -i "s/\\bbiblio\\b/biblio9/" "${COLLEX_CONFIGS}/biblio9/conf/solrconfig.xml"
 fi
 
 echo "Creating required VuFind Solr collections..."
