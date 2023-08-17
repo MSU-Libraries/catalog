@@ -33,9 +33,9 @@ RUN mkdir -p /solr_confs/jars && \
 # We might be able to copy index-alphabetic-browse.sh again from VuFind after 9.1
 #    cp /vufind-${VUFIND_VERSION}/index-alphabetic-browse.sh /solr_confs/ && \
     cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /solr_confs/jars/ && \
-    cp /vufind-${VUFIND_VERSION}/solr/vendor/modules/analysis-extras/lib/* /solr_confs/jars/ && \
     rm v${VUFIND_VERSION}.tar.gz && \
-    rm -rf /vufind-${VUFIND_VERSION}
+    rm -rf /vufind-${VUFIND_VERSION} && \
+    cp /opt/bitnami/solr/modules/analysis-extras/lib/* /solr_confs/jars/
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
