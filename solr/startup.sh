@@ -4,7 +4,6 @@
 export SOLR_SECURITY_MANAGER_ENABLED="false"
 
 COLLEX_CONFIGS=/solr_confs
-PERSISTENT_DIR=/bitnami/solr/server/solr
 
 # Give Zookeeper time to startup
 echo "Waiting for Zookeeper to come online..."
@@ -18,16 +17,6 @@ if ! solr zk ls /solr -z $SOLR_ZK_HOSTS; then
 else
     echo "Found /solr already in Zookeeper."
 fi
-
-# Symlink for compatability with VuFind's solrconfig.xml
-ln -s /solr_confs/import /bitnami/solr/import
-
-echo "Updating persistent Solr jars..."
-mkdir -p "${PERSISTENT_DIR}/old-jars" "${PERSISTENT_DIR}/jars"
-for OLD_JAR in "${PERSISTENT_DIR}/jars/"*.jar; do
-    mv "${OLD_JAR}" "${PERSISTENT_DIR}/old-jars/"
-done
-cp "${COLLEX_CONFIGS}/jars/"*.jar "${PERSISTENT_DIR}/jars/"
 
 # Modify `biblio` config as we are using `biblio9` which uses an alias of `biblio`
 if [[ "${STACK_NAME}" == "catalog-"* ]]; then
@@ -44,9 +33,6 @@ for COLL_DIR in "${COLLEX_CONFIGS}/"*; do
         echo "Created config set for $COLL with files from $COLL_DIR/conf"
     fi
 done
-
-# DEBUG : Where are our permissions at?
-ls -l /solr_confs/jars/ /solr_confs/biblio/conf/
 
 # Call base image CMD
 echo "Running Solr start script: $@"
