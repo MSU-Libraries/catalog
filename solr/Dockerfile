@@ -58,7 +58,7 @@ RUN chmod -R go-w /solr_confs /*.sh && \
     chown 1001:root /solr_confs && \
     # Remove VuFind-specific jar paths (we copied these jars into /solr_confs/jars/)
     sed -i 's/<lib dir="\.\.\/\.\.\/\.\.\/import[^>]*>//g' /solr_confs/biblio/conf/solrconfig.xml && \
-    sed -i 's/<lib dir="\.\.\/\.\.\/\.\.\/vendor[^>]*>//g' /solr_confs/biblio/conf/solrconfig.xml && \
+    sed -i 's/<lib dir="\.\.\/\.\.\/vendor[^>]*>//g' /solr_confs/biblio/conf/solrconfig.xml && \
     # Fix path for /solr_confs/jars
     sed -i 's/<lib dir="\.\.\/jars"/<lib dir="\/solr_confs\/jars"/' /solr_confs/biblio/conf/solrconfig.xml
 
