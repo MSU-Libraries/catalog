@@ -26,17 +26,13 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
 ARG VUFIND_VERSION
 
 # Get solr configs and prepare for alphabetical browsing
-RUN mkdir /solr_confs && \
+RUN mkdir -p /solr_confs/jars && \
     wget https://github.com/vufind-org/vufind/archive/refs/tags/v${VUFIND_VERSION}.tar.gz && \
     tar -xf v${VUFIND_VERSION}.tar.gz  && \
     cp -r /vufind-${VUFIND_VERSION}/solr/vufind/* /solr_confs && \
 # We might be able to copy index-alphabetic-browse.sh again from VuFind after 9.1
 #    cp /vufind-${VUFIND_VERSION}/index-alphabetic-browse.sh /solr_confs/ && \
-#    chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
-    mkdir -p /solr_confs/import/lib && \
-#    cp /vufind-${VUFIND_VERSION}/import/browse-indexing.jar /solr_confs/import/ && \
-    cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /solr_confs/import/lib/ && \
-#    cp /vufind-${VUFIND_VERSION}/import/solrmarc_core*.jar /solr_confs/import/ && \
+    cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /solr_confs/jars/ && \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION} && \
     cp -r /opt/bitnami/solr/modules/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/ && \
@@ -53,17 +49,17 @@ RUN chmod -R g-w,o-w /etc/cron.d/ && \
 COPY startup.sh startup-cron.sh healthcheck.sh clusterhealth.sh cron-alphabrowse.sh alpha-browse.sh lock-state.sh /
 
 # Alphabetic browse and indexing
-# Custom browse-handler.jar and browse-indexing.jar should not be needed after VuFind 9.1
+# Custom browse-handler.jar, browse-indexing.jar and solrmarc_core.jar should not be needed after VuFind 9.1
+# (they will have to be copied from vufind like marc4j-*.jar into /solr_confs/jars/)
 COPY index-alphabetic-browse.sh /solr_confs/
-COPY browse-handler.jar /solr_confs/jars/browse-handler.jar
-COPY browse-indexing.jar solrmarc_core.jar /solr_confs/import/
+COPY browse-handler.jar browse-indexing.jar solrmarc_core.jar /solr_confs/jars/
 COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
 RUN chmod -R go-w /solr_confs /*.sh && \
     chmod ugo+x /*.sh /solr_confs/*.sh && \
-    chown -R 1001 /solr_confs/import /solr_confs/jars /solr_confs/biblio/conf/solrconfig.xml && \
 # Note: solrconfig.xml is also edited (conditionally) in startup.sh
-    sed -i 's/<lib dir="\.\.\/\.\.\/\.\.\/import\/lib"/<lib dir="\/solr_confs\/import\/lib"/' /solr_confs/biblio/conf/solrconfig.xml && \
-    sed -i 's/<lib dir="\.\.\/\.\.\/\.\.\/import"/<lib dir="\/solr_confs\/import"/' /solr_confs/biblio/conf/solrconfig.xml && \
+    # Remove VuFind-specific jar paths
+    sed -i 's/<lib dir="\.\.\/\.\.\/\.\.\/import[^>]*>//g' /solr_confs/biblio/conf/solrconfig.xml && \
+    # Fix path for /solr_confs/jars
     sed -i 's/<lib dir="\.\.\/jars"/<lib dir="\/solr_confs\/jars"/' /solr_confs/biblio/conf/solrconfig.xml
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
