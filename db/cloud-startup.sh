@@ -322,7 +322,7 @@ current_galera_node_is_running() {
     done
     if [[ "${ROWS}" -eq 0 ]]; then
         verbose "No response to SHOW WSREP_MEMBERSHIP on any host"
-        return 0
+        return 1
     fi
 
     # See if SELF_NUMBER is already in the cluster
