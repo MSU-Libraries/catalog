@@ -35,9 +35,7 @@ RUN mkdir -p /solr_confs/jars && \
     cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /solr_confs/jars/ && \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION} && \
-    cp -r /opt/bitnami/solr/modules/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/ && \
-# Let 1001 user modify biblio config to update collection name to biblio9
-    chown 1001:root /solr_confs/biblio/conf/solrconfig.xml
+    cp /opt/bitnami/solr/modules/analysis-extras/lib/* /solr_confs/jars/
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
@@ -57,8 +55,10 @@ COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
 RUN chmod -R go-w /solr_confs /*.sh && \
     chmod ugo+x /*.sh /solr_confs/*.sh && \
 # Note: solrconfig.xml is also edited (conditionally) in startup.sh
-    # Remove VuFind-specific jar paths
+    chown 1001:root /solr_confs && \
+    # Remove VuFind-specific jar paths (we copied these jars into /solr_confs/jars/)
     sed -i 's/<lib dir="\.\.\/\.\.\/\.\.\/import[^>]*>//g' /solr_confs/biblio/conf/solrconfig.xml && \
+    sed -i 's/<lib dir="\.\.\/\.\.\/vendor[^>]*>//g' /solr_confs/biblio/conf/solrconfig.xml && \
     # Fix path for /solr_confs/jars
     sed -i 's/<lib dir="\.\.\/jars"/<lib dir="\/solr_confs\/jars"/' /solr_confs/biblio/conf/solrconfig.xml
 
