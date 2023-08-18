@@ -36,10 +36,9 @@ RUN chmod -R g-w,o-w /etc/cron.d/ && \
 # (they will have to be copied from vufind like marc4j-*.jar)
 # browse-handler.jar, browse-indexing.jar,  solrmarc_core.jar, biblio_solrconfig.xml, index-alphabetic-browse.sh
 COPY startup.sh startup-cron.sh healthcheck.sh clusterhealth.sh cron-alphabrowse.sh alpha-browse.sh lock-state.sh /
-COPY index-alphabetic-browse.sh /solr_confs/
+COPY index-alphabetic-browse.sh biblio_solrconfig.xml /solr_confs/
 COPY browse-handler.jar /solr_confs/jars/
 COPY browse-indexing.jar solrmarc_core.jar /solr_confs/import/
-COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
 RUN \
     wget https://github.com/vufind-org/vufind/archive/refs/tags/v${VUFIND_VERSION}.tar.gz && \
     tar -xf v${VUFIND_VERSION}.tar.gz  && \
@@ -48,6 +47,7 @@ RUN \
     cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /solr_confs/import/lib/ && \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION} && \
+    mv /solr_confs/biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml && \
     chmod -R go-w /solr_confs /*.sh && \
     chmod ugo+x /*.sh /solr_confs/*.sh && \
 # Change solr_confs ownership so that a biblio9 copy can be created (conditionally) in startup.sh
