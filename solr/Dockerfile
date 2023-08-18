@@ -45,7 +45,7 @@ RUN \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION}
 COPY index-alphabetic-browse.sh /solr_confs/
-COPY biblio_solrconfig.xml /solr_confs/biblio/conf/
+COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
 COPY browse-handler.jar /solr_confs/jars/
 COPY browse-indexing.jar solrmarc_core.jar /solr_confs/import/
 RUN \
