@@ -307,6 +307,10 @@ scan_for_online_nodes() {
 # Check if the current galera node already has a
 # running container on the host node joined to the
 # cluster
+#
+# Returns:
+#  int: 0 - when current galera node is running
+#       1 - when current galera node is NOT running
 current_galera_node_is_running() {
     SELF_NUMBER=$(node_number "$GALERA_HOST")
     # Row indices => 0:Index,1:Uuid,2:Name,3:Address
