@@ -356,7 +356,11 @@ import() {
     mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/processed # needed in case it doesn't already exist
     while read -r FILE; do
         DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/$(basename ${FILE})
-        marc2xml ${FILE} > ${DEL_FILE%.mrc}.xml
+        if ! marc2xml ${FILE} > ${DEL_FILE%.mrc}.xml; then
+            verbose "ERROR: marc2xml failed on ${FILE} with code: $?" 1
+            rm -f ${DEL_FILE%.mrc}.xml
+            exit 1
+        fi
         grep -o 'tag="001">[^<]*<' ${DEL_FILE%.mrc}.xml | sed -e 's/.*>\([^<]*\)</hml.\1/' > ${DEL_FILE%.mrc}.delete
         # Cleanup the other files that the batch-delete.sh script won't move to the processed dir
         rm ${DEL_FILE%.mrc}.xml
