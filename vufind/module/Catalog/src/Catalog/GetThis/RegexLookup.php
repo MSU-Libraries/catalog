@@ -86,7 +86,7 @@ class RegexLookup
     public const MAP                   = ['/^MSU MAP/i'];
     public const MICROFORMS            = ['/^MSU MICROFORMS/i'];
     public const MUSIC                 = ['/^MSU MUSIC LIBRARY/i'];
-    public const ONLINE                = ['/ONLINE RESOURCE/i', '/ELECTRONIC RESOURCES/i'];
+    public const ONLINE                = ['/ONLINE RESOURCE/i', '/ELECTRONIC RESOURCES/i', '/INTERNET/i'];
     public const PERM                  = ['/PERM/i'];        // Legacy note: used for Art Reserves
     public const READING_ROOM          = ['/READING ROOM/i'];
     public const REFERENCE             = ['/REFERENCE/i'];
