@@ -27,13 +27,16 @@ def _get_last_minute_apache_requests():
             capture_output=True, text=True, timeout=TIMEOUT, check=True)
     except subprocess.CalledProcessError as err:
         print(f"Error getting number of apache requests: {err.stderr}", file=sys.stderr)
+        return 0
     except subprocess.TimeoutExpired:
         print("Timeout getting number of apache requests", file=sys.stderr)
+        return 0
     try:
-        nb_requests = int(process.stdout)
+        return int(process.stdout)
     except ValueError:
-        nb_requests = 0
-    return nb_requests
+        print(f"Error interpreting number of apache requests: {process.stdout}", file=sys.stderr)
+        print(f"  stderr: {process.stderr}", file=sys.stderr)
+        return 0
 
 def main():
     time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
