@@ -58,7 +58,7 @@ class RegexLookup
     }
 
     // Status
-    public const AVAILABLE             = ['/AVAILABLE/i'];
+    public const AVAILABLE             = ['/^AVAILABLE/i'];
     public const IN_PROCESS            = ['/IN PROCESS/i'];
     public const LIB_USE_ONLY          = ['/LIB USE ONLY/i', '/LIBRARY USE ONLY/i'];
     public const ON_DISPLAY            = ['/ON DISPLAY/i'];

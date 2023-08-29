@@ -349,6 +349,20 @@ class GetThisLoader
     }
 
     /**
+     * Determine if the given item is unavailable
+     *
+     * @param string $item_id Item ID to filter for
+     *
+     * @return bool  If the item is unavailable
+     */
+    public function isUnavailable($item_id = null)
+    {
+        $item_id = $this->getItemId($item_id);
+        $stat = $this->getStatus($item_id);
+        return $stat == 'Unavailable';
+    }
+
+    /**
      * Determine if we should show the in process form
      *
      * @param string $item_id Item ID to filter for
@@ -544,18 +558,8 @@ class GetThisLoader
         $loc = $this->getLocation($item_id);
         $desc = $this->getDescription();
 
-        // Never show if the item is out
-        if ($this->isOut($item_id)) {
-            return false;
-        }
-
-        // If the item is on reserve, return false (PC-539)
-        if (Regex::RESERV($loc)) {
-            return false;
-        }
-
-        // Never show on Remote SPC items (PC-439)
-        if (Regex::SPEC_COLL_REMOTE($loc)) {
+        // Never show if the item is out, unavailable, on reserve or Remote SPC
+        if ($this->isOut($item_id) || $this->isUnavailable($item_id) || Regex::RESERV($loc) || Regex::SPEC_COLL_REMOTE($loc)) {
             return false;
         }
 
@@ -600,18 +604,8 @@ class GetThisLoader
         $loc = $this->getLocation($item_id);
         $desc = $this->getDescription();
 
-        // Never show if the item is out
-        if ($this->isOut($item_id)) {
-            return false;
-        }
-
-        // If the item is on reserve, return false (PC-539)
-        if (Regex::RESERV($loc)) {
-            return false;
-        }
-
-        // Never show on Remote SPC items (PC-439)
-        if (Regex::SPEC_COLL_REMOTE($loc)) {
+        // Never show if the item is out, unavailable, on reserve or Remote SPC
+        if ($this->isOut($item_id) || $this->isUnavailable($item_id) || Regex::RESERV($loc) || Regex::SPEC_COLL_REMOTE($loc)) {
             return false;
         }
 
@@ -678,8 +672,8 @@ class GetThisLoader
             return false;
         }
 
-        // only if the item is on reserve, non-circulating (lib use only), or checked out
-        if (Regex::RESERV($loc) || $this->isOut($item_id) || $this->isLibUseOnly($item_id)) {
+        // only if the item is on reserve, non-circulating (lib use only), checked out or unavailable
+        if (Regex::RESERV($loc) || $this->isOut($item_id) || $this->isLibUseOnly($item_id) || $this->isUnavailable($item_id)) {
             return true;
         }
 
