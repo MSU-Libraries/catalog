@@ -44,9 +44,10 @@ def main():
     memory = status.node_available_memory()
     disk = status.node_available_disk_space()
     nb_requests = _get_last_minute_apache_requests()
-    conn = db.connect(user='monitoring', password='monitoring', host='galera', database="monitoring")
-    cur = conn.cursor()
+    conn = None
     try:
+        conn = db.connect(user='monitoring', password='monitoring', host='galera', database="monitoring")
+        cur = conn.cursor()
         statement = "INSERT INTO data (node, time, available_memory, available_disk_space, " \
             "apache_requests) VALUES (%s, %s, %s, %s, %s)"
         data = (node, time, memory, disk, nb_requests)
@@ -54,4 +55,5 @@ def main():
         conn.commit()
     except db.Error as err:
         print(f"Error adding entry to database: {err}", file=sys.stderr)
-    conn.close()
+    if conn is not None:
+        conn.close()
