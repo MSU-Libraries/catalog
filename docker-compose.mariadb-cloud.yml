@@ -27,6 +27,9 @@ services:
       - logs:/mnt/logs
     stop_signal: SIGWINCH
     stop_grace_period: 80s
+    ulimits:
+      nproc: 8192
+      nofile: 8192
     deploy:
       mode: replicated
       replicas: 3
