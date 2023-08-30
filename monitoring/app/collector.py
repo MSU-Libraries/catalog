@@ -21,7 +21,7 @@ def _get_last_minute_apache_requests():
     # get the number of requests from the apache log within all of the previous minute
     last_minute = datetime.now() - timedelta(minutes=1)
     formatted_time = last_minute.strftime("%d/%b/%Y:%H:%M:.. %z")
-    command = f"tail -1000 /mnt/logs/apache/access.log | grep '{formatted_time}' | wc -l"
+    command = f"tail -10000 /mnt/logs/apache/access.log | grep '{formatted_time}' | wc -l"
     try:
         process = subprocess.run(["/bin/sh", "-c", command],
             capture_output=True, text=True, timeout=TIMEOUT, check=True)
