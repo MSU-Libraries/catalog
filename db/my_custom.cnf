@@ -1,7 +1,7 @@
 # Note: this file must be named my_custom.cnf and placed into /opt/bitnami/mariadb/conf/
 [mysqld]
 wait_timeout        = 345600    # 4 days
-max_connections     = 400
+max_connections     = 1024
 
 [mariadb]
 # Enable SHOW WSREP_STATUS; and SHOW WSREP_MEMBERSHIP; commands
