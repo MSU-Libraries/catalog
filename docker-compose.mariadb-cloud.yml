@@ -28,8 +28,8 @@ services:
     stop_signal: SIGWINCH
     stop_grace_period: 80s
     ulimits:
-      nproc: 8192
-      nofile: 8192
+      nproc: 32768
+      nofile: 32768
     deploy:
       mode: replicated
       replicas: 3
