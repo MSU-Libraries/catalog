@@ -226,7 +226,7 @@ backup_db() {
     verbose "Starting backup of database"
     TIMESTAMP=$( date +%Y%m%d%H%M%S )
     for DB in "${DBS[@]}"; do
-        if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p12345 --triggers --routines --column-statistics=0 vufind 2>&1 > >(gzip > ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql.gz )); then
+        if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p12345 --triggers --routines --single-transaction --skip-lock-tables --column-statistics=0 vufind 2>&1 > >(gzip > ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql.gz )); then
             verbose "ERROR: Failed to successfully backup the database from ${DB}. ${OUTPUT}" 1
             exit 1
         fi
