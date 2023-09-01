@@ -56,6 +56,9 @@ RUN \
         ./vufind_${VUFIND_VERSION}.deb && \
     apt clean && \
     rm vufind_${VUFIND_VERSION}.deb && \
+    # Update some dependencies
+    sed -i 's/"laminas\/laminas-diactoros": "2.17.0"/"laminas\/laminas-diactoros": "2.18.1"/' /usr/local/vufind/composer.json && \
+    sed -i 's/"league\/oauth2-server": "8.4.1"/"league\/oauth2-server": "8.4.2"/' /usr/local/vufind/composer.json && \
     # Install VuFind dev dependencies, for the tests
     composer --working-dir=/usr/local/vufind/ update && \
     # Remove unused dependencies after Vufind is installed
