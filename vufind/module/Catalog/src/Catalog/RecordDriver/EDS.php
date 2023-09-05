@@ -14,6 +14,8 @@
 
 namespace Catalog\RecordDriver;
 
+use VuFind\RecordDriver\DefaultRecord;
+
 /**
  * Model for EDS records.
  *
@@ -42,7 +44,7 @@ class EDS extends \VuFind\RecordDriver\EDS
             }
         }
         if (!empty($this->fields['Items'] ?? []) || empty($this->getAccessLevel())) {
-            return parent::getThumbnail($size);
+            return DefaultRecord::getThumbnail($size);
         } else {
             return false;
         }
