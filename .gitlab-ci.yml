@@ -23,7 +23,7 @@ Set Stack Name:
   tags:
     - msul-shared
   rules:
-    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH ||  $CI_COMMIT_BRANCH = "catalog-review" || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $PROD == "false"'
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH ||  $CI_COMMIT_BRANCH == "catalog-preview" || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $PROD == "false"'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $PROD == "true"'
       when: manual
   before_script:
@@ -49,7 +49,7 @@ Deploy Compose Files:
   extends: .stack_template
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH = "catalog-review"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -66,7 +66,7 @@ Perform Database Backup:
   timeout: 20m
   rules:
     - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule" && $CI_DEPLOY_FREEZE == null'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH = "catalog-review"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
   script:
     - bash ./cicd/perform-database-backup
 
@@ -96,7 +96,7 @@ Deploy Solr:
   extends: .stack_template
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH = "catalog-review"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -113,7 +113,7 @@ Deploy DB:
   extends: .stack_template
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH = "catalog-review"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -134,7 +134,7 @@ Deploy Vufind:
     on_stop: Remove Environment
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH = "catalog-review"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -154,7 +154,7 @@ Deploy Monitoring:
   extends: .stack_template
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH = "catalog-review"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -179,7 +179,7 @@ Populate Vufind Environment:
   extends: .stack_template
   timeout: 10m
   rules:
-    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH = "catalog-review") && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview") && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -191,7 +191,7 @@ Run Functional Tests:
   extends: .stack_template
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH = "catalog-review"'
+    - if: '$CI_COMMIT_BRANCH == "catalog-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -241,7 +241,7 @@ Remove Environment:
     SERVER: $DEPLOY_HOST_A
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH = "catalog-review"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
