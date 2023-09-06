@@ -49,7 +49,7 @@ main() {
         exit 1;
     fi;
 
-    if [[ ${CI_DEFAULT_BRANCH} == "${CI_COMMIT_BRANCH}" ]]; then
+    if [[ ${CI_DEFAULT_BRANCH} == "${CI_COMMIT_BRANCH}" || ${CI_DEFAULT_BRANCH} == "catalog-preview" ]]; then
         echo "Pushing new unique main image tag"
         docker tag "${CURR}" "${CURR}-main";
         docker push "${CURR}-main";
