@@ -157,8 +157,8 @@ apply_prod_changes() {
     # Remove mailcatcher service
     ./yq -i "del(.services.mail-*)" docker-compose.yml;
 
-    ## Changes for catalog-beta
-    if [ "${STACK_NAME}" == "catalog-beta" ]; then
+    ## Changes for catalog-beta and catalog-preview
+    if [ "${STACK_NAME}" == "catalog-beta" ] || [ "${STACK_NAME}" == "catalog-preview" ]; then
         # Override default router rule
         ./yq -i \
         ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" \
