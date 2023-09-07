@@ -133,7 +133,7 @@ rebuild_databases() {
 
     # Create required symlink if it doesn't already exist
     if [[ ! -h ${ARGS[BUILD_PATH]}/jars ]]; then
-        ln -s /bitnami/solr/server/solr/jars ${ARGS[BUILD_PATH]}/jars
+        ln -s /solr_confs/jars ${ARGS[BUILD_PATH]}/jars
     fi
     if [[ ! -h ${ARGS[BUILD_PATH]}/biblio ]]; then
         # Get the biblio collection path in case we are using a "biblio" alias pointing to a collection named "biblioSomething"
