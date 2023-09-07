@@ -60,14 +60,6 @@ Initialize Database Logs:
   script:
      - bash ./cicd/initialize-database-logs
 
-Perform Database Backup:
-  extends: .stack_template
-  rules:
-    - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule" && $CI_DEPLOY_FREEZE == null'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
-  script:
-    - bash ./cicd/perform-database-backup
-
 Deploy Internal Network:
   extends: .stack_template
   script:
@@ -86,7 +78,6 @@ Bootstrap Stacks:
     - Deploy Internal Network
     - Build DB Image
     - Build Solr Image
-    - Perform Database Backup
   script:
     - bash ./cicd/bootstrap-stacks
 
@@ -103,7 +94,6 @@ Deploy Solr:
     - Bootstrap Stacks
     - Deploy Compose Files
     - Deploy Internal Network
-    - Perform Database Backup
   script:
     - bash ./cicd/deploy-solr
 
@@ -120,7 +110,6 @@ Deploy DB:
     - Deploy Compose Files
     - Deploy Internal Network
     - Initialize Database Logs
-    - Perform Database Backup
   script:
     - bash ./cicd/deploy-db
 
@@ -141,7 +130,6 @@ Deploy Vufind:
     - Deploy DB
     - Deploy Solr
     - Deploy Compose Files
-    - Perform Database Backup
   script:
     - bash ./cicd/deploy-vufind
   artifacts:
