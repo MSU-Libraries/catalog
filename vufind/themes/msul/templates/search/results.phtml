@@ -54,11 +54,19 @@
 ?>
 
 <div class="<?=$this->layoutClass('mainbody')?>">
-  <div class="search container navbar">
-    <div class="nav searchbox hidden-print" role="search">
-      <?=$this->layout()->searchbox ?>
+  <?php if ($this->slot('search-heading')->get() == $this->transEsc('Reserves')): ?>
+    <form class="form-inline mb-4" method="get" name="reservesSearchForm">
+      <label class="mb-2 fw-normal" for="reservesSearchForm_lookfor">Search by <strong>Instructor</strong> or by <strong>Course</strong></label><br />
+      <input id="reservesSearchForm_lookfor" placeholder="Search terms" type="text" name="lookfor" size="38" value="" <?=$this->searchOptions('SolrReserves')->autocompleteEnabled() ? ' class="autocomplete searcher:SolrReserves type:Reserves mb-3"' : ''?>>
+      <input class="btn btn-primary" type="submit" name="submit" value="<?=$this->transEscAttr("Find")?>">
+    </form>
+  <?php else: ?>
+    <div class="search container navbar">
+      <div class="nav searchbox hidden-print" role="search">
+        <?=$this->layout()->searchbox ?>
+      </div>
     </div>
-  </div>
+  <?php endif; ?>
   <?php if (($recordTotal = $this->results->getResultTotal()) > 0): // only display these at very top if we have results ?>
     <?php foreach ($this->results->getRecommendations('top') as $index => $current): ?>
       <?=$this->recommend($current, 'top', $index)?>
