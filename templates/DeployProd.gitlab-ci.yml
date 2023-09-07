@@ -19,16 +19,6 @@ Deploy Prod Compose Files:
     - job: Set Prod Stack Name
       artifacts: true
 
-Perform Prod Database Backup:
-  stage: Deploy Prod
-  extends: Perform Database Backup
-  rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-  needs:
-    - job: Set Prod Stack Name
-      artifacts: true
-    - Deploy Prod Compose Files
-
 Deploy Prod Internal Network:
   stage: Deploy Prod
   extends: Deploy Internal Network
@@ -59,7 +49,6 @@ Bootstrap Prod Stacks:
       artifacts: true
     - Deploy Prod Compose Files
     - Deploy Prod Internal Network
-    - Perform Prod Database Backup
 
 Deploy Prod Solr:
   stage: Deploy Prod
@@ -70,7 +59,6 @@ Deploy Prod Solr:
     - job: Set Prod Stack Name
       artifacts: true
     - Bootstrap Prod Stacks
-    - Perform Prod Database Backup
 
 Deploy Prod DB:
   stage: Deploy Prod
@@ -82,7 +70,6 @@ Deploy Prod DB:
       artifacts: true
     - Bootstrap Prod Stacks
     - Initialize Prod Database Logs
-    - Perform Prod Database Backup
 
 Deploy Prod Vufind:
   stage: Deploy Prod
@@ -94,7 +81,6 @@ Deploy Prod Vufind:
       artifacts: true
     - Deploy Prod DB
     - Deploy Prod Solr
-    - Perform Prod Database Backup
 
 Deploy Prod Monitoring:
   stage: Deploy Prod
