@@ -110,6 +110,7 @@ RUN wget https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIM
     mv /tmp/simplesamlphp-${SIMPLESAMLPHP_VERSION} ${SIMPLESAMLPHP_HOME} && \
     rm simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz
 COPY apache2/conf-available/ /etc/apache2/conf-available/
+COPY apache2/sites-available/ /etc/apache2/sites-available/
 COPY simplesamlphp/local/ ${SIMPLESAMLPHP_CUSTOM_DIR}/
 RUN envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW}' < ${SIMPLESAMLPHP_CONFIG_DIR}/config.php | sponge ${SIMPLESAMLPHP_CONFIG_DIR}/config.php && \
     envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \
@@ -177,14 +178,6 @@ ENV SITE_HOSTNAME=$SITE_HOSTNAME \
     VUFIND_LOCAL_MODULES=Catalog \
     LIBRARY_ID=$LIBRARY_ID \
     BROWZINE_TOKEN=$BROWZINE_TOKEN
-
-# Setup Apache logging to both stdout/stderr and log files (needed for monitoring app)
-RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-default.conf && \
-    echo "<VirtualHost *:80>" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "    LogLevel warn" >> /etc/apache2/sites-enabled/000-default.conf && \
-    echo '    ErrorLog "|/usr/bin/tee /var/log/apache2/error.log"' >> /etc/apache2/sites-enabled/000-default.conf && \
-    echo '    CustomLog "|/usr/bin/tee /var/log/apache2/access.log" combined' >> /etc/apache2/sites-enabled/000-default.conf && \
-    echo "</VirtualHost>" >> /etc/apache2/sites-enabled/000-default.conf
 
 # Add file customizations
 COPY local/ /usr/local/vufind/local
