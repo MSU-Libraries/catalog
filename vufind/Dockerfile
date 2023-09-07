@@ -146,7 +146,7 @@ ARG FTP_PASSWORD
 ARG AUTH_FTP_USER
 ARG AUTH_FTP_PASSWORD
 ARG DEPLOY_KEY
-ARG LIBRARY_ID
+ARG BROWZINE_LIBRARY
 ARG BROWZINE_TOKEN
 
 ENV SITE_HOSTNAME=$SITE_HOSTNAME \
@@ -176,7 +176,7 @@ ENV SITE_HOSTNAME=$SITE_HOSTNAME \
     AUTH_FTP_PASSWORD=$AUTH_FTP_PASSWORD \
     DEPLOY_KEY=$DEPLOY_KEY \
     VUFIND_LOCAL_MODULES=Catalog \
-    LIBRARY_ID=$LIBRARY_ID \
+    BROWZINE_LIBRARY=$BROWZINE_LIBRARY \
     BROWZINE_TOKEN=$BROWZINE_TOKEN
 
 # Add file customizations
@@ -218,6 +218,7 @@ RUN \
     envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.ini && \
     envsubst < local/config/vufind/folio.ini | sponge local/config/vufind/folio.ini && \
     envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
+    envsubst < local/config/vufind/BrowZine.ini | sponge local/config/vufind/BrowZine.ini && \
     envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
     envsubst < /etc/aliases | sponge /etc/aliases && \
     # Set required environment variables
@@ -231,7 +232,7 @@ RUN \
     echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment && \
     echo AUTH_FTP_PASSWORD="$AUTH_FTP_PASSWORD" >> /etc/environment && \
     echo DEPLOY_KEY="$DEPLOY_KEY" >> /etc/environment && \
-    echo LIBRARY_ID="$LIBRARY_ID" >> /etc/environment && \
+    echo BROWZINE_LIBRARY="$BROWZINE_LIBRARY" >> /etc/environment && \
     echo BROWZINE_TOKEN="$BROWZINE_TOKEN" >> /etc/environment && \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
