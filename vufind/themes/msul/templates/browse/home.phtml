@@ -4,6 +4,7 @@
 
   $BROWSE_BASE = $this->url('browse-' . strtolower($this->currentAction));
   $SEARCH_BASE = $this->url($this->currentAction == 'Tag' ? 'tag-home' : 'search-results');
+  $this->layout()->searchbox = false;
 ?>
 
 <?php if (!isset($this->currentAction)): ?>

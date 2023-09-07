@@ -3,6 +3,7 @@
   $patron = $user ? $this->auth()->getILSPatron() : false;
   $capabilityParams = $patron ? ['patron' => $patron] : [];
   $ilsOnline = ('ils-none' !== $this->ils()->getOfflineMode());
+  $this->layout()->searchbox = false;
 ?>
 <button class="close-offcanvas btn btn-link" data-toggle="offcanvas"><?=$this->transEsc('navigate_back') ?></button>
 <h3><?=$this->transEsc('Your Account')?></h3>

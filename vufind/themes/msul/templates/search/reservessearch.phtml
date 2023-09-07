@@ -9,6 +9,7 @@
     $reservesLookfor = $this->params->getDisplayQuery();
 
     $this->searchClassId = 'SolrReserves';
+    $this->layout()->searchbox = false;
 ?>
 
 <div class="<?=$this->layoutClass('mainbody')?> mb-5">
