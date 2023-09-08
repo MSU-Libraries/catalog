@@ -54,7 +54,7 @@
 ?>
 
 <div class="<?=$this->layoutClass('mainbody')?>">
-  <?php if ($this->slot('search-heading')->get() == $this->transEsc('Reserves')): ?>
+  <?php if ($this->slot('head-title')->isset() && $this->slot('head-title')->get() == $this->translate('Reserves Search Results')): ?>
     <form class="form-inline mb-4" method="get" name="reservesSearchForm">
       <label class="mb-2 fw-normal" for="reservesSearchForm_lookfor">Search by <strong>Instructor</strong> or by <strong>Course</strong></label><br />
       <input id="reservesSearchForm_lookfor" placeholder="Search terms" type="text" name="lookfor" size="38" value="" <?=$this->searchOptions('SolrReserves')->autocompleteEnabled() ? ' class="autocomplete searcher:SolrReserves type:Reserves mb-3"' : ''?>>
