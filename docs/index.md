@@ -1,7 +1,10 @@
 # Welcome
 This is the technical user documentation for the
-[Michigan State University Libraries' public catalog system](https://catalog-beta.lib.msu.edu/).
-It describes how to setup and configure the containerized Vufind.
+[Michigan State University Libraries' public catalog system](https://catalog.lib.msu.edu/).
+It describes how to setup and configure the containerized VuFind system.
+
+Feel free to reach out to [our team](mailto:LIB.DL.pubcat@msu.edu) with any questions or
+suggestions you have!
 
 ## Getting Started
 * [Technical Overview](tech-overview.md)

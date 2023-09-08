@@ -3,24 +3,40 @@ This page describes the GitLab CI/CD pipeline that is used by
 the MSU Libraries team to deploy the Docker services as multiple stacks
 in a multi-node Docker swarm cluster.
 
+The `catalog-preview` branch represents the staging environment for
+changes before they will be deployed to the production environments.
+This.
+
 The `main` branch represents the stable production environment. Branches
 with the prefix of `review-` or `devel-` will create separate stacks on
 the cluster, auto-provisioning DNS CNAMES as part of the pipeline.
 
+The workflow for developers will be to make code changes on `devel-`
+environments, then merge them in to the `catalog-preview` branch,
+and once a semester (approximately), we will merge that branch
+into the `main` branch to deploy to production. Occassionally there
+may be changes that need to go to production sooner, in that case they
+will be merged to from the `devel-` branches to *BOTH* the `catalog-preview` and
+the `main` branch.
+
 ## Pipeline
 
 * branch: `main`,  
-  stack prefix: `catalog-beta` (`catalog-beta-catalog`, `catalog-beta-internal`, `catalog-beta-solr`, `catalog-beta-mariadb`),  
-  url: https://catalog-beta.aws.lib.msu.edu (local DNS https://catalog-beta.lib.msu.edu)
-  stack prefix: `catalog-prod` (`catalog-prod-catalog`, `catalog-prod-internal`, `catalog-prod-solr`, `catalog-prod-mariadb`),  
-  url: https://catalog.aws.lib.msu.edu (local DNS https://catalog.lib.msu.edu)
+  stack prefix: `catalog-beta` (`catalog-beta-catalog`, `catalog-beta-solr`, `catalog-beta-mariadb`, etc.),  
+  url: https://catalog-beta.lib.msu.edu (local DNS C-Record to catalog.aws.lib.msu.edu)  
+  stack prefix: `catalog-prod` (`catalog-prod-catalog`, `catalog-prod-solr`, `catalog-prod-mariadb`, etc.),  
+  url: https://catalog.lib.msu.edu (local DNS C-Record to catalog.aws.lib.msu.edu)
+
+* branch: `catalog-preview`,  
+  stack prefix: `catalog-preview (`catalog-preview-catalog`, `catalog-preview-solr`, `catalog-preview-mariadb`, etc.),  
+  url: https://catalog-preview.lib.msu.edu (local DNS C-Record to catalog.aws.lib.msu.edu)
 
 * branch: `review-some-feature`,  
-  stack prefix: `review-some-feature` (`review-some-feature-catalog`, `review-some-feature-internal`, `review-some-feature-solr`, `review-some-feature-mariadb`),  
-  url: https://review-some-feature.aws.lib.msu.edu 
+  stack prefix: `review-some-feature` (`review-some-feature-catalog`, `review-some-feature-solr`, `review-some-feature-mariadb`, etc.),  
+  url: https://review-some-feature.aws.lib.msu.edu
 
 * branch: `devel-some-feature`,  
-  stack prefix: `devel-some-feature` (`devel-some-feature-catalog`, `devel-some-feature-internal`, `devel-some-feature-solr`, `devel-some-feature-mariadb`),  
+  stack prefix: `devel-some-feature` (`devel-some-feature-catalog`, `devel-some-feature-solr`, `devel-some-feature-mariadb`, etc.),  
   url: https://devel-some-feature.aws.lib.msu.edu 
 
 * branch: `nothing-special`  
@@ -41,17 +57,17 @@ when you are done with it
 ## Pipeline Stages & Jobs
 
 ## test
-**branches**: `main`, `devel-`*, and `review-`*  
+**branches**: `main`, `catalog-preview`, `devel-`*, and `review-`*  
 * Runs templates included with GitLab CI/CD to scan for secrets used in committed code
 * Runs `shellcheck` on all bash scripts in the repository
 
 ### Build
-**branches**: `main`, `devel-`*, and `review-`*  
+**branches**: `main`, `catalog-preview`, `devel-`*, and `review-`*  
 * Builds all of the images in this repository, tagging them with `latest` only if it the `main` branch
 * When building the VuFind image, it will also perform unit testing of the `Catalog` module
 
 ### Deploy
-**branches**: `main`, `devel-`*, and `review-`*  
+**branches**: `main`, `catalog-preview`, `devel-`*, and `review-`*  
 * Will set the `STACK_NAME` variable that is used throughout the pipeline, which is essentially
 the branch name unless the branch does not start with `devel-`, `review-` or is `main`
 * Will make updates to the docker compose files and copy them to the AWS servers. The updates include
@@ -84,16 +100,22 @@ job should have completed that compiles the docs
 At this time, the following variables need to be defined in the
 project's CI/CD settings to be available to the pipeline. While it is ok for variables to be
 marked as `masked`, they can not be marked as `protected`; otherwise they will not be
-available in the `devel-` and `review-` pipelines.
+available in the `devel-` and `review-` pipelines. You may need to define the same
+variable multiple times, but for each environment, so that each site has different values.
+For example, your development environments might have different values for `FOLIO_URL` then
+the production environment. This is done using the *scope* setting in the variables menu.
+And the *scope* value is simple the branch name you want to match it to.
 
-* `AUTH_FTP_USER`: User name for the authority marc file FTP server
 * `AUTH_FTP_PASSWORD`: Password for `AUTH_FTP_USER`
+* `AUTH_FTP_USER`: User name for the authority marc file FTP server
 * `AWS_KEY`: The AWS access key to use when provisioning the DNS CNAME records
 * `AWS_SECRET`: The AWS secret for the `AWS_KEY` uses when provisioning the DNS CNAME records
 * `BASICAUTH_FOR_RESOURCES`: Bcrypt password hash[^1] for basic authentication to internal
 resources such as Solr and the Traefik dashboard
-* `DEPLOY_PRIVATE_KEY`: The `base64` encoded private ssh key to the deploy server
+* `BROWZINE_LIBRARY`: Library ID for BrowZine (LibKey)
+* `BROWZINE_TOKEN`: BrowZine API token (LibKey)
 * `DEPLOY_KEY`: GitLab read-only deploy key base64 encoded
+* `DEPLOY_PRIVATE_KEY`: The `base64` encoded private ssh key to the deploy server
 * `EDS_ORG`: Organization ID for the EDS API
 * `EDS_PASS`: Password for the `EDS_USER` username
 * `EDS_PROFILE`: Profile name for EDS
@@ -101,19 +123,22 @@ resources such as Solr and the Traefik dashboard
 * `EMAIL`: Email address set in Vufind's configs 
 * `FEEDBACK_EMAIL`: Email address for sending feedback form submissions to
 * `FOLIO_CANCEL_ID`: The FOLIO cancelation ID to use when canceling an order. Vufind uses
+`75187e8d-e25a-47a7-89ad-23ba612338de` by default
 * `FOLIO_PASS`: Password for the `FOLIO_USER` application user used by Vufind
 * `FOLIO_REC_ID`: Record ID in FOLIO to search for to verify the tenant is available
 * `FOLIO_TENANT`: Tenant ID 
 * `FOLIO_URL`: Okapi URL for FOLIO used by Vufind 
 * `FOLIO_USER`: Application user used by Vufind for ILS calls 
-* `FTP_USER`: User name for the EBSCO FTP server
 * `FTP_PASSWORD`: Password for `FTP_USER`
+* `FTP_USER`: User name for the EBSCO FTP server
 * `GITHUB_USER_TOKEN`: Token used to publish releases to GitHub repository 
 * `OAI_URL`: URL for making OAI calls to FOLIO when harvesting (can include API Token) 
-* `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation
 * `RECAPTCHA_SECRET_KEY`: Secret key for reCaptcha form validation
+* `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation
 * `REGISTRY_ACCESS_TOKEN`: Read-only registry access token used by deploy user
 * `RW_CICD_TOKEN`: Read-Write access token to this repository used to create release tags 
+* `SIMPLESAMLPHP_ADMIN_PW`: Password to the admin interface of SimpleSAMLphp
+* `SIMPLESAMLPHP_SALT`: Random salt for SimpleSAMLphp
 
 ## Scheduled Pipelines
 For the Ansible image to build overnight, saving time on regular daily builds, we can set up a scheduled pipeline to
