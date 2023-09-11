@@ -21,6 +21,7 @@ services:
       NODE: "{{slice .Node.Hostname 8 9}}"
       STACK_NAME: "${STACK_NAME}"
       MARIADB_MONITORING_PASSWORD: "${MARIADB_MONITORING_PASSWORD}"
+      MARIADB_VUFIND_PASSWORD: "${MARIADB_VUFIND_PASSWORD}"
     deploy:
       mode: replicated
       replicas: 3

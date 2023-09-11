@@ -18,7 +18,8 @@ TIMEOUT = 10
 
 def _node_cluster_state_uuid():
     try:
-        process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind", "-pvufind", "-ss", "-e",
+        process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind",
+            f"-p\"{os.getenv('MARIADB_VUFIND_PASSWORD')}\"", "-ss", "-e",
             "SELECT variable_value from information_schema.global_status WHERE " \
             "variable_name='wsrep_cluster_state_uuid';"],
             capture_output=True, text=True, timeout=TIMEOUT, check=True)
@@ -36,7 +37,8 @@ def _check_cluster_state_uuid(statuses):
 
 def get_galera_status(statuses):
     try:
-        process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind", "-pvufind", "-ss", "-e",
+        process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind",
+            f"-p\"{os.getenv('MARIADB_VUFIND_PASSWORD')}\"", "-ss", "-e",
             "SELECT variable_value from information_schema.global_status WHERE variable_name='wsrep_cluster_size';"],
         capture_output=True, text=True, timeout=TIMEOUT, check=True)
     except subprocess.CalledProcessError as err:
