@@ -1,12 +1,11 @@
 User-agent: *
+Crawl-delay: 1
 Disallow: /AJAX
 Disallow: /EDS
 Disallow: /EDS/Search
 Disallow: /EdsRecord
 Disallow: /Alphabrowse
 Disallow: /Alphabrowse/Home
-Disallow: /Browse
-Disallow: /Browse/Home
 Disallow: /Channels
 Disallow: /Channels/Home
 Disallow: /Search/Reserves

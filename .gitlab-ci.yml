@@ -7,9 +7,7 @@ stages:
   - Release
 
 variables:
-  VUFIND_VERSION: "8.1.2"
-  # Used during upgrade, which needs to know previous version
-  PREV_VUFIND_VERSION: "8.1.1"
+  VUFIND_VERSION: "9.0.3"
   SIMPLESAMLPHP_VERSION: "1.19.6"
   DEPLOY_HOST_A: catalog-1.aws.lib.msu.edu
   DEPLOY_HOST_B: catalog-2.aws.lib.msu.edu
@@ -62,27 +60,14 @@ Initialize Database Logs:
   script:
      - bash ./cicd/initialize-database-logs
 
-Perform Database Backup:
-  extends: .stack_template
-  rules:
-    - if: '$CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "schedule" && $CI_DEPLOY_FREEZE == null'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/'
-  script:
-    - bash ./cicd/perform-database-backup
-
 Deploy Internal Network:
   extends: .stack_template
   script:
     - bash ./cicd/deploy-internal-network
-
-Deploy Traefik:
-  extends: .stack_template
   needs:
+    - Deploy Compose Files
     - job: Set Stack Name
       artifacts: true
-    - Deploy Compose Files
-  script:
-    - bash ./cicd/deploy-traefik
 
 Bootstrap Stacks:
   extends: .stack_template
@@ -93,7 +78,6 @@ Bootstrap Stacks:
     - Deploy Internal Network
     - Build DB Image
     - Build Solr Image
-    - Perform Database Backup
   script:
     - bash ./cicd/bootstrap-stacks
 
@@ -110,15 +94,8 @@ Deploy Solr:
     - Bootstrap Stacks
     - Deploy Compose Files
     - Deploy Internal Network
-    - Deploy Traefik
-    - Perform Database Backup
   script:
     - bash ./cicd/deploy-solr
-
-Deploy Swarm Cron:
-  extends: .stack_template
-  script:
-    - bash ./cicd/deploy-swarm-cron
 
 Deploy DB:
   extends: .stack_template
@@ -133,7 +110,6 @@ Deploy DB:
     - Deploy Compose Files
     - Deploy Internal Network
     - Initialize Database Logs
-    - Perform Database Backup
   script:
     - bash ./cicd/deploy-db
 
@@ -149,13 +125,11 @@ Deploy Vufind:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Deploy Traefik
     - Deploy Internal Network
     - Build Vufind Image
     - Deploy DB
     - Deploy Solr
     - Deploy Compose Files
-    - Perform Database Backup
   script:
     - bash ./cicd/deploy-vufind
   artifacts:
@@ -173,7 +147,6 @@ Deploy Monitoring:
     - Build Monitoring Image
     - Deploy Compose Files
     - Deploy Internal Network
-    - Deploy Traefik
   script:
     - bash ./cicd/deploy-monitoring
 
@@ -187,17 +160,6 @@ Verify Stack Health:
   script:
     - bash ./cicd/verify-stack-health
 
-Vufind Upgrade:
-  extends: .stack_template
-  needs:
-    - job: Set Stack Name
-      artifacts: true
-    - job: Deploy Vufind
-      artifacts: true
-    - Verify Stack Health
-  script:
-    - bash ./cicd/vufind-upgrade
-
 Populate Vufind Environment:
   extends: .stack_template
   rules:
@@ -205,9 +167,20 @@ Populate Vufind Environment:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Vufind Upgrade
+    - Verify Stack Health
   script:
     - bash ./cicd/populate-vufind-environment
+
+Run Functional Tests:
+  extends: .stack_template
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Verify Stack Health
+  script:
+    - bash ./cicd/run-functional-tests
 
 Scale Down Catalog Service:
   extends: .stack_template

@@ -3,7 +3,7 @@
 # Set defaults
 default_args() {
     declare -g -A ARGS
-    ARGS[SHARED_DIR]=/mnt/shared/backups
+    ARGS[SHARED_DIR]=/mnt/backups
     ARGS[SOLR]=0
     ARGS[DB]=0
     ARGS[ROTATIONS]=3
@@ -28,9 +28,9 @@ runhelp() {
     echo "     Back up the database saving the last 5 backups"
     echo ""
     echo "Flags:"
-    echo "  -s/--solr"
+    echo "  -s|--solr"
     echo "     Back up the Solr index"
-    echo "  -d/--db"
+    echo "  -d|--db"
     echo "     Back up the MariaDB database"
     echo "  -b|--shared-dir SHARED_DIR"
     echo "      Full path to the shared storage location for backups to be stored."
@@ -38,7 +38,7 @@ runhelp() {
     echo "  -r|--rotations ROTATIONS"
     echo "      Number of most recent backups to save"
     echo "      Default: ${ARGS[ROTATIONS]}"
-    echo "  -v/--verbose"
+    echo "  -v|--verbose"
     echo "     Show verbose output"
 }
 
@@ -105,9 +105,15 @@ backup_solr() {
     backup_collection "biblio"
 
     backup_collection "authority"
+
+    backup_collection "reserves"
 }
 
 backup_collection() {
+    # Select one Solr node to perform backups on
+    SOLR_NODES=(solr1 solr2 solr3)
+    SOLR_IDX="$(( RANDOM % ${#SOLR_NODES[@]} ))"
+    SOLR_NODE="${SOLR_NODES[$SOLR_IDX]}"
     COLL="$1"
 
     mkdir -p ${ARGS[SHARED_DIR]}/solr/"${COLL}"
@@ -115,10 +121,10 @@ backup_collection() {
     chmod -R 777 ${ARGS[SHARED_DIR]}/solr_dropbox/
 
     # Trigger the backup in Solr
-    verbose "Starting backup of '${COLL}' index"
+    verbose "Starting backup of '${COLL}' index (using node $SOLR_NODE)"
     SNAPSHOT="$(date +%Y%m%d%H%M%S)"
-    if ! curl "http://solr2:8983/solr/${COLL}/replication?command=backup&location=/mnt/solr_backups/${COLL}&name=${SNAPSHOT}" > /dev/null 2>&1; then
-        verbose "ERROR: Failed to trigger a backup of the '${COLL}' collection in Solr. Exit code: $?" 1
+    if ! OUTPUT=$(curl -sS "http://$SOLR_NODE:8983/solr/${COLL}/replication?command=backup&location=/mnt/solr_backups/${COLL}&name=${SNAPSHOT}"); then
+        verbose "ERROR: Failed to trigger a backup of the '${COLL}' collection in Solr. Exit code: $?. ${OUTPUT}" 1
         exit 1
     fi
 
@@ -144,7 +150,7 @@ backup_collection() {
             verbose "Backup still in progress (${ACTUAL}/${EXPECTED} files copied)"
         fi
         sleep 3
-        EXPECTED="$(curl -s "http://solr2:8983/solr/${COLL}/replication?command=details&wt=json" | jq '.details.commits[0][5]|length')"
+        EXPECTED="$(curl -sS "http://$SOLR_NODE:8983/solr/${COLL}/replication?command=details&wt=json" | jq '.details.commits[0][5]|length')"
         ACTUAL="$(find ${ARGS[SHARED_DIR]}/solr_dropbox/"${COLL}"/"${SNAPSHOT}" -type f 2>/dev/null | wc -l)"
         CUR_WAIT=$((CUR_WAIT+1))
     done
@@ -179,15 +185,38 @@ backup_collection() {
     remove_old_backups ${ARGS[SHARED_DIR]}/solr/"${COLL}"
 }
 
+# Return database back to normal
+reset_db() {
+    # DB_NODE is declared in backup_db() function
+    verbose "Re-enabling Galera node to sychronized state"
+    if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p12345 -e "SET GLOBAL wsrep_desync = OFF" 2>&1); then
+        # Check if it was a false negative and the state was actually set
+        if ! mysql -h "$DB_NODE" -u root -p12345 -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
+          | grep 0 > /dev/null 2>&1; then
+            verbose "ERROR: Failed to re-set node to synchronized state after dump was complete. ${OUTPUT}" 1
+            exit 1
+        fi
+    fi
+}
+
 backup_db() {
+    DBS=( galera1 galera2 galera3 )
+    DB_IDX="$(( RANDOM % ${#DBS[@]} ))"
+    declare -g DB_NODE="${DBS[$DB_IDX]}"
     mkdir -p ${ARGS[SHARED_DIR]}/db
 
-    verbose "Temporarily setting Galera node to desychronized state"
-    if ! mysql -h galera2 -u root -p12345 -e "SET GLOBAL wsrep_desync = ON" 2>/dev/null; then
+    verbose "Removing leftover uncompressed sql files"
+    rm ${ARGS[SHARED_DIR]}/db/*.sql 2>/dev/null
+
+    # If interrupted, we'll try to reset the database before exiting
+    trap reset_db SIGTERM SIGINT EXIT
+
+    verbose "Temporarily setting Galera node to desychronized state (using node $DB_NODE)"
+    if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p12345 -e "SET GLOBAL wsrep_desync = ON" 2>&1); then
         # Check if it was a false negative and the state was actually set
-        if ! mysql -h galera2 -u root -p12345 -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
+        if ! mysql -h "$DB_NODE" -u root -p12345 -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
           | grep 1 > /dev/null 2>&1; then
-            verbose "ERROR: Failed to set node to desychronized state. Unsafe to continue backup." 1
+            verbose "ERROR: Failed to set node to desychronized state. Unsafe to continue backup. ${OUTPUT}" 1
             exit 1
         fi
     fi
@@ -196,23 +225,21 @@ backup_db() {
 
     verbose "Starting backup of database"
     TIMESTAMP=$( date +%Y%m%d%H%M%S )
-    DBS=( galera1 galera2 galera3 )
     for DB in "${DBS[@]}"; do
-        if ! mysqldump -h "${DB}" -u root -p12345 --triggers --routines --column-statistics=0 vufind > ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql 2>/dev/null; then
-            verbose "ERROR: Failed to successfully backup the database from ${DB}" 1
+        if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p12345 --triggers --routines --single-transaction --skip-lock-tables --column-statistics=0 --no-data  vufind 2>&1 > >(gzip > ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql.gz )); then
+            verbose "ERROR: Failed to successfully backup the database structure from ${DB}. ${OUTPUT}" 1
+            exit 1
+        fi
+        if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p12345 --quick --single-transaction --skip-lock-tables --column-statistics=0 --no-create-info --ignore-table=vufind.session --ignore-table=vufind.SimpleSAMLphp_kvstore --ignore-table=vufind.SimpleSAMLphp_saml_LogoutStore vufind 2>&1 > >(gzip >> ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql.gz )); then
+
+            verbose "ERROR: Failed to successfully backup the database from ${DB}. ${OUTPUT}" 1
             exit 1
         fi
     done
 
-    verbose "Re-enabling Galera node to sychronized state"
-    if ! mysql -h galera2 -u root -p12345 -e "SET GLOBAL wsrep_desync = OFF" 2>/dev/null; then
-        # Check if it was a false negative and the state was actually set
-        if ! mysql -h galera2 -u root -p12345 -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
-          | grep 0 > /dev/null 2>&1; then
-            verbose "ERROR: Failed to re-set node to synchronized state after dump was complete." 1
-            exit 1
-        fi
-    fi
+    # Reset the database and unset our trap
+    reset_db
+    trap - SIGTERM SIGINT EXIT
 
     verbose "Compressing the backup"
     PREV_CWD="$(pwd)"
@@ -220,11 +247,11 @@ backup_db() {
         verbose "ERROR: Could not navigate into database backup directory (${ARGS[SHARED_DIR]}/db)" 1
         exit 1
     fi
-    if ! tar -cf "${TIMESTAMP}".tar ./*"${TIMESTAMP}".sql; then
+    if ! tar -cf "${TIMESTAMP}".tar ./*"${TIMESTAMP}".sql.gz; then
         verbose "ERROR: Failed to compress the database dumps." 1
         exit 1
     else
-        if ! rm ./*"${TIMESTAMP}.sql"; then
+        if ! rm ./*"${TIMESTAMP}.sql.gz"; then
             verbose "ERROR: Failed to remove the uncompressed database dumps" 1 # Not exiting
         fi
     fi

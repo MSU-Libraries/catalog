@@ -49,4 +49,8 @@ GitHub Release:
     # Update the GitHub Pages branch used
     - sleep 45 # Needs time to propagate the changes first or this next step will fail
     - echo "{\"source\":{\"path\":\"/\", \"branch\":\"gh-pages\"}" > data.json
+    # Do a post first in case the page doesn't exist yet
     - "curl -X POST -H 'Accept: application/vnd.github.v3+json' -u $GITHUB_USER_TOKEN https://api.github.com/repos/MSU-Libraries/catalog/pages -d '@data.json'"
+    - sleep 2
+    # Do a put next in case the page already existed (and first call would not be effective)
+    - "curl -X PUT -H 'Accept: application/vnd.github.v3+json' -u $GITHUB_USER_TOKEN https://api.github.com/repos/MSU-Libraries/catalog/pages -d '@data.json'"

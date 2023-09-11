@@ -17,7 +17,8 @@ declare -g -A NODE_IPS
 declare -g GALERA_PID
 
 verbose() {
-    1>&2 echo "::${GALERA_HOST}: $1"
+    LOG_TS=$(date +%Y-%m-%d\ %H:%M:%S)
+    1>&2 echo "::${GALERA_HOST} [${LOG_TS}]: $1"
 }
 
 node_number() {
@@ -31,10 +32,9 @@ node_number() {
 ## Returns 0 if an element matches the value to find
 array_contains() {
     local ARRNAME="$1[@]"
-    local HAYSTACK=( ${!ARRNAME} )
     local NEEDLE="$2"
-    for VAL in "${HAYSTACK[@]}"; do
-        if [[ "$NEEDLE" == "$VAL" ]]; then
+    for HAY in "${!ARRNAME}"; do
+        if [[ "$NEEDLE" == "$HAY" ]]; then
             return 0
         fi
     done
@@ -193,6 +193,8 @@ galera_cluster_membership_is_okay() {
     for NODE_NAME in "${NODES_ARR[@]}"; do
         NFOUND=0
         for ((IDX=0; IDX<ROWS; IDX++)); do
+            # We indentionally want to get index 2 for the name
+            # shellcheck disable=SC1087
             NNVAR="ROW_$IDX[2]"
             if [[ "$NODE_NAME" == "${!NNVAR}" ]]; then
                 (( NFOUND += 1 ))
@@ -252,27 +254,13 @@ will_bootstrap() {
     return $WILL_BOOTSTRAP
 }
 
-###############################
-## Wait for local safe_to_bootstrap: 1 in grastate.dat up to a limit
-##  $1 -> The maximum time to wait in seconds (should be divisible by 5)
-wait_for_grastate_safe_to_bootstrap() {
-    local MAX_SLEEP="$1"
-    local CUR_SLEEP=0
-    while ! grastate_safe_to_bootstrap && [[ "$CUR_SLEEP" -le "$MAX_SLEEP" ]]; do
-        sleep 5
-        (( CUR_SLEEP += 5 ))
-        verbose "Waiting for safe_to_bootstrap: 1"
-    done
-    verbose "Wait limit exceeded (${MAX_SLEEP} secs); proceeding while not safe to bootstrap."
-}
-
 wait_for_other_node_synced_or_safe_to_bootstrap() {
-    sleep 5 # pre-sleep to give other nodes an extra head start
+    sleep 2 # pre-sleep to give other nodes an extra head start
     local MAX_SLEEP="$1"
-    local CUR_SLEEP=5
+    local CUR_SLEEP=2
     while [[ "$CUR_SLEEP" -le "$MAX_SLEEP" ]]; do
-        sleep 5
-        (( CUR_SLEEP += 5 ))
+        sleep 2
+        (( CUR_SLEEP += 2 ))
 
         if galera_node_is_donor "$GALERA_HOST"; then
             verbose "Unsafe. I am currently a donor for another node's syncing and must remain"
@@ -306,12 +294,58 @@ scan_for_online_nodes() {
         # Using IPs as Docker Swarm has removed hostnames by this point of shutdown
         NODE_IP="${NODE_IPS[$NODE]}"
         if galera_node_online "$NODE_IP"; then
+            # See: https://github.com/koalaman/shellcheck/issues/1476
+            # shellcheck disable=SC2207
             NODES_UP+=($(node_number "$NODE"))
         fi
     done
     # Sort numerically
     readarray -t NODES_SORTED < <(printf '%s\n' "${NODES_UP[@]}" | sort -g)
     echo "${NODES_SORTED[@]}"
+}
+
+# Check if the current galera node already has a
+# running container on the host node joined to the
+# cluster
+#
+# Returns:
+#  int: 0 - when current galera node is running
+#       1 - when current galera node is NOT running
+current_galera_node_is_running() {
+    SELF_NUMBER=$(node_number "$GALERA_HOST")
+    # Row indices => 0:Index,1:Uuid,2:Name,3:Address
+    for NODE in "${NODES_ARR[@]}"; do
+        GALERA_HOST_IP=$( to_ip "$NODE" )
+        verbose "Querying membership status on $NODE at $GALERA_HOST_IP"
+        galera_node_query "$GALERA_HOST_IP" "SHOW WSREP_MEMBERSHIP"
+        ROWS=$?
+        verbose "Number of rows returned from $NODE: $ROWS"
+        if [[ "${ROWS}" -gt 0 ]]; then # We found a node that returned data, we can stop!
+            break
+        fi
+    done
+    if [[ "${ROWS}" -eq 0 ]]; then
+        verbose "No response to SHOW WSREP_MEMBERSHIP on any host"
+        return 1
+    fi
+
+    # See if SELF_NUMBER is already in the cluster
+    NFOUND=0
+    for ((IDX=0; IDX<ROWS; IDX++)); do
+        # We specifically want to get index 2 for the name
+        # shellcheck disable=SC1087
+        NNVAR="ROW_$IDX[2]"
+        if [[ "$SELF_NUMBER" == "${!NNVAR}" ]]; then
+            verbose "Found $SELF_NUMBER in the cluster at WSREP_MEMBERSHIP row index $IDX"
+            (( NFOUND += 1 ))
+        fi
+    done
+    verbose "After checking cluster, found node $SELF_NUMBER $NFOUND time(s) in the cluster"
+    if [[ "$NFOUND" -ge 1 ]]; then
+        verbose "Duplicate $SELF_NUMBER nodes (found ${NFOUND}) in cluster"
+        return 0
+    fi
+    return 1
 }
 
 galera_slow_startup() {
@@ -322,7 +356,10 @@ galera_slow_startup() {
     while true; do
         verbose "Checking if safe to start."
         update_node_ips
-        if another_galera_node_is_primary_synced; then
+        if current_galera_node_is_running; then
+            verbose "Current node is still running in another container (likely still trying to shutdown)."
+            sleep 4
+        elif another_galera_node_is_primary_synced; then
             verbose "Found another node already online and synced."
             break
         elif will_bootstrap; then
@@ -341,8 +378,6 @@ galera_slow_startup() {
     # Add symlink to log file for monitoring
     touch /mnt/logs/mariadb/mysqld.log
     ln -sf /mnt/logs/mariadb/mysqld.log /opt/bitnami/mariadb/logs/mysqld.log
-    # Output the log for docker
-    tail -f /mnt/logs/mariadb/mysqld.log &
 
     # Start Galera as a background process so we can listen for the shutdown signal
     if [[ "$MARIADB_GALERA_CLUSTER_BOOTSTRAP" == "yes" ]]; then
@@ -353,6 +388,9 @@ galera_slow_startup() {
         /opt/bitnami/scripts/mariadb-galera/run.sh &
     fi
     GALERA_PID=$!
+
+    # Output the log for docker, telling it to exit when the galera process exits
+    tail -f --pid=$GALERA_PID /mnt/logs/mariadb/mysqld.log &
 
     while true; do
         update_node_ips
@@ -374,7 +412,7 @@ galera_slow_shutdown() {
     verbose "Lowest online node number: ${NODES_ONLINE[0]:-None}"
 
     # Wait to give other node scans time to complete
-    sleep 5
+    sleep 2
 
     # If self is the lowest numbered node that is up, we wait to let other nodes stop first
     SELF_NUMBER=$(node_number "$GALERA_HOST")
@@ -393,7 +431,6 @@ galera_slow_shutdown() {
 
     # As this might NOT be a global stop for all nodes, there is no need to re-scan to confirm.
     # We must continue to shutdown after our delay, even if other nodes remain up.
-    # Send a TERM signal to self, which will also be sent through to the Galera run.sh as well
     verbose "Shutting down now!"
     kill -s SIGTERM "$GALERA_PID"
     wait

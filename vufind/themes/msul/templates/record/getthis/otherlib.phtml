@@ -10,10 +10,20 @@ $title_full = $this->driver->getRawData()['title_full'];
 $pubname = $this->driver->getPublisher();
 $author = $this->driver->getPrimaryAuthor();
 $isbn = $this->driver->getCleanISBN();
-$callnum = $this->driver->getCallNumber();
+$callnum = $this->getthis->getCallNumber();
 if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
 ?>
 <div>
+    <p><b><a href='https://ub.relaisd2d.com/?LS=MICHIGANSTATE&PI=MICHIGANSTATE' target="_blank">UBorrow</a>:</b> Borrow from the Big 10 libraries, typically available for pickup in 3-5 business days
+       (MSU Students, Staff and Faculty only)</p>
+    <ul>
+        <?php
+        $search = $isbn;
+        if (empty($search)) $search = $title_full;
+        ?>
+            <li><a href="https://ub.relaisd2d.com/?LS=MICHIGANSTATE&PI=MICHIGANSTATE&query=<?= $search ?>" target="_blank">
+            Search UBorrow</a></li>
+    </ul>
     <?php
       # If law library use only material, display law patron form first
       if (Regex::SCHAEFER($loc) && $this->getthis->isOut()) { ?>
@@ -23,11 +33,11 @@ if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
      <?php
       } ?>
     <p><b><a href='https://lib.msu.edu/ils/' target="_blank">Inter-library Loan</a>:</b> Request materials through the Inter-library Loan Request Form.
-        Typically available for pickup in 3-14 business days (MSU Students, Staff and Facaulty only)</p>
+        Typically available for pickup in 3-14 business days (MSU Students, Staff and Faculty only)</p>
     <ul>
         <?php
         echo "<li><a href='https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:" .
-            $this->escapeHtml($status) . ":" . $this->escapeHtml($item['barcode']) .
+            $this->escapeHtml($status) . ":" . $this->escapeHtml($item == null ? '' : $item['barcode']) .
             "&rft.genre=book&LO=EYM%2CGZM%2CMUN&rft.title=" .
             $this->escapeHtml($title) . "&rft.au=" . $this->escapeHtml($author) . "&rft.pub=" . $this->escapeHtml($pubname) .
             "&rft.isbn=" . $this->escapeHtml($isbn) . "&loc=" .
@@ -49,16 +59,5 @@ if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
             $this->escapeHtml($callnum) .
             "&CAT=1' target='_blank'>Request a SCAN of Copy</a></li>";
     } ?>
-    </ul>
-
-    <p><b><a href='https://ub.relaisd2d.com/?LS=MICHIGANSTATE&PI=MICHIGANSTATE' target="_blank">UBorrow</a>:</b> Borrow from the Big 10 libraries, typically available for pickup in 3-5 business days
-       (MSU Students, Staff and Faculty only)</p>
-    <ul>
-        <?php
-        $search = $isbn;
-        if (empty($search)) $search = $title_full;
-        ?>
-            <li><a href="https://ub.relaisd2d.com/?LS=MICHIGANSTATE&PI=MICHIGANSTATE&query=<?= $search ?>" target="_blank">
-            Search UBorrow</a></li>
     </ul>
 </div>

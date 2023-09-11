@@ -2,7 +2,44 @@
 @import "vendor/bootstrap/variables";
 @import "components/variables";
 @import "components/sidebar";
-@import "components/icons";
+
+//Utility Classes from Bootstrap 5
+
+.mb-1 {
+  margin-bottom:0.25rem !important;
+}
+.mb-2 {
+  margin-bottom:0.5rem !important;
+}
+.mb-3 {
+  margin-bottom:1rem !important;
+}
+.mb-4 {
+  margin-bottom:1.5rem !important;
+}
+.mb-5 {
+  margin-bottom:3rem !important;
+}
+.fw-light {
+  font-weight:300 !important;
+}
+.fw-normal {
+  font-weight:400 !important;
+}
+.fw-medium {
+  font-weight:500 !important;
+}
+.fw-semibold {
+  font-weight:600 !important;
+}
+.fw-bold {
+  font-weight:700 !important;
+}
+.fw-bolder {
+  font-weight:bolder !important;
+}
+
+
 
 //container width
 .container {
@@ -12,44 +49,67 @@
 }
 /* ------ Layout ------ */
 
-/* --- Header --- */
+/* --- Header ---- */
 
-.template-name-home header {
-    background-color:@msugreen;
-    background-image: 
-    linear-gradient(
-      rgba(24, 69, 59, 0.8), 
-      rgba(24, 69, 59, 0.8)
-    ),
-    url(/vufind/themes/msul/images/banner-image.jpg);
-    background-repeat: no-repeat;
-    background-attachment: fixed;  
-    background-position: 50% 80%;
-    background-size: cover;
-    margin-bottom: 3rem;
+.template-dir-search.template-name-home header, .template-dir-eds.template-name-home header, .template-dir-combined.template-name-home header {
+  display:flex;
+  flex-direction:column;
+  background-color:@msugreen;
+  background-image:
+  linear-gradient(
+    rgba(24, 69, 59, 0.8),
+    rgba(24, 69, 59, 0.8)
+  ),
+  url(/vufind/themes/msul/images/banner-image.jpg);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: 50% 80%;
+  background-size: cover;
+  margin-bottom: 3rem;
   .banner.container {
     background: none;
     margin-bottom:0;
-    }  
+    order:1;
   }
+  .search.container.navbar {
+    order:2;
+  }
+  .banner-notice {
+    order:3;
+    margin:0;
+  }
+}
+
+    //center on home page at medium width
+.template-dir-search.template-name-home .search.container, .template-dir-eds.template-name-home .search.container, .template-dir-combined.template-name-home .search.container {
+    @media only screen and (min-width : 992px) {
+      text-align:center;
+      margin-left:auto;
+      margin-right:auto;
+      width:95%;
+    }
+  }
+
   //home page search form appearance
-.template-name-home form.searchForm {
+.template-dir-search.template-name-home form.searchForm, .template-dir-eds.template-name-home form.searchForm, .template-dir-combined.template-name-home form.searchForm  {
   background: rgba(255,255,255,0.8);
   border-radius: 0.5rem;
   padding: 2rem 2rem 3rem 2rem;
-}
-  //center on home page at medium width
-  .template-name-home header .search.container {
-      @media only screen and (min-width : 768px) {
-        margin-left:auto;
-        margin-right:auto;
-        width:80%;
+  margin-top:1.25rem;
+  margin-bottom:3rem;
+  width:100%;
+  @media only screen and (min-width : 992px) {
+    .searchForm_lookfor {
+      width:20rem;
     }
-        @media only screen and (min-width : 992px) {
-        width:70rem;
-        text-align:center;
+
+  }
+  @media only screen and (min-width : 1080px) {
+   .searchForm_lookfor {
+      width:100rem;
     }
   }
+}
 
 header {
   .banner.container {
@@ -128,6 +188,8 @@ header {
 }
 
 .navbar-collapse {
+  margin-top: -3rem;
+  margin-bottom: 3rem;
   a, a:visited {
     color:#fff;
   }
@@ -137,16 +199,24 @@ header {
       color:@msugreen;
     }
   }
+  .nav > li > a {
+    &:hover,
+    &:focus {
+      color: @msugreen;
+      background-color: @nav-link-hover-bg;
+    }
+  }
 }
 
-#navbar-warning {
+.banner-notice {
   margin-top: -3rem;
-  margin-bottom: 3rem;
-  background-color:@alert-warning-bg;
-  color:@eggplant;
+  margin-bottom: 2rem;
+  background-color: @alert-warning-bg;
+  color: @eggplant;
+  padding: 0.3rem 1rem 0.3rem 1rem;
 
   p {
-    padding-top: 0.5rem;
+    margin: 0.4rem 0 0.5rem 0;
   }
   a, i {
     color: @msugreen;
@@ -171,7 +241,7 @@ header {
   padding-left:2rem;
   background-color: @parakeetgreen;
   color:#fff;
-  img {
+  img.msul_logo {
     max-width:240px;
     margin-bottom:1rem;
   }
@@ -202,13 +272,19 @@ header {
   }
 
   #preFooterSocial {
+      background-color:#fff;
+      border-radius: 5rem;
+      width: 12rem;
+      padding-bottom: 0.2rem;
+padding-top: 0.05rem;
+padding-right: 0.3rem;
+padding-left: 0.3rem;
     a, a:hover, a:active {
       text-decoration:none;
     }
 
-    svg {
-      margin-right:1rem;
-      margin-top:1rem;
+    img {
+      width:2.5rem;
     }
   }
 }
@@ -336,32 +412,26 @@ input[type="checkbox"] {
   accent-color: @darkparakeetgreen
 }
 
-// hide searchbox
-body.template-dir-myresearch.template-name-mylist, body.template-dir-myresearch.template-name-checkedout, body.template-dir-holds.template-name-list, body.template-dir-myresearch.template-name-fines, body.template-dir-myresearch.template-name-profile, body.template-dir-search.template-name-history, body.template-dir-myresearch.template-name-editlist, body.template-dir-myresearch.template-name-login, .template-dir-search.template-name-newitem, .template-dir-search.template-name-reservessearch, .template-dir-feedback.template-name-form {
-  header .nav.searchbox {
-    display:none;
-  }
-}
-// hide searchbox & back to catalog link
-body.template-dir-search.template-name-results, body.template-dir-eds.template-name-search, .template-dir-search.template-name-reservesresults, .template-dir-search.template-name-newitemresults, .template-dir-author.template-name-results {
-  header .search.container {
-    display:none;
-  }
-}
 //hide back to catalog link
-body.template-name-home, body.template-dir-record, body.template-dir-combined, body.template-dir-content, body.template-dir-browse, body.template-dir-alphabrowse, body.template-dir-channels {
+.template-dir-channels,
+.template-dir-content,
+.template-name-results,
+.template-name-search,
+.template-name-advanced
+{
   .backtocat {
     display:none;
   }
 }
 
-//hide 2nd searchbox on home page (brought in with Browse Alphabetically template)
-body.template-dir-search.template-name-home .searchHomeContent {
-  display:none;
-}
-//hide filters on home page (don't know why showing up now)
-body.template-dir-search.template-name-home .active-filters {
-  display:none;
+.template-dir-search.template-name-home,
+.template-dir-eds.template-name-home,
+.template-dir-combined.template-name-home
+{
+  // hide filters on home page
+  .active-filters {
+    display:none !important;
+  }
 }
 
 .mainbody .container .searchbox {
@@ -374,6 +444,7 @@ body.template-dir-search.template-name-home .active-filters {
   }
 }
 //searchbox responsive styling
+
   .searchbox {
   @media only screen and (max-width : 767px) {
     label, input, select, button {
@@ -387,6 +458,10 @@ body.template-dir-search.template-name-home .active-filters {
       margin-bottom:0.3rem;
     }
 
+    input, select {
+      width:100% !important;
+    }
+
   }
     @media only screen and (max-width : 1228px) {
       input {
@@ -396,6 +471,13 @@ body.template-dir-search.template-name-home .active-filters {
   @media only screen and (min-width : 992px) {
     .btn-link {
       margin-top:1rem;
+    }
+    input, select {
+      vertical-align:top !important;
+    }
+    .btn-primary {
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin-left: -1rem;
     }
   }
 }
@@ -410,10 +492,39 @@ body.template-dir-search.template-name-home .active-filters {
   }
 }
 
+.mainbody.right {
+  .searchbox {
+    @media only screen and (max-width : 1226px) {
+      label, input, select, button {
+        display:block;
+        margin-bottom:0.3rem;
+      }
+      input, select {
+        width:100% !important;
+      }
+      input {
+        margin-bottom:1rem;
+      }
+    }
+    @media only screen and (min-width : 992px) {
+      .btn-primary {
+        border-radius: 2rem;
+        margin-left:0;
+      }
+    }
+    @media only screen and (min-width : 1227px) {
+      .btn-primary {
+        border-radius: 0 0.5rem 0.5rem 0;
+        margin-left: -1rem;
+      }
+    }
+  }
+}
 
 .searchHomeContent form .active-filters {
   display:none;
 }
+
 @media only screen and (min-width : 768px) {
   .home-facet {
     padding-right:5%;
@@ -439,10 +550,14 @@ body.template-dir-search.template-name-home .active-filters {
     label {
       margin-bottom:0.5rem;
       font-weight:normal;
-      color:@gray-darker;
     }
     input, select {
       margin-bottom:1.5rem;
+    }
+    #reservesSearchForm_lookfor,
+    #alphaBrowseForm_from,
+    #alphaBrowseForm_source {
+      width:100%;
     }
     h2 {
       margin-bottom:2rem;
@@ -450,26 +565,19 @@ body.template-dir-search.template-name-home .active-filters {
   }
 
   .home-facet.home-reserves {
-    label {
-      visibility:hidden;
-      position:relative;
-      margin-bottom:2rem;
+    input {
+      display:inline-block;
     }
-    label:after {
-      visibility: visible;
-      position: absolute;
-      top: 0;
-      left: 0;
-      content: "Search for items on reserve:";
-    }
-    #reservesSearchForm_lookfor {
-      width:100%;
-    }
-  }
+  } 
 
+
+.home-facet.home-askalib::after {
+      position:absolute; width:0; height:0; overflow:hidden; z-index:-1; /* hide images */
+      content:url("/themes/msul/images/Icons_AskALib_Default.svg") url("/themes/msul/images/Icons_AskALib_Hover.svg"); /* load images */
+      }
   .home-facet.home-askalib {
-    padding-top:3rem;
-    a, a:active, a:hover, a:visited {
+      padding-top:3rem;
+      a, a:active, a:hover, a:visited {
       text-decoration:none;
       color:#fff;
       width:100%;
@@ -482,6 +590,12 @@ body.template-dir-search.template-name-home .active-filters {
       -webkit-border-radius: 0.5rem;
       -moz-border-radius: 0.5rem;
       border-radius: 0.5rem;
+      &:hover {
+        background-color:@darkparakeetgreen;
+      }
+      &:active {
+        background-color:@msugreen;
+      }
 
       .ask-icon {
         content:url("/themes/msul/images/Icons_AskALib_Default.svg");
@@ -504,11 +618,17 @@ form.searchForm, .record-tabs, .navbar-form {
     border-bottom:0;
 
     li {
-      font-size:larger;
-      height:2.75rem;
+      height:3rem;
+      @media only screen and (min-width : 992px) {   
+        font-size:larger;
+        height:2rem;
+      }
     }
     a, &:active a, &:hover a {
-      border:0;
+      border-left:0;
+      border-top:0;
+      border-right:0.4rem solid transparent;
+      border-bottom:0.4rem solid transparent;
       outline:0;
       background:none;
       text-decoration:none;
@@ -517,12 +637,20 @@ form.searchForm, .record-tabs, .navbar-form {
       margin:0 0.7rem;
     }
     .navtab-digrepo {
-      border-left:0.2rem solid @eggplant;
-      padding-left:0.5rem;
-      margin-left:0.5rem;
+      @media only screen and (min-width : 998px) {    
+        border-left:0.2rem solid @eggplant;
+        padding-left:0.5rem;
+        margin-left:0.5rem;
+        }
     }
     a:focus {
       outline: 1px dashed @eggplant;
+    }
+    a:hover {
+      border-bottom: 0.4rem solid #ACB3C9;
+      border-right: 0.4rem solid transparent;
+      border-left:0;
+      border-top:0;
     }
     .active a {
       border-bottom: 0.4rem solid @eggplant;
@@ -609,16 +737,23 @@ table tr {
 
 .placehold {
   text-decoration: none;
+  color:@parakeetgreen;
   border: 2px solid @parakeetgreen;
   -webkit-border-radius: 7rem;
   -moz-border-radius: 7rem;
   border-radius: 7rem;
   padding: 0.2rem 0.75rem 0.2rem 0.65rem;
   margin-left:1rem;
-
   &:hover {
     text-decoration:none;
     color:@darkparakeetgreen;
+    border: 2px solid @darkparakeetgreen;
+  }
+  &:active,
+  &:focus {
+    text-decoration:none;
+    color:@msugreen;
+    border: 2px solid @msugreen;
   }
   i {
     display:none;
@@ -669,6 +804,9 @@ table tr {
   }
   a {
     text-decoration:none;
+    .icon-link__label {
+      text-decoration:none;
+    }
   }
 }
 
@@ -712,7 +850,7 @@ table tr {
         width:15rem;
       }
       .view-buttons {
-        a, a:visited {
+        > a, > a:visited {
           text-align:center;
           padding:0.5rem;
           text-decoration: none;
@@ -723,7 +861,7 @@ table tr {
           border-radius: 0.5rem;
         }
 
-        a:hover, a:active, span {
+        > a:hover, > a:active, > span {
           text-align:center;
           padding:0.5rem;
           text-decoration: none;
@@ -732,6 +870,10 @@ table tr {
           -webkit-border-radius: 0.5rem;
           -moz-border-radius: 0.5rem;
           border-radius: 0.5rem;
+        }
+
+        .icon-link__label {
+          text-decoration: none;
         }
       }
     }
@@ -742,7 +884,10 @@ table tr {
   text-decoration:none;
 }
 
-//filter hover color
+// filter remove button
+.active-filters .search-filter-remove {
+  color: #fff;
+}
 .active-filters .search-filter-remove:hover {
   color: @medgray;
 }
@@ -757,9 +902,9 @@ label {
   color:@eggplant;
 }
 
-.searchHomeContent, .nav.searchbox {
+/*.searchHomeContent, .nav.searchbox {
   margin-bottom:3rem;
-}
+}*/
 
 // Pagination
 
@@ -790,21 +935,24 @@ label {
 
   }
 }
-.pagination li a i {
+.pagination li a span {
   border: 2px solid #888;
   color: #888;
-  radius: 3rem;
   -webkit-border-radius: 0.5rem;
   -moz-border-radius: 0.5rem;
   border-radius: 0.5rem;
 }
-.pagination li a i.fa-angle-left {
-  padding: 0 .7rem 0.1rem .5rem;
-  margin-left:0.5rem;
+.pagination li a span.fa-angle-left {
+  padding: 0 .6rem .1rem .5rem;
+  margin-left: 0.5rem;
+  line-height: 1.5rem;
+  vertical-align: baseline;
 }
-.pagination li a i.fa-angle-right {
-  padding: 0 .5rem 0.1rem .7rem;
-  margin-right:0.5rem;
+.pagination li a span.fa-angle-right {
+  padding: 0 .5rem .1rem .6rem;
+  margin-right: 0.5rem;
+  line-height: 1.5rem;
+  vertical-align: baseline;
 }
 .pagination .active span {
   background-color:#fff;
@@ -1061,3 +1209,141 @@ body.template-dir-myresearch.template-name-profile {
     display:block;
   }
 }
+
+
+//Remove catalog only checkbox & location options from EDS Advanced Search
+
+.template-dir-eds.template-name-advanced {
+  label[for=limit_FC], label[for=limit_LB], label[for=limit_FT1], #limit_LB {
+    display:none;
+  }
+}
+
+
+// Make See also (.authoritybox) display inline
+
+.authoritybox {display:inline-flex;}
+.authoritybox div {
+  margin-right:1rem;
+}
+
+// Remove color background from alert-info on results pages
+
+.template-dir-search.template-name-results, .template-dir-eds.template-name-search, .template-dir-combined.template-name-results {
+  .alert-info {
+    background:none;
+    border:none;
+  }
+}
+
+//Align sidebar facets 'start' instead of align-items:center
+
+.facet,
+.facet-group .title,
+.user-list-link {
+  align-items: start;
+
+  .text, .hierarchical-facet-anchor {
+    align-items: start;
+  }
+}
+
+// Button btn-primary
+
+.btn-primary {
+  line-height:1.375;
+    &:hover {
+      background-color:@darkparakeetgreen;
+      border-color:@darkparakeetgreen;
+      color:#fff;
+  }
+    &:active,
+    &:focus {
+      background-color:@msugreen !important;
+      border-color:@msugreen !important;
+      color:#fff;
+  }
+}
+
+// Alignment for flipped advanced search select & input fields
+
+.adv-term-type {
+  float:none;
+  margin-bottom:1%;
+}
+.adv-term-input,
+.adv-term-op,
+.adv-group-match {
+  max-width:80%;
+  float:left;
+}
+.add_search_link {
+  margin-top:0 !important;
+  padding-top:0;
+}
+
+@media (min-width: 768px) {
+  .eds-adv {
+    .adv-search:first-of-type {
+      .adv-term-input {
+        margin-left: 0;
+       }
+      .adv-term-type {
+        margin-left: 17%;
+      }
+    }
+  }
+  .adv-search {
+    .adv-term-type {
+      margin-right:1%;
+    }
+  .adv-term-input {
+    margin-right:0;
+    }
+  }
+}
+
+// space below advanced search button mobile and up
+
+fieldset.eds,
+fieldset.solr-facets {
+  margin-top:1rem;
+}
+
+// spacing below advanced search items
+
+#groupPlaceHolder,
+.adv-submit,
+.eds-adv {
+  margin-bottom:1rem;
+}
+
+
+//spacing between selection boxes on catalog advanced search
+
+#advSearchForm {
+  .solr-adv-facet {
+    .form-control {
+      padding: 0.1rem;
+      margin-bottom:1rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .solr-adv-facet {
+      flex: 1 23%;
+      margin: 0.2rem;
+    }
+  }
+}
+//reduce font size and spacing below headers on catalog advanced search
+
+#advSearchForm {
+  fieldset {
+    margin-bottom:1rem;
+  legend {
+    margin-bottom:1rem;
+    font-size:20px;
+    }
+  }
+}
+

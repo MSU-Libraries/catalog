@@ -9,7 +9,7 @@ $author = $this->driver->getPrimaryAuthor();
 $bibnum = $this->driver->getSierraBN();
 $edition = $this->driver->getEdition();
 $pubname = $this->driver->getPublisher();
-$callnum = $this->driver->getCallNumber();
+$callnum = $this->getthis->getCallNumber();
 $barcode = $item['barcode'];
 if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
 
@@ -34,7 +34,7 @@ $pubname = substr($pubname, 0, 255);
             <b>Special Collections:</b>
             <?= $msg ?>
             This material may only be viewed on a dedicated computer in the
-            <a href='https://lib.msu.edu/general/library-hours-cal/special-collections/' target="_blank">
+            <a href='https://lib.msu.edu/murray-hong-spc/visiting' target="_blank">
             Special Collections Reading Room</a>. Please visit anytime Special Collections is
             open and a staff member will be happy to assist you.
         </p>

@@ -1,6 +1,9 @@
 #!/bin/bash
 
-COLLEX_CONFIGS=/solr_confs/
+# Java security manager is incompatible with AlphaBrowse handler
+export SOLR_SECURITY_MANAGER_ENABLED="false"
+
+COLLEX_CONFIGS=/solr_confs
 
 # Give Zookeeper time to startup
 echo "Waiting for Zookeeper to come online..."
@@ -15,9 +18,14 @@ else
     echo "Found /solr already in Zookeeper."
 fi
 
+# Modify `biblio` config as we are using `biblio9` which uses an alias of `biblio`
+if [[ "${STACK_NAME}" == "catalog-"* ]]; then
+    cp -r /solr_confs/biblio /solr_confs/biblio9
+    sed -i "s/\\bbiblio\\b/biblio9/" "${COLLEX_CONFIGS}/biblio9/conf/solrconfig.xml"
+fi
+
 echo "Creating required VuFind Solr collections..."
-for COLL_DIR in ${COLLEX_CONFIGS}*
-do
+for COLL_DIR in "${COLLEX_CONFIGS}/"*; do
     COLL=$(basename $COLL_DIR)
     if [[ -d "$COLL_DIR" && "$COLL" != "jars" ]]; then
         echo "Attempting to upload Solr config for $COLL collection..."

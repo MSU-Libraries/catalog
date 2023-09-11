@@ -9,9 +9,13 @@
             <?=$block?>
         <?php endif; ?>
     <?php endforeach; ?>
-<li class="navtab-digrepo">
-      <a target="_blank" href="https://d.lib.msu.edu/"><i class="fa fa-sign-in" aria-hidden="true"></i> Digital Repository</a>
-    </li>  </ul>
+    <li class="navtab-digrepo">
+      <a target="_blank" href="https://d.lib.msu.edu/">
+        <span class="icon icon--font fa fa-sign-in" role="img" aria-hidden="true"></span>
+        Digital Repository
+      </a>
+    </li>
+  </ul>
   <?php if ($this->showCounts): ?>
     <?php $this->headScript()->appendFile('resultcount.js'); ?>
   <?php endif; ?>

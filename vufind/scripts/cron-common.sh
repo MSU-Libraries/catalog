@@ -5,17 +5,20 @@
 # (all the vufind cron scripts are assumed to be on the PATH)
 # NOTE: solr/cron-alphabrowse.sh duplicates this code
 
-rm -f "$LATEST_PATH" "$EXIT_CODE_PATH"
-$CRON_COMMAND >$LATEST_PATH 2>&1
+TIMESTAMP=$( date +%Y%m%d%H%M%S )
+LATEST_PATH_WITH_TS="${LATEST_PATH}.${TIMESTAMP}"
+$CRON_COMMAND >$LATEST_PATH_WITH_TS 2>&1
 EXIT_CODE=$?
 
-cat $LATEST_PATH >>$LOG_PATH
+cat $LATEST_PATH_WITH_TS >>$LOG_PATH
 
 echo $EXIT_CODE >$EXIT_CODE_PATH
 
 if [[ $EXIT_CODE -ne 0 ]]; then
-    cat $LATEST_PATH | logger -t $DOCKER_TAG
+    cat $LATEST_PATH_WITH_TS | logger -t $DOCKER_TAG
     if [[ $OUTPUT_LOG -eq 1 ]]; then
-        cat $LATEST_PATH
+        cat $LATEST_PATH_WITH_TS
     fi
 fi
+
+rm -f "$LATEST_PATH_WITH_TS"

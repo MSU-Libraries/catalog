@@ -10,9 +10,9 @@ the ability to write its snapshot data directly to it. For more information on h
 SolrCloud backups work, see the
 [official documentation](https://solr.apache.org/guide/8_9/making-and-restoring-backups.html#solrcloud-backups).
 
-The database backup is a dump of all the tables while putting the galera node into a
-desynchronized state while the backup is running to help ensure the backup is in a more
-consistent state. In case the galera cluster ever gets into a de-clustered state,
+The database backup is a dump of all the non-session tables while putting the galera 
+node into a desynchronized state while the backup is running to help ensure the backup
+is in a more consistent state. In case the galera cluster ever gets into a de-clustered state,
 this backup script will take a dump from all three of the galera nodes just to be
 safe.
 

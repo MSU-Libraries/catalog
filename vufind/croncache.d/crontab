@@ -1,0 +1,17 @@
+##########################################
+# Logging & Notification for Cron Jobs
+##########################################
+#
+# To only log output of a job to Docker logs:
+# - Output of command must be passed to the `logger` command. You may optionally tag (-t) the message.
+# - To log stdout AND stderr, you will need to redirect stderr to stdout by appending `2>&1` to the command.
+#     /path/to/my_cron_job.sh 2>&1 | logger -t MY_CRON
+#
+# - To suppress output if job succeeds, prefix with chronic.
+#     chronic /path/to/my_cron_job.sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# VuFund cache clear on start
+@reboot root chronic clear-vufind-cache 2>&1 | logger -t CACHE_CLEAR
+# Periodic cache clear
+*/5 * * * * root chronic clear-vufind-cache 2>&1 | logger -t CACHE_CLEAR

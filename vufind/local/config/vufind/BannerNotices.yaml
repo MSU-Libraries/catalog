@@ -1,0 +1,148 @@
+---
+# In this file you can configure notices which appear in a banner
+# near the top of the page in VuFind. Each notice will be placed
+# within its own `<div>` tag. Multiple notices are permitted
+# and each notice can be conditionally displayed based on multiple
+# configurable factors.
+#
+# The basic structure is a top level key of `notices` which contain
+# a list of notice definitions.
+#
+# ---
+# ### Example 1
+# notices:
+#   - message: "This is a test banner alert!"
+#   - message: >
+#       This is a second test banner alert, but using
+#       multi-line format in Yaml to make it more
+#       readable.
+#
+# Notice definitions must have a `message` key, which contains the
+# content of the banner notice. Each notice definition can also
+# optionally have the following keys defined:
+# - classes
+# - style
+# - escapeContent
+# - conditions
+#
+# The `classes` key allows you to define a string value of CSS
+# classes (space delimited) add to the notice.
+#
+# The `style` key allows a sub-array of key-value pairs to be
+# defined, where each key is a CSS style and the value it the
+# associated style value. This allows you to easily override
+# styles for banners without needing to update your main CSS.
+#
+# The `escapeContent` key is a boolean (default: `true`) which
+# determines if the `message` content should have HTML special
+# charaters escaped (those being `<>&'"`). If you are placing
+# HTML tags, or pre-escaped content into the `message`, you
+# will want to set this to `false`.
+#
+# ### Example 2
+# ---
+# notices:
+#   - classes: "my-banners welcome-banner"
+#     style:
+#       background: "#BBFFBB"
+#       border: "#55AA55 2px solid"
+#     escapeContent: false
+#     message: |
+#       <p>
+#         <b>Welcome to our catalog!</b> Check out
+#         our <a href="#feature">newest feature</a> below.
+#       </p>
+#
+# The `conditions` key allows for setting a banner notice to
+# appear only when certain conditions exist. Conditions take
+# a _check value_ and attempt to match it against _match value(s)_.
+# When defined, the `conditions` key must contain a list of
+# condition definitions. Each condition definition is an array
+# and can have the following keys defined:
+# - type    (required)
+# - comp    (required)
+# - value
+# - values
+# - (additionally there can be type specific keys)
+#
+# There is only ever one check value per condition. The types
+# of things a condition can check include:
+# - date:         The date without any time constraint.
+# - time:         The time of date without any date constraint.
+# - datetime:     Both the date and time.
+# - string:       Define the string to be checked with the condition itself.
+#                 Has `string` key for defining the string.
+# - env:          Specify an ENVIRONMENT variable on the server to check.
+#                 Has `env` key for specifing the env variable name.
+# - urlpath:      The URL path the requested route (the part after the hostname).
+# - remoteip:     The client's IP address.
+#
+# The match value(s) can be one or more values which to which the
+# check value will be compared. For a condition to succeed, the
+# check value only has to match any single match value. That is,
+# defining multiple match values on a condition means any one of
+# those values are acceptable. For a single possible match value,
+# use the `value` key which accepts a string. For multiple match
+# values, use the `values` key which accepts a list of string.
+#
+# If you define both `value` and `values`, then both will be used
+# as if you had appended the `value` string to the `values` list.
+#
+# Each condition must define what type of comparison will be used
+# between the check value (CV) and the match values (MV). The comparisons
+# available are:
+# - equals:       CV is exactly the same as a MV.
+# - notequals:    CV is not the same as any MV.
+# - startswith:   CV starts with a MV.
+# - endswith:     CV ends with a MV.
+# - lessthan:     CV is less than a MV.
+# - greaterthan:  CV is greater than a MV.
+# - cidr:         CV is an IP and within a CIDR MV.
+# - notcidr:      CV is not an IP or not within a CIDR MV.
+# - filetype:     filetype of CV matches a MV
+#                 (see https://www.php.net/manual/en/function.filetype.php;
+#                 no file match can be checked via false or empty string)
+#
+# Beware that some comparisons might be less useful than others
+# depending on your check value. For example, comparing an IP address
+# using lessthan/greaterthan will perform string comparisons, not
+# integer or IP comparisons. In this case, using cidr/notcidr is
+# preferable.
+#
+# ### Example 3
+# ---
+# notices:
+#   - conditions:
+#       - type: date
+#         comp: lessthan
+#         value: "2024-01-01"
+#       - type: env
+#         env: STACK_NAME
+#         comp: equals
+#         value: prod
+#     classes: "my-banners welcome-banner"
+#     escapeContent: false
+#     message: >
+#       <p>
+#         <b>Welcome to our catalog!</b> Check out
+#         our <a href="#feature">newest feature</a> below.
+#       </p>
+#   - conditions:
+#       - type: urlpath
+#         comp: startswith
+#         values:
+#           - "/Search/"
+#           - "/Combined/"
+#       - type: string
+#         string: /mnt/shared/catalog-prod/index-running
+#         comp: filetype
+#         values:
+#           - file
+#           - link
+#        - type: remoteip
+#          comp: cidr
+#          value: 35.8.220.0/22
+#     classes: "indexing-banner"
+#     message: >
+#       We are currently updating our data. You may experience slower
+#       than normal search performance. Our apologies for any inconvenience!

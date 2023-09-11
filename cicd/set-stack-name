@@ -26,15 +26,15 @@ main() {
     MAIL_PORT=25
 
     if [[ $PROD == "true" ]]; then
-        STACK_NAME="catalog-prod";
-        SITE_HOSTNAME="catalog-prod.lib.msu.edu";
+        STACK_NAME="catalog-prod"
+        SITE_HOSTNAME="catalog.lib.msu.edu"
     elif [[ $CI_DEFAULT_BRANCH == "${CI_COMMIT_BRANCH}" ]]; then
-        STACK_NAME="catalog-beta";
-        SITE_HOSTNAME="catalog-beta.lib.msu.edu";
+        STACK_NAME="catalog-beta"
+        SITE_HOSTNAME="catalog-beta.lib.msu.edu"
     elif [[ "${CI_COMMIT_BRANCH}" == "devel-"* || "${CI_COMMIT_BRANCH}" == "review-"* ]]; then
-        STACK_NAME="${CI_COMMIT_BRANCH}";
-        SITE_HOSTNAME="${STACK_NAME}.aws.lib.msu.edu";
-        MAIL_HOST=mail
+        STACK_NAME="${CI_COMMIT_BRANCH}"
+        SITE_HOSTNAME="${STACK_NAME}.aws.lib.msu.edu"
+        MAIL_HOST="mail-${STACK_NAME}"
     fi
 
     {

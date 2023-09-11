@@ -10,7 +10,6 @@ def homepage():
     status_list = {}
     status_list['memory'] = status.get_memory_status(statuses)
     status_list['disk_space'] = status.get_disk_space_status(statuses)
-    status_list['traefik'] = status.get_traefik_status()
     status_list['galera'] = status.get_galera_status(statuses)
     status_list['solr'] = status.get_solr_status(statuses)
     status_list['vufind'] = status.get_vufind_status(statuses)

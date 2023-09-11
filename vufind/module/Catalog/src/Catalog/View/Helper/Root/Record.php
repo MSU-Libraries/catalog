@@ -1,8 +1,30 @@
 <?php
+
+/**
+ * Default values for the record
+ *
+ * PHP version 7
+ *
+ * @category VuFind
+ * @package  View_Helper
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/wiki/development:plugins:record_drivers Wiki
+ */
+
 namespace Catalog\View\Helper\Root;
 
 use VuFind\Config\YamlReader;
 
+/**
+ * Extend the Record data available to the View
+ *
+ * @category VuFind
+ * @package  View_Helper
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/wiki/development:plugins:record_drivers Wiki
+ */
 class Record extends \VuFind\View\Helper\Root\Record
 {
     /**
@@ -11,9 +33,22 @@ class Record extends \VuFind\View\Helper\Root\Record
      *   desc : Regex must match against the 'desc' field for label to match; or null to ignore
      *   url  : Regex must match against the 'url' field for label to match; or null to ignore
      */
-    private $linkLabels = array();
+    private $linkLabels = [];
 
-    function __construct($config = null) {
+    /**
+     * Config for the access links
+     *
+     * @var \Catalog\View\Helper\Root\Record
+     */
+    private $accessLinksConfig;
+
+    /**
+     * Initialize the record driver
+     *
+     * @param string $config Name of the config to load
+     */
+    public function __construct($config = null)
+    {
         parent::__construct($config);
         $yamlReader = new YamlReader();
         $this->accessLinksConfig = $yamlReader->get("accesslinks.yaml");
@@ -33,12 +68,19 @@ class Record extends \VuFind\View\Helper\Root\Record
     public function getLinkTargetLabel($link)
     {
         $label = null;
+
+        // Add prefix to bookplate URLs
+        if (str_contains($link['url'], 'bookplate')) {
+            $link['desc'] = 'Book Plate: ' . $link['desc'];
+        }
+
+        // Add labels to links
         foreach ($this->linkLabels as $mat) {
-            # Skip entries missing the 'label' field
+            // Skip entries missing the 'label' field
             if (!array_key_exists('label', $mat)) {
                 continue;
             }
-            # Must have one of the regex patterns, otherwise false
+            // Must have one of the regex patterns, otherwise false
             $found = ($mat['desc'] ?? null) || ($mat['url'] ?? null);
             if ($mat['desc'] ?? null) {
                 $found &= preg_match($mat['desc'], $link['desc']);
@@ -51,7 +93,7 @@ class Record extends \VuFind\View\Helper\Root\Record
                 break;
             }
         }
-        if ($label !== null) {
+        if ($label !== null && array_key_exists('desc', $link)) {
             $link['desc'] .= " ({$label})";
         }
         return $link;
@@ -67,29 +109,20 @@ class Record extends \VuFind\View\Helper\Root\Record
      */
     public function getLinkDetails($openUrlActive = false)
     {
-        $links = $this->driver->geteJournalLinks();
+        $links = $this->driver->tryMethod('geteJournalLinks') ?? [];
         foreach ($links as $idx => $link) {
-            if (strcasecmp($link['desc'], "cover image") === 0) {
+            if (strcasecmp($link['desc'] ?? "", "cover image") === 0) {
+                unset($links[$idx]);
+                break;
+            }
+            if (str_contains($link['url'] ?? "", "bookplate")) {
                 unset($links[$idx]);
                 break;
             }
         }
-        return array_map([$this,'getLinkTargetLabel'], $links);
-    }
-
-    /**
-     * Remove duplicates from the array. All keys and values are being used
-     * recursively to compare, so if there are 2 links with the same url
-     * but different desc, they will both be preserved.
-     *
-     * @param array $links array of associative arrays,
-     * each containing 'desc' and 'url' keys
-     *
-     * @return array
-     */
-    protected function deduplicateLinks($links)
-    {
-        return array_values(array_unique($links, SORT_REGULAR));
+        return $this->deduplicateLinks(
+            array_map([$this,'getLinkTargetLabel'], $links)
+        );
     }
 
     /**
@@ -118,4 +151,37 @@ class Record extends \VuFind\View\Helper\Root\Record
         return $url;
     }
 
+    /**
+     * Generate a URL to the LibKey system if a 200 response would be returned for
+     * the item (based on a query to another URL)
+     *
+     * @param string $doi the DOI to validate with LibKey and build the URL with
+     *
+     * @return string|bool
+     */
+    public function getLibKeyUrl($doi)
+    {
+        $url = false;
+
+        if ($doi) {
+            $checkUrl = "https://public-api.thirdiron.com/public/v1/libraries/" .
+                  getenv("BROWZINE_LIBRARY") . "/articles/doi/" . $doi .
+                  "?access_token=" . getenv("BROWZINE_TOKEN");
+            $ch = curl_init($checkUrl);
+            curl_setopt($ch, CURLOPT_HTTPGET, 1);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($ch, CURLOPT_HEADER, 1);    // we want headers
+            curl_setopt($ch, CURLOPT_NOBODY, 0);    // we don't need body
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 8);
+            $output = curl_exec($ch);
+            $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpcode == 200) {
+                $url = "https://libkey.io/libraries/" . getenv("BROWZINE_LIBRARY") . "/" . $doi;
+            }
+        }
+        return $url;
+    }
 }

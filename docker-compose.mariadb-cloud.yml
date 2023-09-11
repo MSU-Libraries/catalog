@@ -27,6 +27,9 @@ services:
       - logs:/mnt/logs
     stop_signal: SIGWINCH
     stop_grace_period: 80s
+    ulimits:
+      nproc: 32768
+      nofile: 32768
     deploy:
       mode: replicated
       replicas: 3
@@ -35,8 +38,9 @@ services:
       update_config:
         parallelism: 1
         failure_action: pause
-        delay: 140s
+        delay: 30s
         monitor: 20s
+        order: stop-first
       placement:
         max_replicas_per_node: 1
 

@@ -58,6 +58,8 @@ main() {
         --build-arg AUTH_FTP_USER="${AUTH_FTP_USER}" \
         --build-arg AUTH_FTP_PASSWORD="${AUTH_FTP_PASSWORD}" \
         --build-arg DEPLOY_KEY="${DEPLOY_KEY}" \
+        --build-arg BROWZINE_LIBRARY="${BROWZINE_LIBRARY}" \
+        --build-arg BROWZINE_TOKEN="${BROWZINE_TOKEN}" \
         --tag "${CURR}" \
         --cache-from "${LATEST}" \
         vufind/;
@@ -66,7 +68,7 @@ main() {
     if [[ ${EC} -ne 0 ]]; then
         echo "Failed to build. Sleeping to add delay before potential retry.";
         sleep 3;
-        exit 1;
+        exit ${EC};
     fi;
 
     echo "Pushing image"
@@ -76,7 +78,7 @@ main() {
     if [[ ${EC} -ne 0 ]]; then
         echo "Failed to push. Sleeping to add delay before potential retry.";
         sleep 3;
-        exit 1;
+        exit ${EC};
     fi;
 
     if [[ ${CI_DEFAULT_BRANCH} == "${CI_COMMIT_BRANCH}" ]]; then
@@ -92,7 +94,7 @@ main() {
     if [[ ${EC} -ne 0 ]]; then
         echo "Failed to add latest tag. Sleeping to add delay before potential retry.";
         sleep 3;
-        exit 1;
+        exit ${EC};
     fi;
 }
 

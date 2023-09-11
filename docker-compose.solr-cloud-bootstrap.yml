@@ -3,13 +3,17 @@ x-solr-envs: &solr_envs
   SOLR_ENABLE_CLOUD_MODE: "yes"
   SOLR_NUMBER_OF_NODES: 3
   SOLR_ZK_HOSTS: zk1:2181,zk2:2181,zk3:2181
-  SOLR_JAVA_MEM: -Xms1g -Xmx4g
+  SOLR_JAVA_MEM: -Xms512m -Xmx512m
+  STACK_NAME: "${STACK_NAME}"
 
 x-zookeeper-envs: &zookeeper_envs
   ALLOW_ANONYMOUS_LOGIN: "yes"
   ZOO_SERVERS: zk1:2888:3888::1 zk2:2888:3888::2 zk3:2888:3888::3
   ZOO_LISTEN_ALLIPS_ENABLED: "yes"
   ZOO_4LW_COMMANDS_WHITELIST: srvr,mntr,conf,ruok,stat
+  ZOO_HEAP_SIZE: 512
+  ZOO_AUTOPURGE_INTERVAL: 24
+  ZOO_AUTOPURGE_RETAIN_COUNT: 8
 
 x-solr-deploy: &solr_deploy
   mode: replicated
@@ -32,7 +36,6 @@ services:
       - bitnami:/bitnami
     hostname: solr{{slice .Node.Hostname 8 9}}
     networks:
-      - public
       - internal
     logging:
       driver: "json-file"
@@ -75,9 +78,6 @@ services:
 networks:
   internal:
     name: ${STACK_NAME}-internal
-    external: true
-  public:
-    name: public
     external: true
 
 volumes:

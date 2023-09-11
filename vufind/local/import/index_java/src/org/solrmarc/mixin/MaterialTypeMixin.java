@@ -15,8 +15,13 @@ public class MaterialTypeMixin extends SolrIndexerMixin {
         List<String> contentTypes = getValuesMatching(record, "336", "a");
         List<String> mediaTypes = getValuesMatching(record, "337", "a");
         List<String> carrierTypes = getValuesMatching(record, "338", "a");
+        List<String> electronicLocationLinkText = getValuesMatching(record, "856", "y");
 
         List<String> result = new ArrayList<String>();
+
+        // PC-413 Temporary fix until material type is fixed in the source records
+        if (electronicLocationLinkText.stream().anyMatch(s -> s.toLowerCase().contains("streaming video")))
+            result.add("Streaming Video");
 
         if (contentTypes.contains("text") &&
                 mediaTypes.contains("unmediated") &&

@@ -105,6 +105,24 @@ verbose() {
     echo "${MSG}" >> "$LOG_FILE"
 }
 
+check_skip() {
+    declare -g SKIP_BUILD
+    SKIP_BUILD=0
+    # Avoid running alpha-browse on prod and beta on the same node
+    if [[ "${STACK_NAME}" == "catalog-prod" && "${NODE}" == "3" ]]; then
+        echo "Stack is prod: not building alpha-browse on node 3."
+        SKIP_BUILD=1
+    fi
+    if [[ "${STACK_NAME}" != "catalog-prod" && "${NODE}" != "3" ]]; then
+        echo "Stack is not prod: not building alpha-browse on node 1 or 2."
+        SKIP_BUILD=1
+    fi
+    if [[ "${SKIP_BUILD}" -eq 1 ]]; then
+        # Wait for another node to start building, so we can copy results afterwards
+        sleep 10
+    fi
+}
+
 # Call the rebuild script to generate new database files
 rebuild_databases() {
     verbose "Running database rebuild script..."
@@ -113,21 +131,20 @@ rebuild_databases() {
     # Prepare build directory
     mkdir -p "${ARGS[BUILD_PATH]}/alphabetical_browse"
 
-    # Create required symlinks if they don't already exist
-    if [[ ! -h ${ARGS[BUILD_PATH]}/../vendor ]]; then
-        ln -s /opt/bitnami/solr ${ARGS[BUILD_PATH]}/../vendor
-    fi
+    # Create required symlink if it doesn't already exist
     if [[ ! -h ${ARGS[BUILD_PATH]}/jars ]]; then
-        ln -s /bitnami/solr/server/solr/jars ${ARGS[BUILD_PATH]}/jars
+        ln -s /solr_confs/jars ${ARGS[BUILD_PATH]}/jars
     fi
     if [[ ! -h ${ARGS[BUILD_PATH]}/biblio ]]; then
-        ln -s /bitnami/solr/server/solr/biblio ${ARGS[BUILD_PATH]}/biblio
+        # Get the biblio collection path in case we are using a "biblio" alias pointing to a collection named "biblioSomething"
+        BIBLIO_COLLECTION_PATH=`ls -d /bitnami/solr/server/solr/biblio* | grep -v shard | head -1`
+        ln -s $BIBLIO_COLLECTION_PATH ${ARGS[BUILD_PATH]}/biblio
     fi
     if [[ ! -h ${ARGS[BUILD_PATH]}/authority ]]; then
         ln -s /bitnami/solr/server/solr/authority ${ARGS[BUILD_PATH]}/authority
     fi
 
-    if ! JAVA_HOME=/opt/bitnami/java SOLR_HOME=${ARGS[BUILD_PATH]} /solr_confs/index-alphabetic-browse.sh; then
+    if ! JAVA_HOME=/opt/bitnami/java SOLR_HOME=${ARGS[BUILD_PATH]} SOLR_JAR_PATH=/opt/bitnami/solr VUFIND_HOME=/solr_confs /solr_confs/index-alphabetic-browse.sh; then
         verbose "Error occured while running index-alphabetic-browse.sh script!"
         RCODE=1
     else
@@ -225,14 +242,28 @@ main() {
     # Ensure the directory exists on the shared path
     mkdir -p "${ARGS[SHARED_PATH]}"
 
+    check_skip
+
     # All nodes will acquire building lock before checking if they need to perform a build.
     # If a build is necessary, the build will happen here before releasing lock.
     # This includes cleaning up old db files and copying new files to shared location.
-    build_browse
+    if [[ "${SKIP_BUILD}" -eq 0 ]]; then
+        build_browse
+        RCODE=$?
+        if [[ "$RCODE" -ne 0 ]]; then
+            verbose "Rebuild failed. Exiting without copying to Solr."
+            exit $RCODE
+        fi
+    fi
 
     # All nodes will acquire copying lock before checking for new DB files in the shared location.
     # If new files exist, the copy will happen here before releasing the lock.
     copy_to_solr
+    RCODE=$?
+    if [[ "$RCODE" -ne 0 ]]; then
+        verbose "Copy to Solr failed."
+        exit $RCODE
+    fi
 
     verbose "All processing complete!"
 }

@@ -4,12 +4,9 @@
 #-----------------------------------------------------------------------------------
 
 AllFields:
-  DismaxMunge:
-    - [append, "*"]
   DismaxFields:
     - course^400
     - instructor^400
-    - department^200
   DismaxHandler: edismax
 
 Instructor:
@@ -20,9 +17,4 @@ Instructor:
 Course:
   DismaxFields:
     - course^400
-  DismaxHandler: edismax
-
-Department:
-  DismaxFields:
-    - department^400
   DismaxHandler: edismax

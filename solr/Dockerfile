@@ -1,11 +1,13 @@
-FROM bitnami/solr:8
+FROM bitnami/solr:9.1.1
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Detroit
+ARG VUFIND_VERSION
+
 USER root
 
-# Install additional packages, including zk-shell
 RUN \
+# Install additional packages, including zk-shell
     apt update && \
     apt install -y wget vim-nox htop rsyslog cron moreutils gettext-base jq \
                    python3 python3-distutils python3-pip && \
@@ -17,28 +19,10 @@ RUN \
     (umask 0022; mkdir /.zk_shell) && \
     (umask 0133; touch /.zk_shell/config) && \
     (umask 0177; touch /.zk_shell/history) && \
-    chown -R 1001 /.zk_shell
-
+    chown -R 1001 /.zk_shell && \
 # Setup Timezone
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
-
-ARG VUFIND_VERSION
-
-# Get solr configs and prepare for alphabetical browsing
-RUN mkdir /solr_confs && \
-    wget https://github.com/vufind-org/vufind/archive/refs/tags/v${VUFIND_VERSION}.tar.gz && \
-    tar -xf v${VUFIND_VERSION}.tar.gz  && \
-    cp -r /vufind-${VUFIND_VERSION}/solr/vufind/* /solr_confs && \
-    cp /vufind-${VUFIND_VERSION}/index-alphabetic-browse.sh /solr_confs/ && \
-    chmod ugo+x /solr_confs/index-alphabetic-browse.sh && \
-    mkdir /solr_confs/import && \
-    chown 1001 /solr_confs/import && \
-    cp /vufind-${VUFIND_VERSION}/import/browse-indexing.jar /solr_confs/import/ && \
-    rm v${VUFIND_VERSION}.tar.gz && \
-    rm -rf /vufind-${VUFIND_VERSION} && \
-    cp -r /opt/bitnami/solr/contrib/analysis-extras/lib/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/ && \
-    cp -r /opt/bitnami/solr/contrib/analysis-extras/lucene-libs/* /opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
@@ -47,22 +31,40 @@ RUN chmod -R g-w,o-w /etc/cron.d/ && \
     sed -i "/PrivDrop/d" /etc/rsyslog.conf && \
     echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf
 
-COPY startup.sh /startup.sh
-COPY startup-cron.sh /startup-cron.sh
-COPY healthcheck.sh /healthcheck.sh
-COPY clusterhealth.sh /clusterhealth.sh
-COPY cron-alphabrowse.sh /cron-alphabrowse.sh
+# Get solr configs and prepare for alphabetical browsing
+# The following files should no longer be needed in the repo after VuFind 9.1 :
+# (they will have to be copied from vufind like marc4j-*.jar)
+# browse-handler.jar, browse-indexing.jar,  solrmarc_core.jar, biblio_solrconfig.xml, index-alphabetic-browse.sh
+COPY startup.sh startup-cron.sh healthcheck.sh clusterhealth.sh cron-alphabrowse.sh alpha-browse.sh lock-state.sh /
+RUN \
+    mkdir -p /solr_confs/import/lib && \
+    wget https://github.com/vufind-org/vufind/archive/refs/tags/v${VUFIND_VERSION}.tar.gz && \
+    tar -xf v${VUFIND_VERSION}.tar.gz  && \
+    cp -r /vufind-${VUFIND_VERSION}/solr/vufind/* /solr_confs/ && \
+    cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /solr_confs/import/lib/ && \
+    rm v${VUFIND_VERSION}.tar.gz && \
+    rm -rf /vufind-${VUFIND_VERSION}
+COPY index-alphabetic-browse.sh /solr_confs/
+COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
+COPY browse-handler.jar /solr_confs/jars/
+COPY browse-indexing.jar solrmarc_core.jar /solr_confs/import/
+RUN \
+    chmod -R go-w /solr_confs /*.sh && \
+    chmod ugo+x /*.sh /solr_confs/*.sh && \
+# Change solr_confs ownership so that a biblio9 copy can be created (conditionally) in startup.sh
+    chown 1001:root /solr_confs && \
+# Fix lib paths in solrconfig.xml
+# Note: the biblio9 copy of solrconfig.xml is also edited in startup.sh
+    sed -i 's/<lib dir="\.\.\/\.\.\/\.\.\/import\/lib"/<lib dir="\/solr_confs\/import\/lib"/' /solr_confs/biblio/conf/solrconfig.xml && \
+    sed -i 's/<lib dir="\.\.\/\.\.\/\.\.\/import"/<lib dir="\/solr_confs\/import"/' /solr_confs/biblio/conf/solrconfig.xml && \
+    sed -i 's/<lib dir="\.\.\/\.\.\/vendor\/modules\/analysis-extras\/lib"/<lib dir="\/opt\/bitnami\/solr\/modules\/analysis-extras\/lib"/' \
+        /solr_confs/biblio/conf/solrconfig.xml && \
+    sed -i 's/<lib dir="\.\.\/jars"/<lib dir="\/solr_confs\/jars"/' /solr_confs/biblio/conf/solrconfig.xml
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
-  CMD /healthcheck.sh
+    CMD /healthcheck.sh
 
 USER 1001
-
-RUN cp -r /solr_confs/jars /opt/bitnami/solr/server/solr/jars
-
-COPY browse-handler.jar /opt/bitnami/solr/server/solr/jars/browse-handler.jar
-COPY alpha-browse.sh /alpha-browse.sh
-COPY lock-state.sh /lock-state.sh
 
 # Run start-up script
 CMD ["/startup.sh", "/opt/bitnami/scripts/solr/run.sh"]

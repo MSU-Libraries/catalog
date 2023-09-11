@@ -4,21 +4,8 @@ $sel_item = $this->getthis->getItem();
 $items = $this->getthis->items;
 
 function getDisplay($view, $item) {
-    $display = "";
-
-    if ($item['callnumber'] ?? false) {
-      $display .= $view->escapeHtml($item['callnumber']);
-    }
-    if ($item['enumchron'] ?? false) {
-      $display .= $view->escapeHtml($item['enumchron']);
-    }
-    if ($item['number'] > 1) {
-      $display .= "&nbsp;(Copy " . $view->escapeHtml($item['number']) . ")";
-    }
-
-    return $display;
+    return $view->getthis->getCallNumber($item['item_id']);
 }
-
 ?>
 
 <b>Items:</b>
@@ -32,17 +19,17 @@ function getDisplay($view, $item) {
                         ? "current" : "";
                     ?><li>
                         <a href="<?= $this->url(
-                            'record-getthis',
-                            [
-                                'id'     => $this->driver->getUniqueId(),
+                        'record-getthis',
+                        [
+                                'id' => $this->driver->getUniqueId(),
                                 'action' => 'GetThis',
                             ],
-                            [
+                        [
                                 'query' => [
                                     "item_id" => $item['item_id'],
                                 ],
                             ]
-                            ) ?>" class="<?= $this->escapeHtml($item_class) ?>" rel="nofollow">
+                    ) ?>" class="<?= $this->escapeHtml($item_class) ?>" rel="nofollow">
                             <?= getDisplay($this, $item) ?>
                         </a>
                     </li>
@@ -52,4 +39,4 @@ function getDisplay($view, $item) {
         </li>
     </ul>
 </nav>
-<br/>
+<br>

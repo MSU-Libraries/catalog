@@ -12,8 +12,11 @@ default_args() {
     ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/folio
     ARGS[SHARED_DIR]=/mnt/oai
     ARGS[SOLR_URL]="http://solr:8983/solr"
+    ARGS[SOLR_COLLECTION]="biblio"
     ARGS[RESET_SOLR]=0
+    ARGS[BYPASS_DISABLED]=0
     ARGS[VERBOSE]=0
+    ARGS[QUICK]=0
     ARGS[TEST_HARVEST]=
 }
 default_args
@@ -69,10 +72,17 @@ runhelp() {
     echo "  -S|--solr SOLR_URL"
     echo "      Base URL for accessing Solr (only used for --reset-solr)."
     echo "      Default: ${ARGS[SOLR_URL]}"
+    echo "  -n|--collection COLLECTION"
+    echo "      Collection in Solr to index records to."
+    echo "      Default: ${ARGS[SOLR_COLLECTION]}"
     echo "  -r|--reset-solr"
-    echo "      Clear out the biblio Solr collection prior to importing."
+    echo "      Clear out the Solr collection prior to importing."
+    echo "  -B|--bypass-disabled"
+    echo "      Runs script even if the 'disabled' file exists in SHARED_DIR."
     echo "  -v|--verbose"
     echo "      Show verbose output."
+    echo "  -q|--quick"
+    echo "      Skip the countdown delays before each stage of the script."
     echo "  -T|--test-harvest HARVEST_TGZ"
     echo "      Instead of calling VuFind's harvest script, instead extract"
     echo "      this gzip'd tar file into the VUFIND_HARVEST_DIR. This flag"
@@ -135,11 +145,20 @@ parse_args() {
         -S|--solr)
             ARGS[SOLR_URL]="$2"
             shift; shift ;;
+        -n|--collection)
+            ARGS[SOLR_COLLECTION]="$2"
+            shift; shift ;;
         -r|--reset-solr)
             ARGS[RESET_SOLR]=1
             shift;;
+        -B|--bypass-disabled)
+            ARGS[BYPASS_DISABLED]=1
+            shift;;
         -v|--verbose)
             ARGS[VERBOSE]=1
+            shift;;
+        -q|--quick)
+            ARGS[QUICK]=1
             shift;;
         -T|--test-harvest)
             ARGS[TEST_HARVEST]=$( readlink -f "$2" )
@@ -220,6 +239,7 @@ verbose_inline() {
 #  $1 => (Optional) String message to display before countdown; default: "Proceeding in:"
 #  $2 => (Optional) Integer number of seconds to countdown from; default: 5
 countdown() {
+    if [[ "${ARGS[QUICK]}" -eq 1 ]]; then return; fi
     CD_CNT="${1:-5}"
     CD_MSG="${2:-Proceeding in:}"
     verbose_inline "${CD_MSG}"
@@ -293,7 +313,7 @@ append_hrid_given_uuid(){
         echo "ERROR: No append file given when converting a delete UUID: $UUID"
         exit 1
     fi
-    HRID=$( curl -s "${ARGS[SOLR_URL]}/biblio/select?q=uuid_str:${UUID}&wt=json" | jq -r '.response.docs[0].id' )
+    HRID=$( curl -s "${ARGS[SOLR_URL]}/${ARGS[SOLR_COLLECTION]}/select?q=uuid_str:${UUID}&wt=json" | jq -r '.response.docs[0].id' )
     JQ_EC="$?"
     if [[ "$JQ_EC" -ne 0 || -z "$HRID" || "$HRID" == "null" ]]; then
         verbose "MISSING: The UUID $UUID was not found in Solr; ignoring it."
@@ -324,15 +344,15 @@ oai_delete_combiner() {
     DELETE_FILES=()
 }
 
-# Reset the biblio Solr collection by clearing all records
+# Reset the Solr collection by clearing all records
 reset_solr() {
     if [[ "${ARGS[RESET_SOLR]}" -eq 0 ]]; then
         return
     fi
-    verbose "Clearing the biblio Solr index."
+    verbose "Clearing the ${ARGS[SOLR_COLLECTION]} Solr index."
     countdown 5
-    curl "${ARGS[SOLR_URL]}/biblio/update" -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
-    curl "${ARGS[SOLR_URL]}/biblio/update" -H "Content-type: text/xml" --data-binary '<commit />'
+    curl "${ARGS[SOLR_URL]}/${ARGS[SOLR_COLLECTION]}/update" -H "Content-type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
+    curl "${ARGS[SOLR_URL]}/${ARGS[SOLR_COLLECTION]}/update" -H "Content-type: text/xml" --data-binary '<commit />'
     verbose "Done clearing the Solr index."
 }
 
@@ -392,7 +412,7 @@ oai_harvest() {
         if [[ "${#COMBINE_FILES[@]}" -ge 100 ]]; then
             oai_harvest_combiner
         fi
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_*_*_*.xml')
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_*_*_*.xml' | sort)
     oai_harvest_combiner
 
     declare -g -a DELETE_FILES=()
@@ -401,7 +421,7 @@ oai_harvest() {
         if [[ "${#DELETE_FILES[@]}" -ge 100 ]]; then
             oai_delete_combiner
         fi
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_*_*_*.delete')
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_*_*_*.delete' | sort)
     oai_delete_combiner
 
     if [[ "${ARGS[FULL]}" -eq 1 ]]; then
@@ -475,7 +495,7 @@ batch_import() {
 
 check_harvest_disabled() {
     DISABLED=$( find -L "${ARGS[SHARED_DIR]}" -mindepth 1 -maxdepth 1 -type f -iname 'disabled' | wc -l )
-    if [[ "$DISABLED" -gt 0 ]]; then
+    if [[ "$DISABLED" -gt 0 && "${ARGS[BYPASS_DISABLED]}" -ne 1 ]]; then
         verbose "Not starting OAI harvest - detected file named 'disabled' in ${ARGS[SHARED_DIR]}"
         exit 0
     fi

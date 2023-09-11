@@ -1,6 +1,6 @@
 <?php
 
-return array (
+return [
   'router' => [
     'routes' => [
       'record-getthis' => [
@@ -10,16 +10,6 @@ return array (
           'defaults' => [
             'controller' => 'Record',
             'action' => 'GetThis',
-          ],
-        ],
-      ],
-      'record-getthissendrequest' => [
-        'type' => 'Laminas\\Router\\Http\\Segment',
-        'options' => [
-          'route' => '/Record/:id/GetThisSendRequest',
-          'defaults' => [
-            'controller' => 'Record',
-            'action' => 'GetThisSendRequest',
           ],
         ],
       ],
@@ -35,13 +25,6 @@ return array (
       'VuFind\\Controller\\MyResearchController' => 'Catalog\\Controller\\MyResearchController',
     ],
   ],
-  'view_manager' => [
-    'template_map' => [
-      'record/getthis/sendrequest' => __DIR__ . '/../../../themes/msul/templates/record/getthis/sendrequest.phtml',
-      'record/getthis/sendsuccess' => __DIR__ . '/../../../themes/msul/templates/record/getthis/sendsuccess.phtml',
-      'record/getthis/login' => __DIR__ . '/../../../themes/msul/templates/record/getthis/login.phtml',
-    ],
-  ],
   'vufind' => [
     'plugin_managers' => [
       'search_backend' => [
@@ -52,9 +35,11 @@ return array (
       'recorddriver' => [
         'factories' => [
           'Catalog\\RecordDriver\\SolrMarc' => 'VuFind\\RecordDriver\\SolrDefaultFactory',
+          'Catalog\\RecordDriver\\SolrDefault' => 'VuFind\\RecordDriver\\SolrDefaultFactory',
         ],
         'aliases' => [
           'VuFind\\RecordDriver\\SolrMarc' => 'Catalog\\RecordDriver\\SolrMarc',
+          'VuFind\\RecordDriver\\SolrDefault' => 'Catalog\\RecordDriver\\SolrDefault',
         ],
         'delegators' => [
           'Catalog\\RecordDriver\\SolrMarc' => [
@@ -72,6 +57,14 @@ return array (
           'okapi' => 'Catalog\\Auth\\Okapi',
         ],
       ],
+      'ajaxhandler' => [
+        'factories' => [
+          'Catalog\\AjaxHandler\\GetItemStatuses' => 'VuFind\\AjaxHandler\\GetItemStatusesFactory',
+        ],
+        'aliases' => [
+          'getItemStatuses' => 'Catalog\\AjaxHandler\\GetItemStatuses',
+        ],
+      ],
       'ils_driver' => [
         'factories' => [
           'Catalog\\ILS\\Driver\\Folio' => 'VuFind\\ILS\\Driver\\FolioFactory',
@@ -84,10 +77,18 @@ return array (
       ],
       'command' => [
         'factories' => [
-          'Catalog\\VuFindConsole\\Command\\Util\\IndexReservesCommand' => 'VuFindConsole\\Command\\Util\\AbstractSolrAndIlsCommandFactory',
+          'Catalog\\Command\\Util\\IndexReservesCommand' => 'VuFindConsole\\Command\\Util\\AbstractSolrAndIlsCommandFactory',
         ],
         'aliases' => [
-          'util/index_reserves' => 'Catalog\\VuFindConsole\\Command\\Util\\IndexReservesCommand',
+          'util/index_reserves' => 'Catalog\\Command\\Util\\IndexReservesCommand',
+        ],
+      ],
+      'form_handler' => [
+        'factories' => [
+          'Catalog\\Form\\Handler\\Email' => 'VuFind\\Form\\Handler\\EmailFactory',
+        ],
+        'aliases' => [
+          'VuFind\\Form\\Handler\\Email' => 'Catalog\\Form\\Handler\\Email',
         ],
       ],
     ],
@@ -101,4 +102,4 @@ return array (
   #    'VuFind\\Mailer\\Mailer' => 'Catalog\\Mailer\\Mailer',
   #  ],
   #],
-);
+];

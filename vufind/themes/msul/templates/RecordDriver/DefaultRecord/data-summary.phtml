@@ -5,6 +5,6 @@
 <?php foreach ($this->summaries($isbn) as $provider => $content): ?>
   <?php foreach ($content as $summary): ?>
     <?php $htmlContent = substr($summary, 0, 1) == '<' && substr($summary, -1) == '>'; ?>
-    <?=$htmlContent ? $summary : ($this->escapeHtml($summary) . '<br />')?>
+    <?=$htmlContent ? $summary : ($this->escapeHtml($summary) . '<br>')?>
   <?php endforeach; ?>
 <?php endforeach; ?>

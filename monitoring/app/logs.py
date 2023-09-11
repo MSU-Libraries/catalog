@@ -1,9 +1,33 @@
 import pathlib
 import asyncio
+import gzip
+import re
 import flask
 import aiohttp
 
 import util
+
+
+MAX_FILE_SIZE = 50*1024*1024 # arbitrary 50 MB
+
+
+def add_file_to_log(path, full_log):
+    if path.stat().st_size > MAX_FILE_SIZE:
+        log_text = 'Log file is too large to load.'
+    else:
+        if path.name.endswith('.gz'):
+            with gzip.open(path, 'rt') as gz_file:
+                log_text = gz_file.read()
+        else:
+            log_text = path.read_text(encoding="utf8", errors="ignore")
+
+    if log_text != '':
+        log_text = path.name + ':\n' + log_text
+        if full_log != '':
+            full_log = '\n---------------------------\n\n' + full_log
+        full_log = log_text + full_log
+
+    return full_log
 
 
 def node_logs(service):
@@ -13,8 +37,8 @@ def node_logs(service):
         'apache/access':           '/mnt/logs/apache/access.log',
         'simplesamlphp':           '/mnt/logs/simplesamlphp/simplesamlphp.log',
         'mariadb':                 '/mnt/logs/mariadb/mysqld.log',
-        'traefik/log':             '/mnt/traefik_logs/traefik/traefik.log',
-        'traefik/access':          '/mnt/traefik_logs/traefik/access.log',
+        'traefik/log':             '/mnt/traefik_logs/traefik.log',
+        'traefik/access':          '/mnt/traefik_logs/access.log',
         'harvests/folio':          '/mnt/logs/harvests/folio.log',
         'harvests/hlm':            '/mnt/logs/harvests/hlm.log',
         'harvests/authority':      '/mnt/logs/harvests/authority.log',
@@ -24,12 +48,32 @@ def node_logs(service):
         'backups/solr':            '/mnt/logs/backups/solr.log',
         'backups/db':              '/mnt/logs/backups/db.log',
     }
-    if service in paths:
-        path = pathlib.Path(paths[service])
-        if path.is_file():
-            return path.read_text(encoding="utf8")
-        return 'Log file does not exist on this node.'
-    return 'Error: unknown service.'
+    if service not in paths:
+        return 'Error: unknown service.'
+
+    path = pathlib.Path(paths[service])
+    full_log = ''
+
+    latest_matching_paths = path.parent.glob(re.sub(r"\.log", "_latest.log.*", path.name))
+    for latest_path in latest_matching_paths:
+        full_log = add_file_to_log(latest_path, full_log)
+
+    if not path.is_file():
+        return f'Log file does not exist on this node: {path.name}'
+    full_log = add_file_to_log(path, full_log)
+
+    rotated_1 = pathlib.Path(f'{paths[service]}.1')
+    if not rotated_1.is_file():
+        return full_log
+    full_log = add_file_to_log(rotated_1, full_log)
+
+    for i in range(2, 4):
+        rotated_gz = pathlib.Path(f'{paths[service]}.{i}.gz')
+        if rotated_gz.is_file():
+            full_log = add_file_to_log(rotated_gz, full_log)
+
+    return full_log
+
 
 def logs_vufind(service):
     urls = []

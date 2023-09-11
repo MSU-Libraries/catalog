@@ -3,46 +3,24 @@
 $item = $this->getthis->getItem();
 $check = $item['check'] ?? false;
 $link = $this->getthis->getLink();
+$callnum = $this->getthis->getCallNumber();
 ?>
 <div>
-    <b>Title:</b> <?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?><br/>
+    <b>Title:</b> <?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?><br>
     <b>Call Number:</b>
-    <?php if ($item['callnumber'] ?? false): ?>
-          <span><?=$this->escapeHtml($item['callnumber'])?></span>
-        <?php endif; ?>
-        <?php if ($item['enumchron'] ?? false): ?>
-          <span class="enumchron"><?=$this->escapeHtml($item['enumchron'])?></span>
-        <?php endif; ?>
-        <?php if ($item['number'] > 1): ?>
-          &nbsp;(Copy <?=$this->escapeHtml(($item['number']))?>)
-        <?php endif; ?>
-    <br/><br/>
-    <?php if ($item['is_holdable'] ?? false): ?>
-        <p class="text-left">
-            <b>Status:</b> <?= $this->getthis->getStatus() ?>
-            <?php if ($item['availability'] ?? false) { ?>
-                <?php if ($link ?? false) { ?>
-                    <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
-                       <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
-                       target="_blank"
-                       href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
-                       <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place Request")?>
-                    </a>
-                <?php
-                } ?>
-            <?php
-            } else { ?>
-                <?php if ($link ?? false) { ?>
-                    <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
-                       <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
-                       target="_blank"
-                       href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
-                       <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place Request")?>
-                    </a>
-                <?php
-                } ?>
-            <?php
-            } ?>
-        </p><br/>
+    <?php if ($callnum ?? false): ?>
+          <span><?=$this->escapeHtml($callnum) ?></span>
     <?php endif; ?>
+    <br><br>
+    <p class="text-left">
+        <b>Status:</b> <?= $this->getthis->getStatus() ?>
+        <?php if ($item != null && !$this->getthis->isOnlineResource() && $item['is_holdable'] && $link ?? false) { ?>
+            <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
+               <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
+               target="_blank"
+               href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
+               <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place Request")?>
+            </a>
+        <?php } ?>
+    </p><br>
 </div>

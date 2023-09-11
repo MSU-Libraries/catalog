@@ -1,9 +1,30 @@
 <?php
 
+/**
+ * Controller for the Account page
+ *
+ * PHP version 7
+ *
+ * @category VuFind
+ * @package  EDS_Result
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/wiki/development:plugins:controllers Wiki
+ */
+
 namespace Catalog\Controller;
 
 use VuFind\Exception\Auth as AuthException;
 
+/**
+ * Controller for the Account page
+ *
+ * @category VuFind
+ * @package  EDS_Result
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/wiki/development:plugins:controllers Wiki
+ */
 class MyResearchController extends \VuFind\Controller\MyResearchController
 {
     /**
@@ -15,7 +36,8 @@ class MyResearchController extends \VuFind\Controller\MyResearchController
     {
         // Process login request, if necessary (either because a form has been
         // submitted or because we're using an external login provider):
-        if ($this->params()->fromPost('processLogin')
+        if (
+            $this->params()->fromPost('processLogin')
             || $this->getSessionInitiator()
             || $this->params()->fromPost('auth_method')
             || $this->params()->fromQuery('auth_method')
@@ -25,7 +47,8 @@ class MyResearchController extends \VuFind\Controller\MyResearchController
                     $this->getAuthManager()->login($this->getRequest());
                     // Return early to avoid unnecessary processing if we are being
                     // called from login lightbox and don't have a followup action.
-                    if ($this->params()->fromPost('processLogin')
+                    if (
+                        $this->params()->fromPost('processLogin')
                         && $this->inLightbox()
                         // (MSULib) No longer checking for lack of followup url, as we always set it
                     ) {
