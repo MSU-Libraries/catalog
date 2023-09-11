@@ -8,6 +8,9 @@ RUN \
     rm -rf /var/lib/apt/lists/*
 
 ARG VUFIND_VERSION
+ARG MARIADB_MONITORING_PASSWORD
+
+ENV MARIADB_MONITORING_PASSWORD=$MARIADB_MONITORING_PASSWORD
 
 # Get the create-database SQL for the version of Vufind
 COPY monitoring.sql /docker-entrypoint-initdb.d/monitoring.sql
