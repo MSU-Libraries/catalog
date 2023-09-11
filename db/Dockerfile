@@ -4,7 +4,7 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive
 RUN \
     apt update && \
-    apt install netcat-openbsd wget -y && \
+    apt install netcat-openbsd wget gettext-base moreutils -y && \
     rm -rf /var/lib/apt/lists/*
 
 ARG VUFIND_VERSION
