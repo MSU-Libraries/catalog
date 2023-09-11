@@ -14,12 +14,14 @@ COPY patches/ /tmp/patches/
 RUN \
     # Perform updates
     apt update && \
-    apt install -y wget vim-nox lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
+    apt install -y wget vim-nox lsof xml-twig-tools curl cron rsyslog jq htop moreutils \
         gettext-base locales msmtp-mta rsync screen libxml-xpath-perl \
         nodejs npm git pigz libxml2-utils libmarc-xml-perl \
-        # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
-        mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php \
+        # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead), and to use php-fpm instead of libapache2-mod-php
+        mysql-client default-jre-headless apache2 php-fpm php-pear php \
         php-curl php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml && \
+    a2enmod proxy_fcgi proxy && \
+    a2enconf php8.1-fpm && \
     # TEMP(PART2): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/99
     apt install -y ant && \
     git clone --depth 1 --branch 2.9.4 https://github.com/marc4j/marc4j.git /tmp/marc4j && \
@@ -31,6 +33,7 @@ RUN \
     # END TEMP(PART2)
     apt clean && \
     rm -rf /var/lib/apt/lists/*
+COPY php-fpm/php-fpm.conf /etc/php/8.1/fpm/php-fpm.conf
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
 RUN apt install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
 

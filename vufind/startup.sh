@@ -113,4 +113,7 @@ if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
 fi
 
 # Start Apache
-tail -f /var/log/vufind/vufind.log & apachectl -DFOREGROUND
+tail -f /var/log/vufind/vufind.log &
+/usr/sbin/php-fpm8.1 --fpm-config /etc/php/8.1/fpm/php-fpm.conf
+apachectl -DFOREGROUND
+kill $(jobs -p)
