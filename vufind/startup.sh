@@ -112,8 +112,9 @@ if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
     grunt watch:less&
 fi
 
-# Start Apache
+# Start Apache and PHP-FPM
 tail -f /var/log/vufind/vufind.log &
+mkdir /run/php
 /usr/sbin/php-fpm8.1 --fpm-config /etc/php/8.1/fpm/php-fpm.conf
 apachectl -DFOREGROUND
 kill $(jobs -p)

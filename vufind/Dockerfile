@@ -33,7 +33,7 @@ RUN \
     # END TEMP(PART2)
     apt clean && \
     rm -rf /var/lib/apt/lists/*
-COPY php-fpm/php-fpm.conf /etc/php/8.1/fpm/php-fpm.conf
+COPY php-fpm/ /etc/php/8.1/fpm/
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
 RUN apt install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
 
