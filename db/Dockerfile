@@ -10,11 +10,11 @@ RUN \
 ARG VUFIND_VERSION
 
 # Get the create-database SQL for the version of Vufind
+COPY monitoring.sql /docker-entrypoint-initdb.d/monitoring.sql
 RUN wget -O /docker-entrypoint-initdb.d/vufind.sql \
     https://raw.githubusercontent.com/vufind-org/vufind/v${VUFIND_VERSION}/module/VuFind/sql/mysql.sql && \
-    sed -i '1s/^/use vufind;\n/' /docker-entrypoint-initdb.d/vufind.sql
-
-COPY monitoring.sql /docker-entrypoint-initdb.d/monitoring.sql
+    sed -i '1s/^/use vufind;\n/' /docker-entrypoint-initdb.d/vufind.sql && \
+    envsubst < /docker-entrypoint-initdb.d/monitoring.sql | sponge /docker-entrypoint-initdb.d/monitoring.sql
 
 USER 1001
 

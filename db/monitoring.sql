@@ -9,6 +9,6 @@ CREATE TABLE IF NOT EXISTS `data` (
     `apache_requests` INT NOT NULL
 );
 
-GRANT ALL PRIVILEGES ON monitoring.* TO 'monitoring'@'%' identified by 'monitoring';
+GRANT ALL PRIVILEGES ON monitoring.* TO 'monitoring'@'%' identified by '${MARIADB_MONITORING_PASSWORD}';
 
 FLUSH PRIVILEGES;
