@@ -9,6 +9,7 @@ secret_detection:
 Shellcheck CI:
   stage: test
   image: alpine:latest
+  timeout: 5m
   tags:
     - msul-shared
   interruptible: true
@@ -22,6 +23,7 @@ Shellcheck CI:
 Shellcheck:
   stage: test
   image: alpine:latest
+  timeout: 5m
   tags:
     - msul-shared
   interruptible: true
