@@ -121,7 +121,6 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
                 $output->writeln(date('Y-m-d H:i:s') . " Retrieving course reserves");
                 $reserves = $this->catalog->findReserves('', '', '');
                 $output->writeln(date('Y-m-d H:i:s') . " Found reserve count: " . count($reserves));
-                $output->writeln(date('Y-m-d H:i:s') . " Validating and mapping reserves to correct Solr record");
             } catch (\Exception $e) {
                 $output->writeln(date('Y-m-d H:i:s') . " " . $e->getMessage());
                 return 1;
