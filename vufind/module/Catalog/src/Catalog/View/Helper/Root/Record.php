@@ -165,7 +165,7 @@ class Record extends \VuFind\View\Helper\Root\Record
 
         if ($doi) {
             $checkUrl = "https://public-api.thirdiron.com/public/v1/libraries/" .
-                  getenv("LIBRARY_ID") . "/articles/doi/" . $doi .
+                  getenv("BROWZINE_LIBRARY") . "/articles/doi/" . $doi .
                   "?access_token=" . getenv("BROWZINE_TOKEN");
             $ch = curl_init($checkUrl);
             curl_setopt($ch, CURLOPT_HTTPGET, 1);
@@ -179,7 +179,7 @@ class Record extends \VuFind\View\Helper\Root\Record
             curl_close($ch);
 
             if ($httpcode == 200) {
-                $url = "https://libkey.io/libraries/" . getenv("LIBRARY_ID") . "/" . $doi;
+                $url = "https://libkey.io/libraries/" . getenv("BROWZINE_LIBRARY") . "/" . $doi;
             }
         }
         return $url;

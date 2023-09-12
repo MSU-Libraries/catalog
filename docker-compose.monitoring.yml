@@ -32,7 +32,7 @@ services:
         failure_action: rollback
         monitor: 10s
 
-  proxymonitoring-$STACK_NAME:
+  proxymon-$STACK_NAME:
     image: bitnami/nginx
     networks:
       - public

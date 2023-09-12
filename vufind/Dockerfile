@@ -19,7 +19,8 @@ RUN \
         nodejs npm git pigz libxml2-utils libmarc-xml-perl \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php \
-        php-curl php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml && \
+        php-curl php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml \
+        libapache2-mod-security2 modsecurity-crs && \
     # TEMP(PART2): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/99
     apt install -y ant && \
     git clone --depth 1 --branch 2.9.4 https://github.com/marc4j/marc4j.git /tmp/marc4j && \
@@ -30,7 +31,13 @@ RUN \
     apt purge -y ant && \
     # END TEMP(PART2)
     apt clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    (umask 077; mkdir -p \
+        /opt/modsecurity/tmp /opt/modsecurity/var/data \
+        /opt/modsecurity/var/upload /opt/modsecurity/var/audit) && \
+    a2enmod security2
+
+COPY modsecurity/modsecurity.conf /etc/modsecurity/
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
 RUN apt install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
 
@@ -110,6 +117,7 @@ RUN wget https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIM
     mv /tmp/simplesamlphp-${SIMPLESAMLPHP_VERSION} ${SIMPLESAMLPHP_HOME} && \
     rm simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz
 COPY apache2/conf-available/ /etc/apache2/conf-available/
+COPY apache2/sites-available/ /etc/apache2/sites-available/
 COPY simplesamlphp/local/ ${SIMPLESAMLPHP_CUSTOM_DIR}/
 RUN envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW}' < ${SIMPLESAMLPHP_CONFIG_DIR}/config.php | sponge ${SIMPLESAMLPHP_CONFIG_DIR}/config.php && \
     envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \
@@ -145,7 +153,7 @@ ARG FTP_PASSWORD
 ARG AUTH_FTP_USER
 ARG AUTH_FTP_PASSWORD
 ARG DEPLOY_KEY
-ARG LIBRARY_ID
+ARG BROWZINE_LIBRARY
 ARG BROWZINE_TOKEN
 
 ENV SITE_HOSTNAME=$SITE_HOSTNAME \
@@ -175,16 +183,8 @@ ENV SITE_HOSTNAME=$SITE_HOSTNAME \
     AUTH_FTP_PASSWORD=$AUTH_FTP_PASSWORD \
     DEPLOY_KEY=$DEPLOY_KEY \
     VUFIND_LOCAL_MODULES=Catalog \
-    LIBRARY_ID=$LIBRARY_ID \
+    BROWZINE_LIBRARY=$BROWZINE_LIBRARY \
     BROWZINE_TOKEN=$BROWZINE_TOKEN
-
-# Setup Apache logging to both stdout/stderr and log files (needed for monitoring app)
-RUN echo "ServerName catalog.lib.msu.edu" > /etc/apache2/sites-available/000-default.conf && \
-    echo "<VirtualHost *:80>" >> /etc/apache2/sites-available/000-default.conf && \
-    echo "    LogLevel warn" >> /etc/apache2/sites-enabled/000-default.conf && \
-    echo '    ErrorLog "|/usr/bin/tee /var/log/apache2/error.log"' >> /etc/apache2/sites-enabled/000-default.conf && \
-    echo '    CustomLog "|/usr/bin/tee /var/log/apache2/access.log" combined' >> /etc/apache2/sites-enabled/000-default.conf && \
-    echo "</VirtualHost>" >> /etc/apache2/sites-enabled/000-default.conf
 
 # Add file customizations
 COPY local/ /usr/local/vufind/local
@@ -225,6 +225,7 @@ RUN \
     envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.ini && \
     envsubst < local/config/vufind/folio.ini | sponge local/config/vufind/folio.ini && \
     envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
+    envsubst < local/config/vufind/BrowZine.ini | sponge local/config/vufind/BrowZine.ini && \
     envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
     envsubst < /etc/aliases | sponge /etc/aliases && \
     # Set required environment variables
@@ -238,7 +239,7 @@ RUN \
     echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment && \
     echo AUTH_FTP_PASSWORD="$AUTH_FTP_PASSWORD" >> /etc/environment && \
     echo DEPLOY_KEY="$DEPLOY_KEY" >> /etc/environment && \
-    echo LIBRARY_ID="$LIBRARY_ID" >> /etc/environment && \
+    echo BROWZINE_LIBRARY="$BROWZINE_LIBRARY" >> /etc/environment && \
     echo BROWZINE_TOKEN="$BROWZINE_TOKEN" >> /etc/environment && \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \

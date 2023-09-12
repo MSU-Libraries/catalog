@@ -122,7 +122,7 @@ command has completed.
 cp /mnt/shared/authority/[STACK_NAME]/current/processed/*.xml /usr/local/vufind/local/harvest/authority/
 
 # You will want to kick off this command in a screen session, since it can take many hours to run
-/authority-harvest-and-import.sh -i
+/authority-harvest-and-import.sh -i -B
 ```
 
 ### `reserves` Index

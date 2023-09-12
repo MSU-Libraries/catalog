@@ -20,3 +20,16 @@ run these tests locally within a Docker container:
 # Queries the catalog home page with 100 users over a 1 minute duration
 docker run --rm -v /path/to/load_test.js:/load_test.js grafana/k6 run -u 100 -d 1m /load_test.js --env URL="https://catalog.lib.msu.edu"
 ```
+
+## Benchmarking
+Another tool you can use if you don't want to test your site over a period of time is the
+[Apache benchmarking tool](https://httpd.apache.org/docs/2.4/programs/ab.html) which is built into
+this VuFind image and is part of most Ubuntu installations.
+
+```
+# Request the URL 100 times, doing 10 concurrent requests
+ab -l -n 100 -c 10 "https://catalog.lib.msu.edu/"
+```
+
+The advantage with this output is it is much simpler so it can be quicker to get a high level picture of
+performance gains when comparing the before-and-after of a code change.
