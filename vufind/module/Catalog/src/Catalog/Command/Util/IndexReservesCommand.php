@@ -32,7 +32,6 @@ namespace Catalog\Command\Util;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use VuFindSearch\Backend\Solr\Record\SerializableRecord;
 
 /**
  * Console command: index course reserves into Solr.
