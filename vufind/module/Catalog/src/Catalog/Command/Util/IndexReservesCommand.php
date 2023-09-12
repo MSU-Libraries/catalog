@@ -32,8 +32,6 @@ namespace Catalog\Command\Util;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use VuFindSearch\Backend\Solr\Command\RawJsonSearchCommand;
-use VuFindSearch\Backend\Solr\Document\UpdateDocument;
 use VuFindSearch\Backend\Solr\Record\SerializableRecord;
 
 /**
