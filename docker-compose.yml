@@ -24,6 +24,7 @@ services:
       STACK_NAME: "${STACK_NAME}"
       SITE_HOSTNAME: "${SITE_HOSTNAME}"
       NODE: "{{slice .Node.Hostname 8 9}}"
+      MARIADB_VUFIND_PASSWORD: "${MARIADB_VUFIND_PASSWORD}"
     deploy:
       mode: replicated
       replicas: 3
@@ -128,6 +129,8 @@ services:
       STACK_NAME: "${STACK_NAME}"
       SITE_HOSTNAME: "${SITE_HOSTNAME}"
       NODE: "{{slice .Node.Hostname 8 9}}"
+      MARIADB_ROOT_PASSWORD: "${MARIADB_ROOT_PASSWORD}"
+      MARIADB_VUFIND_PASSWORD: "${MARIADB_VUFIND_PASSWORD}"
     deploy:
       mode: replicated
       replicas: 1

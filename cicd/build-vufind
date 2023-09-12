@@ -42,6 +42,7 @@ main() {
         --build-arg MAIL_PORT="${MAIL_PORT}" \
         --build-arg MAIL_USERNAME= \
         --build-arg MAIL_PASSWORD= \
+        --build-arg MARIADB_VUFIND_PASSWORD="${MARIADB_VUFIND_PASSWORD}" \
         --build-arg FEEDBACK_EMAIL="${FEEDBACK_EMAIL}" \
         --build-arg SOLR_URL=http://solr:8983/solr \
         --build-arg EDS_USER="${EDS_USER}" \
