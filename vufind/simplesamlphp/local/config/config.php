@@ -1203,7 +1203,7 @@ $config = [
      * The username and password to use when connecting to the database.
      */
     'store.sql.username' => 'vufind',
-    'store.sql.password' => 'vufind',
+    'store.sql.password' => getenv('MARIADB_VUFIND_PASSWORD'),
 
     /*
      * The prefix we should use on our tables.

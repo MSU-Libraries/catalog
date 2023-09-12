@@ -70,7 +70,7 @@ def node_graph_data(variable, period):
     group = _group_by_times(period_start, period_end)
     conn = None
     try:
-        conn = db.connect(user='monitoring', password='monitoring', host='galera', database="monitoring")
+        conn = db.connect(user='monitoring', password=os.getenv('MARIADB_MONITORING_PASSWORD'), host='galera', database="monitoring")
         cur = conn.cursor()
         cur.execute(_sql_query(variable, period_start, period_end, group))
         pt_x = []
