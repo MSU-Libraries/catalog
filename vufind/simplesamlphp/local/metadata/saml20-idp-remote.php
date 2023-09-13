@@ -35,6 +35,14 @@ $metadata['http://www.okta.com/exkvspdzpbUAmE6mM357'] = [
     'certificate'          => 'msu-dev.pem',
     'sign.logout'          => true,
 ];
+// MSU TEST (for catalog-preview)
+$metadata['http://www.okta.com/exkvuaj28f9YbgMpE357'] = [
+    'name'                 => 'MSU TEST IdP',
+    'SingleSignOnService'  => 'https://auth.msu.edu/app/msu_testlibpubliccatalogvufind_1/exkvuaj28f9YbgMpE357/sso/saml',
+    'SingleLogoutService'  => 'https://auth.msu.edu/app/exkvuaj28f9YbgMpE357/sso/saml/metadata',
+    'certificate'          => 'msu-test.pem',
+    'sign.logout'          => true,
+];
 // MSU QA (can be used with catalog-beta); running on Okta prod to avoid IP restrictions
 $metadata['http://www.okta.com/exko9ngr82UjBdFPU357'] = [
     'name'                 => 'MSU QA IdP',

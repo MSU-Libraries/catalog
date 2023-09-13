@@ -5,6 +5,8 @@ if (getenv('STACK_NAME') == 'catalog-prod')
     $idpEntityId = 'http://www.okta.com/exkng5q6tqDecNuDY357';
 elseif (getenv('STACK_NAME') == 'catalog-beta')
     $idpEntityId = 'http://www.okta.com/exko9ngr82UjBdFPU357';
+elseif (getenv('STACK_NAME') == 'catalog-preview')
+    $idpEntityId = 'http://www.okta.com/exkvuaj28f9YbgMpE357';
 else
     $idpEntityId = 'http://www.okta.com/exkvspdzpbUAmE6mM357';
 // Uncomment below for samling override (TESTING ON DEVEL INSTANCES ONLY)
