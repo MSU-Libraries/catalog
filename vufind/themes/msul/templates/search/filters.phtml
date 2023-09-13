@@ -1,0 +1,25 @@
+<?php
+$checkboxFilters = $this->checkboxFilters;
+$filterList = $this->filterList;
+$filterCount = $this->searchbox()->getFilterCount($this->checkboxFilters, $this->filterList);
+$skip = false;
+if ($filterCount == 1) {
+    if (count($filterList) == 1) {
+        if (array_key_first($filterList) == 'Institution') {
+            $filter = $filterList['Institution'];
+            if (count($filter) == 1 && $filter[0]['displayText'] == 'Michigan State University') {
+                $skip = true;
+            }
+        }
+    } else {
+        foreach ($checkboxFilters as $filter) {
+            if ($filter['selected'] && $filter['desc'] == 'eds_expander_fulltext') {
+                $skip = true;
+            }
+        }
+    }
+}
+
+if (!$skip) {
+    include $this->parentTemplate('search/filters.phtml');
+}

@@ -13,19 +13,17 @@ return [
 
     'helpers' => [
         'factories' => [
-            'Catalog\View\Helper\Root\Auth' => 'VuFind\View\Helper\Root\AuthFactory',
-            'Catalog\View\Helper\Root\BannerNotices' => 'Catalog\View\Helper\Root\BannerNoticesFactory',
-            'Catalog\View\Helper\Root\PrintArrayHtml' => 'Laminas\ServiceManager\Factory\InvokableFactory',
-            'Catalog\View\Helper\Root\Record' => 'Catalog\View\Helper\Root\RecordFactory',
-            'Catalog\View\Helper\Root\SearchBox' => 'VuFind\View\Helper\Root\SearchBoxFactory',
             'VuFind\View\Helper\Root\RecordDataFormatter' => 'Catalog\View\Helper\Root\RecordDataFormatterFactory',
+            'Catalog\View\Helper\Root\Record' => 'Catalog\View\Helper\Root\RecordFactory',
+            'Catalog\View\Helper\Root\Auth' => 'VuFind\View\Helper\Root\AuthFactory',
+            'Catalog\View\Helper\Root\PrintArrayHtml' => 'Laminas\ServiceManager\Factory\InvokableFactory',
+            'Catalog\View\Helper\Root\BannerNotices' => 'Catalog\View\Helper\Root\BannerNoticesFactory',
         ],
         'aliases' => [
+            'record' => 'Catalog\View\Helper\Root\Record',
+            'printArrayHtml' => 'Catalog\View\Helper\Root\PrintArrayHtml',
             'auth' => 'Catalog\View\Helper\Root\Auth',
             'bannerNotices' => 'Catalog\View\Helper\Root\BannerNotices',
-            'printArrayHtml' => 'Catalog\View\Helper\Root\PrintArrayHtml',
-            'record' => 'Catalog\View\Helper\Root\Record',
-            'searchbox' => 'Catalog\View\Helper\Root\SearchBox',
         ],
     ],
 
