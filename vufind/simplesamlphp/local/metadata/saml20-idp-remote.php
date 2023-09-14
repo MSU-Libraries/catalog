@@ -28,10 +28,10 @@ $metadata['https://samltest.id/saml/idp'] = [
 ];
 
 // MSU DEV (for devel-authentication)
-$metadata['http://www.okta.com/exk1ed76cimmz56WW0h8'] = [
+$metadata['http://www.okta.com/exkvspdzpbUAmE6mM357'] = [
     'name'                 => 'MSU DEV IdP',
-    'SingleSignOnService'  => 'https://auth.test.itservices.msu.edu/app/msutst_devlibpubliccatalog_1/exk1ed76cimmz56WW0h8/sso/saml',
-    'SingleLogoutService'  => 'https://auth.test.itservices.msu.edu/login/signout?fromURI=https%3A%2F%2F'.getenv('SITE_HOSTNAME'),
+    'SingleSignOnService'  => 'https://auth.msu.edu/app/msu_devlibpubliccatalogvufind_1/exkvspdzpbUAmE6mM357/sso/saml',
+    'SingleLogoutService'  => 'https://auth.msu.edu/app/exkvspdzpbUAmE6mM357/sso/saml/metadata',
     'certificate'          => 'msu-dev.pem',
     'sign.logout'          => true,
 ];

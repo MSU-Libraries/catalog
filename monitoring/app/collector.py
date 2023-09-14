@@ -48,7 +48,7 @@ def main():
     nb_requests = _get_last_minute_apache_requests()
     conn = None
     try:
-        conn = db.connect(user='monitoring', password='monitoring', host='galera', database="monitoring")
+        conn = db.connect(user='monitoring', password=os.getenv('MARIADB_MONITORING_PASSWORD'), host='galera', database="monitoring")
         cur = conn.cursor()
         statement = "INSERT INTO data (node, time, available_memory, available_disk_space, " \
             "apache_requests) VALUES (%s, %s, %s, %s, %s)"

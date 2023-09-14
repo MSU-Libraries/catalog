@@ -1,7 +1,6 @@
 FROM ubuntu:22.04
 
 ENV TZ=America/Detroit
-ENV MYSQL_ROOT_PASSWORD=12345
 ENV DEBIAN_FRONTEND=noninteractive
 ENV VUFIND_LOCAL_DIR=/usr/local/vufind/local
 ENV VUFIND_HOME=/usr/local/vufind
@@ -19,7 +18,8 @@ RUN \
         nodejs npm git pigz libxml2-utils libmarc-xml-perl \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php \
-        php-curl php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml && \
+        php-curl php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml \
+        libapache2-mod-security2 modsecurity-crs && \
     # TEMP(PART2): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/99
     apt install -y ant && \
     git clone --depth 1 --branch 2.9.4 https://github.com/marc4j/marc4j.git /tmp/marc4j && \
@@ -30,7 +30,13 @@ RUN \
     apt purge -y ant && \
     # END TEMP(PART2)
     apt clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    (umask 077; mkdir -p \
+        /opt/modsecurity/tmp /opt/modsecurity/var/data \
+        /opt/modsecurity/var/upload /opt/modsecurity/var/audit) && \
+    a2enmod security2
+
+COPY modsecurity/modsecurity.conf /etc/modsecurity/
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
 RUN apt install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
 
@@ -133,6 +139,7 @@ ARG MAIL_HOST
 ARG MAIL_PORT
 ARG MAIL_USERNAME
 ARG MAIL_PASSWORD
+ARG MARIADB_VUFIND_PASSWORD
 ARG FEEDBACK_EMAIL
 ARG SOLR_URL=http://solr:8983/solr
 ARG EDS_USER
@@ -162,6 +169,7 @@ ENV SITE_HOSTNAME=$SITE_HOSTNAME \
     MAIL_PORT=$MAIL_PORT \
     MAIL_USERNAME=$MAIL_USERNAME \
     MAIL_PASSWORD=$MAIL_PASSWORD \
+    MARIADB_VUFIND_PASSWORD=$MARIADB_VUFIND_PASSWORD \
     FEEDBACK_EMAIL=$FEEDBACK_EMAIL \
     SOLR_URL=$SOLR_URL \
     EDS_USER=$EDS_USER \

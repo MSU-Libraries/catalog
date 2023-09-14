@@ -66,13 +66,13 @@ apply_devel_changes() {
     ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
     docker-compose.solr-cloud.yml;
     ./yq -i \
-    ".services.proxymonitoring-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.tls.certresolver=msul-letsencrypt-dns\"" \
+    ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.tls.certresolver=msul-letsencrypt-dns\"" \
     docker-compose.monitoring.yml;
     ./yq -i \
-    ".services.proxymonitoring-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.tls.domains[0].main=aws.lib.msu.edu\"" \
+    ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.tls.domains[0].main=aws.lib.msu.edu\"" \
     docker-compose.monitoring.yml;
     ./yq -i \
-    ".services.proxymonitoring-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
+    ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
     docker-compose.monitoring.yml;
 
     # Remove the cron service if the stack name is NOT catalog beta or prod
@@ -101,10 +101,10 @@ apply_devel_changes() {
     ".x-solrproxy-deploy.labels +=\"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
     docker-compose.solr-cloud.yml;
     ./yq -i \
-    ".services.proxymonitoring-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
+    ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
     docker-compose.monitoring.yml;
     ./yq -i \
-    ".services.proxymonitoring-\$STACK_NAME.deploy.labels +=\"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
+    ".services.proxymon-\$STACK_NAME.deploy.labels +=\"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
     docker-compose.monitoring.yml;
 
     # Disable container rollback
@@ -148,7 +148,7 @@ apply_prod_changes() {
     ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls.certresolver=msul-letsencrypt\"" \
     docker-compose.solr-cloud.yml;
     ./yq -i \
-    ".services.proxymonitoring-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.tls.certresolver=msul-letsencrypt\"" \
+    ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.tls.certresolver=msul-letsencrypt\"" \
     docker-compose.monitoring.yml;
 
     # Remove the croncache service if the stack name is production
@@ -157,8 +157,8 @@ apply_prod_changes() {
     # Remove mailcatcher service
     ./yq -i "del(.services.mail-*)" docker-compose.yml;
 
-    ## Changes for catalog-beta
-    if [ "${STACK_NAME}" == "catalog-beta" ]; then
+    ## Changes for catalog-beta and catalog-preview
+    if [ "${STACK_NAME}" == "catalog-beta" ] || [ "${STACK_NAME}" == "catalog-preview" ]; then
         # Override default router rule
         ./yq -i \
         ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" \
@@ -179,10 +179,10 @@ apply_prod_changes() {
         ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
-        ".services.proxymonitoring-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
+        ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
         docker-compose.monitoring.yml;
         ./yq -i \
-        ".services.proxymonitoring-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
+        ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
         docker-compose.monitoring.yml;
     fi
 
@@ -222,10 +222,10 @@ apply_prod_changes() {
         ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
-        ".services.proxymonitoring-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
+        ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
         docker-compose.monitoring.yml;
         ./yq -i \
-        ".services.proxymonitoring-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
+        ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
         docker-compose.monitoring.yml;
     fi
 }

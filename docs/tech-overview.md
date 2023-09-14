@@ -121,4 +121,4 @@ swarm)
     **prune-nodes**: Runs a `docker system prune` with flags on each of the nodes in the swarm  
 * **monitoring**:  
     **monitoring**: Runs the locally developed Flask application in the foreground to monitor the other stacks  
-    **proxymonitoring**: Exposes the `monitoring` service publicly since that service is only on the internal network  
+    **proxymon**: Exposes the `monitoring` service publicly since that service is only on the internal network  

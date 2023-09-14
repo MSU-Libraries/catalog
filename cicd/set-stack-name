@@ -31,6 +31,9 @@ main() {
     elif [[ $CI_DEFAULT_BRANCH == "${CI_COMMIT_BRANCH}" ]]; then
         STACK_NAME="catalog-beta"
         SITE_HOSTNAME="catalog-beta.lib.msu.edu"
+    elif [[ "${CI_COMMIT_BRANCH}" == "catalog-preview" ]]; then
+        STACK_NAME="catalog-preview"
+        SITE_HOSTNAME="catalog-preview.lib.msu.edu"
     elif [[ "${CI_COMMIT_BRANCH}" == "devel-"* || "${CI_COMMIT_BRANCH}" == "review-"* ]]; then
         STACK_NAME="${CI_COMMIT_BRANCH}"
         SITE_HOSTNAME="${STACK_NAME}.aws.lib.msu.edu"
