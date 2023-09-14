@@ -100,13 +100,13 @@
   width:100%;
   @media only screen and (min-width : 992px) {
     .searchForm_lookfor {
-      width:20rem;
+      width:25%;
     }
 
   }
-  @media only screen and (min-width : 1080px) {
+  @media only screen and (min-width : 1090px) {
    .searchForm_lookfor {
-      width:100rem;
+      width:35%;
     }
   }
 }
@@ -188,8 +188,6 @@ header {
 }
 
 .navbar-collapse {
-  margin-top: -3rem;
-  margin-bottom: 3rem;
   a, a:visited {
     color:#fff;
   }
@@ -296,7 +294,7 @@ footer {
     ul {
       list-style:none;
       padding-left:0;
-      margin-bottom:8rem;
+      margin-bottom:3rem;
     }
   }
   .msu-footer {
@@ -488,15 +486,10 @@ input[type="checkbox"] {
     }
   }
   @media only screen and (min-width : 992px) {
-    .btn-link {
-      margin-top:1rem;
-    }
-    input, select {
-      vertical-align:top !important;
-    }
-    .btn-primary {
+    button[type=submit].btn-primary {
       border-radius: 0 0.5rem 0.5rem 0;
       margin-left: -1rem;
+      vertical-align:top;
     }
   }
 }
@@ -513,7 +506,7 @@ input[type="checkbox"] {
 
 .mainbody.right {
   .searchbox {
-    @media only screen and (max-width : 1226px) {
+    @media only screen and (max-width : 1235px) {
       label, input, select, button {
         display:block;
         margin-bottom:0.3rem;
@@ -524,20 +517,34 @@ input[type="checkbox"] {
       input {
         margin-bottom:1rem;
       }
-    }
+    }   
     @media only screen and (min-width : 992px) {
-      .btn-primary {
+      button[type=submit].btn-primary {
         border-radius: 2rem;
         margin-left:0;
       }
     }
-    @media only screen and (min-width : 1227px) {
-      .btn-primary {
+    @media only screen and (min-width : 1236px) {
+      button[type=submit].btn-primary {
         border-radius: 0 0.5rem 0.5rem 0;
         margin-left: -1rem;
       }
     }
   }
+  @media only screen and (min-width : 768px) {
+      #search-cart-form {
+        margin-top: -1rem;
+    }
+  } 
+  @media only screen and (min-width : 1315px) {
+      .searchForm_lookfor {
+        width:33%;
+    }
+  }   @media only screen and (min-width : 1445px) {
+      .searchForm_lookfor {
+        width:100%;
+    }
+  }     
 }
 
 .searchHomeContent form .active-filters {
@@ -554,17 +561,15 @@ input[type="checkbox"] {
       border-left:1px solid @medgray;
     }
   }
+  form.searchForm {
+    width:100%;
+  }
 }
 
 .search-home-facets {
-  margin-top:5rem;
-  margin-bottom:5rem;
   .home-facet {
     form, label, select, input {
       display:block;
-    }
-    form {
-      margin-bottom:3rem;
     }
     label {
       margin-bottom:0.5rem;
@@ -927,11 +932,9 @@ label {
 
 // Pagination
 
-@media only screen and (min-width : 900px) {
-  .pagination {
-    margin-left:3.5rem;
+ .pagination {
+    margin:0 0 1rem 0;
   }
-}
 
 .pagination>li>a, .pagination>li>span {
   position:relative;
@@ -942,7 +945,6 @@ label {
   color:#888;
   text-decoration:none;
   background-color:#fff;
-  border:none;
 }
 .pagination li {
   font-size:1.5rem;
@@ -954,34 +956,14 @@ label {
 
   }
 }
-.pagination li a span {
-  border: 2px solid #888;
-  color: #888;
-  -webkit-border-radius: 0.5rem;
-  -moz-border-radius: 0.5rem;
-  border-radius: 0.5rem;
-}
+
 .pagination li a span.fa-angle-left {
-  padding: 0 .6rem .1rem .5rem;
   margin-left: 0.5rem;
-  line-height: 1.5rem;
-  vertical-align: baseline;
 }
 .pagination li a span.fa-angle-right {
-  padding: 0 .5rem .1rem .6rem;
   margin-right: 0.5rem;
-  line-height: 1.5rem;
-  vertical-align: baseline;
 }
-.pagination .active span {
-  background-color:#fff;
-  color:#444;
-  font-weight:800;
 
-  &:hover {
-    background-color:#888;
-  }
-}
 
 // Searchtools spacing
 .search-term {
@@ -1284,6 +1266,28 @@ body.template-dir-myresearch.template-name-profile {
   }
 }
 
+//Filter button on Articles and More coming from Bento web search
+
+#dropdown-toggle-Format {
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  color: #fff;
+  background: @parakeetgreen;
+  vertical-align: baseline;
+  &:hover {
+      background-color:@darkparakeetgreen;
+      border-color:@darkparakeetgreen;
+      color:#fff;
+  }
+    &:active,
+    &:focus {
+      background-color:@msugreen !important;
+      border-color:@msugreen !important;
+      color:#fff !important;
+  }
+}
+
+
 // Alignment for flipped advanced search select & input fields
 
 .adv-term-type {
@@ -1363,6 +1367,13 @@ fieldset.solr-facets {
     margin-bottom:1rem;
     font-size:20px;
     }
+  }
+}
+
+//override vertical align
+@media (min-width: 768px) {
+  .navbar-form .form-control {
+    vertical-align: initial;
   }
 }
 

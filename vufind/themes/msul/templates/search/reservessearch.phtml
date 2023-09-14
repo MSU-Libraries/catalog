@@ -17,7 +17,6 @@
     <label class="mb-2 fw-normal" for="reservesSearchForm_lookfor">Search by <strong>Instructor</strong> or by <strong>Course</strong></label><br />
     <input id="reservesSearchForm_lookfor" placeholder="Search terms" type="text" name="lookfor" size="38" value="<?=$this->escapeHtmlAttr($reservesLookfor)?>" <?=$this->searchOptions('SolrReserves')->autocompleteEnabled() ? ' class="autocomplete searcher:SolrReserves type:Reserves mb-3"' : ''?>>
     <input class="btn btn-primary" type="submit" name="submit" value="<?=$this->transEscAttr("Find")?>">
-    <p class="mb-3"><small>Course codes must be entered with a space between the course and code (e.g.&nbsp;acc&nbsp;341)</small></p>
   </form>
   <?=$this->inlineScript(\Laminas\View\Helper\HeadScript::SCRIPT, "$('#reservesSearchForm_lookfor').focus()", 'SET')?>
 
