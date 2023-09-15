@@ -48,7 +48,7 @@
       <p class="adv_search_terms"><?=$this->transEsc("Your search terms")?>: "<strong><?=$this->escapeHtml($this->lookfor)?></strong>"</p>
       <p class="adv_search_links">
         <a href="<?=$this->url($advSearch)?>?edit=<?=$this->escapeHtmlAttr($this->searchId)?>"><?=$this->transEsc("Edit this Advanced Search")?></a> |
-        <a href="<?=$this->url($advSearch, [], ['query' => $hiddenFilters])?>"><?=$this->transEsc("Start a new Advanced Search")?></a> |
+        <a href="<?=$this->url($advSearch, [], ['query' => $hiddenFilters])?>"><?=$this->transEsc("Start a new  ")?></a> |
         <a href="<?=$this->url($searchHome, [], ['query' => $hiddenFilters])?>"><?=$this->transEsc("Start a new Basic Search")?></a>
       </p>
       <?=
@@ -100,13 +100,13 @@
     <?php elseif ($handlerCount == 1): ?>
       <input type="hidden" name="type" value="<?=$this->escapeHtmlAttr($handlers[0]['value'])?>">
     <?php endif; ?>
-    <button type="submit" class="btn btn-primary"><?=$this->icon('search') ?> <?=$this->transEsc("Search")?></button><br>
+    <button type="submit" class="btn btn-primary"><?=$this->icon('search') ?> <?=$this->transEsc("Search")?></button>
     <?php if ($advSearch): ?>
       <?php
         $advSearchQuery = $results ? ['edit' => $results->getSearchId()] : $hiddenFilters;
         $advSearchLink = $this->url($advSearch, [], ['query' => $advSearchQuery]);
       ?>
-      <a href="<?=$advSearchLink?>" class="advanced-search-link btn btn-link" rel="nofollow"><?=$this->transEsc("Or try an advanced search")?></a>
+      <a href="<?=$advSearchLink?>" class="advanced-search-link btn btn-link" rel="nofollow"><?=$this->transEsc("Advanced")?></a>
     <?php endif; ?>
     <?php if ($geoUrl = $this->geocoords()->getSearchUrl($options)) : ?>
         <a href="<?=$geoUrl ?>" class="btn btn-link"><?=$this->transEsc('Geographic Search')?></a>
