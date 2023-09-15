@@ -36,12 +36,10 @@ return [
         'factories' => [
           'Catalog\\RecordDriver\\SolrMarc' => 'VuFind\\RecordDriver\\SolrDefaultFactory',
           'Catalog\\RecordDriver\\SolrDefault' => 'VuFind\\RecordDriver\\SolrDefaultFactory',
-          'Catalog\\RecordDriver\\EDS' => 'VuFind\\RecordDriver\\NameBasedConfigFactory',
         ],
         'aliases' => [
           'VuFind\\RecordDriver\\SolrMarc' => 'Catalog\\RecordDriver\\SolrMarc',
           'VuFind\\RecordDriver\\SolrDefault' => 'Catalog\\RecordDriver\\SolrDefault',
-          'VuFind\\RecordDriver\\EDS' => 'Catalog\\RecordDriver\\EDS',
         ],
         'delegators' => [
           'Catalog\\RecordDriver\\SolrMarc' => [

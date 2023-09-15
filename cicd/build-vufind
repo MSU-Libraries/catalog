@@ -42,6 +42,7 @@ main() {
         --build-arg MAIL_PORT="${MAIL_PORT}" \
         --build-arg MAIL_USERNAME= \
         --build-arg MAIL_PASSWORD= \
+        --build-arg MARIADB_VUFIND_PASSWORD="${MARIADB_VUFIND_PASSWORD}" \
         --build-arg FEEDBACK_EMAIL="${FEEDBACK_EMAIL}" \
         --build-arg SOLR_URL=http://solr:8983/solr \
         --build-arg EDS_USER="${EDS_USER}" \
@@ -58,7 +59,7 @@ main() {
         --build-arg AUTH_FTP_USER="${AUTH_FTP_USER}" \
         --build-arg AUTH_FTP_PASSWORD="${AUTH_FTP_PASSWORD}" \
         --build-arg DEPLOY_KEY="${DEPLOY_KEY}" \
-        --build-arg LIBRARY_ID="${LIBRARY_ID}" \
+        --build-arg BROWZINE_LIBRARY="${BROWZINE_LIBRARY}" \
         --build-arg BROWZINE_TOKEN="${BROWZINE_TOKEN}" \
         --tag "${CURR}" \
         --cache-from "${LATEST}" \
@@ -81,7 +82,7 @@ main() {
         exit ${EC};
     fi;
 
-    if [[ ${CI_DEFAULT_BRANCH} == "${CI_COMMIT_BRANCH}" ]]; then
+    if [[ ${CI_DEFAULT_BRANCH} == "${CI_COMMIT_BRANCH}" || ${CI_COMMIT_BRANCH} == "catalog-preview" ]]; then
         echo "Pushing new unique main image tag"
         docker tag "${CURR}" "${CURR}-main";
         docker push "${CURR}-main";

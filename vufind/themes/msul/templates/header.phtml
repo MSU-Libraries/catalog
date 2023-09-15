@@ -114,12 +114,15 @@ $account = $this->auth()->getManager();
 <?= $this->bannerNotices() ?>
 <?php if ($this->layout()->searchbox !== false): ?>
   <div class="search container navbar">
-    <div class="backtocat"><p><a style="text-decoration:none;" href="/Search">&#8592;&nbsp;&nbsp;Back to the catalog</a></p></div>
     <div class="nav searchbox hidden-print" role="search">
       <?php $this->slot('search-home-hero')->start() ?>
         <?=$this->layout()->searchbox ?>
         <?=$this->inlineScript(\Laminas\View\Helper\HeadScript::SCRIPT, '$("#searchForm_lookfor").focus();', 'SET'); ?>
       <?=$this->slot('search-home-hero')->end() ?>
     </div>
+  </div>
+<?php else: ?>
+  <div class="backtocat container">
+    <p><a style="text-decoration:none;" href="/Search">&#8592;&nbsp;&nbsp;Back to the catalog</a></p>
   </div>
 <?php endif; ?>

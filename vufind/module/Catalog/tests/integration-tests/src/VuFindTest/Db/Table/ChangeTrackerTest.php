@@ -56,13 +56,14 @@ final class ChangeTrackerTest extends \PHPUnit\Framework\TestCase
     {
         $core = 'testCore';
         $tracker = $this->getTable(ChangeTracker::class);
+        $tracker->delete(['core' => $core]);
 
         // Create a new row:
         $tracker->index($core, 'test1', 1326833170);
         $row = $tracker->retrieve($core, 'test1');
         $this->assertNotNull($row);
         $this->assertNull($row->deleted);
-        $this->assertEquals($row->last_record_change, '2012-01-17 20:46:10');
+        $this->assertEquals('2012-01-17 20:46:10', $row->last_record_change);
         $this->assertTrue(
             // use <= in case test runs too fast for values to become unequal:
             strtotime($row->first_indexed) <= strtotime($row->last_indexed)
@@ -73,7 +74,7 @@ final class ChangeTrackerTest extends \PHPUnit\Framework\TestCase
         $row = $tracker->retrieve($core, 'test1');
         $this->assertNotNull($row);
         $this->assertNull($row->deleted);
-        $this->assertEquals($row->last_record_change, '2012-01-17 20:46:10');
+        $this->assertEquals('2012-01-17 20:46:10', $row->last_record_change);
         $previousFirstIndexed = $row->first_indexed;
         $this->assertTrue(
             // use <= in case test runs too fast for values to become unequal:
@@ -92,10 +93,10 @@ final class ChangeTrackerTest extends \PHPUnit\Framework\TestCase
             // use <= in case test runs too fast for values to become unequal:
             strtotime($row->first_indexed) <= strtotime($row->last_indexed)
         );
-        $this->assertEquals($row->last_record_change, '2012-01-17 20:46:16');
+        $this->assertEquals('2012-01-17 20:46:16', $row->last_record_change);
 
         // Make sure the "first indexed" date hasn't changed!
-        $this->assertEquals($row->first_indexed, $previousFirstIndexed);
+        $this->assertEquals($previousFirstIndexed, $row->first_indexed);
 
         // Delete the record:
         $tracker->markDeleted($core, 'test1');
@@ -114,7 +115,7 @@ final class ChangeTrackerTest extends \PHPUnit\Framework\TestCase
         $row = $tracker->retrieve($core, 'test2');
         $this->assertNotNull($row);
         $this->assertNull($row->deleted);
-        $this->assertEquals($row->last_record_change, '2012-01-17 20:46:10');
+        $this->assertEquals('2012-01-17 20:46:10', $row->last_record_change);
 
         // Clean up after ourselves:
         $tracker->delete(['core' => $core]);

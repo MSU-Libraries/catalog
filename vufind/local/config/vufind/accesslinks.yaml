@@ -189,7 +189,7 @@ labels:
   - label: "China National Knowledge Infrastructure"
     url: "#https?://oversea\\.cnki\\.net/#"
   - label: "China National Knowledge Infrastructure"
-    url: "##https?://gb\\.global\\.cnki\\.net/#"
+    url: "#https?://gb\\.global\\.cnki\\.net/#"
   - label: "Bibliothèque et Archives nationales du Québec"
     url: "#https?://collections\\.banq\\.qc\\.ca/#"
   - label: "Hindawi"

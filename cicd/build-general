@@ -29,6 +29,7 @@ main() {
     docker build \
     --tag "${CURR}" \
     --build-arg VUFIND_VERSION="${VUFIND_VERSION}" \
+    --build-arg MARIADB_MONITORING_PASSWORD="${MARIADB_MONITORING_PASSWORD}" \
     --cache-from "${LATEST}" \
     "${COMPONENT}"/;
 
@@ -49,7 +50,7 @@ main() {
         exit 1;
     fi;
 
-    if [[ ${CI_DEFAULT_BRANCH} == "${CI_COMMIT_BRANCH}" ]]; then
+    if [[ ${CI_DEFAULT_BRANCH} == "${CI_COMMIT_BRANCH}" || ${CI_COMMIT_BRANCH} == "catalog-preview" ]]; then
         echo "Pushing new unique main image tag"
         docker tag "${CURR}" "${CURR}-main";
         docker push "${CURR}-main";

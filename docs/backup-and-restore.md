@@ -10,9 +10,9 @@ the ability to write its snapshot data directly to it. For more information on h
 SolrCloud backups work, see the
 [official documentation](https://solr.apache.org/guide/8_9/making-and-restoring-backups.html#solrcloud-backups).
 
-The database backup is a dump of all the tables while putting the galera node into a
-desynchronized state while the backup is running to help ensure the backup is in a more
-consistent state. In case the galera cluster ever gets into a de-clustered state,
+The database backup is a dump of all the non-session tables while putting the galera 
+node into a desynchronized state while the backup is running to help ensure the backup
+is in a more consistent state. In case the galera cluster ever gets into a de-clustered state,
 this backup script will take a dump from all three of the galera nodes just to be
 safe.
 
@@ -36,6 +36,8 @@ run something similar to:
 Should the need to restore from one of these backups arise, simply use the provided
 restore script giving it the path to the compressed backup you want to restore
 using. You can restore one or more Solr collections at a time as well as the database.
+
+Make sure the `MARIADB_ROOT_PASSWORD` env variable is defined (it will be in `catalog-cron`).
 
 The code for the backup script can be found at:
 [restore.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/restore.sh)

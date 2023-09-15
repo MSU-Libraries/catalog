@@ -41,7 +41,7 @@ RUN \
     wget https://github.com/vufind-org/vufind/archive/refs/tags/v${VUFIND_VERSION}.tar.gz && \
     tar -xf v${VUFIND_VERSION}.tar.gz  && \
     cp -r /vufind-${VUFIND_VERSION}/solr/vufind/* /solr_confs/ && \
-    cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /solr_confs/import/lib/ && \
+    cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /vufind-${VUFIND_VERSION}/import/lib/reload4j-*.jar /solr_confs/import/lib/ && \
     rm v${VUFIND_VERSION}.tar.gz && \
     rm -rf /vufind-${VUFIND_VERSION}
 COPY index-alphabetic-browse.sh /solr_confs/

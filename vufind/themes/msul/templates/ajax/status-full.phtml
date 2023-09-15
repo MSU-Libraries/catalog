@@ -48,9 +48,10 @@ if ($selected != '') {
       </span>
     <?php endif; ?>
     <?php $id = $selected['id']; ?>
-    <?php $getthis = new \Catalog\GetThis\GetThisLoader($this->record($view->driver), $this->statusItems); ?>
+    <?php $item_id = $selected['item_id']; ?>
+    <?php $getthis = new \Catalog\GetThis\GetThisLoader($this->record($view->driver), $this->statusItems, $item_id); ?>
     <?php if ($getthis && ! str_starts_with($id, "hlm.") && ! $getthis->isOnlineResource()): ?>
-      <a class="pl-1 placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis") ?>" rel="nofollow">
+      <a class="pl-1 placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
         <?=$this->transEsc('Get this')?>
       </a>
     <?php endif; ?>
