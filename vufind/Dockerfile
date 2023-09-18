@@ -229,7 +229,7 @@ RUN \
     envsubst < local/config/vufind/BrowZine.ini | sponge local/config/vufind/BrowZine.ini && \
     envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
     envsubst < /etc/aliases | sponge /etc/aliases && \
-    # Set required environment variables
+    # Set required environment variables so cron jobs have access to them
     echo JAVA_HOME="$JAVA_HOME" >> /etc/environment && \
     echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
     echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR" >> /etc/environment && \
@@ -242,6 +242,7 @@ RUN \
     echo DEPLOY_KEY="$DEPLOY_KEY" >> /etc/environment && \
     echo BROWZINE_LIBRARY="$BROWZINE_LIBRARY" >> /etc/environment && \
     echo BROWZINE_TOKEN="$BROWZINE_TOKEN" >> /etc/environment && \
+    echo MARIADB_VUFIND_PASSWORD="$MARIADB_VUFIND_PASSWORD" >> /etc/environment && \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
