@@ -446,7 +446,7 @@ import() {
                 verbose "ERROR: Batch import failed with code: ${EXIT_CODE}" 1
                 exit 1
             fi
-        done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name "*${TAG}.xml")
+        done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name "*${TAG}.xml" | sort)
     done
 
     verbose "Completed batch import"
@@ -480,19 +480,22 @@ slice_marc_files() {
     while read -r FILE; do
         # Split each file into small chunks so we don't run out of memory
         if is_bigger_than_50mb "${FILE}"; then
+            SEARCH=${FILE%".xml"}
+            SEARCH=${SEARCH#"${ARGS[VUFIND_HARVEST_DIR]}/"}
             verbose "Splitting ${FILE} into 50MB chunks"
             xml_split -s 50MB "${FILE}"
 
             # Now split each part into separate files based on the tag attribute
+            verbose "Splitting by tag for files matching: ${SEARCH}*-[[:digit:]]*.xml"
             while read -r PART_FILE; do
                 split_by_tag "${PART_FILE}"
-            done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*-[[:digit:]]*.xml')
+            done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name "${SEARCH}*-[[:digit:]]*.xml")
 
             # Next, merge the parts for each tag together
             for TAG in "${TAGS[@]}"; do
                 OUT_FILE=${FILE%.xml}.${TAG}.xml
                 verbose "Merging parts for tag ${TAG} back into ${OUT_FILE}"
-                find "${ARGS[VUFIND_HARVEST_DIR]}" -mindepth 1 -maxdepth 1 -name "*.${TAG}.xml" -print0 | xargs xml_merge -o "${OUT_FILE}"
+                find "${ARGS[VUFIND_HARVEST_DIR]}" -mindepth 1 -maxdepth 1 -name "${SEARCH}*.${TAG}.xml" -print0 | xargs --null xml_merge -o "${OUT_FILE}"
                 # If the file is empty, just delete it
                 if [[ ! -s ${OUT_FILE} ]]; then
                     verbose "Removing empty merge file ${OUT_FILE}"
@@ -502,7 +505,10 @@ slice_marc_files() {
 
             # Finally, remove the part files
             verbose "Cleaning up remaining unmerged part files"
-            find "${ARGS[VUFIND_HARVEST_DIR]}/" -name '*-[[:digit:]]*.xml' -delete
+            find "${ARGS[VUFIND_HARVEST_DIR]}/" -name "${SEARCH}*-[[:digit:]]*.xml" -delete
+
+            verbose "Cleaning up original non-tag xml file: ${FILE%".xml"}"
+            rm "${FILE%".xml"}"
         else
             # We only need to split each part into separate files based on the tag attribute
             split_by_tag "${FILE}"
@@ -569,7 +575,7 @@ main() {
         verbose "Could change directory to VUFIND_HOME!" 1
         exit 1
     fi
-    verbose "Starting processing"
+    verbose "Starting processing for ${STACK_NAME}"
 
     if [[ "${ARGS[HARVEST]}" -eq 1 ]]; then
         harvest
