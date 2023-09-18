@@ -509,7 +509,7 @@ main() {
     verbose "Using VUFIND_HOME of ${VUFIND_HOME}"
     check_harvest_disabled
     pushd "${VUFIND_HOME}" 2> /dev/null
-    verbose "Starting processing"
+    verbose "Starting processing for ${STACK_NAME}"
 
     if [[ "${ARGS[OAI_HARVEST]}" -eq 1 ]]; then
         oai_harvest

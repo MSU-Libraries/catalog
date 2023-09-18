@@ -286,7 +286,7 @@ main() {
     declare -g LOG_FILE
     LOG_FILE=$(mktemp)
     verbose "Logging to ${LOG_FILE}"
-    verbose "Starting processing"
+    verbose "Starting backup of ${STACK_NAME}"
 
     if [[ "${ARGS[SOLR]}" -eq 1 ]]; then
         backup_solr
