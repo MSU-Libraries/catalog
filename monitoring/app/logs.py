@@ -9,7 +9,7 @@ import aiohttp
 import util
 
 
-MAX_FULL_FILE = 50*1024*1024 # Max file size to return the full contents; arbitrary 50 MB
+MAX_FULL_FILE = 30*1024*1024 # Max file size to return the full contents; arbitrary 30 MB
 BEGIN_END_BYTES = MAX_FULL_FILE // 2
 TIMEOUT = 10
 
