@@ -181,8 +181,14 @@ def _node_vufind_status():
     return 'OK'
 
 def get_vufind_status(statuses):
+    stack_name = os.getenv('STACK_NAME')
+    one_vufind = re.fullmatch(r'devel-.*|review-.*', stack_name)
+    missing_vufind_count = 0
     for node in range(1, 4):
         node_status = statuses[node-1]['vufind']
+        if (one_vufind and 'Name does not resolve' in node_status and missing_vufind_count < 2):
+            missing_vufind_count += 1
+            node_status = 'OK'
         if node_status != 'OK':
             return f'Error on node {node}: {node_status}'
     return 'OK'
