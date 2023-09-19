@@ -2,18 +2,33 @@ import pathlib
 import asyncio
 import gzip
 import re
+import subprocess
 import flask
 import aiohttp
 
 import util
 
 
-MAX_FILE_SIZE = 50*1024*1024 # arbitrary 50 MB
+MAX_FULL_FILE = 50*1024*1024 # Max file size to return the full contents; arbitrary 50 MB
+BEGIN_END_BYTES = MAX_FULL_FILE // 2
+TIMEOUT = 10
+
+
+def read_beginning_and_end(path):
+    command = f'head -c {BEGIN_END_BYTES} {path}; echo -e "\n\n[...]\n"; tail -c {BEGIN_END_BYTES} {path}'
+    try:
+        process = subprocess.run(["/bin/sh", "-c", command],
+            capture_output=True, text=True, timeout=TIMEOUT, check=True)
+    except subprocess.CalledProcessError as err:
+        return f"Error reading log file {path}: {err.stderr}\n"
+    except subprocess.TimeoutExpired:
+        return f"Timeout reading log file {path}\n"
+    return process.stdout
 
 
 def add_file_to_log(path, full_log):
-    if path.stat().st_size > MAX_FILE_SIZE:
-        log_text = 'Log file is too large to load.'
+    if path.stat().st_size > MAX_FULL_FILE:
+        log_text = read_beginning_and_end(path)
     else:
         if path.name.endswith('.gz'):
             with gzip.open(path, 'rt') as gz_file:
