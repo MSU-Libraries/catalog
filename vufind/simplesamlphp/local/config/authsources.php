@@ -2,9 +2,11 @@
 
 // Select the IdP with its entityId; see saml20-idp-remote.php for available IdPs.
 if (getenv('STACK_NAME') == 'catalog-prod')
-    $idpEntityId = 'http://www.okta.com/exkng5q6tqDecNuDY357';
+    $idpEntityId = 'http://www.okta.com/exkvvwpups2ANo53d357';
 elseif (getenv('STACK_NAME') == 'catalog-beta')
-    $idpEntityId = 'http://www.okta.com/exko9ngr82UjBdFPU357';
+    $idpEntityId = 'http://www.okta.com/exkvvw8b28ES52GeY357';
+elseif (getenv('STACK_NAME') == 'catalog-preview')
+    $idpEntityId = 'http://www.okta.com/exkvuaj28f9YbgMpE357';
 else
     $idpEntityId = 'http://www.okta.com/exkvspdzpbUAmE6mM357';
 // Uncomment below for samling override (TESTING ON DEVEL INSTANCES ONLY)

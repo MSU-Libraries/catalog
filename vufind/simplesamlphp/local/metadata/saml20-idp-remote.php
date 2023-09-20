@@ -35,19 +35,27 @@ $metadata['http://www.okta.com/exkvspdzpbUAmE6mM357'] = [
     'certificate'          => 'msu-dev.pem',
     'sign.logout'          => true,
 ];
-// MSU QA (can be used with catalog-beta); running on Okta prod to avoid IP restrictions
-$metadata['http://www.okta.com/exko9ngr82UjBdFPU357'] = [
+// MSU TEST (for catalog-preview)
+$metadata['http://www.okta.com/exkvuaj28f9YbgMpE357'] = [
+    'name'                 => 'MSU TEST IdP',
+    'SingleSignOnService'  => 'https://auth.msu.edu/app/msu_testlibpubliccatalogvufind_1/exkvuaj28f9YbgMpE357/sso/saml',
+    'SingleLogoutService'  => 'https://auth.msu.edu/app/exkvuaj28f9YbgMpE357/sso/saml/metadata',
+    'certificate'          => 'msu-test.pem',
+    'sign.logout'          => true,
+];
+// MSU QA (for catalog-beta)
+$metadata['http://www.okta.com/exkvvw8b28ES52GeY357'] = [
     'name'                 => 'MSU QA IdP',
-    'SingleSignOnService'  => 'https://auth.msu.edu/app/msu_qalibpubliccatalog_1/exko9ngr82UjBdFPU357/sso/saml',
-    'SingleLogoutService'  => 'https://auth.msu.edu/login/signout?fromURI=https://catalog-beta.lib.msu.edu',
+    'SingleSignOnService'  => 'https://auth.msu.edu/app/msu_qalibpubliccatalogvufind_1/exkvvw8b28ES52GeY357/sso/saml',
+    'SingleLogoutService'  => 'https://auth.msu.edu/app/exkvvw8b28ES52GeY357/sso/saml/metadata',
     'certificate'          => 'msu-qa.pem',
     'sign.logout'          => true,
 ];
 // MSU PROD
-$metadata['http://www.okta.com/exkng5q6tqDecNuDY357'] = [
+$metadata['http://www.okta.com/exkvvwpups2ANo53d357'] = [
     'name'                 => 'MSU PROD IdP',
-    'SingleSignOnService'  => 'https://auth.msu.edu/app/msu_libpubliccatalog_1/exkng5q6tqDecNuDY357/sso/saml',
-    'SingleLogoutService'  => 'https://auth.msu.edu/login/signout?fromURI=https://catalog.lib.msu.edu',
+    'SingleSignOnService'  => 'https://auth.msu.edu/app/msu_libpubliccatalogvufind_1/exkvvwpups2ANo53d357/sso/saml',
+    'SingleLogoutService'  => 'https://auth.msu.edu/app/exkvvwpups2ANo53d357/sso/saml/metadata',
     'certificate'          => 'msu-prod.pem',
     'sign.logout'          => true,
 ];

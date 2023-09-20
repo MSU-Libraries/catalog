@@ -243,6 +243,7 @@ RUN \
     echo BROWZINE_LIBRARY="$BROWZINE_LIBRARY" >> /etc/environment && \
     echo BROWZINE_TOKEN="$BROWZINE_TOKEN" >> /etc/environment && \
     echo MARIADB_VUFIND_PASSWORD="$MARIADB_VUFIND_PASSWORD" >> /etc/environment && \
+    echo STACK_NAME="$STACK_NAME" >> /etc/environment && \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
