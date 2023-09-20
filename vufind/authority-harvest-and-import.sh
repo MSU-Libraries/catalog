@@ -543,7 +543,7 @@ split_by_tag() {
     for TAG in "${TAGS[@]}"; do
         NEW_PATH=${SOURCE_FILE%.xml}.${TAG}.xml
 
-        verbose "Running xpath on tag ${TAG} to with ${SOURCE_FILE} to ${NEW_PATH}"
+        verbose "Running xpath on tag ${TAG} with ${SOURCE_FILE} to ${NEW_PATH}"
         if ! xpath -q -e "//record[datafield[@tag=\"${TAG}\"]]" "${SOURCE_FILE}" > "${NEW_PATH}"; then
             verbose "Failed to split out ${TAG} tag on ${SOURCE_FILE}" 1
             exit 1

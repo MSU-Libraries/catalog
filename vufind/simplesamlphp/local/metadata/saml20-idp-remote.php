@@ -31,7 +31,7 @@ $metadata['https://samltest.id/saml/idp'] = [
 $metadata['http://www.okta.com/exkvspdzpbUAmE6mM357'] = [
     'name'                 => 'MSU DEV IdP',
     'SingleSignOnService'  => 'https://auth.msu.edu/app/msu_devlibpubliccatalogvufind_1/exkvspdzpbUAmE6mM357/sso/saml',
-    'SingleLogoutService'  => 'https://auth.msu.edu/app/exkvspdzpbUAmE6mM357/sso/saml/metadata',
+    'SingleLogoutService'  => 'https://auth.msu.edu/login/signout?fromURI=https://devel-authentication.aws.lib.msu.edu',
     'certificate'          => 'msu-dev.pem',
     'sign.logout'          => true,
 ];
@@ -39,7 +39,7 @@ $metadata['http://www.okta.com/exkvspdzpbUAmE6mM357'] = [
 $metadata['http://www.okta.com/exkvuaj28f9YbgMpE357'] = [
     'name'                 => 'MSU TEST IdP',
     'SingleSignOnService'  => 'https://auth.msu.edu/app/msu_testlibpubliccatalogvufind_1/exkvuaj28f9YbgMpE357/sso/saml',
-    'SingleLogoutService'  => 'https://auth.msu.edu/app/exkvuaj28f9YbgMpE357/sso/saml/metadata',
+    'SingleLogoutService'  => 'https://auth.msu.edu/login/signout?fromURI=https://catalog-preview.lib.msu.edu',
     'certificate'          => 'msu-test.pem',
     'sign.logout'          => true,
 ];
@@ -47,7 +47,7 @@ $metadata['http://www.okta.com/exkvuaj28f9YbgMpE357'] = [
 $metadata['http://www.okta.com/exkvvw8b28ES52GeY357'] = [
     'name'                 => 'MSU QA IdP',
     'SingleSignOnService'  => 'https://auth.msu.edu/app/msu_qalibpubliccatalogvufind_1/exkvvw8b28ES52GeY357/sso/saml',
-    'SingleLogoutService'  => 'https://auth.msu.edu/app/exkvvw8b28ES52GeY357/sso/saml/metadata',
+    'SingleLogoutService'  => 'https://auth.msu.edu/login/signout?fromURI=https://catalog-beta.lib.msu.edu',
     'certificate'          => 'msu-qa.pem',
     'sign.logout'          => true,
 ];
@@ -55,7 +55,7 @@ $metadata['http://www.okta.com/exkvvw8b28ES52GeY357'] = [
 $metadata['http://www.okta.com/exkvvwpups2ANo53d357'] = [
     'name'                 => 'MSU PROD IdP',
     'SingleSignOnService'  => 'https://auth.msu.edu/app/msu_libpubliccatalogvufind_1/exkvvwpups2ANo53d357/sso/saml',
-    'SingleLogoutService'  => 'https://auth.msu.edu/app/exkvvwpups2ANo53d357/sso/saml/metadata',
+    'SingleLogoutService'  => 'https://auth.msu.edu/login/signout?fromURI=https://catalog.lib.msu.edu',
     'certificate'          => 'msu-prod.pem',
     'sign.logout'          => true,
 ];
