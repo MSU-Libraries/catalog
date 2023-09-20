@@ -132,9 +132,9 @@ apply_prod_changes() {
     # Build extra environment suffix for image tag
     export EXTRA_TAG_SUFFIX="-main";
 
-    # Increase Solr RAM to 3 GB (note: prod is further increased below)
+    # Increase Solr RAM to 2 GB (note: prod is further increased below)
     ./yq -i \
-    ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms3072m -Xmx3072m\"" \
+    ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms2048m -Xmx2048m\"" \
     docker-compose.solr-cloud.yml;
 
     # Use httpchallenge cert resolver (instead of dnschallenge)
@@ -188,7 +188,7 @@ apply_prod_changes() {
 
     ## Changes for catalog-prod
     if [ "${STACK_NAME}" == "catalog-prod" ]; then
-        # Increase Solr RAM to 4 GB (prod is granted slightly more than non-prod envs)
+        # Increase Solr RAM to 4 GB (prod is granted more than non-prod envs)
         ./yq -i \
         ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms4096m -Xmx4096m\"" \
         docker-compose.solr-cloud.yml;
