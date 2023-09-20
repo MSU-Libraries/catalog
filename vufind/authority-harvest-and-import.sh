@@ -332,7 +332,7 @@ harvest() {
 
             # Remove the files we don't currently import
             find ${ARGS[VUFIND_HARVEST_DIR]} -maxdepth 1 \( -name "*FAST*" -o -name "*MESH.GENRE*" -o -name "*MESH.NAME*" \
-                -o -name "*NAME.CHG*" -o -name "*NAME.NEW*" \) -delete
+                -o -name "*_NAME.CHG*" -o -name "*_NAME.NEW*" \) -delete
         fi
     done < <(curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]} -l -s)
     if ! cd "${OLD_PWD}"; then
@@ -492,12 +492,25 @@ slice_marc_files() {
             for TAG in "${TAGS[@]}"; do
                 OUT_FILE=${FILE%.xml}.${TAG}.xml
                 verbose "Merging parts for tag ${TAG} back into ${OUT_FILE}"
-                find "${ARGS[VUFIND_HARVEST_DIR]}" -mindepth 1 -maxdepth 1 -name "*.${TAG}.xml" -print0 | xargs xml_merge -o "${OUT_FILE}"
-                # If the file is empty, just delete it
-                if [[ ! -s ${OUT_FILE} ]]; then
-                    verbose "Removing empty merge file ${OUT_FILE}"
-                    rm "${OUT_FILE}"
+                if ! OUTPUT=$(xml_grep --pretty_print indented --cond "collection" "${ARGS[VUFIND_HARVEST_DIR]}/${SEARCH}*.${TAG}.xml" "${ARGS[VUFIND_HARVEST_DIR]}/${OUT_FILE}"); then
+                    verbose "ERROR: Failed to merge the parts for ${TAG} back into ${OUT_FILE}. ${OUTPUT}" 1
                 fi
+                # Cleaning up tags to match what import script expects
+                if ! OUTPUT=$(sed -i '/<collection>/d' "${ARGS[VUFIND_HARVEST_DIR]}/${OUT_FILE}"); then
+                    verbose "ERROR: Failed to remove opening tag from ${OUT_FILE}. ${OUTPUT}" 1
+                fi
+                if ! OUTPUT=$(sed -i '/<\/collection>/d' "${ARGS[VUFIND_HARVEST_DIR]}/${OUT_FILE}"); then
+                    verbose "ERROR: Failed to remove closing tag from ${OUT_FILE}. ${OUTPUT}" 1
+                fi
+                if ! OUTPUT=$(sed -i 's/xml_grep/collection/g' "${ARGS[VUFIND_HARVEST_DIR]}/${OUT_FILE}"); then
+                    verbose "ERROR: Failed to replace generic xml_grep wrapping tag with collection tag in ${OUT_FILE}. ${OUTPUT}" 1
+                fi
+                # TODO Find a new way to check this, the file will no longer be empty since it will have opening and closing tags
+                # If the file is empty, just delete it
+                #if [[ ! -s ${OUT_FILE} ]]; then
+                #    verbose "Removing empty merge file ${OUT_FILE}"
+                #    rm "${OUT_FILE}"
+                #fi
             done
 
             # Finally, remove the part files
@@ -530,6 +543,12 @@ split_by_tag() {
             exit 1
         fi
 
+        # If the file is empty, just delete it
+        if [[ -f ${NEW_PATH} ]] && [[ ! -s ${NEW_PATH} ]]; then
+            verbose "Removing empty tag file ${NEW_PATH}"
+            rm "${NEW_PATH}"
+        fi
+
         # Run sed on it to wrap it in <collection>
         if [[ -f ${NEW_PATH} ]]; then
             if ! sed -i -e '1 i\<collection>' -e '$a\</collection>' "${NEW_PATH}"; then
@@ -538,11 +557,6 @@ split_by_tag() {
             fi
         fi
 
-        # If the file is empty, just delete it
-        if [[ ! -s ${NEW_PATH} ]]; then
-            verbose "Removing empty tag file ${NEW_PATH}"
-            rm "${NEW_PATH}"
-        fi
     done
 }
 
