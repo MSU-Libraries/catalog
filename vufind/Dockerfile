@@ -269,6 +269,9 @@ RUN \
     npm install -g grunt-cli && \
     grunt less
 
+# Debugging; temporary files overriding core libraries
+COPY debug/ /usr/local/vufind/
+
 EXPOSE 80
 
 HEALTHCHECK --interval=1m --timeout=40s --start-period=30s --retries=6 \
