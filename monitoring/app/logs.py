@@ -9,7 +9,7 @@ import aiohttp
 import util
 
 
-MAX_FULL_FILE = 30*1024*1024 # Max file size to return the full contents; arbitrary 30 MB
+MAX_FULL_FILE = 10*1024*1024 # Max file size to return the full contents; arbitrary 10 MB
 BEGIN_END_BYTES = MAX_FULL_FILE // 2
 TIMEOUT = 10
 
@@ -28,7 +28,7 @@ def read_beginning_and_end(path):
 
 def add_file_to_log(path, full_log):
     if path.stat().st_size > MAX_FULL_FILE:
-        log_text = read_beginning_and_end(path)
+        log_text = 'Detected a large file. Showing beginning and end...\n' + read_beginning_and_end(path)
     else:
         if path.name.endswith('.gz'):
             with gzip.open(path, 'rt') as gz_file:
