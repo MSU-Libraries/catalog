@@ -1,8 +1,11 @@
 import pathlib
 import asyncio
 import gzip
+import os
 import re
+import shutil
 import subprocess
+import tempfile
 import flask
 import aiohttp
 
@@ -14,7 +17,7 @@ BEGIN_END_BYTES = MAX_FULL_FILE // 2
 TIMEOUT = 10
 
 
-def read_beginning_and_end(path):
+def _read_beginning_and_end(path):
     command = f'head -c {BEGIN_END_BYTES} {path}; echo -e "\n\n[...]\n"; tail -c {BEGIN_END_BYTES} {path}'
     try:
         process = subprocess.run(["/bin/sh", "-c", command],
@@ -26,15 +29,11 @@ def read_beginning_and_end(path):
     return process.stdout
 
 
-def add_file_to_log(path, full_log):
+def _add_uncompressed_file_to_log(path, full_log):
     if path.stat().st_size > MAX_FULL_FILE:
-        log_text = 'Detected a large file. Showing beginning and end...\n' + read_beginning_and_end(path)
+        log_text = 'Detected a large file. Showing beginning and end...\n' + _read_beginning_and_end(path)
     else:
-        if path.name.endswith('.gz'):
-            with gzip.open(path, 'rt') as gz_file:
-                log_text = gz_file.read()
-        else:
-            log_text = path.read_text(encoding="utf8", errors="ignore")
+        log_text = path.read_text(encoding="utf8", errors="ignore")
 
     if log_text != '':
         log_text = path.name + ':\n' + log_text
@@ -43,6 +42,17 @@ def add_file_to_log(path, full_log):
         full_log = log_text + full_log
 
     return full_log
+
+
+def _add_file_to_log(path, full_log):
+    if path.name.endswith('.gz'):
+        with tempfile.TemporaryDirectory() as tmp_dir_name:
+            tmp_path = pathlib.Path(os.path.join(tmp_dir_name, path.name))
+            with gzip.open(path, 'rb') as f_in:
+                with open(tmp_path, 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+            return _add_uncompressed_file_to_log(tmp_path, full_log)
+    return _add_uncompressed_file_to_log(path, full_log)
 
 
 def node_logs(service):
@@ -71,21 +81,21 @@ def node_logs(service):
 
     latest_matching_paths = path.parent.glob(re.sub(r"\.log", "_latest.log.*", path.name))
     for latest_path in latest_matching_paths:
-        full_log = add_file_to_log(latest_path, full_log)
+        full_log = _add_file_to_log(latest_path, full_log)
 
     if not path.is_file():
         return f'Log file does not exist on this node: {path.name}'
-    full_log = add_file_to_log(path, full_log)
+    full_log = _add_file_to_log(path, full_log)
 
     rotated_1 = pathlib.Path(f'{paths[service]}.1')
     if not rotated_1.is_file():
         return full_log
-    full_log = add_file_to_log(rotated_1, full_log)
+    full_log = _add_file_to_log(rotated_1, full_log)
 
     for i in range(2, 4):
         rotated_gz = pathlib.Path(f'{paths[service]}.{i}.gz')
         if rotated_gz.is_file():
-            full_log = add_file_to_log(rotated_gz, full_log)
+            full_log = _add_file_to_log(rotated_gz, full_log)
 
     return full_log
 
