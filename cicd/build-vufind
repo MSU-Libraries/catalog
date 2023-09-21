@@ -61,6 +61,9 @@ main() {
         --build-arg DEPLOY_KEY="${DEPLOY_KEY}" \
         --build-arg BROWZINE_LIBRARY="${BROWZINE_LIBRARY}" \
         --build-arg BROWZINE_TOKEN="${BROWZINE_TOKEN}" \
+        --build-arg MATOMO_URL="${MATOMO_URL}" \
+        --build-arg MATOMO_SITE_ID="${MATOMO_SITE_ID}" \
+        --build-arg MATOMO_SEARCHBACKEND_DIMENSION="${MATOMO_SEARCHBACKEND_DIMENSION}" \
         --tag "${CURR}" \
         --cache-from "${LATEST}" \
         vufind/;
