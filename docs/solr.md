@@ -9,15 +9,31 @@ alias will be used for rebuilding the index on.
 
 ``` mermaid
 graph LR
-    A[biblio] --> B[biblio1];
-    C[biblio-build] --> D[biblio2];
+    biblio --> biblio1;
+    biblio-build --> biblio2;
+    subgraph Aliases;
+    biblio;
+    biblio-build;
+    end;
+    subgraph Collections;
+    biblio1;
+    biblio2;
+    end;
 ```
 Can be swapped to be:
 
 ``` mermaid
 graph LR
-    A[biblio] --> B[biblio2];
-    C[biblio-build] --> D[biblio1];
+    biblio --> biblio2;
+    biblio-build --> biblio1;
+    subgraph Aliases;
+    biblio;
+    biblio-build;
+    end;
+    subgraph Collections;
+    biblio1;
+    biblio2;
+    end;
 ```
 
 Ideally, when you complete the swap over to the `biblio` alias, you would clear out
