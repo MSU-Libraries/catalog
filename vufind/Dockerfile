@@ -204,6 +204,7 @@ COPY robots.txt /usr/local/vufind/public/robots.txt
 COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
 COPY startup.sh /startup.sh
+COPY startup-build.sh /startup-build.sh
 COPY startup-cron.sh /startup-cron.sh
 COPY startup-croncache.sh /startup-croncache.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
