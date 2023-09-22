@@ -31,10 +31,10 @@ done
 
 echo "If there are no aliases create them"
 if ! ALIASES=$(curl "http://${STACK_NAME}-solr_solr:8983/solr/admin/collections?action=LISTALIASES&wt=json" -s); then
-    echo "Failed to query to the collection alaises in Solr. Exiting"
+    echo "Failed to query to the collection alaises in Solr. Exiting. ${ALIASES}"
     exit 1
 fi
-if ! [[ "${ALISES}" =~ .*"biblio".* ]]; then
+if ! [[ "${ALIASES}" =~ .*"biblio".* ]]; then
     if ! OUTPUT=$(curl -s "http://${STACK_NAME}-solr_solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1"); then
         echo "Failed to create biblio alias pointing to biblio1. Exiting. ${OUTPUT}"
         exit 1
