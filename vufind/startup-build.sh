@@ -21,5 +21,11 @@ touch /mnt/logs/vufind/vufind.log
 # Change to using file sessions
 sed -i 's/type\s*=\s*Database/type=File/' /usr/local/vufind/local/config/vufind/config.ini
 
+# Update this container to index to the biblio-build collection alias
+if ! OUTPUT=$(sed -i "s/\\bbiblio\\b/biblio-build/" /usr/local/vufind/local/import/import.properties); then
+    echo "Failed to change the indexing collection from biblio to biblio-build. Exiting container. ${OUTPUT}"
+    exit 1
+fi
+
 # Now do nothing until we need it to!
 sleep inf
