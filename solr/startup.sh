@@ -30,7 +30,7 @@ for COLL_DIR in "${COLLEX_CONFIGS}/"*; do
 done
 
 echo "If there are no aliases create them"
-if ! ALIASES=$("http://${STACK_NAME}-solr_solr:8983/solr/admin/collections?action=LISTALIASES&wt=json" -s); then
+if ! ALIASES=$(curl "http://${STACK_NAME}-solr_solr:8983/solr/admin/collections?action=LISTALIASES&wt=json" -s); then
     echo "Failed to query to the collection alaises in Solr. Exiting"
     exit 1
 fi
