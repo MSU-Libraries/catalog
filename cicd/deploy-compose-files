@@ -78,10 +78,6 @@ apply_devel_changes() {
     # Remove the cron service if this is a devel environment
     ./yq -i "del(.services.cron)" docker-compose.yml;
 
-    # TODO Remove the build service if this is a devel environment (i.e. it is safe to rebuild anytime
-    # in a devel environment, we don't need a special service for it)
-    #./yq -i "del(.services.build)" docker-compose.yml;
-
     # Unset parallelism limit for non-production to speed up redeployments on devel stacks
     ./yq -i "del(.services.catalog.deploy.update_config.parallelism)" docker-compose.yml;
 
@@ -262,6 +258,7 @@ main() {
 
     # Replace variables in all compose files
     envsubst < docker-compose.yml | sponge docker-compose.yml;
+    envsubst < docker-compose.build.yml | sponge docker-compose.build.yml;
     envsubst < docker-compose.solr-cloud.yml | sponge docker-compose.solr-cloud.yml;
     envsubst < docker-compose.solr-cloud-bootstrap.yml | sponge docker-compose.solr-cloud-bootstrap.yml;
     envsubst < docker-compose.mariadb-cloud-bootstrap.yml | sponge docker-compose.mariadb-cloud-bootstrap.yml;

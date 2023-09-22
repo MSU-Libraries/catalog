@@ -141,37 +141,6 @@ services:
         failure_action: rollback
         delay: 10s
 
-  build:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
-    command: /startup-build.sh
-    volumes:
-      - logs:/mnt/logs
-      - /mnt/shared:/mnt/shared:rw
-    networks:
-      - internal
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "5"
-        max-size: "10m"
-    healthcheck:
-      disable: true
-    environment:
-      STACK_NAME: "${STACK_NAME}"
-      SITE_HOSTNAME: "${SITE_HOSTNAME}"
-      NODE: "{{slice .Node.Hostname 8 9}}"
-    deploy:
-      mode: replicated
-      replicas: 1
-      restart_policy:
-        window: 15s
-      update_config:
-        parallelism: 1
-        failure_action: rollback
-        delay: 10s
-
   mail-$STACK_NAME:
     image: sj26/mailcatcher
     command: [

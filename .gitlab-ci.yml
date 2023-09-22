@@ -137,6 +137,21 @@ Deploy Vufind:
     reports:
       dotenv: deploy.env
 
+Deploy Vufind Build Env:
+  extends: .stack_template
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+      when: manual
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Deploy Vufind
+  script:
+    - bash ./cicd/deploy-vufind-build
+  artifacts:
+    reports:
+      dotenv: deploy.env
+
 Deploy Monitoring:
   extends: .stack_template
   rules:
