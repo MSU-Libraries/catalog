@@ -82,6 +82,17 @@ Deploy Prod Vufind:
     - Deploy Prod DB
     - Deploy Prod Solr
 
+Deploy Prod Vufind Build Env:
+  stage: Deploy Prod
+  extends: Deploy Vufind Build Env
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+      when: manual
+  needs:
+    - job: Set Prod Stack Name
+      artifacts: true
+    - Deploy Prod Vufind
+
 Deploy Prod Monitoring:
   stage: Deploy Prod
   extends: Deploy Monitoring

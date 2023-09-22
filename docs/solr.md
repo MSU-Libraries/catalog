@@ -1,5 +1,93 @@
 # Solr
 
+## Collection Structure
+Most of the collections do not have an alias associated with them. But, `biblio` is special!
+For that collection we are using Solr aliases because we want to be able to clear out the
+index completely and rebuild it without causing downtime for search on our site. The
+`biblio` alias will point to the "live" biblio collection and the `biblio-build`
+alias will be used for rebuilding the index on.
+
+``` mermaid
+graph LR
+    biblio --> biblio1;
+    biblio-build --> biblio2;
+    subgraph Aliases;
+    biblio;
+    biblio-build;
+    end;
+    subgraph Collections;
+    biblio1;
+    biblio2;
+    end;
+```
+Can be swapped to be:
+
+``` mermaid
+graph LR
+    biblio --> biblio2;
+    biblio-build --> biblio1;
+    subgraph Aliases;
+    biblio;
+    biblio-build;
+    end;
+    subgraph Collections;
+    biblio1;
+    biblio2;
+    end;
+```
+
+Ideally, when you complete the swap over to the `biblio` alias, you would clear out
+the contents of the collection that is now pointing to the `biblio-build` alias to avoid
+extra disk usage.
+
+## How to swap the Collection Aliases
+As mentioned above, `biblio` uses aliases to manage directing VuFind to the collection in
+Solr that have the "live" biblio data that should be used for searching: `biblio1` or `biblio2`.
+This means we will on occassion need to swap them. This occassion being when we rebuild the index,
+such as when we're adding new data fields or doing a VuFind version upgrade (...which typically
+add new data fields).
+
+* Identify what collection each alias is pointing to currently (i.e. is `biblio` pointing
+to `biblio1` or `biblio2`) and confirm the **other** collection is what `biblio-build` is
+pointing to
+
+* Clear out the collection that `biblio-build` is pointing to
+```bash
+curl 'http://solr1:8983/solr/biblio-build/update' --data '<delete><query>id:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl 'http://solr1:8983/solr/biblio-build/update' --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+```
+
+* Rebuild you index on `biblio-build` using the `catalog_build` container. This has
+everything that the `catalog_cron` containers have access to, but do not run `cron`
+jobs since rebuilds do not happen at regular or frequent intervals. In fact, all this container
+does is sleep! It is recommended to run these commands in a `screen`.
+!!! warning
+    If you run a deploy pipeline while this is running, you will not want to run
+    the manual job that deploys the updates to the build container (since not all of the
+    import scripts are configured to resume where they left off yet).
+```bash
+user@catalog-1$ screen
+user@catalog-1$ docker exec -it catalog-prod-catalog_build.12345 bash
+root@vufind:/usr/local/vufind# /harvest-and-import.sh --verbose --collection biblio-build --batch-import | tee /mnt/shared/logs/folio_import.log
+[Ctrl-a d]
+user@catalog-1$ screen
+user@catalog-1$ docker exec -it catalog-prod-catalog_build.12345 bash
+root@vufind:/usr/local/vufind# /hlm-harvest-and-import.sh --import --verbose | tee /mnt/shared/logs/hlm_import.log
+[Ctrl-a d]
+```
+
+* Verify the counts are what you expect on the `biblio-build` collection using the following command
+```bash
+curl 'http://solr:8983/solr/admin/metrics?nodes=solr1:8983_solr,solr2:8983_solr,solr3:8983_solr&prefix=SEARCHER.searcher.numDocs,SEARCHER.searcher.deletedDocs&wt=json'
+```
+
+* Once you are confident in the new data, you are ready to do the swap! **BE SURE TO SWAP THE NAME AND COLLECTION IN THE BELOW COMMAND EXAMPLE**
+```bash
+# This EXAMPLE sets biblio-build to biblio2, and biblio to biblio1
+curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio2'
+curl 'http://solr:8983/3solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1'
+```
+
 ## Updating the Solr Configuration Files
 You should not need to do this in a new environment (schema changes should be built into
 the Docker image) but for development, sometimes you may want to test changes to the

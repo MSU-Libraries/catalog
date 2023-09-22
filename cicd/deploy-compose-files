@@ -75,7 +75,7 @@ apply_devel_changes() {
     ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
     docker-compose.monitoring.yml;
 
-    # Remove the cron service if the stack name is NOT catalog beta or prod
+    # Remove the cron service if this is a devel environment
     ./yq -i "del(.services.cron)" docker-compose.yml;
 
     # Unset parallelism limit for non-production to speed up redeployments on devel stacks
@@ -258,6 +258,7 @@ main() {
 
     # Replace variables in all compose files
     envsubst < docker-compose.yml | sponge docker-compose.yml;
+    envsubst < docker-compose.build.yml | sponge docker-compose.build.yml;
     envsubst < docker-compose.solr-cloud.yml | sponge docker-compose.solr-cloud.yml;
     envsubst < docker-compose.solr-cloud-bootstrap.yml | sponge docker-compose.solr-cloud-bootstrap.yml;
     envsubst < docker-compose.mariadb-cloud-bootstrap.yml | sponge docker-compose.mariadb-cloud-bootstrap.yml;
