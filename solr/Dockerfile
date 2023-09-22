@@ -64,7 +64,8 @@ RUN \
     # since we have two separate collections, one to build in and one for live searching
     mv /solr_confs/biblio /solr_confs/biblio1 && \
     sed -i "s/\\bbiblio\\b/biblio1/" /solr_confs/biblio1/conf/solrconfig.xml && \
-    cp -r /solr_confs/biblio1 /solr_confs/biblio2
+    cp -r /solr_confs/biblio1 /solr_confs/biblio2 && \
+    sed -i "s/\\bbiblio1\\b/biblio2/" /solr_confs/biblio2/conf/solrconfig.xml
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
     CMD /healthcheck.sh
