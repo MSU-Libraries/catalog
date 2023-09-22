@@ -35,11 +35,11 @@ if ! ALIASES=$(curl "http://${STACK_NAME}-solr_solr:8983/solr/admin/collections?
     exit 1
 fi
 if ! [[ "${ALISES}" =~ .*"biblio".* ]]; then
-    if ! OUTPUT=$(curl "http://${STACK_NAME}-solr_solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1"); then
+    if ! OUTPUT=$(curl -s "http://${STACK_NAME}-solr_solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1"); then
         echo "Failed to create biblio alias pointing to biblio1. Exiting. ${OUTPUT}"
         exit 1
     fi
-    if ! OUTPUT=$(curl "http://${STACK_NAME}-solr_solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio2");then
+    if ! OUTPUT=$(curl -s "http://${STACK_NAME}-solr_solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio2");then
         echo "Failed to create biblio-build alias pointing to biblio2. Exiting. ${OUTPUT}"
         exit 1
     fi

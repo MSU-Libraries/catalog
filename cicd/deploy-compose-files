@@ -78,9 +78,9 @@ apply_devel_changes() {
     # Remove the cron service if this is a devel environment
     ./yq -i "del(.services.cron)" docker-compose.yml;
 
-    # Remove the build service if this is a devel environment (i.e. it is safe to rebuild anytime
+    # TODO Remove the build service if this is a devel environment (i.e. it is safe to rebuild anytime
     # in a devel environment, we don't need a special service for it)
-    ./yq -i "del(.services.build)" docker-compose.yml;
+    #./yq -i "del(.services.build)" docker-compose.yml;
 
     # Unset parallelism limit for non-production to speed up redeployments on devel stacks
     ./yq -i "del(.services.catalog.deploy.update_config.parallelism)" docker-compose.yml;
