@@ -4,12 +4,16 @@ $item = $this->getthis->getItem();
 $check = $item['check'] ?? false;
 $link = $this->getthis->getLink();
 $callnum = $this->getthis->getCallNumber();
+$location = $item['location'];
 ?>
 <div>
     <b>Title:</b> <?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?><br>
     <b>Call Number:</b>
     <?php if ($callnum ?? false): ?>
           <span><?=$this->escapeHtml($callnum) ?></span>
+    <?php endif; ?>
+    <?php if (!empty($location) || !empty($callnum)): ?>
+        <?= $this->locationNotices($location, $callnum) ?>
     <?php endif; ?>
     <br><br>
     <p class="text-left">

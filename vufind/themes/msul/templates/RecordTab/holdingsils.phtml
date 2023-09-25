@@ -102,6 +102,8 @@
           <?=$this->escapeHtml($callNo['display'])?>
         <?php endif; ?>
         <br>
+        <?= $this->locationNotices($holding['location'], $callNo) ?>
+        <br>
       <?php endforeach; ?>
     </td>
   </tr>

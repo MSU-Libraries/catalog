@@ -1,0 +1,48 @@
+---
+# In this file you can configure notices which appear near locations
+# and call numbers, in search results, record pages, and get it dialog.
+# Each notice will be placed within its own `<div>` tag.
+# Multiple notices are permitted and each notice can be conditionally
+# displayed based on regular expressions for the location and call number.
+#
+# The basic structure is a top level key of `notices` which contain
+# a list of notice definitions.
+#
+# ---
+# ### Example 1
+# locationNotices:
+#   - callNumber: P.*
+#     message: The call number starts with a P
+#   - location: MSU Main Library
+#     message: The location is MSU Library
+#   - callNumber: P.*
+#     location: MSU Main Library
+#     message: The call number starts with a P + The location is MSU Library
+#
+# Notice definitions must have a `message` key, which contains the
+# content of the banner notice. Each notice definition can also
+# optionally have the following keys defined:
+# - callNumber
+# - location
+# - classes
+# - style
+# - escapeContent
+#
+# `callNumber` is a regular expression to match a call number.
+#
+# `location` is a regular expression to match a location.
+#
+# `classes` allows you to define a string value of CSS
+# classes (space delimited) add to the notice.
+#
+# `style` allows a sub-array of key-value pairs to be
+# defined, where each key is a CSS style and the value it the
+# associated style value. This allows you to easily override
+# styles for banners without needing to update your main CSS.
+#
+# `escapeContent` is a boolean (default: `true`) which
+# determines if the `message` content should have HTML special
+# charaters escaped (those being `<>&'"`). If you are placing
+# HTML tags, or pre-escaped content into the `message`, you
+# will want to set this to `false`.
+#

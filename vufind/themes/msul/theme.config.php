@@ -18,12 +18,14 @@ return [
             'Catalog\View\Helper\Root\Auth' => 'VuFind\View\Helper\Root\AuthFactory',
             'Catalog\View\Helper\Root\PrintArrayHtml' => 'Laminas\ServiceManager\Factory\InvokableFactory',
             'Catalog\View\Helper\Root\BannerNotices' => 'Catalog\View\Helper\Root\BannerNoticesFactory',
+            'Catalog\View\Helper\Root\LocationNotices' => 'Catalog\View\Helper\Root\LocationNoticesFactory',
         ],
         'aliases' => [
             'record' => 'Catalog\View\Helper\Root\Record',
             'printArrayHtml' => 'Catalog\View\Helper\Root\PrintArrayHtml',
             'auth' => 'Catalog\View\Helper\Root\Auth',
             'bannerNotices' => 'Catalog\View\Helper\Root\BannerNotices',
+            'locationNotices' => 'Catalog\View\Helper\Root\LocationNotices',
         ],
     ],
 
