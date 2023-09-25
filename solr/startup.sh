@@ -18,12 +18,6 @@ else
     echo "Found /solr already in Zookeeper."
 fi
 
-# Modify `biblio` config as we are using `biblio09112023` which uses an alias of `biblio`
-if [[ "${STACK_NAME}" == "catalog-"* ]]; then
-    cp -r /solr_confs/biblio /solr_confs/biblio09112023
-    sed -i "s/\\bbiblio\\b/biblio09112023/" "${COLLEX_CONFIGS}/biblio09112023/conf/solrconfig.xml"
-fi
-
 echo "Creating required VuFind Solr collections..."
 for COLL_DIR in "${COLLEX_CONFIGS}/"*; do
     COLL=$(basename $COLL_DIR)
@@ -34,6 +28,22 @@ for COLL_DIR in "${COLLEX_CONFIGS}/"*; do
         echo "Created config set for $COLL with files from $COLL_DIR/conf"
     fi
 done
+
+echo "If there are no aliases create them"
+if ! ALIASES=$(curl "http://${STACK_NAME}-solr_solr:8983/solr/admin/collections?action=LISTALIASES&wt=json" -s); then
+    echo "Failed to query to the collection alaises in Solr. Exiting. ${ALIASES}"
+    exit 1
+fi
+if ! [[ "${ALIASES}" =~ .*"biblio".* ]]; then
+    if ! OUTPUT=$(curl -s "http://${STACK_NAME}-solr_solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1"); then
+        echo "Failed to create biblio alias pointing to biblio1. Exiting. ${OUTPUT}"
+        exit 1
+    fi
+    if ! OUTPUT=$(curl -s "http://${STACK_NAME}-solr_solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio2");then
+        echo "Failed to create biblio-build alias pointing to biblio2. Exiting. ${OUTPUT}"
+        exit 1
+    fi
+fi
 
 # Call base image CMD
 echo "Running Solr start script: $@"
