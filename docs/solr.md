@@ -40,7 +40,7 @@ Ideally, when you complete the swap over to the `biblio` alias, you would clear 
 the contents of the collection that is now pointing to the `biblio-build` alias to avoid
 extra disk usage.
 
-## How to swap the Collection Aliases
+## How to Use the Collection Aliases to Rebuild and Swap
 As mentioned above, `biblio` uses aliases to manage directing VuFind to the collection in
 Solr that have the "live" biblio data that should be used for searching: `biblio1` or `biblio2`.
 This means we will on occassion need to swap them. This occassion being when we rebuild the index,
@@ -68,10 +68,12 @@ does is sleep! It is recommended to run these commands in a `screen`.
 ```bash
 user@catalog-1$ screen
 user@catalog-1$ docker exec -it catalog-prod-catalog_build.12345 bash
+root@vufind:/usr/local/vufind# cp /mnt/shared/oai/catalog-prod/harvest_folio/processed/* local/harvest/folio/
 root@vufind:/usr/local/vufind# /harvest-and-import.sh --verbose --collection biblio-build --batch-import | tee /mnt/shared/logs/folio_import.log
 [Ctrl-a d]
 user@catalog-1$ screen
 user@catalog-1$ docker exec -it catalog-prod-catalog_build.12345 bash
+root@vufind:/usr/local/vufind# cp /mnt/shared/hlm/catalog-prod/current/* local/harvest/folio/
 root@vufind:/usr/local/vufind# /hlm-harvest-and-import.sh --import --verbose | tee /mnt/shared/logs/hlm_import.log
 [Ctrl-a d]
 ```
@@ -86,6 +88,15 @@ curl 'http://solr:8983/solr/admin/metrics?nodes=solr1:8983_solr,solr2:8983_solr,
 # This EXAMPLE sets biblio-build to biblio2, and biblio to biblio1
 curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio2'
 curl 'http://solr:8983/3solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1'
+```
+
+* If needed, back-date the timestamp on your `last_harvest.txt` re-harvest some of the OAI changes since you started the import
+
+* Clear out the collection that `biblio-build` is pointing to, to avoid having two large indexing stored for a long period of time
+(only after you are confident in the new index's data)
+```bash
+curl 'http://solr1:8983/solr/biblio-build/update' --data '<delete><query>id:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl 'http://solr1:8983/solr/biblio-build/update' --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 ```
 
 ## Updating the Solr Configuration Files
