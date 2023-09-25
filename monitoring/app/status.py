@@ -96,7 +96,7 @@ def _node_solr_status():
     live_nodes = j['cluster']['live_nodes']
     if len(live_nodes) != 3:
         return f'Error: only {len(live_nodes)} live nodes'
-    if len(j['cluster']['collections']) != 4:
+    if len(j['cluster']['collections']) != 5:
         return f"Wrong number of collections: {len(j['cluster']['collections'])}"
     for collection_name, collection in j['cluster']['collections'].items():
         res = _check_collection(collection_name, collection, live_nodes)
