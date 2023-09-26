@@ -98,7 +98,7 @@ class LocationNotices extends AbstractHelper implements \Laminas\Log\LoggerAware
      *
      * @return boolean
      */
-    protected function evaluateConditions(array $conditions, string $item)
+    protected function evaluateConditions(array $conditions, array $item)
     {
         if (empty($conditions['location']) && empty($conditions['locationCode']) && empty($conditions['callNumber'])) {
             return false;
@@ -136,9 +136,8 @@ class LocationNotices extends AbstractHelper implements \Laminas\Log\LoggerAware
                 $success = false;
             }
         }
-        if (!empty($conditions['env'])) {
-            $env = getenv($condition['env'] ?? '');
-            if ($conditions['env'] != $env) {
+        if (!empty($conditions['stackName'])) {
+            if ($conditions['stackName'] !== getenv('STACK_NAME')) {
                 $success = false;
             }
         }
