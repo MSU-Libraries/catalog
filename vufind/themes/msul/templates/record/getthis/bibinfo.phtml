@@ -7,16 +7,19 @@ $callnum = $this->getthis->getCallNumber();
 $location = $item['location'];
 ?>
 <div>
-    <b>Title:</b> <?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?><br>
-    <b>Call Number:</b>
-    <?php if ($callnum ?? false): ?>
-          <span><?=$this->escapeHtml($callnum) ?></span>
-    <?php endif; ?>
+    <p>
+        <b>Title:</b> <?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?>
+    </p>
+    <p>
+        <b>Call Number:</b>
+        <?php if ($callnum ?? false): ?>
+            <span><?=$this->escapeHtml($callnum) ?></span>
+        <?php endif; ?>
+    </p>
     <?php if (!empty($location) || !empty($callnum)): ?>
         <?= $this->locationNotices($location, $callnum) ?>
     <?php endif; ?>
-    <br><br>
-    <p class="text-left">
+    <p class="text-left" style="margin-top: 1.5em">
         <b>Status:</b> <?= $this->getthis->getStatus() ?>
         <?php if ($item != null && !$this->getthis->isOnlineResource() && $item['is_holdable'] && $link ?? false) { ?>
             <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
