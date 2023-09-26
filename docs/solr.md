@@ -60,20 +60,20 @@ curl 'http://solr1:8983/solr/biblio-build/update' --data '<commit/>' -H 'Content
 * Rebuild you index on `biblio-build` using the `catalog_build` container. This has
 everything that the `catalog_cron` containers have access to, but do not run `cron`
 jobs since rebuilds do not happen at regular or frequent intervals. In fact, all this container
-does is sleep! It is recommended to run these commands in a `screen`.
+does is sleep! It is recommended to run these commands in a `screen`.  
 !!! warning
     If you run a deploy pipeline while this is running, you will not want to run
     the manual job that deploys the updates to the build container (since not all of the
-    import scripts are configured to resume where they left off yet).
+    import scripts are configured to resume where they left off yet).  
 ```bash
 user@catalog-1$ screen
 user@catalog-1$ docker exec -it catalog-prod-catalog_build.12345 bash
-root@vufind:/usr/local/vufind# cp /mnt/shared/oai/catalog-prod/harvest_folio/processed/* local/harvest/folio/
+root@vufind:/usr/local/vufind# cp /mnt/shared/oai/${STACK_NAME}/harvest_folio/processed/* local/harvest/folio/
 root@vufind:/usr/local/vufind# /harvest-and-import.sh --verbose --collection biblio-build --batch-import | tee /mnt/shared/logs/folio_import.log
 [Ctrl-a d]
 user@catalog-1$ screen
 user@catalog-1$ docker exec -it catalog-prod-catalog_build.12345 bash
-root@vufind:/usr/local/vufind# cp /mnt/shared/hlm/catalog-prod/current/* local/harvest/folio/
+root@vufind:/usr/local/vufind# cp /mnt/shared/hlm/${STACK_NAME}/current/* local/harvest/hlm/
 root@vufind:/usr/local/vufind# /hlm-harvest-and-import.sh --import --verbose | tee /mnt/shared/logs/hlm_import.log
 [Ctrl-a d]
 ```
