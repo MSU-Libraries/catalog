@@ -103,12 +103,22 @@ class LocationNotices extends AbstractHelper implements \Laminas\Log\LoggerAware
         }
         $success = true;
         if (!empty($notice['location'])) {
-            if (!preg_match('/^' . $notice['location'] . '$/', $location)) {
+            $res = preg_match('/' . $notice['location'] . '/', $location);
+            if ($res === false) {
+                $this->logWarning("Bad regular expression for location notice location: " . $notice['location']);
+                return false;
+            }
+            if ($res == 0) {
                 $success = false;
             }
         }
         if (!empty($notice['callNumber'])) {
-            if (!preg_match('/^' . $notice['callNumber'] . '$/', $callnumber)) {
+            $res = preg_match('/' . $notice['callNumber'] . '/', $callnumber);
+            if ($res === false) {
+                $this->logWarning("Bad regular expression for location notice call number: " . $notice['callNumber']);
+                return false;
+            }
+            if ($res == 0) {
                 $success = false;
             }
         }

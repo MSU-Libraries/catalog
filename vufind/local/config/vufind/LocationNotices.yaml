@@ -11,13 +11,13 @@
 # ---
 # ### Example 1
 # locationNotices:
-#   - callNumber: P.*
-#     message: The call number starts with a P
-#   - location: MSU Main Library
-#     message: The location is MSU Library
-#   - callNumber: P.*
-#     location: MSU Main Library
-#     message: The call number starts with a P + The location is MSU Library
+#   - callNumber: ^[LP]
+#     message: The call number starts with a L or a P
+#   - location: ^MSU Main Library$
+#     message: The location is MSU Main Library
+#   - callNumber: ^P
+#     location: ^MSU Main Library$
+#     message: The call number starts with a P and the location is MSU Main Library
 #
 # Notice definitions must have a `message` key, which contains the
 # content of the banner notice. Each notice definition can also
