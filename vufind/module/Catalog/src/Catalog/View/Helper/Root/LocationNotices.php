@@ -103,28 +103,27 @@ class LocationNotices extends AbstractHelper implements \Laminas\Log\LoggerAware
         if (empty($conditions['location']) && empty($conditions['locationCode']) && empty($conditions['callNumber'])) {
             return false;
         }
-        $success = true;
         if (!empty($conditions['location'])) {
             if (!$this->testRe($conditions['location'], $item['location'], 'location')) {
-                $success = false;
+                return false;
             }
         }
         if (!empty($conditions['locationCode'])) {
             if (!$this->testRe($conditions['locationCode'], $item['location_code'], 'location code')) {
-                $success = false;
+                return false;
             }
         }
         if (!empty($conditions['callNumber'])) {
             if (!$this->testRe($conditions['callNumber'], $item['callnumber'], 'call number')) {
-                $success = false;
+                return false;
             }
         }
         if (!empty($conditions['stackName'])) {
             if (!$this->testRe($conditions['stackName'], getenv('STACK_NAME'), 'stack name')) {
-                $success = false;
+                return false;
             }
         }
-        return $success;
+        return true;
     }
 
     /**
