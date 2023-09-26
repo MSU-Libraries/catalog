@@ -144,7 +144,7 @@ class LocationNotices extends AbstractHelper implements \Laminas\Log\LoggerAware
             $this->logWarning("Bad regular expression for location notice " . $title . ": " . $re);
             return false;
         }
-        return ($res == 1);
+        return $res == 1;
     }
 
     /**
