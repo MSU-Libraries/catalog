@@ -101,6 +101,7 @@
         <?php else: ?>
           <?=$this->escapeHtml($callNo['display'])?>
         <?php endif; ?>
+        <?= $this->locationNotices(array_column($holding['items'], null, 'callnumber')[$callNo['callnumber']]) ?>
         <br>
       <?php endforeach; ?>
     </td>

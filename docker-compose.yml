@@ -9,6 +9,7 @@ services:
       - logs:/mnt/logs
       - /mnt/shared:/mnt/shared:rw
       - /mnt/shared/config/BannerNotices.yaml:/mnt/shared/config/BannerNotices.yaml:ro
+      - /mnt/shared/config/LocationNotices.yaml:/mnt/shared/config/LocationNotices.yaml:ro
       - vufind_cache:/mnt/vufind_cache
     networks:
       - public
