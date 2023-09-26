@@ -48,4 +48,4 @@
 # - callNumber - a regular expression to match a call number
 # - location - a regular expression to match a location
 # - locationCode - a regular expression to match a location code
-# - stackName - a value for the STACK_NAME env variable (such as catalog-prod or catalog-beta)
+# - stackName - a regular expression to match the STACK_NAME env variable

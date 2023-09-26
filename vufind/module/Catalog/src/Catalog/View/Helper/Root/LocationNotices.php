@@ -105,43 +105,46 @@ class LocationNotices extends AbstractHelper implements \Laminas\Log\LoggerAware
         }
         $success = true;
         if (!empty($conditions['location'])) {
-            $res = preg_match('/' . $conditions['location'] . '/', $item['location']);
-            if ($res === false) {
-                $this->logWarning("Bad regular expression for location notice location: " . $conditions['location']);
-                return false;
-            }
-            if ($res == 0) {
+            if (!testRe($conditions['location'], $item['location'], 'location')) {
                 $success = false;
             }
         }
         if (!empty($conditions['locationCode'])) {
-            $res = preg_match('/' . $conditions['locationCode'] . '/', $item['location_code']);
-            if ($res === false) {
-                $this->logWarning("Bad regular expression for location notice location code: " .
-                    $conditions['locationCode']);
-                return false;
-            }
-            if ($res == 0) {
+            if (!testRe($conditions['locationCode'], $item['location_code'], 'location code')) {
                 $success = false;
             }
         }
         if (!empty($conditions['callNumber'])) {
-            $res = preg_match('/' . $conditions['callNumber'] . '/', $item['callnumber']);
-            if ($res === false) {
-                $this->logWarning("Bad regular expression for location notice call number: " .
-                    $conditions['callNumber']);
-                return false;
-            }
-            if ($res == 0) {
+            if (!testRe($conditions['callNumber'], $item['callnumber'], 'call number')) {
                 $success = false;
             }
         }
         if (!empty($conditions['stackName'])) {
-            if ($conditions['stackName'] !== getenv('STACK_NAME')) {
+            if (!testRe($conditions['stackName'], getenv('STACK_NAME'), 'stack name')) {
                 $success = false;
             }
         }
         return $success;
+    }
+
+    /**
+     * Test a regular expression.
+     * Prints a warning if there is a syntax error in the regular expression.
+     *
+     * @param $re    string regular expression
+     * @param $value string value
+     * @param $title string title to use in a warning if there is an error
+     *
+     * @return bool true if it matches
+     */
+    protected function testRe($re, $value, $title)
+    {
+        $res = preg_match('/' . $re . '/', $value);
+        if ($res === false) {
+            $this->logWarning("Bad regular expression for location notice " . $title . ": " . $re);
+            return false;
+        }
+        return ($res == 1);
     }
 
     /**
