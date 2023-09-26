@@ -36,7 +36,7 @@ RUN \
         /opt/modsecurity/var/upload /opt/modsecurity/var/audit) && \
     a2enmod security2
 
-COPY modsecurity/modsecurity.conf /etc/modsecurity/
+COPY modsecurity/ /etc/modsecurity/
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
 RUN apt install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
 
