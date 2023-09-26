@@ -64,9 +64,7 @@ if ($selected != '') {
       </span>
     </div>
   <?php endif; ?>
-  <?php if (!empty($location) || !empty($callnum)): ?>
-    <?= $this->locationNotices($location, $callnumber) ?>
-  <?php endif; ?>
+  <?= $this->locationNotices($selected) ?>
 <?php else: ?>
   <span class="fullAvailability"><strong class="text-danger">Unavailable</strong></span>
 <?php endif; ?>

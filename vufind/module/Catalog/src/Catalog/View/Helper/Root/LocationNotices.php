@@ -64,23 +64,26 @@ class LocationNotices extends AbstractHelper implements \Laminas\Log\LoggerAware
     /**
      * Print banners based on conditions defined in banner-notices.yaml
      *
-     * @param string $location   Location regular expression
-     * @param string $callnumber Call number regular expression
+     * @param array $item The holdings item
      *
      * @return string The formatted HTML for output
      */
-    public function __invoke(string $location, string $callnumber)
+    public function __invoke(array $item)
     {
-        $makeTag = $this->getView()->plugin('makeTag');
-        $html = "";
-
+        if (empty($item['location']) && empty($item['location_code']) && empty($item['callnumber'])) {
+            return '';
+        }
+        $html = '';
         foreach ($this->noticesConfig['locationNotices'] ?? [] as $notice) {
             if (empty($notice['message'])) {
                 $this->logWarning(
-                    "LocationNotices config has notice with " .
-                    "empty or missing 'message'"
+                    "LocationNotices config has notice with empty or missing 'message'"
                 );
-            } elseif ($this->evaluateConditions($notice, $location, $callnumber)) {
+            } elseif (empty($notice['conditions'])) {
+                $this->logWarning(
+                    "LocationNotices config has notice with empty or missing 'conditions'"
+                );
+            } elseif ($this->evaluateConditions($notice['conditions'], $item)) {
                 $html .= $this->renderNotice($notice);
             }
         }
@@ -90,35 +93,52 @@ class LocationNotices extends AbstractHelper implements \Laminas\Log\LoggerAware
     /**
      * Evaluate all conditions appropriate to a single notice configuration
      *
-     * @param array  $notice     A single location notice configuration
-     * @param string $location   Location regular expression
-     * @param string $callnumber Call number regular expression
+     * @param array $conditions Location notice conditions
+     * @param array $item       The holdings item
      *
      * @return boolean
      */
-    protected function evaluateConditions(array $notice, string $location, string $callnumber)
+    protected function evaluateConditions(array $conditions, string $item)
     {
-        if (empty($notice['location']) && empty($notice['callNumber'])) {
+        if (empty($conditions['location']) && empty($conditions['locationCode']) && empty($conditions['callNumber'])) {
             return false;
         }
         $success = true;
-        if (!empty($notice['location'])) {
-            $res = preg_match('/' . $notice['location'] . '/', $location);
+        if (!empty($conditions['location'])) {
+            $res = preg_match('/' . $conditions['location'] . '/', $item['location']);
             if ($res === false) {
-                $this->logWarning("Bad regular expression for location notice location: " . $notice['location']);
+                $this->logWarning("Bad regular expression for location notice location: " . $conditions['location']);
                 return false;
             }
             if ($res == 0) {
                 $success = false;
             }
         }
-        if (!empty($notice['callNumber'])) {
-            $res = preg_match('/' . $notice['callNumber'] . '/', $callnumber);
+        if (!empty($conditions['locationCode'])) {
+            $res = preg_match('/' . $conditions['locationCode'] . '/', $item['location_code']);
             if ($res === false) {
-                $this->logWarning("Bad regular expression for location notice call number: " . $notice['callNumber']);
+                $this->logWarning("Bad regular expression for location notice location code: " .
+                    $conditions['locationCode']);
                 return false;
             }
             if ($res == 0) {
+                $success = false;
+            }
+        }
+        if (!empty($conditions['callNumber'])) {
+            $res = preg_match('/' . $conditions['callNumber'] . '/', $item['callnumber']);
+            if ($res === false) {
+                $this->logWarning("Bad regular expression for location notice call number: " .
+                    $conditions['callNumber']);
+                return false;
+            }
+            if ($res == 0) {
+                $success = false;
+            }
+        }
+        if (!empty($conditions['env'])) {
+            $env = getenv($condition['env'] ?? '');
+            if ($conditions['env'] != $env) {
                 $success = false;
             }
         }

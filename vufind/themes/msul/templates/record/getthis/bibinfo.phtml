@@ -4,7 +4,6 @@ $item = $this->getthis->getItem();
 $check = $item['check'] ?? false;
 $link = $this->getthis->getLink();
 $callnum = $this->getthis->getCallNumber();
-$location = $item['location'];
 ?>
 <div>
     <p>
@@ -16,9 +15,7 @@ $location = $item['location'];
             <span><?=$this->escapeHtml($callnum) ?></span>
         <?php endif; ?>
     </p>
-    <?php if (!empty($location) || !empty($callnum)): ?>
-        <?= $this->locationNotices($location, $callnum) ?>
-    <?php endif; ?>
+    <?= $this->locationNotices($item) ?>
     <p class="text-left" style="margin-top: 1.5em">
         <b>Status:</b> <?= $this->getthis->getStatus() ?>
         <?php if ($item != null && !$this->getthis->isOnlineResource() && $item['is_holdable'] && $link ?? false) { ?>
