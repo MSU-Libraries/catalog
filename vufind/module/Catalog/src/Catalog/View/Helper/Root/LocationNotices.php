@@ -98,17 +98,17 @@ class LocationNotices extends AbstractHelper implements \Laminas\Log\LoggerAware
      */
     protected function evaluateConditions(array $notice, string $location, string $callnumber)
     {
-        if (empty($notice['location'] && empty($notice['callNumber']))) {
+        if (empty($notice['location']) && empty($notice['callNumber'])) {
             return false;
         }
         $success = true;
         if (!empty($notice['location'])) {
-            if (!preg_match($notice['location'], $location)) {
+            if (!preg_match('/^' . $notice['location'] . '$/', $location)) {
                 $success = false;
             }
         }
         if (!empty($notice['callNumber'])) {
-            if (!preg_match($notice['callNumber'], $callnumber)) {
+            if (!preg_match('/^' . $notice['callNumber'] . '$/', $callnumber)) {
                 $success = false;
             }
         }
