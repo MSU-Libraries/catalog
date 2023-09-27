@@ -83,11 +83,15 @@ root@vufind:/usr/local/vufind# /hlm-harvest-and-import.sh --import --verbose | t
 curl 'http://solr:8983/solr/admin/metrics?nodes=solr1:8983_solr,solr2:8983_solr,solr3:8983_solr&prefix=SEARCHER.searcher.numDocs,SEARCHER.searcher.deletedDocs&wt=json'
 ```
 
-* Once you are confident in the new data, you are ready to do the swap! **BE SURE TO SWAP THE NAME AND COLLECTION IN THE BELOW COMMAND EXAMPLE**
+* Once you are confident in the new data, you are ready to do the swap! **BE SURE TO SWAP THE NAME AND COLLECTION IN THE BELOW COMMAND EXAMPLE**  
+!!! warning
+    Your Solr instance may require more memory than it typically needs to do the collection alias swap.
+    Be sure to increase and deploy the stack with additional `SOLR_JAVA_MEM` as required to  ensure no
+    downtime during this step.
 ```bash
 # This EXAMPLE sets biblio-build to biblio2, and biblio to biblio1
 curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio2'
-curl 'http://solr:8983/3solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1'
+curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1'
 ```
 
 * If needed, back-date the timestamp on your `last_harvest.txt` re-harvest some of the OAI changes since you started the import
