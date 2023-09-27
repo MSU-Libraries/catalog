@@ -15,7 +15,6 @@
 namespace Catalog\View\Helper\Root;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Psr\Container\ContainerExceptionInterface as ContainerException;
 use Psr\Container\ContainerInterface;
 
 /**

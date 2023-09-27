@@ -44,14 +44,12 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
      */
     private $accessLinksConfig;
 
-
     /**
      * Config for the BrowZine file
      *
      * @var \Catalog\View\Helper\Root\Record
      */
     private $browzineConfig;
-
 
     /**
      * Library ID used for LibKey queries
