@@ -108,6 +108,9 @@ class Syndetics extends \VuFind\Content\Covers\Syndetics implements \VuFind\Http
     protected function getMetadataXML($baseUrl)
     {
         $url = $baseUrl . '/index.xml';
+        if (!isset($this->cachingDownloader)) {
+            throw new \Exception('CachingDownloader initialization failed.');
+        }
         return $this->cachingDownloader->downloadXML($url);
     }
 
