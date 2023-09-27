@@ -15,6 +15,7 @@
 namespace Catalog\View\Helper\Root;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerExceptionInterface as ContainerException;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -47,8 +48,21 @@ class RecordFactory implements FactoryInterface
         }
         $config = $container->get(\VuFind\Config\PluginManager::class)
             ->get('config');
-        $helper = new $requestedName($config);
+
+        // Get the BrowZine config
+        try {
+            $browzineConfig = $container->get(\VuFind\Config\PluginManager::class)
+                ->get('BrowZine');
+        } catch (\Exception $e) {
+            $logger = $container->get(\VuFind\Log\Logger::class);
+            $logger->err(
+                'Could not parse BrowZine.ini: ' . $e->getMessage()
+            );
+        }
+
+        $helper = new $requestedName($config, $browzineConfig ?? []);
         $helper->setCoverRouter($container->get(\VuFind\Cover\Router::class));
+
         return $helper;
     }
 }

@@ -21,8 +21,8 @@
   </form>
   <?=$this->inlineScript(\Laminas\View\Helper\HeadScript::SCRIPT, "$('#reservesSearchForm_lookfor').focus()", 'SET')?>
 
-  <div class="resulthead mb-3">
-    <div class="pull-left flip">
+  <div class="resulthead search-header mb-3">
+    <div class="flip search-stats">
       <?php $qtime = $this->results->getQuerySpeed(); ?>
       <?php if (($recordTotal = $this->results->getResultTotal()) > 0): ?>
         <?php
@@ -41,7 +41,7 @@
     </div>
 
     <?php if ($recordTotal > 0): ?>
-      <div class="pull-right flip">
+      <div class="flip search-sort">
         <?=$this->render('search/controls/sort.phtml')?>
       </div>
     <?php endif; ?>
