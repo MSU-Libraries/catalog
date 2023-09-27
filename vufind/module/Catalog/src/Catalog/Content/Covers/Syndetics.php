@@ -40,8 +40,10 @@ use DOMDocument;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development Wiki
  */
-class Syndetics extends \VuFind\Content\Covers\Syndetics
+class Syndetics extends \VuFind\Content\Covers\Syndetics implements \VuFind\Http\CachingDownloaderAwareInterface
 {
+    use \VuFind\Http\CachingDownloaderAwareTrait;
+
     /**
      * Get image URL for a particular API key and set of IDs (or false if invalid).
      *
@@ -58,7 +60,7 @@ class Syndetics extends \VuFind\Content\Covers\Syndetics
             return false;
         }
         $baseUrl = $this->getBaseUrl($key, $ids);
-        $xml = getMetadata($baseUrl);
+        $xml = $this->getMetadataXML($baseUrl);
         $filename = $this->getImageFilename($xml, $size);
         if ($filename == false) {
             return false;
@@ -70,7 +72,8 @@ class Syndetics extends \VuFind\Content\Covers\Syndetics
      * Return the base Syndetics URL for both the metadata and image URLs.
      *
      * @param string $key API key
-     * @param string $id  Client ID
+     * @param array  $ids  Associative array of identifiers (keys may include 'isbn'
+     * pointing to an ISBN object and 'issn' pointing to a string)
      *
      * @return string Base URL
      */
@@ -102,7 +105,7 @@ class Syndetics extends \VuFind\Content\Covers\Syndetics
      *
      * @return DOMDocument The metadata as a DOM XML document.
      */
-    protected function getMetadata($baseUrl)
+    protected function getMetadataXML($baseUrl)
     {
         $url = $baseUrl . '/index.xml';
         return $this->cachingDownloader->downloadXML($url);
