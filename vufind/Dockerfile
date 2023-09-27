@@ -250,8 +250,6 @@ RUN \
     echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment && \
     echo AUTH_FTP_PASSWORD="$AUTH_FTP_PASSWORD" >> /etc/environment && \
     echo DEPLOY_KEY="$DEPLOY_KEY" >> /etc/environment && \
-    echo BROWZINE_LIBRARY="$BROWZINE_LIBRARY" >> /etc/environment && \
-    echo BROWZINE_TOKEN="$BROWZINE_TOKEN" >> /etc/environment && \
     echo STACK_NAME="$STACK_NAME" >> /etc/environment && \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
