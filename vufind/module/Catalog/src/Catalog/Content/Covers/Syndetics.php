@@ -56,10 +56,10 @@ class Syndetics extends \VuFind\Content\Covers\Syndetics implements \VuFind\Http
      */
     public function getUrl($key, $size, $ids)
     {
-        if (!isset($ids['isbn']) && !isset($ids['issn']) && !isset($ids['oclc']) && !isset($ids['upc'])) {
+        $baseUrl = $this->getBaseUrl($key, $ids);
+        if ($baseUrl == false) {
             return false;
         }
-        $baseUrl = $this->getBaseUrl($key, $ids);
         $xmldoc = $this->getMetadataXML($baseUrl);
         if ($xmldoc == false) {
             return false;
@@ -78,27 +78,31 @@ class Syndetics extends \VuFind\Content\Covers\Syndetics implements \VuFind\Http
      * @param array  $ids Associative array of identifiers (keys may include 'isbn'
      * pointing to an ISBN object and 'issn' pointing to a string)
      *
-     * @return string Base URL
+     * @return string|bool Base URL, or false if no identifier can be used
      */
     protected function getBaseUrl($key, $ids)
     {
         $url = $this->useSSL
             ? 'https://secure.syndetics.com' : 'http://syndetics.com';
         $url .= "/index.aspx?client={$key}";
+        $ident = '';
         if (isset($ids['isbn']) && $ids['isbn']->isValid()) {
             $isbn = $ids['isbn']->get13();
-            $url .= "&isbn={$isbn}";
+            $ident .= "&isbn={$isbn}";
         }
         if (isset($ids['issn'])) {
-            $url .= "&issn={$ids['issn']}";
+            $ident .= "&issn={$ids['issn']}";
         }
         if (isset($ids['oclc'])) {
-            $url .= "&oclc={$ids['oclc']}";
+            $ident .= "&oclc={$ids['oclc']}";
         }
         if (isset($ids['upc'])) {
-            $url .= "&upc={$ids['upc']}";
+            $ident .= "&upc={$ids['upc']}";
         }
-        return $url;
+        if (empty($ident)) {
+            return false;
+        }
+        return $url . $ident;
     }
 
     /**
