@@ -11,10 +11,12 @@ suggestions you have!
 * [First Time Setup](first-time-setup.md)
 * [Harvesting & Importing](harvesting-and-importing.md)
 * [CI/CD](CICD.md)
-* [Troubleshooting](troubleshooting.md)
 
 ## Administration
 * [Backup & Restore](backup-and-restore.md)
 * [Upgrading](upgrading.md)
+* [VuFind](vufind.md)
 * [Solr](solr.md)
+* [MariaD](mariadb.md)
+* [Traefik](traefik.md)
 * [Load Testing](load-testing.md)

@@ -134,6 +134,37 @@ curl 'http://solr1:8983/solr/biblio/update' --data '<delete><query>id:folio.in00
 curl 'http://solr1:8983/solr/biblio/update' --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 ```
 
+## Troubleshooting
+
+* Solr can be accessed via https://your-site/solr which is helpful
+for verifying the state that the cloud is in (Cloud -> Nodes) as well as the ZooKeeper
+containers (Cloud -> ZK Status). Additionally you can check the status of the collections
+(Cloud -> Graph) to make sure they are marked as Active. It may also be helpful to use the
+web interface for testing queries in too.
+
+* A helper script is included with all of the nodes, called `clusterhealth.sh`,
+that can be run to check all of the replicas and shards across all nodes and report
+and issues identified. It can be run by:
+
+```bash
+docker exec $(docker ps -q -f name=${STACK_NAME}-solr_solr) /clusterhealth.sh
+```
+
+* To view the Docker healthcheck logs from a particular container you can:
+
+```bash
+# View from running containers
+docker inspect --format '{{ .State.Health.Status }}' $(docker ps -q -f name=${STACK_NAME}-solr_solr)
+docker inspect --format '{{ (index .State.Health.Log 0).Output }}' $(docker ps -q -f name=${STACK_NAME}-solr_solr)
+
+# View from stopped containers
+docker inspect --format '{{ .State.Health.Status }}' [CONTAINER_ID]
+docker inspect --format '{{ (index .State.Health.Log 0).Output }}' [CONTAINER_ID]
+
+# Run healthcheck script manually
+docker exec $(docker ps -q -f name=${STACK_NAME}-solr_solr) /healthcheck.sh
+```
+
 ## Fixing Down Solr Replicas
 
 In the event that you find a Solr replica that appears to be stuck in a "down" state
