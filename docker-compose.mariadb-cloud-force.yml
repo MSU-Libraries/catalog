@@ -27,6 +27,10 @@ version: "3.8"
 #
 # As an additional precaution, you may want to make backups of all the
 # MariaDB volumes data prior to proceeding.
+#
+# Once the cluster has recovered, remove the stack again and re-deploy
+# with the docker-compose.mariadb-cloud.yml to remove the bootstrap
+# setting from the stack.
 ######### WARNING ########
 
 services:
@@ -58,6 +62,8 @@ services:
         delay: 140s
         monitor: 20s
       placement:
+        ### YOU MUST BRING THE STACK DOWN BEFORE AND AFTER USING THIS FILE AND RE-DEPLOY WIT
+        ### THE NORMAL COMPOSE FILE ONCE GALERA HAS RECOVERED SO THAT BOOTSTRAPINNG CAN BE DISABLED
         constraints:
           # Update N to be the Docker Swarm node number with most recent SQL file changes
           - "node.labels.nodeid==N"
