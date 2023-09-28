@@ -513,9 +513,17 @@ input[type="checkbox"] {
     }
   }
   @media only screen and (min-width : 768px) {
+      .container {
+        padding-left:0;
+      }
       #search-cart-form {
         margin-top: -1rem;
     }
+      .searchtools {
+        .icon-link {
+          padding-left:0;
+        }
+      }
   } 
   @media only screen and (min-width : 1315px) {
       .searchForm_lookfor {
@@ -641,6 +649,9 @@ form.searchForm, .record-tabs, .navbar-form {
       padding:0;
       margin:0 0.7rem;
     }
+    li:first-child a {
+      margin-left:0;
+    }
     .navtab-digrepo {
       @media only screen and (min-width : 998px) {    
         border-left:0.2rem solid @eggplant;
@@ -759,7 +770,45 @@ table tr {
   }
 }
 
+// results record list design clean up
 
+.result {
+  margin-bottom:1rem;
+  .checkbox-select-item {
+    display:block;
+    height:1.25rem;
+    width:1.25rem;
+  }
+  .result-body {
+    & :not(:first-child) {
+      font-size:14px;
+   }
+//    & > * {
+//    margin-bottom:0.15rem;
+//    }
+    .result-formats span {
+      font-size:12px;
+      margin-top:0.5rem;
+    }
+  }
+  .login,
+  .libkey-link {
+    padding-right:0.25rem;
+  }
+  .media { //EDS
+    .media-left {
+      font-size:14px; 
+      }
+    }
+  @media only screen and (min-width : 768px) {
+    .result-links {
+      padding-left:14px;
+    }
+  }
+}
+
+
+// Placehold (Get This)
 
 .placehold {
   display:inline-block;
@@ -925,9 +974,9 @@ label {
 }
 
 .search-term {
-  font-weight: 500;
-  font-size: x-large;
-  color:@eggplant;
+  background-color:#f1f1f1;
+  padding:0.5rem 1rem;
+  border-radius:0.5rem;
 }
 
 /*.searchHomeContent, .nav.searchbox {
@@ -987,8 +1036,8 @@ label {
 }
 
 .view-buttons {
-  margin-top:1rem;
-  margin-bottom:2rem;
+  margin-top:.5rem;
+  margin-bottom:1.5rem;
 }
 
 // Remove table striping
