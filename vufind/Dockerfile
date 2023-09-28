@@ -155,6 +155,10 @@ ARG AUTH_FTP_PASSWORD
 ARG DEPLOY_KEY
 ARG BROWZINE_LIBRARY
 ARG BROWZINE_TOKEN
+ARG MATOMO_URL
+ARG MATOMO_SITE_ID
+ARG MATOMO_SEARCHBACKEND_DIMENSION
+
 
 ENV SITE_HOSTNAME=$SITE_HOSTNAME \
     FOLIO_URL=$FOLIO_URL \
@@ -185,7 +189,11 @@ ENV SITE_HOSTNAME=$SITE_HOSTNAME \
     DEPLOY_KEY=$DEPLOY_KEY \
     VUFIND_LOCAL_MODULES=Catalog \
     BROWZINE_LIBRARY=$BROWZINE_LIBRARY \
-    BROWZINE_TOKEN=$BROWZINE_TOKEN
+    BROWZINE_TOKEN=$BROWZINE_TOKEN \
+    MATOMO_URL=$MATOMO_URL \
+    MATOMO_SITE_ID=$MATOMO_SITE_ID \
+    MATOMO_SEARCHBACKEND_DIMENSION=$MATOMO_SEARCHBACKEND_DIMENSION
+
 
 # Add file customizations
 COPY local/ /usr/local/vufind/local
@@ -196,6 +204,7 @@ COPY robots.txt /usr/local/vufind/public/robots.txt
 COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
 COPY startup.sh /startup.sh
+COPY startup-build.sh /startup-build.sh
 COPY startup-cron.sh /startup-cron.sh
 COPY startup-croncache.sh /startup-croncache.sh
 COPY harvest-and-import.sh /harvest-and-import.sh
@@ -224,6 +233,7 @@ WORKDIR /usr/local/vufind
 RUN \
     # Replace environment variables in template ini files
     envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.ini && \
+    envsubst < local/config/vufind/contentsecuritypolicy.ini | sponge local/config/vufind/contentsecuritypolicy.ini && \
     envsubst < local/config/vufind/folio.ini | sponge local/config/vufind/folio.ini && \
     envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
     envsubst < local/config/vufind/BrowZine.ini | sponge local/config/vufind/BrowZine.ini && \
@@ -240,9 +250,6 @@ RUN \
     echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment && \
     echo AUTH_FTP_PASSWORD="$AUTH_FTP_PASSWORD" >> /etc/environment && \
     echo DEPLOY_KEY="$DEPLOY_KEY" >> /etc/environment && \
-    echo BROWZINE_LIBRARY="$BROWZINE_LIBRARY" >> /etc/environment && \
-    echo BROWZINE_TOKEN="$BROWZINE_TOKEN" >> /etc/environment && \
-    echo MARIADB_VUFIND_PASSWORD="$MARIADB_VUFIND_PASSWORD" >> /etc/environment && \
     echo STACK_NAME="$STACK_NAME" >> /etc/environment && \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
@@ -268,6 +275,9 @@ RUN \
     # Install grunt
     npm install -g grunt-cli && \
     grunt less
+
+# Debugging; temporary files overriding core libraries
+COPY debug/ /usr/local/vufind/
 
 EXPOSE 80
 

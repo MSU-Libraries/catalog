@@ -495,7 +495,7 @@ slice_marc_files() {
             for TAG in "${TAGS[@]}"; do
                 OUT_FILE=${FILE%.xml}.${TAG}.xml
                 verbose "Merging parts for tag ${TAG} back into ${OUT_FILE}"
-                if ! OUTPUT=$(xml_grep --pretty_print indented --cond "collection" "${ARGS[VUFIND_HARVEST_DIR]}/${SEARCH}*.${TAG}.xml" "${ARGS[VUFIND_HARVEST_DIR]}/${OUT_FILE}"); then
+                if ! OUTPUT=$(xml_grep --pretty_print indented --cond "collection" "${ARGS[VUFIND_HARVEST_DIR]}/${SEARCH}*.${TAG}.xml" > "${ARGS[VUFIND_HARVEST_DIR]}/${OUT_FILE}"); then
                     verbose "ERROR: Failed to merge the parts for ${TAG} back into ${OUT_FILE}. ${OUTPUT}" 1
                 fi
                 # Cleaning up tags to match what import script expects

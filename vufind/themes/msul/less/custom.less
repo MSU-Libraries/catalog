@@ -1245,6 +1245,18 @@ body.template-dir-myresearch.template-name-profile {
   }
 }
 
+// LibKey link styling
+.result-body {
+  .libkey-link {
+    display: inline-block;
+    .icon-link__label {
+      padding-right: .5rem;
+    }
+    .fa-lock {
+      text-decoration: underline;
+    }
+  }
+}
 
 //Remove catalog only checkbox & location options from EDS Advanced Search
 
@@ -1411,3 +1423,9 @@ fieldset.solr-facets {
   }
 }
 
+// Highlighting
+.highlight,
+mark {
+  background: #E5E5E5;
+  padding: .1em .2em;
+}

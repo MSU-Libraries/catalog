@@ -92,7 +92,7 @@ let SLEEP_TIME=${NODE}*2
 sleep $SLEEP_TIME
 
 # Create Solr collections
-COLLS=("authority" "biblio" "reserves" "website")
+COLLS=("authority" "biblio1" "biblio2" "reserves" "website")
 for COLL in "${COLLS[@]}"
 do
     # See if the collection already exists in Solr
@@ -105,6 +105,22 @@ do
         echo "Verified that Solr collection $COLL exists."
     fi
 done
+
+echo "If there are no aliases create them"
+if ! ALIASES=$(curl "http://solr:8983/solr/admin/collections?action=LISTALIASES&wt=json" -s); then
+    echo "Failed to query to the collection alaises in Solr. Exiting. ${ALIASES}"
+    exit 1
+fi
+if ! [[ "${ALIASES}" =~ .*"biblio".* ]]; then
+    if ! OUTPUT=$(curl -s "http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1"); then
+        echo "Failed to create biblio alias pointing to biblio1. Exiting. ${OUTPUT}"
+        exit 1
+    fi
+    if ! OUTPUT=$(curl -s "http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio2");then
+        echo "Failed to create biblio-build alias pointing to biblio2. Exiting. ${OUTPUT}"
+        exit 1
+    fi
+fi
 
 # Run grunt if a devel/review site
 if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then

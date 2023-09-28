@@ -75,7 +75,7 @@ apply_devel_changes() {
     ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
     docker-compose.monitoring.yml;
 
-    # Remove the cron service if the stack name is NOT catalog beta or prod
+    # Remove the cron service if this is a devel environment
     ./yq -i "del(.services.cron)" docker-compose.yml;
 
     # Unset parallelism limit for non-production to speed up redeployments on devel stacks
@@ -132,9 +132,10 @@ apply_prod_changes() {
     # Build extra environment suffix for image tag
     export EXTRA_TAG_SUFFIX="-main";
 
-    # Increase Solr RAM to 3 GB (note: prod is further increased below)
+    # Increase Solr RAM to 2 GB (note: prod is further increased below)
+    # TODO Reduce this back down to 2048 once we are done rebuilding the collections
     ./yq -i \
-    ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms3072m -Xmx3072m\"" \
+    ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms4096m -Xmx4096m\"" \
     docker-compose.solr-cloud.yml;
 
     # Use httpchallenge cert resolver (instead of dnschallenge)
@@ -188,7 +189,7 @@ apply_prod_changes() {
 
     ## Changes for catalog-prod
     if [ "${STACK_NAME}" == "catalog-prod" ]; then
-        # Increase Solr RAM to 4 GB (prod is granted slightly more than non-prod envs)
+        # Increase Solr RAM to 4 GB (prod is granted more than non-prod envs)
         ./yq -i \
         ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms4096m -Xmx4096m\"" \
         docker-compose.solr-cloud.yml;
@@ -258,6 +259,7 @@ main() {
 
     # Replace variables in all compose files
     envsubst < docker-compose.yml | sponge docker-compose.yml;
+    envsubst < docker-compose.build.yml | sponge docker-compose.build.yml;
     envsubst < docker-compose.solr-cloud.yml | sponge docker-compose.solr-cloud.yml;
     envsubst < docker-compose.solr-cloud-bootstrap.yml | sponge docker-compose.solr-cloud-bootstrap.yml;
     envsubst < docker-compose.mariadb-cloud-bootstrap.yml | sponge docker-compose.mariadb-cloud-bootstrap.yml;

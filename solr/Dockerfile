@@ -51,15 +51,23 @@ COPY browse-indexing.jar solrmarc_core.jar /solr_confs/import/
 RUN \
     chmod -R go-w /solr_confs /*.sh && \
     chmod ugo+x /*.sh /solr_confs/*.sh && \
-# Change solr_confs ownership so that a biblio9 copy can be created (conditionally) in startup.sh
+    # Change solr_confs ownership so that a biblio9 copy can be created (conditionally) in startup.sh
     chown 1001:root /solr_confs && \
-# Fix lib paths in solrconfig.xml
-# Note: the biblio9 copy of solrconfig.xml is also edited in startup.sh
+    # Empty stopwords.txt
+    > /solr_confs/biblio/conf/stopwords.txt && \
+    # Fix lib paths in solrconfig.xml
+    # Note: the biblio9 copy of solrconfig.xml is also edited in startup.sh
     sed -i 's/<lib dir="\.\.\/\.\.\/\.\.\/import\/lib"/<lib dir="\/solr_confs\/import\/lib"/' /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i 's/<lib dir="\.\.\/\.\.\/\.\.\/import"/<lib dir="\/solr_confs\/import"/' /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i 's/<lib dir="\.\.\/\.\.\/vendor\/modules\/analysis-extras\/lib"/<lib dir="\/opt\/bitnami\/solr\/modules\/analysis-extras\/lib"/' \
         /solr_confs/biblio/conf/solrconfig.xml && \
-    sed -i 's/<lib dir="\.\.\/jars"/<lib dir="\/solr_confs\/jars"/' /solr_confs/biblio/conf/solrconfig.xml
+    sed -i 's/<lib dir="\.\.\/jars"/<lib dir="\/solr_confs\/jars"/' /solr_confs/biblio/conf/solrconfig.xml && \
+    # Now rename biblio to biblio1 and duplicate it to biblio2, then update the datadir path
+    # since we have two separate collections, one to build in and one for live searching
+    mv /solr_confs/biblio /solr_confs/biblio1 && \
+    sed -i "s/\\bbiblio\\b/biblio1/" /solr_confs/biblio1/conf/solrconfig.xml && \
+    cp -r /solr_confs/biblio1 /solr_confs/biblio2 && \
+    sed -i "s/\\bbiblio1\\b/biblio2/" /solr_confs/biblio2/conf/solrconfig.xml
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
     CMD /healthcheck.sh

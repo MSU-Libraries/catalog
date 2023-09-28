@@ -132,6 +132,9 @@ resources such as Solr and the Traefik dashboard
 * `FTP_PASSWORD`: Password for `FTP_USER`
 * `FTP_USER`: User name for the EBSCO FTP server
 * `GITHUB_USER_TOKEN`: Token used to publish releases to GitHub repository 
+* `MATOMO_SEARCHBACKEND_DIMENSION`: ID for the custom dimension in Matomo to track the search backend used for the request
+* `MATOMO_SITE_ID`: Matomo site identifer for the website you want the analytics sent to
+* `MATOMO_URL`: Matomo URL to send the analytics to
 * `OAI_URL`: URL for making OAI calls to FOLIO when harvesting (can include API Token) 
 * `RECAPTCHA_SECRET_KEY`: Secret key for reCaptcha form validation
 * `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation

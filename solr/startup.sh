@@ -18,12 +18,6 @@ else
     echo "Found /solr already in Zookeeper."
 fi
 
-# Modify `biblio` config as we are using `biblio09112023` which uses an alias of `biblio`
-if [[ "${STACK_NAME}" == "catalog-"* ]]; then
-    cp -r /solr_confs/biblio /solr_confs/biblio09112023
-    sed -i "s/\\bbiblio\\b/biblio09112023/" "${COLLEX_CONFIGS}/biblio09112023/conf/solrconfig.xml"
-fi
-
 echo "Creating required VuFind Solr collections..."
 for COLL_DIR in "${COLLEX_CONFIGS}/"*; do
     COLL=$(basename $COLL_DIR)
