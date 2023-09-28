@@ -60,7 +60,10 @@ class Syndetics extends \VuFind\Content\Covers\Syndetics implements \VuFind\Http
             return false;
         }
         $baseUrl = $this->getBaseUrl($key, $ids);
-        $xml = $this->getMetadataXML($baseUrl);
+        $xmldoc = $this->getMetadataXML($baseUrl);
+        if ($xmldoc == false) {
+            return false;
+        }
         $filename = $this->getImageFilename($xml, $size);
         if ($filename == false) {
             return false;
@@ -99,11 +102,11 @@ class Syndetics extends \VuFind\Content\Covers\Syndetics implements \VuFind\Http
     }
 
     /**
-     * Get the Syndetics metadata as XML.
+     * Get the Syndetics metadata as XML, using a cache.
      *
      * @param $baseUrl string  Base URL for the Syndetics query
      *
-     * @return DOMDocument The metadata as a DOM XML document.
+     * @return DOMDocument|bool The metadata as a DOM XML document, or false if the document cannot be parsed.
      */
     protected function getMetadataXML($baseUrl)
     {
@@ -111,18 +114,20 @@ class Syndetics extends \VuFind\Content\Covers\Syndetics implements \VuFind\Http
         if (!isset($this->cachingDownloader)) {
             throw new \Exception('CachingDownloader initialization failed.');
         }
-        return $this->cachingDownloader->downloadXML($url);
+        $body = $this->cachingDownloader->download($url);
+        $dom = new DOMDocument();
+        return $dom->loadXML($body) ? $dom : false;
     }
 
     /**
      * Find the image url in the XML returned from API.
      *
-     * @param DOMDocument $xml  Parsed XML document
-     * @param string      $size Size of image to load (small/medium/large)
+     * @param DOMDocument $xmldoc Parsed XML document
+     * @param string      $size   Size of image to load (small/medium/large)
      *
      * @return string|bool Full url of the image, or false if none matches
      */
-    protected function getImageFilename($xml, $size)
+    protected function getImageFilename($xmldoc, $size)
     {
         switch ($size) {
             case 'small':
