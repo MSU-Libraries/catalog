@@ -72,7 +72,7 @@ class Syndetics extends \VuFind\Content\Covers\Syndetics implements \VuFind\Http
      * Return the base Syndetics URL for both the metadata and image URLs.
      *
      * @param string $key API key
-     * @param array  $ids  Associative array of identifiers (keys may include 'isbn'
+     * @param array  $ids Associative array of identifiers (keys may include 'isbn'
      * pointing to an ISBN object and 'issn' pointing to a string)
      *
      * @return string Base URL

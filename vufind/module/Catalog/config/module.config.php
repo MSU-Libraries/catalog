@@ -55,7 +55,7 @@ return [
       ],
       'content_covers' => [
         'factories' => [
-          'Catalog\\Content\\Covers\\Syndetics' => 'VuFind\\Content\\Covers\\SyndeticsFactory',
+          'Catalog\\Content\\Covers\\Syndetics' => 'Catalog\\Content\\Covers\\SyndeticsFactory',
         ],
         'aliases' => [
           'syndetics' => 'Catalog\\Content\\Covers\\Syndetics',
