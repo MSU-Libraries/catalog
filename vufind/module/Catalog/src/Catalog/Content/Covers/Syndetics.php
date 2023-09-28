@@ -64,7 +64,7 @@ class Syndetics extends \VuFind\Content\Covers\Syndetics implements \VuFind\Http
         if ($xmldoc == false) {
             return false;
         }
-        $filename = $this->getImageFilename($xml, $size);
+        $filename = $this->getImageFilename($xmldoc, $size);
         if ($filename == false) {
             return false;
         }
