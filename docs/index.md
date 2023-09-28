@@ -17,6 +17,6 @@ suggestions you have!
 * [Upgrading](upgrading.md)
 * [VuFind](vufind.md)
 * [Solr](solr.md)
-* [MariaD](mariadb.md)
+* [MariaDB](mariadb.md)
 * [Traefik](traefik.md)
 * [Load Testing](load-testing.md)
