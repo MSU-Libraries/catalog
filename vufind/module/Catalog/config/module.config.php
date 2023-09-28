@@ -25,6 +25,14 @@ return [
       'VuFind\\Controller\\MyResearchController' => 'Catalog\\Controller\\MyResearchController',
     ],
   ],
+  'service_manager' => [
+    'factories' => [
+      'Catalog\\Http\\CachingDownloader' => 'VuFind\\Http\\CachingDownloaderFactory',
+    ],
+    'aliases' => [
+      'VuFind\\Http\\CachingDownloader' => 'Catalog\\Http\\CachingDownloader',
+    ],
+  ],
   'vufind' => [
     'plugin_managers' => [
       'ajaxhandler' => [
@@ -101,13 +109,4 @@ return [
       ],
     ],
   ],
-  # Example override for VuFind service
-  #'service_manager' => [
-  #  'factories' => [
-  #    'Catalog\\Mailer\\Mailer' => 'VuFind\\Mailer\\Factory',
-  #  ],
-  #  'aliases' => [
-  #    'VuFind\\Mailer\\Mailer' => 'Catalog\\Mailer\\Mailer',
-  #  ],
-  #],
 ];
