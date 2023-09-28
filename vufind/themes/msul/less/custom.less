@@ -513,9 +513,17 @@ input[type="checkbox"] {
     }
   }
   @media only screen and (min-width : 768px) {
+      .container {
+        padding-left:0;
+      }
       #search-cart-form {
         margin-top: -1rem;
     }
+      .searchtools {
+        .icon-link {
+          padding-left:0;
+        }
+      }
   } 
   @media only screen and (min-width : 1315px) {
       .searchForm_lookfor {
@@ -641,6 +649,9 @@ form.searchForm, .record-tabs, .navbar-form {
       padding:0;
       margin:0 0.7rem;
     }
+    li:first-child a {
+      margin-left:0;
+    }
     .navtab-digrepo {
       @media only screen and (min-width : 998px) {    
         border-left:0.2rem solid @eggplant;
@@ -740,8 +751,68 @@ table tr {
   }
 }
 
+// Fix checkboxes disapearing on account page
+.result .record-checkbox {
+  display:block;
+  flex: 0;
+  cursor: pointer;
+}
+
+.result .record-number {
+  display: block;
+  flex: 0 2rem;
+  text-align: center;
+}
+
+@media only screen and (max-width : 767px) {
+  .result .checkbox {
+    display:block;
+  }
+}
+
+// results record list design clean up
+
+.result {
+  margin-bottom:1rem;
+  .checkbox-select-item {
+    display:block;
+    height:1.25rem;
+    width:1.25rem;
+  }
+  .result-body {
+    & :not(:first-child) {
+      font-size:14px;
+   }
+//    & > * {
+//    margin-bottom:0.15rem;
+//    }
+    .result-formats span {
+      font-size:12px;
+      margin-top:0.5rem;
+    }
+  }
+  .login,
+  .libkey-link {
+    padding-right:0.25rem;
+  }
+  .media { //EDS
+    .media-left {
+      font-size:14px; 
+      }
+    }
+  @media only screen and (min-width : 768px) {
+    .result-links {
+      padding-left:14px;
+    }
+  }
+}
+
+
+// Placehold (Get This)
+
 .placehold {
-  text-decoration: none;
+  display:inline-block;
+  text-decoration: none !important;
   color:@parakeetgreen;
   border: 2px solid @parakeetgreen;
   -webkit-border-radius: 7rem;
@@ -817,7 +888,8 @@ table tr {
 
 @media only screen and (min-width : 768px) {
   .sidebar.left {
-    border-right:1px solid @medgray;
+    //border-right:1px solid @medgray;
+    border-right: 1px solid #C1C1C1;
   }
   .record .mainbody.right {
     float:left;
@@ -902,9 +974,9 @@ label {
 }
 
 .search-term {
-  font-weight: 500;
-  font-size: x-large;
-  color:@eggplant;
+  background-color:#f1f1f1;
+  padding:0.5rem 1rem;
+  border-radius:0.5rem;
 }
 
 /*.searchHomeContent, .nav.searchbox {
@@ -964,8 +1036,8 @@ label {
 }
 
 .view-buttons {
-  margin-top:1rem;
-  margin-bottom:2rem;
+  margin-top:.5rem;
+  margin-bottom:1.5rem;
 }
 
 // Remove table striping
@@ -1170,25 +1242,6 @@ body.template-dir-myresearch.template-name-profile {
       background-color: @gray-darker;
       color: white;
    }
-  }
-}
-
-// Fix checkboxes disapearing on account page
-.result .record-checkbox {
-  display:block;
-  flex: 0;
-  cursor: pointer;
-}
-
-.result .record-number {
-  display: block;
-  flex: 0 2rem;
-  text-align: center;
-}
-
-@media only screen and (max-width : 767px) {
-  .result .checkbox {
-    display:block;
   }
 }
 

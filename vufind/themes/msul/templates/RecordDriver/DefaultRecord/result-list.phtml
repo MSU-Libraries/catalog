@@ -36,7 +36,7 @@
           <?=implode(' ', array_map([$this, 'escapeHtml'], $this->driver->getSummary())); ?>
         <?php else: ?>
           <?php $summAuthors = $this->driver->getPrimaryAuthorsWithHighlighting(); if (!empty($summAuthors)): ?>
-            <?=$this->transEsc('by')?>
+            <strong><?=$this->transEsc('By')?>:</strong>
             <?php $authorCount = count($summAuthors); foreach ($summAuthors as $i => $summAuthor): ?>
               <a href="<?=$this->record($this->driver)->getLink('author', $this->highlight($summAuthor, null, true, false))?>" class="result-author"><?=$this->highlight(rtrim($summAuthor, ','))?></a><?=$i + 1 < $authorCount ? ',' : ''?>
             <?php endforeach; ?>
@@ -47,7 +47,7 @@
           <?php if (is_array($publisherName)): $publisherName = implode(", ", $publisherName); endif; ?>
           <?php if (!empty($journalTitle)): ?>
             <?=!empty($summAuthor) ? '<br>' : ''?>
-            <strong><?=$this->transEsc('Published:')?></strong>
+            <strong><?=$this->transEsc('Published')?>:</strong>
             <?=$this->escapeHtml($publisherName)?>
             <?php $containerSource = $this->driver->getSourceIdentifier(); ?>
             <?php $containerID = $this->driver->getContainerRecordID(); ?>
@@ -56,7 +56,7 @@
             <?=!empty($summDate) ? ' (' . $this->escapeHtml($summDate[0]) . ')' : ''?>
           <?php elseif (!empty($summDate)): ?>
             <?=!empty($summAuthor) ? '<br>' : ''?>
-            <strong><?=$this->transEsc('Published:')?></strong>
+            <strong><?=$this->transEsc('Published')?>:</strong>
             <?=$this->escapeHtml($publisherName) . ' ' . $this->escapeHtml($summDate[0])?>
           <?php endif; ?>
           <?php $summInCollection = $this->driver->getContainingCollections(); if (!empty($summInCollection)): ?>

@@ -36,10 +36,8 @@
                   <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getUrl($this->driver))?>" class="title getFull _record_link"  data-view="<?=$this->escapeHtmlAttr($this->params->getOptions()->getListViewOption())?>">
                   <?=$item['Data']?> </a>
                 <?php else:?>
-                  <p>
                     <b><?=$this->transEsc($item['Label'])?>:</b>
                     <?=$this->driver->linkUrls($item['Data'])?>
-                  </p>
                 <?php endif;?>
               </div>
             <?php endif;
