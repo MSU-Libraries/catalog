@@ -56,10 +56,10 @@ Deploy Compose Files:
   script:
     - bash ./cicd/deploy-compose-files
 
-Initialize Database Logs:
+Initialize Log Dirs:
   extends: .stack_template
   script:
-     - bash ./cicd/initialize-database-logs
+     - bash ./cicd/initialize-log-dirs
 
 Deploy Internal Network:
   extends: .stack_template
@@ -110,7 +110,7 @@ Deploy DB:
     - Bootstrap Stacks
     - Deploy Compose Files
     - Deploy Internal Network
-    - Initialize Database Logs
+    - Initialize Log Dirs
   script:
     - bash ./cicd/deploy-db
 
@@ -187,7 +187,7 @@ Populate Vufind Environment:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Verify Stack Health
+    - Deploy Vufind
   script:
     - bash ./cicd/populate-vufind-environment
 
@@ -199,20 +199,9 @@ Run Functional Tests:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Verify Stack Health
-  script:
-    - bash ./cicd/run-functional-tests
-
-Scale Down Catalog Service:
-  extends: .stack_template
-  rules:
-    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
-  needs:
-    - job: Set Stack Name
-      artifacts: true
     - Populate Vufind Environment
   script:
-    - bash ./cicd/scale-down-catalog-service
+    - bash ./cicd/run-functional-tests
 
 Remove Environment:
   stage: Cleanup
