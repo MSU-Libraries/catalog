@@ -9,9 +9,13 @@ This is helpful when the issue is a configuration issue either in the
 Traefik command or labels.
 
 * When you have basic authentication enabled, ensure that the
-password hash has a low enough settings (we found 8 to work well)
-otherwise Traefik will use a significant amount of CPU load and
-cause pages to load extremely slow.
+password hash has an appropriate cost setting; 9 or less might make
+brute forcing easier, while 12 or higher will add significant amounts
+of CPU load to Traefik, causing page loads to be extremely slow. A setting
+of 10 is recommended.
+```
+htpasswd -n -B -C 10 mylogin
+```
 
 * To debug performance issues in Traefik, you can enable debug
 mode by adding to the traefik service: `--api.debug=true`.
