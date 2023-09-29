@@ -32,7 +32,7 @@ main() {
     S_CONTAINER_B=$(ssh deploy@"${DEPLOY_HOST_B}" "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo "";
     S_CONTAINER_C=$(ssh deploy@"${DEPLOY_HOST_C}" "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo "";
 
-    if [ -z "${CATALOG_NODE}" ] || [ -z "${CONTAINER_CONTAINER}" ] ; then
+    if [ -z "${CATALOG_NODE}" ] || [ -z "${CATALOG_CONTAINER}" ] ; then
         echo "Could not find container for ${STACK_NAME}-catalog_catalog. Node: ${CATALOG_NODE}. Container: ${CATALOG_CONTAINER}";
         exit 1;
     fi;
