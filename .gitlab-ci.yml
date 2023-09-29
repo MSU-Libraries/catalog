@@ -199,6 +199,7 @@ Run Functional Tests:
   needs:
     - job: Set Stack Name
       artifacts: true
+    - Verify Stack Health
   script:
     - bash ./cicd/run-functional-tests
 

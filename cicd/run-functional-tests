@@ -23,7 +23,7 @@ fi
 
 main() {
     echo "Finding container to run tests against for stack ${STACK_NAME}-catalog_catalog..."
-    NODE=$(ssh deploy@"${DEPLOY_HOST_A}" "docker service ps -f 'desired-state=running' --format '{{ .Node }}' ${STACK_NAME}-catalog_catalog") || echo "";
+    NODE=$(ssh deploy@"${DEPLOY_HOST_A}" "docker service ps -f 'desired-state=running' --format '{{ .Node }}' ${STACK_NAME}-catalog_catalog | head -n 1") || echo "";
     CONTAINER=$(ssh deploy@"${NODE}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "";
 
     if [ -z "${NODE}" ] || [ -z "${CONTAINER}" ] ; then
