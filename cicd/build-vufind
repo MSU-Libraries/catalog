@@ -104,4 +104,6 @@ main() {
 
 # exit script if any command fails
 set -e;
+# set xtrace to show commands being run in the CI job logs
+set -o xtrace
 main;

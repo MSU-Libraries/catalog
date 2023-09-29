@@ -2,6 +2,13 @@
 
 Tag Release:
   stage: Release
+  needs:
+    - Build DB Image
+    - Build LegacyLinks Image
+    - Build Monitoring Image
+    - Build Solr Image
+    - Build Vufind Image
+    - Build ZK Image
   tags:
     - msul-shared
   interruptible: true
