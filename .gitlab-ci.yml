@@ -199,7 +199,6 @@ Run Functional Tests:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Populate Vufind Environment
   script:
     - bash ./cicd/run-functional-tests
 
