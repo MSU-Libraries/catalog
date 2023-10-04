@@ -24,7 +24,7 @@ public class LocationMixin extends SolrIndexerMixin {
             List<Subfield> tSubfields = getSubfieldsMatching(location, "t");
             if (tSubfields.stream().anyMatch(t -> "1".equals(t.getData().trim()))) {
                 // Ignore location when 952t is 1
-                continue;
+                return;
             }
             List<Subfield> cSubfields = getSubfieldsMatching(location, "c");
             List<Subfield> dSubfields = getSubfieldsMatching(location, "d");
