@@ -4,3 +4,4 @@ Flask==2.2.2
 mariadb==1.1.5.post3
 requests==2.25.1
 humanize==4.4.0
+Werkzeug==2.3.7 # Flask bug workaround, see https://stackoverflow.com/q/77213053/438970
