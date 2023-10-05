@@ -262,6 +262,18 @@ class GetThisLoader
     }
 
     /**
+     * Return true if the location of the given item is at Library of Michigan
+     *
+     * @param array $item item record
+     *
+     * @return bool
+     */
+    public static function locationAtLoM($item)
+    {
+        return str_starts_with($item['location'] ?? '', 'Library of Michigan');
+    }
+
+    /**
      * Get the description for the record
      *
      * @return string The description string
