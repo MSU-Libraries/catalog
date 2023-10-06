@@ -47,7 +47,9 @@ class GetThisLoader
     public function __construct($record, $items, $item_id = null)
     {
         $this->record = $record;
-        $this->items = $items;
+        $this->items = array_values(array_filter($items, function ($it) {
+            return !GetThisLoader::locationAtLoM($it);
+        }));
         $this->item_id = $item_id;
         $this->msgTemplate = null;
         if (null !== $this->item_id) {
