@@ -45,6 +45,26 @@ class Syndetics extends \VuFind\Content\Covers\Syndetics implements \VuFind\Http
     use \VuFind\Http\CachingDownloaderAwareTrait;
 
     /**
+     * Use Syndetics image fallback ?
+     *
+     * @var bool
+     */
+    protected $useSyndeticsCoverImageFallback;
+
+    /**
+     * Constructor
+     *
+     * @param \Laminas\Config\Config $config Syndetics configuration
+     */
+    public function __construct($config)
+    {
+        $this->useSSL = $config->use_ssl ?? false;
+        $this->useSyndeticsCoverImageFallback = $config->use_syndetics_cover_image_fallback ?? false;
+        $this->supportsIsbn = $this->supportsIssn = $this->supportsOclc
+            = $this->supportsUpc = $this->cacheAllowed = true;
+    }
+
+    /**
      * Get image URL for a particular API key and set of IDs (or false if invalid).
      *
      * @param string $key  API key
@@ -60,13 +80,20 @@ class Syndetics extends \VuFind\Content\Covers\Syndetics implements \VuFind\Http
         if ($baseUrl == false) {
             return false;
         }
-        $xmldoc = $this->getMetadataXML($baseUrl);
-        if ($xmldoc == false) {
-            return false;
-        }
-        $filename = $this->getImageFilename($xmldoc, $size);
-        if ($filename == false) {
-            return false;
+        if ($this->useSyndeticsCoverImageFallback) {
+            $filename = $this->getImageFilenameFromSize($size);
+            if ($filename == false) {
+                return false;
+            }
+        } else {
+            $xmldoc = $this->getMetadataXML($baseUrl);
+            if ($xmldoc == false) {
+                return false;
+            }
+            $filename = $this->getImageFilenameFromMetadata($xmldoc, $size);
+            if ($filename == false) {
+                return false;
+            }
         }
         return $this->getImageUrl($baseUrl, $filename);
     }
@@ -106,6 +133,27 @@ class Syndetics extends \VuFind\Content\Covers\Syndetics implements \VuFind\Http
     }
 
     /**
+     * Calculate the image filename based on the size, without checking if it exists in the metadata.
+     *
+     * @param string $size Size of image to load (small/medium/large)
+     *
+     * @return string|bool Image filename, or false if the size is not 'small', 'medium' or 'large'
+     */
+    protected function getImageFilenameFromSize($size)
+    {
+        switch ($size) {
+            case 'small':
+                return 'SC.GIF';
+            case 'medium':
+                return 'MC.GIF';
+            case 'large':
+                return 'LC.JPG';
+            default:
+                return false;
+        }
+    }
+
+    /**
      * Get the Syndetics metadata as XML, using a cache.
      *
      * @param $baseUrl string  Base URL for the Syndetics query
@@ -124,14 +172,14 @@ class Syndetics extends \VuFind\Content\Covers\Syndetics implements \VuFind\Http
     }
 
     /**
-     * Find the image url in the XML returned from API.
+     * Find the image filename in the XML returned from API.
      *
      * @param DOMDocument $xmldoc Parsed XML document
      * @param string      $size   Size of image to load (small/medium/large)
      *
-     * @return string|bool Full url of the image, or false if none matches
+     * @return string|bool Image filename, or false if none matches
      */
-    protected function getImageFilename($xmldoc, $size)
+    protected function getImageFilenameFromMetadata($xmldoc, $size)
     {
         switch ($size) {
             case 'small':

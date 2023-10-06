@@ -71,7 +71,7 @@ class SyndeticsFactory extends \VuFind\Content\Covers\SyndeticsFactory
         }
         $config = $container->get(\VuFind\Config\PluginManager::class)
             ->get('config');
-        $syndetics = new $requestedName($config->Syndetics->use_ssl ?? false);
+        $syndetics = new $requestedName($config->Syndetics ?? null);
         $cachingDownloader = $container->get(\VuFind\Http\CachingDownloader::class);
         $syndetics->setCachingDownloader($cachingDownloader);
         return $syndetics;
