@@ -3,7 +3,7 @@
 /**
  * Google cover content loader.
  *
- * PHP version 8
+ * PHP version 7
  *
  * Copyright (C) Villanova University 2010.
  *
@@ -22,29 +22,25 @@
  *
  * @category VuFind
  * @package  Content
- * @author   Damien Guillaume <damieng@msu.edu>
+ * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development Wiki
  */
 
 namespace Catalog\Content\Covers;
 
-use VuFind\Exception\HttpDownloadException;
-
-use function is_callable;
-
 /**
  * Google cover content loader.
  *
  * @category VuFind
  * @package  Content
- * @author   Damien Guillaume <damieng@msu.edu>
+ * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development Wiki
  */
-class Google extends \VuFind\Content\AbstractCover implements \VuFind\Http\CachingDownloaderAwareInterface
+class Google extends \VuFind\Content\AbstractCover implements \VuFindHttp\HttpServiceAwareInterface
 {
-    use \VuFind\Http\CachingDownloaderAwareTrait;
+    use \VuFindHttp\HttpServiceAwareTrait;
 
     /**
      * Constructor
@@ -52,7 +48,21 @@ class Google extends \VuFind\Content\AbstractCover implements \VuFind\Http\Cachi
     public function __construct()
     {
         $this->supportsIsbn = $this->supportsOclc = true;
-        $this->cacheOptionsSection = 'GoogleCover';
+    }
+
+    /**
+     * Get an HTTP client
+     *
+     * @param string $url URL for client to use
+     *
+     * @return \Laminas\Http\Client
+     */
+    protected function getHttpClient($url = null)
+    {
+        if (null === $this->httpService) {
+            throw new \Exception('HTTP service missing.');
+        }
+        return $this->httpService->createClient($url);
     }
 
     /**
@@ -69,67 +79,39 @@ class Google extends \VuFind\Content\AbstractCover implements \VuFind\Http\Cachi
      */
     public function getUrl($key, $size, $ids)
     {
-        // Don't bother trying if we can't read JSON or ISBN and OCLC are missing:
-        if (!is_callable('json_decode') || (!isset($ids['isbn']) && !isset($ids['oclc']))) {
+        // Don't bother trying if we can't read JSON or ISBN is missing:
+        if (!is_callable('json_decode') || !isset($ids['isbn'])) {
             return false;
         }
 
         // Construct the request URL and make the HTTP request:
         if (isset($ids['isbn']) && $ids['isbn']->isValid()) {
-            $ident .= "ISBN:{$ids['isbn']->get13()}";
+            $ident = "ISBN:{$ids['isbn']->get13()}";
         } elseif (isset($ids['oclc'])) {
-            $ident .= "OCLC:{$ids['oclc']}";
+            $ident = "OCLC:{$ids['oclc']}";
         } else {
             return false;
         }
         $url = 'https://books.google.com/books?jscmd=viewapi&' .
                'bibkeys=' . $ident . '&callback=addTheCover';
+        $result = $this->getHttpClient($url)->send();
 
-        $decodeCallback = function (\Laminas\Http\Response $response, $url) {
-            if (
-                !preg_match(
-                    '/^[^{]*({.*})[^}]*$/',
-                    $response->getBody(),
-                    $matches
-                )
-            ) {
-                throw new HttpDownloadException(
-                    'Invalid response body (raw)',
-                    $url,
-                    $response->getStatusCode(),
-                    $response->getHeaders(),
-                    $response->getBody()
-                );
-            }
-
+        // If the request was successful and we can extract a valid response...
+        if (
+            $result->isSuccess()
+            && preg_match('/^[^{]*({.*})[^}]*$/', $result->getBody(), $matches)
+        ) {
             // convert \x26 or \u0026 to &
             $json = json_decode(
                 str_replace(['\\x26', '\\u0026'], '&', $matches[1]),
                 true
             );
 
-            if ($json === null) {
-                throw new HttpDownloadException(
-                    'Invalid response body (json)',
-                    $url,
-                    $response->getStatusCode(),
-                    $response->getHeaders(),
-                    $response->getBody()
-                );
-            }
-
-            return $json;
-        };
-
-        if (!isset($this->cachingDownloader)) {
-            throw new \Exception('CachingDownloader initialization failed.');
-        }
-
-        $json = $this->cachingDownloader->download($url, [], $decodeCallback);
-        // find the first thumbnail URL and process it:
-        foreach ((array)$json as $current) {
-            if (isset($current['thumbnail_url'])) {
-                return $current['thumbnail_url'];
+            // find the first thumbnail URL and process it:
+            foreach ((array)$json as $current) {
+                if (isset($current['thumbnail_url'])) {
+                    return $current['thumbnail_url'];
+                }
             }
         }
         return false;
