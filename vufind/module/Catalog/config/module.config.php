@@ -55,9 +55,11 @@ return [
       ],
       'content_covers' => [
         'factories' => [
+          'Catalog\\Content\\Covers\\Google' => 'VuFind\\Content\\Covers\\GoogleFactory',
           'Catalog\\Content\\Covers\\Syndetics' => 'Catalog\\Content\\Covers\\SyndeticsFactory',
         ],
         'aliases' => [
+          'google' => 'Catalog\\Content\\Covers\\Google',
           'syndetics' => 'Catalog\\Content\\Covers\\Syndetics',
         ],
       ],
