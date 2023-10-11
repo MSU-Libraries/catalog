@@ -80,7 +80,7 @@ class Google extends \VuFind\Content\AbstractCover implements \VuFindHttp\HttpSe
     public function getUrl($key, $size, $ids)
     {
         // Don't bother trying if we can't read JSON or ISBN is missing:
-        if (!is_callable('json_decode') || !isset($ids['isbn'])) {
+        if (!is_callable('json_decode') || (!isset($ids['isbn']) && !isset($ids['oclc']))) {
             return false;
         }
 
