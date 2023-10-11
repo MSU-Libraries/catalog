@@ -77,7 +77,7 @@ class Google extends \VuFind\Content\AbstractCover implements \VuFind\Http\Cachi
         // Construct the request URL and make the HTTP request:
         if (isset($ids['isbn']) && $ids['isbn']->isValid()) {
             $ident .= "ISBN:{$ids['isbn']->get13()}";
-        } else if (isset($ids['oclc'])) {
+        } elseif (isset($ids['oclc'])) {
             $ident .= "OCLC:{$ids['oclc']}";
         } else {
             return false;
