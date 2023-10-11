@@ -110,7 +110,11 @@ class Google extends \VuFind\Content\AbstractCover implements \VuFindHttp\HttpSe
             // find the first thumbnail URL and process it:
             foreach ((array)$json as $current) {
                 if (isset($current['thumbnail_url'])) {
-                    return $current['thumbnail_url'];
+                    $imageUrl = $current['thumbnail_url'];
+                    if ($size == 'medium' || $size == 'large') {
+                        $imageUrl = str_replace('zoom=5', 'zoom=1', $imageUrl);
+                    }
+                    return $imageUrl;
                 }
             }
         }
