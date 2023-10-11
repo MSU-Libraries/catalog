@@ -55,7 +55,7 @@ return [
       ],
       'content_covers' => [
         'factories' => [
-          'Catalog\\Content\\Covers\\Google' => 'VuFind\\Content\\Covers\\GoogleFactory',
+          'Catalog\\Content\\Covers\\Google' => 'Laminas\\ServiceManager\\Factory\\InvokableFactory',
           'Catalog\\Content\\Covers\\Syndetics' => 'Catalog\\Content\\Covers\\SyndeticsFactory',
         ],
         'aliases' => [
