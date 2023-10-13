@@ -361,7 +361,7 @@ import() {
             rm -f ${DEL_FILE%.mrc}.xml
             exit 1
         fi
-        grep -o 'tag="001">[^<]*<' ${DEL_FILE%.mrc}.xml | sed -e 's/.*>\([^<]*\)</hml.\1/' > ${DEL_FILE%.mrc}.delete
+        grep -o 'tag="001">[^<]*<' ${DEL_FILE%.mrc}.xml | sed -e 's/.*>\([^<]*\)</hlm.\1/' > ${DEL_FILE%.mrc}.delete
         # Cleanup the other files that the batch-delete.sh script won't move to the processed dir
         rm ${DEL_FILE%.mrc}.xml
         mv ${FILE} ${ARGS[VUFIND_HARVEST_DIR]}/processed
