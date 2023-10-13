@@ -26,4 +26,6 @@ main() {
 beforescript
 # or if not using beforescript be sure to add this to ensure failed commands
 # fail the script: set -e
+# set xtrace to show commands being run in the CI job logs
+#set -o xtrace
 main

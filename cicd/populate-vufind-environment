@@ -26,15 +26,14 @@ fi
 
 main() {
     # Determine if records are already loaded
-    CONTAINER_A=$(ssh deploy@"${DEPLOY_HOST_A}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "";
-    CONTAINER_B=$(ssh deploy@"${DEPLOY_HOST_B}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "";
-    CONTAINER_C=$(ssh deploy@"${DEPLOY_HOST_C}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "";
+    CATALOG_NODE=$(ssh deploy@"${DEPLOY_HOST_A}" "docker service ps -f 'desired-state=running' --format '{{ .Node }}' ${STACK_NAME}-catalog_catalog") || echo "";
+    CATALOG_CONTAINER=$(ssh deploy@"${CATALOG_NODE}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "";
     S_CONTAINER_A=$(ssh deploy@"${DEPLOY_HOST_A}" "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo "";
     S_CONTAINER_B=$(ssh deploy@"${DEPLOY_HOST_B}" "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo "";
     S_CONTAINER_C=$(ssh deploy@"${DEPLOY_HOST_C}" "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo "";
 
-    if [ -z "${CONTAINER_A}" ] || [ -z "${CONTAINER_B}" ] || [ -z "${CONTAINER_C}" ] ; then
-        echo "Could not find container for ${STACK_NAME}-catalog_catalog on all 3 nodes";
+    if [ -z "${CATALOG_NODE}" ] || [ -z "${CATALOG_CONTAINER}" ] ; then
+        echo "Could not find container for ${STACK_NAME}-catalog_catalog. Node: ${CATALOG_NODE}. Container: ${CATALOG_CONTAINER}";
         exit 1;
     fi;
 
@@ -43,7 +42,7 @@ main() {
         exit 1;
     fi;
 
-    STAT_CD=$(ssh deploy@"${DEPLOY_HOST_A}" "docker exec ${CONTAINER_A} curl 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' --write-out %{http_code} --silent --output /dev/null") || echo "-1";
+    STAT_CD=$(ssh deploy@"${DEPLOY_HOST_A}" "docker exec ${S_CONTAINER_A} curl 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' --write-out %{http_code} --silent --output /dev/null") || echo "-1";
 
     if [[ "${STAT_CD}" -ne 200 ]]; then
         echo "Failed to get number of records from Solr. Curl returned ${STAT_CD}. Sleeping for 5 seconds to add delay before retry.";
@@ -51,15 +50,15 @@ main() {
         exit 1;
     fi;
 
-    NUM_RECS=$(ssh deploy@"${DEPLOY_HOST_A}" "docker exec ${CONTAINER_A} curl -s 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' | jq '.response.numFound'") ||  echo "-1";
+    NUM_RECS=$(ssh deploy@"${DEPLOY_HOST_A}" "docker exec ${S_CONTAINER_A} curl -s 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' | jq '.response.numFound'") ||  echo "-1";
 
     if [[ "${NUM_RECS}" -eq "0" ]]; then
         # Load some records
         echo "Running harvest-and-import.sh now";
-        ssh deploy@"${DEPLOY_HOST_A}" "docker exec ${CONTAINER_A} /harvest-and-import.sh -c -l 1 -b -r -s /mnt/shared/oai/devel-batch >/dev/null 2>&1";
+        ssh deploy@"${CATALOG_NODE}" "docker exec ${CATALOG_CONTAINER} /harvest-and-import.sh -c -l 1 -b -r -s /mnt/shared/oai/devel-batch >/dev/null 2>&1";
         echo "Import completed with exit code $?";
         echo "Running HLM harvest-and-import.sh now";
-        ssh deploy@"${DEPLOY_HOST_A}" "docker exec ${CONTAINER_A} /hlm-harvest-and-import.sh -l 1 -c -i -s /mnt/shared/hlm/devel-batch >/dev/null 2>&1";
+        ssh deploy@"${CATALOG_NODE}" "docker exec ${CATALOG_CONTAINER} /hlm-harvest-and-import.sh -l 1 -c -i -s /mnt/shared/hlm/devel-batch >/dev/null 2>&1";
         echo "Import completed with exit code $?";
         # Rebuild alphabetic browse databases
         echo "Running Alphabetic browse database build";

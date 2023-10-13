@@ -31,9 +31,11 @@ nav:
     - First Time Setup: first-time-setup.md
     - Harvesting &amp; Importing: harvesting-and-importing.md
     - CI/CD: CICD.md
-    - Troubleshooting: troubleshooting.md
 - Administration:
     - Backup &amp; Restore: backup-and-restore.md
     - Upgrading: upgrading.md
+    - VuFind: vufind.md
     - Solr: solr.md
+    - MariaDB: mariadb.md
+    - Traefik: traefik.md
     - Load Testing: load-testing.md

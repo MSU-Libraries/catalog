@@ -3,7 +3,12 @@ Set Prod Stack Name:
   stage: Deploy
   extends: Set Stack Name
   needs:
-    - Verify Stack Health
+    - Build DB Image
+    - Build LegacyLinks Image
+    - Build Monitoring Image
+    - Build Solr Image
+    - Build Vufind Image
+    - Build ZK Image
   variables:
     PROD: "true"
   rules:
@@ -29,9 +34,9 @@ Deploy Prod Internal Network:
       artifacts: true
     - Deploy Prod Compose Files
 
-Initialize Prod Database Logs:
+Initialize Prod Log Dirs:
   stage: Deploy Prod
-  extends: Initialize Database Logs
+  extends: Initialize Log Dirs
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
@@ -69,7 +74,7 @@ Deploy Prod DB:
     - job: Set Prod Stack Name
       artifacts: true
     - Bootstrap Prod Stacks
-    - Initialize Prod Database Logs
+    - Initialize Prod Log Dirs
 
 Deploy Prod Vufind:
   stage: Deploy Prod

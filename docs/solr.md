@@ -83,11 +83,15 @@ root@vufind:/usr/local/vufind# /hlm-harvest-and-import.sh --import --verbose | t
 curl 'http://solr:8983/solr/admin/metrics?nodes=solr1:8983_solr,solr2:8983_solr,solr3:8983_solr&prefix=SEARCHER.searcher.numDocs,SEARCHER.searcher.deletedDocs&wt=json'
 ```
 
-* Once you are confident in the new data, you are ready to do the swap! **BE SURE TO SWAP THE NAME AND COLLECTION IN THE BELOW COMMAND EXAMPLE**
+* Once you are confident in the new data, you are ready to do the swap! **BE SURE TO SWAP THE NAME AND COLLECTION IN THE BELOW COMMAND EXAMPLE**  
+!!! warning
+    Your Solr instance may require more memory than it typically needs to do the collection alias swap.
+    Be sure to increase and deploy the stack with additional `SOLR_JAVA_MEM` as required to  ensure no
+    downtime during this step.
 ```bash
 # This EXAMPLE sets biblio-build to biblio2, and biblio to biblio1
 curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio2'
-curl 'http://solr:8983/3solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1'
+curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1'
 ```
 
 * If needed, back-date the timestamp on your `last_harvest.txt` re-harvest some of the OAI changes since you started the import
@@ -128,6 +132,37 @@ command.
 # Deletes the document with the id of folio.in00006795294 from the biblio collection
 curl 'http://solr1:8983/solr/biblio/update' --data '<delete><query>id:folio.in00006795294</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
 curl 'http://solr1:8983/solr/biblio/update' --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+```
+
+## Troubleshooting
+
+* Solr can be accessed via https://your-site/solr which is helpful
+for verifying the state that the cloud is in (Cloud -> Nodes) as well as the ZooKeeper
+containers (Cloud -> ZK Status). Additionally you can check the status of the collections
+(Cloud -> Graph) to make sure they are marked as Active. It may also be helpful to use the
+web interface for testing queries in too.
+
+* A helper script is included with all of the nodes, called `clusterhealth.sh`,
+that can be run to check all of the replicas and shards across all nodes and report
+and issues identified. It can be run by:
+
+```bash
+docker exec $(docker ps -q -f name=${STACK_NAME}-solr_solr) /clusterhealth.sh
+```
+
+* To view the Docker healthcheck logs from a particular container you can:
+
+```bash
+# View from running containers
+docker inspect --format '{{ .State.Health.Status }}' $(docker ps -q -f name=${STACK_NAME}-solr_solr)
+docker inspect --format '{{ (index .State.Health.Log 0).Output }}' $(docker ps -q -f name=${STACK_NAME}-solr_solr)
+
+# View from stopped containers
+docker inspect --format '{{ .State.Health.Status }}' [CONTAINER_ID]
+docker inspect --format '{{ (index .State.Health.Log 0).Output }}' [CONTAINER_ID]
+
+# Run healthcheck script manually
+docker exec $(docker ps -q -f name=${STACK_NAME}-solr_solr) /healthcheck.sh
 ```
 
 ## Fixing Down Solr Replicas

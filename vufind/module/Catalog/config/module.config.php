@@ -27,9 +27,58 @@ return [
   ],
   'vufind' => [
     'plugin_managers' => [
-      'search_backend' => [
+      'ajaxhandler' => [
         'factories' => [
-          'EDS' => 'Catalog\\Search\\Factory\\EdsBackendFactory',
+          'Catalog\\AjaxHandler\\GetItemStatuses' => 'VuFind\\AjaxHandler\\GetItemStatusesFactory',
+        ],
+        'aliases' => [
+          'getItemStatuses' => 'Catalog\\AjaxHandler\\GetItemStatuses',
+        ],
+      ],
+      'auth' => [
+        'factories' => [
+          'Catalog\\Auth\\SAML' => 'Catalog\\Auth\\SAMLFactory',
+          'Catalog\\Auth\\Okapi' => 'Catalog\\Auth\\OkapiFactory',
+        ],
+        'aliases' => [
+          'saml' => 'Catalog\\Auth\\SAML',
+          'okapi' => 'Catalog\\Auth\\Okapi',
+        ],
+      ],
+      'command' => [
+        'factories' => [
+          'Catalog\\Command\\Util\\IndexReservesCommand' => 'VuFindConsole\\Command\\Util\\AbstractSolrAndIlsCommandFactory',
+        ],
+        'aliases' => [
+          'util/index_reserves' => 'Catalog\\Command\\Util\\IndexReservesCommand',
+        ],
+      ],
+      'content_covers' => [
+        'factories' => [
+          'Catalog\\Content\\Covers\\Google' => 'Laminas\\ServiceManager\\Factory\\InvokableFactory',
+          'Catalog\\Content\\Covers\\Syndetics' => 'Catalog\\Content\\Covers\\SyndeticsFactory',
+        ],
+        'aliases' => [
+          'google' => 'Catalog\\Content\\Covers\\Google',
+          'syndetics' => 'Catalog\\Content\\Covers\\Syndetics',
+        ],
+      ],
+      'form_handler' => [
+        'factories' => [
+          'Catalog\\Form\\Handler\\Email' => 'VuFind\\Form\\Handler\\EmailFactory',
+        ],
+        'aliases' => [
+          'VuFind\\Form\\Handler\\Email' => 'Catalog\\Form\\Handler\\Email',
+        ],
+      ],
+      'ils_driver' => [
+        'factories' => [
+          'Catalog\\ILS\\Driver\\Folio' => 'VuFind\\ILS\\Driver\\FolioFactory',
+          'Catalog\\ILS\\Driver\\MultiBackend' => 'VuFind\\ILS\\Driver\\MultiBackendFactory',
+        ],
+        'aliases' => [
+          'folio' => 'Catalog\\ILS\\Driver\\Folio',
+          'multibackend' => 'Catalog\\ILS\\Driver\\MultiBackend',
         ],
       ],
       'recorddriver' => [
@@ -47,48 +96,9 @@ return [
           ],
         ],
       ],
-      'auth' => [
+      'search_backend' => [
         'factories' => [
-          'Catalog\\Auth\\SAML' => 'Catalog\\Auth\\SAMLFactory',
-          'Catalog\\Auth\\Okapi' => 'Catalog\\Auth\\OkapiFactory',
-        ],
-        'aliases' => [
-          'saml' => 'Catalog\\Auth\\SAML',
-          'okapi' => 'Catalog\\Auth\\Okapi',
-        ],
-      ],
-      'ajaxhandler' => [
-        'factories' => [
-          'Catalog\\AjaxHandler\\GetItemStatuses' => 'VuFind\\AjaxHandler\\GetItemStatusesFactory',
-        ],
-        'aliases' => [
-          'getItemStatuses' => 'Catalog\\AjaxHandler\\GetItemStatuses',
-        ],
-      ],
-      'ils_driver' => [
-        'factories' => [
-          'Catalog\\ILS\\Driver\\Folio' => 'VuFind\\ILS\\Driver\\FolioFactory',
-          'Catalog\\ILS\\Driver\\MultiBackend' => 'VuFind\\ILS\\Driver\\MultiBackendFactory',
-        ],
-        'aliases' => [
-          'folio' => 'Catalog\\ILS\\Driver\\Folio',
-          'multibackend' => 'Catalog\\ILS\\Driver\\MultiBackend',
-        ],
-      ],
-      'command' => [
-        'factories' => [
-          'Catalog\\Command\\Util\\IndexReservesCommand' => 'VuFindConsole\\Command\\Util\\AbstractSolrAndIlsCommandFactory',
-        ],
-        'aliases' => [
-          'util/index_reserves' => 'Catalog\\Command\\Util\\IndexReservesCommand',
-        ],
-      ],
-      'form_handler' => [
-        'factories' => [
-          'Catalog\\Form\\Handler\\Email' => 'VuFind\\Form\\Handler\\EmailFactory',
-        ],
-        'aliases' => [
-          'VuFind\\Form\\Handler\\Email' => 'Catalog\\Form\\Handler\\Email',
+          'EDS' => 'Catalog\\Search\\Factory\\EdsBackendFactory',
         ],
       ],
     ],
