@@ -87,7 +87,15 @@ that is frequently required to update the Solr index with new field updates. If 
 harvests or incremental) refer to the `--help` flags on the appropriate script.
 
 ### `biblio` Index
-1. Connect to one of the catalog server nodes and move the following files up a level out of the
+Full imports for the `biblio` collection can be done
+- directly in the `cron` container for prod/beta/preview,
+- in the `catalog` container for dev environments,
+- using the `biblio` collection alias in the `build` container,
+to avoid serving incomplete collections in prod (see
+[How to Use the Collection Aliases to Rebuild and Swap](#how-to-use-the-collection-aliases-to-rebuild-and-swap) below).
+
+#### Importing FOLIO records using the cron container
+Connect to one of the catalog server nodes and move the following files up a level out of the
 processed directory in the shared storage. This will allow them to be picked up by the next cron job
 and re-started automatically should the container get stopped due to deployments. Progress can be monitored
 by checking then number of files remaining in the directory and the log file in `/mnt/logs/harvests/folio_latest.log`.
@@ -96,7 +104,14 @@ by checking then number of files remaining in the directory and the log file in 
 mv /mnt/shared/oai/[STACK_NAME]/harvest_folio/processed/* /mnt/shared/oai/[STACK_NAME]/harvest_folio/
 ```
 
-2. Assuming HLM records also need to be updated in the `biblio` index as well, you will need to copy those files from
+#### Importing FOLIO records in dev environments
+This will import the tests records. In the `catalog` container:
+```
+./harvest-and-import.sh -c -l 1 -b -v -r -s /mnt/shared/oai/devel-batch
+```
+
+#### Importing HLM records using the cron container
+Assuming HLM records also need to be updated in the `biblio` index as well, you will need to copy those files from
 the shared directory into the container prior to starting the script. Then start a `screen` session and connect to the
 container again and run the command to import the files. Note that this will get terminated and not be recoverable if
 the container stops due to a deploy like the previous command was. Process can be monitored by seeing the remaining
@@ -108,6 +123,69 @@ cp /mnt/shared/hlm/[STACK_NAME]/current/* /usr/local/vufind/local/harvest/hlm/
 
 # You will want to kick off this command in a screen session, since it can take many hours to run
 /hlm-harvest-and-import.sh -i
+```
+
+#### How to Use the Collection Aliases to Rebuild and Swap
+As mentioned in the [Solr documentation](solr.md#collection-structure), `biblio` uses aliases to manage directing
+VuFind to the collection in Solr that have the "live" biblio data that should be used for searching: `biblio1` or `biblio2`.
+This means we will on occassion need to swap them. This occassion being when we rebuild the index,
+such as when we're adding new data fields or doing a VuFind version upgrade (...which typically
+add new data fields).
+
+* Identify what collection each alias is pointing to currently (i.e. is `biblio` pointing
+to `biblio1` or `biblio2`) and confirm the **other** collection is what `biblio-build` is
+pointing to
+
+* Clear out the collection that `biblio-build` is pointing to
+```bash
+curl 'http://solr1:8983/solr/biblio-build/update' --data '<delete><query>id:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl 'http://solr1:8983/solr/biblio-build/update' --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+```
+
+* Rebuild you index on `biblio-build` using the `catalog_build` container. This has
+everything that the `catalog_cron` containers have access to, but do not run `cron`
+jobs since rebuilds do not happen at regular or frequent intervals. In fact, all this container
+does is sleep! It is recommended to run these commands in a `screen`.  
+!!! warning
+    If you run a deploy pipeline while this is running, you will not want to run
+    the manual job that deploys the updates to the build container (since not all of the
+    import scripts are configured to resume where they left off yet).  
+```bash
+user@catalog-1$ screen
+user@catalog-1$ docker exec -it catalog-prod-catalog_build.12345 bash
+root@vufind:/usr/local/vufind# cp /mnt/shared/oai/${STACK_NAME}/harvest_folio/processed/* local/harvest/folio/
+root@vufind:/usr/local/vufind# /harvest-and-import.sh --verbose --collection biblio-build --batch-import | tee /mnt/shared/logs/folio_import.log
+[Ctrl-a d]
+user@catalog-1$ screen
+user@catalog-1$ docker exec -it catalog-prod-catalog_build.12345 bash
+root@vufind:/usr/local/vufind# cp /mnt/shared/hlm/${STACK_NAME}/current/* local/harvest/hlm/
+root@vufind:/usr/local/vufind# /hlm-harvest-and-import.sh --import --verbose | tee /mnt/shared/logs/hlm_import.log
+[Ctrl-a d]
+```
+
+* Verify the counts are what you expect on the `biblio-build` collection using the following command
+```bash
+curl 'http://solr:8983/solr/admin/metrics?nodes=solr1:8983_solr,solr2:8983_solr,solr3:8983_solr&prefix=SEARCHER.searcher.numDocs,SEARCHER.searcher.deletedDocs&wt=json'
+```
+
+* Once you are confident in the new data, you are ready to do the swap! **BE SURE TO SWAP THE NAME AND COLLECTION IN THE BELOW COMMAND EXAMPLE**  
+!!! warning
+    Your Solr instance may require more memory than it typically needs to do the collection alias swap.
+    Be sure to increase and deploy the stack with additional `SOLR_JAVA_MEM` as required to  ensure no
+    downtime during this step.
+```bash
+# This EXAMPLE sets biblio-build to biblio2, and biblio to biblio1
+curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio2'
+curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1'
+```
+
+* If needed, back-date the timestamp on your `last_harvest.txt` re-harvest some of the OAI changes since you started the import
+
+* Clear out the collection that `biblio-build` is pointing to, to avoid having two large indexing stored for a long period of time
+(only after you are confident in the new index's data)
+```bash
+curl 'http://solr1:8983/solr/biblio-build/update' --data '<delete><query>id:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
+curl 'http://solr1:8983/solr/biblio-build/update' --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 ```
 
 ### `authority` Index
