@@ -8,6 +8,10 @@ import aiohttp
 
 import util
 
+
+KNOWN_VARIABLES = ['available_memory', 'available_disk_space', 'apache_requests', 'response_time']
+
+
 def _times_by_period(period):
     delta_by_period = {
         'hour': timedelta(hours=1),
@@ -53,7 +57,7 @@ def _sql_query(variable, period_start, period_end, group):
     }
     sql_group = sql_group_by_group[group]
     node = os.getenv('NODE')
-    if variable == 'apache_requests':
+    if variable in ['apache_requests', 'response_time']:
         aggreg = 'AVG'
     else:
         aggreg = 'MIN'
@@ -61,7 +65,7 @@ def _sql_query(variable, period_start, period_end, group):
         f'WHERE time > "{sql_start}" AND time < "{sql_end}" AND node = {node} GROUP BY {sql_group};'
 
 def node_graph_data(variable, period):
-    if variable not in ['available_memory', 'available_disk_space', 'apache_requests']:
+    if variable not in KNOWN_VARIABLES:
         return 'Error: unknown variable'
     if period not in ['hour', 'day', 'week', 'month', 'year']:
         return 'Error: unknown period'
@@ -70,7 +74,8 @@ def node_graph_data(variable, period):
     group = _group_by_times(period_start, period_end)
     conn = None
     try:
-        conn = db.connect(user='monitoring', password=os.getenv('MARIADB_MONITORING_PASSWORD'), host='galera', database="monitoring")
+        conn = db.connect(user='monitoring', password=os.getenv('MARIADB_MONITORING_PASSWORD'), host='galera',
+            database="monitoring")
         cur = conn.cursor()
         cur.execute(_sql_query(variable, period_start, period_end, group))
         pt_x = []
@@ -98,7 +103,7 @@ def node_graph_data(variable, period):
     return result
 
 def graph(variable, period):
-    if variable not in ['available_memory', 'available_disk_space', 'apache_requests']:
+    if variable not in KNOWN_VARIABLES:
         return 'Error: unknown variable'
     if period not in ['hour', 'day', 'week', 'month', 'year']:
         return 'Error: unknown period'
