@@ -48,7 +48,7 @@ def _vufind_search_response_time():
     formatted_time = last_minute.strftime("%d/%b/%Y:%H:%M:[0-9]{2} %z")
     tail = f"tail -c 10240000 {ACCESS_LOG_PATH}"
     grep = f"grep -E '{formatted_time}.*/Search/Results.* [0-9]+$'"
-    awk = "awk '{s+=$NF}END{print int(s/NR/1000)}'"
+    awk = "awk '{ s += $NF } END { print (NR > 0) ? int(s/NR/1000) : 0 }'"
     command = f"{tail} | {grep} | {awk}"
     try:
         process = subprocess.run(["/bin/sh", "-c", command],
