@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `data` (
     `available_memory` FLOAT NOT NULL,
     `available_disk_space` FLOAT NOT NULL,
     `apache_requests` INT NOT NULL,
-    `response_time` INT NOT NULL,
+    `response_time` INT NOT NULL
 );
 
 GRANT ALL PRIVILEGES ON monitoring.* TO 'monitoring'@'%' identified by '${MARIADB_MONITORING_PASSWORD}';
