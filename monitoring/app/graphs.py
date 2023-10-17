@@ -89,8 +89,9 @@ def node_graph_data(variable, period):
                 x = datetime(row[0], row[1], row[2], row[3]).strftime('%Y-%m-%d %H')
             else:
                 x = datetime(row[0], row[1], row[2], row[3], row[4]).strftime('%Y-%m-%d %H:%M:%S')
-            pt_x.append(x)
-            pt_y.append(row[-1])
+            if row[-1] is not None:
+                pt_x.append(x)
+                pt_y.append(row[-1])
     except db.Error as err:
         if conn is not None:
             conn.close()

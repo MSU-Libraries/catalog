@@ -44,6 +44,7 @@ def _get_last_minute_apache_requests():
 
 def _vufind_search_response_time():
     # get the average search response time in ms from the apache log within the previous minute
+    # return None if it cannot be calculated
     last_minute = datetime.now() - timedelta(minutes=1)
     formatted_time = last_minute.strftime("%d/%b/%Y:%H:%M:[0-9]{2} %z")
     tail = f"tail -c 10240000 {ACCESS_LOG_PATH}"
@@ -55,16 +56,19 @@ def _vufind_search_response_time():
             capture_output=True, text=True, timeout=TIMEOUT, check=True)
     except subprocess.CalledProcessError as err:
         print(f"Error getting response time from apache log: {err.stderr}", file=sys.stderr)
-        return 0
+        return None
     except subprocess.TimeoutExpired:
         print("Timeout getting response time from apache log", file=sys.stderr)
-        return 0
+        return None
     try:
-        return int(process.stdout)
+        value = int(process.stdout)
+        if value == 0:
+            return None
+        return value
     except ValueError:
         print(f"Error interpreting response time from apache log: {process.stdout}", file=sys.stderr)
         print(f"  stderr: {process.stderr}", file=sys.stderr)
-        return 0
+        return None
 
 def main():
     time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -76,7 +80,7 @@ def main():
         response_time = _vufind_search_response_time()
     else:
         nb_requests = 0
-        response_time = 0
+        response_time = None
     conn = None
     try:
         conn = db.connect(user='monitoring', password=os.getenv('MARIADB_MONITORING_PASSWORD'), host='galera',
