@@ -1,3 +1,4 @@
+import pathlib
 import os
 import sys
 import subprocess
@@ -9,6 +10,7 @@ import status
 
 
 TIMEOUT = 10
+ACCESS_LOG_PATH = '/mnt/logs/apache/access.log'
 
 
 def init(debug):
@@ -23,7 +25,7 @@ def _get_last_minute_apache_requests():
     formatted_time = last_minute.strftime("%d/%b/%Y:%H:%M:.. %z")
     # Tail of logs to use -c in order to avoid needed to parse file for line endings
     # Max tail chars = 10000 lines * 1024 max log entry length
-    command = f"tail -c 10240000 /mnt/logs/apache/access.log | grep '{formatted_time}' | wc -l"
+    command = f"tail -c 10240000 {ACCESS_LOG_PATH} | grep '{formatted_time}' | wc -l"
     try:
         process = subprocess.run(["/bin/sh", "-c", command],
             capture_output=True, text=True, timeout=TIMEOUT, check=True)
@@ -43,9 +45,9 @@ def _get_last_minute_apache_requests():
 def _vufind_search_response_time():
     # get the average search response time in ms from the apache log within the previous minute
     last_minute = datetime.now() - timedelta(minutes=1)
-    formatted_time = last_minute.strftime("%d/%b/%Y:%H:%M:.. %z")
-    tail = "tail -c 10240000 /mnt/logs/apache/access.log"
-    grep = f"grep '{formatted_time}.*/Search/Results.*\\s[0-9]$'"
+    formatted_time = last_minute.strftime("%d/%b/%Y:%H:%M:[0-9]{2} %z")
+    tail = f"tail -c 10240000 {ACCESS_LOG_PATH}"
+    grep = f"grep -E '{formatted_time}.*/Search/Results.* [0-9]+$'"
     awk = "awk '{s+=$NF}END{print int(s/NR/1000)}'"
     command = f"{tail} | {grep} | {awk}"
     try:
@@ -69,8 +71,12 @@ def main():
     node = os.getenv('NODE')
     memory = status.node_available_memory()
     disk = status.node_available_disk_space()
-    nb_requests = _get_last_minute_apache_requests()
-    response_time = _vufind_search_response_time()
+    if pathlib.Path(ACCESS_LOG_PATH).is_file():
+        nb_requests = _get_last_minute_apache_requests()
+        response_time = _vufind_search_response_time()
+    else:
+        nb_requests = 0
+        response_time = 0
     conn = None
     try:
         conn = db.connect(user='monitoring', password=os.getenv('MARIADB_MONITORING_PASSWORD'), host='galera',
