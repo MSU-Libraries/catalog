@@ -2,6 +2,7 @@ import os
 import sys
 import subprocess
 from datetime import datetime, timedelta
+import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 import mariadb as db
 
@@ -40,19 +41,33 @@ def _get_last_minute_apache_requests():
         print(f"  stderr: {process.stderr}", file=sys.stderr)
         return 0
 
+def _vufind_search_response_time(node):
+    try:
+        req = requests.get(
+            f'http://vufind{node}/Search/Results?limit=20&dfApplied=1&lookfor=life+in+the+new+world&type=AllFields',
+            timeout=TIMEOUT)
+        req.raise_for_status()
+        return req.elapsed.microseconds // 1000
+    except requests.exceptions.Timeout:
+        return TIMEOUT * 1000
+    except (requests.exceptions.HTTPError, requests.exceptions.RequestException):
+        return 0
+
 def main():
     time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     node = os.getenv('NODE')
     memory = status.node_available_memory()
     disk = status.node_available_disk_space()
     nb_requests = _get_last_minute_apache_requests()
+    response_time = _vufind_search_response_time(node)
     conn = None
     try:
-        conn = db.connect(user='monitoring', password=os.getenv('MARIADB_MONITORING_PASSWORD'), host='galera', database="monitoring")
+        conn = db.connect(user='monitoring', password=os.getenv('MARIADB_MONITORING_PASSWORD'), host='galera',
+            database="monitoring")
         cur = conn.cursor()
         statement = "INSERT INTO data (node, time, available_memory, available_disk_space, " \
-            "apache_requests) VALUES (%s, %s, %s, %s, %s)"
-        data = (node, time, memory, disk, nb_requests)
+            "apache_requests, response_time) VALUES (%s, %s, %s, %s, %s, %s)"
+        data = (node, time, memory, disk, nb_requests, response_time)
         cur.execute(statement, data)
         conn.commit()
     except db.Error as err:
