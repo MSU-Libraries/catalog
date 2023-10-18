@@ -285,7 +285,7 @@ class GetThisLoader
      */
     public static function locationAtLoM($item)
     {
-        return str_starts_with($item['location'] ?? '', 'Library of Michigan');
+        return str_starts_with(strtolower($item['location'] ?? ''), 'library of michigan');
     }
 
     /**

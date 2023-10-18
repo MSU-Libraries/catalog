@@ -1,7 +1,7 @@
 <?php
 use Catalog\GetThis\GetThisLoader;
-?>
-<?php if ($this->holdings()->holdingIsVisible($holding)): ?>
+
+if ($this->holdings()->holdingIsVisible($holding)): ?>
   <?php
     # TODO is $holding actually an item record? possibly!
     $id = $holding['id'];
