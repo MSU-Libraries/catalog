@@ -15,7 +15,11 @@ default_args() {
     ARGS[FTP_USER]=${FTP_USER}
     ARGS[FTP_PASSWORD]=${FTP_PASSWORD}
     ARGS[SHARED_DIR]=/mnt/hlm
+    ARGS[DRY_RUN]=0
     ARGS[VERBOSE]=0
+    # This is not part of ARGS because bash does not support multidimensional arrays
+    IGNORE_SUBSTR=( "-2021" "-2022" "-202301" "-202302" )
+    IGNORE_SUBSTR+=( "-202303" "-202304" "-202305" "-202306" "-202307" "-202308" )
 }
 default_args
 
@@ -54,6 +58,12 @@ runhelp() {
     echo "  -l|--limit COPY_COUNT"
     echo "      Usable with --copy-shared only. This will limit the number"
     echo "      of files copied from SHARED_DIR to VUFIND_HARVEST_DIR."
+    echo "  -p|--ignore-substr SUBSTR"
+    echo "      Substring to match on in the HLM FTP location and ignore those"
+    echo "      files when considering them for syncing. This flag can be passed"
+    echo "      multiple times"
+    echo "  -n|--dry-run"
+    echo "      Perform the harvest in dry-run mode (just listing files it would copy)"
     echo "  -X|--limit-by-delete IMPORT_COUNT"
     echo "      Usable with --batch-import only. This will limit the number"
     echo "      of files imported from VUFIND_HARVEST_DIR by deleting MARC"
@@ -89,6 +99,7 @@ fi
 
 # Parse command arguments
 parse_args() {
+    FIRST_PASS=0
     # Parse flag arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -101,9 +112,20 @@ parse_args() {
         -c|--copy-shared)
             ARGS[COPY_SHARED]=1
             shift;;
+        -n|--dry-run)
+            ARGS[DRY_RUN]=1
+            shift;;
         -i|--import)
             ARGS[IMPORT]=1
             shift;;
+        -p|--ignore-substr)
+            # Clear out the defaults if a user provided value is set
+            if [ "${FIRST_PASS}" -eq 0 ]; then
+                IGNORE_SUBSTR=()
+                FIRST_PASS=1
+            fi
+            IGNORE_SUBSTR+=("$2")
+            shift; shift;;
         -l|--limit)
             ARGS[LIMIT]="$2"
             if [[ ! "${ARGS[LIMIT]}" -gt 0 ]]; then
@@ -267,6 +289,17 @@ clear_harvest_files() {
     find "${1}" -mindepth 1 -maxdepth 1 -name '*.marc' -delete
 }
 
+# Determines if a file matches any of the provided ignore substring patterns
+is_ignored() {
+    FILE="${1}"
+    for SUBSTR in "${IGNORE_SUBSTR[@]}"; do
+        if [[ "${FILE}" == *"${SUBSTR}"* ]]; then
+            return 1
+        fi
+    done
+    return 0
+}
+
 # Perform an harvest of HLM Records
 harvest() {
     assert_vufind_harvest_dir_writable
@@ -276,27 +309,31 @@ harvest() {
     if [[ "${ARGS[FULL]}" -eq 1 ]]; then
         verbose "Clearing VuFind harvest directory for new full harvest."
         clear_harvest_files "${ARGS[VUFIND_HARVEST_DIR]}/"
-        
+
         archive_current_harvest
 
         verbose "Clearing shared current directory before we sync the new full harvest."
         clear_harvest_files "${ARGS[SHARED_DIR]}/current/"
     fi
 
+    verbose "Starting harvest of new files."
     # Check FTP server to compare files for ones we don't have
     OLD_PWD=$(pwd)
     cd ${ARGS[VUFIND_HARVEST_DIR]}
     while IFS= read -r HLM_FILE
     do
-        # If it is not in the shared storage and it is an MARC file, then get it
-        if [ ! -f "${ARGS[SHARED_DIR]}/current/${HLM_FILE}" ] && [[ ${HLM_FILE} == *.marc ]]; then
-            if ! wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${HLM_FILE} > /dev/null 2>&1; then
-                verbose "ERROR: Failed to retrieve ${HLM_FILE} from FTP server" 1
-                exit 1
+        # If it is not in the shared storage, it is not and ignored patten, and it is an MARC file, then get it
+        if is_ignored "${HLM_FILE}" && [ ! -f "${ARGS[SHARED_DIR]}/current/${HLM_FILE}" ] && [[ "${HLM_FILE}" == *.marc ]]; then
+            verbose "Getting ${HLM_FILE}"
+            if [ "${ARGS[DRY_RUN]}" -eq "0" ]; then
+                if ! wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/"${HLM_FILE}" > /dev/null 2>&1; then
+                    verbose "ERROR: Failed to retrieve ${HLM_FILE} from FTP server" 1
+                    exit 1
+                fi
             fi
         fi
     done < <(curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]} -l -s)
-    cd ${OLD_PWD}
+    cd "${OLD_PWD}"
 
     verbose "Syncing harvest files to shared storage."
     if ! rsync -ai --exclude "processed" --exclude "log" --exclude ".gitkeep" "${ARGS[VUFIND_HARVEST_DIR]}"/ "${ARGS[SHARED_DIR]}/current/" > /dev/null 2>&1; then
@@ -345,27 +382,21 @@ import() {
     else
         countdown 5
     fi
-    # TODO -- can remove once https://github.com/vufind-org/vufind/pull/2623 is included
-    # in a release (remember to also update the while loop find below too to)
-    verbose "Pre-processing import files to rename from .marc to .mrc"
-    while read -r FILE; do
-        mv ${FILE} ${FILE%.marc}.mrc
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.marc')
 
     verbose "Pre-processing deletion files to extract IDs from EBSCO MARC records"
     mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/processed # needed in case it doesn't already exist
     while read -r FILE; do
-        DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/$(basename ${FILE})
-        if ! marc2xml ${FILE} > ${DEL_FILE%.mrc}.xml; then
+        DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/$(basename "${FILE}")
+        if ! marc2xml "${FILE}" > "${DEL_FILE%.marc}".xml; then
             verbose "ERROR: marc2xml failed on ${FILE} with code: $?" 1
-            rm -f ${DEL_FILE%.mrc}.xml
+            rm -f "${DEL_FILE%.marc}".xml
             exit 1
         fi
-        grep -o 'tag="001">[^<]*<' ${DEL_FILE%.mrc}.xml | sed -e 's/.*>\([^<]*\)</hlm.\1/' > ${DEL_FILE%.mrc}.delete
+        grep -o 'tag="001">[^<]*<' "${DEL_FILE%.marc}".xml | sed -e 's/.*>\([^<]*\)</hlm.\1/' > "${DEL_FILE%.marc}".delete
         # Cleanup the other files that the batch-delete.sh script won't move to the processed dir
-        rm ${DEL_FILE%.mrc}.xml
-        mv ${FILE} ${ARGS[VUFIND_HARVEST_DIR]}/processed
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*-Del-*.mrc')
+        rm "${DEL_FILE%.marc}".xml
+        mv "${FILE}" ${ARGS[VUFIND_HARVEST_DIR]}/processed
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*-Del-*.marc')
 
     verbose "Running batch import"
     if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
