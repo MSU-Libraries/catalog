@@ -458,6 +458,26 @@ copyback_from_shared() {
     cp --preserve=timestamps "${ARGS[SHARED_DIR]}"/current/last_harvest.txt "${ARGS[VUFIND_HARVEST_DIR]}/"
 }
 
+# Remove processed .delete entries matching ids in the last harvest
+update_processed_delete_files() {
+    verbose "Updating past delete files (in case some records were undeleted)..."
+    DELETE_FILES=(${ARGS[VUFIND_HARVEST_DIR]}/processed/combined_*.delete)
+    if [[ ${#DELETE_FILES[@]} -eq 0 ]]; then
+        verbose "No delete file in processed directory, skipping."
+        return
+    fi
+    IDS=$(grep -o '001">[^<]*<' ${ARGS[VUFIND_HARVEST_DIR]}/combined_*.xml | sed -e 's/.*001">\([^<]*\)</\1/' | sort)
+    for DFILE in "${DELETE_FILES[@]}"; do
+        comm -2 -3 <(sort "$DFILE") <(echo "$IDS") >"${DFILE}_2"
+        if [[ "$?" -eq 0 ]]; then
+            mv "${DFILE}_2" "$DFILE"
+        else
+            echo "ERROR updating delete file ${DFILE}"
+            rm -f "${DFILE}_2"
+        fi
+    done
+}
+
 # Perform VuFind batch import of OAI records
 batch_import() {
     assert_vufind_harvest_dir_writable
@@ -477,6 +497,8 @@ batch_import() {
     else
         countdown 5
     fi
+
+    update_processed_delete_files
 
     if ! /usr/local/vufind/harvest/batch-import-marc.sh folio; then
         echo "ERROR: Batch import failed with code: $?"
