@@ -87,9 +87,9 @@ that is frequently required to update the Solr index with new field updates. If 
 harvests or incremental) refer to the `--help` flags on the appropriate script.
 
 ### `biblio` Index
-Full imports for the `biblio` collection can be done
-- directly in the `cron` container for prod/beta/preview,
-- in the `catalog` container for dev environments,
+Full imports for the `biblio` collection can be done  
+- directly in the `cron` container for prod/beta/preview,  
+- in the `catalog` container for dev environments,  
 - using the `biblio` collection alias in the `build` container,
 to avoid serving incomplete collections in prod (see
 [How to Use the Collection Aliases to Rebuild and Swap](#how-to-use-the-collection-aliases-to-rebuild-and-swap) below).
