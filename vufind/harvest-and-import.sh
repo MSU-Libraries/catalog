@@ -466,7 +466,7 @@ update_processed_delete_files() {
         verbose "No delete file in processed directory, skipping."
         return
     fi
-    IDS=$(grep -o '001">[^<]*<' ${ARGS[VUFIND_HARVEST_DIR]}/combined_*.xml | sed -e 's/.*001">\([^<]*\)</\1/' | sort)
+    IDS=$(grep -o '001">[^<]*<' ${ARGS[VUFIND_HARVEST_DIR]}/combined_*.xml | sed -e 's/.*001">\([^<]*\)</folio.\1/' | sort)
     for DFILE in "${DELETE_FILES[@]}"; do
         comm -2 -3 <(sort "$DFILE") <(echo "$IDS") >"${DFILE}_2"
         if [[ "$?" -eq 0 ]]; then
