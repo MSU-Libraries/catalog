@@ -91,7 +91,7 @@ done
 
 # Sleep before creating collections so all
 # nodes don't try at the same time
-let SLEEP_TIME=${NODE}*2
+let SLEEP_TIME=${NODE}*3
 sleep $SLEEP_TIME
 
 # Create Solr collections

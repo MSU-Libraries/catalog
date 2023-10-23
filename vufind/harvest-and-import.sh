@@ -461,7 +461,9 @@ copyback_from_shared() {
 # Remove processed .delete entries matching ids in the last harvest
 update_processed_delete_files() {
     verbose "Updating past delete files (in case some records were undeleted)..."
+    shopt -s nullglob
     DELETE_FILES=(${ARGS[VUFIND_HARVEST_DIR]}/processed/combined_*.delete)
+    shopt -u nullglob
     if [[ ${#DELETE_FILES[@]} -eq 0 ]]; then
         verbose "No delete file in processed directory, skipping."
         return
