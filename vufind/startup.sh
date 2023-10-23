@@ -1,12 +1,7 @@
 #!/bin/bash
 
 echo "Startup script..."
-
-# Unset env variables that are just used in config files and don't need to be in the environment after this
-# (for some reason it doesn't work when done at the end of the entrypoint)
-unset FOLIO_URL FOLIO_USER FOLIO_PASS FOLIO_TENANT FOLIO_REC_ID FOLIO_CANCEL_ID OAI_URL MAIL_HOST MAIL_PORT \
-    MAIL_USERNAME MAIL_PASSWORD FEEDBACK_EMAIL EDS_USER EDS_PASS EDS_PROFILE EDS_ORG RECAPTCHA_SITE_KEY \
-    RECAPTCHA_SECRET_KEY MATOMO_URL MATOMO_SITE_ID MATOMO_SEARCHBACKEND_DIMENSION SIMPLESAMLPHP_SALT SIMPLESAMLPHP_ADMIN_PW
+env
 
 SHARED_STORAGE="/mnt/shared/local"
 TIMESTAMP=$( date +%Y%m%d%H%M%S )
