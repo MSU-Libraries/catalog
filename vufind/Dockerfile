@@ -102,14 +102,10 @@ USER 0
 
 # Install SimpleSAMLphp
 ARG SIMPLESAMLPHP_VERSION
-ARG SIMPLESAMLPHP_SALT
-ARG SIMPLESAMLPHP_ADMIN_PW
 ENV SIMPLESAMLPHP_HOME=/usr/local/simplesamlphp \
     SIMPLESAMLPHP_CUSTOM_DIR=/usr/local/simplesamlphp/local \
     SIMPLESAMLPHP_CONFIG_DIR=/usr/local/simplesamlphp/local/config \
-    SIMPLESAMLPHP_VERSION=$SIMPLESAMLPHP_VERSION \
-    SIMPLESAMLPHP_SALT=$SIMPLESAMLPHP_SALT \
-    SIMPLESAMLPHP_ADMIN_PW=$SIMPLESAMLPHP_ADMIN_PW
+    SIMPLESAMLPHP_VERSION=$SIMPLESAMLPHP_VERSION
 
 RUN wget https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIMPLESAMLPHP_VERSION}/simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz && \
     tar -C /tmp/ -xzf simplesamlphp-${SIMPLESAMLPHP_VERSION}.tar.gz && \
@@ -118,8 +114,7 @@ RUN wget https://github.com/simplesamlphp/simplesamlphp/releases/download/v${SIM
 COPY apache2/conf-available/ /etc/apache2/conf-available/
 COPY apache2/sites-available/ /etc/apache2/sites-available/
 COPY simplesamlphp/local/ ${SIMPLESAMLPHP_CUSTOM_DIR}/
-RUN envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW}' < ${SIMPLESAMLPHP_CONFIG_DIR}/config.php | sponge ${SIMPLESAMLPHP_CONFIG_DIR}/config.php && \
-    envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \
+RUN envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \
     a2enmod remoteip && \
     a2enconf simplesamlphp.conf && \
     chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR} && \
