@@ -25,7 +25,6 @@ x-vufind-envs: &vufind_envs
   FTP_PASSWORD: "${FTP_PASSWORD}"
   AUTH_FTP_USER: "${AUTH_FTP_USER}"
   AUTH_FTP_PASSWORD: "${AUTH_FTP_PASSWORD}"
-  DEPLOY_KEY: "${DEPLOY_KEY}"
   BROWZINE_LIBRARY: "${BROWZINE_LIBRARY}"
   BROWZINE_TOKEN: "${BROWZINE_TOKEN}"
   MATOMO_URL: "${MATOMO_URL}"
@@ -59,6 +58,7 @@ services:
     environment:
       STACK_NAME: "${STACK_NAME}"
       NODE: "{{slice .Node.Hostname 8 9}}"
+      DEPLOY_KEY: "${DEPLOY_KEY}"
       <<: *vufind_envs
     deploy:
       mode: replicated
