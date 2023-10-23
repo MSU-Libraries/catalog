@@ -126,73 +126,10 @@ RUN envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW}' < ${SIMPLESAMLPHP
     a2enconf catalog.conf
 
 # Build Arguments
-ARG SITE_HOSTNAME
-ARG FOLIO_URL
-ARG FOLIO_USER
-ARG FOLIO_PASS
-ARG FOLIO_TENANT
-ARG FOLIO_REC_ID
-ARG FOLIO_CANCEL_ID
-ARG OAI_URL
-ARG EMAIL
-ARG MAIL_HOST
-ARG MAIL_PORT
-ARG MAIL_USERNAME
-ARG MAIL_PASSWORD
-ARG MARIADB_VUFIND_PASSWORD
-ARG FEEDBACK_EMAIL
 ARG SOLR_URL=http://solr:8983/solr
-ARG EDS_USER
-ARG EDS_PASS
-ARG EDS_PROFILE
-ARG EDS_ORG
-ARG RECAPTCHA_SITE_KEY
-ARG RECAPTCHA_SECRET_KEY
-ARG FTP_USER
-ARG FTP_PASSWORD
-ARG AUTH_FTP_USER
-ARG AUTH_FTP_PASSWORD
-ARG DEPLOY_KEY
-ARG BROWZINE_LIBRARY
-ARG BROWZINE_TOKEN
-ARG MATOMO_URL
-ARG MATOMO_SITE_ID
-ARG MATOMO_SEARCHBACKEND_DIMENSION
 
-
-ENV SITE_HOSTNAME=$SITE_HOSTNAME \
-    FOLIO_URL=$FOLIO_URL \
-    FOLIO_USER=$FOLIO_USER \
-    FOLIO_PASS=$FOLIO_PASS \
-    FOLIO_TENANT=$FOLIO_TENANT \
-    FOLIO_REC_ID=$FOLIO_REC_ID \
-    FOLIO_CANCEL_ID=$FOLIO_CANCEL_ID \
-    OAI_URL=$OAI_URL \
-    EMAIL=$EMAIL \
-    MAIL_HOST=$MAIL_HOST \
-    MAIL_PORT=$MAIL_PORT \
-    MAIL_USERNAME=$MAIL_USERNAME \
-    MAIL_PASSWORD=$MAIL_PASSWORD \
-    MARIADB_VUFIND_PASSWORD=$MARIADB_VUFIND_PASSWORD \
-    FEEDBACK_EMAIL=$FEEDBACK_EMAIL \
-    SOLR_URL=$SOLR_URL \
-    EDS_USER=$EDS_USER \
-    EDS_PASS=$EDS_PASS \
-    EDS_PROFILE=$EDS_PROFILE \
-    EDS_ORG=$EDS_ORG \
-    RECAPTCHA_SITE_KEY=$RECAPTCHA_SITE_KEY \
-    RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY \
-    FTP_USER=$FTP_USER \
-    FTP_PASSWORD=$FTP_PASSWORD \
-    AUTH_FTP_USER=$AUTH_FTP_USER \
-    AUTH_FTP_PASSWORD=$AUTH_FTP_PASSWORD \
-    DEPLOY_KEY=$DEPLOY_KEY \
-    VUFIND_LOCAL_MODULES=Catalog \
-    BROWZINE_LIBRARY=$BROWZINE_LIBRARY \
-    BROWZINE_TOKEN=$BROWZINE_TOKEN \
-    MATOMO_URL=$MATOMO_URL \
-    MATOMO_SITE_ID=$MATOMO_SITE_ID \
-    MATOMO_SEARCHBACKEND_DIMENSION=$MATOMO_SEARCHBACKEND_DIMENSION
+ENV SOLR_URL=$SOLR_URL \
+    VUFIND_LOCAL_MODULES=Catalog
 
 
 # Add file customizations
@@ -203,19 +140,11 @@ COPY tests/ /tests
 COPY robots.txt /usr/local/vufind/public/robots.txt
 COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
-COPY startup.sh /startup.sh
-COPY startup-build.sh /startup-build.sh
-COPY startup-cron.sh /startup-cron.sh
-COPY startup-croncache.sh /startup-croncache.sh
-COPY harvest-and-import.sh /harvest-and-import.sh
+COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh \
+    harvest-and-import.sh hlm-harvest-and-import.sh authority-harvest-and-import.sh backup.sh restore.sh /
 COPY import-marc.sh /usr/local/vufind/import-marc.sh
 COPY batch-import-marc.sh /usr/local/vufind/harvest/batch-import-marc.sh
-COPY hlm-harvest-and-import.sh /hlm-harvest-and-import.sh
-COPY authority-harvest-and-import.sh /authority-harvest-and-import.sh
-COPY backup.sh /backup.sh
-COPY restore.sh /restore.sh
-COPY msmtp/aliases /etc/aliases
-COPY msmtp/msmtprc /etc/msmtprc
+COPY msmtp/aliases msmtp/msmtprc /etc/
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
@@ -231,28 +160,6 @@ RUN chmod -R g-w,o-w /etc/cron.d/ && \
 WORKDIR /usr/local/vufind
 
 RUN \
-    # Replace environment variables in template ini files
-    envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.ini && \
-    envsubst < local/config/vufind/contentsecuritypolicy.ini | sponge local/config/vufind/contentsecuritypolicy.ini && \
-    envsubst < local/config/vufind/folio.ini | sponge local/config/vufind/folio.ini && \
-    envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini && \
-    envsubst < local/config/vufind/BrowZine.ini | sponge local/config/vufind/BrowZine.ini && \
-    envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini && \
-    envsubst < /etc/aliases | sponge /etc/aliases && \
-    # Set required environment variables so cron jobs have access to them
-    echo JAVA_HOME="$JAVA_HOME" >> /etc/environment && \
-    echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment && \
-    echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR" >> /etc/environment && \
-    echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment && \
-    echo VUFIND_LOCAL_MODULES="Catalog" >> /etc/environment && \
-    echo FTP_USER="$FTP_USER" >> /etc/environment && \
-    echo FTP_PASSWORD="$FTP_PASSWORD" >> /etc/environment && \
-    echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment && \
-    echo AUTH_FTP_PASSWORD="$AUTH_FTP_PASSWORD" >> /etc/environment && \
-    echo DEPLOY_KEY="$DEPLOY_KEY" >> /etc/environment && \
-    echo BROWZINE_LIBRARY="$BROWZINE_LIBRARY" >> /etc/environment && \
-    echo BROWZINE_TOKEN="$BROWZINE_TOKEN" >> /etc/environment && \
-    echo STACK_NAME="$STACK_NAME" >> /etc/environment && \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
@@ -286,4 +193,5 @@ EXPOSE 80
 HEALTHCHECK --interval=1m --timeout=40s --start-period=30s --retries=6 \
    CMD curl --fail -s http://localhost:80/ || exit 1
 
+ENTRYPOINT [ "/entrypoint.sh" ]
 CMD /startup.sh
