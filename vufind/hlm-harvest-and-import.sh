@@ -290,6 +290,8 @@ clear_harvest_files() {
 }
 
 # Determines if a file matches any of the provided ignore substring patterns
+# Returns 0 when the file is not found in any of the ignored substrings
+# Returns 1 if there is a match found.
 is_ignored() {
     FILE="${1}"
     for SUBSTR in "${IGNORE_SUBSTR[@]}"; do
@@ -323,7 +325,9 @@ harvest() {
     while IFS= read -r HLM_FILE
     do
         # If it is not in the shared storage, it is not and ignored patten, and it is an MARC file, then get it
-        if is_ignored "${HLM_FILE}" && [ ! -f "${ARGS[SHARED_DIR]}/current/${HLM_FILE}" ] && [[ "${HLM_FILE}" == *.marc ]]; then
+        is_ignored "${HLM_FILE}"
+        IGNORED=$? # 0 = not ignored, 1 = ignored
+        if [[ "${IGNORED}" -eq "0" ]] && [ ! -f "${ARGS[SHARED_DIR]}/current/${HLM_FILE}" ] && [[ "${HLM_FILE}" == *.marc ]]; then
             verbose "Getting ${HLM_FILE}"
             if [ "${ARGS[DRY_RUN]}" -eq "0" ]; then
                 if ! wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/"${HLM_FILE}" > /dev/null 2>&1; then
