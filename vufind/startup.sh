@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Startup script..."
+
 SHARED_STORAGE="/mnt/shared/local"
 TIMESTAMP=$( date +%Y%m%d%H%M%S )
 
@@ -128,6 +130,9 @@ if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
     echo "Starting grunt to auto-compile theme changes..."
     grunt watch:less&
 fi
+
+# Unset environment variables that are no longer necessary before starting Apache
+unset DEPLOY_KEY
 
 # Start Apache
 tail -f /var/log/vufind/vufind.log & apachectl -DFOREGROUND
