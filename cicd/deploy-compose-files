@@ -266,7 +266,7 @@ main() {
     fi
 
     # Save CI variables
-    env | grep -f <(grep -ohE '\$[A-Z_]+|\$\{[A-Z_]+\}' ./*.yml | tr -d '\${}' | sort -u) >.env
+    env | grep -f <(grep -ohE '\$[A-Z_]+|\$\{[A-Z_]+\}' ./*.yml | tr -d '{}$' | sort -u) | sed -E -e 's/([A-Z_]+=)(.*)/\1"\2"/' >.env
     chmod o-r .env
 
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
