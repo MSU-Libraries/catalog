@@ -1,4 +1,6 @@
 ---
+#include vufind-envs
+
 version: "3.8"
 
 services:
@@ -21,8 +23,8 @@ services:
       disable: true
     environment:
       STACK_NAME: "${STACK_NAME}"
-      SITE_HOSTNAME: "${SITE_HOSTNAME}"
       NODE: "{{slice .Node.Hostname 8 9}}"
+      <<: *vufind_envs
     deploy:
       mode: replicated
       replicas: 1
