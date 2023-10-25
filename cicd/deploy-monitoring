@@ -36,7 +36,7 @@ main() {
     ssh deploy@"${DEPLOY_HOST_A}" sudo mv "${COMPOSE_PATH}"/proxymonitoring.conf /mnt/shared/local/"${STACK_NAME}"/deploy/proxymonitoring/
 
     echo "Issuing deploy command now"
-    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --prune --with-registry-auth -c <(docker compose -f ${COMPOSE_PATH}/docker-compose.monitoring.yml config) ${STACK_NAME}-monitoring";
+    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --prune --with-registry-auth -c <(source .env; envsubst <${COMPOSE_PATH}/docker-compose.monitoring.yml) ${STACK_NAME}-monitoring";
 }
 
 beforescript

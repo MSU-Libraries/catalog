@@ -23,7 +23,7 @@ fi
 
 main() {
     sleep 45
-    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --prune --with-registry-auth -c <(docker compose -f ${COMPOSE_PATH}/docker-compose.mariadb-cloud.yml config) ${STACK_NAME}-mariadb"
+    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --prune --with-registry-auth -c <(source .env; envsubst <${COMPOSE_PATH}/docker-compose.mariadb-cloud.yml) ${STACK_NAME}-mariadb"
 
     # TODO eventually have this query the WSREP status and loop until ready instead of sleeping
     sleep 45

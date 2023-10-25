@@ -43,7 +43,7 @@ to change the `N` to you your node number, i.e. a value 1-3. Then also update th
 Now we're ready to bring back up the stack with just the single node in bootstrap mode.
 
 ```bash
-docker stack deploy --with-registry-auth -c <(docker compose -f docker-compose.mariadb-cloud-force.yml config) [STACK_NAME]-mariadb
+docker stack deploy --with-registry-auth -c <(source .env; envsubst <docker-compose.mariadb-cloud-force.yml) [STACK_NAME]-mariadb
 docker service logs -f
 ```
 
@@ -55,7 +55,7 @@ it can cleanly stop first and disable its bootstrap state before the other nodes
 ```bash
 docker stack rm [STACK_NAME]-mariadb
 # wait for the container to stop
-docker stack deploy --with-registry-auth -c <(docker compose -f docker-compose.mariadb-cloud.yml config) [STACK_NAME]-mariadb
+docker stack deploy --with-registry-auth -c <(source .env; envsubst <docker-compose.mariadb-cloud.yml) [STACK_NAME]-mariadb
 ```
 
 The stack should now come back up with all of the nodes being healthy and joined to the cluster.
