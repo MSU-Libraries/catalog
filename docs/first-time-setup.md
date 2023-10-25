@@ -41,36 +41,36 @@ LATEST=legacylinks:latest CURR=legacylinks:new COMPONENT=legacylinks VUFIND_VERS
 During the first time you are bring up the stack, you will need
 to run these first to bootstrap Solr and MariaDB:
 ```bash
-docker stack deploy -c docker-compose.solr-cloud-bootstrap.yml solr
-docker stack deploy -c docker-compose.mariadb-cloud-bootstrap.yml mariadb
+docker stack deploy -c <(docker-compose -f docker-compose.solr-cloud-bootstrap.yml config) solr
+docker stack deploy -c <(docker-compose -f docker-compose.mariadb-cloud-bootstrap.yml config) mariadb
 ```
 
 Subsequently you will run these commands (during the inital deploy
 and whenever you need to deploy updates):
 ```bash
 # Public network
-docker stack deploy -c docker-compose.public.yml public
+docker stack deploy -c <(docker-compose -f docker-compose.public.yml config) public
 
 # Traefik stack to handle networking
-docker stack deploy -c docker-compose.traefik.yml traefik
+docker stack deploy -c <(docker-compose -f docker-compose.traefik.yml config) traefik
 
 # Internal network for galera cluster
-docker stack deploy -c docker-compose.internal.yml internal
+docker stack deploy -c <(docker-compose -f docker-compose.internal.yml config) internal
 
 # The rest of the MariaDB galera cluster
-docker stack deploy -c docker-compose.mariadb-cloud.yml mariadb
+docker stack deploy -c <(docker-compose -f docker-compose.mariadb-cloud.yml config) mariadb
 
 # The rest of the Solr cloud stack
-docker stack deploy -c docker-compose.solr-cloud.yml solr
+docker stack deploy -c <(docker-compose -f docker-compose.solr-cloud.yml config) solr
 
 # The vufind stack
-docker stack deploy -c docker-compose.yml catalog
+docker stack deploy -c <(docker-compose -f docker-compose.yml config) catalog
 
 # Deploy the swarm cleanup stack
-docker stack deploy -c docker-compose.swarm-cleanup.yml swarm-cleanup
+docker stack deploy -c <(docker-compose -f docker-compose.swarm-cleanup.yml config) swarm-cleanup
 
 # Deploy the monitoring stack
-docker stack deploy -c docker-compose.monitoring.yml monitoring
+docker stack deploy -c <(docker-compose -f docker-compose.monitoring.yml config) monitoring
 ```
 
 ## Creating a FOLIO user
