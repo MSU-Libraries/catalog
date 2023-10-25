@@ -15,7 +15,7 @@
   $thumbnail = false;
   $thumbnailAlignment = $this->record($this->driver)->getThumbnailAlignment('list');
 ?>
-<li class="result<?php if ($this->driver->supportsAjaxStatus()): ?> ajaxItem<?php endif ?>">
+<li id="li-<?= str_replace('.', '_', $id) ?>" class="result<?php if ($this->driver->supportsAjaxStatus()): ?> ajaxItem<?php endif ?>">
   <?php if ($cover):
     ob_start(); ?>
     <div class="media-<?=$thumbnailAlignment ?> <?=$this->escapeHtmlAttr($coverDetails['size'])?>">
