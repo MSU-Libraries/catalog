@@ -38,7 +38,7 @@ main() {
     ssh deploy@"${DEPLOY_HOST_A}" sudo mv "${COMPOSE_PATH}"/proxysolr.conf /mnt/shared/local/"${STACK_NAME}"/deploy/proxysolr/
 
     echo "Issuing deploy command now"
-    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --prune --with-registry-auth -c <(docker-compose -f ${COMPOSE_PATH}/docker-compose.solr-cloud.yml config) ${STACK_NAME}-solr";
+    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --prune --with-registry-auth -c <(docker compose -f ${COMPOSE_PATH}/docker-compose.solr-cloud.yml config) ${STACK_NAME}-solr";
 }
 
 beforescript

@@ -41,36 +41,36 @@ LATEST=legacylinks:latest CURR=legacylinks:new COMPONENT=legacylinks VUFIND_VERS
 During the first time you are bring up the stack, you will need
 to run these first to bootstrap Solr and MariaDB:
 ```bash
-docker stack deploy -c <(docker-compose -f docker-compose.solr-cloud-bootstrap.yml config) solr
-docker stack deploy -c <(docker-compose -f docker-compose.mariadb-cloud-bootstrap.yml config) mariadb
+docker stack deploy -c <(docker compose -f docker-compose.solr-cloud-bootstrap.yml config) solr
+docker stack deploy -c <(docker compose -f docker-compose.mariadb-cloud-bootstrap.yml config) mariadb
 ```
 
 Subsequently you will run these commands (during the inital deploy
 and whenever you need to deploy updates):
 ```bash
 # Public network
-docker stack deploy -c <(docker-compose -f docker-compose.public.yml config) public
+docker stack deploy -c <(docker compose -f docker-compose.public.yml config) public
 
 # Traefik stack to handle networking
-docker stack deploy -c <(docker-compose -f docker-compose.traefik.yml config) traefik
+docker stack deploy -c <(docker compose -f docker-compose.traefik.yml config) traefik
 
 # Internal network for galera cluster
-docker stack deploy -c <(docker-compose -f docker-compose.internal.yml config) internal
+docker stack deploy -c <(docker compose -f docker-compose.internal.yml config) internal
 
 # The rest of the MariaDB galera cluster
-docker stack deploy -c <(docker-compose -f docker-compose.mariadb-cloud.yml config) mariadb
+docker stack deploy -c <(docker compose -f docker-compose.mariadb-cloud.yml config) mariadb
 
 # The rest of the Solr cloud stack
-docker stack deploy -c <(docker-compose -f docker-compose.solr-cloud.yml config) solr
+docker stack deploy -c <(docker compose -f docker-compose.solr-cloud.yml config) solr
 
 # The vufind stack
-docker stack deploy -c <(docker-compose -f docker-compose.yml config) catalog
+docker stack deploy -c <(docker compose -f docker-compose.yml config) catalog
 
 # Deploy the swarm cleanup stack
-docker stack deploy -c <(docker-compose -f docker-compose.swarm-cleanup.yml config) swarm-cleanup
+docker stack deploy -c <(docker compose -f docker-compose.swarm-cleanup.yml config) swarm-cleanup
 
 # Deploy the monitoring stack
-docker stack deploy -c <(docker-compose -f docker-compose.monitoring.yml config) monitoring
+docker stack deploy -c <(docker compose -f docker-compose.monitoring.yml config) monitoring
 ```
 
 ## Creating a FOLIO user
