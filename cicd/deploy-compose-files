@@ -261,8 +261,8 @@ main() {
     fi
 
     # Save CI variables
-    env >.env
-    # TODO: filter out non-CI variables
+    env | grep -Ev '^(_|PATH|PWD|OLDPWD|HOME|SHLVL|CI|GITLAB|FF_|DEPLOY|DOCKER|SERVER|COMPOSE|ENCODED|DIND|BASIC|SECURE|SECRETS?_|AWS_|HOSTNAME|SSH_|REGISTRY|RUNNER_|$)' >.env
+    chmod o-r .env
 
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
     sed -i "/^$/d" docker-compose.internal.yml;
