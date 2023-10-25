@@ -260,16 +260,9 @@ main() {
       ./yq -i ".services.catalog.volumes += \"/home/deploy/samlcerts/${STACK_NAME}:/mnt/samlcerts:ro\"" docker-compose.yml;
     fi
 
-    # Replace variables in all compose files
-    envsubst < docker-compose.yml | sponge docker-compose.yml;
-    envsubst < docker-compose.build.yml | sponge docker-compose.build.yml;
-    envsubst < docker-compose.solr-cloud.yml | sponge docker-compose.solr-cloud.yml;
-    envsubst < docker-compose.solr-cloud-bootstrap.yml | sponge docker-compose.solr-cloud-bootstrap.yml;
-    envsubst < docker-compose.mariadb-cloud-bootstrap.yml | sponge docker-compose.mariadb-cloud-bootstrap.yml;
-    envsubst < docker-compose.mariadb-cloud-force.yml | sponge docker-compose.mariadb-cloud-force.yml;
-    envsubst < docker-compose.mariadb-cloud.yml | sponge docker-compose.mariadb-cloud.yml;
-    envsubst < docker-compose.internal.yml | sponge docker-compose.internal.yml;
-    envsubst < docker-compose.monitoring.yml | sponge docker-compose.monitoring.yml;
+    # Save CI variables
+    env >.env
+    # TODO: filter out non-CI variables
 
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
     sed -i "/^$/d" docker-compose.internal.yml;
@@ -277,7 +270,8 @@ main() {
 
     # Copy the updated compose files to the server
     ssh deploy@"${DEPLOY_HOST_A}" mkdir -p "${COMPOSE_PATH}";
-    scp docker-compose* deploy@"${DEPLOY_HOST_A}":"${COMPOSE_PATH}"/;
+    scp docker-compose* .env deploy@"${DEPLOY_HOST_A}":"${COMPOSE_PATH}"/;
+    rm .env
     echo "Copying files to ${COMPOSE_PATH}"
 }
 
