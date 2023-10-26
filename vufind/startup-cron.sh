@@ -25,7 +25,10 @@ ln -s /mnt/shared/backups/${STACK_NAME}/ /mnt/backups
 FOLIO_CRON_MINS="0,30"  # catalog-prod
 HARV_CRON_MINS="30"
 if [[ "${STACK_NAME}" == "catalog-beta" ]]; then
-    FOLIO_CRON_MINS="15,45"
+    FOLIO_CRON_MINS="15"
+    HARV_CRON_MINS="15"
+elif [[ "${STACK_NAME}" == "catalog-preview" ]]; then
+    FOLIO_CRON_MINS="45"
     HARV_CRON_MINS="45"
 fi
 export FOLIO_CRON_MINS
