@@ -1,6 +1,8 @@
 <?php
   // Set up some convenience variables:
   $id = $this->driver->getUniqueId();
+  $safeId = str_replace(',', '-', $id); # remove comma in EDS IDs
+  $safeId = str_replace('.', '_', $safeId); # remove periods in MultiBackend IDs
   $source = $this->driver->getSourceIdentifier();
   if (isset($this->list) && is_object($this->list)) {
     $list_id = $this->list->id;
@@ -15,7 +17,7 @@
   $thumbnail = false;
   $thumbnailAlignment = $this->record($this->driver)->getThumbnailAlignment('list');
 ?>
-<li id="li-<?= str_replace('.', '_', $id) ?>" class="result<?php if ($this->driver->supportsAjaxStatus()): ?> ajaxItem<?php endif ?>">
+<li id="li-<?= $safeId ?>" class="result<?php if ($this->driver->supportsAjaxStatus()): ?> ajaxItem<?php endif ?>">
   <?php if ($cover):
     ob_start(); ?>
     <div class="media-<?=$thumbnailAlignment ?> <?=$this->escapeHtmlAttr($coverDetails['size'])?>">
@@ -196,9 +198,9 @@
           $deleteUrl = null === $list_id
               ? $this->url('myresearch-favorites')
               : $this->url('userList', ['id' => $list_id]);
-          $deleteUrlGet = $deleteUrl . '?delete=' . urlencode($id) . '&amp;source=' . urlencode($source);
+          $deleteUrlGet = $deleteUrl . '?delete=' . urlencode($safeId) . '&amp;source=' . urlencode($source);
 
-          $dLabel = 'delete-label-' . preg_replace('[\W]', '-', str_replace('.', '_', $id));
+          $dLabel = 'delete-label-' . preg_replace('[\W]', '-', $safeId);
         ?>
         <div class="dropdown">
           <a class="dropdown-toggle icon-link" id="<?=$dLabel ?>" role="button" data-toggle="dropdown" href="<?=$deleteUrlGet ?>">
@@ -206,7 +208,7 @@
             <span class="icon-link__label"><?=$this->transEsc('Delete') ?></span>
           </a>
           <ul class="dropdown-menu" role="menu" aria-labelledby="<?=$dLabel ?>">
-            <li><a id="confirm_delete_item_<?= str_replace('.', '_', $this->escapeHtmlAttr($id));?>" title="<?=$this->transEscAttr('confirm_delete_brief')?>"><?=$this->transEsc('confirm_dialog_yes')?></a></li>
+            <li><a id="confirm_delete_item_<?= $this->escapeHtmlAttr($safeId);?>" title="<?=$this->transEscAttr('confirm_delete_brief')?>"><?=$this->transEsc('confirm_dialog_yes')?></a></li>
             <li><a><?=$this->transEsc('confirm_dialog_no')?></a></li>
           </ul>
         </div>
@@ -219,14 +221,23 @@
     <?php endif; ?>
   </div>
   <?php
-    $escId = str_replace('.', '_', $this->escapeJs($id));
+    $escId = $this->escapeJs($safeId);
     $escSource = $this->escapeJs($source);
     $script = <<<JS
         $(document).ready(function() {
           $('#confirm_delete_item_${escId}').click(function() {
-            //e.preventDefault();
             $.post('${deleteUrl}', {
                 'delete':'${escId}'.replace(/_/g,'.'),
+                'source':'${escSource}',
+                'confirm':true
+              },
+              function(){
+                location.reload()
+              }
+            );
+            // In case it was an EDS item, try deleting that
+            $.post('${deleteUrl}', {
+                'delete':'${escId}'.replace(/-/g,','),
                 'source':'${escSource}',
                 'confirm':true
               },
