@@ -2,6 +2,7 @@
 use Catalog\GetThis\GetThisLoader;
 
 $selected = '';
+$record = $this->record($this->driver);
 foreach ($this->statusItems as $item) {
   if ($selected == '') {
     $selected = $item;
@@ -12,19 +13,11 @@ foreach ($this->statusItems as $item) {
   }
 }
 if ($selected != '') {
-  $status = $selected['status'];
+  $status = $record->getStatus($selected);
+  $statusSuffix = $record->getStatusSuffix($selected);
   $location = $selected['location'];
   $callnumber = $selected['callnumber'];
   $callNumPrefix = !empty($selected['callnumber_prefix']) ? $selected['callnumber_prefix'] . ' ' : '';
-  if (in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process', 'In process (non-requestable)',
-      'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed', 'Unknown', 'Withdrawn']))
-    $status = 'Unavailable';
-  elseif (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out']))
-    $status = 'Checked Out';
-  elseif ($status == 'Restricted')
-    $status = 'Library Use Only';
-  elseif (!in_array($status, ['Available', 'Unavailable']))
-    $status = 'Unknown status';
 }
 ?>
 <?php if ($selected != ''): ?>
@@ -38,6 +31,7 @@ if ($selected != '') {
       <?php else: ?>
         <strong class="text-danger"><?=$this->transEsc($status)?></strong>
       <?php endif; ?>
+      <?=$this->escapeHtml($statusSuffix)?>
     </span>
     <?php if ($location != ''): ?>
       at
@@ -52,7 +46,7 @@ if ($selected != '') {
     <?php endif; ?>
     <?php $id = $selected['id']; ?>
     <?php $item_id = $selected['item_id']; ?>
-    <?php $getthis = new GetThisLoader($this->record($view->driver), $this->statusItems, $item_id); ?>
+    <?php $getthis = new GetThisLoader($record, $this->statusItems, $item_id); ?>
     <?php if ($getthis && ! str_starts_with($id, "hlm.") && ! $getthis->isOnlineResource() &&
         ! GetThisLoader::locationAtLoM($selected)): ?>
       <a class="pl-1 placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
