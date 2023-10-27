@@ -226,25 +226,15 @@
     $script = <<<JS
         $(document).ready(function() {
           $('#confirm_delete_item_${escId}').click(function() {
-            $.post('${deleteUrl}', {
-                'delete':'${escId}'.replace(/_/g,'.'),
-                'source':'${escSource}',
-                'confirm':true
-              },
-              function(){
-                location.reload()
-              }
-            );
-            // In case it was an EDS item, try deleting that
-            $.post('${deleteUrl}', {
-                'delete':'${escId}'.replace(/-/g,','),
-                'source':'${escSource}',
-                'confirm':true
-              },
-              function(){
-                location.reload()
-              }
-            );
+              $.post('${deleteUrl}', {
+                  'delete':'${escId}'.replace(/_/g,'.').replace(/-/g,','),
+                  'source':'${escSource}',
+                  'confirm':true
+                },
+                function(){
+                  location.reload()
+                }
+              );
           });
         });
         JS;
