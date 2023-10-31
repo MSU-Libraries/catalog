@@ -71,7 +71,7 @@ def _analyse_log():
     logging.debug('finished ok')
     return {
         'request_count': request_count,
-        'response_time': None if response_time_count == 0 else response_time_total / response_time_count,
+        'response_time': None if response_time_count == 0 else response_time_total // response_time_count,
     }
 
 def main():
