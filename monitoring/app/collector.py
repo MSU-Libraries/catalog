@@ -51,10 +51,11 @@ def _analyse_log():
                 logging.debug(line)
                 if not line:
                     break
-                if time_pattern.match(line):
+                time_match = time_pattern.search(line)
+                if time_match:
                     logging.debug('time match')
                     request_count += 1
-                    search_match = search_pattern.match(line)
+                    search_match = search_pattern.search(line, time_match.end())
                     if search_match:
                         logging.debug('search match')
                         time_nano = search_match.group(1)
