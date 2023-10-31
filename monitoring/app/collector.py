@@ -21,7 +21,6 @@ def init(debug):
 
 def _analyse_log():
     logging.debug('_analyse_log')
-    print("Test of print to stderr", file=sys.stderr)
     # Get the number of requests from the apache log within the previous minute
     # and the average search response time in ms from the apache log within the previous minute
     if not pathlib.Path(ACCESS_LOG_PATH).is_file():
@@ -43,7 +42,7 @@ def _analyse_log():
             # Seek log file in order to avoid parsing the whole file for line endings
             # 10000 lines * 1024 max log entry length
             logging.debug('after open')
-            log_file.seek(-10240000, whence=os.SEEK_END)
+            log_file.seek(-10240000, os.SEEK_END)
             logging.debug('after seek')
             while True:
                 line = log_file.readline()
@@ -73,6 +72,9 @@ def _analyse_log():
     }
 
 def main():
+    print("Test of simple print")
+    print("Test of print to stderr", file=sys.stderr)
+    print("Test of print to stdout", file=sys.stdout)
     logging.basicConfig(filename='/tmp/collector_output.txt', level=logging.DEBUG, format='')
     time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     node = os.getenv('NODE')
