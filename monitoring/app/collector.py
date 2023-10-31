@@ -58,7 +58,7 @@ def _analyse_log():
                     search_match = search_pattern.search(line, time_match.end())
                     if search_match:
                         logging.debug('search match')
-                        time_nano = search_match.group(1)
+                        time_nano = int(search_match.group(1))
                         response_time_count += 1
                         response_time_total += time_nano // 1000
     except OSError as err:
