@@ -38,14 +38,14 @@ def _analyse_log():
     time_pattern = re.compile(formatted_time)
     search_pattern = re.compile(r'GET /Search/Results.* (\d+)$')
     try:
-        with open(ACCESS_LOG_PATH, 'r', encoding='utf-8') as log_file:
+        with open(ACCESS_LOG_PATH, 'rb') as log_file:
             # Seek log file in order to avoid parsing the whole file for line endings
             # 10000 lines * 1024 max log entry length
             logging.debug('after open')
             log_file.seek(-10240000, os.SEEK_END)
             logging.debug('after seek')
             while True:
-                line = log_file.readline()
+                line = log_file.readline().decode(encoding='utf-8', errors='ignore')
                 logging.debug(line)
                 if not line:
                     break
