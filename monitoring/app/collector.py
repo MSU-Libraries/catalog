@@ -1,3 +1,4 @@
+import logging
 import pathlib
 import os
 import re
@@ -19,18 +20,19 @@ def init(debug):
         scheduler.start()
 
 def _analyse_log():
-    print('_analyse_log')
+    logging.debug('_analyse_log')
+    print("Test of print to stderr", file=sys.stderr)
     # Get the number of requests from the apache log within the previous minute
     # and the average search response time in ms from the apache log within the previous minute
     if not pathlib.Path(ACCESS_LOG_PATH).is_file():
-        print('not a file')
+        logging.debug('not a file')
         return {
             'request_count': 0,
             'response_time': None,
         }
     last_minute = datetime.now() - timedelta(minutes=1)
     formatted_time = last_minute.strftime("%d/%b/%Y:%H:%M:\\d\\d %z")
-    print(formatted_time)
+    logging.debug(formatted_time)
     request_count = 0
     response_time_total = 0
     response_time_count = 0
@@ -40,37 +42,38 @@ def _analyse_log():
         with open(ACCESS_LOG_PATH, 'r', encoding='utf-8') as log_file:
             # Seek log file in order to avoid parsing the whole file for line endings
             # 10000 lines * 1024 max log entry length
-            print('after open')
+            logging.debug('after open')
             log_file.seek(-10240000, whence=os.SEEK_END)
-            print('after seek')
+            logging.debug('after seek')
             while True:
                 line = log_file.readline()
-                print(line)
+                logging.debug(line)
                 if not line:
                     break
                 if time_pattern.match(line):
-                    print('time match')
+                    logging.debug('time match')
                     request_count += 1
                     search_match = search_pattern.match(line)
                     if search_match:
-                        print('search match')
+                        logging.debug('search match')
                         time_nano = search_match.group(1)
                         response_time_count += 1
                         response_time_total += time_nano // 1000
     except OSError as err:
-        print('os error')
+        logging.debug('os error')
         print(f"Error reading the apache log file: {err}", file=sys.stderr)
         return {
             'request_count': 0,
             'response_time': None,
         }
-    print('finished ok')
+    logging.debug('finished ok')
     return {
         'request_count': request_count,
         'response_time': None if response_time_count == 0 else response_time_total / response_time_count,
     }
 
 def main():
+    logging.basicConfig(filename='/tmp/collector_output.txt', level=logging.DEBUG, format='')
     time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     node = os.getenv('NODE')
     memory = status.node_available_memory()
@@ -78,8 +81,8 @@ def main():
     log_results = _analyse_log()
     nb_requests = log_results['request_count']
     response_time = log_results['response_time']
-    print(f'nb_requests={nb_requests}')
-    print(f'response_time={response_time}')
+    logging.debug('nb_requests=%s', nb_requests)
+    logging.debug('response_time=%s', response_time)
     conn = None
     try:
         conn = db.connect(user='monitoring', password=os.getenv('MARIADB_MONITORING_PASSWORD'), host='galera',
