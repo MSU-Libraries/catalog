@@ -59,7 +59,7 @@ def _analyse_log():
                         response_time_count += 1
                         response_time_total += time_nano // 1000
     except OSError as err:
-        logging.debug('os error')
+        logging.debug('os error: %s', err)
         print(f"Error reading the apache log file: {err}", file=sys.stderr)
         return {
             'request_count': 0,
