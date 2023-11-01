@@ -3,7 +3,7 @@ import flask
 import status
 
 
-def homepage():
+def homepage() -> str:
     statuses = status.get_node_statuses()
     if isinstance(statuses, str):
         return statuses

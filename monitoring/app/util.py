@@ -5,7 +5,7 @@ import aiohttp
 MAX_PARALLEL_REQUESTS = 100
 DEFAULT_TIMEOUT = 10
 
-def async_get_requests(urls, convert_to_json=False, timeout=DEFAULT_TIMEOUT):
+def async_get_requests(urls: list[str], convert_to_json: bool=False, timeout: int=DEFAULT_TIMEOUT) -> list:
     async def gather_with_concurrency():
         semaphore = asyncio.Semaphore(MAX_PARALLEL_REQUESTS)
         aiohttp_timeout = aiohttp.ClientTimeout(total=timeout)
