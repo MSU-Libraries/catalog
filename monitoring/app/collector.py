@@ -21,7 +21,8 @@ def init(debug):
 def _analyse_log():
     # Get the number of requests from the apache log within the previous minute
     # and the average search response time in ms from the apache log within the previous minute
-    if not pathlib.Path(ACCESS_LOG_PATH).is_file():
+    path = pathlib.Path(ACCESS_LOG_PATH)
+    if not path.is_file():
         return {
             'request_count': 0,
             'response_time': None,
@@ -33,7 +34,6 @@ def _analyse_log():
     response_time_count = 0
     time_pattern = re.compile(formatted_time)
     search_pattern = re.compile(r'GET /Search/Results.* (\d+)$')
-    path = pathlib.Path(ACCESS_LOG_PATH)
     try:
         with open(path, 'rb') as log_file:
             # Seek log file in order to avoid parsing the whole file for line endings
