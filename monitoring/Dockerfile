@@ -1,5 +1,7 @@
 FROM python:3.8-alpine
 
+ENV PYTHONUNBUFFERED=1
+
 RUN \
     apk update && \
     apk add mariadb-client mariadb-dev mariadb-connector-c gcc musl-dev tzdata && \
@@ -15,6 +17,4 @@ RUN pip install -r requirements.txt
 
 COPY . /app
 
-ENTRYPOINT [ "python" ]
-
-CMD [ "app/app.py" ]
+CMD [ "python", "app/app.py" ]
