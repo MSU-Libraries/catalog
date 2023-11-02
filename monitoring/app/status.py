@@ -6,7 +6,7 @@ import re
 from aiohttp import ClientError, ClientSession
 import humanize
 
-from util import ExecException, async_exec, async_multiple_get, async_single_get, get_aiohttp_session, get_eventloop
+from util import ExecException, async_exec, async_multiple_get, async_single_get, get_aiohttp_session
 
 
 # Galera
@@ -297,16 +297,17 @@ def get_harvest_status(name: str, statuses: list[dict]) -> str:
 # Getting all the node statuses at once
 
 def get_node_status() -> dict:
-    event_loop = get_eventloop()
-    with get_aiohttp_session() as aiohttp_session:
-        commands = [
-            _node_cluster_state_uuid(),
-            _node_solr_status(aiohttp_session),
-            _node_vufind_status(aiohttp_session),
-            node_available_memory(),
-            node_available_disk_space()
-        ]
-        results = event_loop.run_until_complete(asyncio.gather(*commands))
+    async def async_inner():
+        async with get_aiohttp_session() as aiohttp_session:
+            commands = [
+                _node_cluster_state_uuid(),
+                _node_solr_status(aiohttp_session),
+                _node_vufind_status(aiohttp_session),
+                node_available_memory(),
+                node_available_disk_space()
+            ]
+            return asyncio.gather(*commands)
+    results = asyncio.run(async_inner())
     status = {}
     status['cluster_state_uuid'] = results[0]
     status['solr'] = results[1]
