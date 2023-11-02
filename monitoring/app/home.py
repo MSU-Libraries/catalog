@@ -1,16 +1,17 @@
+import asyncio
 import flask
 
 import status
 
 
-def homepage():
+def homepage() -> str:
     statuses = status.get_node_statuses()
     if isinstance(statuses, str):
         return statuses
     status_list = {}
     status_list['memory'] = status.get_memory_status(statuses)
     status_list['disk_space'] = status.get_disk_space_status(statuses)
-    status_list['galera'] = status.get_galera_status(statuses)
+    status_list['galera'] = asyncio.run(status.get_galera_status(statuses))
     status_list['solr'] = status.get_solr_status(statuses)
     status_list['vufind'] = status.get_vufind_status(statuses)
     status_list['folio_harvest'] = status.get_harvest_status('folio', statuses)

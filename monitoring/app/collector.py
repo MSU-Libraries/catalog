@@ -1,3 +1,4 @@
+import asyncio
 import pathlib
 import os
 import re
@@ -7,18 +8,19 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import mariadb as db
 
 import status
+from util import get_eventloop
 
 
 ACCESS_LOG_PATH = '/mnt/logs/apache/access.log'
 
 
-def init(debug):
+def init(debug: bool):
     if not debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
         scheduler = BackgroundScheduler()
         scheduler.add_job(func=main, id='collector', replace_existing=True, trigger='interval', minutes=1)
         scheduler.start()
 
-def _analyse_log():
+def _analyse_log() -> dict[str, int | None]:
     # Get the number of requests from the apache log within the previous minute
     # and the average search response time in ms from the apache log within the previous minute
     path = pathlib.Path(ACCESS_LOG_PATH)
@@ -66,8 +68,13 @@ def _analyse_log():
 def main():
     time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     node = os.getenv('NODE')
-    memory = status.node_available_memory()
-    disk = status.node_available_disk_space()
+    event_loop = get_eventloop()
+    results = event_loop.run_until_complete(asyncio.gather(
+        status.node_available_memory(),
+        status.node_available_disk_space()
+    ))
+    memory = results[0]
+    disk = results[1]
     log_results = _analyse_log()
     nb_requests = log_results['request_count']
     response_time = log_results['response_time']
