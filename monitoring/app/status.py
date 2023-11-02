@@ -6,7 +6,7 @@ import re
 from aiohttp import ClientError, ClientSession
 import humanize
 
-from util import ExecException, async_exec, async_multiple_get, async_single_get, get_aiohttp_session
+from util import ExecException, async_exec, multiple_get, async_single_get, get_aiohttp_session
 
 
 # Galera
@@ -322,7 +322,7 @@ def get_node_statuses() -> list[dict] | str:
     for node in range(1, 4):
         urls.append(f'http://monitoring{node}/monitoring/node/status')
     try:
-        statuses = async_multiple_get(urls, convert_to_json=True, timeout=20)
+        statuses = multiple_get(urls, convert_to_json=True, timeout=20)
     except ClientError as err:
         return f'Error reading node status: {err}'
     except asyncio.TimeoutError:

@@ -29,17 +29,6 @@ async def async_exec(program: str, *args, timeout: int=DEFAULT_TIMEOUT) -> str:
     return stdout.decode().strip()
 
 
-def get_eventloop() -> asyncio.events.AbstractEventLoop:
-    try:
-        return asyncio.get_event_loop()
-    except RuntimeError as ex:
-        if "There is no current event loop in thread" in str(ex):
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            return asyncio.get_event_loop()
-        raise ex
-
-
 @asynccontextmanager
 async def get_aiohttp_session(timeout: int=DEFAULT_TIMEOUT) -> aiohttp.ClientSession:
     try:
@@ -62,7 +51,7 @@ async def async_single_get(session: aiohttp.ClientSession, url: str, convert_to_
         return result
 
 
-def async_multiple_get(urls: list[str], convert_to_json: bool=False, timeout: int=DEFAULT_TIMEOUT) -> list:
+def multiple_get(urls: list[str], convert_to_json: bool=False, timeout: int=DEFAULT_TIMEOUT) -> list:
     async def gather_with_concurrency():
         semaphore = asyncio.Semaphore(MAX_PARALLEL_REQUESTS)
         aiohttp_timeout = aiohttp.ClientTimeout(total=timeout)
@@ -81,10 +70,9 @@ def async_multiple_get(urls: list[str], convert_to_json: bool=False, timeout: in
         await asyncio.gather(*(get(url) for url in urls))
         await session.close()
 
-    loop = get_eventloop()
     conn = aiohttp.TCPConnector(limit_per_host=100, limit=0, ttl_dns_cache=300)
     results = {}
-    loop.run_until_complete(gather_with_concurrency())
+    asyncio.run(gather_with_concurrency())
     conn.close()
     ordered_results = []
     for url in urls:
