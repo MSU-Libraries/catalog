@@ -306,7 +306,7 @@ def get_node_status() -> dict:
                 node_available_memory(),
                 node_available_disk_space()
             ]
-            return asyncio.gather(*commands)
+            return await asyncio.gather(*commands)
     results = asyncio.run(async_inner())
     status = {}
     status['cluster_state_uuid'] = results[0]
