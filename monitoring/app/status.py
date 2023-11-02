@@ -301,15 +301,15 @@ def get_harvest_status(name: str, statuses: list[dict]) -> str:
 
 def get_node_status() -> dict:
     event_loop = get_eventloop()
-    aiohttp_session = get_aiohttp_session()
-    commands = [
-        _node_cluster_state_uuid(),
-        _node_solr_status(aiohttp_session),
-        _node_vufind_status(aiohttp_session),
-        node_available_memory(),
-        node_available_disk_space()
-    ]
-    results = run_async_tasks(commands, event_loop)
+    with get_aiohttp_session() as aiohttp_session:
+        commands = [
+            _node_cluster_state_uuid(),
+            _node_solr_status(aiohttp_session),
+            _node_vufind_status(aiohttp_session),
+            node_available_memory(),
+            node_available_disk_space()
+        ]
+        results = run_async_tasks(commands, event_loop)
     status = {}
     status['cluster_state_uuid'] = results[0]
     status['solr'] = results[1]

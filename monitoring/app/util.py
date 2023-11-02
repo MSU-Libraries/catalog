@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import json
 import asyncio
 import aiohttp
@@ -39,10 +40,14 @@ def get_eventloop() -> asyncio.events.AbstractEventLoop:
         raise ex
 
 
+@contextmanager
 def get_aiohttp_session(timeout: int=DEFAULT_TIMEOUT) -> aiohttp.ClientSession:
-    conn = aiohttp.TCPConnector(limit_per_host=100, limit=0, ttl_dns_cache=300)
-    aiohttp_timeout = aiohttp.ClientTimeout(total=timeout)
-    return aiohttp.ClientSession(connector=conn, timeout=aiohttp_timeout, raise_for_status=True)
+    try:
+        conn = aiohttp.TCPConnector(limit_per_host=100, limit=0, ttl_dns_cache=300)
+        aiohttp_timeout = aiohttp.ClientTimeout(total=timeout)
+        yield aiohttp.ClientSession(connector=conn, timeout=aiohttp_timeout, raise_for_status=True)
+    finally:
+        conn.close()
 
 
 def run_async_tasks(tasks: list, loop: asyncio.events.AbstractEventLoop) -> list:
