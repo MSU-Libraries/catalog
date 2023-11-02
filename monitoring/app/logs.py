@@ -17,7 +17,7 @@ BEGIN_END_BYTES = MAX_FULL_FILE // 2
 TIMEOUT = 10
 
 
-def _read_beginning_and_end(path):
+def _read_beginning_and_end(path: str) -> str:
     command = f'head -c {BEGIN_END_BYTES} {path}; echo -e "\n\n[...]\n"; tail -c {BEGIN_END_BYTES} {path}'
     try:
         process = subprocess.run(["/bin/sh", "-c", command],
@@ -29,7 +29,7 @@ def _read_beginning_and_end(path):
     return process.stdout
 
 
-def _add_uncompressed_file_to_log(path, full_log):
+def _add_uncompressed_file_to_log(path: str, full_log: str) -> str:
     if path.stat().st_size > MAX_FULL_FILE:
         log_text = 'Detected a large file. Showing beginning and end...\n' + _read_beginning_and_end(path)
     else:
@@ -44,7 +44,7 @@ def _add_uncompressed_file_to_log(path, full_log):
     return full_log
 
 
-def _add_file_to_log(path, full_log):
+def _add_file_to_log(path: str, full_log: str) -> str:
     if path.name.endswith('.gz'):
         with tempfile.TemporaryDirectory() as tmp_dir_name:
             tmp_path = pathlib.Path(os.path.join(tmp_dir_name, path.name))
@@ -55,7 +55,7 @@ def _add_file_to_log(path, full_log):
     return _add_uncompressed_file_to_log(path, full_log)
 
 
-def node_logs(service):
+def node_logs(service: str) -> str:
     paths = {
         'vufind':                  '/mnt/logs/vufind/vufind.log',
         'apache/error':            '/mnt/logs/apache/error.log',
@@ -100,12 +100,12 @@ def node_logs(service):
     return full_log
 
 
-def logs_vufind(service):
+def logs_vufind(service: str) -> str:
     urls = []
     for node in range(1, 4):
         urls.append(f'http://monitoring{node}/monitoring/node/logs/{service}')
     try:
-        logs = util.async_get_requests(urls)
+        logs = util.multiple_get(urls)
     except aiohttp.ClientError as err:
         return f'Error reading the {service} log: {err}'
     except asyncio.exceptions.TimeoutError:
