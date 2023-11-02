@@ -306,7 +306,7 @@ def get_node_status() -> dict:
             node_available_memory(),
             node_available_disk_space()
         ]
-        results = event_loop.run_until_complete(asyncio.gather(*commands, event_loop))
+        results = event_loop.run_until_complete(asyncio.gather(*commands))
     status = {}
     status['cluster_state_uuid'] = results[0]
     status['solr'] = results[1]

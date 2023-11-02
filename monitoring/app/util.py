@@ -45,8 +45,10 @@ def get_aiohttp_session(timeout: int=DEFAULT_TIMEOUT) -> aiohttp.ClientSession:
     try:
         conn = aiohttp.TCPConnector(limit_per_host=100, limit=0, ttl_dns_cache=300)
         aiohttp_timeout = aiohttp.ClientTimeout(total=timeout)
-        yield aiohttp.ClientSession(connector=conn, timeout=aiohttp_timeout, raise_for_status=True)
+        session = aiohttp.ClientSession(connector=conn, timeout=aiohttp_timeout, raise_for_status=True)
+        yield session
     finally:
+        session.close()
         conn.close()
 
 
