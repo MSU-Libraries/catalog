@@ -111,7 +111,7 @@ def graph(variable: str, period: str) -> str:
     for node in range(1, 4):
         urls.append(f'http://monitoring{node}/monitoring/node/graph_data/{variable}/{period}')
     try:
-        nodes_graph_data = util.async_get_requests(urls)
+        nodes_graph_data = util.async_multiple_get(urls)
     except aiohttp.ClientError as err:
         return f'Error getting graph data: {err}'
     except asyncio.exceptions.TimeoutError:

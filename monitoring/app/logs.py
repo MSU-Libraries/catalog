@@ -105,7 +105,7 @@ def logs_vufind(service: str) -> str:
     for node in range(1, 4):
         urls.append(f'http://monitoring{node}/monitoring/node/logs/{service}')
     try:
-        logs = util.async_get_requests(urls)
+        logs = util.async_multiple_get(urls)
     except aiohttp.ClientError as err:
         return f'Error reading the {service} log: {err}'
     except asyncio.exceptions.TimeoutError:

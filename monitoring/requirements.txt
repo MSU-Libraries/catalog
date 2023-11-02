@@ -6,5 +6,4 @@ aiohttp==3.8.6
 APScheduler==3.10.4
 Flask==3.0.0
 mariadb==1.1.8
-requests==2.31.0
 humanize==4.8.0

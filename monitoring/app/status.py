@@ -1,33 +1,28 @@
 import os
 import pathlib
-import subprocess
 import asyncio
 from datetime import datetime, timedelta
 import re
-import requests
-import aiohttp
+from aiohttp import ClientError, ClientSession
 import humanize
 
-import util
-
-
-TIMEOUT = 10
+from util import (
+    ExecException, async_exec, async_multiple_get, async_single_get, get_aiohttp_session, get_eventloop, run_async_tasks
+)
 
 
 # Galera
 
-def _node_cluster_state_uuid() -> str:
+async def _node_cluster_state_uuid() -> str:
     try:
-        process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind",
+        return await async_exec("mysql", "-h", "galera", "-u", "vufind",
             f"-p{os.getenv('MARIADB_VUFIND_PASSWORD')}", "-ss", "-e",
             "SELECT variable_value from information_schema.global_status WHERE " \
-            "variable_name='wsrep_cluster_state_uuid';"],
-            capture_output=True, text=True, timeout=TIMEOUT, check=True)
-    except subprocess.CalledProcessError as err:
-        return f"Error getting the cluster state uuid: {err.stderr}"
-    except subprocess.TimeoutExpired:
+            "variable_name='wsrep_cluster_state_uuid';")
+    except ExecException as ex:
+        return f"Error getting the cluster state uuid: {ex}"
+    except asyncio.TimeoutError:
         return "Timeout getting the cluster state uuid"
-    return process.stdout.strip()
 
 def _check_cluster_state_uuid(statuses: list[dict]) -> bool:
     uuid0 = statuses[0]['cluster_state_uuid']
@@ -35,17 +30,15 @@ def _check_cluster_state_uuid(statuses: list[dict]) -> bool:
     uuid2 = statuses[2]['cluster_state_uuid']
     return uuid0 == uuid1 and uuid0 == uuid2
 
-def get_galera_status(statuses: list[dict]) -> str:
+async def get_galera_status(statuses: list[dict]) -> str:
     try:
-        process = subprocess.run(["mysql", "-h", "galera", "-u", "vufind",
+        cluster_size = await async_exec("mysql", "-h", "galera", "-u", "vufind",
             f"-p{os.getenv('MARIADB_VUFIND_PASSWORD')}", "-ss", "-e",
-            "SELECT variable_value from information_schema.global_status WHERE variable_name='wsrep_cluster_size';"],
-        capture_output=True, text=True, timeout=TIMEOUT, check=True)
-    except subprocess.CalledProcessError as err:
-        return f"Error checking the status: {err.stderr}"
-    except subprocess.TimeoutExpired:
-        return "Timeout when checking the status"
-    cluster_size = process.stdout.strip()
+            "SELECT variable_value from information_schema.global_status WHERE variable_name='wsrep_cluster_size';")
+    except ExecException as ex:
+        return f"Error checking the galera status: {ex}"
+    except asyncio.TimeoutError:
+        return "Timeout when checking the galera status"
     if cluster_size != '3':
         return f'Error: wrong cluster size: {cluster_size}'
     if not _check_cluster_state_uuid(statuses):
@@ -83,15 +76,14 @@ def _check_collection(collection_name: str, collection: dict, live_nodes: list[s
             return res
     return 'OK'
 
-def _node_solr_status() -> str:
+async def _node_solr_status(aiohttp_session: ClientSession) -> str:
     node = os.getenv('NODE')
+    url = f'http://solr{node}:8983/solr/admin/collections?action=clusterstatus'
     try:
-        req = requests.get(f'http://solr{node}:8983/solr/admin/collections?action=clusterstatus', timeout=TIMEOUT)
-        req.raise_for_status()
-        j = req.json()
-    except requests.exceptions.Timeout:
+        j = await async_single_get(aiohttp_session, url, convert_to_json=True)
+    except asyncio.TimeoutError:
         return 'Timeout when reading the solr clusterstatus'
-    except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
+    except ClientError as err:
         return f'Error reading the solr clusterstatus: {err}'
     live_nodes = j['cluster']['live_nodes']
     if len(live_nodes) != 3:
@@ -114,14 +106,12 @@ def get_solr_status(statuses: list[dict]) -> str:
 
 # Vufind
 
-def _check_vufind_home_page(node: str) -> str:
+async def _check_vufind_home_page(node: str, aiohttp_session: ClientSession) -> str:
     try:
-        req = requests.get(f'http://vufind{node}/', timeout=TIMEOUT)
-        req.raise_for_status()
-        text = req.text
-    except requests.exceptions.Timeout:
+        text = await async_single_get(aiohttp_session, f'http://vufind{node}/')
+    except asyncio.TimeoutError:
         return 'Timeout when reading vufind home page'
-    except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
+    except ClientError as err:
         return f'Error reading vufind home page: {err}'
     if '</html>' not in text:
         return 'Vufind home page not complete'
@@ -129,35 +119,32 @@ def _check_vufind_home_page(node: str) -> str:
         return 'An error is reported in Vufind home page'
     return 'OK'
 
-def _check_vufind_record_page(node: str) -> str:
+async def _check_vufind_record_page(node: str, aiohttp_session: ClientSession) -> str:
     try:
-        req = requests.get(f'http://vufind{node}/Record/folio.in00006782951', timeout=TIMEOUT)
-        req.raise_for_status()
-        text = req.text
-    except requests.exceptions.Timeout:
+        text = await async_single_get(aiohttp_session, f'http://vufind{node}/Record/folio.in00006782951')
+    except asyncio.TimeoutError:
         return 'Timeout when reading vufind record page'
-    except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
+    except ClientError as err:
         return f'Error reading vufind record page: {err}'
     if '</html>' not in text:
-        return 'Vufind record page folio.in00006782951 not complete'
-    if '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
-        return 'An error is reported in Vufind record page folio.in00006782951'
-    if 'Edward R. Barton' not in text:
-        return 'Vufind record page folio.in00006782951 not complete'
-    if 'PS3611.O586 O98 2014' not in text:
-        return 'Vufind record page folio.in00006782951 not complete'
-    return 'OK'
+        result = 'Vufind record page folio.in00006782951 not complete'
+    elif '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
+        result = 'An error is reported in Vufind record page folio.in00006782951'
+    elif 'Edward R. Barton' not in text:
+        result = 'Vufind record page folio.in00006782951 not complete'
+    elif 'PS3611.O586 O98 2014' not in text:
+        result = 'Vufind record page folio.in00006782951 not complete'
+    else:
+        result = 'OK'
+    return result
 
-def _check_vufind_search_page(node: str) -> str:
+async def _check_vufind_search_page(node: str, aiohttp_session: ClientSession) -> str:
+    url = f'http://vufind{node}/Search/Results?limit=5&dfApplied=1&lookfor=Out+of+the+pocket&type=AllFields'
     try:
-        req = requests.get(
-            f'http://vufind{node}/Search/Results?limit=5&dfApplied=1&lookfor=Out+of+the+pocket&type=AllFields',
-            timeout=TIMEOUT)
-        req.raise_for_status()
-        text = req.text
-    except requests.exceptions.Timeout:
+        text = await async_single_get(aiohttp_session, url)
+    except asyncio.TimeoutError:
         return 'Timeout when reading vufind search page'
-    except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
+    except ClientError as err:
         return f'Error reading vufind search page: {err}'
     if '</html>' not in text:
         return 'Vufind search page not complete'
@@ -167,15 +154,15 @@ def _check_vufind_search_page(node: str) -> str:
         return 'Vufind search page not complete'
     return 'OK'
 
-def _node_vufind_status() -> str:
+async def _node_vufind_status(aiohttp_session: ClientSession) -> str:
     node = os.getenv('NODE')
-    res = _check_vufind_home_page(node)
+    res = await _check_vufind_home_page(node, aiohttp_session)
     if res != 'OK':
         return res
-    res = _check_vufind_record_page(node)
+    res = await _check_vufind_record_page(node, aiohttp_session)
     if res != 'OK':
         return res
-    res = _check_vufind_search_page(node)
+    res = await _check_vufind_search_page(node, aiohttp_session)
     if res != 'OK':
         return res
     return 'OK'
@@ -196,25 +183,21 @@ def get_vufind_status(statuses: list[dict]) -> str:
 
 # Available memory and disk space
 
-def node_available_memory() -> str:
+async def node_available_memory() -> str:
     try:
-        process = subprocess.run(["/bin/sh", "-c", "free | grep Mem | awk '{print $7/$2 * 100.0}'"],
-            capture_output=True, text=True, timeout=TIMEOUT, check=True)
-    except subprocess.CalledProcessError as err:
-        return f"Error getting available memory: {err.stderr}"
-    except subprocess.TimeoutExpired:
+        return await async_exec("/bin/sh", "-c", "free | grep Mem | awk '{print $7/$2 * 100.0}'")
+    except ExecException as ex:
+        return f"Error getting available memory: {ex}"
+    except asyncio.TimeoutError:
         return "Timeout when getting available memory"
-    return process.stdout.strip()
 
-def node_available_disk_space() -> str:
+async def node_available_disk_space() -> str:
     try:
-        process = subprocess.run(["/bin/sh", "-c", "df / | grep overlay | awk '{print $4/$2 * 100.0}'"],
-            capture_output=True, text=True, timeout=TIMEOUT, check=True)
-    except subprocess.CalledProcessError as err:
-        return f"Error getting available disk space: {err.stderr}"
-    except subprocess.TimeoutExpired:
+        return await async_exec("/bin/sh", "-c", "df / | grep overlay | awk '{print $4/$2 * 100.0}'")
+    except ExecException as ex:
+        return f"Error getting available disk space: {ex}"
+    except asyncio.TimeoutError:
         return "Timeout when getting available disk space"
-    return process.stdout.strip()
 
 def get_memory_status(statuses: list[dict]) -> str:
     for node in range(1, 4):
@@ -317,12 +300,22 @@ def get_harvest_status(name: str, statuses: list[dict]) -> str:
 # Getting all the node statuses at once
 
 def get_node_status() -> dict:
+    event_loop = get_eventloop()
+    aiohttp_session = get_aiohttp_session()
+    commands = [
+        _node_cluster_state_uuid(),
+        _node_solr_status(aiohttp_session),
+        _node_vufind_status(aiohttp_session),
+        node_available_memory(),
+        node_available_disk_space()
+    ]
+    results = run_async_tasks(commands, event_loop)
     status = {}
-    status['cluster_state_uuid'] = _node_cluster_state_uuid()
-    status['solr'] = _node_solr_status()
-    status['vufind'] = _node_vufind_status()
-    status['available_memory'] = node_available_memory()
-    status['available_disk_space'] = node_available_disk_space()
+    status['cluster_state_uuid'] = results[0]
+    status['solr'] = results[1]
+    status['vufind'] = results[2]
+    status['available_memory'] = results[3]
+    status['available_disk_space'] = results[4]
     status['harvests'] = _node_harvest_exit_codes()
     return status
 
@@ -331,9 +324,9 @@ def get_node_statuses() -> list[dict] | str:
     for node in range(1, 4):
         urls.append(f'http://monitoring{node}/monitoring/node/status')
     try:
-        statuses = util.async_get_requests(urls, convert_to_json=True, timeout=20)
-    except aiohttp.ClientError as err:
+        statuses = async_multiple_get(urls, convert_to_json=True, timeout=20)
+    except ClientError as err:
         return f'Error reading node status: {err}'
-    except asyncio.exceptions.TimeoutError:
+    except asyncio.TimeoutError:
         return 'Timeout when reading node status'
     return statuses
