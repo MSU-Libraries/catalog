@@ -13,7 +13,7 @@ class ExecException(Exception):
 
 async def async_exec(program: str, *args, timeout: int=DEFAULT_TIMEOUT) -> str:
     try:
-        process = await asyncio.create_subprocess_exec(program, args, stdout=asyncio.subprocess.PIPE,
+        process = await asyncio.create_subprocess_exec(program, *args, stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE)
         stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
     except asyncio.TimeoutError as err:
