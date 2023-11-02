@@ -50,11 +50,6 @@ def get_aiohttp_session(timeout: int=DEFAULT_TIMEOUT) -> aiohttp.ClientSession:
         conn.close()
 
 
-def run_async_tasks(tasks: list, loop: asyncio.events.AbstractEventLoop) -> list:
-    commands = asyncio.gather(*tasks)
-    return loop.run_until_complete(commands)
-
-
 async def async_single_get(session: aiohttp.ClientSession, url: str, convert_to_json: bool=False) -> str:
     async with session.get(url) as response:
         text = await response.text()

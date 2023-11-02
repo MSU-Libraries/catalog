@@ -6,9 +6,7 @@ import re
 from aiohttp import ClientError, ClientSession
 import humanize
 
-from util import (
-    ExecException, async_exec, async_multiple_get, async_single_get, get_aiohttp_session, get_eventloop, run_async_tasks
-)
+from util import ExecException, async_exec, async_multiple_get, async_single_get, get_aiohttp_session, get_eventloop
 
 
 # Galera
@@ -156,15 +154,14 @@ async def _check_vufind_search_page(node: str, aiohttp_session: ClientSession) -
 
 async def _node_vufind_status(aiohttp_session: ClientSession) -> str:
     node = os.getenv('NODE')
-    res = await _check_vufind_home_page(node, aiohttp_session)
-    if res != 'OK':
-        return res
-    res = await _check_vufind_record_page(node, aiohttp_session)
-    if res != 'OK':
-        return res
-    res = await _check_vufind_search_page(node, aiohttp_session)
-    if res != 'OK':
-        return res
+    results = await asyncio.gather(
+        _check_vufind_home_page(node, aiohttp_session),
+        _check_vufind_record_page(node, aiohttp_session),
+        _check_vufind_search_page(node, aiohttp_session)
+    )
+    for res in results:
+        if res != 'OK':
+            return res
     return 'OK'
 
 def get_vufind_status(statuses: list[dict]) -> str:
@@ -309,7 +306,7 @@ def get_node_status() -> dict:
             node_available_memory(),
             node_available_disk_space()
         ]
-        results = run_async_tasks(commands, event_loop)
+        results = event_loop.run_until_complete(asyncio.gather(*commands, event_loop))
     status = {}
     status['cluster_state_uuid'] = results[0]
     status['solr'] = results[1]
