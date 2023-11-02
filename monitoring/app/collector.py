@@ -8,6 +8,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import mariadb as db
 
 import status
+from util import get_eventloop
 
 
 ACCESS_LOG_PATH = '/mnt/logs/apache/access.log'
@@ -67,7 +68,8 @@ def _analyse_log() -> dict[str, int | None]:
 def main():
     time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     node = os.getenv('NODE')
-    results = asyncio.run(asyncio.gather(
+    event_loop = get_eventloop()
+    results = event_loop.run_until_complete(asyncio.gather(
         status.node_available_memory(),
         status.node_available_disk_space()
     ))

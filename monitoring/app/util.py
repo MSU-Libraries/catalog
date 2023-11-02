@@ -29,6 +29,17 @@ async def async_exec(program: str, *args, timeout: int=DEFAULT_TIMEOUT) -> str:
     return stdout.decode().strip()
 
 
+def get_eventloop() -> asyncio.events.AbstractEventLoop:
+    try:
+        return asyncio.get_event_loop()
+    except RuntimeError as ex:
+        if "There is no current event loop in thread" in str(ex):
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            return asyncio.get_event_loop()
+        raise ex
+
+
 @asynccontextmanager
 async def get_aiohttp_session(timeout: int=DEFAULT_TIMEOUT) -> aiohttp.ClientSession:
     try:
@@ -70,9 +81,10 @@ def multiple_get(urls: list[str], convert_to_json: bool=False, timeout: int=DEFA
         await asyncio.gather(*(get(url) for url in urls))
         await session.close()
 
+    loop = get_eventloop()
     conn = aiohttp.TCPConnector(limit_per_host=100, limit=0, ttl_dns_cache=300)
     results = {}
-    asyncio.run(gather_with_concurrency())
+    loop.run_until_complete(gather_with_concurrency())
     conn.close()
     ordered_results = []
     for url in urls:
