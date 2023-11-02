@@ -152,6 +152,53 @@ class Record extends \VuFind\View\Helper\Root\Record
     }
 
     /**
+     * Determine the holding status
+     *
+     * @param array $holding the holding data
+     *
+     * @return string
+     */
+    public function getStatus($holding)
+    {
+        $transEsc = $this->getView()->plugin('transEsc');
+        $status = $holding['status'];
+        if (
+            in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
+            'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
+            'Unknown', 'Withdrawn'])
+        ) {
+            $status = $transEsc('Unavailable') . '(' . $transEsc($status) . ')';
+        } elseif (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged'])) {
+            $status = $transEsc('Checked Out') . '(' . $transEsc($status) . ')';
+        } elseif ($status == 'Restricted') {
+            $status = $transEsc('Library Use Only');
+        } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
+            $status = $transEsc('Unknown status') . '(' . $transEsc($status) . ')';
+        }
+        return $status;
+    }
+
+    /**
+     * Determine the holding status suffix (if any)
+     *
+     * @param array $holding the holding data
+     *
+     * @return string
+     */
+    public function getStatusSuffix($holding)
+    {
+        $transEsc = $this->getView()->plugin('transEsc');
+        $suffix = "";
+        if ($holding['returnDate'] ?? false) {
+            $suffix = " - " . $holding['returnDate'];
+        }
+        if ($holding['duedate'] ?? false) {
+            $suffix = $suffix . " - " . $transEsc("Due") . ":"  . $holding['duedate'];
+        }
+        return $suffix;
+    }
+
+    /**
      * Generate a URL to the LibKey system if a 200 response would be returned for
      * the item (based on a query to another URL)
      *
