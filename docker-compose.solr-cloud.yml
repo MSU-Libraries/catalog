@@ -59,6 +59,7 @@ services:
     init: true
     environment:
       SOLR_HOST: solr{{slice .Node.Hostname 8 9}}
+      SOLR_LOGS_DIR: /mnt/logs/solr
       <<: *solr_envs
     deploy:
       mode: replicated

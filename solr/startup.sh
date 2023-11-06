@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Save all the Solr logs in the logs docker volume
-if [[ ! -L /opt/bitnami/solr/logs ]]; then
-    rm -rf /opt/bitnami/solr/logs
-    ln -s /mnt/logs/solr /opt/bitnami/solr/logs
-fi
-
 # Java security manager is incompatible with AlphaBrowse handler
 export SOLR_SECURITY_MANAGER_ENABLED="false"
 
