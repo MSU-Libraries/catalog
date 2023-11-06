@@ -68,10 +68,11 @@ def node_logs(service: str) -> str:
         'harvests/hlm':            '/mnt/logs/harvests/hlm.log',
         'harvests/authority':      '/mnt/logs/harvests/authority.log',
         'vufind/reserves_update':  '/mnt/logs/vufind/reserves_update.log',
-        'solr/alphabrowse':        '/mnt/logs/solr/alphabrowse.log',
+        'alphabrowse':             '/mnt/logs/alphabrowse/alphabrowse.log',
         'vufind/searches_cleanup': '/mnt/logs/vufind/searches_cleanup.log',
         'backups/solr':            '/mnt/logs/backups/solr.log',
         'backups/db':              '/mnt/logs/backups/db.log',
+        'solr':                    '/mnt/logs/solr/solr.log'
     }
     if service not in paths:
         return 'Error: unknown service.'

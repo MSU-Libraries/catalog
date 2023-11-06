@@ -5,7 +5,7 @@ source "${CI_PROJECT_DIR}"/cicd/before-script
 runhelp() {
     echo ""
     echo "Purpose: Create the volume for the logs and initialize the directory with"
-    echo "         proper permissions for MariaDB"
+    echo "         proper permissions for MariaDB and Solr"
     echo ""
     echo "Expected User-defined Variables:"
     echo "  - STACK_NAME: Name of the stack"
@@ -25,12 +25,12 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
-    # Create logs volume and set permissions for /mnt/logs/mariadb so that mariadb can write the log there
+    # Create logs volume and set permissions for /mnt/logs/mariadb so that mariadb can write the log there (same for solr)
     HOSTS="$DEPLOY_HOST_A $DEPLOY_HOST_B $DEPLOY_HOST_C";
     for HOST in ${HOSTS}; do
         ssh deploy@"${HOST}" \
         "docker volume create ${STACK_NAME}_logs &&
-        docker run --rm -v ${STACK_NAME}_logs:/mnt/logs alpine sh -c 'mkdir -p /mnt/logs/mariadb && chown 1001 /mnt/logs/mariadb'";
+        docker run --rm -v ${STACK_NAME}_logs:/mnt/logs alpine sh -c 'mkdir -p /mnt/logs/mariadb /mnt/logs/solr && chown 1001 /mnt/logs/mariadb /mnt/logs/solr'";
     done
 }
 
