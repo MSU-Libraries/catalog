@@ -99,6 +99,7 @@ Deploy Solr:
     - Bootstrap Stacks
     - Deploy Compose Files
     - Deploy Internal Network
+    - Initialize Log Dirs
   script:
     - bash ./cicd/deploy-solr
 
