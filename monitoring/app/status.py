@@ -242,7 +242,7 @@ def _harvest_delta(name: str) -> timedelta:
         return timedelta(days=7)
     return timedelta(days=1)
 
-def _node_harvest_exit_codes() -> dict[str, str]:
+def _node_cron_exit_codes() -> dict[str, str]:
     paths = {
         'folio': '/mnt/logs/harvests/folio_exit_code',
         'hlm': '/mnt/logs/harvests/hlm_exit_code',
@@ -251,7 +251,7 @@ def _node_harvest_exit_codes() -> dict[str, str]:
         'searches': '/mnt/logs/vufind/searches_exit_code',
         'solr': '/mnt/logs/backups/solr_exit_code',
         'db': '/mnt/logs/backups/db_exit_code',
-        'alphabrowse': '/mnt/logs/solr/alphabrowse_exit_code',
+        'alphabrowse': '/mnt/logs/alphabrowse/alphabrowse_exit_code',
     }
     exit_codes = {}
     for name, path in paths.items():
@@ -268,7 +268,7 @@ def _node_harvest_exit_codes() -> dict[str, str]:
         exit_codes[name] = exit_code
     return exit_codes
 
-def get_harvest_status(name: str, statuses: list[dict]) -> str:
+def get_cron_status(name: str, statuses: list[dict]) -> str:
     nb_executed = 0
     node_where_executed = 0
     exit_code = ''
@@ -314,7 +314,7 @@ def get_node_status() -> dict:
     status['vufind'] = results[2]
     status['available_memory'] = results[3]
     status['available_disk_space'] = results[4]
-    status['harvests'] = _node_harvest_exit_codes()
+    status['harvests'] = _node_cron_exit_codes()
     return status
 
 def get_node_statuses() -> list[dict] | str:

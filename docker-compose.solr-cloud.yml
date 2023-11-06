@@ -47,6 +47,7 @@ services:
     volumes:
       - bitnami:/bitnami
       - /mnt/shared/backups/${STACK_NAME}/solr_dropbox:/mnt/solr_backups
+      - logs:/mnt/logs
     hostname: solr{{slice .Node.Hostname 8 9}}
     networks:
       - internal

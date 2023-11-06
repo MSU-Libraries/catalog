@@ -14,14 +14,14 @@ def homepage() -> str:
     status_list['galera'] = asyncio.run(status.get_galera_status(statuses))
     status_list['solr'] = status.get_solr_status(statuses)
     status_list['vufind'] = status.get_vufind_status(statuses)
-    status_list['folio_harvest'] = status.get_harvest_status('folio', statuses)
-    status_list['hlm_harvest'] = status.get_harvest_status('hlm', statuses)
-    status_list['authority_harvest'] = status.get_harvest_status('authority', statuses)
-    status_list['reserves_update'] = status.get_harvest_status('reserves', statuses)
-    status_list['alphabrowse'] = status.get_harvest_status('alphabrowse', statuses)
-    status_list['searches_cleanup'] = status.get_harvest_status('searches', statuses)
-    status_list['solr_backup'] = status.get_harvest_status('solr', statuses)
-    status_list['db_backup'] = status.get_harvest_status('db', statuses)
+    status_list['folio_harvest'] = status.get_cron_status('folio', statuses)
+    status_list['hlm_harvest'] = status.get_cron_status('hlm', statuses)
+    status_list['authority_harvest'] = status.get_cron_status('authority', statuses)
+    status_list['reserves_update'] = status.get_cron_status('reserves', statuses)
+    status_list['alphabrowse'] = status.get_cron_status('alphabrowse', statuses)
+    status_list['searches_cleanup'] = status.get_cron_status('searches', statuses)
+    status_list['solr_backup'] = status.get_cron_status('solr', statuses)
+    status_list['db_backup'] = status.get_cron_status('db', statuses)
     services = {}
     for s_name, s_text in status_list.items():
         if s_text.startswith('OK'):
