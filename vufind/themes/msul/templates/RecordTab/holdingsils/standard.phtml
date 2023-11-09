@@ -1,4 +1,7 @@
-<?php if ($this->holdings()->holdingIsVisible($holding)): ?>
+<?php
+use Catalog\GetThis\GetThisLoader;
+
+if ($this->holdings()->holdingIsVisible($holding)): ?>
   <?php
     # TODO is $holding actually an item record? possibly!
     $id = $holding['id'];
@@ -6,7 +9,7 @@
     $check = $holding['check'] ?? false;
     $checkStorageRetrievalRequest = $holding['checkStorageRetrievalRequest'] ?? false;
     $checkILLRequest = $holding['checkILLRequest'] ?? false;
-    $getthis = new \Catalog\GetThis\GetThisLoader($record, [$holding]);
+    $getthis = new GetThisLoader($record, [$holding]);
     $callnum = $getthis->getCallNumber($item_id);
     ?>
   <tr vocab="http://schema.org/" typeof="Offer">
@@ -27,7 +30,7 @@
           <?php /* Begin Available Items (Holds) */ ?>
           <span class="text-success"><?=$this->transEsc("Available")?><link property="availability" href="http://schema.org/InStock"></span>
           <?php if (! $this->driver instanceof VuFind\RecordDriver\EDS && ! $getthis->isOnlineResource($item_id) &&
-              ! \Catalog\GetThis\GetThisLoader::locationAtLoM($holding)): ?>
+              ! GetThisLoader::locationAtLoM($holding)): ?>
             <a class="<?=$check ? 'checkRequest' : ''?> placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
               <?=$this->transEsc('Get this')?>
             </a>
@@ -46,28 +49,16 @@
           <?php endif; ?>
         <?php else: ?>
           <?php /* Begin Unavailable Items (Requests) */
-            $status = $holding['status'];
-            if (in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
-                'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
-                'Unknown', 'Withdrawn']))
-              $status = 'Unavailable (' . $status . ')';
-            elseif (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged']))
-              $status = 'Checked Out (' . $status . ')';
-            elseif ($status == 'Restricted')
-              $status = 'Library Use Only';
-            elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out']))
-              $status = 'Unknown status (' . $status . ')';
+            $status = $this->record($this->driver)->getStatus($holding);
+            $statusSuffix = $this->record($this->driver)->getStatusSuffix($holding);
           ?>
           <span class="text-danger"><?=$this->transEsc($status)?><link property="availability" href="http://schema.org/OutOfStock"></span>
-          <?php if ($holding['returnDate'] ?? false): ?>&ndash; <span class="small"><?=$this->escapeHtml($holding['returnDate'])?></span><?php endif; ?>
-          <?php if ($holding['duedate'] ?? false): ?>
-            &ndash; <span class="small"><?=$this->transEsc("Due")?>: <?=$this->escapeHtml($holding['duedate'])?></span>
-          <?php endif; ?>
+          <?=$this->escapeHtml($statusSuffix)?>
           <?php if (($holding['requests_placed'] ?? 0) > 0): ?>
             <span><?=$this->transEsc("Requests")?>: <?=$this->escapeHtml($holding['requests_placed'])?></span>
           <?php endif; ?>
           <?php if (! $this->driver instanceof VuFind\RecordDriver\EDS && ! $getthis->isOnlineResource($item_id) &&
-              ! \Catalog\GetThis\GetThisLoader::locationAtLoM($holding)): ?>
+              ! GetThisLoader::locationAtLoM($holding)): ?>
             <a class="<?=$check ? 'checkRequest' : ''?> placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
               <?=$this->transEsc('Get this')?>
             </a>

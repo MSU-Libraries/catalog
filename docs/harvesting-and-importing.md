@@ -132,6 +132,9 @@ This means we will on occassion need to swap them. This occassion being when we 
 such as when we're adding new data fields or doing a VuFind version upgrade (...which typically
 add new data fields).
 
+* Start the manual task "Deploy VuFind Build Env" in gitlab. It will update the `catalog_build` container.
+This is not done automatically so that other updates to the main branch can be deployed while a full import is running.
+
 * Identify what collection each alias is pointing to currently (i.e. is `biblio` pointing
 to `biblio1` or `biblio2`) and confirm the **other** collection is what `biblio-build` is
 pointing to
@@ -142,7 +145,7 @@ curl 'http://solr1:8983/solr/biblio-build/update' --data '<delete><query>id:*</q
 curl 'http://solr1:8983/solr/biblio-build/update' --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
 ```
 
-* Rebuild you index on `biblio-build` using the `catalog_build` container. This has
+* Rebuild the index on `biblio-build` using the `catalog_build` container. This has
 everything that the `catalog_cron` containers have access to, but do not run `cron`
 jobs since rebuilds do not happen at regular or frequent intervals. In fact, all this container
 does is sleep! It is recommended to run these commands in a `screen`.  

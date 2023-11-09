@@ -264,6 +264,19 @@ class GetThisLoader
     }
 
     /**
+     * Return true if the Place Request button should not be displayed for the given item
+     * because the location code is mnmst.
+     *
+     * @param array $item item record
+     *
+     * @return bool
+     */
+    public static function makerspaceLocation($item)
+    {
+        return $item['location_code'] == 'mnmst';
+    }
+
+    /**
      * Return true if the location of the given item is at Library of Michigan
      *
      * @param array $item item record
@@ -272,7 +285,7 @@ class GetThisLoader
      */
     public static function locationAtLoM($item)
     {
-        return str_starts_with($item['location'] ?? '', 'Library of Michigan');
+        return str_starts_with(strtolower($item['location'] ?? ''), 'library of michigan');
     }
 
     /**
