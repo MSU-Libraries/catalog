@@ -55,6 +55,16 @@ Bootstrap Prod Stacks:
     - Deploy Prod Compose Files
     - Deploy Prod Internal Network
 
+Deploy Prod ZK:
+  stage: Deploy Prod
+  extends: Deploy ZK
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+  needs:
+    - job: Set Prod Stack Name
+      artifacts: true
+    - Bootstrap Prod Stacks
+
 Deploy Prod Solr:
   stage: Deploy Prod
   extends: Deploy Solr
@@ -63,6 +73,7 @@ Deploy Prod Solr:
   needs:
     - job: Set Prod Stack Name
       artifacts: true
+    - Deploy Prod ZK
     - Bootstrap Prod Stacks
 
 Deploy Prod DB:

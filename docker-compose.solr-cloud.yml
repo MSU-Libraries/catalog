@@ -7,15 +7,6 @@ x-solr-envs: &solr_envs
   SOLR_OPTS: "-Dsolr.allowPaths=/mnt/solr_backups"
   STACK_NAME: "${STACK_NAME}"
 
-x-zookeeper-envs: &zookeeper_envs
-  ALLOW_ANONYMOUS_LOGIN: "yes"
-  ZOO_SERVERS: zk1:2888:3888::1 zk2:2888:3888::2 zk3:2888:3888::3
-  ZOO_LISTEN_ALLIPS_ENABLED: "yes"
-  ZOO_4LW_COMMANDS_WHITELIST: srvr,mntr,conf,ruok,stat
-  ZOO_HEAP_SIZE: 512
-  ZOO_AUTOPURGE_INTERVAL: 24
-  ZOO_AUTOPURGE_RETAIN_COUNT: 8
-
 x-solrproxy-deploy: &solrproxy_deploy
   mode: replicated
   replicas: 3
@@ -72,32 +63,6 @@ services:
         monitor: 10s
       placement:
         max_replicas_per_node: 1
-
-  zk:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
-    volumes:
-      - zk-bitnami:/bitnami
-    hostname: zk{{slice .Node.Hostname 8 9}}
-    environment:
-      ZOO_SERVER_ID: "{{slice .Node.Hostname 8 9}}"
-      <<: *zookeeper_envs
-    networks:
-      - internal
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "5"
-        max-size: "10m"
-    deploy:
-      mode: replicated
-      replicas: 3
-      placement:
-        max_replicas_per_node: 1
-      update_config:
-        parallelism: 1
-        failure_action: rollback
-      restart_policy:
-        window: 15s
 
   cron:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
@@ -156,7 +121,6 @@ networks:
 
 volumes:
   bitnami:
-  zk-bitnami:
   logs:
     external: true
     name: "${STACK_NAME}_logs"
