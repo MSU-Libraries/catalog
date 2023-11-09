@@ -110,9 +110,8 @@ apply_devel_changes() {
     # Disable container rollback
     ./yq -i "del(.services.monitoring.deploy.update_config.failure_action)" docker-compose.monitoring.yml;
     ./yq -i "del(.x-solrproxy-deploy.update_config.failure_action)" docker-compose.solr-cloud-bootstrap.yml;
-    ./yq -i "del(.services.zk.deploy.update_config.failure_action)" docker-compose.solr-cloud-bootstrap.yml;
+    ./yq -i "del(.services.zk.deploy.update_config.failure_action)" docker-compose.zk.yml;
     ./yq -i "del(.x-solrproxy-deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
-    ./yq -i "del(.services.zk.deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
     ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud.yml;
     ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud-force.yml;
     ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud-bootstrap.yml;
