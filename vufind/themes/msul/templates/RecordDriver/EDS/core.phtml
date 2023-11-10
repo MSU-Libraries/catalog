@@ -10,6 +10,7 @@
     $restrictedView = empty($accessLevel) ? false : true;
     $coverDetails = $this->record($this->driver)->getCoverDetails('core', 'medium');
     $cover = $coverDetails['html'];
+    $libkeyData = $this->record($this->driver)->getLibKeyData($this->driver->getCleanDOI());
 ?>
 <div class="media" vocab="http://schema.org/" resource="#record" typeof="<?=$this->driver->getSchemaOrgFormats()?> Product">
   <div class="media-left medium img-col">
@@ -28,6 +29,7 @@
         <?php
             if($pLink): ?>
           <span>
+            <?=$this->icon('external-link', 'icon-link__icon') ?>
             <a href="<?=$this->escapeHtmlAttr($pLink)?>">
               <?=$this->transEsc('View in EDS')?>
             </a>
@@ -36,6 +38,7 @@
         <?php
             if ($ftLink): ?>
           <span>
+            <?=$this->icon('external-link', 'icon-link__icon') ?>
             <a href="<?=$ftLink?>" class="fulltext">
               <?=$this->transEsc('Linked Full Text')?>
             </a>
@@ -44,6 +47,7 @@
         <?php
             if ($pdfLink): ?>
           <span>
+            <?=$this->icon('external-link', 'icon-link__icon') ?>
             <a href="<?=$pdfLink?>" class="icon pdf fulltext">
               <?=$this->transEsc('PDF Full Text')?>
             </a>
@@ -52,6 +56,7 @@
         <?php
             if ($epubLink): ?>
           <span>
+            <?=$this->icon('external-link', 'icon-link__icon') ?>
             <a href="<?=$epubLink?>" class="icon epub fulltext">
               <?=$this->transEsc('ePub Full Text')?>
             </a>
@@ -65,6 +70,15 @@
         </a>
        </span><br />
     <?php endif; ?>
+    <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ["link" => $libkeyData["pdf"],
+                                           "label" => "Download PDF",
+                                           "openAccess" => $libkeyData["openAccess"]]); ?>
+    <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ["link" => $libkeyData["article"],
+                                           "label" => "View Article",
+                                           "openAccess" => $libkeyData["openAccess"]]); ?>
+    <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ["link" => $libkeyData["issue"],
+                                           "label" => "View Full Issue",
+                                           "openAccess" => $libkeyData["openAccess"]]); ?>
   </div>
   <div class="media-body info-col">
     <h1 property="name"><?=$this->driver->getTitle()?></h1>
@@ -101,8 +115,10 @@
           $name = $customLink['Text'] ?? '';
         ?>
         <div>
+          <?php if ($icon): ?><img src="<?=$this->escapeHtmlAttr($icon)?>" />
+          <?php else: ?><?=$this->icon('external-link', 'icon-link__icon') ?><?php endif; ?>
           <a href="<?=$this->escapeHtmlAttr($url)?>" target="_blank" title="<?=$this->escapeHtmlAttr($mot)?>" class="custom-link">
-            <?php if ($icon): ?><img src="<?=$this->escapeHtmlAttr($icon)?>" /> <?php endif; ?><?=$this->escapeHtml($name)?>
+            <?=$this->escapeHtml($name)?>
           </a>
         </div>
       <?php endforeach; ?>

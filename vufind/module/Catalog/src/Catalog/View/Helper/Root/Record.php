@@ -99,6 +99,9 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             $link['desc'] = 'Book Plate: ' . $link['desc'];
         }
 
+        if (!array_key_exists('desc', $link)) {
+            $link['desc'] = "";
+        }
         // Add labels to links
         foreach ($this->linkLabels as $mat) {
             // Skip entries missing the 'label' field
@@ -118,8 +121,13 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
                 break;
             }
         }
-        if ($label !== null && array_key_exists('desc', $link)) {
+        if ($label !== null) {
             $link['desc'] .= " ({$label})";
+        }
+        // In case there is still no description by this point,
+        // add one so there isn't a blank link on the page
+        elseif ($link['desc'] == null || trim($link['desc']) == "") {
+            $link['desc'] = "Access Content Online";
         }
         return $link;
     }
