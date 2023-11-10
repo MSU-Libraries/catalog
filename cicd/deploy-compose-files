@@ -166,22 +166,14 @@ apply_prod_changes() {
         ## Only catalog-beta
         if [ "${STACK_NAME}" == "catalog-beta" ]; then
             # Set cron/build placement contraint
-            ./yq -i \
-            ".services.cron.deploy.placement.constraints += \"${DEPLOY_HOST_B}\""
-            docker-compose.yml;
-            ./yq -i \
-            ".services.build.deploy.placement.constraints += \"${DEPLOY_HOST_B}\""
-            docker-compose.build.yml;
+            ./yq -i ".services.cron.deploy.placement.constraints += \"${DEPLOY_HOST_B}\"" docker-compose.yml;
+            ./yq -i ".services.build.deploy.placement.constraints += \"${DEPLOY_HOST_B}\"" docker-compose.build.yml;
         fi;
         ## Only catalog-preview
         if [ "${STACK_NAME}" == "catalog-preview" ]; then
             # Set cron/build placement contraint
-            ./yq -i \
-            ".services.cron.deploy.placement.constraints += \"${DEPLOY_HOST_C}\""
-            docker-compose.yml;
-            ./yq -i \
-            ".services.build.deploy.placement.constraints += \"${DEPLOY_HOST_C}\""
-            docker-compose.build.yml;
+            ./yq -i ".services.cron.deploy.placement.constraints += \"${DEPLOY_HOST_C}\"" docker-compose.yml;
+            ./yq -i ".services.build.deploy.placement.constraints += \"${DEPLOY_HOST_C}\"" docker-compose.build.yml;
         fi;
         ## both catalog-beta and catalog-preview
         # Override default router rule
@@ -214,12 +206,8 @@ apply_prod_changes() {
     ## Changes for catalog-prod
     if [ "${STACK_NAME}" == "catalog-prod" ]; then
         # Set cron/build placement contraint
-        ./yq -i \
-        ".services.cron.deploy.placement.constraints += \"${DEPLOY_HOST_A}\""
-        docker-compose.yml;
-        ./yq -i \
-        ".services.build.deploy.placement.constraints += \"${DEPLOY_HOST_A}\""
-        docker-compose.build.yml;
+        ./yq -i ".services.cron.deploy.placement.constraints += \"${DEPLOY_HOST_A}\"" docker-compose.yml;
+        ./yq -i ".services.build.deploy.placement.constraints += \"${DEPLOY_HOST_A}\"" docker-compose.build.yml;
         # Increase Solr RAM to 4 GB (prod is granted more than non-prod envs)
         ./yq -i \
         ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms4096m -Xmx4096m\"" \
