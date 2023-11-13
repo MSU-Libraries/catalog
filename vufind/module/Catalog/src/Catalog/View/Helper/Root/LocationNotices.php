@@ -64,11 +64,11 @@ class LocationNotices extends AbstractHelper implements \Laminas\Log\LoggerAware
     /**
      * Print banners based on conditions defined in banner-notices.yaml
      *
-     * @param array $item The holdings item
+     * @param array|null $item The holdings item
      *
      * @return string The formatted HTML for output
      */
-    public function __invoke(array $item)
+    public function __invoke(array|null $item)
     {
         if (empty($item['location']) && empty($item['location_code']) && empty($item['callnumber'])) {
             return '';
