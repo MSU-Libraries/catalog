@@ -4,7 +4,7 @@ $sel_item = $this->getthis->getItem();
 $items = $this->getthis->items;
 
 function getDisplay($view, $item) {
-    return $view->getthis->getCallNumber($item['item_id']);
+    return $view->getthis->getCallNumber($item['item_id'] ?? null);
 }
 ?>
 
