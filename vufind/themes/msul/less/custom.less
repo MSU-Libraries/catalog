@@ -114,9 +114,9 @@
 header {
   .banner.container {
     background-color:@msugreen;
-    background-image: 
+    background-image:
     linear-gradient(
-      rgba(24, 69, 59, 0.8), 
+      rgba(24, 69, 59, 0.8),
       rgba(24, 69, 59, 0.8)
     ),
     url(/vufind/themes/msul/images/banner-image.jpg);
@@ -498,7 +498,7 @@ input[type="checkbox"] {
       input {
         margin-bottom:1rem;
       }
-    }   
+    }
     @media only screen and (min-width : 992px) {
       button[type=submit].btn-primary {
         border-radius: 2rem;
@@ -524,7 +524,7 @@ input[type="checkbox"] {
           padding-left:0;
         }
       }
-  } 
+  }
   @media only screen and (min-width : 1315px) {
       .searchForm_lookfor {
         width:33%;
@@ -533,7 +533,7 @@ input[type="checkbox"] {
       .searchForm_lookfor {
         width:100%;
     }
-  }     
+  }
 }
 
 .searchHomeContent form .active-filters {
@@ -580,7 +580,7 @@ input[type="checkbox"] {
     input {
       display:inline-block;
     }
-  } 
+  }
 
 
 .home-facet.home-askalib::after {
@@ -631,7 +631,7 @@ form.searchForm, .record-tabs, .navbar-form {
 
     li {
       height:3rem;
-      @media only screen and (min-width : 992px) {   
+      @media only screen and (min-width : 992px) {
         font-size:larger;
         height:2rem;
       }
@@ -652,7 +652,7 @@ form.searchForm, .record-tabs, .navbar-form {
       margin-left:0;
     }
     .navtab-digrepo {
-      @media only screen and (min-width : 998px) {    
+      @media only screen and (min-width : 998px) {
         border-left:0.2rem solid @eggplant;
         padding-left:0.5rem;
         margin-left:0.5rem;
@@ -792,9 +792,9 @@ table tr {
       margin-top:0.5rem;
     }
   }
-  .media { 
+  .media {
     .media-left {
-      font-size:14px; 
+      font-size:14px;
       }
   @media only screen and (min-width : 768px) {
     .result-links {
@@ -1241,16 +1241,26 @@ body.template-dir-myresearch.template-name-profile {
   }
 }
 
-// LibKey link styling
+// LibKey and EDS link styling
 .result-body {
+  .custom-link {
+    display: inline-block;
+    padding-right: 1rem;
+  }
   .libkey-link {
     display: inline-block;
     .icon-link__label {
-      padding-right: .5rem;
+      padding-right: 1rem;
     }
     .fa-lock {
       text-decoration: underline;
     }
+  }
+}
+
+.media-left {
+  a {
+    padding-bottom: .25rem;
   }
 }
 

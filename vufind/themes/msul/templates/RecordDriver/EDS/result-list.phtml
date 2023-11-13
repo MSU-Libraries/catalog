@@ -65,8 +65,10 @@
               $name = $customLink['Text'] ?? '';
             ?>
             <span>
+              <?php if ($icon): ?><img src="<?=$this->escapeHtmlAttr($icon)?>" />
+              <?php else: ?><?=$this->icon('external-link', 'icon-link__icon') ?><?php endif; ?>
               <a href="<?=$this->escapeHtmlAttr($url)?>" target="_blank" title="<?=$this->escapeHtmlAttr($mot)?>" class="custom-link">
-                <?php if ($icon): ?><img src="<?=$this->escapeHtmlAttr($icon)?>" /> <?php endif; ?><?=$this->escapeHtml($name)?>
+                <?=$this->escapeHtml($name)?>
               </a>
             </span>
           <?php endforeach; ?>
@@ -82,19 +84,22 @@
     <?php if (($isCommunityBorrower && $isOnCampus) || ($user && !$isCommunityBorrower)): ?>
 
       <?php if ($this->driver->hasLinkedFullTextAvailable()): ?>
-        <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getTabUrl($this->driver, 'LinkedText')) ?>" class="fulltext" target="_blank">
+        <?=$this->icon('external-link', 'icon-link__icon') ?>
+        <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getTabUrl($this->driver, 'LinkedText')) ?>" class="custom-link fulltext" target="_blank">
           <?=$this->transEsc('Linked Full Text')?>
         </a>
       <?php endif; ?>
 
       <?php if ($this->driver->hasPdfAvailable()): ?>
-        <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getTabUrl($this->driver, 'PDF')) ?>" class="icon pdf fulltext" target="_blank">
+        <?=$this->icon('external-link', 'icon-link__icon') ?>
+        <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getTabUrl($this->driver, 'PDF')) ?>" class="custom-link icon pdf fulltext" target="_blank">
           <?=$this->transEsc('PDF Full Text')?>
         </a>
       <?php endif; ?>
 
       <?php if ($this->driver->hasEpubAvailable()): ?>
-        <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getTabUrl($this->driver, 'Epub')) ?>" class="icon epub fulltext" target="_blank">
+        <?=$this->icon('external-link', 'icon-link__icon') ?>
+        <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getTabUrl($this->driver, 'Epub')) ?>" class="custom-link icon epub fulltext" target="_blank">
           <?=$this->transEsc('ePub Full Text')?>
         </a>
       <?php endif; ?>
