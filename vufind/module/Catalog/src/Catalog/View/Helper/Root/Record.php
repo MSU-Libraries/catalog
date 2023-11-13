@@ -123,10 +123,9 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
         }
         if ($label !== null) {
             $link['desc'] .= " ({$label})";
-        } 
-        // In case there is still no description by this point,
-        // add one so there isn't a blank link on the page
-        elseif ($link['desc'] == null || trim($link['desc']) == "") {
+        } elseif ($link['desc'] == null || trim($link['desc']) == "") {
+            // In case there is still no description by this point,
+            // add one so there isn't a blank link on the page
             $link['desc'] = "Access Content Online";
         }
         return $link;
