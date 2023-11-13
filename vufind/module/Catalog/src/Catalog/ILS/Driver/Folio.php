@@ -566,7 +566,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         // aren't already included via the previous sort
         foreach ($locations as $loc) {
             if (!in_array($loc['locationDisplay'], $sortby)) {
-                $finalLocations[] = $location;
+                $finalLocations[] = $loc;
             }
         }
 
