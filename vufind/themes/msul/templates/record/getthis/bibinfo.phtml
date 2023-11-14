@@ -17,7 +17,9 @@ $callnum = $this->getthis->getCallNumber();
       <span><?=$this->escapeHtml($callnum) ?></span>
     <?php endif; ?>
   </p>
-  <?= $this->locationNotices($item) ?>
+  <?php if (!empty($item)): ?>
+    <?= $this->locationNotices($item) ?>
+  <?php endif; ?>
   <p class="text-left" style="margin-top: 1.5em">
     <b>Status:</b> <?= $this->getthis->getStatus() ?>
     <?php if ($item != null && !$this->getthis->isOnlineResource() && !GetThisLoader::makerspaceLocation($item) &&

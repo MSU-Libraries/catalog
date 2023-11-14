@@ -62,7 +62,9 @@ if ($selected != '') {
       </span>
     </div>
   <?php endif; ?>
-  <?= $this->locationNotices($selected) ?>
+  <?php if (!empty($selected)): ?>
+    <?= $this->locationNotices($selected) ?>
+  <?php endif; ?>
 <?php else: ?>
   <span class="fullAvailability"><strong class="text-danger">Unavailable</strong></span>
 <?php endif; ?>
