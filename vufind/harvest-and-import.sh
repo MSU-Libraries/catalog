@@ -67,7 +67,7 @@ runhelp() {
     echo "  -d|--vufind-harvest-dir VUFIND_HARVEST_DIR"
     echo "      Full path to the VuFind harvest directory."
     echo "      Default: ${ARGS[VUFIND_HARVEST_DIR]}"
-    echo "  -s|--shared-harvest-dir SHARED_DIR"
+    echo "  -s|--shared-dir SHARED_DIR"
     echo "      Full path to the shared storage location for archiving OAI files."
     echo "      Default: ${ARGS[SHARED_DIR]}"
     echo "  -S|--solr SOLR_URL"
@@ -140,11 +140,11 @@ parse_args() {
                 exit 1
             fi
             shift; shift ;;
-        -s|--shared-harvest-dir)
+        -s|--shared-dir)
             ARGS[SHARED_DIR]=$( readlink -f "$2" )
             RC=$?
             if [[ "$RC" -ne 0 || ! -d "${ARGS[SHARED_DIR]}" ]]; then
-                echo "ERROR: -s|--shared-harvest-dir path does not exist: $2"
+                echo "ERROR: -s|--shared-dir path does not exist: $2"
                 exit 1
             fi
             shift; shift ;;

@@ -40,7 +40,11 @@ then repeat the database migration steps once the pipeline completes.
 * It is recommended to do a reindex of Solr to apply the latest schema changes, if the helper script
 detected any. In order to do this, you will need to run the
 [harvest-and-import script](https://github.com/MSU-Libraries/catalog/blob/main/vufind/harvest-and-import.sh)
-copying back the last full harvest and doing only an import: `./harvest-and-import.sh -c -b`.
+copying back the last full harvest and doing only an import:
+```
+mv /usr/local/vufind/local/harvest/folio/processed/* /usr/local/vufind/local/harvest/folio/
+./harvest-and-import.sh -b
+```
 
 
 ## Solr
