@@ -40,9 +40,9 @@ RUN \
     cp -r /vufind-${VUFIND_VERSION}/solr/vufind/* /solr_confs/ && \
     cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /vufind-${VUFIND_VERSION}/import/lib/reload4j-*.jar /solr_confs/import/lib/ && \
     rm v${VUFIND_VERSION}.tar.gz && \
-    rm -rf /vufind-${VUFIND_VERSION} && \
     cp /vufind-${VUFIND_VERSION}/index-alphabetic-browse.sh /solr_confs/ && \
-    cp /vufind-${VUFIND_VERSION}/import/*.jar /solr_confs/import/
+    cp /vufind-${VUFIND_VERSION}/import/*.jar /solr_confs/import/ && \
+    rm -rf /vufind-${VUFIND_VERSION}
 RUN \
     chmod -R go-w /solr_confs /*.sh && \
     chmod ugo+x /*.sh /solr_confs/*.sh && \

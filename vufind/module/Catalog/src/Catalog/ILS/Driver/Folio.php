@@ -802,5 +802,4 @@ class Folio extends \VuFind\ILS\Driver\Folio
         }
         return $instances->instances[0];
     }
-
 }
