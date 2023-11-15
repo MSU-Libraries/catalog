@@ -3,7 +3,7 @@
 /**
  * Retrieves data for the page asynchronously
  *
- * PHP version 7
+ * PHP version 8
  *
  * @category VuFind
  * @package  Ajax_Handler
@@ -18,9 +18,10 @@ use Laminas\Mvc\Controller\Plugin\Params;
 use VuFind\Exception\ILS as ILSException;
 
 /**
- * Retrieves data for the item status
+ * "Get Item Status" AJAX handler
  *
- * PHP version 7
+ * This is responsible for printing the holdings information for a
+ * collection of records in JSON format.
  *
  * @category VuFind
  * @package  Ajax_Handler
@@ -67,7 +68,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
         }
 
         // In order to detect IDs missing from the status response, create an
-        // array with a key for every requested ID.  We will clear keys as we
+        // array with a key for every requested ID. We will clear keys as we
         // encounter IDs in the response -- anything left will be problems that
         // need special handling.
         $missingIds = array_flip($ids);
@@ -77,6 +78,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
             'available' => $this->renderer->render('ajax/status-available.phtml'),
             'unavailable' =>
                 $this->renderer->render('ajax/status-unavailable.phtml'),
+            'uncertain' => $this->renderer->render('ajax/status-uncertain.phtml'),
             'unknown' => $this->renderer->render('ajax/status-unknown.phtml'),
         ];
 

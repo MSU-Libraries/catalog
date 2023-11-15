@@ -7,7 +7,7 @@ stages:
   - Release
 
 variables:
-  VUFIND_VERSION: "9.0.3"
+  VUFIND_VERSION: "9.1"
   SIMPLESAMLPHP_VERSION: "1.19.6"
   DEPLOY_HOST_A: catalog-1.aws.lib.msu.edu
   DEPLOY_HOST_B: catalog-2.aws.lib.msu.edu

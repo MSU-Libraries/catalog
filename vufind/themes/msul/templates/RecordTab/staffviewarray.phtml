@@ -6,26 +6,28 @@
     $isOnCampus = $this->auth()->isOnCampus();
 ?>
 <table class="staff-view table table-striped">
-  <?php $rawData = $this->driver->getRawData(); ksort($rawData); ?>
+  <?php
+    $rawData = $this->driver->getRawData();
+    ksort($rawData);
+  ?>
+  <?php
+    // MSUL override to exclude full text
+    if (array_key_exists('FullText', $rawData) &&
+        array_key_exists('Text', $rawData['FullText']) &&
+        array_key_exists('Value', $rawData['FullText']['Text'])) {
+      unset($rawData['FullText']['Text']['Value']);
+    }
 
-    <?php
-        // MSUL override to exclude full text
-        if (array_key_exists('FullText', $rawData) &&
-            array_key_exists('Text', $rawData['FullText']) &&
-            array_key_exists('Value', $rawData['FullText']['Text'])) {
-          unset($rawData['FullText']['Text']['Value']);
-        }
-
-       // MSUL override to exclude links when not authenticated
-       if (!$user || ($isCommunityBorrower && !$isOnCampus)) {
-         if (array_key_exists('PLink', $rawData)) {
-           unset($rawData['PLink']);
-         }
-         if (array_key_exists('FullText', $rawData) && array_key_exists('Links', $rawData['FullText'])) {
-           unset($rawData['FullText']['Links']);
-         }
-       }
-    ?>
+    // MSUL override to exclude links when not authenticated
+    if (!$user || ($isCommunityBorrower && !$isOnCampus)) {
+      if (array_key_exists('PLink', $rawData)) {
+        unset($rawData['PLink']);
+      }
+      if (array_key_exists('FullText', $rawData) && array_key_exists('Links', $rawData['FullText'])) {
+        unset($rawData['FullText']['Links']);
+      }
+    }
+  ?>
 
   <?php foreach ($rawData as $field => $values): ?>
     <tr>

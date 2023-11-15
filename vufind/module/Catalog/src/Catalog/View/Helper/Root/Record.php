@@ -174,6 +174,10 @@ class Record extends \VuFind\View\Helper\Root\Record
             $status = $transEsc('Library Use Only');
         } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
             $status = $transEsc('Unknown status') . '(' . $transEsc($status) . ')';
+        } elseif ($holding['reserve'] === 'Y') {
+            $status = 'On Reserve';
+        } elseif (!is_int($holding['availability']) || empty($holding['status'])) {
+            $status = 'Available';
         }
         return $status;
     }

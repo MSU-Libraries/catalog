@@ -144,7 +144,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         return $callNumberData + [
             'id' => $bibId,
             'item_id' => $item->id,
-            'holding_id' => $holdingDetails['id'],
+            'holdings_id' => $holdingDetails['id'],
             'number' => $number,
             'enumchron' => $enum,
             'barcode' => $item->barcode ?? '',
@@ -803,41 +803,4 @@ class Folio extends \VuFind\ILS\Driver\Folio
         return $instances->instances[0];
     }
 
-    /**
-     * MSUL Customization that was merged in as a PR and will be in v9.1
-     * Helper function to retrieve paged results from FOLIO API
-     *
-     * @param string $responseKey Key containing values to collect in response
-     * @param string $interface   FOLIO api interface to call
-     * @param array  $query       CQL query
-     * @param int    $limit       How many results to retrieve from FOLIO per call
-     *
-     * @return array
-     */
-    protected function getPagedResults($responseKey, $interface, $query = [], $limit = 1000)
-    {
-        $offset = 0;
-
-        do {
-            $combinedQuery = array_merge($query, compact('offset', 'limit'));
-            $response = $this->makeRequest(
-                'GET',
-                $interface,
-                $combinedQuery
-            );
-            $json = json_decode($response->getBody());
-            if (!$response->isSuccess() || !$json) {
-                $msg = $json->errors[0]->message ?? json_last_error_msg();
-                throw new ILSException("Error: '$msg' fetching '$responseKey'");
-            }
-            $totalEstimate = $json->totalRecords ?? 0;
-            foreach ($json->$responseKey ?? [] as $item) {
-                yield $item ?? '';
-            }
-            $offset += $limit;
-
-            // Continue until the current offset is greater than the totalRecords value returned
-            // from the API (which could be an estimate if more than 1000 results are returned).
-        } while ($offset <= $totalEstimate);
-    }
 }
