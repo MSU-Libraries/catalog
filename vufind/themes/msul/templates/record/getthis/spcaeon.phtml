@@ -11,22 +11,22 @@ $edition = $this->driver->getEdition();
 $pubname = $this->driver->getPublisher();
 $callnum = $this->getthis->getCallNumber();
 $barcode = $item['barcode'];
-if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
+if (is_array($pubname)): $pubname = implode(', ', $pubname); endif;
 
 $title = substr($title, 0, 255);
 $pubname = substr($pubname, 0, 255);
 ?>
 <div>
     <?php
-    $msg = "";
+    $msg = '';
     if (Regex::SPEC_COLL_REMOTE($loc)) {
-        $msg = "Material will be retrieved for viewing in the Special Collections Reading Room. Please allow up to 3 days for delivery, or you may schedule a later date and time for viewing.";
+        $msg = 'Material will be retrieved for viewing in the Special Collections Reading Room. Please allow up to 3 days for delivery, or you may schedule a later date and time for viewing.';
     }
     elseif (Regex::READING_ROOM($loc)) {
-        $msg = "";
+        $msg = '';
     }
     else {
-        $msg = "Material will be retrieved for viewing in the Special Collections Reading Room.";
+        $msg = 'Material will be retrieved for viewing in the Special Collections Reading Room.';
     }
 
     if (Regex::READING_ROOM($loc)) { ?>

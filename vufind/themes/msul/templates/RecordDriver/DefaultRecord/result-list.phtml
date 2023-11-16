@@ -52,7 +52,7 @@
             $summDate = $this->driver->getPublicationDates();
             $publisherName = $this->driver->getPublisher();
           ?>
-          <?php if (is_array($publisherName)): $publisherName = implode(", ", $publisherName); endif; ?>
+          <?php if (is_array($publisherName)): $publisherName = implode(', ', $publisherName); endif; ?>
           <?php if (!empty($journalTitle)): ?>
             <strong><?=$this->transEsc('Published:')?></strong>
             <?=$this->escapeHtml($publisherName)?>
@@ -114,8 +114,9 @@
         </div>
       <?php endif; ?>
 
-      <?php $physical = $this->driver->getPhysical(); if (!empty($physical)): ?>
-        <?php if (is_array($physical)): $physical = implode(", ", $physical); endif; ?>
+      <?php $physical = $this->driver->getPhysical();
+      if (!empty($physical)): ?>
+        <?php if (is_array($physical)): $physical = implode(', ', $physical); endif; ?>
         <div>
           <b><?=$this->transEsc('Physical Description')?>:</b>
           <?=$this->escapeHtml($physical)?>

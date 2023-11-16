@@ -76,9 +76,9 @@
       </div>
 
       <?=$this->record($this->driver)->renderTemplate(
-        'result-list/full-text-links.phtml',
-        ['recordLinker' => $recordLinker]
-      );
+                'result-list/full-text-links.phtml',
+                ['recordLinker' => $recordLinker]
+              );
       ?>
 
       <?php /* Links from DOI linker */ ?>
@@ -96,7 +96,7 @@
     </div>
     <div class="result-links hidden-print">
       <?php /* Display qrcode if appropriate: */ ?>
-      <?php if ($QRCode = $this->record($this->driver)->getQRCode("results")): ?>
+      <?php if ($QRCode = $this->record($this->driver)->getQRCode('results')): ?>
         <?php
           // Add JS Variables for QrCode
           $this->jsTranslations()->addStrings(['qrcode_hide' => 'qrcode_hide', 'qrcode_show' => 'qrcode_show']);

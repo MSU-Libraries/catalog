@@ -26,7 +26,7 @@ $callnum = $this->getthis->getCallNumber();
         <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
         target="_blank"
         href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
-        <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? "Check Hold" : "Place Request")?>
+        <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? 'Check Hold' : 'Place Request')?>
       </a>
     <?php } ?>
   </p><br>
