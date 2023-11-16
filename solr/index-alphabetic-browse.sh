@@ -49,7 +49,6 @@ then
 fi
 CLASSPATH="browse-indexing.jar:${SOLRMARC_CLASSPATH}:${VUFIND_HOME}/import/lib/*:${SOLR_HOME}/jars/*:${SOLR_JAR_PATH}/modules/analysis-extras/lib/*:${SOLR_JAR_PATH}/server/solr-webapp/webapp/WEB-INF/lib/*"
 
-
 # make index work with replicated index
 # current index is stored in the last line of index.properties
 function locate_index
