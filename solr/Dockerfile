@@ -2,6 +2,7 @@ FROM bitnami/solr:9.3.0
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Detroit
+ENV BITNAMI_DEBUG=true
 ARG VUFIND_VERSION
 
 USER root
