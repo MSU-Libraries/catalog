@@ -101,6 +101,10 @@ parse_args() {
     # Parse flag arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
+        -h|--help)
+            runhelp
+            exit 0
+            shift;;
         -o|--oai-harvest)
             ARGS[OAI_HARVEST]=1
             shift;;
@@ -111,7 +115,7 @@ parse_args() {
             ARGS[COPY_DIR]=$( readlink -f "$2" )
             RC=$?
             if [[ "$RC" -ne 0 || ! -d "${ARGS[COPY_DIR]}" ]]; then
-                echo "ERROR: -c|--copy-from path does not exist: $2"
+                echo "ERROR: -c|--copy-from directory is not valid: $2"
                 exit 1
             fi
             shift; shift ;;
@@ -452,7 +456,7 @@ oai_harvest() {
 # Copy XML files to VuFind harvest dir
 copyback_files_to_import() {
     assert_vufind_harvest_dir_writable
-    verbose "Replacing any VuFind combined XML with files from shared directory."
+    verbose "Replacing any VuFind combined XML with files from --copy-from directory."
     countdown 5
 
     COPIED_COUNT=0
@@ -468,7 +472,7 @@ copyback_files_to_import() {
 
     LAST_HARVEST_FILE="${ARGS[COPY_DIR]}"/last_harvest.txt
     if [[ -f $LAST_HARVEST_FILE ]]; then
-        verbose "Copying last_harvest.txt from shared dir to VuFind."
+        verbose "Copying last_harvest.txt from --copy-from directory to VuFind."
         cp --preserve=timestamps "$LAST_HARVEST_FILE" "${ARGS[VUFIND_HARVEST_DIR]}/"
     fi
 }
