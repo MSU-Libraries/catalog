@@ -17,7 +17,7 @@ function getDisplay($view, $item)
             <ul class="dropdown">
                 <?php foreach ($items as $item) {
                     $item_class = ($sel_item['item_id'] ?? null == $item['item_id'])
-                        ? "current" : '';
+                        ? 'current' : '';
                     ?><li>
                         <a href="<?= $this->url(
                         'record-getthis',

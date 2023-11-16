@@ -21,11 +21,9 @@ $pubname = substr($pubname, 0, 255);
     $msg = '';
     if (Regex::SPEC_COLL_REMOTE($loc)) {
         $msg = 'Material will be retrieved for viewing in the Special Collections Reading Room. Please allow up to 3 days for delivery, or you may schedule a later date and time for viewing.';
-    }
-    elseif (Regex::READING_ROOM($loc)) {
+    } elseif (Regex::READING_ROOM($loc)) {
         $msg = '';
-    }
-    else {
+    } else {
         $msg = 'Material will be retrieved for viewing in the Special Collections Reading Room.';
     }
 
