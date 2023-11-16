@@ -201,7 +201,7 @@ class Record extends \VuFind\View\Helper\Root\Record
             $suffix = ' - ' . $holding['returnDate'];
         }
         if ($holding['duedate'] ?? false) {
-            $suffix = $suffix . ' - ' . $transEsc("Due") . ':' . $holding['duedate'];
+            $suffix = $suffix . ' - ' . $transEsc('Due') . ':' . $holding['duedate'];
         }
         return $suffix;
     }

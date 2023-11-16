@@ -232,7 +232,7 @@ class SAML extends \VuFind\Auth\AbstractBase
     {
         $config = $this->config->SAML;
         $samlTarget = $config->target ?? $target;
-        $append = (strpos($samlTarget, '?') !== false) ? '&' : '?';
+        $append = (str_contains($samlTarget, '?')) ? '&' : '?';
         // Adding the auth_method parameter makes it possible to handle logins when
         // using an auth method that proxies others.
         $samlTarget .= $append . 'auth_method=SAML';
