@@ -396,7 +396,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                         $dueDateTimestamp
                     ),
                 'dueStatus' => $dueStatus,
-                'id' => "folio." . $this->getBibId($trans->item->instanceId),
+                'id' => 'folio.' . $this->getBibId($trans->item->instanceId),
                 'item_id' => $trans->item->id,
                 'barcode' => $trans->item->barcode,
                 'renew' => $trans->renewalCount ?? 0,
@@ -440,7 +440,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 ? 'instanceHrid' : 'instanceId';
             $bibId = $item->copiedItem->$idProperty ?? null;
             if ($bibId !== null) {
-                $bibId = "folio." . $bibId;
+                $bibId = 'folio.' . $bibId;
             }
 
             // Get the electronic access links from the item record if possible
@@ -592,7 +592,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $excludeLocs = (array)($this->config['Holds']['excludePickupLocations'] ?? []);
 
         // Exclude checking by regex match
-        if (trim(strtolower($mode)) == "regex") {
+        if (trim(strtolower($mode)) == 'regex') {
             foreach ($excludeLocs as $pattern) {
                 $match = @preg_match($pattern, $servicepoint);
                 // Invalid regex, skip this pattern
@@ -673,20 +673,20 @@ class Folio extends \VuFind\ILS\Driver\Folio
             ) as $hold
         ) {
             $requestDate = $this->dateConverter->convertToDisplayDate(
-                "Y-m-d H:i",
+                'Y-m-d H:i',
                 $hold->requestDate
             );
             // Set expire date if it was included in the response
             $expireDate = isset($hold->requestExpirationDate)
                 ? $this->dateConverter->convertToDisplayDate(
-                    "Y-m-d H:i",
+                    'Y-m-d H:i',
                     $hold->requestExpirationDate
                 )
                 : null;
             // Set lastPickup Date if provided, format to j M Y
             $lastPickup = isset($hold->holdShelfExpirationDate)
                 ? $this->dateConverter->convertToDisplayDate(
-                    "Y-m-d H:i",
+                    'Y-m-d H:i',
                     $hold->holdShelfExpirationDate
                 )
                 : null;
@@ -698,14 +698,14 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $servicePoint = isset($hold->pickupServicePointId)
                 ? $this->getPickupLocation($hold->pickupServicePointId) : null;
             $location = isset($servicePoint) && count($servicePoint) == 1
-                ? $servicePoint[0]['locationDisplay'] : "";
+                ? $servicePoint[0]['locationDisplay'] : '';
             $request_id = $this->getBibId(null, null, $hold->itemId);
             $updateDetails = (!$available || $allowCancelingAvailableRequests)
                 ? (string)$request_id : '';
             $currentHold = [
                 'type' => $hold->requestType,
                 'create' => $requestDate,
-                'expire' => $expireDate ?? "",
+                'expire' => $expireDate ?? '',
                 // MSU customization: id changed for multi-backend
                 'id' => 'folio.' . $request_id,
                 'item_id' => $hold->itemId,
@@ -798,7 +798,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $response = $this->makeRequest('GET', '/instance-storage/instances', $query);
         $instances = json_decode($response->getBody());
         if (count($instances->instances) == 0) {
-            throw new ILSException("Item Not Found");
+            throw new ILSException('Item Not Found');
         }
         return $instances->instances[0];
     }

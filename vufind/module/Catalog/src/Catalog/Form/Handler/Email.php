@@ -57,9 +57,9 @@ class Email extends \VuFind\Form\Handler\Email
         $fields = $form->mapRequestParamsToFieldValues($params->fromPost());
         // MSUL: Add in user id if logged in
         $messageParams[] = [
-            "type" => "hidden",
-            "label" => "VFUserID",
-            "value" => $user->id ?? "none",
+            'type' => 'hidden',
+            'label' => 'VFUserID',
+            'value' => $user->id ?? 'none',
         ];
         $emailMessage = $this->viewRenderer->partial(
             'Email/form.phtml',
@@ -80,8 +80,8 @@ class Email extends \VuFind\Form\Handler\Email
         // MSUL: Copy feedback to user if they are logged in
         if ($replyToEmail !== null && $user) {
             $recipients[] = [
-                "name" => $replyToName ?? $replyToEmail,
-                "email" => $replyToEmail,
+                'name' => $replyToName ?? $replyToEmail,
+                'email' => $replyToEmail,
             ];
         }
         $emailSubject = $form->getEmailSubject($params->fromPost());

@@ -140,7 +140,7 @@ class LocationNotices extends AbstractHelper implements \Laminas\Log\LoggerAware
     {
         $res = preg_match('/' . $re . '/', $value);
         if ($res === false) {
-            $this->logWarning("Bad regular expression for location notice " . $title . ": " . $re);
+            $this->logWarning('Bad regular expression for location notice ' . $title . ': ' . $re);
             return false;
         }
         return $res == 1;
@@ -157,18 +157,18 @@ class LocationNotices extends AbstractHelper implements \Laminas\Log\LoggerAware
     {
         $makeTag = $this->getView()->plugin('makeTag');
         $escapeContent = ($notice['escapeContent'] ?? true);
-        $style = "";
+        $style = '';
         foreach ($notice['style'] ?? [] as $key => $val) {
             $style .= "{$key}:{$val};";
         }
         return $makeTag(
-            "div",
-            $notice["message"],
+            'div',
+            $notice['message'],
             [
-                "class" => "location-notice" . ($notice["classes"] ?? ""),
-                "style" => $style,
+                'class' => 'location-notice' . ($notice['classes'] ?? ''),
+                'style' => $style,
             ],
-            ["escapeContent" => $escapeContent]
+            ['escapeContent' => $escapeContent]
         );
     }
 }

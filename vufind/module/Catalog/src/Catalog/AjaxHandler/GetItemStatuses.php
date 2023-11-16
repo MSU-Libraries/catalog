@@ -17,6 +17,9 @@ namespace Catalog\AjaxHandler;
 use Laminas\Mvc\Controller\Plugin\Params;
 use VuFind\Exception\ILS as ILSException;
 
+use function count;
+use function is_array;
+
 /**
  * "Get Item Status" AJAX handler
  *

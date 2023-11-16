@@ -32,6 +32,8 @@ namespace Catalog\Auth;
 use Laminas\Http\PhpEnvironment\Request;
 use VuFind\Exception\Auth as AuthException;
 
+use function is_object;
+
 /**
  * Folio Okapi authentication module.
  * This is independant from the ILS/Folio authentication method, so that it can

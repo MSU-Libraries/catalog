@@ -14,6 +14,10 @@
 
 namespace Catalog\RecordDriver;
 
+use function array_key_exists;
+use function count;
+use function in_array;
+
 /**
  * Extends the record driver with additional data from Solr
  *
@@ -83,7 +87,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         $marc_fields = $marc->getFields($field, $subfield);
         foreach ($marc_fields as $marc_data) {
             $exclude = false;
-            $val = "";
+            $val = '';
             $subfields = $marc_data['subfields'];
             foreach ($subfields as $subfield) {
                 // exclude field from display if value of subfield 5 is not MiEM
@@ -95,7 +99,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 if ($subfield['code'] == '5') {
                     continue;
                 }
-                $val .= $subfield['data'] . " ";
+                $val .= $subfield['data'] . ' ';
             }
             if (!$exclude) {
                 $vals[] = trim($val);
@@ -114,7 +118,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getSolrField(string $field)
     {
-        $val = "";
+        $val = '';
         if (array_key_exists($field, $this->fields) && !empty($this->fields[$field])) {
             $val = $this->fields[$field];
         }
@@ -156,8 +160,8 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             foreach ($marc856['subfields'] as $subfield) {
                 $sfvals[$subfield['code']] = $subfield['data'];
             }
-            if (str_contains($sfvals['u'], "bookplate")) {
-                $bookplates[] = ["note" => $sfvals['y'], "url" => $sfvals['u']];
+            if (str_contains($sfvals['u'], 'bookplate')) {
+                $bookplates[] = ['note' => $sfvals['y'], 'url' => $sfvals['u']];
             }
         }
 
@@ -173,14 +177,14 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             // if so, use the bookplate values instead
             $bookplateMatch = false;
             foreach ($bookplates as $bookplate) {
-                if (strcasecmp($bookplate['note'] ?? "", $sfvals['a']) === 0) {
-                    $notes[] = ["note" => $sfvals['a'], "url" => $bookplate['url']];
+                if (strcasecmp($bookplate['note'] ?? '', $sfvals['a']) === 0) {
+                    $notes[] = ['note' => $sfvals['a'], 'url' => $bookplate['url']];
                     $bookplateMatch = true;
                     break;
                 }
             }
             if (!$bookplateMatch) {
-                $notes[] = ["note" => $sfvals['a']];
+                $notes[] = ['note' => $sfvals['a']];
             }
         }
         return $notes;
@@ -254,7 +258,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             foreach ($subfields as $subfield) {
                 $sfvals[$subfield['code']] = $subfield['data'];
             }
-            if ($sfvals['b'] == "Michigan State University") {
+            if ($sfvals['b'] == 'Michigan State University') {
                 $locs[] = empty($sfvals['d']) ? $sfvals['c'] : $sfvals['d'];
             }
         }

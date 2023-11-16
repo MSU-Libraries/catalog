@@ -31,6 +31,9 @@ namespace Catalog\View\Helper\Root;
 
 use Laminas\View\Helper\AbstractHelper;
 
+use function is_array;
+use function is_int;
+
 /**
  * View helper to print an array formatted for HTML display.
  *
@@ -55,11 +58,11 @@ class PrintArrayHtml extends AbstractHelper
      */
     public function __invoke($entry, $indentLevel = 0, $indentFirst = true)
     {
-        $html = "";
+        $html = '';
         if (is_array($entry)) {
             foreach ($entry as $key => $value) {
                 if ($indentFirst || $key != array_key_first($entry)) {
-                    $html .= str_repeat("&ensp;", $indentLevel);
+                    $html .= str_repeat('&ensp;', $indentLevel);
                 }
 
                 // Increase indent if entering new array
@@ -69,16 +72,16 @@ class PrintArrayHtml extends AbstractHelper
 
                 if (is_int($key)) {
                     // Integer keyed arrays use a hypen list
-                    $html .= "&ndash;&ensp;";
+                    $html .= '&ndash;&ensp;';
                 } else {
-                    $html .= "<strong>" . $this->view->escapeHtml($key) . "</strong>: "
-                             . (is_array($value) ? "<br />" : "");
+                    $html .= '<strong>' . $this->view->escapeHtml($key) . '</strong>: '
+                             . (is_array($value) ? '<br>' : '');
                 }
 
                 $html .= $this->__invoke($value, $nextIndentLevel, $nextIndentFirst);
             }
         } else {
-            $html = $this->view->escapeHtml($entry) . "<br />";
+            $html = $this->view->escapeHtml($entry) . '<br>';
         }
         return $html;
     }

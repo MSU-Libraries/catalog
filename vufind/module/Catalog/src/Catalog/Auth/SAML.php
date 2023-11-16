@@ -32,6 +32,9 @@ namespace Catalog\Auth;
 use Laminas\Http\PhpEnvironment\Request;
 use VuFind\Exception\Auth as AuthException;
 
+use function count;
+use function is_array;
+
 /**
  * SAML authentication module.
  *
@@ -122,7 +125,7 @@ class SAML extends \VuFind\Auth\AbstractBase
         $saml = $this->config->SAML;
         if (!isset($saml->username) || empty($saml->username)) {
             throw new AuthException(
-                "SAML username is missing in your configuration file."
+                'SAML username is missing in your configuration file.'
             );
         }
     }
@@ -317,14 +320,14 @@ class SAML extends \VuFind\Auth\AbstractBase
 
         // Now extract user attribute values:
         foreach ($config as $key => $value) {
-            if (preg_match("/userattribute_[0-9]{1,}/", $key)) {
+            if (preg_match('/userattribute_[0-9]{1,}/', $key)) {
                 $valueKey = 'userattribute_value_' . substr($key, 14);
                 $sortedUserAttributes[$value] = $config[$valueKey] ?? null;
 
                 // Throw an exception if attributes are missing/empty.
                 if (empty($sortedUserAttributes[$value])) {
                     throw new AuthException(
-                        "User attribute value of " . $value . " is missing!"
+                        'User attribute value of ' . $value . ' is missing!'
                     );
                 }
             }
