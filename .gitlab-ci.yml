@@ -47,6 +47,10 @@ Create DNS:
 
 Deploy Compose Files:
   extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH
+    url: $URL
+    on_stop: Remove Environment
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
@@ -82,6 +86,22 @@ Bootstrap Stacks:
   script:
     - bash ./cicd/bootstrap-stacks
 
+Deploy ZK:
+  extends: .stack_template
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Build ZK Image
+    - Bootstrap Stacks
+    - Deploy Compose Files
+    - Deploy Internal Network
+    - Initialize Log Dirs
+  script:
+    - bash ./cicd/deploy-zk
+
 Deploy Solr:
   extends: .stack_template
   rules:
@@ -91,10 +111,11 @@ Deploy Solr:
     - job: Set Stack Name
       artifacts: true
     - Build Solr Image
-    - Build ZK Image
+    - Deploy ZK
     - Bootstrap Stacks
     - Deploy Compose Files
     - Deploy Internal Network
+    - Initialize Log Dirs
   script:
     - bash ./cicd/deploy-solr
 
@@ -116,10 +137,6 @@ Deploy DB:
 
 Deploy Vufind:
   extends: .stack_template
-  environment:
-    name: $CI_COMMIT_BRANCH
-    url: $URL
-    on_stop: Remove Environment
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'

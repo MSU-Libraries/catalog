@@ -5,7 +5,7 @@ default_args() {
     declare -g -A ARGS
     ARGS[OAI_HARVEST]=0
     ARGS[FULL]=0
-    ARGS[COPY_SHARED]=0
+    ARGS[COPY_DIR]=
     ARGS[BATCH_IMPORT]=0
     ARGS[LIMIT]=
     ARGS[LIMIT_BY_DELETE]=
@@ -47,18 +47,19 @@ runhelp() {
     echo "  -o|--oai-harvest"
     echo "      Run an OAI harvest into VUFIND_HARVEST_DIR. Will attempt"
     echo "      to resume from last harvest state unless -f flag given."
-    echo "      On success, sync copy of harvest files to SHARED_DIR/current/."
     echo "  -f|--full"
-    echo "      Forces a reset of VUFIND_HARVEST_DIR, resulting"
-    echo "      in a full harvest. Must be used with --oai-harvest."
+    echo "      Forces a reset of VUFIND_HARVEST_DIR, resulting in a full"
+    echo "      harvest. Must be used with --oai-harvest. Will create an"
+    echo "      archive of the previous harvest files before removing them,"
+    echo "      and make an archive of the new harvest (saved in SHARED_DIR)."
     echo "  -b|--batch-import"
     echo "      Run VuFind batch import on files within VUFIND_HARVEST_DIR."
-    echo "  -c|--copy-shared"
-    echo "      Copy XML file(s) from SHARED_DIR back to VUFIND_HARVEST_DIR."
+    echo "  -c|--copy-from COPY_DIR"
+    echo "      Copy XML file(s) from COPY_DIR to VUFIND_HARVEST_DIR."
     echo "      Only usable when NOT running a harvest (see also --limit)."
     echo "  -l|--limit COPY_COUNT"
-    echo "      Usable with --copy-shared only. This will limit the number"
-    echo "      of files copied from SHARED_DIR to VUFIND_HARVEST_DIR."
+    echo "      Usable with --copy-from only. This will limit the number"
+    echo "      of files copied from COPY_DIR to VUFIND_HARVEST_DIR."
     echo "  -X|--limit-by-delete IMPORT_COUNT"
     echo "      Usable with --batch-import only. This will limit the number"
     echo "      of files imported from VUFIND_HARVEST_DIR by deleting XML"
@@ -66,8 +67,8 @@ runhelp() {
     echo "  -d|--vufind-harvest-dir VUFIND_HARVEST_DIR"
     echo "      Full path to the VuFind harvest directory."
     echo "      Default: ${ARGS[VUFIND_HARVEST_DIR]}"
-    echo "  -s|--shared-harvest-dir SHARED_DIR"
-    echo "      Full path to the shared storage location for OAI files."
+    echo "  -s|--shared-dir SHARED_DIR"
+    echo "      Full path to the shared storage location for archiving OAI files."
     echo "      Default: ${ARGS[SHARED_DIR]}"
     echo "  -S|--solr SOLR_URL"
     echo "      Base URL for accessing Solr (only used for --reset-solr)."
@@ -100,15 +101,24 @@ parse_args() {
     # Parse flag arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
+        -h|--help)
+            runhelp
+            exit 0
+            shift;;
         -o|--oai-harvest)
             ARGS[OAI_HARVEST]=1
             shift;;
         -f|--full)
             ARGS[FULL]=1
             shift;;
-        -c|--copy-shared)
-            ARGS[COPY_SHARED]=1
-            shift;;
+        -c|--copy-from)
+            ARGS[COPY_DIR]=$( readlink -f "$2" )
+            RC=$?
+            if [[ "$RC" -ne 0 || ! -d "${ARGS[COPY_DIR]}" ]]; then
+                echo "ERROR: -c|--copy-from directory is not valid: $2"
+                exit 1
+            fi
+            shift; shift ;;
         -b|--batch-import)
             ARGS[BATCH_IMPORT]=1
             shift;;
@@ -134,11 +144,11 @@ parse_args() {
                 exit 1
             fi
             shift; shift ;;
-        -s|--shared-harvest-dir)
+        -s|--shared-dir)
             ARGS[SHARED_DIR]=$( readlink -f "$2" )
             RC=$?
             if [[ "$RC" -ne 0 || ! -d "${ARGS[SHARED_DIR]}" ]]; then
-                echo "ERROR: -s|--shared-harvest-dir path does not exist: $2"
+                echo "ERROR: -s|--shared-dir path does not exist: $2"
                 exit 1
             fi
             shift; shift ;;
@@ -182,12 +192,12 @@ parse_args() {
 }
 
 catch_invalid_args() {
-    if [[ "${ARGS[OAI_HARVEST]}" -eq 1 && "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
-        echo "ERROR: It is invalid to set both --oai-harvest and --copy-shared flags."
+    if [[ "${ARGS[OAI_HARVEST]}" -eq 1 && -n "${ARGS[COPY_DIR]}" ]]; then
+        echo "ERROR: It is invalid to set both --oai-harvest and --copy-from flags."
         exit 1
     fi
-    if [[ -n "${ARGS[LIMIT]}" && "${ARGS[COPY_SHARED]}" -ne 1 ]]; then
-        echo "ERROR: The --limit flag is only valid when --copy-shared is also set."
+    if [[ -n "${ARGS[LIMIT]}" && -z "${ARGS[COPY_DIR]}" ]]; then
+        echo "ERROR: The --limit flag is only valid when --copy-from is also set."
         exit 1
     fi
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" && "${ARGS[BATCH_IMPORT]}" -ne 1 ]]; then
@@ -205,7 +215,6 @@ assert_shared_dir_writable() {
         echo "ERROR: Shared storage location is not writable: ${ARGS[SHARED_DIR]}"
         exit 1
     fi
-    mkdir -p "${ARGS[SHARED_DIR]}/current/"
     mkdir -p "${ARGS[SHARED_DIR]}/archives/"
 }
 
@@ -260,31 +269,38 @@ last_modified() {
     fi
 }
 
-archive_current_harvest() {
+archive_harvest() {
     assert_shared_dir_writable
-    verbose "Creating archive of latest harvest"
+    verbose "Building file list of harvest files to archive."
+    # Optional tag to add to filename
+    TAG="${1}"
+    if [[ -n $TAG ]]; then
+        TAG="_${TAG}"
+    fi
 
     ARCHIVE_TS=$(date +%Y%m%d_%H%M%S)
-    ARCHIVE_FILE="${ARGS[SHARED_DIR]}/archives/archive_${ARCHIVE_TS}.tar.gz"
+    ARCHIVE_FILE="${ARGS[SHARED_DIR]}/archives/archive_${ARCHIVE_TS}${TAG}.tar.gz"
     pushd "${ARGS[VUFIND_HARVEST_DIR]}/" > /dev/null 2>&1 || exit 1
     declare -a ARCHIVE_LIST
     while read -r FILE; do
         ARCHIVE_LIST+=("$FILE")
-    done < <( find ./ -mindepth 1 -maxdepth 1 \
-        -name 'combined_*.xml' -o \
-        -name 'combined_*.delete' -o \
+    done < <( find ./ ./processed/ -mindepth 1 -maxdepth 1 \
+        -name '*.xml' -o \
+        -name '*.delete' -o \
         -name 'last_harvest.txt' -o \
         -name 'harvest.log'
     )
 
-    # Archive all combined xml files and the last_harvest file, if it exists
     if [[ "${#ARCHIVE_LIST[@]}" -gt 0 ]]; then
-        verbose "Archiving ${#ARCHIVE_LIST[@]} harvest files."
+        verbose "Archiving ${#ARCHIVE_LIST[@]} harvest related files."
         countdown 5
         if ! tar -czvf "$ARCHIVE_FILE" "${ARCHIVE_LIST[@]}"; then
             echo "ERROR: Could not archive harvest files into ${ARCHIVE_FILE}"
             exit 1
         fi
+        verbose "Archive created: ${ARCHIVE_FILE}"
+    else
+        verbose "Found no files to archive. Skipping."
     fi
     popd > /dev/null 2>&1 || exit 1
 }
@@ -357,8 +373,10 @@ reset_solr() {
 }
 
 clear_harvest_files() {
+    verbose "Clearing previous harvest files."
     countdown 5
-    find "${1}" -mindepth 1 -maxdepth 1 \
+    pushd "${ARGS[VUFIND_HARVEST_DIR]}/" > /dev/null 2>&1 || exit 1
+    find ./ ./processed/ -mindepth 1 -maxdepth 1 \
       \( \
         -name '*.xml' -o \
         -name '*.delete' -o \
@@ -366,6 +384,7 @@ clear_harvest_files() {
         -name 'last_state.txt' -o \
         -name 'harvest.log' \
       \) -delete
+    popd > /dev/null 2>&1 || exit 1
 }
 
 # Perform an OAI harvest
@@ -374,8 +393,10 @@ oai_harvest() {
     assert_shared_dir_writable
 
     if [[ "${ARGS[FULL]}" -eq 1 ]]; then
+        # Archive and remove the old harvest to begin a full harvest
+        archive_harvest "old"
         verbose "Clearing VuFind harvest directory for new full harvest."
-        clear_harvest_files "${ARGS[VUFIND_HARVEST_DIR]}/"
+        clear_harvest_files
     fi
 
 
@@ -404,7 +425,7 @@ oai_harvest() {
     fi
 
     # Combine XML files for faster import
-    verbose "Combining harvested XML files."
+    verbose "Combining harvested files."
     countdown 5
     declare -g -a COMBINE_FILES=()
     while read -r FILE; do
@@ -424,25 +445,19 @@ oai_harvest() {
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*_*_*_*.delete' | sort)
     oai_delete_combiner
 
+    verbose "Done combining files."
+
     if [[ "${ARGS[FULL]}" -eq 1 ]]; then
-        archive_current_harvest
-
-        verbose "Clearing shared current directory before we sync the new full harvest."
-        clear_harvest_files "${ARGS[SHARED_DIR]}/current/"
+        # Create fresh archive of the newly completed harvest
+        archive_harvest "new"
     fi
-
-    verbose "Syncing combined harvest files to shared storage."
-    rsync -vt "${ARGS[VUFIND_HARVEST_DIR]}"/* "${ARGS[SHARED_DIR]}/current/"
 }
 
-# Copy XML files back from shared dir to VuFind dir
-copyback_from_shared() {
+# Copy XML files to VuFind harvest dir
+copyback_files_to_import() {
     assert_vufind_harvest_dir_writable
-    verbose "Replacing any VuFind combined XML with files from shared directory."
+    verbose "Replacing any VuFind combined XML with files from --copy-from directory."
     countdown 5
-
-    # Clear out any exising xml files before copying back from shared storage
-    rm -f "${ARGS[VUFIND_HARVEST_DIR]}/combined_"*.xml
 
     COPIED_COUNT=0
     while read -r FILE; do
@@ -452,10 +467,36 @@ copyback_from_shared() {
             # If limit is set, only copy the provided limit of xml files over to the VUFIND_HARVEST_DIR
             break
         fi
-    done < <(find "${ARGS[SHARED_DIR]}/current/" -mindepth 1 -maxdepth 1 -name 'combined_*.xml')
+    # Maxdepth 2 so we can copy back from ./ or ./processed/ if it exists
+    done < <(find "${ARGS[COPY_DIR]}/" -mindepth 1 -maxdepth 2 -name '*.xml')
 
-    verbose "Copying last_harvest.txt from shared dir to VuFind."
-    cp --preserve=timestamps "${ARGS[SHARED_DIR]}"/current/last_harvest.txt "${ARGS[VUFIND_HARVEST_DIR]}/"
+    LAST_HARVEST_FILE="${ARGS[COPY_DIR]}"/last_harvest.txt
+    if [[ -f $LAST_HARVEST_FILE ]]; then
+        verbose "Copying last_harvest.txt from --copy-from directory to VuFind."
+        cp --preserve=timestamps "$LAST_HARVEST_FILE" "${ARGS[VUFIND_HARVEST_DIR]}/"
+    fi
+}
+
+# Remove processed .delete entries matching ids in the last harvest
+update_processed_delete_files() {
+    verbose "Updating past delete files (in case some records were undeleted)..."
+    shopt -s nullglob
+    DELETE_FILES=("${ARGS[VUFIND_HARVEST_DIR]}"/processed/combined_*.delete)
+    shopt -u nullglob
+    if [[ ${#DELETE_FILES[@]} -eq 0 ]]; then
+        verbose "No delete file in processed directory, skipping."
+        return
+    fi
+    IDS=$(grep -o '001">[^<]*<' "${ARGS[VUFIND_HARVEST_DIR]}"/combined_*.xml | sed -e 's/.*001">\([^<]*\)</folio.\1/' | sort)
+    for DFILE in "${DELETE_FILES[@]}"; do
+        comm -2 -3 <(sort "$DFILE") <(echo "$IDS") >"${DFILE}_2"
+        if [[ "$?" -eq 0 ]]; then
+            mv "${DFILE}_2" "$DFILE"
+        else
+            echo "ERROR updating delete file ${DFILE}"
+            rm -f "${DFILE}_2"
+        fi
+    done
 }
 
 # Perform VuFind batch import of OAI records
@@ -464,7 +505,7 @@ batch_import() {
 
     verbose "Starting batch import..."
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" ]]; then
-        verbose "Will only import ${ARGS[LIMIT_BY_DELETE]} XML files; others will be deleted."
+        verbose "Will only import ${ARGS[LIMIT_BY_DELETE]} XML files; others will be DELETED."
         countdown 5
         # Delete excess files beyond the provided limit from the VUFIND_HARVEST_DIR prior to import
         FOUND_COUNT=0
@@ -477,6 +518,8 @@ batch_import() {
     else
         countdown 5
     fi
+
+    update_processed_delete_files
 
     if ! /usr/local/vufind/harvest/batch-import-marc.sh folio; then
         echo "ERROR: Batch import failed with code: $?"
@@ -508,13 +551,13 @@ main() {
     verbose "Logging to ${LOG_FILE}"
     verbose "Using VUFIND_HOME of ${VUFIND_HOME}"
     check_harvest_disabled
-    pushd "${VUFIND_HOME}" 2> /dev/null
+    pushd "${VUFIND_HOME}" > /dev/null 2>&1 || exit 1
     verbose "Starting processing for ${STACK_NAME}"
 
     if [[ "${ARGS[OAI_HARVEST]}" -eq 1 ]]; then
         oai_harvest
-    elif [[ "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
-        copyback_from_shared
+    elif [[ -n "${ARGS[COPY_DIR]}" ]]; then
+        copyback_files_to_import
     fi
     if [[ "${ARGS[RESET_SOLR]}" -eq 1 ]]; then
         reset_solr
@@ -523,7 +566,7 @@ main() {
         batch_import
     fi
 
-    popd 2> /dev/null
+    popd > /dev/null 2>&1 || exit 1
     verbose "All processing complete!"
 }
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Save the logs in the logs docker volume
-mkdir -p /mnt/logs/solr
+mkdir -p /mnt/logs/alphabrowse
 
 # Replace $STACK_NAME and $NODE in the crontab entry
 envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab

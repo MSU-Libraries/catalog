@@ -29,7 +29,6 @@ main() {
     docker build \
     --tag "${CURR}" \
     --build-arg VUFIND_VERSION="${VUFIND_VERSION}" \
-    --build-arg MARIADB_MONITORING_PASSWORD="${MARIADB_MONITORING_PASSWORD}" \
     --cache-from "${LATEST}" \
     "${COMPONENT}"/;
 

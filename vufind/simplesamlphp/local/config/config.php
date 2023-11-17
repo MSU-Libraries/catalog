@@ -62,7 +62,7 @@ $config = [
      * When specified as a relative path, this is relative to the SimpleSAMLphp
      * root directory.
      */
-    'certdir' => getenv('SIMPLESAMLPHP_CUSTOM_DIR').'/cert/',
+    'certdir' => '${SIMPLESAMLPHP_CUSTOM_DIR}/cert/',
     'loggingdir' => '/var/log/simplesamlphp/',
     'datadir' => 'data/',
     'tempdir' => '/tmp/simplesaml',
@@ -1066,7 +1066,7 @@ $config = [
      * This option allows you to specify a directory for your metadata outside of the standard metadata directory
      * included in the standard distribution of the software.
      */
-    'metadatadir' => getenv('SIMPLESAMLPHP_CUSTOM_DIR').'/metadata',
+    'metadatadir' => '${SIMPLESAMLPHP_CUSTOM_DIR}/metadata',
 
     /*
      * This option configures the metadata sources. The metadata sources is given as an array with

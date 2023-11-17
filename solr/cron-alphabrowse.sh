@@ -3,9 +3,9 @@
 # Cron job - Update alphabetical browsing
 
 CRON_COMMAND="/alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}"
-LATEST_PATH=/mnt/logs/solr/alphabrowse_latest.log
-LOG_PATH=/mnt/logs/solr/alphabrowse.log
-EXIT_CODE_PATH=/mnt/logs/solr/alphabrowse_exit_code
+LATEST_PATH=/mnt/logs/alphabrowse/alphabrowse_latest.log
+LOG_PATH=/mnt/logs/alphabrowse/alphabrowse.log
+EXIT_CODE_PATH=/mnt/logs/alphabrowse/alphabrowse_exit_code
 DOCKER_TAG=ALPHA_BROWSE
 OUTPUT_LOG=0
 

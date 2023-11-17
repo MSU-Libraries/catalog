@@ -1,4 +1,6 @@
 ---
+#include vufind-envs
+
 version: "3.8"
 
 services:
@@ -23,9 +25,9 @@ services:
         max-size: "10m"
     environment:
       STACK_NAME: "${STACK_NAME}"
-      SITE_HOSTNAME: "${SITE_HOSTNAME}"
       NODE: "{{slice .Node.Hostname 8 9}}"
-      MARIADB_VUFIND_PASSWORD: "${MARIADB_VUFIND_PASSWORD}"
+      DEPLOY_KEY: "${DEPLOY_KEY}"
+      <<: *vufind_envs
     deploy:
       mode: replicated
       replicas: 3
@@ -128,10 +130,9 @@ services:
       disable: true
     environment:
       STACK_NAME: "${STACK_NAME}"
-      SITE_HOSTNAME: "${SITE_HOSTNAME}"
       NODE: "{{slice .Node.Hostname 8 9}}"
       MARIADB_ROOT_PASSWORD: "${MARIADB_ROOT_PASSWORD}"
-      MARIADB_VUFIND_PASSWORD: "${MARIADB_VUFIND_PASSWORD}"
+      <<: *vufind_envs
     deploy:
       mode: replicated
       replicas: 1

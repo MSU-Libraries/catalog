@@ -1,0 +1,39 @@
+#!/bin/bash
+
+source "${CI_PROJECT_DIR}"/cicd/before-script
+
+runhelp() {
+    echo ""
+    echo "Purpose: Deploy Zookeeper"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - STACK_NAME: Stack name"
+    echo "  - DEPLOY_HOST_A: The first host in the cluster"
+    echo "  - DEPLOY_HOST_B: The second host in the cluster"
+    echo "  - DEPLOY_HOST_C: The third host in the cluster"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - Deploying the stack fails"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+main() {
+    # Pull images now to save time with stack deploy
+    echo "Pre-pulling Docker images"
+    ssh deploy@"${DEPLOY_HOST_A}" "docker pull $CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA" &
+    ssh deploy@"${DEPLOY_HOST_B}" "docker pull $CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA" &
+    ssh deploy@"${DEPLOY_HOST_C}" "docker pull $CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA";
+    wait
+
+    echo "Issuing deploy command now"
+    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.zk.yml) ${STACK_NAME}-solr";
+}
+
+beforescript
+main
+

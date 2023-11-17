@@ -110,9 +110,8 @@ apply_devel_changes() {
     # Disable container rollback
     ./yq -i "del(.services.monitoring.deploy.update_config.failure_action)" docker-compose.monitoring.yml;
     ./yq -i "del(.x-solrproxy-deploy.update_config.failure_action)" docker-compose.solr-cloud-bootstrap.yml;
-    ./yq -i "del(.services.zk.deploy.update_config.failure_action)" docker-compose.solr-cloud-bootstrap.yml;
+    ./yq -i "del(.services.zk.deploy.update_config.failure_action)" docker-compose.zk.yml;
     ./yq -i "del(.x-solrproxy-deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
-    ./yq -i "del(.services.zk.deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
     ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud.yml;
     ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud-force.yml;
     ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud-bootstrap.yml;
@@ -136,9 +135,8 @@ apply_prod_changes() {
     export EXTRA_TAG_SUFFIX="-main";
 
     # Increase Solr RAM to 2 GB (note: prod is further increased below)
-    # TODO Reduce this back down to 2048 once we are done rebuilding the collections
     ./yq -i \
-    ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms4096m -Xmx4096m\"" \
+    ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms2048m -Xmx2048m\"" \
     docker-compose.solr-cloud.yml;
 
     # Use httpchallenge cert resolver (instead of dnschallenge)
@@ -257,6 +255,11 @@ main() {
     "https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64" -O ./yq;
     chmod +x ./yq;
 
+    # Replace custom includes with related files
+    for f in *.yml; do
+        sed -i -e "/#include vufind-envs/r vufind-envs" -e "/#include vufind-envs/d" "$f"
+    done
+
     # Development environment changes
     if [[ "${STACK_NAME}" != catalog-* ]]; then
         apply_devel_changes;
@@ -276,16 +279,9 @@ main() {
       ./yq -i ".services.catalog.volumes += \"/home/deploy/samlcerts/${STACK_NAME}:/mnt/samlcerts:ro\"" docker-compose.yml;
     fi
 
-    # Replace variables in all compose files
-    envsubst < docker-compose.yml | sponge docker-compose.yml;
-    envsubst < docker-compose.build.yml | sponge docker-compose.build.yml;
-    envsubst < docker-compose.solr-cloud.yml | sponge docker-compose.solr-cloud.yml;
-    envsubst < docker-compose.solr-cloud-bootstrap.yml | sponge docker-compose.solr-cloud-bootstrap.yml;
-    envsubst < docker-compose.mariadb-cloud-bootstrap.yml | sponge docker-compose.mariadb-cloud-bootstrap.yml;
-    envsubst < docker-compose.mariadb-cloud-force.yml | sponge docker-compose.mariadb-cloud-force.yml;
-    envsubst < docker-compose.mariadb-cloud.yml | sponge docker-compose.mariadb-cloud.yml;
-    envsubst < docker-compose.internal.yml | sponge docker-compose.internal.yml;
-    envsubst < docker-compose.monitoring.yml | sponge docker-compose.monitoring.yml;
+    # Save CI variables
+    env | grep -f <(grep -ohE '\$[A-Z_]+|\$\{[A-Z_]+\}' ./*.yml | tr -d '{}$' | sort -u) | sed -E -e 's/([A-Z_]+=)(.*)/export \1"\2"/' >.env
+    chmod o-r .env
 
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
     sed -i "/^$/d" docker-compose.internal.yml;
@@ -293,7 +289,8 @@ main() {
 
     # Copy the updated compose files to the server
     ssh deploy@"${DEPLOY_HOST_A}" mkdir -p "${COMPOSE_PATH}";
-    scp docker-compose* deploy@"${DEPLOY_HOST_A}":"${COMPOSE_PATH}"/;
+    scp docker-compose* .env deploy@"${DEPLOY_HOST_A}":"${COMPOSE_PATH}"/;
+    rm .env
     echo "Copying files to ${COMPOSE_PATH}"
 }
 

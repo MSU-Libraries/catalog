@@ -1,4 +1,6 @@
-FROM python:3.8-alpine
+FROM python:3.10-alpine
+
+ENV PYTHONUNBUFFERED=1
 
 RUN \
     apk update && \
@@ -15,6 +17,4 @@ RUN pip install -r requirements.txt
 
 COPY . /app
 
-ENTRYPOINT [ "python" ]
-
-CMD [ "app/app.py" ]
+CMD [ "python", "app/app.py" ]

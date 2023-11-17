@@ -1,7 +1,7 @@
 # Public Catalog Monitoring
 
 ## Introduction
-The Monitoring app helps to monitor the Public Catalog system as a whole. It is a web application displaying a dashboard of the status for the different services and cron processes, doing checks across all the nodes. It also records available memory, disk space and apache requests to display graphs of these variables over time. To make troubleshooting easy, it also provides easy access to the numerous logs for the different services across all the nodes. Finally, it provides links to other admin panels.
+The Monitoring app helps to monitor the Public Catalog system as a whole. It is a web application displaying a dashboard of the status for the different services and cron processes, doing checks across all the nodes. It also records available memory, disk space, apache requests and response times to display graphs of these variables over time. To make troubleshooting easy, it also provides easy access to the numerous logs for the different services across all the nodes. Finally, it provides links to other admin panels.
 The home page is refreshed regularly (with an html `meta`).
 
 ## Access
@@ -16,7 +16,7 @@ Here is a summary of what top-level files/directories are for:
 - `static`: CSS and Javascript files
 - `templates`: Jinja templates
 - `app.py`: main file, including all the routes, and starting the scheduler
-- `collector.py`: regular task saving the variables in a database; also collects apache requests by looking at the access log.
+- `collector.py`: regular task saving the variables in a database; also collects apache requests and response times by looking at the access log.
 - `graphs.py`: functions to create graphs
 - `home.py`: prepares the home page template using functions in `status.py`.
 - `logs.py`: gathers and displays the logs; log files are read from the `${STACK_NAME}_logs` docker volume.
@@ -32,4 +32,3 @@ Here is a summary of what top-level files/directories are for:
 
 ## TODO
 See JIRA tickets.
-Currently it is still running with debug on, but eventually that should be turned off.

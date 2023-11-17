@@ -67,7 +67,10 @@ RUN \
     mv /solr_confs/biblio /solr_confs/biblio1 && \
     sed -i "s/\\bbiblio\\b/biblio1/" /solr_confs/biblio1/conf/solrconfig.xml && \
     cp -r /solr_confs/biblio1 /solr_confs/biblio2 && \
-    sed -i "s/\\bbiblio1\\b/biblio2/" /solr_confs/biblio2/conf/solrconfig.xml
+    sed -i "s/\\bbiblio1\\b/biblio2/" /solr_confs/biblio2/conf/solrconfig.xml && \
+    # Use /mnt/logs/solr for the Solr logs
+    rm -rf /opt/bitnami/solr/logs && \
+    ln -s /mnt/logs/solr /opt/bitnami/solr/logs
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
     CMD /healthcheck.sh

@@ -29,7 +29,7 @@ main() {
     ssh deploy@"${DEPLOY_HOST_C}" "docker pull $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA";
     wait
 
-    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --with-registry-auth -c $COMPOSE_PATH/docker-compose.yml ${STACK_NAME}-catalog";
+    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.yml) ${STACK_NAME}-catalog";
     
     # Set URL
     URL="${SITE_HOSTNAME}";
