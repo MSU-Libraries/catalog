@@ -448,6 +448,16 @@ input[type="checkbox"] {
     label, input, select, button {
       width:100%;
     }
+    .searchForm-query {
+      max-width:100%;
+    }
+  }
+
+  @media only screen and (max-width : 1235px) {
+    .searchForm-query {
+      width:100%;
+      max-width:400px;
+    }
   }
 
   @media only screen and (max-width : 991px) {
@@ -500,9 +510,6 @@ input[type="checkbox"] {
         display:block;
         margin-bottom:0.3rem;
       }
-      .searchForm-query {
-        width:100%;
-      }
       input {
         margin-bottom:1rem;
       }
@@ -529,7 +536,8 @@ input[type="checkbox"] {
       .searchForm-query {
         width:33%;
     }
-  }   @media only screen and (min-width : 1445px) {
+  }
+  @media only screen and (min-width : 1445px) {
       .searchForm-query {
         width:100%;
     }
