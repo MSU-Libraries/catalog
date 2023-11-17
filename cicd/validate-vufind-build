@@ -27,8 +27,9 @@ main() {
         --build-arg SOLR_URL=http://solr:8983/solr \
         --build-arg SIMPLESAMLPHP_VERSION="${SIMPLESAMLPHP_VERSION}" \
         --tag validate \
-        --cache-from "${LATEST}" \
         vufind/;
+    # Removed the below flag because it sometimes caused inaccurate failures when it incorrectly cached from :latest in some cases
+    #--cache-from "${LATEST}"
 
     EC=$?;
     if [[ ${EC} -ne 0 ]]; then
@@ -50,7 +51,7 @@ main() {
     
     echo "Running code style checks";
     echo "vendor/bin/phing eslint jshint phpcs-console php-cs-fixer-dryrun checkLessToSass phpstan-console";
-    docker run --rm msul-validate vendor/bin/phing eslint jshint phpcs-console php-cs-fixer-dryrun checkLessToSass phpstan-console;
+    docker run --rm validate vendor/bin/phing eslint jshint phpcs-console php-cs-fixer-dryrun checkLessToSass phpstan-console;
     EC=$?;
     if [[ ${EC} -ne 0 ]]; then
         echo "One or more of the style checks failed. Run the following command in a VuFind container to debug";
@@ -58,7 +59,7 @@ main() {
         exit ${EC};
     fi;
 
-    docker image rm msul-validate;
+    docker image rm validate;
     echo "All validations have passed";
 }
 
