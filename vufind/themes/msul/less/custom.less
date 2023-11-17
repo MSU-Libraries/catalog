@@ -449,7 +449,7 @@ input[type="checkbox"] {
       width:100%;
     }
     .searchForm-query {
-      max-width:100%;
+      max-width:100% !important;
     }
   }
 
@@ -510,6 +510,9 @@ input[type="checkbox"] {
         display:block;
         margin-bottom:0.3rem;
       }
+      select {
+        width: 100%;
+      }
       input {
         margin-bottom:1rem;
       }
@@ -540,6 +543,7 @@ input[type="checkbox"] {
   @media only screen and (min-width : 1445px) {
       .searchForm-query {
         width:100%;
+        max-width: 400px;
     }
   }     
 }
