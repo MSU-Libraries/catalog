@@ -39,7 +39,7 @@ Validate Vufind Build:
   stage: test
   tags:
     - msul-shared
-  retry: 2
+  retry: 1
   timeout: 10m
   interruptible: true
   rules:
