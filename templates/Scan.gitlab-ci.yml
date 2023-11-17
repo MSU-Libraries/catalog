@@ -44,6 +44,8 @@ Validate Vufind Build:
   interruptible: true
   rules:
     - if: '$CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule" && $CI_PIPELINE_SOURCE != "merge_request_event"'
+  before_script:
+    - apk add --no-cache bash
   script:
     - bash ./cicd/validate-vufind-build
 
