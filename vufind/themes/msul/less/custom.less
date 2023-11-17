@@ -1478,6 +1478,9 @@ mark {
       border-left: 0.3em solid transparent;
       transition: 0.5s;
       }
+      &[aria-expanded="true"]::after {
+        transform: rotate(-180deg);
+      }
     }
   }
   .card-body {
@@ -1492,4 +1495,3 @@ mark {
   color: @msugreen;
   background-color: @nav-link-hover-bg;
 }
-
