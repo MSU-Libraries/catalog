@@ -107,7 +107,7 @@ mv /mnt/shared/oai/[STACK_NAME]/harvest_folio/processed/* /mnt/shared/oai/[STACK
 #### Importing FOLIO records in dev environments
 This will import the tests records. In the `catalog` container:
 ```
-./harvest-and-import.sh -c -l 1 -b -v -r -s /mnt/shared/oai/devel-batch
+./harvest-and-import.sh -c /mnt/shared/oai/devel-batch -l 1 -b -v -r
 ```
 
 #### Importing HLM records using the cron container

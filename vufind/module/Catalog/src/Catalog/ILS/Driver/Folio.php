@@ -550,7 +550,27 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 ];
             }
         }
-        return $locations;
+        // PC-864 Sort the locations, if configured to do so
+        // sortby is a list of location names in the order we should be sorting them in
+        $sortby = (array)($this->config['Holds']['sortPickupLocations'] ?? []);
+        $finalLocations = [];
+        foreach ($sortby as $sort) {
+            foreach ($locations as $loc) {
+                if ($loc['locationDisplay'] == $sort) {
+                    $finalLocations[] = $loc;
+                    break;
+                }
+            }
+        }
+        // Add the rest of the original locations to the final list, if they
+        // aren't already included via the previous sort
+        foreach ($locations as $loc) {
+            if (!in_array($loc['locationDisplay'], $sortby)) {
+                $finalLocations[] = $loc;
+            }
+        }
+
+        return $finalLocations;
     }
 
     /**
