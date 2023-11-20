@@ -18,7 +18,6 @@ use VuFind\Config\YamlReader;
 
 use function array_key_exists;
 use function in_array;
-use function is_int;
 
 /**
  * Extend the Record data available to the View
