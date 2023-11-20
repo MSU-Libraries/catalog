@@ -3,7 +3,8 @@
 $sel_item = $this->getthis->getItem();
 $items = $this->getthis->items;
 
-function getDisplay($view, $item) {
+function getDisplay($view, $item)
+{
     return $view->getthis->getCallNumber($item['item_id'] ?? null);
 }
 ?>
@@ -16,7 +17,7 @@ function getDisplay($view, $item) {
             <ul class="dropdown">
                 <?php foreach ($items as $item) {
                     $item_class = ($sel_item['item_id'] ?? null == $item['item_id'])
-                        ? "current" : "";
+                        ? 'current' : '';
                     ?><li>
                         <a href="<?= $this->url(
                         'record-getthis',
@@ -26,7 +27,7 @@ function getDisplay($view, $item) {
                             ],
                         [
                                 'query' => [
-                                    "item_id" => $item['item_id'],
+                                    'item_id' => $item['item_id'],
                                 ],
                             ]
                     ) ?>" class="<?= $this->escapeHtml($item_class) ?>" rel="nofollow">

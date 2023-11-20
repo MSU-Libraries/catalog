@@ -53,16 +53,6 @@ return [
           'util/index_reserves' => 'Catalog\\Command\\Util\\IndexReservesCommand',
         ],
       ],
-      'content_covers' => [
-        'factories' => [
-          'Catalog\\Content\\Covers\\Google' => 'Laminas\\ServiceManager\\Factory\\InvokableFactory',
-          'Catalog\\Content\\Covers\\Syndetics' => 'Catalog\\Content\\Covers\\SyndeticsFactory',
-        ],
-        'aliases' => [
-          'google' => 'Catalog\\Content\\Covers\\Google',
-          'syndetics' => 'Catalog\\Content\\Covers\\Syndetics',
-        ],
-      ],
       'form_handler' => [
         'factories' => [
           'Catalog\\Form\\Handler\\Email' => 'VuFind\\Form\\Handler\\EmailFactory',

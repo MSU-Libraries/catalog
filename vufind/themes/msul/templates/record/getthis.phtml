@@ -3,8 +3,7 @@
 $rec_id = $this->driver->getUniqueId();
 if ($this->getthis->isHLM()) {
     echo $this->render('RecordTab/holdingsils.phtml');
-}
-else {
+} else {
     // Show the item dropdown if there are multiple items available
     if (count($this->getthis->items) > 1) {
         echo $this->render('record/getthis/itemopts.phtml');

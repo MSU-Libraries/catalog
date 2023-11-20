@@ -8,7 +8,7 @@ $status = $this->getthis->getStatus();
 $isbn = $this->driver->getCleanISBN();
 $callnum = $this->getthis->getCallNumber();
 $pubname = $this->driver->getPublisher();
-if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
+if (is_array($pubname)): $pubname = implode(', ', $pubname); endif;
 ?>
 <div>
     <p>

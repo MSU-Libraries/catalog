@@ -16,6 +16,9 @@ namespace Catalog\View\Helper\Root;
 
 use VuFind\Config\YamlReader;
 
+use function array_key_exists;
+use function in_array;
+
 /**
  * Extend the Record data available to the View
  *
@@ -51,7 +54,7 @@ class Record extends \VuFind\View\Helper\Root\Record
     {
         parent::__construct($config);
         $yamlReader = new YamlReader();
-        $this->accessLinksConfig = $yamlReader->get("accesslinks.yaml");
+        $this->accessLinksConfig = $yamlReader->get('accesslinks.yaml');
         if (array_key_exists('labels', $this->accessLinksConfig)) {
             $this->linkLabels = $this->accessLinksConfig['labels'];
         }
@@ -111,11 +114,11 @@ class Record extends \VuFind\View\Helper\Root\Record
     {
         $links = $this->driver->tryMethod('geteJournalLinks') ?? [];
         foreach ($links as $idx => $link) {
-            if (strcasecmp($link['desc'] ?? "", "cover image") === 0) {
+            if (strcasecmp($link['desc'] ?? '', 'cover image') === 0) {
                 unset($links[$idx]);
                 break;
             }
-            if (str_contains($link['url'] ?? "", "bookplate")) {
+            if (str_contains($link['url'] ?? '', 'bookplate')) {
                 unset($links[$idx]);
                 break;
             }
@@ -140,7 +143,7 @@ class Record extends \VuFind\View\Helper\Root\Record
         // Check if a link is provided with "Cover image" as the label
         $links = parent::getLinkDetails();
         foreach ($links as $link) {
-            if (strcasecmp($link['desc'], "cover image") === 0) {
+            if (strcasecmp($link['desc'], 'cover image') === 0) {
                 $url = $link['url'];
             }
         }
@@ -174,6 +177,8 @@ class Record extends \VuFind\View\Helper\Root\Record
             $status = $transEsc('Library Use Only');
         } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
             $status = $transEsc('Unknown status') . '(' . $transEsc($status) . ')';
+        } elseif ($holding['reserve'] === 'Y') {
+            $status = 'On Reserve';
         }
         return $status;
     }
@@ -188,12 +193,12 @@ class Record extends \VuFind\View\Helper\Root\Record
     public function getStatusSuffix($holding)
     {
         $transEsc = $this->getView()->plugin('transEsc');
-        $suffix = "";
+        $suffix = '';
         if ($holding['returnDate'] ?? false) {
-            $suffix = " - " . $holding['returnDate'];
+            $suffix = ' - ' . $holding['returnDate'];
         }
         if ($holding['duedate'] ?? false) {
-            $suffix = $suffix . " - " . $transEsc("Due") . ":" . $holding['duedate'];
+            $suffix = $suffix . ' - ' . $transEsc('Due') . ':' . $holding['duedate'];
         }
         return $suffix;
     }
@@ -211,9 +216,9 @@ class Record extends \VuFind\View\Helper\Root\Record
         $url = false;
 
         if ($doi) {
-            $checkUrl = "https://public-api.thirdiron.com/public/v1/libraries/" .
-                  getenv("BROWZINE_LIBRARY") . "/articles/doi/" . $doi .
-                  "?access_token=" . getenv("BROWZINE_TOKEN");
+            $checkUrl = 'https://public-api.thirdiron.com/public/v1/libraries/' .
+                  getenv('BROWZINE_LIBRARY') . '/articles/doi/' . $doi .
+                  '?access_token=' . getenv('BROWZINE_TOKEN');
             $ch = curl_init($checkUrl);
             curl_setopt($ch, CURLOPT_HTTPGET, 1);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
@@ -226,7 +231,7 @@ class Record extends \VuFind\View\Helper\Root\Record
             curl_close($ch);
 
             if ($httpcode == 200) {
-                $url = "https://libkey.io/libraries/" . getenv("BROWZINE_LIBRARY") . "/" . $doi;
+                $url = 'https://libkey.io/libraries/' . getenv('BROWZINE_LIBRARY') . '/' . $doi;
             }
         }
         return $url;

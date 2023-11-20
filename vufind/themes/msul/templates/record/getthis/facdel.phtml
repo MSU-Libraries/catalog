@@ -7,7 +7,7 @@ $author = $this->driver->getPrimaryAuthor();
 $loc = $this->getthis->getLocation();
 $isbn = $this->driver->getCleanISBN();
 $pubname = $this->driver->getPublisher();
-if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
+if (is_array($pubname)): $pubname = implode(', ', $pubname); endif;
 ?>
 <div>
     <p>

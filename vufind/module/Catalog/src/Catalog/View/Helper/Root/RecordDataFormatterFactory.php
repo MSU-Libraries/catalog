@@ -52,10 +52,10 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         $spec->setLine('Platform', 'getPlatform');
 
         // Reorder the fields to get Genre next to Subjects
-        $spec->reorderKeys(["Published in", "New Title", "Previous Title", "Authors",
-                "Format", "Language", "Published", "Edition", "Series",
-                "Subjects", "Genre", "Physical Description",
-                "child_records", "Online Access", "Related Items", "Notes", "Tags"]);
+        $spec->reorderKeys(['Published in', 'New Title', 'Previous Title', 'Authors',
+                'Format', 'Language', 'Published', 'Edition', 'Series',
+                'Subjects', 'Genre', 'Physical Description',
+                'child_records', 'Online Access', 'Related Items', 'Notes', 'Tags']);
 
         return $spec->getArray();
     }
