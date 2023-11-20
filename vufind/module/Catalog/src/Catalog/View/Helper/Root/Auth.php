@@ -18,6 +18,9 @@ use Laminas\Config\Config;
 use Laminas\Config\Reader\Ini as IniReader;
 use VuFind\Config\Locator as Locator;
 
+use function array_key_exists;
+use function count;
+
 /**
  * Authentication handler to add additional data to the view
  *
@@ -67,14 +70,14 @@ class Auth extends \VuFind\View\Helper\Root\Auth
         $config = new Config((new IniReader())->fromFile($fullpath, true));
 
         if (
-            $config["default"]["EDSModule"] != null &&
-            $config["default"]["EDSModule"]["ipRange"] != null
+            $config['default']['EDSModule'] != null &&
+            $config['default']['EDSModule']['ipRange'] != null
         ) {
-            $ranges = $config["default"]["EDSModule"]["ipRange"];
+            $ranges = $config['default']['EDSModule']['ipRange'];
             foreach ($ranges as $range) {
-                $ipParts = explode("-", $range);
-                $lowIp = count($ipParts) > 0 ? ip2long($ipParts[0]) : "";
-                $highIp = count($ipParts) > 1 ? ip2long($ipParts[1]) : "";
+                $ipParts = explode('-', $range);
+                $lowIp = count($ipParts) > 0 ? ip2long($ipParts[0]) : '';
+                $highIp = count($ipParts) > 1 ? ip2long($ipParts[1]) : '';
                 if ($ip <= $highIp && $lowIp <= $ip) {
                     $isOnCampus = true;
                     break;

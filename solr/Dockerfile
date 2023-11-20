@@ -1,7 +1,8 @@
-FROM bitnami/solr:9.1.1
+FROM bitnami/solr:9.3.0
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Detroit
+ENV BITNAMI_DEBUG=true
 ARG VUFIND_VERSION
 
 USER root
@@ -32,9 +33,6 @@ RUN chmod -R g-w,o-w /etc/cron.d/ && \
     echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf
 
 # Get solr configs and prepare for alphabetical browsing
-# The following files should no longer be needed in the repo after VuFind 9.1 :
-# (they will have to be copied from vufind like marc4j-*.jar)
-# browse-handler.jar, browse-indexing.jar,  solrmarc_core.jar, biblio_solrconfig.xml, index-alphabetic-browse.sh
 COPY startup.sh startup-cron.sh healthcheck.sh clusterhealth.sh cron-alphabrowse.sh alpha-browse.sh lock-state.sh /
 RUN \
     mkdir -p /solr_confs/import/lib && \
@@ -43,11 +41,9 @@ RUN \
     cp -r /vufind-${VUFIND_VERSION}/solr/vufind/* /solr_confs/ && \
     cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /vufind-${VUFIND_VERSION}/import/lib/reload4j-*.jar /solr_confs/import/lib/ && \
     rm v${VUFIND_VERSION}.tar.gz && \
+    cp /vufind-${VUFIND_VERSION}/import/*.jar /solr_confs/import/ && \
     rm -rf /vufind-${VUFIND_VERSION}
 COPY index-alphabetic-browse.sh /solr_confs/
-COPY biblio_solrconfig.xml /solr_confs/biblio/conf/solrconfig.xml
-COPY browse-handler.jar /solr_confs/jars/
-COPY browse-indexing.jar solrmarc_core.jar /solr_confs/import/
 RUN \
     chmod -R go-w /solr_confs /*.sh && \
     chmod ugo+x /*.sh /solr_confs/*.sh && \

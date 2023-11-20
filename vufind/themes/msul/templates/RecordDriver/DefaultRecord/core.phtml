@@ -3,7 +3,7 @@
 ?>
 <div class="media" vocab="http://schema.org/" resource="#record" typeof="<?=$this->driver->getSchemaOrgFormats()?> Product">
   <?php
-    $QRCode = $this->record($this->driver)->getQRCode("core");
+    $QRCode = $this->record($this->driver)->getQRCode('core');
     $coverDetails = $this->record($this->driver)->getCoverDetails('core', 'medium', $this->record($this->driver)->getThumbnail('large'));
     $cover = $coverDetails['html'];
     $preview = ($this->previewOverride ?? false)
@@ -43,6 +43,13 @@
   <div class="media-body">
 
     <h1 property="name"><?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '')?></h1>
+
+    <?php if ($this->driver->getExtraDetail('cached_record') && !$this->translationEmpty('cached_record_warning')): ?>
+      <div class="alert alert-warning">
+        <?=$this->transEsc('cached_record_warning')?>
+      </div>
+    <?php endif; ?>
+
     <?php foreach ($this->driver->tryMethod('getFullTitlesAltScript', [], []) as $altTitle): ?>
       <div class="title-alt">
         <?=$this->escapeHtml($altTitle)?>
@@ -63,7 +70,7 @@
         for ($i = 0; $i < count($summary); $i++):
           $this->escapeHtml($summary[$i]);
         endfor;
-        $summary = implode(" ", $summary);
+        $summary = implode(' ', $summary);
       else:
         $summary = false;
       endif;
@@ -79,7 +86,7 @@
     <?php if ($this->userlist()->getMode() !== 'disabled'): ?>
       <?php /* Display the lists that this record is saved to */ ?>
       <div class="savedLists">
-        <strong><?=$this->transEsc("Saved in")?>:</strong>
+        <strong><?=$this->transEsc('Saved in')?>:</strong>
       </div>
     <?php endif; ?>
 

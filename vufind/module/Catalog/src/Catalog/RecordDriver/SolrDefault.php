@@ -83,7 +83,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
      */
     public function getSierraBN()
     {
-        return "";
+        return '';
     }
 
     /**
