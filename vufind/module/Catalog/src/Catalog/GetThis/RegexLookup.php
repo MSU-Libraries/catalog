@@ -15,6 +15,9 @@
 
 namespace Catalog\GetThis;
 
+use function constant;
+use function count;
+
 /**
  * RegexLookup use example to check if $search matches the given regex patterns.
  *

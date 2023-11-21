@@ -35,6 +35,20 @@ Shellcheck:
     # TODO eventually have this fail the job, but for now it's informational
     - shellcheck $(find . -name "*.sh") || exit 0
 
+Validate Vufind Build:
+  stage: test
+  tags:
+    - msul-shared
+  retry: 1
+  timeout: 10m
+  interruptible: true
+  rules:
+    - if: '$CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule" && $CI_PIPELINE_SOURCE != "merge_request_event"'
+  before_script:
+    - apk add --no-cache bash
+  script:
+    - bash ./cicd/validate-vufind-build
+
 # Commenting this out since the https://docs.gitlab.com/ee/user/application_security/container_scanning/#vulnerability-allowlisting
 # wasn't being respecting in attempts at storing it at top level or at vufind level
 #container_scanning:

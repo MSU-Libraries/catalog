@@ -8,8 +8,9 @@ foreach ($this->statusItems as $item) {
     $selected = $item;
   } elseif ($selected['status'] != 'Available' || (GetThisLoader::locationAtLoM($selected) &&
       ! GetThisLoader::locationAtLoM($item) && $item['status'] == 'Available')) {
-    if ($item['status'] == 'Available' || ($selected['status'] != 'Restricted' && $item['status'] == 'Restricted'))
+    if ($item['status'] == 'Available' || ($selected['status'] != 'Restricted' && $item['status'] == 'Restricted')) {
       $selected = $item;
+    }
   }
 }
 if ($selected != '') {
@@ -24,12 +25,16 @@ if ($selected != '') {
   <div>
     <strong>Holdings:</strong>
     <span class="fullAvailability">
-      <?php if ($selected['availability']): ?>
-        <strong class="text-success"><?=($selected['reserve'] == 'Y') ? $this->transEsc("On Reserve") : $this->transEsc("Available")?></strong>
+      <?php if ($selected['use_unknown_message'] ?? false): ?>
+        <strong class="text-muted"><?=$this->transEsc('status_unknown_message')?></strong>
       <?php elseif ($status == 'Library Use Only'): ?>
         <strong class="text-warning"><?=$this->transEsc($status)?></strong>
-      <?php else: ?>
+      <?php elseif ((int)$selected['availability'] === \VuFind\ILS\Logic\ItemStatus::STATUS_UNAVAILABLE): ?>
         <strong class="text-danger"><?=$this->transEsc($status)?></strong>
+      <?php elseif ((int)$selected['availability'] === \VuFind\ILS\Logic\ItemStatus::STATUS_UNCERTAIN): ?>
+        <strong class="text-warning"><?=$this->transEsc($status)?></strong>
+      <?php else: ?>
+        <strong class="text-success"><?=$this->transEsc($status)?></strong>
       <?php endif; ?>
       <?=$this->escapeHtml($statusSuffix)?>
     </span>
@@ -47,7 +52,7 @@ if ($selected != '') {
     <?php $id = $selected['id']; ?>
     <?php $item_id = $selected['item_id']; ?>
     <?php $getthis = new GetThisLoader($record, $this->statusItems, $item_id); ?>
-    <?php if ($getthis && ! str_starts_with($id, "hlm.") && ! $getthis->isOnlineResource() &&
+    <?php if ($getthis && ! str_starts_with($id, 'hlm.') && ! $getthis->isOnlineResource() &&
         ! GetThisLoader::locationAtLoM($selected)): ?>
       <a class="pl-1 placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
         <?=$this->transEsc('Get this')?>

@@ -107,14 +107,14 @@
   margin-bottom:3rem;
   width:100%;
   @media only screen and (min-width : 992px) {
-    .searchForm_lookfor {
-      width:25%;
+    .searchForm-query {
+      width: 25%;
     }
 
   }
   @media only screen and (min-width : 1090px) {
-   .searchForm_lookfor {
-      width:35%;
+   .searchForm-query {
+      width: 35%;
     }
   }
 }
@@ -449,40 +449,58 @@ input[type="checkbox"] {
     padding-left:5%;
   }
 }
-//searchbox responsive styling
 
-  .searchbox {
+//searchbox responsive styling
+.searchbox {
   @media only screen and (max-width : 767px) {
     label, input, select, button {
       width:100%;
     }
-
+    .searchForm-query {
+      max-width:100% !important;
+    }
   }
+
+  @media only screen and (max-width : 1235px) {
+    .searchForm-query {
+      width:100%;
+      max-width:400px;
+    }
+  }
+
   @media only screen and (max-width : 991px) {
     label, input, select, button {
       display:block;
       margin-bottom:0.3rem;
     }
-
     input, select {
       width:100% !important;
     }
 
   }
-    @media only screen and (max-width : 1228px) {
-      input {
+
+  @media only screen and (max-width : 1228px) {
+    input {
       margin-bottom:1rem;
     }
   }
+
   @media only screen and (min-width : 992px) {
+    .searchForm_lookfor {
+      width: 100%;
+      max-width: initial;
+    }
     button[type=submit].btn-primary {
+      position: relative;
+      z-index: 2;
       border-radius: 0 0.5rem 0.5rem 0;
       margin-left: -1rem;
-      vertical-align:top;
+      vertical-align: top;
     }
   }
 }
-  .template-dir-search.template-name-results .searchbox {
+
+.template-dir-search.template-name-results .searchbox {
   @media only screen and (max-width : 767px) {
 
   }
@@ -500,8 +518,8 @@ input[type="checkbox"] {
         display:block;
         margin-bottom:0.3rem;
       }
-      input, select {
-        width:100% !important;
+      select {
+        width: 100%;
       }
       input {
         margin-bottom:1rem;
@@ -534,12 +552,14 @@ input[type="checkbox"] {
       }
   }
   @media only screen and (min-width : 1315px) {
-      .searchForm_lookfor {
+      .searchForm-query {
         width:33%;
     }
-  }   @media only screen and (min-width : 1445px) {
-      .searchForm_lookfor {
+  }
+  @media only screen and (min-width : 1445px) {
+      .searchForm-query {
         width:100%;
+        max-width: 400px;
     }
   }
 }
@@ -840,20 +860,30 @@ table tr {
   }
 }
 
-/* Get this button on the search results page */
-.result-body .placehold {
-  padding: .2rem .5rem 0.2rem .5rem;
-  font-size: 75%;
-  font-weight: 700;
-  margin-left: 0rem;
-}
-/* Fix top padding on badges */
-.result-body .format {
-  padding: .3em .6em .3em;
-}
-/* Hide status tag, as we're using the Get-this button instead */
-.result-body .status {
-  display: none;
+.result-body {
+  /* Get this button on the search results page */
+  .placehold {
+    padding: .2rem .5rem 0.2rem .5rem;
+    font-size: 75%;
+    font-weight: 700;
+    margin-left: 0rem;
+  }
+  /* Fix top padding on badges */
+  .format {
+    padding: .3em .6em .3em;
+  }
+  /* Hide status tag, as we're using the Get-this button instead */
+  .status {
+    display: none;
+  }
+  h2 a {
+    color: @msugreen;
+    text-decoration: none;
+    &:hover {
+      color: black;
+    }
+    text-decoration: underline;
+  }
 }
 
 .tag-record {
@@ -882,11 +912,24 @@ table tr {
     border-bottom-right-radius:0;
     border-bottom-left-radius:0;
   }
+  .facet-group .collapse, .facet-group .collapsing, .facet-group.full-facet-list .facet {
+    border-left: 0;
+    border-right: 0;
+  }
+  .facet-tree > ul > li, .facet-tree .more-less-btn-wrapper {
+    border-bottom: 0;
+  }
+  button.facet-tree__toggle-expanded, button.facet-tree__toggle-expanded {
+    padding-left: .2rem;
+  }
   a {
     text-decoration:none;
     .icon-link__label {
       text-decoration:none;
     }
+  }
+  h3 {
+    color: black;
   }
 }
 
@@ -1029,14 +1072,6 @@ label {
 
 .searchtools {
   margin-bottom:1rem;
-
-  a {
-    margin-right:1rem;
-
-    .fa {
-      margin-right:0.5rem;
-    }
-  }
 }
 
 .view-buttons {

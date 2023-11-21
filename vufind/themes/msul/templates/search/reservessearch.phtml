@@ -15,9 +15,27 @@
 <div class="<?=$this->layoutClass('mainbody')?> mb-5">
   <h2 class="mb-5"><?=$this->transEsc('Search For Items on Reserve')?></h2>
   <form class="form-inline mb-4" method="get" name="reservesSearchForm">
-    <label class="mb-2 fw-normal" for="reservesSearchForm_lookfor">Search by <strong>Instructor</strong> or by <strong>Course</strong></label><br />
-    <input id="reservesSearchForm_lookfor" placeholder="Search terms" type="text" name="lookfor" size="38" value="<?=$this->escapeHtmlAttr($reservesLookfor)?>" <?=$this->searchOptions('SolrReserves')->autocompleteEnabled() ? ' class="autocomplete searcher:SolrReserves type:Reserves mb-3"' : ''?>>
-    <input class="btn btn-primary" type="submit" name="submit" value="<?=$this->transEscAttr("Find")?>">
+    <label class="mb-2 fw-normal" for="reservesSearchForm_lookfor">Search by <strong>Instructor</strong> or by <strong>Course</strong></label><br>
+    <?php
+      $searchboxAttributes = [
+        'id' => 'reservesSearchForm_lookfor',
+        'type' => 'search',
+        'name' => 'lookfor',
+        'size' => '38',
+        'value' => $reservesLookfor,
+        'aria-label' => $this->translate('search_terms'),
+      ];
+      if ($placeholder = $this->searchbox()->getPlaceholderText($tabConfig['selected']['id'] ?? $this->searchClassId)) {
+        $searchboxAttributes['placeholder'] = $placeholder;
+      }
+      if ($this->searchbox()->autocompleteEnabled('SolrReserves')) {
+        $searchboxAttributes['class'] = ' autocomplete form-control searcher:SolrReserves type:Reserves mb-3'
+          . ($this->searchbox()->autocompleteAutoSubmit('SolrReserves') ? ' ac-auto-submit' : '');
+        $searchboxAttributes['data-autocomplete-formatting-rules'] = $this->searchbox()->autocompleteFormattingRulesJson('SolrReserves');
+      }
+    ?>
+    <input<?=$this->htmlAttributes($searchboxAttributes)?>>
+    <input class="btn btn-primary" type="submit" value="<?=$this->transEscAttr('Find')?>">
   </form>
   <?=$this->inlineScript(\Laminas\View\Helper\HeadScript::SCRIPT, "$('#reservesSearchForm_lookfor').focus()", 'SET')?>
 

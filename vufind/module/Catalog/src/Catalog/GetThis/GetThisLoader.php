@@ -16,6 +16,10 @@ namespace Catalog\GetThis;
 
 use Catalog\GetThis\RegexLookup as Regex;
 
+use function array_key_exists;
+use function count;
+use function in_array;
+
 /**
  * Class to hold data for the Get This button
  *
@@ -88,7 +92,7 @@ class GetThisLoader
      */
     public function isHLM()
     {
-        return str_starts_with($this->record->getUniqueId(), "hlm.");
+        return str_starts_with($this->record->getUniqueId(), 'hlm.');
     }
 
     /**
@@ -143,7 +147,7 @@ class GetThisLoader
     public function getStatus($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
-        $status = $this->getItem($item_id)['status'] ?? "Unknown";
+        $status = $this->getItem($item_id)['status'] ?? 'Unknown';
 
         if (
             in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
@@ -177,7 +181,7 @@ class GetThisLoader
     public function getLocation($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
-        return $this->getItem($item_id)['location'] ?? "";
+        return $this->getItem($item_id)['location'] ?? '';
     }
 
     /**
@@ -224,26 +228,26 @@ class GetThisLoader
         $item_id = $this->getItemId($item_id);
         $item = $this->getItem($item_id);
 
-        $callnum = "";
+        $callnum = '';
         if ($item['callnumber'] ?? false) {
             $callnum .= ($item['callnumber_prefix'] ? $item['callnumber_prefix'] . ' ' : '') .
                         $item['callnumber'];
         }
 
         if ($item['enumchron'] ?? false) {
-            $callnum .= " " . $item['enumchron'];
+            $callnum .= ' ' . $item['enumchron'];
         }
 
         if ($item != null && isset($item['number']) && $item['number'] > 1) {
-            $callnum .= " (Copy #" . ($item['number']) . ")";
+            $callnum .= ' (Copy #' . ($item['number']) . ')';
         }
 
         if ($this->isOnlineResource($item_id)) {
-            $callnum = "Online";
+            $callnum = 'Online';
         }
 
         if (empty($callnum)) {
-            $callnum = "Access";
+            $callnum = 'Access';
         }
 
         return $callnum;
@@ -351,7 +355,7 @@ class GetThisLoader
     public function isMedia($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
-        $callNum = strtolower($this->getItem($item_id)['callnumber'] ?? "");
+        $callNum = strtolower($this->getItem($item_id)['callnumber'] ?? '');
         return
             preg_match('/fiche/', $callNum) ||
             preg_match('/disc/', $callNum) ||

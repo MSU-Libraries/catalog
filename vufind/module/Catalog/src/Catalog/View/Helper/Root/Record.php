@@ -16,6 +16,9 @@ namespace Catalog\View\Helper\Root;
 
 use VuFind\Config\YamlReader;
 
+use function array_key_exists;
+use function in_array;
+
 /**
  * Extend the Record data available to the View
  *
@@ -75,7 +78,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
     {
         parent::__construct($config);
         $yamlReader = new YamlReader();
-        $this->accessLinksConfig = $yamlReader->get("accesslinks.yaml");
+        $this->accessLinksConfig = $yamlReader->get('accesslinks.yaml');
         if (array_key_exists('labels', $this->accessLinksConfig)) {
             $this->linkLabels = $this->accessLinksConfig['labels'];
         }
@@ -143,11 +146,11 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
     {
         $links = $this->driver->tryMethod('geteJournalLinks') ?? [];
         foreach ($links as $idx => $link) {
-            if (strcasecmp($link['desc'] ?? "", "cover image") === 0) {
+            if (strcasecmp($link['desc'] ?? '', 'cover image') === 0) {
                 unset($links[$idx]);
                 break;
             }
-            if (str_contains($link['url'] ?? "", "bookplate")) {
+            if (str_contains($link['url'] ?? '', 'bookplate')) {
                 unset($links[$idx]);
                 break;
             }
@@ -172,7 +175,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
         // Check if a link is provided with "Cover image" as the label
         $links = parent::getLinkDetails();
         foreach ($links as $link) {
-            if (strcasecmp($link['desc'], "cover image") === 0) {
+            if (strcasecmp($link['desc'], 'cover image') === 0) {
                 $url = $link['url'];
             }
         }
@@ -206,6 +209,8 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             $status = $transEsc('Library Use Only');
         } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
             $status = $transEsc('Unknown status') . '(' . $transEsc($status) . ')';
+        } elseif ($holding['reserve'] === 'Y') {
+            $status = 'On Reserve';
         }
         return $status;
     }
@@ -220,12 +225,12 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
     public function getStatusSuffix($holding)
     {
         $transEsc = $this->getView()->plugin('transEsc');
-        $suffix = "";
+        $suffix = '';
         if ($holding['returnDate'] ?? false) {
-            $suffix = " - " . $holding['returnDate'];
+            $suffix = ' - ' . $holding['returnDate'];
         }
         if ($holding['duedate'] ?? false) {
-            $suffix = $suffix . " - " . $transEsc("Due") . ":" . $holding['duedate'];
+            $suffix = $suffix . ' - ' . $transEsc('Due') . ':' . $holding['duedate'];
         }
         return $suffix;
     }
@@ -239,7 +244,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
      */
     public function getLibKeyData($doi)
     {
-        $parsedData = ["pdf" => "", "article" => "", "issue" => "", "openAccess" => false];
+        $parsedData = ['pdf' => '', 'article' => '', 'issue' => '', 'openAccess' => false];
 
         // get JSON data for the DOI
         $data = $this->getLibKeyJSON($doi);
@@ -249,17 +254,17 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
         }
 
         // check the JSON for the required urls
-        if (array_key_exists("fullTextFile", $data)) {
-            $parsedData["pdf"] = $data["fullTextFile"];
+        if (array_key_exists('fullTextFile', $data)) {
+            $parsedData['pdf'] = $data['fullTextFile'];
         }
-        if (array_key_exists("browzineWebLink", $data)) {
-            $parsedData["issue"] = $data["browzineWebLink"];
+        if (array_key_exists('browzineWebLink', $data)) {
+            $parsedData['issue'] = $data['browzineWebLink'];
         }
-        if (array_key_exists("contentLocation", $data)) {
-            $parsedData["article"] = $data["contentLocation"];
+        if (array_key_exists('contentLocation', $data)) {
+            $parsedData['article'] = $data['contentLocation'];
         }
-        if (array_key_exists("openAccess", $data)) {
-            $parsedData["openAccess"] = $data["openAccess"];
+        if (array_key_exists('openAccess', $data)) {
+            $parsedData['openAccess'] = $data['openAccess'];
         }
 
         return $parsedData;
@@ -274,7 +279,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
      */
     private function getLibKeyJSON($doi)
     {
-        $data = "";
+        $data = '';
 
         // check if we have credentials, if not, return now
         $this->loadLibKeyConfigs();
@@ -282,9 +287,9 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             return $data;
         }
 
-        $url = "https://public-api.thirdiron.com/public/v1/libraries/" .
-              $this->libkeyLibraryId . "/articles/doi/" . $doi .
-              "?access_token=" . $this->libkeyAccessToken;
+        $url = 'https://public-api.thirdiron.com/public/v1/libraries/' .
+              $this->libkeyLibraryId . '/articles/doi/' . $doi .
+              '?access_token=' . $this->libkeyAccessToken;
         $curl = curl_init($url);
         curl_setopt($curl, CURLOPT_HTTPGET, 1);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
@@ -294,8 +299,8 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
 
         // if there are no errors, attempt to decode the json response
         if ($e = curl_error($curl)) {
-            $this->logError("Error occurred when querying LibKey API for DOI " .
-                            $doi . ". " . $e);
+            $this->logError('Error occurred when querying LibKey API for DOI ' .
+                            $doi . '. ' . $e);
         } else {
             // if there was no data from the API, then  they don't have that DOI in the LibKey system
             if (empty($output)) {
@@ -303,13 +308,13 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             }
             $data = json_decode($output, true);
             if ($data === null) {
-                $this->logError("Error occured parsing the JSON data from LibKey for DOI " .
-                                $doi . ". Error: " . json_last_error_msg() . ". Full Response: " . $output);
-                $data = "";
+                $this->logError('Error occured parsing the JSON data from LibKey for DOI ' .
+                                $doi . '. Error: ' . json_last_error_msg() . '. Full Response: ' . $output);
+                $data = '';
             } else {
                 // remove the layer of nesting to make parsing later more straight forward
-                if (array_key_exists("data", $data)) {
-                    $data = $data["data"];
+                if (array_key_exists('data', $data)) {
+                    $data = $data['data'];
                 }
             }
         }
@@ -330,8 +335,8 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             return;
         }
 
-        $this->libkeyAccessToken = "";
-        $this->libkeyLibraryId = "";
+        $this->libkeyAccessToken = '';
+        $this->libkeyLibraryId = '';
 
         // parse the access_token and library_id fields
         if (isset($this->browzineConfig->General)) {

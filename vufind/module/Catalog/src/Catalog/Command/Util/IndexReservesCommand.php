@@ -33,6 +33,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use function count;
+use function ini_get;
+
 /**
  * Console command: index course reserves into Solr.
  *
@@ -75,7 +78,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln(date('Y-m-d H:i:s') . " Starting reserves processing");
+        $output->writeln(date('Y-m-d H:i:s') . ' Starting reserves processing');
         $startTime = date('Y-m-d H:i:s');
 
         // Check time limit; increase if necessary:
@@ -94,7 +97,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
                 $departments = $reader->getDepartments();
                 $reserves = $reader->getReserves();
             } catch (\Exception $e) {
-                $output->writeln(date('Y-m-d H:i:s') . " " . $e->getMessage());
+                $output->writeln(date('Y-m-d H:i:s') . ' ' . $e->getMessage());
                 return 1;
             }
         } elseif ($delimiter !== $this->defaultDelimiter) {
@@ -109,20 +112,20 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
                 $instructors = [];
                 $courses = [];
                 $departments = [];
-                $output->writeln(date('Y-m-d H:i:s') . " Retrieving instructors");
+                $output->writeln(date('Y-m-d H:i:s') . ' Retrieving instructors');
                 $instructors = $this->catalog->getInstructors();
-                $output->writeln(date('Y-m-d H:i:s') . " Found instructor count: " . count($instructors));
-                $output->writeln(date('Y-m-d H:i:s') . " Retrieving courses");
+                $output->writeln(date('Y-m-d H:i:s') . ' Found instructor count: ' . count($instructors));
+                $output->writeln(date('Y-m-d H:i:s') . ' Retrieving courses');
                 $courses = $this->catalog->getCourses();
-                $output->writeln(date('Y-m-d H:i:s') . " Found course count: " . count($courses));
-                $output->writeln(date('Y-m-d H:i:s') . " Retrieving departments");
+                $output->writeln(date('Y-m-d H:i:s') . ' Found course count: ' . count($courses));
+                $output->writeln(date('Y-m-d H:i:s') . ' Retrieving departments');
                 $departments = $this->catalog->getDepartments();
-                $output->writeln(date('Y-m-d H:i:s') . " Found department count: " . count($departments));
-                $output->writeln(date('Y-m-d H:i:s') . " Retrieving course reserves");
+                $output->writeln(date('Y-m-d H:i:s') . ' Found department count: ' . count($departments));
+                $output->writeln(date('Y-m-d H:i:s') . ' Retrieving course reserves');
                 $reserves = $this->catalog->findReserves('', '', '');
-                $output->writeln(date('Y-m-d H:i:s') . " Found reserve count: " . count($reserves));
+                $output->writeln(date('Y-m-d H:i:s') . ' Found reserve count: ' . count($reserves));
             } catch (\Exception $e) {
-                $output->writeln(date('Y-m-d H:i:s') . " " . $e->getMessage());
+                $output->writeln(date('Y-m-d H:i:s') . ' ' . $e->getMessage());
                 return 1;
             }
         }
@@ -134,11 +137,11 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             && !empty($reserves)
         ) {
             // Delete existing records
-            $output->writeln(date('Y-m-d H:i:s') . " Clearing existing reserves");
+            $output->writeln(date('Y-m-d H:i:s') . ' Clearing existing reserves');
             $this->solr->deleteAll('SolrReserves');
 
             // Build and Save the index
-            $output->writeln(date('Y-m-d H:i:s') . " Building new reserves");
+            $output->writeln(date('Y-m-d H:i:s') . ' Building new reserves');
             $index = $this->buildReservesIndex(
                 $instructors,
                 $courses,
@@ -147,7 +150,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
             );
 
             // Build and Save the index
-            $output->writeln(date('Y-m-d H:i:s') . " Writing new reserves");
+            $output->writeln(date('Y-m-d H:i:s') . ' Writing new reserves');
             $this->solr->save('SolrReserves', $index);
 
             // Commit and Optimize the Solr Index
@@ -157,7 +160,7 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
 
             $output->writeln(date('Y-m-d H:i:s') . ' Successfully loaded ' . count($reserves) . ' rows.');
             $endTime = date('Y-m-d H:i:s');
-            $output->writeln(date('Y-m-d H:i:s') . " Stated at: " . $startTime . " Completed at: " . $endTime);
+            $output->writeln(date('Y-m-d H:i:s') . ' Stated at: ' . $startTime . ' Completed at: ' . $endTime);
             return 0;
         }
         $missing = array_merge(

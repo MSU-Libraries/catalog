@@ -31,6 +31,9 @@ namespace Catalog\ILS\Driver;
 
 use VuFind\Exception\ILS as ILSException;
 
+use function count;
+use function in_array;
+
 /**
  * FOLIO REST API driver
  *
@@ -144,7 +147,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         return $callNumberData + [
             'id' => $bibId,
             'item_id' => $item->id,
-            'holding_id' => $holdingDetails['id'],
+            'holdings_id' => $holdingDetails['id'],
             'number' => $number,
             'enumchron' => $enum,
             'barcode' => $item->barcode ?? '',
@@ -396,7 +399,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                         $dueDateTimestamp
                     ),
                 'dueStatus' => $dueStatus,
-                'id' => "folio." . $this->getBibId($trans->item->instanceId),
+                'id' => 'folio.' . $this->getBibId($trans->item->instanceId),
                 'item_id' => $trans->item->id,
                 'barcode' => $trans->item->barcode,
                 'renew' => $trans->renewalCount ?? 0,
@@ -440,7 +443,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 ? 'instanceHrid' : 'instanceId';
             $bibId = $item->copiedItem->$idProperty ?? null;
             if ($bibId !== null) {
-                $bibId = "folio." . $bibId;
+                $bibId = 'folio.' . $bibId;
             }
 
             // Get the electronic access links from the item record if possible
@@ -592,7 +595,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $excludeLocs = (array)($this->config['Holds']['excludePickupLocations'] ?? []);
 
         // Exclude checking by regex match
-        if (trim(strtolower($mode)) == "regex") {
+        if (trim(strtolower($mode)) == 'regex') {
             foreach ($excludeLocs as $pattern) {
                 $match = @preg_match($pattern, $servicepoint);
                 // Invalid regex, skip this pattern
@@ -673,20 +676,20 @@ class Folio extends \VuFind\ILS\Driver\Folio
             ) as $hold
         ) {
             $requestDate = $this->dateConverter->convertToDisplayDate(
-                "Y-m-d H:i",
+                'Y-m-d H:i',
                 $hold->requestDate
             );
             // Set expire date if it was included in the response
             $expireDate = isset($hold->requestExpirationDate)
                 ? $this->dateConverter->convertToDisplayDate(
-                    "Y-m-d H:i",
+                    'Y-m-d H:i',
                     $hold->requestExpirationDate
                 )
                 : null;
             // Set lastPickup Date if provided, format to j M Y
             $lastPickup = isset($hold->holdShelfExpirationDate)
                 ? $this->dateConverter->convertToDisplayDate(
-                    "Y-m-d H:i",
+                    'Y-m-d H:i',
                     $hold->holdShelfExpirationDate
                 )
                 : null;
@@ -698,14 +701,14 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $servicePoint = isset($hold->pickupServicePointId)
                 ? $this->getPickupLocation($hold->pickupServicePointId) : null;
             $location = isset($servicePoint) && count($servicePoint) == 1
-                ? $servicePoint[0]['locationDisplay'] : "";
+                ? $servicePoint[0]['locationDisplay'] : '';
             $request_id = $this->getBibId(null, null, $hold->itemId);
             $updateDetails = (!$available || $allowCancelingAvailableRequests)
                 ? (string)$request_id : '';
             $currentHold = [
                 'type' => $hold->requestType,
                 'create' => $requestDate,
-                'expire' => $expireDate ?? "",
+                'expire' => $expireDate ?? '',
                 // MSU customization: id changed for multi-backend
                 'id' => 'folio.' . $request_id,
                 'item_id' => $hold->itemId,
@@ -798,46 +801,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $response = $this->makeRequest('GET', '/instance-storage/instances', $query);
         $instances = json_decode($response->getBody());
         if (count($instances->instances) == 0) {
-            throw new ILSException("Item Not Found");
+            throw new ILSException('Item Not Found');
         }
         return $instances->instances[0];
-    }
-
-    /**
-     * MSUL Customization that was merged in as a PR and will be in v9.1
-     * Helper function to retrieve paged results from FOLIO API
-     *
-     * @param string $responseKey Key containing values to collect in response
-     * @param string $interface   FOLIO api interface to call
-     * @param array  $query       CQL query
-     * @param int    $limit       How many results to retrieve from FOLIO per call
-     *
-     * @return array
-     */
-    protected function getPagedResults($responseKey, $interface, $query = [], $limit = 1000)
-    {
-        $offset = 0;
-
-        do {
-            $combinedQuery = array_merge($query, compact('offset', 'limit'));
-            $response = $this->makeRequest(
-                'GET',
-                $interface,
-                $combinedQuery
-            );
-            $json = json_decode($response->getBody());
-            if (!$response->isSuccess() || !$json) {
-                $msg = $json->errors[0]->message ?? json_last_error_msg();
-                throw new ILSException("Error: '$msg' fetching '$responseKey'");
-            }
-            $totalEstimate = $json->totalRecords ?? 0;
-            foreach ($json->$responseKey ?? [] as $item) {
-                yield $item ?? '';
-            }
-            $offset += $limit;
-
-            // Continue until the current offset is greater than the totalRecords value returned
-            // from the API (which could be an estimate if more than 1000 results are returned).
-        } while ($offset <= $totalEstimate);
     }
 }

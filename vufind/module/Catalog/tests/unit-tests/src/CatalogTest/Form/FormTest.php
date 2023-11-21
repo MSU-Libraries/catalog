@@ -33,6 +33,8 @@ namespace CatalogTest\Form;
 use VuFind\Config\YamlReader;
 use VuFind\Form\Form;
 
+use function get_class;
+
 /**
  * Form Test Class
  *

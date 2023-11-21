@@ -1,9 +1,9 @@
 <?php foreach ($data as $field): ?>
     <div class="notes-line" property="keywords">
-    <?php if (is_array($field) && !array_key_exists("url", $field)): ?>
-	  <?=trim($this->escapeHtml($field["note"]))?>
-    <?php elseif (is_array($field) && array_key_exists("url", $field)): ?>
-	  <a href="<?=trim($this->escapeHtml($field["url"]))?>"><?=trim($this->escapeHtml($field["note"]))?></a>
+    <?php if (is_array($field) && !array_key_exists('url', $field)): ?>
+	  <?=trim($this->escapeHtml($field['note']))?>
+    <?php elseif (is_array($field) && array_key_exists('url', $field)): ?>
+	  <a href="<?=trim($this->escapeHtml($field['url']))?>"><?=trim($this->escapeHtml($field['note']))?></a>
     <?php else: ?>
 	  <?=trim($this->escapeHtml($field))?>
     <?php endif; ?>

@@ -11,18 +11,20 @@ $pubname = $this->driver->getPublisher();
 $author = $this->driver->getPrimaryAuthor();
 $isbn = $this->driver->getCleanISBN();
 $callnum = $this->getthis->getCallNumber();
-if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
+if (is_array($pubname)): $pubname = implode(', ', $pubname); endif;
 ?>
 <div>
     <p><b><a href='https://ub.relaisd2d.com/?LS=MICHIGANSTATE&PI=MICHIGANSTATE' target="_blank">UBorrow</a>:</b> Borrow from the Big 10 libraries, typically available for pickup in 3-5 business days
        (MSU Students, Staff and Faculty only)</p>
     <ul>
         <?php
-        $search = $isbn;
-        if (empty($search)) $search = $title_full;
+            $search = $isbn;
+            if (empty($search)) {
+                $search = $title_full;
+            }
         ?>
-            <li><a href="https://ub.relaisd2d.com/?LS=MICHIGANSTATE&PI=MICHIGANSTATE&query=<?= $search ?>" target="_blank">
-            Search UBorrow</a></li>
+        <li><a href="https://ub.relaisd2d.com/?LS=MICHIGANSTATE&PI=MICHIGANSTATE&query=<?= $search ?>" target="_blank">
+        Search UBorrow</a></li>
     </ul>
     <?php
       # If law library use only material, display law patron form first
@@ -37,11 +39,11 @@ if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
     <ul>
         <?php
         echo "<li><a href='https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:" .
-            $this->escapeHtml($status) . ":" . $this->escapeHtml($item == null ? '' : $item['barcode']) .
-            "&rft.genre=book&LO=EYM%2CGZM%2CMUN&rft.title=" .
-            $this->escapeHtml($title) . "&rft.au=" . $this->escapeHtml($author) . "&rft.pub=" . $this->escapeHtml($pubname) .
-            "&rft.isbn=" . $this->escapeHtml($isbn) . "&loc=" .
-            $this->escapeHtml($loc) . "&callno=" . $this->escapeHtml($callnum) .
+            $this->escapeHtml($status) . ':' . $this->escapeHtml($item == null ? '' : $item['barcode']) .
+            '&rft.genre=book&LO=EYM%2CGZM%2CMUN&rft.title=' .
+            $this->escapeHtml($title) . '&rft.au=' . $this->escapeHtml($author) . '&rft.pub=' . $this->escapeHtml($pubname) .
+            '&rft.isbn=' . $this->escapeHtml($isbn) . '&loc=' .
+            $this->escapeHtml($loc) . '&callno=' . $this->escapeHtml($callnum) .
             "&CAT=1' target='_blank'>Request Copy via ILLiad</a></li>";
         ?>
     </ul>
@@ -52,10 +54,10 @@ if (is_array($pubname)): $pubname = implode(", ", $pubname); endif;
     <ul>
         <?php
         echo "<li><a href='https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:" .
-            $this->escapeHtml($status) . ":" . $this->escapeHtml($item['barcode']) .
-            "&rft.genre=article&LO=EYM%2CGZM%2CMUN&rft.title=" .
-            $this->escapeHtml($title) . "&rft.au=" . $this->escapeHtml($author) . "&rft.pub=" . $this->escapeHtml($pubname) .
-            "&rft.isbn=" . $this->escapeHtml($isbn) . "&loc=" . $this->escapeHtml($loc) . "&callno=" .
+            $this->escapeHtml($status) . ':' . $this->escapeHtml($item['barcode']) .
+            '&rft.genre=article&LO=EYM%2CGZM%2CMUN&rft.title=' .
+            $this->escapeHtml($title) . '&rft.au=' . $this->escapeHtml($author) . '&rft.pub=' . $this->escapeHtml($pubname) .
+            '&rft.isbn=' . $this->escapeHtml($isbn) . '&loc=' . $this->escapeHtml($loc) . '&callno=' .
             $this->escapeHtml($callnum) .
             "&CAT=1' target='_blank'>Request a SCAN of Copy</a></li>";
     } ?>

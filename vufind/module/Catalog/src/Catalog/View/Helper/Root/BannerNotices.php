@@ -32,6 +32,8 @@ namespace Catalog\View\Helper\Root;
 use Laminas\Diactoros\ServerRequestFilter\IPRange;
 use Laminas\View\Helper\AbstractHelper;
 
+use function array_key_exists;
+
 /**
  * View helper to display banner notices loaded from a Yaml config
  *
@@ -88,12 +90,12 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
     public function __invoke()
     {
         $makeTag = $this->getView()->plugin('makeTag');
-        $html = "";
+        $html = '';
 
         foreach ($this->noticesConfig['notices'] ?? [] as $notice) {
             if (empty($notice['message'])) {
                 $this->logWarning(
-                    "BannerNotices config has notice with " .
+                    'BannerNotices config has notice with ' .
                     "empty or missing 'message'"
                 );
             } elseif ($this->evaluateConditions($notice)) {
@@ -114,18 +116,18 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
     {
         $makeTag = $this->getView()->plugin('makeTag');
         $escapeContent = ($notice['escapeContent'] ?? true);
-        $style = "";
+        $style = '';
         foreach ($notice['style'] ?? [] as $key => $val) {
             $style .= "{$key}:{$val};";
         }
         return $makeTag(
-            "div",
-            $notice["message"],
+            'div',
+            $notice['message'],
             [
-                "class" => "banner-notice" . ($notice["classes"] ?? ""),
-                "style" => $style,
+                'class' => 'banner-notice' . ($notice['classes'] ?? ''),
+                'style' => $style,
             ],
-            ["escapeContent" => $escapeContent]
+            ['escapeContent' => $escapeContent]
         );
     }
 
@@ -140,44 +142,44 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
     {
         $success = true;
         foreach ($notice['conditions'] ?? [] as $idx => $condition) {
-            $baseVal = "";
+            $baseVal = '';
             $compVals = array_merge(
                 array_key_exists('value', $condition) ? [$condition['value']] : [],
                 $condition['values'] ?? []
             );
-            switch ($condition['type'] ?? "") {
+            switch ($condition['type'] ?? '') {
                 case 'string':
-                    $baseVal = $condition['string'] ?? "";
+                    $baseVal = $condition['string'] ?? '';
                     break;
                 case 'datetime':
-                    $baseVal = (new \DateTime())->format("c");
+                    $baseVal = (new \DateTime())->format('c');
                     $compVals = array_map(
                         function ($val) {
-                            return (new \DateTime($val))->format("c");
+                            return (new \DateTime($val))->format('c');
                         },
                         $compVals
                     );
                     break;
                 case 'date':
-                    $baseVal = (new \DateTime())->setTime(0, 0)->format("Y-m-d");
+                    $baseVal = (new \DateTime())->setTime(0, 0)->format('Y-m-d');
                     $compVals = array_map(
                         function ($val) {
-                            return (new \DateTime($val))->format("Y-m-d");
+                            return (new \DateTime($val))->format('Y-m-d');
                         },
                         $compVals
                     );
                     break;
                 case 'time':
-                    $baseVal = (new \DateTime())->format("H:i:s");
+                    $baseVal = (new \DateTime())->format('H:i:s');
                     $compVals = array_map(
                         function ($val) {
-                            return (new \DateTime($val))->format("H:i:s");
+                            return (new \DateTime($val))->format('H:i:s');
                         },
                         $compVals
                     );
                     break;
                 case 'env':
-                    $baseVal = getenv($condition['env'] ?? "");
+                    $baseVal = getenv($condition['env'] ?? '');
                     break;
                 case 'urlpath':
                     $baseVal = $this->request->getUri()->getPath();
@@ -187,14 +189,14 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
                     break;
                 default:
                     $this->logWarning(
-                        "BannerNotices config has invalid type for " .
+                        'BannerNotices config has invalid type for ' .
                         "condition index of {$idx} with message starting '" .
-                        mb_substr($condition['message'] ?? "", 0, 10) . "'"
+                        mb_substr($condition['message'] ?? '', 0, 10) . "'"
                     );
             }
 
             $success &= $this->handleComparison(
-                $condition['comp'] ?? "",
+                $condition['comp'] ?? '',
                 $baseVal,
                 $compVals
             );
