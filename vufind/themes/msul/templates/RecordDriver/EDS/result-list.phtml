@@ -74,65 +74,26 @@
           <?php endforeach; ?>
         <?php endif; ?>
       </div>
-
-<<<<<<< HEAD
-    <?php
-      $pLink = $this->driver->getPLink();
-      $ftLink = $this->driver->getLinkedFullTextLink();
-      $pdfLink = $this->driver->getPdfLink();
-      $epubLink = $this->driver->getEpubLink();
-    ?>
-    <?php if (($isCommunityBorrower && $isOnCampus) || ($user && !$isCommunityBorrower)): ?>
-
-      <?php if ($this->driver->hasLinkedFullTextAvailable()): ?>
-        <?=$this->icon('external-link', 'icon-link__icon') ?>
-        <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getTabUrl($this->driver, 'LinkedText')) ?>" class="custom-link fulltext" target="_blank">
-          <?=$this->transEsc('Linked Full Text')?>
-        </a>
-      <?php endif; ?>
-
-      <?php if ($this->driver->hasPdfAvailable()): ?>
-        <?=$this->icon('external-link', 'icon-link__icon') ?>
-        <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getTabUrl($this->driver, 'PDF')) ?>" class="custom-link icon pdf fulltext" target="_blank">
-          <?=$this->transEsc('PDF Full Text')?>
-        </a>
-      <?php endif; ?>
-
-      <?php if ($this->driver->hasEpubAvailable()): ?>
-        <?=$this->icon('external-link', 'icon-link__icon') ?>
-        <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getTabUrl($this->driver, 'Epub')) ?>" class="custom-link icon epub fulltext" target="_blank">
-          <?=$this->transEsc('ePub Full Text')?>
-        </a>
-      <?php endif; ?>
-
-    <?php elseif (($pLink || $ftLink || $pdfLink || $epubLink) && !empty($item)): ?>
-        <a class="login" data-lightbox href="<?=$this->url('myresearch-userlogin')?>">
-            <strong><?=$this->transEsc('Login for full access')?></strong>
-        </a>
-    <?php endif; ?>
-=======
       <?=$this->record($this->driver)->renderTemplate(
-                'result-list/full-text-links.phtml',
-                ['recordLinker' => $recordLinker]
-            );
+        'result-list/full-text-links.phtml',
+        ['recordLinker' => $recordLinker]
+      );
       ?>
->>>>>>> main
-
       <?php /* Links from DOI linker */ ?>
       <?php $doi = $this->doi($this->driver, 'results'); ?>
       <?php if ($doi->isActive()): ?>
         <div><?=$doi->renderTemplate()?></div>
       <?php endif; ?>
       <?php $libkeyData = $this->record($this->driver)->getLibKeyData($this->driver->getCleanDOI()); ?>
-      <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ["link" => $libkeyData["pdf"],
-                                             "label" => "Download PDF",
-                                             "openAccess" => $libkeyData["openAccess"]]); ?>
-      <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ["link" => $libkeyData["article"],
-                                             "label" => "View Article",
-                                             "openAccess" => $libkeyData["openAccess"]]); ?>
-      <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ["link" => $libkeyData["issue"],
-                                             "label" => "View Full Issue",
-                                             "openAccess" => $libkeyData["openAccess"]]); ?>
+      <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['pdf'],
+                                             'label' => 'Download PDF',
+                                             'openAccess' => $libkeyData['openAccess']]); ?>
+      <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['article'],
+                                             'label' => 'View Article',
+                                             'openAccess' => $libkeyData['openAccess']]); ?>
+      <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['issue'],
+                                             'label' => 'View Full Issue',
+                                             'openAccess' => $libkeyData['openAccess']]); ?>
     </div>
     <div class="result-links hidden-print">
       <?php /* Display qrcode if appropriate: */ ?>

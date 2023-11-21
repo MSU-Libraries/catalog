@@ -66,15 +66,15 @@
         </a>
        </span><br>
     <?php endif; ?>
-    <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ["link" => $libkeyData["pdf"],
-                                           "label" => "Download PDF",
-                                           "openAccess" => $libkeyData["openAccess"]]); ?>
-    <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ["link" => $libkeyData["article"],
-                                           "label" => "View Article",
-                                           "openAccess" => $libkeyData["openAccess"]]); ?>
-    <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ["link" => $libkeyData["issue"],
-                                           "label" => "View Full Issue",
-                                           "openAccess" => $libkeyData["openAccess"]]); ?>
+    <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['pdf'],
+                                           'label' => 'Download PDF',
+                                           'openAccess' => $libkeyData['openAccess']]); ?>
+    <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['article'],
+                                           'label' => 'View Article',
+                                           'openAccess' => $libkeyData['openAccess']]); ?>
+    <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['issue'],
+                                           'label' => 'View Full Issue',
+                                           'openAccess' => $libkeyData['openAccess']]); ?>
   </div>
   <div class="media-body info-col">
     <h1 property="name"><?=$this->driver->getTitle()?></h1>
