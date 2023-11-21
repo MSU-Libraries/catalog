@@ -121,7 +121,17 @@
     </div>
   </div>
 <?php else: ?>
+  <?php
+    if ($this->layout()->showSearchBacklink ?? false) {
+      $backlink = $this->searchMemory()->getLastSearchLink($this->transEsc('Back to Search Results'));
+    } else {
+      $backlink = '';
+    }
+    if ($backlink == '') {
+      $backlink = '<a href="/Search">Back to the catalog</a>';
+    }
+  ?>
   <div class="backtocat container">
-    <p><a style="text-decoration:none;" href="/Search">&#8592;&nbsp;&nbsp;Back to the catalog</a></p>
+    <p><?= $backlink ?></p>
   </div>
 <?php endif; ?>
