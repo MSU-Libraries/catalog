@@ -125,6 +125,9 @@
     if ($this->layout()->showSearchBacklink ?? false) {
       $backlink = $this->searchMemory()->getLastSearchLink($this->transEsc('Back to Search Results'));
     } else {
+      $backlink = '';
+    }
+    if ($backlink == '') {
       $backlink = '<a href="/Search">Back to the catalog</a>';
     }
   ?>
