@@ -123,7 +123,7 @@
 <?php else: ?>
   <?php
     if ($this->layout()->showSearchBacklink ?? false) {
-      $backlink = $this->searchMemory()->getLastSearchLink($this->transEsc('Search'));
+      $backlink = $this->searchMemory()->getLastSearchLink($this->transEsc('Back to Search Results'));
     } else {
       $backlink = '';
     }
@@ -134,7 +134,7 @@
     </div>
   <?php else: ?>
     <div class="backtocat container">
-      <p><a style="text-decoration:none;" href="/Search">&#8592;&nbsp;&nbsp;Back to the catalog</a></p>
+      <p><a style="text-decoration:none;" href="/Search">Back to the catalog</a></p>
     </div>
   <?php endif; ?>
 <?php endif; ?>
