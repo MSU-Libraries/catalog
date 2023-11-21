@@ -422,8 +422,11 @@ input[type="checkbox"] {
   }
 }
 
-.backtocat>p>a::before {
-  content: "← ";
+.backtocat>p>a {
+  text-decoration: none;
+  &::before {
+    content: "← ";
+  }
 }
 
 .template-dir-search.template-name-home,
