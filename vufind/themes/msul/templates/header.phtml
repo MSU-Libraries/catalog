@@ -125,16 +125,10 @@
     if ($this->layout()->showSearchBacklink ?? false) {
       $backlink = $this->searchMemory()->getLastSearchLink($this->transEsc('Back to Search Results'));
     } else {
-      $backlink = '';
+      $backlink = '<a href="/Search">Back to the catalog</a>';
     }
   ?>
-  <?php if ($backlink != ''): ?>
-    <div class="backtocat container">
-      <p><?= $backlink ?></p>
-    </div>
-  <?php else: ?>
-    <div class="backtocat container">
-      <p><a href="/Search">Back to the catalog</a></p>
-    </div>
-  <?php endif; ?>
+  <div class="backtocat container">
+    <p><?= $backlink ?></p>
+  </div>
 <?php endif; ?>
