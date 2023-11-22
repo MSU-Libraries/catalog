@@ -143,7 +143,7 @@ rebuild_databases() {
         fi
         BIBLIO_COLLECTION_NAME=`echo "$ALIASES" | grep '"biblio"' | sed -e 's/.*>\([^<]*\)<.*/\1/'`
         BIBLIO_COLLECTION_PATH="/bitnami/solr/server/solr/${BIBLIO_COLLECTION_NAME}"
-        if [ ! -d $BIBLIO_COLLECTION_PATH ]
+        if [ ! -d $BIBLIO_COLLECTION_PATH ]; then
             echo "Could not find the collection directory at $BIBLIO_COLLECTION_PATH"
             return 1
         fi
