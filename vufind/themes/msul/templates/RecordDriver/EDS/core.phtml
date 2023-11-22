@@ -1,5 +1,6 @@
 <?php $this->headLink()->appendStylesheet('EDS.css'); ?>
 <?php
+    $this->layout()->showSearchBacklink = true;
     $items = $this->driver->getItems('core');
     $dbLabel = $this->driver->getDbLabel();
     $customLinks = $this->driver->getCustomLinks();

@@ -430,6 +430,13 @@ input[type="checkbox"] {
   }
 }
 
+.backtocat>p>a {
+  text-decoration: none;
+  &::before {
+    content: "← ";
+  }
+}
+
 .template-dir-search.template-name-home,
 .template-dir-eds.template-name-home,
 .template-dir-combined.template-name-home
@@ -497,6 +504,9 @@ input[type="checkbox"] {
       margin-left: -1rem;
       vertical-align: top;
     }
+    #searchForm-reset {
+      right: 10px;
+    }
   }
 }
 
@@ -530,11 +540,17 @@ input[type="checkbox"] {
         border-radius: 2rem;
         margin-left:0;
       }
+      #searchForm-reset {
+        right: 3px;
+      }
     }
     @media only screen and (min-width : 1236px) {
       button[type=submit].btn-primary {
         border-radius: 0 0.5rem 0.5rem 0;
         margin-left: -1rem;
+      }
+      #searchForm-reset {
+        right: 10px;
       }
     }
   }
