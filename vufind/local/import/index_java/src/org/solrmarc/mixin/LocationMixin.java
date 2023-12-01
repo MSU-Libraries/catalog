@@ -26,11 +26,6 @@ public class LocationMixin extends SolrIndexerMixin {
                 // Ignore location when 952t is 1
                 return;
             }
-            List<Subfield> bSubfields = getSubfieldsMatching(location, "b");
-            if (bSubfields.stream().anyMatch(b -> "Library of Michigan".equals(b.getData().trim()))) {
-                // Ignore location when 952b is "Library of Michigan"
-                return;
-            }
             List<Subfield> cSubfields = getSubfieldsMatching(location, "c");
             List<Subfield> dSubfields = getSubfieldsMatching(location, "d");
             List<String> cValues = cSubfields.stream().map(f -> f.getData().replace("/", " ").trim()).collect(Collectors.toList());
