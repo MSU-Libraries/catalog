@@ -135,14 +135,12 @@ add new data fields).
 * Start the manual task "Deploy VuFind Build Env" in gitlab. It will update the `catalog_build` container.
 This is not done automatically so that other updates to the main branch can be deployed while a full import is running.
 
-* Identify what collection each alias is pointing to currently (i.e. is `biblio` pointing
-to `biblio1` or `biblio2`) and confirm the **other** collection is what `biblio-build` is
-pointing to
-
-* Clear out the collection that `biblio-build` is pointing to
+* Identify what collection each alias is pointing to currently
+(i.e. is `biblio` pointing to `biblio1` or `biblio2`) and confirm the **other** collection is what `biblio-build` is
+pointing to.
+To get the list of aliases, from a container:
 ```bash
-curl 'http://solr1:8983/solr/biblio-build/update' --data '<delete><query>id:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
-curl 'http://solr1:8983/solr/biblio-build/update' --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+curl -s "http://solr:8983/solr/admin/collections?action=LISTALIASES" | grep biblio
 ```
 
 * Rebuild the index on `biblio-build` using the `catalog_build` container. This has
@@ -156,13 +154,14 @@ does is sleep! It is recommended to run these commands in a `screen`.
 ```bash
 user@catalog-1$ screen
 user@catalog-1$ docker exec -it catalog-prod-catalog_build.12345 bash
+root@vufind:/usr/local/vufind# rm local/harvest/folio/processed/*
 root@vufind:/usr/local/vufind# cp /mnt/shared/oai/${STACK_NAME}/harvest_folio/processed/* local/harvest/folio/
-root@vufind:/usr/local/vufind# /harvest-and-import.sh --verbose --collection biblio-build --batch-import | tee /mnt/shared/logs/folio_import.log
+root@vufind:/usr/local/vufind# /harvest-and-import.sh --verbose --reset-solr --collection biblio-build --batch-import | tee /mnt/shared/logs/folio_import_${STACK_NAME}_$(date -I).log
 [Ctrl-a d]
 user@catalog-1$ screen
 user@catalog-1$ docker exec -it catalog-prod-catalog_build.12345 bash
 root@vufind:/usr/local/vufind# cp /mnt/shared/hlm/${STACK_NAME}/current/* local/harvest/hlm/
-root@vufind:/usr/local/vufind# /hlm-harvest-and-import.sh --import --verbose | tee /mnt/shared/logs/hlm_import.log
+root@vufind:/usr/local/vufind# /hlm-harvest-and-import.sh --import --verbose | tee /mnt/shared/logs/hlm_import_${STACK_NAME}_$(date -I).log
 [Ctrl-a d]
 ```
 
@@ -173,9 +172,12 @@ curl 'http://solr:8983/solr/admin/metrics?nodes=solr1:8983_solr,solr2:8983_solr,
 
 * Once you are confident in the new data, you are ready to do the swap! **BE SURE TO SWAP THE NAME AND COLLECTION IN THE BELOW COMMAND EXAMPLE**  
 !!! warning
-    Your Solr instance may require more memory than it typically needs to do the collection alias swap.
+    Your Solr instance may require more memory than it typically needs to do the collection alias swap
     Be sure to increase and deploy the stack with additional `SOLR_JAVA_MEM` as required to  ensure no
     downtime during this step.
+    Currently 4G (which we use in prod) is enough for the swap, but 2G (which we use in beta and preview) is not.
+    Alternatively (for beta and preview), let it crash after these commands and restart the pipeline to
+    help Solr cloud fix itself.
 ```bash
 # This EXAMPLE sets biblio-build to biblio2, and biblio to biblio1
 curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio2'
@@ -187,9 +189,10 @@ curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&col
 * Clear out the collection that `biblio-build` is pointing to, to avoid having two large indexing stored for a long period of time
 (only after you are confident in the new index's data)
 ```bash
-curl 'http://solr1:8983/solr/biblio-build/update' --data '<delete><query>id:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'
-curl 'http://solr1:8983/solr/biblio-build/update' --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'
+/harvest-and-import.sh --verbose --reset-solr --collection biblio-build
 ```
+
+* If `SOLR_JAVA_MEM` was increased, lower it to its previous amount.
 
 ### `authority` Index
 Similar to the process for HLM records, copy the files from the shared directory into the containers import
