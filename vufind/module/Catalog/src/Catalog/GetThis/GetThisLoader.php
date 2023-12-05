@@ -185,6 +185,19 @@ class GetThisLoader
     }
 
     /**
+     * Get the location code for a holding item
+     *
+     * @param string $item_id The holding item UUID. If null (default) will return status for first item
+     *
+     * @return string The location code
+     */
+    public function getLocationCode($item_id = null)
+    {
+        $item_id = $this->getItemId($item_id);
+        return $this->getItem($item_id)['location_code'] ?? '';
+    }
+
+    /**
      * Get the link data for requesting the item
      *
      * @param string $item_id The holding item UUID. If null (default) will return status for first item
@@ -491,8 +504,9 @@ class GetThisLoader
     {
         $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
+        $loc_code = $this->getLocationCode($item_id);
 
-        if (Regex::AVAILABLE($stat)) {
+        if (Regex::AVAILABLE($stat) && $loc_code != 'mnmst') {
             return true;
         }
         return false;
@@ -587,12 +601,13 @@ class GetThisLoader
         $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
+        $loc_code = $this->getLocationCode($item_id);
         $desc = $this->getDescription();
 
-        // Never show if the item is out, unavailable, on reserve or Remote SPC
+        // Never show if the item is out, unavailable, on reserve, Remote SPC or mnmst (Makerspace equipment)
         if (
             $this->isOut($item_id) || $this->isUnavailable($item_id) || Regex::RESERV($loc)
-            || Regex::SPEC_COLL_REMOTE($loc)
+            || Regex::SPEC_COLL_REMOTE($loc) || $loc_code == 'mnmst'
         ) {
             return false;
         }
@@ -636,12 +651,13 @@ class GetThisLoader
         $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
+        $loc_code = $this->getLocationCode($item_id);
         $desc = $this->getDescription();
 
-        // Never show if the item is out, unavailable, on reserve or Remote SPC
+        // Never show if the item is out, unavailable, on reserve, Remote SPC or mnmst (Makerspace equipment)
         if (
             $this->isOut($item_id) || $this->isUnavailable($item_id) || Regex::RESERV($loc)
-            || Regex::SPEC_COLL_REMOTE($loc)
+            || Regex::SPEC_COLL_REMOTE($loc) || $loc_code == 'mnmst'
         ) {
             return false;
         }
@@ -703,9 +719,10 @@ class GetThisLoader
     {
         $item_id = $this->getItemId($item_id);
         $loc = $this->getLocation($item_id);
+        $loc_code = $this->getLocationCode($item_id);
 
-        // Never show on Remote SPC items (PC-439)
-        if (Regex::SPEC_COLL_REMOTE($loc)) {
+        // Never show on Remote SPC items (PC-439) or Makerspace equipment
+        if (Regex::SPEC_COLL_REMOTE($loc) || $loc_code == 'mnmst') {
             return false;
         }
 
