@@ -170,13 +170,13 @@ class Record extends \VuFind\View\Helper\Root\Record
             'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
             'Unknown', 'Withdrawn'])
         ) {
-            $status = $transEsc('Unavailable') . '(' . $transEsc($status) . ')';
+            $status = $transEsc('Unavailable') . ' (' . $transEsc($status) . ')';
         } elseif (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged'])) {
-            $status = $transEsc('Checked Out') . '(' . $transEsc($status) . ')';
+            $status = $transEsc('Checked Out') . ' (' . $transEsc($status) . ')';
         } elseif ($status == 'Restricted') {
             $status = $transEsc('Library Use Only');
         } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
-            $status = $transEsc('Unknown status') . '(' . $transEsc($status) . ')';
+            $status = $transEsc('Unknown status') . ' (' . $transEsc($status) . ')';
         } elseif ($holding['reserve'] === 'Y') {
             $status = 'On Reserve';
         }
