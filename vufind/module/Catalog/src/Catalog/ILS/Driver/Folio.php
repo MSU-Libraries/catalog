@@ -29,8 +29,8 @@
 
 namespace Catalog\ILS\Driver;
 
-use VuFind\Exception\ILS as ILSException;
 use Catalog\GetThis\RegexLookup as Regex;
+use VuFind\Exception\ILS as ILSException;
 
 use function count;
 use function in_array;
