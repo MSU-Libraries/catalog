@@ -49,6 +49,8 @@ RUN \
     chmod ugo+x /*.sh /solr_confs/*.sh && \
     # Change solr_confs ownership so that a biblio9 copy can be created (conditionally) in startup.sh
     chown 1001:root /solr_confs && \
+    # Empty stopwords.txt
+    > /solr_confs/biblio/conf/stopwords.txt && \
     # Fix lib paths in solrconfig.xml
     # Note: the biblio9 copy of solrconfig.xml is also edited in startup.sh
     sed -i 's/<lib dir="\.\.\/\.\.\/\.\.\/import\/lib"/<lib dir="\/solr_confs\/import\/lib"/' /solr_confs/biblio/conf/solrconfig.xml && \

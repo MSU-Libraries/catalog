@@ -38,6 +38,14 @@
 .fw-bolder {
   font-weight:bolder !important;
 }
+.visually-hidden {
+  position:absolute !important;
+  overflow:hidden;
+  clip:rect(1px,1px,1px,1px);
+  width:1px;
+  height:1px;
+  word-wrap:normal;
+}
 
 
 
@@ -114,9 +122,9 @@
 header {
   .banner.container {
     background-color:@msugreen;
-    background-image: 
+    background-image:
     linear-gradient(
-      rgba(24, 69, 59, 0.8), 
+      rgba(24, 69, 59, 0.8),
       rgba(24, 69, 59, 0.8)
     ),
     url(/vufind/themes/msul/images/banner-image.jpg);
@@ -526,7 +534,7 @@ input[type="checkbox"] {
       input {
         margin-bottom:1rem;
       }
-    }   
+    }
     @media only screen and (min-width : 992px) {
       button[type=submit].btn-primary {
         border-radius: 2rem;
@@ -547,10 +555,13 @@ input[type="checkbox"] {
     }
   }
   @media only screen and (min-width : 768px) {
+      .container {
+        padding-left:0;
+      }
       #search-cart-form {
         margin-top: -1rem;
     }
-  } 
+  }
   @media only screen and (min-width : 1315px) {
       .searchForm-query {
         width:33%;
@@ -561,7 +572,7 @@ input[type="checkbox"] {
         width:100%;
         max-width: 400px;
     }
-  }     
+  }
 }
 
 .searchHomeContent form .active-filters {
@@ -573,8 +584,7 @@ input[type="checkbox"] {
     padding-right:5%;
     padding-left:5%;
 
-    &.home-reserves,
-    &.home-askalib {
+    &.home-reserves {
       border-left:1px solid @medgray;
     }
   }
@@ -609,7 +619,7 @@ input[type="checkbox"] {
     input {
       display:inline-block;
     }
-  } 
+  }
 
 
 .home-facet.home-askalib::after {
@@ -660,7 +670,7 @@ form.searchForm, .record-tabs, .navbar-form {
 
     li {
       height:3rem;
-      @media only screen and (min-width : 992px) {   
+      @media only screen and (min-width : 992px) {
         font-size:larger;
         height:2rem;
       }
@@ -677,8 +687,11 @@ form.searchForm, .record-tabs, .navbar-form {
       padding:0;
       margin:0 0.7rem;
     }
+    li:first-child a {
+      margin-left:0;
+    }
     .navtab-digrepo {
-      @media only screen and (min-width : 998px) {    
+      @media only screen and (min-width : 998px) {
         border-left:0.2rem solid @eggplant;
         padding-left:0.5rem;
         margin-left:0.5rem;
@@ -795,7 +808,42 @@ table tr {
   }
 }
 
+// results record list design clean up
 
+.result {
+  margin-bottom:1rem;
+  .checkbox-select-item {
+    display:block;
+    height:1.25rem;
+    width:1.25rem;
+  }
+  .result-body {
+    & :not(:first-child) {
+      font-size:14px;
+      line-height:1.6rem;
+   }
+    & > * {
+    margin-bottom:0.2rem;
+    }
+    .result-formats span {
+      font-size:12px;
+      line-height:1rem;
+      margin-top:0.5rem;
+    }
+  }
+  .media {
+    .media-left {
+      font-size:14px;
+      }
+  @media only screen and (min-width : 768px) {
+    .result-links {
+      padding-left:1rem;
+    }
+  }
+}
+}
+
+// Placehold (Get This)
 
 .placehold {
   display:inline-block;
@@ -984,9 +1032,9 @@ label {
 }
 
 .search-term {
-  font-weight: 500;
-  font-size: x-large;
-  color:@eggplant;
+  background-color:#f1f1f1;
+  padding:0.5rem 1rem;
+  border-radius:0.5rem;
 }
 
 /*.searchHomeContent, .nav.searchbox {
@@ -1038,8 +1086,8 @@ label {
 }
 
 .view-buttons {
-  margin-top:1rem;
-  margin-bottom:2rem;
+  margin-top:.5rem;
+  margin-bottom:1.5rem;
 }
 
 // Remove table striping
@@ -1247,6 +1295,28 @@ body.template-dir-myresearch.template-name-profile {
   }
 }
 
+// LibKey and EDS link styling
+.result-body {
+  .custom-link {
+    display: inline-block;
+    padding-right: 1rem;
+  }
+  .libkey-link {
+    display: inline-block;
+    .icon-link__label {
+      padding-right: 1rem;
+    }
+    .fa-lock {
+      text-decoration: underline;
+    }
+  }
+}
+
+.media-left {
+  a {
+    padding-bottom: .25rem;
+  }
+}
 
 //Remove catalog only checkbox & location options from EDS Advanced Search
 
@@ -1416,4 +1486,58 @@ fieldset.solr-facets {
 // Location notices
 .location-notice {
   padding: 0 3px 0 3px;
+}
+
+// Highlighting
+.highlight,
+mark {
+  background: #E5E5E5;
+  padding: .1em .2em;
+}
+
+// Login Options page and Community Login Border and Collapse
+
+.template-name-login .main {
+  margin-bottom:4rem;
+}
+.authmethod0 {
+  h3 {
+  color:@gray-base;
+  }
+  a {
+  margin:1rem 1rem 1rem 2.15rem;
+  }
+}
+.authmethod1 {
+  h3 {
+      font-size:large;
+      a {
+      text-decoration:none;
+      &::after {
+      display: inline-block;
+      margin-left: 0.255em;
+      vertical-align: 0.255em;
+      content: "";
+      border-top: 0.3em solid;
+      border-right: 0.3em solid transparent;
+      border-bottom: 0;
+      border-left: 0.3em solid transparent;
+      transition: 0.5s;
+      }
+      &[aria-expanded="true"]::after {
+        transform: rotate(-180deg);
+      }
+    }
+  }
+  .card-body {
+    border:2px dashed @medgray;
+    border-radius:1rem;
+    padding:2rem;
+  }
+}
+.template-name-login #loginOptions .icon-link { //disable header login link on login page
+  pointer-events: none;
+  cursor: default;
+  color: @msugreen;
+  background-color: @nav-link-hover-bg;
 }

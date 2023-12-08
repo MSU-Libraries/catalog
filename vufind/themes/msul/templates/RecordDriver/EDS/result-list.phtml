@@ -36,10 +36,8 @@
                     <?=$item['Data']?> </a>
                   </h2>
                 <?php else:?>
-                  <p>
                     <b><?=$this->transEsc($item['Label'])?>:</b>
                     <?=$this->driver->linkUrls($item['Data'])?>
-                  </p>
                 <?php endif;?>
               </div>
             <?php endif;
@@ -67,32 +65,35 @@
               $name = $customLink['Text'] ?? '';
             ?>
             <span>
+              <?php if ($icon): ?><img src="<?=$this->escapeHtmlAttr($icon)?>" />
+              <?php else: ?><?=$this->icon('external-link', 'icon-link__icon') ?><?php endif; ?>
               <a href="<?=$this->escapeHtmlAttr($url)?>" target="_blank" title="<?=$this->escapeHtmlAttr($mot)?>" class="custom-link">
-                <?php if ($icon): ?><img src="<?=$this->escapeHtmlAttr($icon)?>"> <?php endif; ?><?=$this->escapeHtml($name)?>
+                <?=$this->escapeHtml($name)?>
               </a>
             </span>
           <?php endforeach; ?>
         <?php endif; ?>
       </div>
-
       <?=$this->record($this->driver)->renderTemplate(
                 'result-list/full-text-links.phtml',
                 ['recordLinker' => $recordLinker]
             );
       ?>
-
       <?php /* Links from DOI linker */ ?>
       <?php $doi = $this->doi($this->driver, 'results'); ?>
       <?php if ($doi->isActive()): ?>
         <div><?=$doi->renderTemplate()?></div>
       <?php endif; ?>
-      <?php $libkey = $this->record($this->driver)->getLibKeyUrl($this->driver->getCleanDOI()); ?>
-      <?php if ($libkey): ?>
-          <?=$this->icon('external-link', 'icon-link__icon') ?>
-          <a class="icon-link" target="new" href="<?= $libkey ?>">
-            <span class="icon-link__label">Access Content Online (LibKey)</span>
-          </a><br>
-      <?php endif; ?>
+      <?php $libkeyData = $this->record($this->driver)->getLibKeyData($this->driver->getCleanDOI()); ?>
+      <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['pdf'],
+                                             'label' => 'Download PDF',
+                                             'openAccess' => $libkeyData['openAccess']]); ?>
+      <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['article'],
+                                             'label' => 'View Article',
+                                             'openAccess' => $libkeyData['openAccess']]); ?>
+      <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['issue'],
+                                             'label' => 'View Full Issue',
+                                             'openAccess' => $libkeyData['openAccess']]); ?>
     </div>
     <div class="result-links hidden-print">
       <?php /* Display qrcode if appropriate: */ ?>
