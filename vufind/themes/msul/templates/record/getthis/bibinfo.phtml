@@ -20,7 +20,7 @@ $callnum = $this->getthis->getCallNumber();
   <?php if (!empty($item)): ?>
     <?= $this->locationNotices($item) ?>
   <?php endif; ?>
-  <p class="text-left" style="margin-top: 1.5em">
+  <p class="text-left" style="margin: 1.5em 0 1.5em 0">
     <b>Status:</b> <?= $this->getthis->getStatus() ?>
     <?php if ($item != null && !$this->getthis->isOnlineResource() && !GetThisLoader::makerspaceLocation($item) &&
         $item['is_holdable'] && $link ?? false) { ?>
@@ -31,5 +31,11 @@ $callnum = $this->getthis->getCallNumber();
         <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? 'Check Hold' : 'Place Request')?>
       </a>
     <?php } ?>
-  </p><br>
+    <?php if ($this->userlist()->getMode() !== 'disabled' && $this->permission()->allowDisplay('feature.Favorites')): ?>
+      <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getActionUrl($this->driver, 'Save'))?>" data-lightbox class="save-record result-link icon-link" data-id="<?=$this->escapeHtmlAttr($this->driver->getUniqueId()) ?>">
+        <?=$this->icon('user-favorites', 'icon-link__icon') ?>
+        <span class="result-link-label icon-link__label"><?=$this->transEsc('Add to favorites')?></span>
+      </a>
+    <?php endif; ?>
+  </p>
 </div>
