@@ -1,7 +1,7 @@
 <?php
 
 /**
- * View helper to display banner notices loaded from a Yaml config
+ * View helper to display notices loaded from a Yaml config
  *
  * PHP version 8
  *
@@ -35,7 +35,7 @@ use Laminas\View\Helper\AbstractHelper;
 use function array_key_exists;
 
 /**
- * View helper to display banner notices loaded from a Yaml config
+ * View helper to display notices loaded from a Yaml config
  *
  * @category VuFind
  * @package  View_Helpers
@@ -43,16 +43,23 @@ use function array_key_exists;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development Wiki
  */
-class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareInterface
+class Notices extends AbstractHelper implements \Laminas\Log\LoggerAwareInterface
 {
     use \VuFind\Log\LoggerAwareTrait;
 
     /**
-     * Banner notices configuration
+     * Container interface
      *
      * @var array
      */
-    protected $noticesConfig;
+    protected $container;
+
+    /**
+     * Notices configuration
+     *
+     * @var array
+     */
+    protected $config;
 
     /**
      * User IP address reader
@@ -71,48 +78,102 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
     /**
      * Constructor
      *
-     * @param array                                $noticesConfig Banner notices configuration
-     * @param UserIpReader                         $userIpReader  IP reader for client
-     * @param \Laminas\Http\PhpEnvironment\Request $request       Request object
+     * @param container                            $container    Container interface
+     * @param UserIpReader                         $userIpReader IP reader for client
+     * @param \Laminas\Http\PhpEnvironment\Request $request      Request object
      */
-    public function __construct(array $noticesConfig, $userIpReader, $request)
+    public function __construct($container, $userIpReader, $request)
     {
-        $this->noticesConfig = $noticesConfig;
+        $this->container = $container;
+        $this->config = [];
         $this->userIpReader = $userIpReader;
         $this->request = $request;
     }
 
     /**
-     * Print banners based on conditions defined in banner-notices.yaml
+     * Sets and loads the current config file and will
+     * print notices based on conditions defined in config, if set to renderNow
      *
-     * @return string                   The formatted HTML for output
+     * @param string $config Name of the YAML config to load with Notice configs
+     *
+     * @return Notice           Instance of the Notice object
      */
-    public function __invoke()
+    public function __invoke(string $config)
     {
-        $makeTag = $this->getView()->plugin('makeTag');
-        $html = '';
+        if (!empty($config)) {
+            $this->setConfig($config);
+        } else {
+            throw new \Exception('Missing required config to load Notices.');
+        }
+        return $this;
+    }
 
-        foreach ($this->noticesConfig['notices'] ?? [] as $notice) {
+    /**
+     * Returns if the criteria is met for having at least one notice to be displayed
+     *
+     * @return bool                   At least one notice criteria is met
+     */
+    public function hasNotices()
+    {
+        // If the message is not empty (since that is required in renderNotices
+        // and the evaluateConditions passes, then stop processing and return true
+        // because we found at least one criteria that passed
+        foreach ($this->config['notices'] ?? [] as $notice) {
+            if (!empty($notice['message']) && $this->evaluateConditions($notice)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the formatted notices that match the criteria
+     *
+     * @param string $extraClasses Any extra classes to add to all the notices
+     *
+     * @return string                  The formatted HTML for output
+     */
+    public function renderNotices($extraClasses = '')
+    {
+        $html = '';
+        foreach ($this->config['notices'] ?? [] as $notice) {
             if (empty($notice['message'])) {
                 $this->logWarning(
-                    'BannerNotices config has notice with ' .
+                    'Notices config has notice with ' .
                     "empty or missing 'message'"
                 );
             } elseif ($this->evaluateConditions($notice)) {
-                $html .= $this->renderNotice($notice);
+                $html .= $this->renderNotice($notice, $extraClasses);
             }
         }
         return $html;
     }
 
     /**
+     * Given a config name, load the YAML file into the class variable
+     *
+     * @param string $config Name of the YAML config to load with Notice configs
+     *
+     * @return null
+     */
+    protected function setConfig(string $config)
+    {
+        try {
+            $this->config = $this->container->get(\VuFind\Config\YamlReader::class)->get($config);
+        } catch (\Exception $e) {
+            $this->logError('Could not parse ' . $config . $e->getMessage());
+        }
+    }
+
+    /**
      * Given a notice configuration, render and return HTML as appropriate
      *
-     * @param array $notice A single banner notice configuration
+     * @param array  $notice       A single notice configuration
+     * @param string $extraClasses One or more classes to add to each notice
      *
-     * @return string       The rendered banner notice div, or empty string
+     * @return string       The rendered notice div, or empty string
      */
-    protected function renderNotice(array $notice)
+    protected function renderNotice(array $notice, string $extraClasses = null)
     {
         $makeTag = $this->getView()->plugin('makeTag');
         $escapeContent = ($notice['escapeContent'] ?? true);
@@ -120,11 +181,12 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
         foreach ($notice['style'] ?? [] as $key => $val) {
             $style .= "{$key}:{$val};";
         }
+        $classes = array_filter(['custom-notices', $notice['classes'] ?? '', $extraClasses]);
         return $makeTag(
             'div',
             $notice['message'],
             [
-                'class' => 'banner-notice' . ($notice['classes'] ?? ''),
+                'class' => implode(' ', $classes),
                 'style' => $style,
             ],
             ['escapeContent' => $escapeContent]
@@ -134,7 +196,7 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
     /**
      * Evaluate all conditions appropriate to a single notice configuration
      *
-     * @param array $notice A single banner notice configuration
+     * @param array $notice A single notice configuration
      *
      * @return boolean
      */
@@ -189,7 +251,7 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
                     break;
                 default:
                     $this->logWarning(
-                        'BannerNotices config has invalid type for ' .
+                        'Notices config has invalid type for ' .
                         "condition index of {$idx} with message starting '" .
                         mb_substr($condition['message'] ?? '', 0, 10) . "'"
                     );
@@ -250,7 +312,7 @@ class BannerNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareIn
                     break;
                 default:
                     $this->logWarning(
-                        "BannerNotices config has invalid comparison type '{$comp}'"
+                        "Notices config has invalid comparison type '{$comp}'"
                     );
             }
             if ($matched) {

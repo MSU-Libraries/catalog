@@ -1,7 +1,7 @@
 <?php
 
 /**
- * BannerNotices helper factory.
+ * Notices helper factory.
  *
  * PHP version 8
  *
@@ -36,7 +36,7 @@ use Psr\Container\ContainerExceptionInterface as ContainerException;
 use Psr\Container\ContainerInterface;
 
 /**
- * BannerNotice helper factory.
+ * Notice helper factory.
  *
  * @category VuFind
  * @package  View_Helpers
@@ -44,7 +44,7 @@ use Psr\Container\ContainerInterface;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development Wiki
  */
-class BannerNoticesFactory implements FactoryInterface
+class NoticesFactory implements FactoryInterface
 {
     /**
      * Create an object
@@ -68,17 +68,8 @@ class BannerNoticesFactory implements FactoryInterface
         if (!empty($options)) {
             throw new \Exception('Unexpected options sent to factory.');
         }
-        try {
-            $noticesConfig = $container->get(\VuFind\Config\YamlReader::class)
-                ->get('BannerNotices.yaml');
-        } catch (\Exception $e) {
-            $logger = $container->get(\VuFind\Log\Logger::class);
-            $logger->err(
-                'Could not parse BannerNotices.yaml: ' . $e->getMessage()
-            );
-        }
         return new $requestedName(
-            $noticesConfig ?? [],
+            $container,
             $container->get(\VuFind\Net\UserIpReader::class),
             $container->get('Request')
         );

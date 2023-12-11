@@ -82,7 +82,7 @@
   .search.container.navbar {
     order:2;
   }
-  .banner-notice {
+  .custom-notice {
     order:3;
     margin:0;
   }
@@ -214,7 +214,7 @@ header {
   }
 }
 
-.banner-notice {
+.custom-notice {
   margin-top: -3rem;
   margin-bottom: 2rem;
   background-color: @alert-warning-bg;
@@ -854,7 +854,7 @@ table tr {
   -moz-border-radius: 7rem;
   border-radius: 7rem;
   padding: 0.2rem 0.75rem 0.2rem 0.65rem;
-  margin-left:1rem;
+  margin: 0 1rem 0 1rem;
   &:hover {
     text-decoration:none;
     color:@darkparakeetgreen;
@@ -868,6 +868,20 @@ table tr {
   }
   i {
     display:none;
+  }
+}
+
+/* Diable links (such as the request button */
+.disabled {
+  color: @darkgray;
+  border-color: @darkgray;
+  background-color: @lightgray;
+  cursor: not-allowed;
+  &:focus, &:hover {
+    color: @darkgray;
+    border-color: @darkgray;
+    background-color: @lightgray;
+    cursor: not-allowed;
   }
 }
 
@@ -1485,7 +1499,11 @@ fieldset.solr-facets {
 
 // Location notices
 .location-notice {
-  padding: 0 3px 0 3px;
+  padding: 0 .5rem 0 .5rem;
+}
+
+.custom-notices-item {
+  padding: 0 .5rem 0 .5rem;
 }
 
 // Highlighting

@@ -110,7 +110,7 @@
     </div>
   <?php endif; ?>
 </div>
-<?= $this->bannerNotices() ?>
+<?= $this->Notices('BannerNotices.yaml')->renderNotices(); ?>
 <?php if ($this->layout()->searchbox !== false): ?>
   <div class="search container navbar">
     <div class="nav searchbox hidden-print" role="search">
