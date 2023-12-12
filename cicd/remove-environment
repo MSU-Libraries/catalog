@@ -25,11 +25,24 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
     exit 0
 fi
 
+waitforstop() {
+    HOST=$1
+    SERVICES=$(ssh deploy@"${HOST}" "docker ps --filter name=${STACK_NAME} --format '{{.Names}}' | wc -l")
+    while [[ "${SERVICES}" -gt 0 ]]; do
+        echo "There are still ${SERVICES} running on ${HOST} for ${STACK_NAME}..."
+        sleep 3
+        SERVICES=$(ssh deploy@"${HOST}" "docker ps --filter name=${STACK_NAME} --format '{{.Names}}' | wc -l")
+    done
+}
+
 prunevols() {
-    HOST=$1;
-    VOLS=$(ssh deploy@"${HOST}" "docker volume ls --filter name=$STACK_NAME --format '{{.Name}}'");
+    HOST=$1
+    VOLS=$(ssh deploy@"${HOST}" "docker volume ls --filter name=$STACK_NAME --format '{{.Name}}'")
     if [ -n "${VOLS}" ]; then
-        ssh deploy@"${HOST}" "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm";
+        if ! OUTPUT=$(ssh deploy@"${HOST}" "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"); then
+            echo "Failed to remove one or more volumes from ${HOST} for ${VOLS}. ${OUTPUT}"
+            exit 1
+        fi
     fi
 }
 
@@ -58,8 +71,12 @@ main() {
     docker stack rm ${STACK_NAME}-internal;
     rm -rf $COMPOSE_PATH;";
 
-    sleep 15
+    # Wait for the containers to stop now the services have been removed
+    waitforstop "${DEPLOY_HOST_A}";
+    waitforstop "${DEPLOY_HOST_B}";
+    waitforstop "${DEPLOY_HOST_C}";
 
+    # Prune the volumes
     prunevols "${DEPLOY_HOST_A}";
     prunevols "${DEPLOY_HOST_B}";
     prunevols "${DEPLOY_HOST_C}";
