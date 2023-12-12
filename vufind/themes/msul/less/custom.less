@@ -39,8 +39,6 @@
   font-weight:bolder !important;
 }
 
-
-
 //container width
 .container {
   width: 100%;
@@ -1416,4 +1414,18 @@ fieldset.solr-facets {
 // Location notices
 .location-notice {
   padding: 0 3px 0 3px;
+}
+
+//Modal content
+
+#modal .modal-content {
+  .close {
+    &:hover {
+      background-color: @gray;
+    }
+  }  button {
+    &:focus {
+      outline:0.25rem solid #ffffff;
+    }
+  }
 }
