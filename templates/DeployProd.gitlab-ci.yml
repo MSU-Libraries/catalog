@@ -3,12 +3,7 @@ Set Prod Stack Name:
   stage: Deploy
   extends: Set Stack Name
   needs:
-    - Build DB Image
-    - Build LegacyLinks Image
-    - Build Monitoring Image
-    - Build Solr Image
-    - Build Vufind Image
-    - Build ZK Image
+    - Verify Stack Health
   variables:
     PROD: "true"
   rules:

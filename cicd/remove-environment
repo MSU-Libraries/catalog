@@ -29,7 +29,7 @@ waitforstop() {
     HOST=$1
     SERVICES=$(ssh deploy@"${HOST}" "docker ps --filter name=${STACK_NAME} --format '{{.Names}}' | wc -l")
     while [[ "${SERVICES}" -gt 0 ]]; do
-        echo "There are still ${SERVICES} running on ${HOST} for ${STACK_NAME}..."
+        echo "There are still ${SERVICES} services running on ${HOST} for ${STACK_NAME}..."
         sleep 3
         SERVICES=$(ssh deploy@"${HOST}" "docker ps --filter name=${STACK_NAME} --format '{{.Names}}' | wc -l")
     done
