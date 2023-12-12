@@ -37,7 +37,6 @@ $notices = $this->Notices('RequestNotices.yaml');
         <?php else: ?>
            <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
              <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
-             <?=$notices->hasNotices() ? 'aria-disabled="true"' : ''?>
              href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
              <i class="fa fa-flag" aria-hidden="true"></i>
              &nbsp;<?=$this->transEsc($check ? 'Check Hold' : 'Place Request') ?>
