@@ -47,8 +47,6 @@
   word-wrap:normal;
 }
 
-
-
 //container width
 .container {
   width: 100%;
@@ -1558,4 +1556,18 @@ mark {
   cursor: default;
   color: @msugreen;
   background-color: @nav-link-hover-bg;
+}
+
+//Modal content
+
+#modal .modal-content {
+  .close {
+    &:hover {
+      background-color: @gray;
+    }
+  }  button {
+    &:focus {
+      outline:0.25rem solid #ffffff;
+    }
+  }
 }
