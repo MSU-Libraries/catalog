@@ -181,7 +181,7 @@ class Notices extends AbstractHelper implements \Laminas\Log\LoggerAwareInterfac
         foreach ($notice['style'] ?? [] as $key => $val) {
             $style .= "{$key}:{$val};";
         }
-        $classes = array_filter(['custom-notices', $notice['classes'] ?? '', $extraClasses]);
+        $classes = array_filter([$notice['classes'] ?? '', $extraClasses]);
         return $makeTag(
             'div',
             $notice['message'],
