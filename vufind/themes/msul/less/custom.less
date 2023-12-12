@@ -82,7 +82,7 @@
   .search.container.navbar {
     order:2;
   }
-  .banner-notice {
+  .custom-notices {
     order:3;
     margin:0;
   }
@@ -214,7 +214,7 @@ header {
   }
 }
 
-.banner-notice {
+.custom-notices {
   margin-top: -3rem;
   margin-bottom: 2rem;
   background-color: @alert-warning-bg;
@@ -871,6 +871,20 @@ table tr {
   }
 }
 
+/* Diable links (such as the request button */
+.disabled {
+  color: @darkgray;
+  border-color: @darkgray;
+  background-color: @lightgray;
+  cursor: not-allowed;
+  &:focus, &:hover {
+    color: @darkgray;
+    border-color: @darkgray;
+    background-color: @lightgray;
+    cursor: not-allowed;
+  }
+}
+
 .result-body {
   /* Get this button on the search results page */
   .placehold {
@@ -1485,7 +1499,11 @@ fieldset.solr-facets {
 
 // Location notices
 .location-notice {
-  padding: 0 3px 0 3px;
+  padding: 0 .5rem 0 .5rem;
+}
+
+.custom-notices-item {
+  padding: 0 .5rem 0 .5rem;
 }
 
 // Highlighting

@@ -6,6 +6,7 @@ $item = $this->getthis->getItem();
 $check = $item['check'] ?? false;
 $link = $this->getthis->getLink();
 $callnum = $this->getthis->getCallNumber();
+$notices = $this->Notices('RequestNotices.yaml');
 ?>
 <div>
   <p>
@@ -20,18 +21,30 @@ $callnum = $this->getthis->getCallNumber();
   <?php if (!empty($item)): ?>
     <?= $this->locationNotices($item) ?>
   <?php endif; ?>
+  <?=$notices->renderNotices('custom-notices-item')?>
   <p class="text-left" style="margin: 1.5em 0 1.5em 0">
     <b>Status:</b> <?= $this->getthis->getStatus() ?>
     <?php if ($item != null && !$this->getthis->isOnlineResource() && !GetThisLoader::makerspaceLocation($item) &&
         $item['is_holdable'] && $link ?? false) { ?>
-      <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
-        <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
-        target="_blank"
-        href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
-        <i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc($check ? 'Check Hold' : 'Place Request')?>
-      </a>
+        <?php // PC-745 Disabled requests during configured periods of time ?>
+        <?php if ($notices->hasNotices()): ?>
+           <a class="<?=$check ? 'checkRequest ' : ''?>placehold disabled"
+             <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
+             aria-disabled='true'>
+             <i class='fa fa-flag' aria-hidden='true'></i>
+             &nbsp;<?=$this->transEsc($check ? 'Check Hold (UNAVAILABLE)' : 'Place Request (UNAVAILABLE)')?>
+           </a>
+        <?php else: ?>
+           <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
+             <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
+             href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
+             <i class="fa fa-flag" aria-hidden="true"></i>
+             &nbsp;<?=$this->transEsc($check ? 'Check Hold' : 'Place Request') ?>
+           </a>
+        <?php endif; ?>
     <?php } ?>
-    <?php if ($this->userlist()->getMode() !== 'disabled' && $this->permission()->allowDisplay('feature.Favorites')): ?>
+    <?php // PC-804 Add save to list option to Get This when requests are disabled ?>
+  <?php if ($notices->hasNotices() && $this->userlist()->getMode() !== 'disabled' && $this->permission()->allowDisplay('feature.Favorites')): ?>
       <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getActionUrl($this->driver, 'Save'))?>" data-lightbox class="save-record result-link icon-link" data-id="<?=$this->escapeHtmlAttr($this->driver->getUniqueId()) ?>">
         <?=$this->icon('user-favorites', 'icon-link__icon') ?>
         <span class="result-link-label icon-link__label"><?=$this->transEsc('Add to favorites')?></span>
