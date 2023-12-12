@@ -29,6 +29,7 @@
 
 namespace Catalog\ILS\Driver;
 
+use Catalog\GetThis\RegexLookup as Regex;
 use VuFind\Exception\ILS as ILSException;
 
 use function count;
@@ -143,6 +144,15 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $item->effectiveCallNumberComponents->callNumber
                 ?? $item->itemLevelCallNumber ?? ''
         );
+
+        // PC-835: Items with loan type "Non Circulating" should show as "Lib Use Only" after they're checked in
+        if (
+            $item->permanentLoanTypeId == 'adac93ac-951f-4f42-ab32-79f4faeabb50' &&
+            $item->status->name == 'Available' &&
+            !Regex::ONLINE($locationName)
+        ) {
+            $item->status->name = 'Restricted';
+        }
 
         return $callNumberData + [
             'id' => $bibId,
