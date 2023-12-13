@@ -43,7 +43,7 @@ Validate Vufind Build:
   timeout: 10m
   interruptible: true
   rules:
-    - if: '$CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule" && $CI_PIPELINE_SOURCE != "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE != "schedule" && $CI_PIPELINE_SOURCE != "merge_request_event"'
   before_script:
     - apk add --no-cache bash
   script:
