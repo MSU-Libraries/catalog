@@ -135,20 +135,22 @@ rebuild_databases() {
     if [[ ! -h ${ARGS[BUILD_PATH]}/jars ]]; then
         ln -s /solr_confs/jars ${ARGS[BUILD_PATH]}/jars
     fi
-    if [[ ! -h ${ARGS[BUILD_PATH]}/biblio ]]; then
-        # Get the biblio collection path for the biblio alias
-        if ! ALIASES=$(curl -s "http://solr:8983/solr/admin/collections?action=LISTALIASES&wt=xml"); then
-            echo "Failed to query the collection aliases in Solr. Output: ${ALIASES}"
-            return 1
-        fi
-        BIBLIO_COLLECTION_NAME=`echo "$ALIASES" | grep '"biblio"' | sed -e 's/.*>\([^<]*\)<.*/\1/'`
-        BIBLIO_COLLECTION_PATH="/bitnami/solr/server/solr/${BIBLIO_COLLECTION_NAME}"
-        if [ ! -d $BIBLIO_COLLECTION_PATH ]; then
-            echo "Could not find the collection directory at $BIBLIO_COLLECTION_PATH"
-            return 1
-        fi
-        ln -s $BIBLIO_COLLECTION_PATH ${ARGS[BUILD_PATH]}/biblio
+
+    # Always recreate the biblio link (collections might have changed)
+    rm -f "${ARGS[BUILD_PATH]}/biblio"
+    # Get the biblio collection path for the biblio alias
+    if ! ALIASES=$(curl -s "http://solr:8983/solr/admin/collections?action=LISTALIASES&wt=xml"); then
+        echo "Failed to query the collection aliases in Solr. Output: ${ALIASES}"
+        return 1
     fi
+    BIBLIO_COLLECTION_NAME=`echo "$ALIASES" | grep '"biblio"' | sed -e 's/.*>\([^<]*\)<.*/\1/'`
+    BIBLIO_COLLECTION_PATH="/bitnami/solr/server/solr/${BIBLIO_COLLECTION_NAME}"
+    if [ ! -d $BIBLIO_COLLECTION_PATH ]; then
+        echo "Could not find the collection directory at $BIBLIO_COLLECTION_PATH"
+        return 1
+    fi
+    ln -s $BIBLIO_COLLECTION_PATH ${ARGS[BUILD_PATH]}/biblio
+
     if [[ ! -h ${ARGS[BUILD_PATH]}/authority ]]; then
         ln -s /bitnami/solr/server/solr/authority ${ARGS[BUILD_PATH]}/authority
     fi
