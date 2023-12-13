@@ -88,7 +88,7 @@ import a single marc file into the vufind instance as test data
 
 ### Cleanup
 **branches**: `devel-`* and `review-`*  
-* Removes the stacks and runs the playbook to remove the DNS record created for the environment
+* Removes the stacks, their volumes, and runs the playbook to remove the DNS record created for the environment
 
 ### Release 
 **branches**: `main`  
@@ -148,12 +148,6 @@ For the Ansible image to build overnight, saving time on regular daily builds, w
 run off-hours in GitLab. This is done in the [Schedules](https://gitlab.msu.edu/msu-libraries/devops/catalog/-/pipeline_schedules)
 tab in the CI/CD page of GitLab. You should configure it for the `main` branch and set it to run at whatever time is convienient
 for your team.
-
-## Deploy Freezes
-If you want to prevent deployments to the production environment during certain times, you
-can make use of GitLab's [Deploy Freeze](https://gitlab.msu.edu/help/ci/environments/deployment_safety.md#prevent-deployments-during-deploy-freeze-windows)
-feature. Simply enter in a timeframe using cron-style syntax in the "Deploy Freeze" section
-of the CI/CD Settings of the repository.
 
 [^1]: 
     There are many ways to generate this password hash, such as online generators or command
