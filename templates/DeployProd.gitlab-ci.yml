@@ -3,7 +3,8 @@ Set Prod Stack Name:
   stage: Deploy
   extends: Set Stack Name
   environment:
-    name: $CI_COMMIT_BRANCH-prod
+    # This can't be part of -prod env because we would need a coresoibdubg Remove Environment job
+    name: $CI_COMMIT_BRANCH
   needs:
     - Verify Stack Health
   variables:
