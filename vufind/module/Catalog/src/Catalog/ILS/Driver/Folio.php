@@ -246,6 +246,15 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $number,
                     $dueDateValue
                 );
+                // PC-872: Filter out LoM holdings
+                if (
+                    !empty($nextItem['location']) && (
+                        str_starts_with($nextItem['location'], 'Library of Michigan') ||
+                        str_starts_with($nextItem['location'], 'Technical migration')
+                    )
+                ) {
+                    continue;
+                }
                 if (!empty($vufindItemSort) && !empty($nextItem[$vufindItemSort])) {
                     $sortNeeded = true;
                 }

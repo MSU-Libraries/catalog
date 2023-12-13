@@ -51,9 +51,7 @@ class GetThisLoader
     public function __construct($record, $items, $item_id = null)
     {
         $this->record = $record;
-        $this->items = array_values(array_filter($items, function ($it) {
-            return !GetThisLoader::locationAtLoM($it);
-        }));
+        $this->items = $items;
         $this->item_id = $item_id;
         $this->msgTemplate = null;
         if (null !== $this->item_id) {
@@ -291,18 +289,6 @@ class GetThisLoader
     public static function makerspaceLocation($item)
     {
         return $item['location_code'] == 'mnmst';
-    }
-
-    /**
-     * Return true if the location of the given item is at Library of Michigan
-     *
-     * @param array $item item record
-     *
-     * @return bool
-     */
-    public static function locationAtLoM($item)
-    {
-        return str_starts_with(strtolower($item['location'] ?? ''), 'library of michigan');
     }
 
     /**

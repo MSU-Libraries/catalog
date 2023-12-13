@@ -6,8 +6,7 @@ $record = $this->record($this->driver);
 foreach ($this->statusItems as $item) {
   if ($selected == '') {
     $selected = $item;
-  } elseif ($selected['status'] != 'Available' || (GetThisLoader::locationAtLoM($selected) &&
-      ! GetThisLoader::locationAtLoM($item) && $item['status'] == 'Available')) {
+  } elseif ($selected['status'] != 'Available') {
     if ($item['status'] == 'Available' || ($selected['status'] != 'Restricted' && $item['status'] == 'Restricted')) {
       $selected = $item;
     }
@@ -52,8 +51,7 @@ if ($selected != '') {
     <?php $id = $selected['id']; ?>
     <?php $item_id = $selected['item_id']; ?>
     <?php $getthis = new GetThisLoader($record, $this->statusItems, $item_id); ?>
-    <?php if ($getthis && ! str_starts_with($id, 'hlm.') && ! $getthis->isOnlineResource() &&
-        ! GetThisLoader::locationAtLoM($selected)): ?>
+    <?php if ($getthis && ! str_starts_with($id, 'hlm.') && ! $getthis->isOnlineResource()): ?>
       <a class="pl-1 placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
         <?=$this->transEsc('Get this')?>
       </a>
