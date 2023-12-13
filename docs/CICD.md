@@ -104,7 +104,8 @@ available in the `devel-` and `review-` pipelines. You may need to define the sa
 variable multiple times, but for each environment, so that each site has different values.
 For example, your development environments might have different values for `FOLIO_URL` then
 the production environment. This is done using the *scope* setting in the variables menu.
-And the *scope* value is simple the branch name you want to match it to.
+And the *scope* value is the branch name you want to match it to followed by a wildcard (`*`).
+For example: `devel-mytest*`.
 
 * `AUTH_FTP_PASSWORD`: Password for `AUTH_FTP_USER`
 * `AUTH_FTP_USER`: User name for the authority marc file FTP server
@@ -148,6 +149,12 @@ For the Ansible image to build overnight, saving time on regular daily builds, w
 run off-hours in GitLab. This is done in the [Schedules](https://gitlab.msu.edu/msu-libraries/devops/catalog/-/pipeline_schedules)
 tab in the CI/CD page of GitLab. You should configure it for the `main` branch and set it to run at whatever time is convienient
 for your team.
+
+## Deploy Freezes
+If you want to prevent deployments to the production environment during certain times, you
+can make use of GitLab's [Deploy Freeze](https://gitlab.msu.edu/help/ci/environments/deployment_safety.md#prevent-deployments-during-deploy-freeze-windows)
+feature. Simply enter in a timeframe using cron-style syntax in the "Deploy Freeze" section
+of the CI/CD Settings of the repository.
 
 [^1]: 
     There are many ways to generate this password hash, such as online generators or command
