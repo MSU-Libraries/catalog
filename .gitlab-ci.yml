@@ -16,6 +16,10 @@ variables:
 
 Set Stack Name:
   stage: test
+  environment:
+    name: $CI_COMMIT_BRANCH
+    url: $URL
+    on_stop: Remove Environment
   interruptible: true
   timeout: 2m
   variables:
@@ -36,6 +40,8 @@ Set Stack Name:
 
 Create DNS:
   extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/create-dns
   image: $CI_REGISTRY_IMAGE/ansible:latest
   rules:
     - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
@@ -48,9 +54,7 @@ Create DNS:
 Deploy Compose Files:
   extends: .stack_template
   environment:
-    name: $CI_COMMIT_BRANCH
-    url: $URL
-    on_stop: Remove Environment
+    name: $CI_COMMIT_BRANCH/deploy-compose
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
@@ -62,11 +66,15 @@ Deploy Compose Files:
 
 Initialize Log Dirs:
   extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/init-logs
   script:
      - bash ./cicd/initialize-log-dirs
 
 Deploy Internal Network:
   extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/deploy-network
   script:
     - bash ./cicd/deploy-internal-network
   needs:
@@ -76,6 +84,8 @@ Deploy Internal Network:
 
 Bootstrap Stacks:
   extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/bootstrap
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -88,6 +98,8 @@ Bootstrap Stacks:
 
 Deploy ZK:
   extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/deploy-zk
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
@@ -104,6 +116,8 @@ Deploy ZK:
 
 Deploy Solr:
   extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/deploy-solr
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
@@ -121,6 +135,8 @@ Deploy Solr:
 
 Deploy DB:
   extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/deploy-db
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
@@ -137,6 +153,8 @@ Deploy DB:
 
 Deploy Vufind:
   extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/deploy-vufind
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
@@ -156,6 +174,8 @@ Deploy Vufind:
 
 Deploy Vufind Build Env:
   extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/deploy-buildenv
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
       when: manual
@@ -173,6 +193,8 @@ Deploy Vufind Build Env:
 
 Deploy Monitoring:
   extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/deploy-monitoring
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
@@ -187,6 +209,8 @@ Deploy Monitoring:
 
 Verify Stack Health:
   extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/verify
   timeout: 20m
   needs:
     - job: Set Stack Name
@@ -198,6 +222,8 @@ Verify Stack Health:
 
 Populate Vufind Environment:
   extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/populate
   timeout: 10m
   rules:
     - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
@@ -210,6 +236,8 @@ Populate Vufind Environment:
 
 Run Functional Tests:
   extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/run-tests
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH == "catalog-preview"'

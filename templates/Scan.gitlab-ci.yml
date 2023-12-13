@@ -3,11 +3,15 @@
 
 secret_detection:
   interruptible: true
+  environment:
+    name: $CI_COMMIT_BRANCH/secret-scan
   tags:
     - msul-shared
 
 Shellcheck CI:
   stage: test
+  environment:
+    name: $CI_COMMIT_BRANCH/shellcheck-ci
   image: alpine:latest
   timeout: 5m
   tags:
@@ -22,6 +26,8 @@ Shellcheck CI:
 
 Shellcheck:
   stage: test
+  environment:
+    name: $CI_COMMIT_BRANCH/shellcheck
   image: alpine:latest
   timeout: 5m
   tags:
@@ -37,6 +43,8 @@ Shellcheck:
 
 Validate Vufind Build:
   stage: test
+  environment:
+    name: $CI_COMMIT_BRANCH/validate-vufind
   tags:
     - msul-shared
   retry: 1

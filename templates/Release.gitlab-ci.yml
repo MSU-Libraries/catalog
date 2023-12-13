@@ -2,6 +2,8 @@
 
 Tag Release:
   stage: Release
+  environment:
+    name: $CI_COMMIT_BRANCH/tag
   needs:
     - Build DB Image
     - Build LegacyLinks Image
@@ -37,6 +39,8 @@ Tag Release:
 
 GitHub Release:
   stage: Release
+  environment:
+    name: $CI_COMMIT_BRANCH/release
   tags:
     - msul-shared
   timeout: 5m

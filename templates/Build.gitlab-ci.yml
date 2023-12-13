@@ -3,16 +3,22 @@ Build DB Image:
   variables:
      COMPONENT: db
   extends: .build_template
+  environment:
+    name: $CI_COMMIT_BRANCH/build-db
 
 Build Solr Image:
   variables:
      COMPONENT: solr
   extends: .build_template
+  environment:
+    name: $CI_COMMIT_BRANCH/build-solr
 
 Build ZK Image:
   variables:
      COMPONENT: zk
   extends: .build_template
+  environment:
+    name: $CI_COMMIT_BRANCH/build-zk
 
 Build Ansible Image:
   variables:
@@ -20,19 +26,27 @@ Build Ansible Image:
   extends: .build_template
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  environment:
+    name: $CI_COMMIT_BRANCH/build-ansible
 
 Build Monitoring Image:
   variables:
      COMPONENT: monitoring
   extends: .build_template
+  environment:
+    name: $CI_COMMIT_BRANCH/build-monitoring
 
 Build LegacyLinks Image:
   variables:
      COMPONENT: legacylinks
   extends: .build_template
+  environment:
+    name: $CI_COMMIT_BRANCH/build-legacylinks
 
 Build Vufind Image:
   stage: Build
+  environment:
+    name: $CI_COMMIT_BRANCH/build-vufind
   tags:
     - msul-shared
   retry: 2
