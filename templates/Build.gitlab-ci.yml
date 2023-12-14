@@ -5,6 +5,7 @@ Build DB Image:
   extends: .build_template
   environment:
     name: $CI_COMMIT_BRANCH/build-db
+    auto_stop_in: 2 weeks
 
 Build Solr Image:
   variables:
@@ -12,6 +13,7 @@ Build Solr Image:
   extends: .build_template
   environment:
     name: $CI_COMMIT_BRANCH/build-solr
+    auto_stop_in: 2 weeks
 
 Build ZK Image:
   variables:
@@ -19,6 +21,7 @@ Build ZK Image:
   extends: .build_template
   environment:
     name: $CI_COMMIT_BRANCH/build-zk
+    auto_stop_in: 2 weeks
 
 Build Ansible Image:
   variables:
@@ -28,6 +31,7 @@ Build Ansible Image:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
   environment:
     name: $CI_COMMIT_BRANCH/build-ansible
+    auto_stop_in: 2 weeks
 
 Build Monitoring Image:
   variables:
@@ -35,6 +39,7 @@ Build Monitoring Image:
   extends: .build_template
   environment:
     name: $CI_COMMIT_BRANCH/build-monitoring
+    auto_stop_in: 2 weeks
 
 Build LegacyLinks Image:
   variables:
@@ -42,11 +47,13 @@ Build LegacyLinks Image:
   extends: .build_template
   environment:
     name: $CI_COMMIT_BRANCH/build-legacylinks
+    auto_stop_in: 2 weeks
 
 Build Vufind Image:
   stage: Build
   environment:
     name: $CI_COMMIT_BRANCH/build-vufind
+    auto_stop_in: 2 weeks
   tags:
     - msul-shared
   retry: 2
