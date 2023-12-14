@@ -85,32 +85,6 @@ services:
         - "traefik.http.routers.${STACK_NAME}-https-links.service=${STACK_NAME}-https-links-app"
         - "traefik.http.services.${STACK_NAME}-https-links-app.loadbalancer.server.port=80"
 
-  croncache:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
-    command: /startup-croncache.sh
-    volumes:
-      - vufind_cache:/mnt/vufind_cache
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "5"
-        max-size: "10m"
-    networks:
-      - internal
-    healthcheck:
-      disable: true
-    deploy:
-      mode: replicated
-      replicas: 3
-      placement:
-        max_replicas_per_node: 1
-      restart_policy:
-        window: 15s
-      update_config:
-        parallelism: 1
-        failure_action: rollback
-        delay: 10s
-
   cron:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     command: /startup-cron.sh

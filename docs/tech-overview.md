@@ -101,7 +101,6 @@ a read-only access key to the registry to pull from
     **cron**: A single replica service using the `catalog` service's image to run automated jobs
     such as the periodic harvest and import of data from FOLIO  
     **legacylinks**: Redirrects legacy Sierra formated URLS to VuFind record pages  
-    **croncache**: Only on development environments, clearing local cache files that are created  
 * **solr**:  
     **solr**: Runs SolrCloud  
     **zk**: ZooKeeper in the foreground  
