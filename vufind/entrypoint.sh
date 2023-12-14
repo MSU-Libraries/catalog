@@ -12,7 +12,7 @@ envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini
 envsubst < /etc/aliases | sponge /etc/aliases
 
 # Disable file cache for devel environments
-if [[ "${STACK_NAME}" == devel-* ]]
+if [[ "${STACK_NAME}" == devel-* ]]; then
   sed -i '/^\[Cache\]$/,/^\[/ s/^;disabled = true/disabled = true/' local/config/vufind/config.ini
 fi
 
