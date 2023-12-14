@@ -14,6 +14,7 @@ envsubst < /etc/aliases | sponge /etc/aliases
 # Disable file cache for devel environments
 if [[ "${STACK_NAME}" == devel-* ]]; then
   sed -i '/^\[Cache\]$/,/^\[/ s/^;disabled = true/disabled = true/' local/config/vufind/config.ini
+  unset VUFIND_CACHE_DIR
 fi
 
 # Finish SimpleSAMLphp config setup
@@ -34,9 +35,7 @@ if [[ "$1" == "/startup-cron.sh" ]]; then
         echo JAVA_HOME="$JAVA_HOME" >> /etc/environment
         echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment
         echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR" >> /etc/environment
-        if [[ "${STACK_NAME}" == devel-* ]]; then
-            unset VUFIND_CACHE_DIR
-        else
+        if [[ "${STACK_NAME}" != devel-* ]]; then
             echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment
         fi
         echo VUFIND_LOCAL_MODULES="Catalog" >> /etc/environment
