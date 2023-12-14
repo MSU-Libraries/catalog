@@ -31,7 +31,8 @@
     </a>
   <?php endif; ?>
 <?php elseif (($pLink || $ftLink || $pdfLink || $epubLink) && !empty($item)): ?>
-  <a class="login" href="<?=$this->url('myresearch-userlogin')?>">
+  <a class="login" href="<?=$this->url('myresearch-userlogin')?>" data-lightbox ref="nofollow">
+    <span class="icon icon--font fa fa-sign-in icon-link__icon" role="img" aria-hidden="true"></span>
     <strong><?=$this->transEsc('Login for full access')?></strong>
   </a>
 <?php endif; ?>
