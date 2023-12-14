@@ -9,6 +9,10 @@ secret_detection:
   tags:
     - msul-shared
 
+# Does not have the environment tag due to this being run on merge requests
+# and the $CI_COMMIT_BRANCH variable may not exist yet and could cause this error:
+# "This job could not be executed because it would create an environment with an invalid parameter."
+# See: https://gitlab.msu.edu/help/ci/environments/index#a-deployment-job-failed-with-this-job-could-not-be-executed-because-it-would-create-an-environment-with-an-invalid-parameter-error
 Shellcheck CI:
   stage: test
   image: alpine:latest
