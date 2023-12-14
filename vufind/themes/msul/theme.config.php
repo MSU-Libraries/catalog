@@ -10,7 +10,7 @@ return [
         ['file' => 'get-this-dropdown.js', 'priority' => 450],
         ['file' => 'check_item_statuses.js', 'priority' => 450],
     ],
-
+    'favicon' => 'msul-favicon.ico',
     'helpers' => [
         'factories' => [
             'VuFind\View\Helper\Root\RecordDataFormatter' => 'Catalog\View\Helper\Root\RecordDataFormatterFactory',
