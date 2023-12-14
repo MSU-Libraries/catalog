@@ -153,7 +153,7 @@ WORKDIR /usr/local/vufind
 RUN \
     # Set permissions on local, theme, and Catalog
     chown -R 1000:1000 ${VUFIND_LOCAL_DIR} && \
-    chown -R 33:33 ${VUFIND_LOCAL_DIR}/cache && \
+    chown -R 33:1000 ${VUFIND_LOCAL_DIR}/cache && \
     chown -R 33:1000 ${VUFIND_HOME}/themes/msul && \
     chown -R 1000:1000 ${VUFIND_HOME}/module/Catalog && \
     rsync -aip --chmod=D2775,F664 ${VUFIND_LOCAL_DIR}/ ${VUFIND_LOCAL_DIR}/ && \
