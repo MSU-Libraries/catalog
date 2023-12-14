@@ -96,6 +96,7 @@ let SLEEP_TIME=${NODE}*4
 sleep $SLEEP_TIME
 
 # Create Solr collections
+# biblio needs to be done first in order to initialize the ICUTokenizerFactory
 COLLS=("biblio1" "biblio2" "authority" "reserves" "website")
 for COLL in "${COLLS[@]}"
 do
@@ -112,9 +113,9 @@ do
         OUTPUT=$(curl -s "http://solr:8983/solr/admin/collections?action=CREATE&name=${COLL}&numShards=1&replicationFactor=3&wt=xml&collection.configName=${COLL}")
         HAS_ERROR=$(echo ${OUTPUT} | grep "SolrException" | wc -l)
 
-        if [[ $((HAS_ERROR)) -gt 0 ]]; then
+        if [[ ${HAS_ERROR} -gt 0 ]]; then
             echo "Failed to create Solr collection ${COLL}. ${OUTPUT}"
-            sleep 10
+            sleep 5
         else
             echo "Created Solr collection for ${COLL}."
             # Not breaking here so we can do a final curl call to verify it is showing in the cluster status properly
