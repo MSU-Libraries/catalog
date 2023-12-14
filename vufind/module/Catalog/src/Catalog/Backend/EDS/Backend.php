@@ -31,6 +31,10 @@
 namespace Catalog\Backend\EDS;
 
 use Laminas\Cache\Storage\StorageInterface as CacheInterface;
+use Laminas\Config\Config;
+use Laminas\Session\Container as SessionContainer;
+use VuFindSearch\Backend\EDS\Connector;
+use VuFindSearch\Response\RecordCollectionFactoryInterface;
 
 /**
  *  EDS API Backend

@@ -31,6 +31,7 @@ namespace Catalog\Search\Factory;
 
 use Catalog\Backend\EDS\Backend;
 use Catalog\Backend\EDS\QueryBuilder;
+use VuFindSearch\Backend\EDS\Connector;
 
 /**
  * Extending the backend to customize the builder for our query param overrides
