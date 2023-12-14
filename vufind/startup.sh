@@ -103,8 +103,9 @@ do
     MATCHED_COLL=$(curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.collections | keys[]" | grep "${COLL}")
     while [[ -z "${MATCHED_COLL}" ]]; do
         # Create collection
-        if ! OUTPUT=$(curl "http://solr:8983/solr/admin/collections?action=CREATE&name=$COLL&numShards=1&replicationFactor=3&wt=xml&collection.configName=$COLL"i); then
-            echo "Failed to create Solr collection ${COLL}. ${OUTPUT}"
+        OUTPUT=$(curl -s "http://solr:8983/solr/admin/collections?action=CREATE&name=$COLL&numShards=1&replicationFactor=3&wt=xml&collection.configName=$COLL" | grep "SolrException" | wc -l)
+        if [[ ${OUTPUT} -gt 0 ]]; then
+            echo "Failed to create Solr collection ${COLL}; will sleep for Solr to be ready and try again..."
             sleep 3
         else
             echo "Created Solr collection for $COLL."
