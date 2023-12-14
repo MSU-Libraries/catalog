@@ -42,6 +42,7 @@ Create DNS:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/create-dns
+    auto_stop_in: 2 weeks
   image: $CI_REGISTRY_IMAGE/ansible:latest
   rules:
     - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
@@ -55,6 +56,7 @@ Deploy Compose Files:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/deploy-compose
+    auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
@@ -68,6 +70,7 @@ Initialize Log Dirs:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/init-logs
+    auto_stop_in: 2 weeks
   script:
      - bash ./cicd/initialize-log-dirs
 
@@ -75,6 +78,7 @@ Deploy Internal Network:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/deploy-network
+    auto_stop_in: 2 weeks
   script:
     - bash ./cicd/deploy-internal-network
   needs:
@@ -86,6 +90,7 @@ Bootstrap Stacks:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/bootstrap
+    auto_stop_in: 2 weeks
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -100,6 +105,7 @@ Deploy ZK:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/deploy-zk
+    auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
@@ -118,6 +124,7 @@ Deploy Solr:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/deploy-solr
+    auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
@@ -137,6 +144,7 @@ Deploy DB:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/deploy-db
+    auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
@@ -155,6 +163,7 @@ Deploy Vufind:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/deploy-vufind
+    auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
@@ -176,6 +185,7 @@ Deploy Vufind Build Env:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/deploy-buildenv
+    auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
       when: manual
@@ -195,6 +205,7 @@ Deploy Monitoring:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/deploy-monitoring
+    auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
@@ -211,6 +222,7 @@ Verify Stack Health:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/verify
+    auto_stop_in: 2 weeks
   timeout: 20m
   needs:
     - job: Set Stack Name
@@ -224,6 +236,7 @@ Populate Vufind Environment:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/populate
+    auto_stop_in: 2 weeks
   timeout: 10m
   rules:
     - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
@@ -238,6 +251,7 @@ Run Functional Tests:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/run-tests
+    auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH == "catalog-preview"'

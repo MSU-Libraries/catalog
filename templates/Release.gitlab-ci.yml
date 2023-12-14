@@ -4,6 +4,7 @@ Tag Release:
   stage: Release
   environment:
     name: $CI_COMMIT_BRANCH/tag
+    auto_stop_in: 2 weeks
   needs:
     - Build DB Image
     - Build LegacyLinks Image
@@ -41,6 +42,7 @@ GitHub Release:
   stage: Release
   environment:
     name: $CI_COMMIT_BRANCH/release
+    auto_stop_in: 2 weeks
   tags:
     - msul-shared
   timeout: 5m
