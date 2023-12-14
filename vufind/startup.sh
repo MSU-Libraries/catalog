@@ -96,7 +96,7 @@ let SLEEP_TIME=${NODE}*4
 sleep $SLEEP_TIME
 
 # Create Solr collections
-COLLS=("authority" "biblio1" "biblio2" "reserves" "website")
+COLLS=("biblio1" "biblio2" "authority" "reserves" "website")
 for COLL in "${COLLS[@]}"
 do
     # See if the collection already exists in Solr
