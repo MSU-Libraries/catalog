@@ -143,6 +143,16 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get the language note fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getLanguageNotes()
+    {
+        return $this->getNotesMarcFields('546');
+    }
+
+    /**
      * Get the 590 local notes field
      *
      * @return array Content from Solr
