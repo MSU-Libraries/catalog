@@ -155,9 +155,9 @@ RUN \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
-    chown -R 33:33 /usr/local/vufind/local/cache && \
     # Set permissions on local, theme, and Catalog
     chown -R 1000:1000 ${VUFIND_LOCAL_DIR} && \
+    chown -R 33:33 ${VUFIND_LOCAL_DIR}/cache && \
     chown -R 33:1000 ${VUFIND_HOME}/themes/msul && \
     chown -R 1000:1000 ${VUFIND_HOME}/module/Catalog && \
     rsync -aip --chmod=D2775,F664 ${VUFIND_CACHE_DIR}/ ${VUFIND_CACHE_DIR}/ && \
