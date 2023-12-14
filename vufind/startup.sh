@@ -101,13 +101,18 @@ for COLL in "${COLLS[@]}"
 do
     # See if the collection already exists in Solr
     MATCHED_COLL=$(curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.collections | keys[]" | grep "${COLL}")
-    if [ -z "${MATCHED_COLL}" ]; then
+    while [[ -z "${MATCHED_COLL}" ]]; do
         # Create collection
-        curl "http://solr:8983/solr/admin/collections?action=CREATE&name=$COLL&numShards=1&replicationFactor=3&wt=xml&collection.configName=$COLL"
-        echo "Created Solr collection for $COLL."
-    else
-        echo "Verified that Solr collection $COLL exists."
-    fi
+        if ! OUTPUT=$(curl "http://solr:8983/solr/admin/collections?action=CREATE&name=$COLL&numShards=1&replicationFactor=3&wt=xml&collection.configName=$COLL"i); then
+            echo "Failed to create Solr collection ${COLL}. ${OUTPUT}"
+            sleep 3
+        else
+            echo "Created Solr collection for $COLL."
+            # Not breaking here so we can do a final curl call to verify it is showing in the cluster status properly
+        fi
+        MATCHED_COLL=$(curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.collections | keys[]" | grep "${COLL}")
+    done
+    echo "Verified that Solr collection $COLL exists."
 done
 
 echo "If there are no aliases create them"
