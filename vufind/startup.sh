@@ -124,6 +124,17 @@ if ! [[ "${ALIASES}" =~ .*"biblio".* ]]; then
     fi
 fi
 
+# Initialize VuFind cache
+rm -r /usr/local/vufind/local/cache/*
+mkdir -p /usr/local/vufind/local/cache/cli \
+         /usr/local/vufind/local/cache/covers \
+         /usr/local/vufind/local/cache/objects \
+         /usr/local/vufind/local/cache/yamls \
+         /usr/local/vufind/local/cache/searchspecs
+chown 33:33 /usr/local/vufind/local/cache/*
+chmod g+sw /usr/local/vufind/local/cache/cli /usr/local/vufind/local/cache/covers
+chmod g+s /usr/local/vufind/local/cache/objects /usr/local/vufind/local/cache/yamls
+
 # Run grunt if a devel/review site
 if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
     echo "Starting grunt to auto-compile theme changes..."
