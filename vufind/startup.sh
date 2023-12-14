@@ -78,9 +78,6 @@ ln -f -s /mnt/shared/config/BannerNotices.yaml /usr/local/vufind/local/config/vu
 ln -f -s /mnt/shared/config/LocationNotices.yaml /usr/local/vufind/local/config/vufind/LocationNotices.yaml
 ln -f -s /mnt/shared/config/RequestNotices.yaml /usr/local/vufind/local/config/vufind/RequestNotices.yaml
 
-# Prepare cache cli dir (volume only exists after start)
-clear-vufind-cache
-
 # Ensure SolrCloud is available prior to creating Collections
 CLUSTER_STATUS_URL="http://solr:8983/solr/admin/collections?action=clusterstatus"
 SOLR_CLUSTER_SIZE=0

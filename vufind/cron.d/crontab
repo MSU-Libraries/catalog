@@ -25,9 +25,6 @@
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=$EMAIL
 
-# VuFund cache clear on start
-@reboot root chronic clear-vufind-cache 2>&1 | logger -t CACHE_CLEAR
-
 # Harvest updates
 ${FOLIO_CRON_MINS} 3-23 * * *	root    cron-folio.sh
 ${HARV_CRON_MINS} 2    * * *	root    cron-hlm.sh

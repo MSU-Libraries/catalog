@@ -5,7 +5,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV VUFIND_LOCAL_DIR=/usr/local/vufind/local
 ENV VUFIND_HOME=/usr/local/vufind
 ENV JAVA_HOME=/usr/lib/jvm/default-java
-ENV VUFIND_CACHE_DIR=/mnt/vufind_cache
 
 # TEMP(PART1): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/99
 COPY patches/ /tmp/patches/
@@ -152,15 +151,11 @@ RUN chmod -R g-w,o-w /etc/cron.d/ && \
 WORKDIR /usr/local/vufind
 
 RUN \
-    # Prepare cache directory
-    mkdir -p ${VUFIND_CACHE_DIR} && \
-    chown -R 33:33 ${VUFIND_CACHE_DIR} && \
     # Set permissions on local, theme, and Catalog
     chown -R 1000:1000 ${VUFIND_LOCAL_DIR} && \
     chown -R 33:33 ${VUFIND_LOCAL_DIR}/cache && \
     chown -R 33:1000 ${VUFIND_HOME}/themes/msul && \
     chown -R 1000:1000 ${VUFIND_HOME}/module/Catalog && \
-    rsync -aip --chmod=D2775,F664 ${VUFIND_CACHE_DIR}/ ${VUFIND_CACHE_DIR}/ && \
     rsync -aip --chmod=D2775,F664 ${VUFIND_LOCAL_DIR}/ ${VUFIND_LOCAL_DIR}/ && \
     rsync -aip --chmod=D2775,F664 ${VUFIND_HOME}/themes/msul/ ${VUFIND_HOME}/themes/msul/ && \
     rsync -aip --chmod=D2775,F664 ${VUFIND_HOME}/module/Catalog/ ${VUFIND_HOME}/module/Catalog/ && \

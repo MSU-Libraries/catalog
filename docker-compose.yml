@@ -12,7 +12,6 @@ services:
       - /mnt/shared:/mnt/shared:rw
       - /mnt/shared/config/BannerNotices.yaml:/mnt/shared/config/BannerNotices.yaml:ro
       - /mnt/shared/config/LocationNotices.yaml:/mnt/shared/config/LocationNotices.yaml:ro
-      - vufind_cache:/mnt/vufind_cache
     networks:
       - public
       - internal
@@ -165,4 +164,3 @@ volumes:
   logs:
     external: true
     name: "${STACK_NAME}_logs"
-  vufind_cache:
