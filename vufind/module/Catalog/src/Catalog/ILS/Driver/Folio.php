@@ -3,9 +3,9 @@
 /**
  * FOLIO REST API driver
  *
- * PHP version 7
+ * PHP version 8
  *
- * Copyright (C) Villanova University 2022.
+ * Copyright (C) Villanova University 2018-2023.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2,
@@ -46,56 +46,6 @@ use function in_array;
  */
 class Folio extends \VuFind\ILS\Driver\Folio
 {
-    /**
-     * Support method for getHolding(): extract details from the holding record that
-     * will be needed by formatHoldingItem() below.
-     *
-     * See https://github.com/vufind-org/vufind/pull/2983
-     *
-     * @param object $holding FOLIO holding record (decoded from JSON)
-     *
-     * @return array
-     */
-    protected function getHoldingDetailsForItem($holding): array
-    {
-        $textFormatter = function ($supplement) {
-            $format = '%s %s';
-            $supStat = $supplement->statement ?? '';
-            $supNote = $supplement->note ?? '';
-            $statement = trim(sprintf($format, $supStat, $supNote));
-            return $statement;
-        };
-        $id = $holding->id;
-        $holdingNotes = array_filter(
-            array_map([$this, 'formatNote'], $holding->notes ?? [])
-        );
-        $hasHoldingNotes = !empty(implode($holdingNotes));
-        $holdingsStatements = array_filter(array_map(
-            $textFormatter,
-            $holding->holdingsStatements ?? []
-        ));
-        $holdingsSupplements = array_filter(array_map(
-            $textFormatter,
-            $holding->holdingsStatementsForSupplements ?? []
-        ));
-        $holdingsIndexes = array_filter(array_map(
-            $textFormatter,
-            $holding->holdingsStatementsForIndexes ?? []
-        ));
-        $holdingCallNumber = $holding->callNumber ?? '';
-        $holdingCallNumberPrefix = $holding->callNumberPrefix ?? '';
-        return compact(
-            'id',
-            'holdingNotes',
-            'hasHoldingNotes',
-            'holdingsStatements',
-            'holdingsSupplements',
-            'holdingsIndexes',
-            'holdingCallNumber',
-            'holdingCallNumberPrefix'
-        );
-    }
-
     /**
      * Support method for getHolding() -- given a few key details, format an item
      * for inclusion in the return value.

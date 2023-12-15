@@ -137,8 +137,6 @@ COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
 COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh \
     harvest-and-import.sh hlm-harvest-and-import.sh authority-harvest-and-import.sh backup.sh restore.sh /
-COPY import-marc.sh /usr/local/vufind/import-marc.sh
-COPY batch-import-marc.sh /usr/local/vufind/harvest/batch-import-marc.sh
 COPY msmtp/aliases msmtp/msmtprc /etc/
 
 # Setup cron and logging for cron
