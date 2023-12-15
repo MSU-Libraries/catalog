@@ -199,7 +199,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 // PC-872: Filter out LoM holdings
                 if (
                     !empty($nextItem['location']) && (
-                        str_starts_with($nextItem['location'], 'Library of Michigan') ||
+                        str_starts_with(strtolower($nextItem['location']), 'library of michigan') ||
                         str_starts_with($nextItem['location'], 'Technical migration')
                     )
                 ) {
