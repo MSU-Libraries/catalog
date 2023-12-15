@@ -350,12 +350,13 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         $idx = 0;
         $marc = $this->getMarcReader();
 
-        $marc856s = $marc->getFields('856', ['u', 'y', 'z']);
+        $marc856s = $marc->getFields('856', ['u', 'y', 'z', '3']);
         $marc773s = $marc->getFields('773', ['t']);
 
         foreach ($marc856s as $marc856) {
             $subfields = $marc856['subfields'];
             $rec = [];
+            $suffix = '';
 
             foreach ($subfields as $subfield) {
                 $sfvals[$subfield['code']] = $subfield['data'];
@@ -363,12 +364,19 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                     $rec['url'] = $subfield['data'];
                 } elseif (in_array($subfield['code'], ['y','z'])) {
                     $rec['desc'] = $subfield['data'];
+                } elseif ($subfield['code'] == '3') {
+                    $suffix = ' (' . $subfield['data'] . ')';
                 }
             }
 
             // Fall back to 773 field if we can't find description in the '856z' field
             if ((in_array('z', $subfields) || empty($rec['desc'])) && count($marc773s) >= $idx) {
                 $rec['desc'] = $marc773s[$idx]['subfields'][0]['data'];
+            }
+
+            // Append the 856|3 if present
+            if (!empty($suffix)) {
+                $rec['desc'] .= $suffix;
             }
 
             $data[] = $rec;
