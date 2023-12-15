@@ -170,6 +170,21 @@ root@vufind:/usr/local/vufind# /hlm-harvest-and-import.sh --import --verbose | t
 curl 'http://solr:8983/solr/admin/metrics?nodes=solr1:8983_solr,solr2:8983_solr,solr3:8983_solr&prefix=SEARCHER.searcher.numDocs,SEARCHER.searcher.deletedDocs&wt=json'
 ```
 
+* Build the spellchecking indices
+Building these indices is only necessary for a full import.
+```bash
+curl 'http://solr1:8983/solr/biblio-build/select?q=*:*&spellcheck=true&spellcheck.build=true' &
+curl 'http://solr2:8983/solr/biblio-build/select?q=*:*&spellcheck=true&spellcheck.build=true' &
+curl 'http://solr3:8983/solr/biblio-build/select?q=*:*&spellcheck=true&spellcheck.build=true' &
+wait
+curl 'http://solr1:8983/solr/biblio-build/select?q=*:*&spellcheck.dictionary=basicSpell&spellcheck=true&spellcheck.build=true' &
+curl 'http://solr2:8983/solr/biblio-build/select?q=*:*&spellcheck.dictionary=basicSpell&spellcheck=true&spellcheck.build=true' &
+curl 'http://solr3:8983/solr/biblio-build/select?q=*:*&spellcheck.dictionary=basicSpell&spellcheck=true&spellcheck.build=true' &
+wait
+```
+`/bitnami/solr/server/solr/biblioN/spellShingle` and `/bitnami/solr/server/solr/biblioN/spellchecker` should have a significant size afterwards in the solr container (replace `biblioN` by the `biblio-build` collection)
+
+
 * Once you are confident in the new data, you are ready to do the swap! **BE SURE TO SWAP THE NAME AND COLLECTION IN THE BELOW COMMAND EXAMPLE**  
 !!! warning
     Your Solr instance may require more memory than it typically needs to do the collection alias swap

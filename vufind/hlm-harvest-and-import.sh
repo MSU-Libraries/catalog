@@ -429,6 +429,10 @@ import() {
             exit 1
         fi
     fi
+
+    verbose "Solr optimization"
+    php "${VUFIND_HOME}/public/index.php" util/optimize
+
     verbose "Completed processing records to be deleted."
 }
 
