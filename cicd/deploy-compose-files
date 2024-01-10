@@ -28,6 +28,8 @@ fi
 declare -a -g HTTPS_MIDDLEWARES=(remove-prefix)
 
 apply_devel_changes() {
+    # Restrict devel/review to campus IPs only
+    HTTPS_MIDDLEWARES+=("ip-campus")
     # Use dnschallenge cert resolver (instead of httpchallenge)
     ./yq -i \
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt-dns\"" \
@@ -161,6 +163,8 @@ apply_prod_changes() {
 
     ## Changes for catalog-beta and catalog-preview
     if [ "${STACK_NAME}" == "catalog-beta" ] || [ "${STACK_NAME}" == "catalog-preview" ]; then
+        # Restrict both beta/preview to campus IPs only
+        HTTPS_MIDDLEWARES+=("ip-campus")
         ## Only catalog-beta
         if [ "${STACK_NAME}" == "catalog-beta" ]; then
             # Set cron/build placement contraint
