@@ -64,7 +64,7 @@ docker stack deploy -c <(source .env; envsubst <docker-compose.mariadb-cloud.yml
 docker stack deploy -c <(source .env; envsubst <docker-compose.solr-cloud.yml) solr
 
 # The vufind stack
-docker stack deploy -c <(source .env; envsubst <docker-compose.yml) catalog
+docker stack deploy -c <(source .env; envsubst <docker-compose.vufind.yml) catalog
 
 # Deploy the swarm cleanup stack
 docker stack deploy -c <(source .env; envsubst <docker-compose.swarm-cleanup.yml) swarm-cleanup
