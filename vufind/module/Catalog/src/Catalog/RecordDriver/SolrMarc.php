@@ -231,6 +231,16 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get the uniform title
+     *
+     * @return array Content from Solr
+     */
+    public function getUniformTitle()
+    {
+        return $this->getMarcField('130', range('a', 'z'));
+    }
+
+    /**
      * Get the Sierra bib number
      *
      * @return array Content from Solr
