@@ -296,7 +296,7 @@ main() {
     docker-compose.yml;
 
     # Limit access to prod OAI; must happen after middleware added
-    if [ "${STACK_NAME}" == "catalog-*" ]; then
+    if [[ "${STACK_NAME}" == catalog-* ]]; then
         restrict_oai
     fi
 
