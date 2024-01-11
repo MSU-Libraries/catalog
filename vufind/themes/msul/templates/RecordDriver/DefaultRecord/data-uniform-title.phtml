@@ -6,5 +6,7 @@
     <a href="<?=$this->record($this->driver)->getLink('uniform-title', $data[0]['name'])?>"><?=$this->escapeHtml(implode(' ', $data))?></a>
   <?php endif; ?>
 <?php else: ?>
-  <a href="<?=$this->record($this->driver)->getLink('uniform-title', $data[0])?>"><?=$this->escapeHtml(implode(' ', $data))?></a>
+  <a href="<?=$this->record($this->driver)->getLink('uniform-title', $data[0])?>"><?=$this->escapeHtml($data[0])?></a>
+  <?php array_shift($data); ?>
+  <?=$this->escapeHtml(implode(' ', $data))?>
 <?php endif; ?>
