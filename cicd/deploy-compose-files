@@ -252,6 +252,17 @@ apply_prod_changes() {
     fi
 }
 
+restrict_oai() {
+    # Restrict OAI access (duplicates https-router then adds middleware and rule path)
+    while read -r LINE; do
+        export LINE; yq -i '.services.catalog.deploy.labels += env(LINE)' docker-compose.yml
+    done < <( \
+        yq '.services.catalog.deploy.labels[] | select(. == "traefik.http.routers.*-https-router.*")' docker-compose.yml |
+        sed -e 's/-https-router/-oai-https-router/' -e 's/middlewares=/middlewares=ip-campus,/';
+        echo 'traefik.http.routers.${STACK_NAME}-oai-https-router.rule="Host(`catalog.lib.msu.edu`) && PathPrefix(`/OAI/Server`))"'
+    );
+}
+
 main() {
     # Install yq, enbsubst, and sponge
     apk add wget gettext moreutils;
@@ -277,6 +288,11 @@ main() {
     ./yq -i \
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.middlewares=$(IFS=, ; echo "${HTTPS_MIDDLEWARES[*]}")\"" \
     docker-compose.yml;
+
+    # Limit access to prod OAI (other deployments are already ip limited); must happen after middleware added
+    if [ "${STACK_NAME}" == "catalog-prod" ]; then
+        restrict_oai
+    fi
 
     # Authentication environment changes
     if [[ "${STACK_NAME}" == catalog-* ]] || [ "${STACK_NAME}" == "devel-authentication" ]; then
