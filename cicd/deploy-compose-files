@@ -28,6 +28,8 @@ fi
 declare -a -g HTTPS_MIDDLEWARES=(remove-prefix)
 
 apply_devel_changes() {
+    # Restrict devel/review to campus IPs only
+    HTTPS_MIDDLEWARES+=("ip-campus")
     # Use dnschallenge cert resolver (instead of httpchallenge)
     ./yq -i \
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt-dns\"" \
@@ -161,6 +163,8 @@ apply_prod_changes() {
 
     ## Changes for catalog-beta and catalog-preview
     if [ "${STACK_NAME}" == "catalog-beta" ] || [ "${STACK_NAME}" == "catalog-preview" ]; then
+        # Restrict both beta/preview to campus IPs only
+        HTTPS_MIDDLEWARES+=("ip-campus")
         ## Only catalog-beta
         if [ "${STACK_NAME}" == "catalog-beta" ]; then
             # Set cron/build placement contraint
@@ -248,6 +252,23 @@ apply_prod_changes() {
     fi
 }
 
+restrict_oai() {
+    # Restrict OAI access (duplicates https-router then adds middleware and rule path)
+    while read -r LINE; do
+        export LINE; ./yq -i '.services.catalog.deploy.labels += env(LINE)' docker-compose.yml
+    done < <( \
+        ./yq '.services.catalog.deploy.labels[] | select(. == "traefik.http.routers.*-https-router.*")' docker-compose.yml |
+        sed -e 's/-https-router/-oai-https-router/' -e 's/middlewares=/middlewares=ip-campus,/' |
+        grep -vF ".rule="
+    );
+
+    LINE=$(
+        ./yq '.services.catalog.deploy.labels[] | select(. == "traefik.http.routers.*-https-router.rule=*") + " && PathPrefix(`/OAI/Server`)"' docker-compose.yml |
+        sed -e 's/-https-router/-oai-https-router/'
+    )
+    export LINE; ./yq -i '.services.catalog.deploy.labels += env(LINE)' docker-compose.yml
+}
+
 main() {
     # Install yq, enbsubst, and sponge
     apk add wget gettext moreutils;
@@ -273,6 +294,11 @@ main() {
     ./yq -i \
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.middlewares=$(IFS=, ; echo "${HTTPS_MIDDLEWARES[*]}")\"" \
     docker-compose.yml;
+
+    # Limit access to prod OAI; must happen after middleware added
+    if [ "${STACK_NAME}" == "catalog-*" ]; then
+        restrict_oai
+    fi
 
     # Authentication environment changes
     if [[ "${STACK_NAME}" == catalog-* ]] || [ "${STACK_NAME}" == "devel-authentication" ]; then
