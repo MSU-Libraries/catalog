@@ -255,18 +255,18 @@ apply_prod_changes() {
 restrict_oai() {
     # Restrict OAI access (duplicates https-router then adds middleware and rule path)
     while read -r LINE; do
-        export LINE; ./yq -i '.services.catalog.deploy.labels += env(LINE)' docker-compose.yml
+        export LINE; ./yq -i '.services.catalog.deploy.labels += env(LINE)' docker-compose.catalog.yml
     done < <( \
-        ./yq '.services.catalog.deploy.labels[] | select(. == "traefik.http.routers.*-https-router.*")' docker-compose.yml |
+        ./yq '.services.catalog.deploy.labels[] | select(. == "traefik.http.routers.*-https-router.*")' docker-compose.catalog.yml |
         sed -e 's/-https-router/-oai-https-router/' -e 's/middlewares=/middlewares=ip-campus,/' |
         grep -vF ".rule="
     );
 
     LINE=$(
-        ./yq '.services.catalog.deploy.labels[] | select(. == "traefik.http.routers.*-https-router.rule=*") + " && PathPrefix(`/OAI/Server`)"' docker-compose.yml |
+        ./yq '.services.catalog.deploy.labels[] | select(. == "traefik.http.routers.*-https-router.rule=*") + " && PathPrefix(`/OAI/Server`)"' docker-compose.catalog.yml |
         sed -e 's/-https-router/-oai-https-router/'
     )
-    export LINE; ./yq -i '.services.catalog.deploy.labels += env(LINE)' docker-compose.yml
+    export LINE; ./yq -i '.services.catalog.deploy.labels += env(LINE)' docker-compose.catalog.yml
 }
 
 main() {
