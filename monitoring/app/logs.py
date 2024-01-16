@@ -72,6 +72,7 @@ def node_logs(service: str) -> str:
         'vufind/searches_cleanup': '/mnt/logs/vufind/searches_cleanup.log',
         'backups/solr':            '/mnt/logs/backups/solr.log',
         'backups/db':              '/mnt/logs/backups/db.log',
+        'backups/alpha':           '/mnt/logs/backups/alpha.log',
         'solr':                    '/mnt/logs/solr/solr.log'
     }
     if service not in paths:

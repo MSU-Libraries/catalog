@@ -10,6 +10,8 @@ services:
     volumes:
       - logs:/mnt/logs
       - /mnt/shared:/mnt/shared:rw
+      # Requires rw so it can restore from backups
+      - /mnt/shared/alpha-browse/${STACK_NAME}:/mnt/alpha-browse:ro
     networks:
       - internal
     extra_hosts:

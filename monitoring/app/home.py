@@ -22,6 +22,7 @@ def homepage() -> str:
     status_list['searches_cleanup'] = status.get_cron_status('searches', statuses)
     status_list['solr_backup'] = status.get_cron_status('solr', statuses)
     status_list['db_backup'] = status.get_cron_status('db', statuses)
+    status_list['solr_backup'] = status.get_cron_status('alpha', statuses)
     services = {}
     for s_name, s_text in status_list.items():
         if s_text.startswith('OK'):
