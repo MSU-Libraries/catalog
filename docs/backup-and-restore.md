@@ -2,7 +2,8 @@
 
 # Backup
 Included with this repository is a script and automated job to backup both the MariaDB
-database and the Solr index to the shared storage location (`/mnt/shared`).
+database, the Solr index, and the alphabetical browse database files to the shared storage
+location (`/mnt/shared`).
 
 The script is part of the `vufind` image used by the `cron` service in the `catalog`
 stack. The shared storage is mounted on the `solr` service so that the cluster has
@@ -54,5 +55,8 @@ Examples for restoring from backups:
 ./restore.sh --db /mnt/shared/backups/db/dbbackup.tar --node 2
 
 # Restoring the `authority` and `biblio` index
-./restore -b /tmp/biblio.tar.gz -a /tmp/authority.tar.gz -v 
+./restore -b /tmp/biblio.tar.gz -a /tmp/authority.tar.gz -v
+
+# Restoring the alhpabrowse database
+./restore.sh --alpha /mnt/shared/backups/alpha/20240116152918.tar
 ```

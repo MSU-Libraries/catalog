@@ -4,10 +4,11 @@
 default_args() {
     declare -g -A ARGS
     ARGS[SHARED_DIR]=/mnt/shared/backups
+    ARGS[ALPHA_DIR]=/mnt/alpha-browse
     ARGS[AUTHORITY]=
     ARGS[BIBLIO]=
     ARGS[DB]=
-    ARGS[NODE]=1
+    ARGS[NODE]=
     ARGS[VERBOSE]=0
 }
 default_args
@@ -15,12 +16,14 @@ default_args
 # Script help text
 runhelp() {
     echo ""
-    echo "Usage: Runs a restore of the Solr and/or the database from"
-    echo "       data backups."
+    echo "Usage: Runs a restore of the Solr, the database, and/or the alphabrowse"
+    echo "       files from backups."
     echo ""
     echo "Examples:"
     echo "  ./restore.sh --biblio /path/to/biblio/snapshot.1.tar.gz"
     echo "     Restore the biblio Solr index using data from snapshot.1.tar.gz"
+    echo "  ./restore.sh --alpha /path/to/alpha/20220101.tar"
+    echo "     Restore the alphabrowse databases from 20220101.tar"
     echo "  ./restore.sh --db /path/to/20220101.tar"
     echo "     Restore the database using 20220101.tar backup"
     echo "  ./restore.sh --authority /path/to/authority/snapshot.1.tar.gz"
@@ -31,11 +34,16 @@ runhelp() {
     echo "     Full path to the authority Solr index backup to restore to"
     echo "  -b/--biblio"
     echo "     Full path to the biblio Solr index backup to restore to"
+    echo "  -l|--alpha"
+    echo "     Back up the Solr alphabrowse database files"
     echo "  -d/--db"
     echo "     Full path to the database backup to restore to"
     echo "  -n/--node"
     echo "     Node number to restore the database backup from"
     echo "     Default: 1"
+    echo "  -p|--alpha-dir ALPHA_DIR"
+    echo "      Full path to the alphabrowse database storage location."
+    echo "      Default: ${ARGS[ALPHA_DIR]}"
     echo "  -s|--shared-dir SHARED_DIR"
     echo "      Full path to the shared storage location for backups to be stored."
     echo "      Default: ${ARGS[SHARED_DIR]}"
@@ -53,6 +61,14 @@ parse_args() {
     # Parse flag arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
+        -l|--alpha)
+            ARGS[ALPHA]=$( readlink -f "$2" )
+            RC=$?
+            if [[ "$RC" -ne 0 || ! -f "${ARGS[ALPHA]}" ]]; then
+                echo "ERROR: -l|--alpha file does not exist: $2"
+                exit 1
+            fi
+            shift; shift ;;
         -a|--authority)
             ARGS[AUTHORITY]=$( readlink -f "$2" )
             RC=$?
@@ -85,6 +101,14 @@ parse_args() {
                 exit 1
             fi
             shift; shift ;;
+        -p|--alpha-dir)
+            ARGS[ALPHA_DIR]=$( readlink -f "$2" )
+            RC=$?
+            if [[ "$RC" -ne 0 || ! -d "${ARGS[ALPHA_DIR]}" ]]; then
+                echo "ERROR: -p|--alpha-dir path does not exist: $2"
+                exit 1
+            fi
+            shift; shift ;;
         -n|--node)
             ARGS[NODE]="$2"
             if [[ ! "${ARGS[NODE]}" -gt 0 ]]; then
@@ -103,8 +127,8 @@ parse_args() {
 }
 
 catch_invalid_args() {
-    if [[ -z "${ARGS[AUTHORITY]}" && -z "${ARGS[DB]}" && -z "${ARGS[BIBLIO]}" ]]; then
-        echo "ERROR: Neither --authority, --biblio or --db flag is set. Please select one or more to use this tool."
+    if [[ -z "${ARGS[AUTHORITY]}" && -z "${ARGS[DB]}" && -z "${ARGS[BIBLIO]}" && -z "${ARGS[ALPHA]}" ]]; then
+        echo "ERROR: Neither --authority, --biblio, --alpha, or --db flag is set. Please select one or more to use this tool."
         exit 1
     fi
 
@@ -237,6 +261,48 @@ restore_db() {
     verbose "Completed restore of database"
 }
 
+restore_alpha() {
+    verbose "Extracting the backup"
+
+    if ! OUTPUT=$(mkdir -p /tmp/restore); then
+        verbose "ERROR: could not make temp restore directory. ${OUTPUT}" 1
+        exit 1
+    fi
+
+    if ! OUTPUT=$(tar -xf ${ARGS[ALPHA]} -C /tmp/restore); then
+        verbose "ERROR: could not extract ${ARGS[ALPHA]} to /tmp/restore. ${OUTPUT}" 1
+        exit 1
+    fi
+
+    verbose "Starting restore."
+    if ! OUTPUT=$(find /tmp/restore/ -type f -exec cp {} ${ARGS[ALPHA_DIR]}/ \;); then
+        verbose "ERROR: failed to restore ${ARGS[ALPHA]} to ${ARGS[ALPHA_DIR]}. ${OUTPUT}" 1
+        exit 1
+    fi
+
+    verbose "Touching files to update timestamp"
+    verbose "(so that the alpha-browse script recognizes them as the most up-to-date files to use)"
+    if ! OUTPUT=$(touch ${ARGS[ALPHA_DIR]}/*); then
+        verbose "ERROR: failed to update the timestamp of the files in ${ARGS[ALPHA_DIR]}. ${OUTPUT}" 1
+        exit 1
+    fi
+
+    verbose "Cleaning up temp files"
+    if ! OUTPUT=$(rm -rf /tmp/restore); then
+        verbose "ERROR: failed to cleanup /tmp/restore directory. ${OUTPUT}" 1
+        exit 1
+    fi
+
+    verbose "Restore complete." 1
+    verbose "IMPORTANT: remaining steps: " 1
+    verbose "--" 1
+    verbose "On each node, connect to the Solr cron container and run the alpha-browse.sh script" 1
+    verbose "to copy back the files into the running Solr instance." 1
+    verbose "Command:" 1
+    verbose "docker exec \$(docker ps -q -f ${STACK_NAME}-solr_cron) /alpha-browse.sh -v" 1
+    verbose "--" 1
+}
+
 main() {
     declare -g LOG_FILE
     LOG_FILE=$(mktemp)
@@ -251,6 +317,9 @@ main() {
     fi
     if [[ -n "${ARGS[DB]}" ]]; then
         restore_db
+    fi
+    if [[ -n "${ARGS[ALPHA]}" ]]; then
+        restore_alpha
     fi
 
     verbose "All processing complete"
