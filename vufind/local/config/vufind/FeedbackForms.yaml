@@ -190,6 +190,12 @@ forms:
           post: feedback_comment_help
         # help: message_help
 
+      - name: libstaff
+        type: checkbox
+        label: Select if you are
+        options:
+          - MSU Libraries Staff
+
   # Example for an acquisition request form
 
   AcquisitionRequest:
