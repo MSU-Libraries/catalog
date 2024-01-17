@@ -262,8 +262,9 @@ restrict_oai() {
         grep -vF ".rule="
     );
 
+    # shellcheck disable=SC2006
     LINE=$(
-        ./yq '.services.catalog.deploy.labels[] | select(. == "traefik.http.routers.*-https-router.rule=*") + " && PathPrefix(`/OAI/Server`)"' docker-compose.catalog.yml |
+        ./yq ".services.catalog.deploy.labels[] | select(. == \"traefik.http.routers.*-https-router.rule=*\") + \" && PathPrefix(`/OAI/Server`)\"" docker-compose.catalog.yml |
         sed -e 's/-https-router/-oai-https-router/'
     )
     export LINE; ./yq -i '.services.catalog.deploy.labels += env(LINE)' docker-compose.catalog.yml
