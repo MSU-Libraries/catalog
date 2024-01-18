@@ -86,7 +86,7 @@ class Form extends \VuFind\Form\Form
         return $recipients;
     }
 
-     /**
+    /**
      * Return a list of field names to read from settings file.
      *
      * @return array
@@ -102,5 +102,4 @@ class Form extends \VuFind\Form\Form
             ]
         );
     }
-
 }
