@@ -6,7 +6,7 @@
       <?=$this->icon('ui-menu') ?>
     </button>
 <!--add duplicate heading to show h1 on home and hide elsewhere with CSS-->
-  <?php $homePaths = ['/', '/Search', '/Search/Home', '/EDS/Home', '/Combined/Home']; ?>
+  <?php $homePaths = ['/', '/Search', '/Search/Home', '/EDS', '/EDS/Home', '/Combined', '/Combined/Home']; ?>
   <?php if (in_array($this->currentPath(), $homePaths)): ?>
     <h2 class="navbar-msul"><a href="https://lib.msu.edu/">MSU Libraries</a></h2>
     <h1 class="navbar-catalog"><a href="/Search">Catalog</a></h1>
