@@ -65,7 +65,7 @@ class FeedbackEmail extends \VuFind\Form\Handler\Email
             'value' => $user->id ?? 'none',
         ];
         // Grab libstaff checkbox (for determining target email)
-        $libstaff = array_filter($fields, function($val) {
+        $libstaff = array_filter($fields, function ($val) {
             return $val['name'] == 'libstaff';
         });
         $staffFeedback = !empty(array_shift($libstaff)['value']);
