@@ -50,7 +50,7 @@
 <?php /* MSUL: Always use the simplified form for alpha browse */ ?>
 <?php if (true || !$this->searchbox()->alphaBrowseOptionsEnabled() || empty($this->source)): ?>
   <div class="search container navbar">
-  <h2 class="mb-5">Browse Alphabetically</h2>
+  <h1 class="mb-5">Browse Alphabetically</h1>
   <form class="form-inline" method="get" action="<?=$this->url('alphabrowse-home')?>" name="alphaBrowseForm" id="alphaBrowseForm">
     <label for="alphaBrowseForm_source"><?=$this->transEsc('Browse Alphabetically') ?></label>
     <select id="alphaBrowseForm_source" name="source" class="form-control">
