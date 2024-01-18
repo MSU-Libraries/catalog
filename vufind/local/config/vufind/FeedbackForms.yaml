@@ -166,10 +166,16 @@ forms:
     reportUserAgent: true
     #emailFrom:
     #  name: Your Library - Site Feedback
-    #recipient:
+    recipient:
+      email: "$FEEDBACK_EMAIL"
     #  name: Your Library
-    #  email: feedback@myuniversity.edu
-    primaryHandler: email
+    recipient_public:
+      email: "$FEEDBACK_PUBLIC_EMAIL"
+    # Send a separate copy of feedback to submitting user, if logged in
+    recipient_copy_user: true
+    # CC the default recipient when sending to public receipient
+    recipient_cc_public: true
+    primaryHandler: FeedbackEmail
     onlyForLoggedUsers: false
     #emailSubject: VuFind Feedback
     response: feedback_response

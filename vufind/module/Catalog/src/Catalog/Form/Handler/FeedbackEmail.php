@@ -40,7 +40,7 @@ use Laminas\Mail\Address;
  * @license  https://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development Wiki
  */
-class Email extends \VuFind\Form\Handler\Email
+class FeedbackEmail extends \VuFind\Form\Handler\Email
 {
     /**
      * Get data from submitted form and process them.
@@ -88,17 +88,17 @@ class Email extends \VuFind\Form\Handler\Email
         $recipients = $form->getRecipient($params->fromPost());
         // MSUL Start
         // Non staff email goes to Discovery services (cc'ing original)
-        $nonStaffRecipient = [
-            'name' => 'Discovery Services',
-            'email' => 'LIB.DL.discoveryservices@msu.edu'
-        ];
+        $publicRecipients = $form->getRecipientPublic($params->fromPost());
         $ccEmail = null;
         if (!$staffFeedback) {
-            $ccEmail = $recipients[0]['email'];
-            $recipients[0] = $nonStaffRecipient;
+            // Can be set to cc original recipient address
+            if ($form->ccOriginalOnPublic()) {
+                $ccEmail = $recipients[0]['email'];
+            }
+            $recipients[0] = $publicRecipients[0];
         }
         // Copy feedback to user if they are logged in
-        if ($replyToEmail !== null && $user) {
+        if ($form->copyUserOnEmail() && $replyToEmail !== null && $user) {
             $recipients[] = [
                 'name' => $replyToName ?? $replyToEmail,
                 'email' => $replyToEmail,
