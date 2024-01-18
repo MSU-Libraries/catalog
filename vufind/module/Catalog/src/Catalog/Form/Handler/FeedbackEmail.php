@@ -30,6 +30,7 @@
 namespace Catalog\Form\Handler;
 
 use Laminas\Mail\Address;
+use VuFind\Exception\Mail as MailException;
 
 /**
  * Class Email
