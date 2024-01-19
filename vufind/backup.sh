@@ -135,7 +135,7 @@ backup_alpha() {
     fi
 
     verbose "Compressing the backup"
-    if ! tar -cf "${TIMESTAMP}".tar -C ./"${TIMESTAMP}" --remove-files ./; then
+    if ! tar -cf ${ARGS[SHARED_DIR]}/alpha/"${TIMESTAMP}".tar -C ${ARGS[SHARED_DIR]}/alpha/"${TIMESTAMP}" --remove-files ./; then
         verbose "ERROR: Failed to compress the alphabrowse databases." 1
         exit 1
     fi
