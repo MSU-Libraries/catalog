@@ -5,9 +5,12 @@
     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-collapse" aria-label="<?=$this->transEscAttr('mobile_toggle_navigation_text')?>">
       <?=$this->icon('ui-menu') ?>
     </button>
-<!--add duplicate heading to show h1 on home and hide elsewhere with CSS-->
-  <?php $homePaths = ['/', '/Search', '/Search/Home', '/EDS', '/EDS/Home', '/Combined', '/Combined/Home']; ?>
-  <?php if (in_array($this->currentPath(), $homePaths)): ?>
+  <!--conditionally show header title as h1 based on url path (use lower case) -->
+  <?php
+    $homePaths = ['/', '/search', '/search/home', '/eds', '/eds/home', '/combined', '/combined/home'];
+    $currentPath = rtrim($this->currentPath(), '/') ?: '/';
+  ?>
+  <?php if (in_array(strtolower($currentPath), $homePaths)): ?>
     <h2 class="navbar-msul"><a href="https://lib.msu.edu/">MSU Libraries</a></h2>
     <h1 class="navbar-catalog"><a href="/Search">Catalog</a></h1>
   <?php else: ?>
