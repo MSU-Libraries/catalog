@@ -5,7 +5,7 @@ $items = $this->getthis->items;
 
 function getDisplay($view, $item)
 {
-    return $view->getthis->getCallNumber($item['item_id'] ?? null);
+    return $view->getthis->getLocation($item['item_id'] ?? null) . ': ' . $view->getthis->getCallNumber($item['item_id'] ?? null);
 }
 ?>
 
