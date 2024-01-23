@@ -6,6 +6,7 @@ $item = $this->getthis->getItem();
 $check = $item['check'] ?? false;
 $link = $this->getthis->getLink();
 $callnum = $this->getthis->getCallNumber();
+$location = $this->getthis->getLocation();
 $notices = $this->Notices('RequestNotices.yaml');
 ?>
 <div>
@@ -18,6 +19,12 @@ $notices = $this->Notices('RequestNotices.yaml');
       <span><?=$this->escapeHtml($callnum) ?></span>
     <?php endif; ?>
   </p>
+  <?php if ($location ?? false): ?>
+    <p>
+      <b>Location:</b>
+        <span><?=$this->escapeHtml($location) ?></span>
+    </p>
+  <?php endif; ?>
   <?php if (!empty($item)): ?>
     <?= $this->locationNotices($item) ?>
   <?php endif; ?>
