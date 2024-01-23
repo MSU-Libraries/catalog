@@ -1,0 +1,4 @@
+<?php if (array_key_exists('ConcurrentUsers', $licenseAgreement) &&
+          !empty($licenseAgreement['ConcurrentUsers'])): ?>
+<b>Concurrent Users:</b> <?= $licenseAgreement['ConcurrentUsers'] ?><br/>
+<?php endif; ?>

@@ -30,9 +30,11 @@ return [
       'ajaxhandler' => [
         'factories' => [
           'Catalog\\AjaxHandler\\GetItemStatuses' => 'VuFind\\AjaxHandler\\GetItemStatusesFactory',
+          'Catalog\\AjaxHandler\\GetLicenseAgreement' => 'Catalog\\AjaxHandler\\GetLicenseAgreementFactory',
         ],
         'aliases' => [
           'getItemStatuses' => 'Catalog\\AjaxHandler\\GetItemStatuses',
+          'getLicenseAgreement' => 'Catalog\\AjaxHandler\\GetLicenseAgreement',
         ],
       ],
       'auth' => [

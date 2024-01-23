@@ -1,0 +1,4 @@
+<?php if (array_key_exists('authorizedusers', $licenseAgreement) &&
+          !empty($licenseAgreement['authorizedusers'])): ?>
+<b>Authorized Users:</b> <?= $licenseAgreement['authorizedusers'] ?><br/>
+<?php endif; ?>

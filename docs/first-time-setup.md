@@ -109,6 +109,7 @@ with a `POST` request to `/perms/permissions`.
 * `course-reserves-storage.departments.collection.get`
 * `course-reserves-storage.reserves.collection.get`
 * `oai-pmh.records.collection.get`
+* `kb-ebsco.packages.collection.get` (For MSUL customization to add license agreement information to record pages)
 
 ## For GitLab users
 ### Creating a CI/CD Token

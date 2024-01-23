@@ -1,6 +1,7 @@
 <?php
   $this->layout()->showSearchBacklink = true;
   $this->metadata()->generateMetatags($this->driver);
+  $this->headScript()->appendFile('get_license_agreement.js');
 ?>
 <div class="media" vocab="http://schema.org/" resource="#record" typeof="<?=$this->driver->getSchemaOrgFormats()?> Product">
   <?php
@@ -44,7 +45,9 @@
   <div class="media-body">
 
     <h1 property="name"><?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '')?></h1>
-
+    <?php //MSUL customization to add hidden fields used in support of PC-606 ?>
+    <input type='hidden' id='title_short' value='<?= $this->escapeHtml($this->driver->getRawData()['title_short'] ?? '')?>'/>
+    <input type='hidden' id='id' value='<?= $this->escapeHtml($this->driver->getRawData()['id'] ?? '')?>'/>
     <?php if ($this->driver->getExtraDetail('cached_record') && !$this->translationEmpty('cached_record_warning')): ?>
       <div class="alert alert-warning">
         <?=$this->transEsc('cached_record_warning')?>
