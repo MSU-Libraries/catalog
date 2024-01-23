@@ -5,7 +5,7 @@ runhelp() {
     echo "Purpose: Run validation on the VuFind image"
     echo ""
     echo "Expected User-defined Variables:"
-    echo "  - CURR: Image tag for the VuFind image to test"
+    echo "  - LATEST: Image tag for the latest VuFind image to use for cache"
     echo ""
     echo "Failure Scenarios:"
     echo "  - When the unit tests return a non-zero exit code"
