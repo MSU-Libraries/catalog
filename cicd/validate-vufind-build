@@ -27,7 +27,7 @@ main() {
         --build-arg SOLR_URL=http://solr:8983/solr \
         --build-arg SIMPLESAMLPHP_VERSION="${SIMPLESAMLPHP_VERSION}" \
         --tag validate \
-        --cache-from "${LATEST}"
+        --cache-from "${LATEST}" \
         vufind/;
     # 1/23/24 - Trying to add it back in now
     # Removed the below flag because it sometimes caused inaccurate failures when it incorrectly cached from :latest in some cases
