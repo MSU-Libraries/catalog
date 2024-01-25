@@ -7,6 +7,7 @@ envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.in
 envsubst < local/config/vufind/contentsecuritypolicy.ini | sponge local/config/vufind/contentsecuritypolicy.ini
 envsubst < local/config/vufind/folio.ini | sponge local/config/vufind/folio.ini
 envsubst < local/config/vufind/EDS.ini | sponge local/config/vufind/EDS.ini
+envsubst < local/config/vufind/EPF.ini | sponge local/config/vufind/EPF.ini
 envsubst < local/config/vufind/BrowZine.ini | sponge local/config/vufind/BrowZine.ini
 envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini
 envsubst < /etc/aliases | sponge /etc/aliases
