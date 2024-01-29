@@ -6,6 +6,7 @@
         <ul>
           <li><a href="<?=$this->url('search-history')?>"><?=$this->transEsc('Search History')?></a></li>
           <li><a href="<?=$this->url('search-advanced')?>"><?=$this->transEsc('Advanced Search')?></a></li>
+          <li><a href="https://eds.lib.msu.edu"><?=$this->transEsc('EDS catalog interface')?></a></li>
         </ul>
       <?=$this->slot('footer-left')->end(); ?>
     </div>
@@ -32,6 +33,7 @@
           <?php if ($this->cookieConsent()->isEnabled()): ?>
             <li><a href="#" data-cc="show-preferencesModal" aria-haspopup="dialog"><?=$this->transEsc('Cookie Settings')?></a></li>
           <?php endif; ?>
+          <li><a href="<?=$this->url('feedback-home') ?>"><?=$this->transEsc('Feedback')?></a></li>
         </ul>
       <?=$this->slot('footer-right')->end(); ?>
     </div>

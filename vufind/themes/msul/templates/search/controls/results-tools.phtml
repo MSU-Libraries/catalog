@@ -37,6 +37,12 @@
         </a>
       </li>
       <li>
+        <a class="icon-link linkSearch" href="<?=  $this->currentPath() . $results->getUrlQuery() ?>" id="linkSearch<?=$this->escapeHtmlAttr($this->results->getSearchId())?>">
+          <?=$this->icon('external-link') ?>
+          <span class="icon-link__label"><?=$this->transEsc('shareable_link')?></span>
+        </a>
+      </li>
+      <li>
         <a class="icon-link" href="<?=$this->results->getUrlQuery()->setViewParam('rss')?>">
           <?=$this->icon('search-rss', 'icon-link__icon') ?>
           <span class="icon-link__label"><?=$this->transEsc('Get RSS Feed')?></span>
