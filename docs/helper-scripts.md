@@ -26,4 +26,3 @@ pc-deploy devel-test solr-bootstrap
 # or
 pc-deploy devel-test docker-compose.solr-bootstrap.yml
 ```
-

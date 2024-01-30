@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "Running unit tests"
+/usr/local/vufind/vendor/bin/phing phpunitfaster -Dphpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/
+
+echo "Running code quality tests"
+/usr/local/vufind/vendor/bin/phing eslint jshint phpcs-console php-cs-fixer-dryrun checkLessToSass phpstan-console
