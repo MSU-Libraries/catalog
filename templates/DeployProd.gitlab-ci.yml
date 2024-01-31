@@ -1,6 +1,6 @@
 ############# Prod Deploy ###############
-Set Prod Stack Name:
-  stage: Deploy
+Begin Prod Deploy:
+  stage: Deploy Prod
   extends: Set Stack Name
   environment:
     # This can't be part of -prod env because we would need a coresponding Remove Environment job
