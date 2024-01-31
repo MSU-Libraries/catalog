@@ -3,6 +3,7 @@ stages:
   - Build
   - Deploy
   - Deploy Prod
+  - Deploy Build Envs
   - Cleanup
   - Release
 
@@ -183,6 +184,7 @@ Deploy Vufind:
 
 Deploy Vufind Build Env:
   extends: .stack_template
+  stage: Deploy Build Envs
   environment:
     name: $CI_COMMIT_BRANCH/deploy-buildenv
     auto_stop_in: 2 weeks

@@ -121,7 +121,6 @@ Deploy Prod Vufind:
     - Deploy Prod Solr
 
 Deploy Prod Vufind Build Env:
-  stage: Deploy Prod
   extends: Deploy Vufind Build Env
   environment:
     name: $CI_COMMIT_BRANCH-prod/deploy-buildenv
