@@ -4,3 +4,5 @@
 compiled.css
 vufind/themes/msul/css/less/
 ._*
+# PHP Storm folder
+.idea/

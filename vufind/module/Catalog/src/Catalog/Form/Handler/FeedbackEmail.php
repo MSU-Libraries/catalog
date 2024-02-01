@@ -58,19 +58,6 @@ class FeedbackEmail extends \VuFind\Form\Handler\Email
         ?\VuFind\Db\Row\User $user = null
     ): bool {
         $fields = $form->mapRequestParamsToFieldValues($params->fromPost());
-        // MSUL Start
-        // Add in user id if logged in
-        $messageParams[] = [
-            'type' => 'hidden',
-            'label' => 'VFUserID',
-            'value' => $user->id ?? 'none',
-        ];
-        // Grab libstaff checkbox (for determining target email)
-        $libstaff = array_filter($fields, function ($val) {
-            return $val['name'] == 'libstaff';
-        });
-        $staffFeedback = !empty(array_shift($libstaff)['value']);
-        // MSUL End
         $emailMessage = $this->viewRenderer->partial(
             'Email/form.phtml',
             compact('fields')
@@ -78,55 +65,116 @@ class FeedbackEmail extends \VuFind\Form\Handler\Email
 
         [$senderName, $senderEmail] = $this->getSender($form);
 
-        $replyToName = $params->fromPost(
+        $formFromNameField = $params->fromPost(
             'name',
             $user ? trim($user->firstname . ' ' . $user->lastname) : null
         );
-        $replyToEmail = $params->fromPost(
+        $formFromEmailField = $params->fromPost(
             'email',
             $user ? $user->email : null
         );
         $recipients = $form->getRecipient($params->fromPost());
-        // MSUL Start
-        // Non staff email goes to Discovery services (cc'ing original)
-        $publicRecipients = $form->getRecipientPublic($params->fromPost());
-        $ccEmail = null;
-        if (!$staffFeedback) {
-            // Can be set to cc original recipient address
-            if ($form->ccOriginalOnPublic()) {
-                $ccEmail = $recipients[0]['email'];
-            }
-            $recipients[0] = $publicRecipients[0];
-        }
-        // Copy feedback to user if they are logged in
-        if ($form->copyUserOnEmail() && $replyToEmail !== null && $user) {
-            $recipients[] = [
-                'name' => $replyToName ?? $replyToEmail,
-                'email' => $replyToEmail,
-            ];
-        }
-        // MSUL End
         $emailSubject = $form->getEmailSubject($params->fromPost());
 
-        $result = true;
-        foreach ($recipients as $recipient) {
-            $success = $this->sendEmail(
-                $recipient['name'],
-                $recipient['email'],
-                $senderName,
-                $senderEmail,
-                $replyToName,
-                $replyToEmail,
-                $emailSubject,
-                $emailMessage,
-                $ccEmail
-            );
-            // MSUL Start: Only CC once
-            $ccEmail = null;
-            // MSUL End
+        // MSUL Start
 
+        // $senderName                   "Catalog Feedback Form"       Same for all emails sent
+        // $senderEmail                  "noreply@catalog.lib.msu.edu" Same for all emails sent
+        // $emailSubject                 "Catalog Feedback"            Same for all emails sent
+        // $recipients[0]['name']        NULL
+        // $recipients[0]['email']       "LIB.DL.cdawg@msu.edu"
+        // $publicRecipients[0]['name']  NULL
+        // $publicRecipients[0]['email'] "**discoveryservices**@**msu**" => to change to **support**@**libanswers**
+        // $formFromNameField            "Robby From form"
+        // $formFromEmailField           "roudonro@msu.edu From form"
+
+        // Grab libstaff checkbox (for determining target email)
+        $libstaff = array_filter($fields, function ($val) {
+            return $val['name'] == 'libstaff';
+        });
+        $staffFeedback = !empty(array_shift($libstaff)['value']);
+
+        $emails = [];
+        //Always send feedback to library:
+        if ($staffFeedback) {
+            // Box Checked / Library Staff
+            // When “Library Staff” checkbox is CHECKED, feedback is sent
+            // To: LIB.DL.cdawg@msu.edu
+            $emails[] = [
+                'recipientName' => $recipients[0]['name'] ?? $recipients[0]['email'],
+                'recipientEmail' => $recipients[0]['email'],
+                'senderName' => $senderName,
+                'senderEmail' => $senderEmail,
+                'replyToName' => $formFromNameField,
+                'replyToEmail' => $formFromEmailField,
+                'emailSubject' => $recipients[0]['subject_prefix'] . $emailSubject,
+                'emailMessage' => $emailMessage,
+                'ccEmail' => null
+            ];
+        } else {
+            // Box Unchecked / Not Library Staff
+            // When “Library staff checkbox is UNCHECKED, feedback is sent:
+            // 1st email To: support@msu.libanswers.com
+            // 2nd email To: LIB.DL.cdawg@msu.edu
+            $publicRecipients = $form->getRecipientPublic($params->fromPost());
+            $emails[] = [
+                'recipientName' => $publicRecipients[0]['name'] ?? $publicRecipients[0]['email'],
+                'recipientEmail' => $publicRecipients[0]['email'],
+                'senderName' => $senderName,
+                'senderEmail' => $senderEmail,
+                'replyToName' => $senderName,
+                'replyToEmail' => $senderEmail,
+                'emailSubject' => $publicRecipients[0]['subject_prefix'] . $emailSubject,
+                'emailMessage' => $emailMessage,
+                'ccEmail' => null
+            ];
+
+            $emails[] = [
+                'recipientName' => $form->ccOriginalOnPublic() ? $recipients[0]['email'] : null,
+                'recipientEmail' => $form->ccOriginalOnPublic() ? $recipients[0]['email'] : null,
+                'senderName' => $senderName,
+                'senderEmail' => $senderEmail,
+                'replyToName' => $senderName,
+                'replyToEmail' => $senderEmail,
+                'emailSubject' => $publicRecipients[0]['subject_prefix'] . $emailSubject,
+                'emailMessage' => $emailMessage,
+                'ccEmail' => null
+            ];
+        }
+        // Copy feedback to user if they are logged in
+        if ($form->copyUserOnEmail() && $formFromEmailField !== null && $user) {
+            // If the user sending feedback is logged in and provided an email address:
+            // Send an independent copy of the feedback to the user:
+            // Only that user’s email address will be a recipient; the email will NOT include any other recipients on this email (not CDAWG, not DS, not Libanswers)
+            $emails[] = [
+                'recipientName' => $formFromNameField ?? $formFromEmailField,
+                'recipientEmail' => $formFromEmailField,
+                'senderName' => $senderName,
+                'senderEmail' => $senderEmail,
+                'replyToName' => $formFromNameField,
+                'replyToEmail' => $formFromEmailField,
+                'emailSubject' => $emailSubject,
+                'emailMessage' => $emailMessage,
+                'ccEmail' => null
+            ];
+        }
+
+        $result = true;
+        foreach ($emails as $email) {
+            $success = $this->sendEmail(
+                $email['recipientName'] ?? null,
+                $email['recipientEmail'] ?? null,
+                $email['senderName'] ?? null,
+                $email['senderEmail'] ?? null,
+                $email['replyToName'] ?? null,
+                $email['replyToEmail'] ?? null,
+                $email['emailSubject'] ?? null,
+                $email['emailMessage'] ?? null,
+                $email['ccEmail'] ?? null
+            );
             $result = $result && $success;
         }
+        // MSUL End
         return $result;
     }
 
