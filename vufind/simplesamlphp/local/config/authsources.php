@@ -76,6 +76,8 @@ $config = [
             'urn:oid:x.x.x.x',
         ],
         */
+        'privatekey' => '/mnt/samlcerts/sp-private.pem',
+        'certificate' => '/mnt/samlcerts/sp.crt',
     ],
 
 
