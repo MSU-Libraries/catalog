@@ -65,6 +65,7 @@ fi
 
 # Save the logs in the logs docker volume
 mkdir -p /mnt/logs/apache /mnt/logs/vufind /mnt/logs/simplesamlphp /mnt/logs/harvests /mnt/logs/backups
+chown www-data:www-data /mnt/logs/simplesamlphp
 rm -rf /var/log/apache2
 ln -sf /mnt/logs/apache /var/log/apache2
 ln -sf /mnt/logs/vufind /var/log/vufind

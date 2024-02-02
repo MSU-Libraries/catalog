@@ -46,6 +46,11 @@
   height:1px;
   word-wrap:normal;
 }
+.h2-style {
+  font-size: 23px;
+  font-weight: normal;
+}
+
 
 //Focus indicators
 a.record-cover-link:focus {
@@ -253,6 +258,7 @@ header {
   padding-left:2rem;
   background-color: @parakeetgreen;
   color:#fff;
+  font-weight:500;
   img.msul_logo {
     max-width:240px;
     margin-bottom:1rem;
@@ -338,11 +344,11 @@ footer {
           font-weight:400
         }
         &.bold-text {
-          font-weight:600;
+          font-weight:400;
         }
         a {
            /*font-size:.8125rem;*/
-          font-weight:600;
+          font-weight:400;
           color:#0A875F !important;
           display:inline-block;
           text-decoration:none;
@@ -1055,6 +1061,9 @@ label {
   background-color:#f1f1f1;
   padding:0.5rem 1rem;
   border-radius:0.5rem;
+  color:@gray-darker;
+  font-size:18px;
+
 }
 
 /*.searchHomeContent, .nav.searchbox {
@@ -1158,6 +1167,14 @@ body.template-dir-myresearch.template-name-profile {
       }
     }
   }
+}
+
+//Myresearch sidebar styling
+#myresearch-sidebar {
+  margin-top:1rem;
+    h2 {
+      margin-top:1rem;
+    }
 }
 
 // Zebra-striping

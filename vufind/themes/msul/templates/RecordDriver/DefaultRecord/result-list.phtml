@@ -216,6 +216,13 @@
         </div>
       <?php endif; ?>
 
+      <div>
+          <a href="<?=$this->escapeHtmlAttr($recordLinker->getActionUrl($this->driver, 'PermaLink'))?>" data-lightbox class="permalink-record" rel="nofollow">
+            <?=$this->icon('external-link') ?>
+            <?=$this->transEsc('permanent_link')?>
+          </a>
+      </div>
+
       <?php /* Hierarchy tree link */ ?>
       <?php $trees = $this->driver->tryMethod('getHierarchyTrees'); ?>
       <?php if (!empty($trees)): ?>

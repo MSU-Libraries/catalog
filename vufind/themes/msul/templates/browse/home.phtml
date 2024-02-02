@@ -10,7 +10,7 @@
 <?php if (!isset($this->currentAction)): ?>
   <h2><?=$this->transEsc('Choose a Category to Begin Browsing') ?>:</h2>
 <?php endif; ?>
-<h2 class="mb-5">Explore Catalog by Filters</h2>
+<h1 class="mb-5">Explore Catalog by Filters</h1>
 <div class="browse-container mb-4">
   <div class="browse-list<?php if (!empty($this->categoryList) || !empty($this->secondaryList)): ?> hidden-xs<?php endif ?>" id="list1">
     <?php foreach ($this->browseOptions as $item => $currentOption): ?>

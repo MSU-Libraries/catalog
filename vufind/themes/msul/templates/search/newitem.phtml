@@ -10,7 +10,7 @@
 
     $this->layout()->searchbox = false;
 ?>
-<h2><?=$this->transEsc('Find New Items')?></h2>
+<h1><?=$this->transEsc('Find New Items')?></h1>
 <?php if ($offlineMode == 'ils-offline'): ?>
   <?=$this->render('Helpers/ils-offline.phtml', ['offlineModeMsg' => 'ils_offline_holdings_message'])?>
 <?php endif; ?>

@@ -3,12 +3,13 @@ stages:
   - Build
   - Deploy
   - Deploy Prod
+  - Deploy Build Envs
   - Cleanup
   - Release
 
 variables:
   VUFIND_VERSION: "9.1"
-  SIMPLESAMLPHP_VERSION: "1.19.6"
+  SIMPLESAMLPHP_VERSION: "2.1.1"
   DEPLOY_HOST_A: catalog-1.aws.lib.msu.edu
   DEPLOY_HOST_B: catalog-2.aws.lib.msu.edu
   DEPLOY_HOST_C: catalog-3.aws.lib.msu.edu
@@ -183,6 +184,7 @@ Deploy Vufind:
 
 Deploy Vufind Build Env:
   extends: .stack_template
+  stage: Deploy Build Envs
   environment:
     name: $CI_COMMIT_BRANCH/deploy-buildenv
     auto_stop_in: 2 weeks

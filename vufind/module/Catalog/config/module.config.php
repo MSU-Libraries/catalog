@@ -57,10 +57,11 @@ return [
       ],
       'form_handler' => [
         'factories' => [
-          'Catalog\\Form\\Handler\\Email' => 'VuFind\\Form\\Handler\\EmailFactory',
+          'Catalog\\Form\\Handler\\FeedbackEmail' => 'VuFind\\Form\\Handler\\EmailFactory',
         ],
         'aliases' => [
-          'VuFind\\Form\\Handler\\Email' => 'Catalog\\Form\\Handler\\Email',
+          'VuFind\\Form\\Handler\\FeedbackEmail' => 'Catalog\\Form\\Handler\\FeedbackEmail',
+          'FeedbackEmail' => 'Catalog\\Form\\Handler\\FeedbackEmail',
         ],
       ],
       'ils_driver' => [
@@ -95,13 +96,12 @@ return [
       ],
     ],
   ],
-  # Example override for VuFind service
-  #'service_manager' => [
-  #  'factories' => [
-  #    'Catalog\\Mailer\\Mailer' => 'VuFind\\Mailer\\Factory',
-  #  ],
-  #  'aliases' => [
-  #    'VuFind\\Mailer\\Mailer' => 'Catalog\\Mailer\\Mailer',
-  #  ],
-  #],
+  'service_manager' => [
+    'factories' => [
+      'Catalog\\Form\\Form' => 'VuFind\\Form\\FormFactory',
+    ],
+    'aliases' => [
+      'VuFind\\Form\\Form' => 'Catalog\\Form\\Form',
+    ],
+  ],
 ];

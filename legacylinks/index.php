@@ -65,9 +65,21 @@ if ($r === 1) {
     );
 
     $hrid = $json["records"][0]["id"] ?? null;
+    $resultCount = $json["resultCount"] ?? null;
     if ($httpcode == 200 && !empty($hrid)) {
         header("Location: https://" . getenv("SITE_HOSTNAME") . "/Record/" . $hrid);
         exit(0);
     }
+    elseif ($httpcode == 200 && $resultCount == 0) {
+	http_response_code(404);
+        echo "No record matching the requested bibnumber found in Catalog.";
+    }
+    else {
+        http_response_code(503);
+        echo "Service temporarily not available. Try again later.";
+    }
 }
-header("Location: https://" . getenv("SITE_HOSTNAME") . "/");
+else {
+    http_response_code(400);
+    echo "URL parameters passed did not meet expected format. Unable to redirect to Catalog.";
+}

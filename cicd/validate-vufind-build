@@ -42,22 +42,12 @@ main() {
 
     echo "Running PHP unit tests";
     echo "vendor/bin/phing phpunitfaster -Dphpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/";
-    docker run --rm validate vendor/bin/phing phpunitfaster -Dphpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/;
+    docker run --rm validate run-tests;
     EC=$?;
 
     if [[ ${EC} -ne 0 ]]; then
-        echo "One or more unit tests failed. Run the following command in a VuFind container to debug";
-        echo "vendor/bin/phing phpunitfaster -Dphpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/";
-        exit ${EC};
-    fi;
-    
-    echo "Running code style checks";
-    echo "vendor/bin/phing eslint jshint phpcs-console php-cs-fixer-dryrun checkLessToSass phpstan-console";
-    docker run --rm validate vendor/bin/phing eslint jshint phpcs-console php-cs-fixer-dryrun checkLessToSass phpstan-console;
-    EC=$?;
-    if [[ ${EC} -ne 0 ]]; then
-        echo "One or more of the style checks failed. Run the following command in a VuFind container to debug";
-        echo "vendor/bin/phing eslint jshint phpcs-console php-cs-fixer-dryrun checkLessToSass phpstan-console"
+        echo "One or more unit tests or code quality tests failed. Run the following command in a VuFind container to debug";
+        echo "run-tests";
         exit ${EC};
     fi;
 

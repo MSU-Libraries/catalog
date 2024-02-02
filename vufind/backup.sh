@@ -135,21 +135,8 @@ backup_alpha() {
     fi
 
     verbose "Compressing the backup"
-    PREV_CWD="$(pwd)"
-    if ! cd ${ARGS[SHARED_DIR]}/alpha; then
-        verbose "ERROR: Could not navigate into alphabrowse backup directory (${ARGS[SHARED_DIR]}/alpha)" 1
-        exit 1
-    fi
-    if ! tar -cf "${TIMESTAMP}".tar ./"${TIMESTAMP}"/*; then
+    if ! tar -cf ${ARGS[SHARED_DIR]}/alpha/"${TIMESTAMP}".tar -C ${ARGS[SHARED_DIR]}/alpha/"${TIMESTAMP}" --remove-files ./; then
         verbose "ERROR: Failed to compress the alphabrowse databases." 1
-        exit 1
-    else
-        if ! rm -rf ./"${TIMESTAMP}"; then
-            verbose "ERROR: Failed to remove the uncompressed alphabrowse database files." 1 # Not exiting
-        fi
-    fi
-    if ! cd "${PREV_CWD}"; then
-        verbose "ERROR: Could not navigate back out of backup directory to previous working dir (${PREV_CWD})" 1
         exit 1
     fi
 
