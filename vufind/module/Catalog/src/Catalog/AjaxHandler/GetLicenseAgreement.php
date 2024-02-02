@@ -174,7 +174,6 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
             return $publishers;
         }
 
-
         return $publishers;
     }
 
