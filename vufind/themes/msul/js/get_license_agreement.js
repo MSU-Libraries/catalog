@@ -15,11 +15,18 @@ async function getLicenseAgreement(title) {
 
       // Add rendered data from record next to link
       var btn = document.createElement("button");
-      btn.innerText = "View Access & Accessibility Information";
+      var icon = document.createElement("span");
+      var label = document.createElement("span");
+      icon.setAttribute("class", "icon icon--font fa fa-info icon-link__icon");
+      icon.setAttribute("role", "img");
+      icon.setAttribute("aria-hidden", "true");
+      btn.appendChild(icon);
+      label.innerText = "More Info";
+      btn.appendChild(label);
       btn.setAttribute("data-content", record.concurrent_users + record.authorized_users + record.accessibility_link);
       btn.setAttribute("data-toggle", "popover");
       btn.setAttribute("data-html", "true");
-      btn.setAttribute("class", "btn btn-primary msul-access-btn");
+      btn.setAttribute("class", "placehold");
       link[0].parentNode.append(btn);
     }
   });
