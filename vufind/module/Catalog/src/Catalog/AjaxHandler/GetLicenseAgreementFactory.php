@@ -33,6 +33,7 @@ use Laminas\ServiceManager\Exception\ServiceNotCreatedException;
 use Laminas\ServiceManager\Exception\ServiceNotFoundException;
 use Psr\Container\ContainerExceptionInterface as ContainerException;
 use Psr\Container\ContainerInterface;
+use VuFind\Search\Factory\EPFBackendFactory as EPFBackendFactory;
 
 /**
  * Factory for GetLicenseAgreement AJAX handler.
@@ -70,21 +71,10 @@ class GetLicenseAgreementFactory implements \Laminas\ServiceManager\Factory\Fact
             throw new \Exception('Unexpected options passed to factory.');
         }
 
-        // Get EDS Publication Finder config
-        try {
-            $epfConfig = $container->get(\VuFind\Config\PluginManager::class)
-                ->get('EPF');
-        } catch (\Exception $e) {
-            $logger = $container->get(\VuFind\Log\Logger::class);
-            $logger->err(
-                'Could not parse EPF.ini: ' . $e->getMessage()
-            );
-        }
-
         $handler = new $requestedName(
             $container->get(\VuFind\Session\Settings::class),
             $container->get(\VuFind\Config\PluginManager::class)->get('config'),
-            $epfConfig ?? [], // EDS Publication Finder config
+            (new EPFBackendFactory())($container, 'EPF'),
             $container->get(\VuFind\ILS\Connection::class),
             $container->get('ViewRenderer'),
         );

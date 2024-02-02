@@ -35,6 +35,7 @@ use Laminas\View\Renderer\RendererInterface;
 use VuFind\Exception\ILS as ILSException;
 use VuFind\ILS\Connection;
 use VuFind\Session\Settings as SessionSettings;
+use VuFindSearch\Query\Query as Query;
 
 use function is_array;
 
@@ -67,13 +68,6 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
     protected $config;
 
     /**
-     * EDS Publication Finder configuration
-     *
-     * @var Config
-     */
-    protected $epfConfig;
-
-    /**
      * EDS Publication Finder session
      *
      * @var Config
@@ -102,6 +96,13 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
     protected $epfSessionCreation;
 
     /**
+     * EPF connection
+     *
+     * @var Connection
+     */
+    protected $epf;
+
+    /**
      * ILS connection
      *
      * @var Connection
@@ -118,118 +119,24 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
     /**
      * Constructor
      *
-     * @param SessionSettings   $ss        Session settings
-     * @param Config            $config    Top-level configuration
-     * @param Config            $epfConfig EBSCO Publication finder configuration
-     * @param Connection        $ils       ILS connection
-     * @param RendererInterface $renderer  View renderer
+     * @param SessionSettings   $ss       Session settings
+     * @param Config            $config   Top-level configuration
+     * @param Backend           $epf      EBSCO Publication finder backend
+     * @param Connection        $ils      ILS connection
+     * @param RendererInterface $renderer View renderer
      */
     public function __construct(
         SessionSettings $ss,
         Config $config,
-        Config $epfConfig,
+        \VuFindSearch\Backend\EDS\Backend $epf,
         Connection $ils,
         RendererInterface $renderer,
     ) {
         $this->sessionSettings = $ss;
         $this->config = $config;
-        $this->epfConfig = $epfConfig;
+        $this->epf = $epf;
         $this->ils = $ils;
         $this->renderer = $renderer;
-    }
-
-    /**
-     * If not already created, will authenticate and create a new session with EDS
-     *
-     * @return null
-     */
-    protected function refreshEpfSession()
-    {
-        $token = null;
-        $auth_url = $this->epfConfig?->General?->auth_url . '/uidauth';
-        $session_url = $this->epfConfig?->General?->session_url . '/CreateSession';
-
-        $user = $this->epfConfig?->EBSCO_Account?->user_name;
-        $pass = $this->epfConfig?->EBSCO_Account?->password;
-        $profile = $this->epfConfig?->EBSCO_Account?->profile;
-        $org = $this->epfConfig?->EBSCO_Account?->organization_id;
-
-        // The session expired or doesn't exist, create a new one
-        if (
-            null === $this->epfSessionCreation || null === $this->epfSessionDuration ||
-            null === $this->epfSession || date('Y-m-d H:i:s') - $this->epfSessionCreation >= $this->epfSessionDuration
-        ) {
-            // Authenticate to get the token
-            $curl = curl_init();
-            curl_setopt_array($curl, [
-              CURLOPT_URL => $auth_url,
-              CURLOPT_RETURNTRANSFER => true,
-              CURLOPT_TIMEOUT => 8,
-              CURLOPT_FOLLOWLOCATION => true,
-              CURLOPT_CUSTOMREQUEST => 'POST',
-              CURLOPT_POSTFIELDS => '{
-                "UserId": "' . $user . '",
-                "Password": "' . $pass . '"
-              }',
-              CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json',
-                'Accept: application/json',
-              ],
-            ]);
-            $response = curl_exec($curl);
-
-            // if there are no errors, attempt to decode the json response
-            if ($e = curl_error($curl)) {
-                $this->logError('Error occurred when authenticating to EDS. ' . $e);
-            } else {
-                $data = json_decode($response, true);
-                if ($data === null) {
-                    $this->logError('Error occured parsing the JSON data from authentication endpoint. Error: ' .
-                                    json_last_error_msg() . '. Full Response: ' . $response);
-                } else {
-                    $this->epfSessionToken = $data['AuthToken'];
-                    $this->epfSessionDuration = $data['AuthTimeout'];
-                    $this->epfSessionCreation = date('Y-m-d H:i:s');
-                }
-            }
-            curl_close($curl);
-
-            // Create the session
-            if (null !== $this->epfSessionToken) {
-                $curl = curl_init();
-                curl_setopt_array($curl, [
-                  CURLOPT_URL => $session_url,
-                  CURLOPT_RETURNTRANSFER => true,
-                  CURLOPT_TIMEOUT => 8,
-                  CURLOPT_FOLLOWLOCATION => true,
-                  CURLOPT_CUSTOMREQUEST => 'POST',
-                  CURLOPT_POSTFIELDS => '{
-                    "Profile": "' . $profile . '",
-                    "Guest": "n",
-                    "Org": "' . $org . '"
-                  }',
-                  CURLOPT_HTTPHEADER => [
-                    'Content-Type: application/json',
-                    'Accept: application/json',
-                    'x-authenticationToken: ' . $this->epfSessionToken,
-                  ],
-                ]);
-                $response = curl_exec($curl);
-                // if there are no errors, attempt to decode the json response
-                if ($e = curl_error($curl)) {
-                    $this->logError('Error occurred when creating the session with EDS. ' . $e);
-                } else {
-                    $data = json_decode($response, true);
-                    if ($data === null) {
-                        $this->logError('Error occured parsing the JSON data from the session endpoint. Error: ' .
-                                        json_last_error_msg() . '. Full Response: ' . $response);
-                    } else {
-                        $this->epfSession = $data['SessionToken'];
-                    }
-                }
-                curl_close($curl);
-            }
-        }
     }
 
     /**
@@ -243,52 +150,31 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
     protected function getPublishers($title)
     {
         $publishers = [];
-        $this->refreshEpfSession();
-        $epf_url = $this->epfConfig?->General?->api_url . '/search';
 
         if (empty($title)) {
             return $publishers; // only search for publishers if a title is provided
         }
 
         $this->debug('Calling EPF function to get publishers for ' . $title);
+        try {
+            $resp = $this->epf->search(new Query($title), 0, 3);
 
-        $curl = curl_init();
-        curl_setopt_array($curl, [
-          CURLOPT_URL => $epf_url . '?query=' . urlencode($title),
-          CURLOPT_HTTPGET => true,
-          CURLOPT_RETURNTRANSFER => true,
-          CURLOPT_TIMEOUT => 8,
-          CURLOPT_FOLLOWLOCATION => true,
-          CURLOPT_HTTPHEADER => [
-            'Content-Type: application/json',
-            'Accept: application/json',
-            'x-sessionToken: ' . $this->epfSession,
-            'x-authenticationToken: ' . $this->epfSessionToken,
-          ],
-        ]);
-        $response = curl_exec($curl);
-        // if there are no errors, attempt to decode the json response
-        if ($e = curl_error($curl)) {
-            $this->logError('Error occurred when searching EPF for publishers. ' . $e);
-        } else {
-            $data = json_decode($response, true);
-            if ($data === null) {
-                $this->logError('Error occured parsing the JSON data from the EPF search endpoint. Error: ' .
-                                json_last_error_msg() . '. Full Response: ' . $response);
-            } else {
-                // Parse the publisher data to get the names
-                $fullTextHoldings = $data['SearchResult']['Data']['Records'][0]['FullTextHoldings'] ?? [];
-                foreach ($fullTextHoldings as $fullTextHolding) {
-                    if (!empty($fullTextHolding['Name'] ?? '')) {
-                        $publishers[] = [
-                            'publisher' => $fullTextHolding['Name'] ?? '',
-                            'resource_url' => $fullTextHolding['URL'] ?? '',
-                        ];
-                    }
+            // Parse the publisher data to get the names
+            $fullTextHoldings = $resp->getRecords()[0]->getFullTextHoldings();
+            foreach ($fullTextHoldings as $fullTextHolding) {
+                if (!empty($fullTextHolding['Name'] ?? '')) {
+                    $publishers[] = [
+                        'publisher' => $fullTextHolding['Name'] ?? '',
+                        'resource_url' => $fullTextHolding['URL'] ?? '',
+                    ];
                 }
             }
+        } catch (\Exception $e) {
+            $this->logError('Error occurred when searching EPF for publishers. ' . $e);
+            return $publishers;
         }
-        curl_close($curl);
+
+
         return $publishers;
     }
 

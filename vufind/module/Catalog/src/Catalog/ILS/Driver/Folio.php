@@ -807,7 +807,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $query = [
                 'referenceId' => $packageId,
             ];
-            $response = $this->makeRequest('GET', '/erm/sas/publicLookup', $query, $headers);
+            $response = $this->makeRequest('GET', '/erm/sas/publicLookup', $query);
             $licenses = json_decode($response->getBody());
             $customProperties = $licenses->records[0]?->linkedLicenses[0]?->remoteId_object?->customProperties;
             $licenseAgreements = [
