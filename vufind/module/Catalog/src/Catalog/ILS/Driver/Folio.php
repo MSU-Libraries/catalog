@@ -34,6 +34,7 @@ use VuFind\Exception\ILS as ILSException;
 
 use function count;
 use function in_array;
+use function is_string;
 
 /**
  * FOLIO REST API driver
@@ -773,5 +774,154 @@ class Folio extends \VuFind\ILS\Driver\Folio
             throw new ILSException('Item Not Found');
         }
         return $instances->instances[0];
+    }
+
+    /**
+     * Get the license agreement data for the specific publisher
+     *
+     * @param string $publisherName Publisher name
+     *
+     * @return array of license agreement data
+     */
+    public function getLicenseAgreement($publisherName)
+    {
+        $licenseAgreements = [];
+
+        // Call the package API to get the `id` field
+        $query = [
+            'q' => '"' . $publisherName . '"',
+            'page' => '1',
+            'filter[selected]' => 'true',
+        ];
+        $headers = [
+            'Accept: application/vnd.api+json',
+        ];
+        $response = $this->makeRequest('GET', '/eholdings/packages', $query, $headers);
+        $packages = json_decode($response->getBody());
+        if (count($packages->data) != 1) {
+            throw new ILSException('Could not identify single package for publisher');
+        }
+        $packageId = $packages->data[0]->id ?? '';
+        // Get the license agreements if we were able to locate the package ID
+        if (!empty($packageId)) {
+            $query = [
+                'referenceId' => $packageId,
+            ];
+            $response = $this->makeRequest('GET', '/erm/sas/publicLookup', $query);
+            $licenses = json_decode($response->getBody());
+            $customProperties = $licenses->records[0]?->linkedLicenses[0]?->remoteId_object?->customProperties;
+            $licenseAgreements = [
+                'vendoraccessibilityinfo' => $customProperties?->vendoraccessibilityinfo[0]?->value ?? '',
+                'authorizedusers' => $customProperties?->authorizedusers[0]->value?->label ?? '',
+                'ConcurrentUsers' => $customProperties?->ConcurrentUsers[0]?->value ?? '',
+            ];
+        }
+
+        return $licenseAgreements;
+    }
+
+    /**
+     * Make requests
+     * MSUL Override to update default headers instead of just add to them PC-606
+     *
+     * @param string            $method              GET/POST/PUT/DELETE/etc
+     * @param string            $path                API path (with a leading /)
+     * @param string|array      $params              Query parameters
+     * @param array             $headers             Additional headers
+     * @param true|int[]|string $allowedFailureCodes HTTP failure codes that should
+     * NOT cause an ILSException to be thrown. May be an array of integers, a regular
+     * expression, or boolean true to allow all codes.
+     * @param string|array      $debugParams         Value to use in place of $params
+     * in debug messages (useful for concealing sensitive data, etc.)
+     *
+     * @return \Laminas\Http\Response
+     * @throws ILSException
+     */
+    public function makeRequest(
+        $method = 'GET',
+        $path = '/',
+        $params = [],
+        $headers = [],
+        $allowedFailureCodes = [],
+        $debugParams = null
+    ) {
+        $client = $this->httpService->createClient(
+            $this->config['API']['base_url'] . $path,
+            $method,
+            120
+        );
+
+        // MSUL customization -- Update default headers and parameters when they exist
+        $req_headers = $client->getRequest()->getHeaders();
+        [$req_headers, $params] = $this->preRequest($req_headers, $params);
+        if (!empty($headers)) {
+            foreach ($headers as $header) {
+                $matches = $req_headers->get(explode(':', $header)[0]);
+
+                if ($matches instanceof ArrayIterator) {
+                    foreach ($req_headers as $req_header) {
+                        $req_headers->removeHeader($req_header);
+                    }
+                } elseif ($matches instanceof HeaderInterface) {
+                    $req_headers->removeHeader($matches);
+                }
+                if ($matches != false) {
+                    $req_headers->addHeaderLine($header);
+                }
+            }
+        }
+
+        if ($this->logger) {
+            $this->debugRequest($method, $path, $debugParams ?? $params, $req_headers);
+        }
+
+        // Add params
+        if ($method == 'GET') {
+            $client->setParameterGet($params);
+        } else {
+            if (is_string($params)) {
+                $client->getRequest()->setContent($params);
+            } else {
+                $client->setParameterPost($params);
+            }
+        }
+        try {
+            $response = $client->send();
+        } catch (\Exception $e) {
+            $this->logError('Unexpected ' . $e::class . ': ' . (string)$e);
+            throw new ILSException('Error during send operation.');
+        }
+        $code = $response->getStatusCode();
+        if (
+            !$response->isSuccess()
+            && !$this->failureCodeIsAllowed($code, $allowedFailureCodes)
+        ) {
+            $this->logError(
+                "Unexpected error response; code: $code, body: "
+                . $response->getBody()
+            );
+            throw new ILSException('Unexpected error code.');
+        }
+        if ($jsonLog = ($this->config['API']['json_log_file'] ?? false)) {
+            if (APPLICATION_ENV !== 'development') {
+                throw new \Exception(
+                    'SECURITY: json_log_file enabled outside of development mode'
+                );
+            }
+            $body = $response->getBody();
+            $jsonBody = @json_decode($body);
+            $json = file_exists($jsonLog)
+                ? json_decode(file_get_contents($jsonLog)) : [];
+            $json[] = [
+                'expectedMethod' => $method,
+                'expectedPath' => $path,
+                'expectedParams' => $params,
+                'body' => $jsonBody ? $jsonBody : $body,
+                'bodyType' => $jsonBody ? 'json' : 'string',
+                'code' => $code,
+            ];
+            file_put_contents($jsonLog, json_encode($json));
+        }
+        return $response;
     }
 }

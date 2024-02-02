@@ -54,6 +54,8 @@ Validate Vufind Build:
   environment:
     name: $CI_COMMIT_BRANCH/validate-vufind
     auto_stop_in: 2 weeks
+  variables:
+    LATEST: $CI_REGISTRY_IMAGE/vufind:latest
   tags:
     - msul-shared
   retry: 1

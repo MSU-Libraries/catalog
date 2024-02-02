@@ -5,7 +5,7 @@ runhelp() {
     echo "Purpose: Run validation on the VuFind image"
     echo ""
     echo "Expected User-defined Variables:"
-    echo "  - CURR: Image tag for the VuFind image to test"
+    echo "  - LATEST: Image tag for the latest VuFind image to use for cache"
     echo ""
     echo "Failure Scenarios:"
     echo "  - When the unit tests return a non-zero exit code"
@@ -27,7 +27,9 @@ main() {
         --build-arg SOLR_URL=http://solr:8983/solr \
         --build-arg SIMPLESAMLPHP_VERSION="${SIMPLESAMLPHP_VERSION}" \
         --tag validate \
+        --cache-from "${LATEST}" \
         vufind/;
+    # 1/23/24 - Trying to add it back in now
     # Removed the below flag because it sometimes caused inaccurate failures when it incorrectly cached from :latest in some cases
     #--cache-from "${LATEST}"
 

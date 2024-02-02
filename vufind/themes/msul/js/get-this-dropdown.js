@@ -1,5 +1,5 @@
 
-$(document).ready(function pageLoad() {
+$(function pageLoad() {
   $(".modal").on("click", ".get-this-dropdown > ul > li > a", function getThisLinkClick(e) {
     $(this).siblings("div").toggleClass('active');
     $(this).attr("aria-expanded", function getThisAriaExpand(index, attr) {
@@ -25,7 +25,7 @@ $(document).ready(function pageLoad() {
       $(".get-this-dropdown div").addClass('active');
       $(".get-this-dropdown > ul > li > a").attr("aria-expanded", "true");
       setTimeout(function getThisSetLinkFocus() {
-        $(".get-this-dropdown div a").first().focus();
+        $(".get-this-dropdown div a").first().trigger("focus");
       }, 1);
       return false;
     }

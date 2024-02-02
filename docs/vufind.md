@@ -43,3 +43,11 @@ exception is thrown, edit the `local/httpd-vufind.conf` file and
 uncomment the line that says: `SetEnv VUFIND_ENV development`. Write
 the changes to the file and then run `apachectl graceful` to apply
 the change.
+
+* To clear VuFind's caches (which can sometimes hang on to old compiled
+stylesheets or language files), you can run the following within any
+VuFind container:
+
+```bash
+clear-vufind-cache
+```
