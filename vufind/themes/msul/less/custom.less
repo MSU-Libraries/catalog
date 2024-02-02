@@ -915,7 +915,6 @@ table tr {
   }
   h2 a {
     color: @msugreen;
-    text-decoration: none;
     &:hover {
       color: black;
     }
@@ -1276,7 +1275,6 @@ body.template-dir-myresearch.template-name-profile {
     left: 0;
     visibility: hidden;
     opacity: 0;
-    display: none;
 
     &.active {
       visibility: visible;
@@ -1601,4 +1599,18 @@ mark {
 
 #similar-items-carousel .hover-overlay:focus .content {
   display:block;
+}
+
+
+@media only screen and (min-width : 790px) {
+  .template-dir-record {
+    nav:has(.pager) {
+      margin-top: @pager-margin-top;
+      margin-bottom: 0;
+    }
+
+    nav .pager {
+      margin: 0;
+    }
+  }
 }
