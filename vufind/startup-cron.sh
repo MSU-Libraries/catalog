@@ -24,15 +24,19 @@ ln -s /mnt/shared/backups/${STACK_NAME}/ /mnt/backups
 # Set custom cron minute offsets for OAI harvesting
 FOLIO_CRON_MINS="0,30"  # catalog-prod
 HARV_CRON_MINS="30"
+RESRV_CRON_MINS="10"
 if [[ "${STACK_NAME}" == "catalog-beta" ]]; then
     FOLIO_CRON_MINS="15"
     HARV_CRON_MINS="15"
+    RESRV_CRON_MINS="20"
 elif [[ "${STACK_NAME}" == "catalog-preview" ]]; then
     FOLIO_CRON_MINS="45"
     HARV_CRON_MINS="45"
+    RESRV_CRON_MINS="50"
 fi
 export FOLIO_CRON_MINS
 export HARV_CRON_MINS
+export RESRV_CRON_MINS
 # Replace the $NODE in the crontab entry
 envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
 
