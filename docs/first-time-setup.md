@@ -109,6 +109,7 @@ with a `POST` request to `/perms/permissions`.
 * `course-reserves-storage.departments.collection.get`
 * `course-reserves-storage.reserves.collection.get`
 * `oai-pmh.records.collection.get`
+* `proxiesfor.collection.get`
 
 ## For GitLab users
 ### Creating a CI/CD Token
