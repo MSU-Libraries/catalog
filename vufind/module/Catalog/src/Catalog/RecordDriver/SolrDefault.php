@@ -165,4 +165,14 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     {
         return [];
     }
+
+    /**
+     * Get the video game platform
+     *
+     * @return array
+     */
+    public function getPlatform()
+    {
+        return [];
+    }
 }

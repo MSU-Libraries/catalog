@@ -414,4 +414,90 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         return $this->getMarcFieldUnique('753', ['a']);
     }
+
+    /**
+     * Get the variant titles
+     *
+     * @return array Content from Solr
+     */
+    public function getVariantTitles()
+    {
+        $titles = [];
+        $marc = $this->getMarcReader();
+        $marcArr246 = $marc->getFields('246', ['a', 'b', 'c', 'i']);
+
+        foreach ($marcArr246 as $marc246) {
+            $type = '';
+            $title = '';
+
+            // Make sure there is an 'a' subfield in this record to get the title
+            if (in_array('a', array_column($marc246['subfields'], 'code'))) {
+                $a = $b = $c = '';
+                foreach ($marc246['subfields'] as $subfield) {
+                    switch ($subfield['code']) {
+                        case 'a':
+                            $a = $subfield['data'];
+                            break;
+                        case 'b':
+                            $b = ' ' . $subfield['data'];
+                            break;
+                        case 'c':
+                            $c = ' ' . $subfield['data'];
+                            break;
+                    }
+                }
+                $title = $a . $b . $c;
+            } else {
+                continue; // don't proces if we don't even have a title
+            }
+
+            if (!empty($marc246['i2'] ?? '')) {
+                // If the 2nd indicator is present, use that as 'type'
+                $type = $marc246['i2'];
+                switch ($marc246['i2']) {
+                    case 0:
+                        $type = 'Portion of title';
+                        break;
+                    case 1:
+                        $type = 'Parallel title';
+                        break;
+                    case 2:
+                        $type = 'Distinctive title';
+                        break;
+                    case 3:
+                        $type = 'Other title';
+                        break;
+                    case 4:
+                        $type = 'Cover title';
+                        break;
+                    case 5:
+                        $type = 'Added title page title';
+                        break;
+                    case 6:
+                        $type = 'Caption title';
+                        break;
+                    case 7:
+                        $type = 'Running title';
+                        break;
+                    case 8:
+                        $type = 'Spine title';
+                        break;
+                }
+            } elseif (in_array('i', array_column($marc246['subfields'], 'code'))) {
+                // otherwise check if subfield 'i' is present, and use that for 'type'
+                foreach ($marc246['subfields'] as $subfield) {
+                    if ($subfield['code'] == 'i') {
+                        $type = $subfield['data'];
+                        break;
+                    }
+                }
+            }
+            // Get the title
+            $titles[] = [
+                'type' => $type,
+                'title' => $title,
+            ];
+        }
+        return $titles;
+    }
 }
