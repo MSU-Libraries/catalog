@@ -129,13 +129,7 @@
       <a class="sr-only" href="#content"><?=$this->transEsc('Skip to content') ?></a>
       <?=$this->render('header.phtml')?>
     </header>
-    <nav class="breadcrumbs" aria-label="<?=$this->transEscAttr('Breadcrumbs') ?>">
-      <div class="container">
-        <?php if (!empty($this->layout()->showBreadcrumbs ?? true) && !empty($this->layout()->breadcrumbs)): ?>
-          <ul class="breadcrumb hidden-print"><?=$this->layout()->breadcrumbs ?></ul>
-        <?php endif; ?>
-      </div>
-    </nav>
+<!-- Removed nav class="breadcrumbs" -->
     <div role="main" class="main">
       <div id="content" class="container">
         <?=$this->layout()->content ?>
