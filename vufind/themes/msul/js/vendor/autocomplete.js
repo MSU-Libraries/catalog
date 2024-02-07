@@ -281,7 +281,7 @@ function Autocomplete(_settings) {
 
     // Aria
     list.setAttribute("role", "listbox");
-    list.setAttribute("aria-live", "assertive");
+    list.setAttribute("aria-live", "assertive"); // msul added autocomplete suggestions screen reader
     input.setAttribute("role", "combobox");
     input.setAttribute("aria-autocomplete", "both");
     input.setAttribute("aria-controls", list.getAttribute("id"));
