@@ -1,0 +1,45 @@
+<!-- Get-this: Bibinfo -->
+<?php
+use Catalog\GetThis\GetThisLoader;
+
+$item = $this->getthis->getItem();
+$check = $item['check'] ?? false;
+$link = $this->getthis->getLink();
+$notices = $this->Notices('RequestNotices.yaml');
+?>
+<div>
+  <p><b><a href='https://lib.msu.edu/circ/borrowing-at-msu' target='_blank'>Place Request for On-Campus Pickup:</a></b>
+    We will hold MSU materials for pickup at the campus 
+    library of your choice, or you may pickup materials at a library location locker. (All patrons)
+  </p>
+  <ul>
+    <li>
+      <?php if ($item != null && !$this->getthis->isOnlineResource() && !GetThisLoader::makerspaceLocation($item) &&
+          $item['is_holdable'] && $link ?? false) { ?>
+          <?php // PC-745 Disabled requests during configured periods of time ?>
+          <?php if ($notices->hasNotices()): ?>
+             <a class="<?=$check ? 'checkRequest ' : ''?>placehold disabled"
+               <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
+               aria-disabled='true'>
+               <i class='fa fa-flag' aria-hidden='true'></i>
+               &nbsp;<?=$this->transEsc($check ? 'Check Hold (UNAVAILABLE)' : 'Place Request (UNAVAILABLE)')?>
+             </a>
+          <?php else: ?>
+             <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
+               <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
+               href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
+               <i class="fa fa-flag" aria-hidden="true"></i>
+               &nbsp;<?=$this->transEsc($check ? 'Check Hold' : 'Place Request') ?>
+             </a>
+          <?php endif; ?>
+      <?php } ?>
+      <?php // PC-804 Add save to list option to Get This when requests are disabled ?>
+      <?php if ($notices->hasNotices() && $this->userlist()->getMode() !== 'disabled' && $this->permission()->allowDisplay('feature.Favorites')): ?>
+        <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getActionUrl($this->driver, 'Save'))?>" data-lightbox class="save-record result-link icon-link" data-id="<?=$this->escapeHtmlAttr($this->driver->getUniqueId()) ?>">
+          <?=$this->icon('user-favorites', 'icon-link__icon') ?>
+          <span class="result-link-label icon-link__label"><?=$this->transEsc('Add to favorites')?></span>
+        </a>
+      <?php endif; ?>
+    </li>
+  </ul>
+</div>
