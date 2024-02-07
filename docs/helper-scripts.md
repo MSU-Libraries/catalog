@@ -26,3 +26,22 @@ pc-deploy devel-test solr-bootstrap
 # or
 pc-deploy devel-test docker-compose.solr-bootstrap.yml
 ```
+
+## OAI File Locator ([pc-locate-oai](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-locate-oai?ref_type=heads))
+Locates the OAI harvest file that contains the given FOLIO instance ID, which can be then used for
+importing a specific record into your stack (or re-importing it). The script is available on the host
+machines as well as within the `catalog`, `cron` and `build` containers in the `catalog` stack.
+
+```bash
+# Locate the file that contains data for in01234 in catalog-prod's OAI files
+# that have previously been imported to that environment
+pc-locate-oai in01234
+# or
+pc-locate-oai in01234
+
+# Give verbose output to show you the grep command being run
+pc-locate-oai in01234 -v
+
+# Locate the file that contains data for in01234 in catalog-beta's OAI files
+pc-locate-oai in01234 catalog-beta
+```
