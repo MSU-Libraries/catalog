@@ -360,16 +360,18 @@ VuFind.register('lightbox', function Lightbox() {
     if (focusableNodes.length === 0) return;
 
     // remove nodes on whose click, the modal closes
+    // MSUL customization to change focus element to place request button or
+    // form-control element instead of 1st non-close button in modal (PC-814)
     var nodesWhichAreNotCloseTargets = focusableNodes.filter(function nodeFilter(node) {
       return !node.hasAttribute("data-lightbox-close") && (
         !node.hasAttribute("data-dismiss") ||
         node.getAttribute("data-dismiss") !== "modal"
-      );
+        ) && (node.classList.contains("placehold") ||
+        node.classList.contains("form-control"));
     });
 
-    // MSUL customization to change focus element to place request button instead of 1st item in modal (PC-814)
-    if (nodesWhichAreNotCloseTargets.length > 1) {
-      nodesWhichAreNotCloseTargets[1].focus();
+    if (nodesWhichAreNotCloseTargets.length > 0) {
+      nodesWhichAreNotCloseTargets[0].focus();
     }
     if (nodesWhichAreNotCloseTargets.length === 0) {
       focusableNodes[0].focus();
