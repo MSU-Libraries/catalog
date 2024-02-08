@@ -19,12 +19,10 @@ return [
     'factories' => [
       'Catalog\\Controller\\RecordController' => 'VuFind\\Controller\\AbstractBaseWithConfigFactory',
       'Catalog\\Controller\\MyResearchController' => 'VuFind\\Controller\\AbstractBaseFactory',
-      'Catalog\\Controller\\EdsController' => 'VuFind\\Controller\\AbstractBaseFactory',
     ],
     'aliases' => [
       'VuFind\\Controller\\RecordController' => 'Catalog\\Controller\\RecordController',
       'VuFind\\Controller\\MyResearchController' => 'Catalog\\Controller\\MyResearchController',
-      'VuFind\\Controller\\EdsController' => 'Catalog\\Controller\\EdsController',
     ],
   ],
   'vufind' => [

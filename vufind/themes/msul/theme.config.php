@@ -41,7 +41,6 @@ return [
              */
             'send-sms' => 'FontAwesome:mobile',
             'user-list-add' => 'FontAwesome:star',
-
         ],
     ],
 
