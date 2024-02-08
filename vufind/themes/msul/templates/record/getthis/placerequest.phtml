@@ -21,14 +21,12 @@ $notices = $this->Notices('RequestNotices.yaml');
            <a class="<?=$check ? 'checkRequest ' : ''?>placehold disabled"
              <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
              aria-disabled='true'>
-             <?= $this->icon('fa-flag', 'fa-flag') ?>
              &nbsp;<?=$this->transEsc($check ? 'Check Hold (UNAVAILABLE)' : 'Place Request (UNAVAILABLE)')?>
            </a>
         <?php else: ?>
            <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
              <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
              href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
-             <?= $this->icon('fa-flag', 'fa-flag') ?>
              &nbsp;<?=$this->transEsc($check ? 'Check Hold' : 'Place Request') ?>
            </a>
         <?php endif; ?>
