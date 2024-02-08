@@ -43,5 +43,4 @@ return [
             'user-list-add' => 'FontAwesome:star',
         ],
     ],
-
 ];
