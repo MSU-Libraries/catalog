@@ -366,8 +366,8 @@ VuFind.register('lightbox', function Lightbox() {
       return !node.hasAttribute("data-lightbox-close") && (
         !node.hasAttribute("data-dismiss") ||
         node.getAttribute("data-dismiss") !== "modal"
-        ) && (node.classList.contains("placehold") ||
-        node.classList.contains("form-control"));
+      ) && (node.classList.contains("placehold") ||
+      node.classList.contains("form-control"));
     });
 
     if (nodesWhichAreNotCloseTargets.length > 0) {
