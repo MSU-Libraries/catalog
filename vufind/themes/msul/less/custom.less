@@ -1483,19 +1483,60 @@ fieldset.solr-facets {
 }
 
 
-//spacing between selection boxes on catalog advanced search
-
+// catalog advanced search
+// spacing between selection boxes
+// leveled checkboxes (expandables) to be used by js
 #advSearchForm {
   .solr-adv-facet {
     .form-control {
       padding: 0.1rem;
-      margin-bottom:1rem;
+      margin-bottom: 1rem;
+      height: 15.5em;
+      overflow: auto;
+      white-space: nowrap;
+
+      label {
+        font-weight: inherit;
+        color: inherit;
+      }
+    }
+
+    .form-control.expandableLeveledCheckboxes {
+      .leveledCheckbox {
+        height: auto;
+      }
+
+      .leveledCheckbox:not(.expandable):not(.leveledCheckbox[data-level="0"]):not(.visibleLevel) {
+        display: none;
+      }
+
+      .expandable .expander,
+      .notExpandable .expander {
+        display: inline-block;
+        width: 17px;
+      }
+
+      .notExpandable .expander {
+        visibility: hidden;
+      }
+
+      .expandable.expanded > .expander .chevronRight,
+      .expandable:not(.expanded) > .expander .chevronDown,
+      .notExpandable > .expander .chevronDown {
+        display: none;
+      }
     }
   }
+
   @media (min-width: 768px) {
+    .solr-facet-container {
+      justify-content: space-around;
+      gap: 0.4rem;
+    }
+
     .solr-adv-facet {
-      flex: 1 23%;
-      margin: 0.2rem;
+      flex: 1 1 23%;
+      width: 23%;
     }
   }
 }
