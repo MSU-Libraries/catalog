@@ -1,8 +1,9 @@
 <!-- Getthis: Otherlib -->
 <?php
-use Catalog\GetThis\RegexLookup as Regex;
 
-$item = $this->getthis->getItem();
+  use Catalog\Utils\RegexLookup as Regex;
+
+  $item = $this->getthis->getItem();
 $loc = $this->getthis->getLocation();
 $status = $this->getthis->getStatus();
 $title = $this->driver->getTitle();
