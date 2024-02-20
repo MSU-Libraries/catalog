@@ -15,6 +15,7 @@
 namespace Catalog\GetThis;
 
 use Catalog\Utils\RegexLookup as Regex;
+
 use function array_key_exists;
 use function count;
 use function in_array;
