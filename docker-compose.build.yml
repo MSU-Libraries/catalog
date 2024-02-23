@@ -14,6 +14,7 @@ services:
       - /etc/bash_completion.d/pc-locate-oai:/etc/bash_completion.d/pc-locate-oai:ro
       # Requires rw so it can restore from backups
       - /mnt/shared/alpha-browse/${STACK_NAME}:/mnt/alpha-browse:ro
+      - /home/roudonro/testMount:/mnt/testMount:rw
     networks:
       - internal
     extra_hosts:
