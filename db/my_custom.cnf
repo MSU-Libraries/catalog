@@ -2,6 +2,7 @@
 [mysqld]
 wait_timeout        = 345600    # 4 days
 max_connections     = 1024
+disable_log_bin
 
 [mariadb]
 # Enable SHOW WSREP_STATUS; and SHOW WSREP_MEMBERSHIP; commands
