@@ -5,3 +5,9 @@ compiled.css
 vufind/themes/msul/css/less/
 ._*
 .idea/
+vufind/vendor
+vufind/public
+vufind/themes/bootprint3
+vufind/themes/root
+vufind/themes/sandal
+vufind/themes/themes

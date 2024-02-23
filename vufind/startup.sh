@@ -48,6 +48,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     fi
     # Sync over the current pipeline's configs
     rsync -ai /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/local-confs/
+
     # Set up the symlink
     rm -rf /usr/local/vufind/local
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/local-confs /usr/local/vufind/local
@@ -55,10 +56,17 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/themes/msul /usr/local/vufind/themes
     rm -rf /usr/local/vufind/module/Catalog
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog /usr/local/vufind/module
+
+    # Make core vufind files available in shared storage
+    ln -sf /usr/local/vufind/vendor ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind
+    ln -sf /usr/local/vufind/public ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind
+    find /usr/local/vufind/module -maxdepth 1 -name "VuFind*" -type d -exec sh -c "ln -sf {} ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/" \;
+    find /usr/local/vufind/themes -maxdepth 1 -type d ! -path "msul" ! -path "*local_*" -exec sh -c "ln -sf {} ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/themes/" \;
+
     # Make sure permissions haven't gotten changed on the share along the way
     # (This can happen no matter what on devel container startup)
     chown msuldevs:msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/*
-    chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/msul/
+    chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/*
     chown msuldevs:msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/local-confs/*
     rsync -aip --chmod=D2775,F664 --exclude "*.sh" --exclude "cicd" --exclude "*scripts*" "${SHARED_STORAGE}/${STACK_NAME}"/ "${SHARED_STORAGE}/${STACK_NAME}"/
 fi
