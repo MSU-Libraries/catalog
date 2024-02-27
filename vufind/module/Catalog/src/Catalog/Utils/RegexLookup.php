@@ -13,7 +13,7 @@
  * @link     https://vufind.org/vufind/ Main page
  */
 
-namespace Catalog\GetThis;
+namespace Catalog\Utils;
 
 use function constant;
 use function count;

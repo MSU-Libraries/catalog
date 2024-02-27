@@ -34,8 +34,12 @@ async function getLicenseAgreement(title) {
 }
 
 $( function pageLoad() {
+  var title = $("#title_short")[0];
+  if (title == null) {
+    return; // There is no title_short element on the page
+  }
   // Get the title of the item
-  var title = $("#title_short")[0].value;
+  title = title.value;
   var recordId = $("#id")[0].value;
 
   // Make AJAX request to get the license agreement information if this is an HLM record

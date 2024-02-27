@@ -424,7 +424,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         $titles = [];
         $marc = $this->getMarcReader();
-        $marcArr246 = $marc->getFields('246', ['a', 'b', 'c', 'i']);
+        $marcArr246 = $marc->getFields('246', ['a', 'b', 'i']);
 
         foreach ($marcArr246 as $marc246) {
             $type = '';
@@ -432,7 +432,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 
             // Make sure there is an 'a' subfield in this record to get the title
             if (in_array('a', array_column($marc246['subfields'], 'code'))) {
-                $a = $b = $c = '';
+                $a = $b = '';
                 foreach ($marc246['subfields'] as $subfield) {
                     switch ($subfield['code']) {
                         case 'a':
@@ -441,12 +441,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                         case 'b':
                             $b = ' ' . $subfield['data'];
                             break;
-                        case 'c':
-                            $c = ' ' . $subfield['data'];
-                            break;
                     }
                 }
-                $title = $a . $b . $c;
+                $title = $a . $b;
             } else {
                 continue; // don't proces if we don't even have a title
             }

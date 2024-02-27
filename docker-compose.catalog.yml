@@ -13,6 +13,8 @@ services:
       - /mnt/shared/config/BannerNotices.yaml:/mnt/shared/config/BannerNotices.yaml:ro
       - /mnt/shared/config/LocationNotices.yaml:/mnt/shared/config/LocationNotices.yaml:ro
       - vufind_cache:/mnt/vufind_cache
+      - /usr/local/bin/pc-locate-oai:/usr/local/bin/pc-locate-oai:ro
+      - /etc/bash_completion.d/pc-locate-oai:/etc/bash_completion.d/pc-locate-oai:ro
     networks:
       - public
       - internal
@@ -117,6 +119,8 @@ services:
     volumes:
       - logs:/mnt/logs
       - /mnt/shared:/mnt/shared:rw
+      - /usr/local/bin/pc-locate-oai:/usr/local/bin/pc-locate-oai:ro
+      - /etc/bash_completion.d/pc-locate-oai:/etc/bash_completion.d/pc-locate-oai:ro
       # Requires rw so it can restore from backups
       - /mnt/shared/alpha-browse/${STACK_NAME}:/mnt/alpha-browse:rw
     networks:

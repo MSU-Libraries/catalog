@@ -29,7 +29,7 @@
 
 namespace Catalog\ILS\Driver;
 
-use Catalog\GetThis\RegexLookup as Regex;
+use Catalog\Utils\RegexLookup as Regex;
 use VuFind\Exception\ILS as ILSException;
 
 use function count;
