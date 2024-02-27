@@ -84,6 +84,11 @@ RUN \
     # Enable bash completion for all users
     echo ". /usr/share/bash-completion/bash_completion" >> /etc/bash.bashrc
 
+# TEMP (VuFind 9.1.1 Cover image vulnerability fix)
+RUN \
+    wget -q 'https://raw.githubusercontent.com/vufind-org/vufind/release-9.1/module/VuFind/src/VuFind/Controller/CoverControllerFactory.php' -O /usr/local/vufind/module/VuFind/src/VuFind/Controller/CoverControllerFactory.php && \
+    wget -q 'https://raw.githubusercontent.com/vufind-org/vufind/release-9.1/module/VuFind/src/VuFind/Controller/CoverController.php' -O /usr/local/vufind/module/VuFind/src/VuFind/Controller/CoverController.php
+
 # TEMP(PART3): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/99
 RUN \
     rm /usr/local/vufind/import/lib/marc4j*.jar && \
