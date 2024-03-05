@@ -58,9 +58,9 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
 
     # Set up symlinks for core vufind code
     rm -rf /usr/local/vufind/module/VuFind*
-    find ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module -mindepth 1 -maxdepth 1 -name "VuFind*" -type d -exec sh -c 'for fl do ln -sf /${SHARED_STORAGE}${STACK_NAME}/core-repo/module/$(basename ${fl}) /usr/local/vufind/module; done;' _ {} +
+    find ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module -mindepth 1 -maxdepth 1 -name "VuFind*" -type d -exec sh -c 'for fl do ln -sf /mnt/shared/local/${STACK_NAME}/core-repo/module/$(basename ${fl}) /usr/local/vufind/module; done;' _ {} +
     rm -rf /usr/local/vufind/themes/*
-    find ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes -mindepth 1 -maxdepth 1 -type d ! -path "*local_*" -exec sh -c 'for fl do ln -sf ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/$(basename ${fl}) /usr/local/vufind/themes; done;' _ {} +
+    find ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes -mindepth 1 -maxdepth 1 -type d ! -path "*local_*" -exec sh -c 'for fl do ln -sf /mnt/shared/local/${STACK_NAME}/core-repo/themes/$(basename ${fl}) /usr/local/vufind/themes; done;' _ {} +
     rm -rf /usr/local/vufind/public
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/core-repo/public /usr/local/vufind
     mv /usr/local/vufind/vendor /mnt/shared/local/${STACK_NAME}/core-repo
