@@ -360,6 +360,16 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get the translated from languaes
+     *
+     * @return array Content from Solr
+     */
+    public function getTranslatedFrom()
+    {
+        return $this->getSolrField('translated_from_str_mv');
+    }
+
+    /**
      * Get the eJournal links with date coverage from the z subfield if available
      *
      * @return array Content from Solr
