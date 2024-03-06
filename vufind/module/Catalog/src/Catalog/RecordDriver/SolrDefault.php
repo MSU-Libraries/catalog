@@ -175,4 +175,14 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     {
         return [];
     }
+
+    /**
+     * Get the translated from languaes
+     *
+     * @return array Content from Solr
+     */
+    public function getTranslatedFrom()
+    {
+        return [];
+    }
 }
