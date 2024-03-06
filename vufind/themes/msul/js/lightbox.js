@@ -492,7 +492,7 @@ VuFind.register('lightbox', function Lightbox() {
           _beforeOpenElement = null;
         }
         unbindFocus();
-        this.setAttribute('aria-hidden', true);
+        this.setAttribute('aria-hidden', false); //msul-changed to false
         _emit('VuFind.lightbox.closing');
       }
     });

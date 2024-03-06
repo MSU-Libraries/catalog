@@ -1543,18 +1543,19 @@ mark {
   h3 {
   color:@gray-base;
   }
-  a {
-  margin:1rem 1rem 1rem 2.15rem;
-  }
 }
 .authmethod1 {
   h3 {
       font-size:large;
       a {
       text-decoration:none;
+      border: 2px solid #0A875F;
+      -webkit-border-radius: 7rem;
+      -moz-border-radius: 7rem;
+      border-radius: 7rem;
       &::after {
       display: inline-block;
-      margin-left: 0.255em;
+      margin-left: 0.5em;
       vertical-align: 0.255em;
       content: "";
       border-top: 0.3em solid;
@@ -1583,7 +1584,14 @@ mark {
 
 //Modal content
 
+.lightbox-header { //for non-modal layout /MyResearch/Home
+  margin-bottom:2rem;
+}
+
 #modal .modal-content {
+  h1 {
+    margin-bottom:2rem;
+  }
   .close {
     &:hover {
       background-color: @gray;
