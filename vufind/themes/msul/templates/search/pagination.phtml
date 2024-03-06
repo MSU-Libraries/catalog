@@ -19,8 +19,8 @@
         <?php foreach ($this->pagesInRange as $page): ?>
           <?php if ($page != $this->current): ?>
             <li role="none">
-              <a href="<?=$this->currentPath() . $this->results->getUrlQuery()->setPage($page)?>" aria-label="<?=$this->transEscAttr('page_no', ['%%page%%' => $page])?>"><?=$page?></a>
-            </li>
+              <a href="<?=$this->currentPath() . $this->results->getUrlQuery()->setPage($page)?>" aria-label="<?=$this->transEscAttr('page_num', ['%%page%%' => $page])?>"><?=$page?></a>
+            </li> <!-- msul-changed 'page_no' to 'page_num' -->
           <?php else: ?>
             <li role="none" class="active" aria-current="page"><span><?=$page?></span></li>
           <?php endif; ?>
