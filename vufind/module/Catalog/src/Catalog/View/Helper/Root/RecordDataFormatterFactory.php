@@ -63,11 +63,12 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         $spec->setLine('Cartographic Data', 'getCartographicData');
         $spec->setLine('Platform', 'getPlatform');
         $spec->setLine('Translated From', 'getTranslatedFrom');
-        $spec->setLine('Language Notes', 'getLanguageNotes');
+        $spec->setLine('Language and/or Writing System', 'getLanguageNotes');
 
         // Reorder the fields to get Genre next to Subjects
         $spec->reorderKeys(['Uniform Title', 'Variant Title', 'Published in', 'New Title', 'Previous Title',
-                'Authors', 'Format', 'Language', 'Translated From', 'Language Notes', 'Published', 'Edition', 'Series',
+                'Authors', 'Format', 'Language', 'Translated From', 'Language and/or Writing System',
+                'Published', 'Edition', 'Series',
                 'Subjects', 'Genre', 'Physical Description',
                 'child_records', 'Online Access', 'Related Items', 'Notes', 'Tags']);
 
@@ -84,9 +85,9 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
     {
         $spec = new SpecBuilder(parent::getDefaultDescriptionSpecs());
 
-        // Remove Physical Description
         $spec->setLine('Physical Description', null);
         $spec->setLine('Call Number', 'getFullCallnumber');
+        $spec->setLine('Numbering Peculiarities', 'getNumberingPeculiaritiesNotes');
 
         return $spec->getArray();
     }

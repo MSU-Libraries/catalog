@@ -133,13 +133,22 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getNotes()
     {
         $notes = array_merge(
-            $this->getNotesMarcFields('515'),
             $this->getNotesMarcFields('541'),
             $this->getNotesMarcFields('561'),
             $this->getNotesMarcFields('563')
         );
         $allNotes = array_merge($notes, $this->getLocalNotes());
         return $allNotes;
+    }
+
+    /**
+     * Get the numbering peculiarity notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getNumberingPeculiaritiesNotes()
+    {
+        return $this->getNotesMarcFields('515');
     }
 
     /**

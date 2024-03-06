@@ -57,6 +57,16 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
+     * Get the numbering peculiarity notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getNumberingPeculiaritiesNotes()
+    {
+        return [];
+    }
+
+    /**
      * Get phyiscal description
      *
      * @return array
