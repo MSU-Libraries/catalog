@@ -25,6 +25,8 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
+    ssh deploy@"${DEPLOY_HOST_A}" "cd /mnt/shared/local/${STACK_NAME}/core-repo/themes && ln -s ../../repo/vufind/themes/msul msul"
+    ssh deploy@"${DEPLOY_HOST_A}" "cd /mnt/shared/local/${STACK_NAME}/core-repo/module && ln -s ../../repo/vufind/module/Catalog Catalog"
     # Determine if records are already loaded
     CATALOG_NODE=$(ssh deploy@"${DEPLOY_HOST_A}" "docker service ps -f 'desired-state=running' --format '{{ .Node }}' ${STACK_NAME}-catalog_catalog") || echo "";
     CATALOG_CONTAINER=$(ssh deploy@"${CATALOG_NODE}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "";
