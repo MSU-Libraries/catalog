@@ -18,8 +18,8 @@ default_args() {
     ARGS[DRY_RUN]=0
     ARGS[VERBOSE]=0
     # This is not part of ARGS because bash does not support multidimensional arrays
-    IGNORE_SUBSTR=( "-2021" "-2022" "-202301" "-202302" )
-    IGNORE_SUBSTR+=( "-202303" "-202304" "-202305" "-202306" "-202307" "-202308" )
+    IGNORE_SUBSTR=( "-2021" "-2022" "-2023")
+    IGNORE_SUBSTR+=( "-202401" "-20240208" "-20240216" "-20240222" "-20240223" )
 }
 default_args
 
