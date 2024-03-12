@@ -132,13 +132,11 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getNotes()
     {
-        $notes = array_merge(
+        return array_merge(
             $this->getNotesMarcFields('541'),
             $this->getNotesMarcFields('561'),
             $this->getNotesMarcFields('563')
         );
-        $allNotes = array_merge($notes, $this->getLocalNotes());
-        return $allNotes;
     }
 
     /**
@@ -159,6 +157,36 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getLanguageNotes()
     {
         return $this->getNotesMarcFields('546');
+    }
+
+    /**
+     * Get the scale note fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getScaleNotes()
+    {
+        return $this->getNotesMarcFields('507');
+    }
+
+    /**
+     * Get the cite as note fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getCiteAsNotes()
+    {
+        return $this->getNotesMarcFields('524');
+    }
+
+    /**
+     * Get the dissertation note fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getDissertationNotes()
+    {
+        return $this->getNotesMarcFields('502');
     }
 
     /**

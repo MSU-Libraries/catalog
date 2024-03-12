@@ -236,6 +236,16 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
     }
 
     /**
+     * Get the access restriction notes field data
+     *
+     * @return Array Data in the note field
+     */
+    public function getAccessRestrictions()
+    {
+        return $this->getAccessRestrictions();
+    }
+
+    /**
      * Get the fields required for the templates from LibKey
      *
      * @param string $doi the DOI to validate with LibKey and build the URL with
