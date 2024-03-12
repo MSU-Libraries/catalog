@@ -177,6 +177,26 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
+     * Get the scale notes
+     *
+     * @return array
+     */
+    public function getScaleNotes()
+    {
+        return [];
+    }
+
+    /**
+     * Get the cite as notes
+     *
+     * @return array
+     */
+    public function getCiteAsNotes()
+    {
+        return [];
+    }
+
+    /**
      * Get the video game platform
      *
      * @return array
@@ -187,11 +207,21 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get the translated from languaes
+     * Get the translated from languages
      *
      * @return array Content from Solr
      */
     public function getTranslatedFrom()
+    {
+        return [];
+    }
+
+    /**
+     * Get the dissertation note
+     *
+     * @return array Content from Solr
+     */
+    public function getDissertationNotes()
     {
         return [];
     }

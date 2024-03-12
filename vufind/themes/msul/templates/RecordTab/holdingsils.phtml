@@ -48,6 +48,12 @@
     <?php endif; ?>
   <?php endif; ?>
 <?php endif; ?>
+<?php if (!empty($restrictions = $this->driver->getAccessRestrictions())): ?>
+  <h2><?=$this->transEsc('Access Restrictions')?></h2>
+  <?php foreach ($restrictions as $restriction): ?>
+    <span><?= $restriction ?></span>
+  <?php endforeach; ?>
+<?php endif; ?>
 <?php $holdingTitleHold = $this->driver->tryMethod('getRealTimeTitleHold'); ?>
 <?php if (!empty($holdingTitleHold)): ?>
   <a class="placehold icon-link" data-lightbox title="<?=$this->transEscAttr('request_place_text')?>" href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($holdingTitleHold))?>">
