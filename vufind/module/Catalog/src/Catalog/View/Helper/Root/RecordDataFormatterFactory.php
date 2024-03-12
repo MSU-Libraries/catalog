@@ -62,15 +62,17 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         $spec->setLine('Physical Description', 'getPhysicalDescriptions');
         $spec->setLine('Cartographic Data', 'getCartographicData');
         $spec->setLine('Platform', 'getPlatform');
-        $spec->setLine('Translated From', 'getTranslatedFrom');
-        $spec->setLine('Language and/or Writing System', 'getLanguageNotes');
+        $spec->setTemplateLine('Translated From', 'getTranslatedFrom', 'data-notes.phtml');
+        $spec->setTemplateLine('Language and/or Writing System', 'getLanguageNotes', 'data-notes.phtml');
+        $spec->setTemplateLine('Local Note', 'getLocalNotes', 'data-notes.phtml');
+        $spec->setTemplateLine('Dissertation Note', 'getDissertationNotes', 'data-notes.phtml');
 
-        // Reorder the fields to get Genre next to Subjects
         $spec->reorderKeys(['Uniform Title', 'Variant Title', 'Published in', 'New Title', 'Previous Title',
-                'Authors', 'Format', 'Language', 'Translated From', 'Language and/or Writing System',
+                'Authors', 'Language', 'Translated From', 'Language and/or Writing System',
                 'Published', 'Edition', 'Series',
                 'Subjects', 'Genre', 'Physical Description',
-                'child_records', 'Online Access', 'Related Items', 'Notes', 'Tags']);
+                'child_records', 'Online Access',
+                'Notes', 'Local Note', 'Dissertation Note', 'Tags']);
 
         return $spec->getArray();
     }
@@ -87,7 +89,69 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
 
         $spec->setLine('Physical Description', null);
         $spec->setLine('Call Number', 'getFullCallnumber');
-        $spec->setLine('Numbering Peculiarities', 'getNumberingPeculiaritiesNotes');
+        $spec->setTemplateLine('Numbering Peculiarities', 'getNumberingPeculiaritiesNotes', 'data-notes.phtml');
+        $spec->setLine('Production Credits', null);
+        $spec->setLine('Credits', 'getProductionCredits');
+        $spec->setLine('Related Items', null);
+        $spec->setLine('Related Materials', 'getRelationshipNotes');
+        $spec->setLine('Format', null);
+        $spec->setLine('System Details', 'getSystemDetails');
+        $spec->setLine('Access', null);
+        $spec->setTemplateLine('Scale Note', 'getScaleNotes', 'data-notes.phtml');
+        $spec->setTemplateLine('Cite As', 'getCiteAsNotes', 'data-notes.phtml');
+
+        return $spec->getArray();
+    }
+
+    /**
+     * Get default specifications for displaying data in collection-info metadata.
+     *
+     * @return array
+     */
+    public function getDefaultCollectionInfoSpecs()
+    {
+        $spec = new SpecBuilder(parent::getDefaultCollectionInfoSpecs());
+
+        $spec->setLine('Production Credits', null);
+        $spec->setLine('Credits', 'getProductionCredits');
+
+        $spec->setLine('Related Items', null);
+        $spec->setTemplateLine(
+            'Related Materials',
+            'getAllRecordLinks',
+            'data-allRecordLinks.phtml'
+        );
+
+        $spec->setLine('Format', null);
+        $spec->setLine(
+            'System Details',
+            'getFormats',
+            'RecordHelper',
+            ['helperMethod' => 'getFormatList']
+        );
+
+        return $spec->getArray();
+    }
+
+    /**
+     * Get default specifications for displaying data in collection-record metadata.
+     *
+     * @return array
+     */
+    public function getDefaultCollectionRecordSpecs()
+    {
+        $spec = new SpecBuilder(parent::getDefaultCollectionInfoSpecs());
+
+        $spec->setLine('Related Items', null);
+        $spec->setLine('Related Materials', 'getRelationshipNotes');
+
+        $spec->setLine('Format', null);
+        $spec->setLine(
+            'System Details',
+            'getFormats',
+            'RecordHelper',
+            ['helperMethod' => 'getFormatList']
+        );
 
         return $spec->getArray();
     }
