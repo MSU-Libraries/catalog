@@ -53,10 +53,10 @@
   <div class="navbar-form navbar-left flip">
     <?php $tabs = $this->context($this)->renderInContext('search/searchTabs', ['searchTabs' => $tabConfig['tabs'], 'showCounts' => false]); ?>
     <?php if (!empty($tabs)): ?><?=$tabs ?><div class="tab-content clearfix"><?php endif; ?>
-      <p class="adv_search_terms"><?=$this->transEsc('Your search terms')?>: "<strong><?=$this->escapeHtml($this->lookfor)?></strong>"</p>
+      <!-- <p class="adv_search_terms"><?=$this->transEsc('Your search terms')?>: "<strong><?=$this->escapeHtml($this->lookfor)?></strong>"</p> -->
       <p class="adv_search_links">
         <a href="<?=$this->url($advSearch)?>?edit=<?=$this->escapeHtmlAttr($this->searchId)?>"><?=$this->transEsc('Edit this Advanced Search')?></a> |
-        <a href="<?=$this->url($advSearch, [], ['query' => $hiddenFilters])?>"><?=$this->transEsc('Start a new  ')?></a> |
+        <a href="<?=$this->url($advSearch, [], ['query' => $hiddenFilters])?>"><?=$this->transEsc('Start a new Advanced Search')?></a> |
         <a href="<?=$this->url($searchHome, [], ['query' => $hiddenFilters])?>"><?=$this->transEsc('Start a new Basic Search')?></a>
       </p>
       <?=
@@ -77,7 +77,7 @@
 <?php else: ?>
   <form id="searchForm" class="searchForm navbar-form navbar-left flip" method="get" action="<?=$this->url($basicSearch)?>" name="searchForm" autocomplete="off">
     <?= $this->context($this)->renderInContext('search/searchTabs', ['searchTabs' => $tabConfig['tabs'], 'showCounts' => $tabConfig['showCounts']]); ?>
-    <label for="searchForm_type">Search&nbsp;</label>
+    <div class="searchtools"><label for="searchForm_type">Search&nbsp;</label> <!-- msul class for spacing -->
     <?php if ($handlerCount > 1): ?>
       <select id="searchForm_type" class="searchForm_type form-control" name="type" data-native-menu="false" aria-label="<?=$this->transEscAttr('Search type')?>">
         <?php $currentGroup = $insideGroup = false; ?>
@@ -134,7 +134,7 @@
         $advSearchQuery = $results ? ['edit' => $results->getSearchId()] : $hiddenFilters;
         $advSearchLink = $this->url($advSearch, [], ['query' => $advSearchQuery]);
       ?>
-      <a href="<?=$advSearchLink?>" class="advanced-search-link btn btn-link" rel="nofollow"><?=$this->transEsc('Advanced')?></a>
+      <a href="<?=$advSearchLink?>" class="advanced-search-link btn btn-link" rel="nofollow"><?=$this->transEsc('Advanced')?></a></div>
     <?php endif; ?>
     <?php if ($geoUrl = $this->geocoords()->getSearchUrl($options)) : ?>
         <a href="<?=$geoUrl ?>" class="btn btn-link"><?=$this->transEsc('Geographic Search')?></a>

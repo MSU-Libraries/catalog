@@ -278,7 +278,7 @@ header {
   a:focus {
     outline: 1px dashed #fff;
   }
-  .msul-address-icon, .msul-address, .msul-phone-icon, .msul-phone {
+  .msul-address-icon, .a-address, .a-phone-icon, .msul-phone {
     display: inline-flex;
     vertical-align:top;
     margin-bottom:1rem;
@@ -458,7 +458,7 @@ input[type="checkbox"] {
   }
 }
 
-.mainbody .container .searchbox {
+.mainbody .container .searchbox, .mainbody .search.navbar {
   margin-bottom:0;
 }
 
@@ -678,6 +678,7 @@ input[type="checkbox"] {
 form.searchForm, .record-tabs, .navbar-form {
   ul.nav-tabs {
     border-bottom:0;
+    margin-bottom:2rem;
 
     li {
       height:3rem;
@@ -726,15 +727,11 @@ form.searchForm, .record-tabs, .navbar-form {
   }
 
   .active-filters {
-    margin-top:2rem;
+    margin-bottom:1rem;
   }
 }
 
-form.searchForm {
-  ul.nav-tabs {
-    margin-bottom:2rem;
-  }
-}
+
 
 
 .record-tabs {
@@ -774,6 +771,11 @@ form.searchForm {
 }
 
 .bulkActionButtons {
+  .bulk-checkbox input {
+    height:1.25rem;
+    width:1.25rem;
+    vertical-align:text-bottom;
+  }
   .action-toolbar li button {
     background-color:transparent;
     color:@darkparakeetgreen;
@@ -825,6 +827,9 @@ table tr {
     width:1.25rem;
   }
   .result-body {
+    .fulltext {
+      display:inline;
+    }
     & :not(:first-child) {
       font-size:14px;
       line-height:1.6rem;
@@ -1062,7 +1067,8 @@ label {
   border-radius:0.5rem;
   color:@gray-darker;
   font-size:18px;
-
+  margin-bottom:1rem;
+  margin-top:0;
 }
 
 /*.searchHomeContent, .nav.searchbox {
@@ -1086,7 +1092,6 @@ label {
   background-color:#fff;
 }
 .pagination li {
-  font-size:1.5rem;
   color:#18453b;
   font-weight:300;
 
@@ -1105,9 +1110,6 @@ label {
 
 
 // Searchtools spacing
-.search-term {
-  margin-bottom:1rem;
-}
 
 .searchtools {
   margin-bottom:1rem;
@@ -1360,7 +1362,13 @@ body.template-dir-myresearch.template-name-profile {
     display:none;
   }
 }
-
+//Add left margin to 'edit and start a new searches' for Articles&More
+.template-dir-eds.template-name-search {
+  p.adv_search_links {
+    margin-left:7rem;
+    margin-bottom:1rem;
+  }
+}
 
 // Make See also (.authoritybox) display inline
 
