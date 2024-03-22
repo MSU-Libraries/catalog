@@ -48,6 +48,19 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     fi
     # Sync over the current pipeline's configs
     rsync -ai /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/local-confs/
+
+    # Shallow clone of vufind core's code
+    mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/core-repo
+    git clone -n /mnt/shared/vufind ${SHARED_STORAGE}/${STACK_NAME}/core-repo
+    git -C ${SHARED_STORAGE}/${STACK_NAME}/core-repo sparse-checkout init
+    git -C ${SHARED_STORAGE}/${STACK_NAME}/core-repo sparse-checkout set module themes public
+    git -C ${SHARED_STORAGE}/${STACK_NAME}/core-repo checkout v${VUFIND_VERSION}
+
+    # Clean the place for volume mount for core vufind code
+    rm -rf /usr/local/vufind/module/VuFind*
+    rm -rf /usr/local/vufind/themes/*
+    mv /usr/local/vufind/vendor /mnt/shared/local/${STACK_NAME}/core-repo
+
     # Set up the symlink
     rm -rf /usr/local/vufind/local
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/local-confs /usr/local/vufind/local
