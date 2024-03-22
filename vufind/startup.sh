@@ -56,10 +56,11 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     git -C ${SHARED_STORAGE}/${STACK_NAME}/core-repo sparse-checkout set module themes public
     git -C ${SHARED_STORAGE}/${STACK_NAME}/core-repo checkout v${VUFIND_VERSION}
 
-    # Clean the place for volume mount for core vufind code
-    rm -rf /usr/local/vufind/module/VuFind*
-    rm -rf /usr/local/vufind/themes/*
-    mv /usr/local/vufind/vendor /mnt/shared/local/${STACK_NAME}/core-repo
+    # Clean the place for volume mount for core vufind code TODO
+#    rm -rf /usr/local/vufind/module/VuFind*
+#    rm -rf /usr/local/vufind/themes/*
+    mv /usr/local/vufind/vendor ${SHARED_STORAGE}/${STACK_NAME}/core-repo
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/vendor /usr/local/vufind/vendor
 
     # Set up the symlink
     rm -rf /usr/local/vufind/local
