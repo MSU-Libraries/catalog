@@ -15,6 +15,22 @@ services:
       - vufind_cache:/mnt/vufind_cache
       - /usr/local/bin/pc-locate-oai:/usr/local/bin/pc-locate-oai:ro
       - /etc/bash_completion.d/pc-locate-oai:/etc/bash_completion.d/pc-locate-oai:ro
+      # Mounting for core vufind code to be available on host
+    #      - /mnt/shared/local/${STACK_NAME}/core-repo/public/:/usr/local/vufind/public/:rw
+    #      - /mnt/shared/local/${STACK_NAME}/core-repo/vendor/:/usr/local/vufind/vendor/:rw
+    #      - /mnt/shared/local/${STACK_NAME}/core-repo/themes/bootprint3/:/usr/local/vufind/themes/bootprint3/:rw
+    #      - /mnt/shared/local/${STACK_NAME}/core-repo/themes/bootstrap3/:/usr/local/vufind/themes/bootstrap3/:rw
+    #      - /mnt/shared/local/${STACK_NAME}/core-repo/themes/root/:/usr/local/vufind/themes/root/:rw
+    #      - /mnt/shared/local/${STACK_NAME}/core-repo/themes/sandal/:/usr/local/vufind/themes/sandal/:rw
+    #      - /mnt/shared/local/${STACK_NAME}/core-repo/module/VuFind/:/usr/local/vufind/module/VuFind/:rw
+    #      - /mnt/shared/local/${STACK_NAME}/core-repo/module/VuFindAdmin/:/usr/local/vufind/module/VuFindAdmin/:rw
+    #      - /mnt/shared/local/${STACK_NAME}/core-repo/module/VuFindApi/:/usr/local/vufind/module/VuFindApi/:rw
+    #      - /mnt/shared/local/${STACK_NAME}/core-repo/module/VuFindConsole/:/usr/local/vufind/module/VuFindConsole/:rw
+    #      - /mnt/shared/local/${STACK_NAME}/core-repo/module/VuFindDevTools/:/usr/local/vufind/module/VuFindDevTools/:rw
+    #      - /mnt/shared/local/${STACK_NAME}/core-repo/module/VuFindLocalTemplate/:/usr/local/vufind/module/VuFindLocalTemplate/:rw
+    #      - /mnt/shared/local/${STACK_NAME}/core-repo/module/VuFindSearch/:/usr/local/vufind/module/VuFindSearch/:rw
+    #      - /mnt/shared/local/${STACK_NAME}/core-repo/module/VuFindTheme/:/usr/local/vufind/module/VuFindTheme/:rw
+    #      - /mnt/shared/local/${STACK_NAME}/repo/vufind/startup.sh:/startup.sh:rw
     networks:
       - public
       - internal
