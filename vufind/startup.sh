@@ -48,13 +48,39 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     fi
     # Sync over the current pipeline's configs
     rsync -ai /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/local-confs/
-    # Set up the symlink
+
+    # Shallow clone of vufind core's code
+    mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/core-repo
+    git clone -n /mnt/shared/vufind ${SHARED_STORAGE}/${STACK_NAME}/core-repo
+    git -C ${SHARED_STORAGE}/${STACK_NAME}/core-repo sparse-checkout init
+    git -C ${SHARED_STORAGE}/${STACK_NAME}/core-repo sparse-checkout set module themes public
+    git -C ${SHARED_STORAGE}/${STACK_NAME}/core-repo checkout v${VUFIND_VERSION}
+
+    # Set up the symlink to be able to access code from host machine
+    rm -rf /usr/local/vufind/themes/*
+    rm -rf /usr/local/vufind/module/*
     rm -rf /usr/local/vufind/local
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/local-confs /usr/local/vufind/local
-    rm -rf /usr/local/vufind/themes/msul
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/themes/msul /usr/local/vufind/themes
-    rm -rf /usr/local/vufind/module/Catalog
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog /usr/local/vufind/module
+
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/public /usr/local/vufind/public
+    mv /usr/local/vufind/vendor ${SHARED_STORAGE}/${STACK_NAME}/core-repo
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/vendor /usr/local/vufind/vendor
+
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootprint3 /usr/local/vufind/themes/bootprint3
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootstrap3 /usr/local/vufind/themes/bootstrap3
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/root /usr/local/vufind/themes/root
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/sandal /usr/local/vufind/themes/sandal
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFind /usr/local/vufind/module/VuFind
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindAdmin /usr/local/vufind/module/VuFindAdmin
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindApi /usr/local/vufind/module/VuFindApi
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindConsole /usr/local/vufind/module/VuFindConsole
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindDevTools /usr/local/vufind/module/VuFindDevTools
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindLocalTemplate /usr/local/vufind/module/VuFindLocalTemplate
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindSearch /usr/local/vufind/module/VuFindSearch
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindTheme /usr/local/vufind/module/VuFindTheme
+
     # Make sure permissions haven't gotten changed on the share along the way
     # (This can happen no matter what on devel container startup)
     chown msuldevs:msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/*
