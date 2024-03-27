@@ -288,7 +288,11 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 $sfvals[$subfield['code']] = $subfield['data'];
             }
             if ($sfvals['b'] == 'Michigan State University') {
-                $locs[] = empty($sfvals['d']) ? $sfvals['c'] : $sfvals['d'];
+                if (str_contains($sfvals['d'], $sfvals['c'])) {
+                    $locs[] = $sfvals['c'];
+                } else {
+                    $locs[] = empty($sfvals['d']) ? $sfvals['c'] : $sfvals['d'];
+                }
             }
         }
         return $locs;
