@@ -251,6 +251,7 @@ def _node_cron_exit_codes() -> dict[str, str]:
         'searches': '/mnt/logs/vufind/searches_exit_code',
         'solr': '/mnt/logs/backups/solr_exit_code',
         'db': '/mnt/logs/backups/db_exit_code',
+        'alpha': '/mnt/logs/backups/alpha_exit_code',
         'alphabrowse': '/mnt/logs/alphabrowse/alphabrowse_exit_code',
     }
     exit_codes = {}

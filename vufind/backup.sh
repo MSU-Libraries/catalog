@@ -4,7 +4,9 @@
 default_args() {
     declare -g -A ARGS
     ARGS[SHARED_DIR]=/mnt/backups
+    ARGS[ALPHA_DIR]=/mnt/alpha-browse
     ARGS[SOLR]=0
+    ARGS[ALPHA]=0
     ARGS[DB]=0
     ARGS[ROTATIONS]=3
     ARGS[VERBOSE]=0
@@ -22,6 +24,8 @@ runhelp() {
     echo "     Back up both the Solr index and database"
     echo "  ./backup.sh --solr"
     echo "     Back up the Solr index"
+    echo "  ./backup.sh --alpha"
+    echo "     Back up the Solr alphabrowse database files"
     echo "  ./backup.sh --db"
     echo "     Back up the database"
     echo "  ./backup.sh --db --rotations 5"
@@ -30,11 +34,16 @@ runhelp() {
     echo "Flags:"
     echo "  -s|--solr"
     echo "     Back up the Solr index"
+    echo "  -a|--alpha"
+    echo "     Back up the Solr alphabrowse database files"
     echo "  -d|--db"
     echo "     Back up the MariaDB database"
     echo "  -b|--shared-dir SHARED_DIR"
     echo "      Full path to the shared storage location for backups to be stored."
     echo "      Default: ${ARGS[SHARED_DIR]}"
+    echo "  -p|--alpha-dir ALPHA_DIR"
+    echo "      Full path to the alphabrowse database storage location."
+    echo "      Default: ${ARGS[ALPHA_DIR]}"
     echo "  -r|--rotations ROTATIONS"
     echo "      Number of most recent backups to save"
     echo "      Default: ${ARGS[ROTATIONS]}"
@@ -52,6 +61,9 @@ parse_args() {
     # Parse flag arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
+        -a|--alpha)
+            ARGS[ALPHA]=1
+            shift;;
         -s|--solr)
             ARGS[SOLR]=1
             shift;;
@@ -63,6 +75,14 @@ parse_args() {
             RC=$?
             if [[ "$RC" -ne 0 || ! -d "${ARGS[SHARED_DIR]}" ]]; then
                 echo "ERROR: -s|--shared-dir path does not exist: $2"
+                exit 1
+            fi
+            shift; shift ;;
+        -p|--alpha-dir)
+            ARGS[ALPHA_DIR]=$( readlink -f "$2" )
+            RC=$?
+            if [[ "$RC" -ne 0 || ! -d "${ARGS[ALPHA_DIR]}" ]]; then
+                echo "ERROR: -p|--alpha-dir path does not exist: $2"
                 exit 1
             fi
             shift; shift ;;
@@ -84,8 +104,8 @@ parse_args() {
 }
 
 catch_invalid_args() {
-    if [[ "${ARGS[SOLR]}" -eq 0 && "${ARGS[DB]}" -eq 0 ]]; then
-        echo "ERROR: Neither --solr or --db flag is set. Please selet one or both to use this tool."
+    if [[ "${ARGS[SOLR]}" -eq 0 && "${ARGS[DB]}" -eq 0 && "${ARGS[ALPHA]}" -eq 0 ]]; then
+        echo "ERROR: Neither --solr, --alpha, or --db flag is set. Please selet at least one to use this tool."
         exit 1
     fi
 }
@@ -99,6 +119,28 @@ verbose() {
         echo "${MSG}"
     fi
     echo "${MSG}" >> "$LOG_FILE"
+}
+
+backup_alpha() {
+    mkdir -p ${ARGS[SHARED_DIR]}/alpha
+    remove_old_backups ${ARGS[SHARED_DIR]}/alpha
+
+    verbose "Taking a backup of the alphabrowse databases"
+    TIMESTAMP=$( date +%Y%m%d%H%M%S )
+    mkdir -p ${ARGS[SHARED_DIR]}/alpha/"${TIMESTAMP}"
+
+    if ! OUTPUT=$(cp ${ARGS[ALPHA_DIR]}/* ${ARGS[SHARED_DIR]}/alpha/"${TIMESTAMP}"/); then
+        verbose "ERROR: failed to make a backup of the alphabrowse databases. $OUTPUT" 1
+        exit 1
+    fi
+
+    verbose "Compressing the backup"
+    if ! tar -cf ${ARGS[SHARED_DIR]}/alpha/"${TIMESTAMP}".tar -C ${ARGS[SHARED_DIR]}/alpha/"${TIMESTAMP}" --remove-files ./; then
+        verbose "ERROR: Failed to compress the alphabrowse databases." 1
+        exit 1
+    fi
+
+    verbose "Completed backup of alphabrowse database"
 }
 
 backup_solr() {
@@ -293,6 +335,9 @@ main() {
     fi
     if [[ "${ARGS[DB]}" -eq 1 ]]; then
         backup_db
+    fi
+    if [[ "${ARGS[ALPHA]}" -eq 1 ]]; then
+        backup_alpha
     fi
 
     verbose "All processing complete"

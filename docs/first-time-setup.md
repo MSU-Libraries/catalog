@@ -64,7 +64,7 @@ docker stack deploy -c <(source .env; envsubst <docker-compose.mariadb-cloud.yml
 docker stack deploy -c <(source .env; envsubst <docker-compose.solr-cloud.yml) solr
 
 # The vufind stack
-docker stack deploy -c <(source .env; envsubst <docker-compose.yml) catalog
+docker stack deploy -c <(source .env; envsubst <docker-compose.catalog.yml) catalog
 
 # Deploy the swarm cleanup stack
 docker stack deploy -c <(source .env; envsubst <docker-compose.swarm-cleanup.yml) swarm-cleanup
@@ -109,6 +109,8 @@ with a `POST` request to `/perms/permissions`.
 * `course-reserves-storage.departments.collection.get`
 * `course-reserves-storage.reserves.collection.get`
 * `oai-pmh.records.collection.get`
+* `kb-ebsco.packages.collection.get` (For MSUL customization to add license agreement information to record pages)
+* `proxiesfor.collection.get`
 
 ## For GitLab users
 ### Creating a CI/CD Token

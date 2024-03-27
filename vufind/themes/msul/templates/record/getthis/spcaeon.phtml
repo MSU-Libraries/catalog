@@ -1,6 +1,7 @@
 <!-- Getthis: spcaeon -->
 <?php
-use Catalog\GetThis\RegexLookup as Regex;
+
+use Catalog\Utils\RegexLookup as Regex;
 
 $item = $this->getthis->getItem();
 $loc = $this->getthis->getLocation();
@@ -42,7 +43,7 @@ $pubname = substr($pubname, 0, 255);
             <?= $msg ?>
             <ul>
                 <li>
-                    <a href="https://spcrequest.lib.msu.edu/Logon/?Action=10&Form=20&value=GenericRequestMonograph&DocumentType=book&ItemTitle=<?= $this->escapeHtml($title) ?>&ItemEdition=<?= $this->escapeHtml($edition) ?>&ItemAuthor=<?= $this->escapeHtml($author) ?>&ItemPublisher=<?= $this->escapeHtml($pubname) ?>&Location=<?= $this->escapeHtml($loc) ?>&CallNumber=<?= $this->escapeHtml($callnum) ?>&ItemNumber=<?= $this->escapeHtml($bibnum) ?>&ItemVolume=<?= $this->escapeHtml($barcode) ?>" target="_blank">Request Item</a>
+                    <a href="https://spcrequest.lib.msu.edu/Logon/?Action=10&Form=20&value=GenericRequestMonograph&DocumentType=book&ItemTitle=<?= $this->escapeUrl($title) ?>&ItemEdition=<?= $this->escapeUrl($edition) ?>&ItemAuthor=<?= $this->escapeUrl($author) ?>&ItemPublisher=<?= $this->escapeUrl($pubname) ?>&Location=<?= $this->escapeUrl($loc) ?>&CallNumber=<?= $this->escapeUrl($callnum) ?>&ItemNumber=<?= $this->escapeUrl($bibnum) ?>&ItemVolume=<?= $this->escapeUrl($barcode) ?>" target="_blank">Request Item</a>
                 </li>
             </ul>
         </p>

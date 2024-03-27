@@ -57,6 +57,16 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
+     * Get the numbering peculiarity notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getNumberingPeculiaritiesNotes()
+    {
+        return [];
+    }
+
+    /**
      * Get phyiscal description
      *
      * @return array
@@ -162,6 +172,56 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
      * @return array
      */
     public function getLocalNotes()
+    {
+        return [];
+    }
+
+    /**
+     * Get the scale notes
+     *
+     * @return array
+     */
+    public function getScaleNotes()
+    {
+        return [];
+    }
+
+    /**
+     * Get the cite as notes
+     *
+     * @return array
+     */
+    public function getCiteAsNotes()
+    {
+        return [];
+    }
+
+    /**
+     * Get the video game platform
+     *
+     * @return array
+     */
+    public function getPlatform()
+    {
+        return [];
+    }
+
+    /**
+     * Get the translated from languages
+     *
+     * @return array Content from Solr
+     */
+    public function getTranslatedFrom()
+    {
+        return [];
+    }
+
+    /**
+     * Get the dissertation note
+     *
+     * @return array Content from Solr
+     */
+    public function getDissertationNotes()
     {
         return [];
     }

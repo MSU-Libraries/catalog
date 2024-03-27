@@ -46,6 +46,11 @@
   height:1px;
   word-wrap:normal;
 }
+.h2-style {
+  font-size: 23px;
+  font-weight: normal;
+}
+
 
 //Focus indicators
 a.record-cover-link:focus {
@@ -253,6 +258,7 @@ header {
   padding-left:2rem;
   background-color: @parakeetgreen;
   color:#fff;
+  font-weight:500;
   img.msul_logo {
     max-width:240px;
     margin-bottom:1rem;
@@ -272,7 +278,7 @@ header {
   a:focus {
     outline: 1px dashed #fff;
   }
-  .msul-address-icon, .msul-address, .msul-phone-icon, .msul-phone {
+  .msul-address-icon, .a-address, .a-phone-icon, .msul-phone {
     display: inline-flex;
     vertical-align:top;
     margin-bottom:1rem;
@@ -317,7 +323,6 @@ footer {
     }
     .col-lg-9 ul {
       display:block;
-      padding-left:0;
       line-height:1;
       margin-bottom:1rem;
       padding:0;
@@ -338,11 +343,11 @@ footer {
           font-weight:400
         }
         &.bold-text {
-          font-weight:600;
+          font-weight:400;
         }
         a {
            /*font-size:.8125rem;*/
-          font-weight:600;
+          font-weight:400;
           color:#0A875F !important;
           display:inline-block;
           text-decoration:none;
@@ -453,7 +458,7 @@ input[type="checkbox"] {
   }
 }
 
-.mainbody .container .searchbox {
+.mainbody .container .searchbox, .mainbody .search.navbar {
   margin-bottom:0;
 }
 
@@ -673,6 +678,7 @@ input[type="checkbox"] {
 form.searchForm, .record-tabs, .navbar-form {
   ul.nav-tabs {
     border-bottom:0;
+    margin-bottom:2rem;
 
     li {
       height:3rem;
@@ -721,15 +727,11 @@ form.searchForm, .record-tabs, .navbar-form {
   }
 
   .active-filters {
-    margin-top:2rem;
+    margin-bottom:1rem;
   }
 }
 
-form.searchForm {
-  ul.nav-tabs {
-    margin-bottom:2rem;
-  }
-}
+
 
 
 .record-tabs {
@@ -761,10 +763,6 @@ form.searchForm {
   }
 }
 
-.breadcrumbs {
-    display:none;
-}
-
 .record-nav {
   .action-toolbar li a {
     background-color:revert;
@@ -773,6 +771,11 @@ form.searchForm {
 }
 
 .bulkActionButtons {
+  .bulk-checkbox input {
+    height:1.25rem;
+    width:1.25rem;
+    vertical-align:text-bottom;
+  }
   .action-toolbar li button {
     background-color:transparent;
     color:@darkparakeetgreen;
@@ -824,6 +827,9 @@ table tr {
     width:1.25rem;
   }
   .result-body {
+    .fulltext {
+      display:inline;
+    }
     & :not(:first-child) {
       font-size:14px;
       line-height:1.6rem;
@@ -861,16 +867,21 @@ table tr {
   border-radius: 7rem;
   padding: 0.2rem 0.75rem 0.2rem 0.65rem;
   margin: 0 1rem 0 1rem;
+  transition:box-shadow .3s linear;
+  -moz-transition:-moz-box-shadow .3s linear;
+  -webkit-transition:-webkit-box-shadow .3s linear;
   &:hover {
     text-decoration:none;
-    color:@darkparakeetgreen;
-    border: 2px solid @darkparakeetgreen;
+    color:@darkparakeetgreen !important;
+    border: 2px solid @darkparakeetgreen !important;
   }
   &:active,
   &:focus {
     text-decoration:none;
-    color:@msugreen;
-    border: 2px solid @msugreen;
+    color:@parakeetgreen;
+    border: 2px solid @parakeetgreen;
+    box-shadow: inset 0 1rem 1rem @lightgray, 0 0 0.5rem @parakeetgreen;
+    -webkit-box-shadow: inset 0 1rem 1rem @lightgray, 0 0 0.5rem @parakeetgreen;
   }
   i {
     display:none;
@@ -897,7 +908,7 @@ table tr {
     padding: .2rem .5rem 0.2rem .5rem;
     font-size: 75%;
     font-weight: 700;
-    margin-left: 0rem;
+    margin-left: 0;
   }
   /* Fix top padding on badges */
   .format {
@@ -909,7 +920,6 @@ table tr {
   }
   h2 a {
     color: @msugreen;
-    text-decoration: none;
     &:hover {
       color: black;
     }
@@ -1055,6 +1065,10 @@ label {
   background-color:#f1f1f1;
   padding:0.5rem 1rem;
   border-radius:0.5rem;
+  color:@gray-darker;
+  font-size:18px;
+  margin-bottom:1rem;
+  margin-top:0;
 }
 
 /*.searchHomeContent, .nav.searchbox {
@@ -1078,7 +1092,6 @@ label {
   background-color:#fff;
 }
 .pagination li {
-  font-size:1.5rem;
   color:#18453b;
   font-weight:300;
 
@@ -1097,9 +1110,6 @@ label {
 
 
 // Searchtools spacing
-.search-term {
-  margin-bottom:1rem;
-}
 
 .searchtools {
   margin-bottom:1rem;
@@ -1158,6 +1168,14 @@ body.template-dir-myresearch.template-name-profile {
       }
     }
   }
+}
+
+//Myresearch sidebar styling
+#myresearch-sidebar {
+  margin-top:1rem;
+    h2 {
+      margin-top:1rem;
+    }
 }
 
 // Zebra-striping
@@ -1251,7 +1269,6 @@ body.template-dir-myresearch.template-name-profile {
   div {
     max-height: 15rem;
     overflow-y: auto;
-    display: none;
     width: ~"calc(100% + 0.3rem)";
     position: absolute;
     margin: -0.15rem;
@@ -1345,7 +1362,13 @@ body.template-dir-myresearch.template-name-profile {
     display:none;
   }
 }
-
+//Add left margin to 'edit and start a new searches' for Articles&More
+.template-dir-eds.template-name-search {
+  p.adv_search_links {
+    margin-left:7rem;
+    margin-bottom:1rem;
+  }
+}
 
 // Make See also (.authoritybox) display inline
 
@@ -1528,18 +1551,19 @@ mark {
   h3 {
   color:@gray-base;
   }
-  a {
-  margin:1rem 1rem 1rem 2.15rem;
-  }
 }
 .authmethod1 {
   h3 {
       font-size:large;
       a {
       text-decoration:none;
+      border: 2px solid #0A875F;
+      -webkit-border-radius: 7rem;
+      -moz-border-radius: 7rem;
+      border-radius: 7rem;
       &::after {
       display: inline-block;
-      margin-left: 0.255em;
+      margin-left: 0.5em;
       vertical-align: 0.255em;
       content: "";
       border-top: 0.3em solid;
@@ -1568,7 +1592,14 @@ mark {
 
 //Modal content
 
+.lightbox-header { //for non-modal layout /MyResearch/Home
+  margin-bottom:2rem;
+}
+
 #modal .modal-content {
+  h1 {
+    margin-bottom:2rem;
+  }
   .close {
     &:hover {
       background-color: @gray;
@@ -1578,4 +1609,50 @@ mark {
       outline:0.25rem solid #ffffff;
     }
   }
+}
+
+//Similar items carousel focus same as hover for A11Y
+
+#similar-items-carousel .hover-overlay:focus .content {
+  display:block;
+}
+
+// Popover
+.popover {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+.msul-online-access {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+
+  button {
+    padding: .25rem .75rem .25rem .75rem;
+    margin-left: 1rem;
+    margin-bottom: -0.1rem;
+    font-size: 1rem;
+    background-color: white !important;
+  }
+  .fa-info {
+    padding-right: 0.5rem;
+  }
+}
+
+@media only screen and (min-width : 790px) {
+  .template-dir-record {
+    nav:has(.pager) {
+      margin-top: @pager-margin-top;
+      margin-bottom: 0;
+    }
+
+    nav .pager {
+      margin: 0;
+    }
+  }
+}
+
+.fa-external-link {
+  padding-left: 0.3rem;
 }

@@ -1,6 +1,7 @@
 <!-- Getthis: Otherlib -->
 <?php
-use Catalog\GetThis\RegexLookup as Regex;
+
+use Catalog\Utils\RegexLookup as Regex;
 
 $item = $this->getthis->getItem();
 $loc = $this->getthis->getLocation();
@@ -39,11 +40,11 @@ if (is_array($pubname)): $pubname = implode(', ', $pubname); endif;
     <ul>
         <?php
         echo "<li><a href='https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:" .
-            $this->escapeHtml($status) . ':' . $this->escapeHtml($item == null ? '' : $item['barcode']) .
+            $this->escapeUrl($status) . ':' . $this->escapeUrl($item == null ? '' : $item['barcode']) .
             '&rft.genre=book&LO=EYM%2CGZM%2CMUN&rft.title=' .
-            $this->escapeHtml($title) . '&rft.au=' . $this->escapeHtml($author) . '&rft.pub=' . $this->escapeHtml($pubname) .
-            '&rft.isbn=' . $this->escapeHtml($isbn) . '&loc=' .
-            $this->escapeHtml($loc) . '&callno=' . $this->escapeHtml($callnum) .
+            $this->escapeUrl($title) . '&rft.au=' . $this->escapeUrl($author) . '&rft.pub=' . $this->escapeUrl($pubname) .
+            '&rft.isbn=' . $this->escapeUrl($isbn) . '&loc=' .
+            $this->escapeUrl($loc) . '&callno=' . $this->escapeUrl($callnum) .
             "&CAT=1' target='_blank'>Request Copy via ILLiad</a></li>";
         ?>
     </ul>
@@ -54,11 +55,11 @@ if (is_array($pubname)): $pubname = implode(', ', $pubname); endif;
     <ul>
         <?php
         echo "<li><a href='https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:" .
-            $this->escapeHtml($status) . ':' . $this->escapeHtml($item['barcode']) .
+            $this->escapeUrl($status) . ':' . $this->escapeUrl($item['barcode']) .
             '&rft.genre=article&LO=EYM%2CGZM%2CMUN&rft.title=' .
-            $this->escapeHtml($title) . '&rft.au=' . $this->escapeHtml($author) . '&rft.pub=' . $this->escapeHtml($pubname) .
-            '&rft.isbn=' . $this->escapeHtml($isbn) . '&loc=' . $this->escapeHtml($loc) . '&callno=' .
-            $this->escapeHtml($callnum) .
+            $this->escapeUrl($title) . '&rft.au=' . $this->escapeUrl($author) . '&rft.pub=' . $this->escapeUrl($pubname) .
+            '&rft.isbn=' . $this->escapeUrl($isbn) . '&loc=' . $this->escapeUrl($loc) . '&callno=' .
+            $this->escapeUrl($callnum) .
             "&CAT=1' target='_blank'>Request a SCAN of Copy</a></li>";
     } ?>
     </ul>

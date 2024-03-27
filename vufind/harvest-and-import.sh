@@ -546,6 +546,9 @@ batch_import() {
     fi
     verbose "Completed processing records to be deleted."
 
+    verbose "Solr optimization"
+    php "${VUFIND_HOME}/public/index.php" util/optimize
+
     if [[ "${ARGS[SOLR_COLLECTION]}" != "biblio-build" ]]; then
         solr_cache_warmup
     fi

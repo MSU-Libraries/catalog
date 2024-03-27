@@ -3,4 +3,5 @@ MAILTO=$EMAIL
 
 # Backups
 5 20    * * *   root    cron-solr-backup.sh
+4 20    * * *   root    cron-alpha-backup.sh
 0 20    * * *   root    cron-db-backup.sh

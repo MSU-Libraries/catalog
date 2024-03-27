@@ -122,7 +122,10 @@ resources such as Solr and the Traefik dashboard
 * `EDS_PROFILE`: Profile name for EDS
 * `EDS_USER`: Username for the EDS API
 * `EMAIL`: Email address set in Vufind's configs 
-* `FEEDBACK_EMAIL`: Email address for sending feedback form submissions to
+* `FEEDBACK_EMAIL`: Email address for sending feedback form submissions to (internal and external)
+* `FEEDBACK_PUBLIC_EMAIL`: Email address for sending external feedback form submissions to
+* `FEEDBACK_PUBLIC_EMAIL_SUBJECT_PREFIX`: Subject prefix of the feedback email when sent by a patron  
+* `FEEDBACK_EMAIL_SUBJECT_PREFIX`: Subject prefix of the feedback email when sent by a library staff member
 * `FOLIO_CANCEL_ID`: The FOLIO cancelation ID to use when canceling an order. Vufind uses
 `75187e8d-e25a-47a7-89ad-23ba612338de` by default
 * `FOLIO_PASS`: Password for the `FOLIO_USER` application user used by Vufind

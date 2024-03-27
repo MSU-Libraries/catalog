@@ -28,34 +28,36 @@ fi
 declare -a -g HTTPS_MIDDLEWARES=(remove-prefix)
 
 apply_devel_changes() {
+    # Restrict devel/review to campus IPs only
+    HTTPS_MIDDLEWARES+=("ip-campus")
     # Use dnschallenge cert resolver (instead of httpchallenge)
     ./yq -i \
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt-dns\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
     ./yq -i \
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].main=aws.lib.msu.edu\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
     ./yq -i \
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
     ./yq -i \
     ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.certresolver=msul-letsencrypt-dns\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
     ./yq -i \
     ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.domains[0].main=aws.lib.msu.edu\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
     ./yq -i \
     ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
     ./yq -i \
     ".services.mail-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.tls.certresolver=msul-letsencrypt-dns\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
     ./yq -i \
     ".services.mail-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.tls.domains[0].main=aws.lib.msu.edu\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
     ./yq -i \
     ".services.mail-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
     ./yq -i \
     ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls.certresolver=msul-letsencrypt-dns\"" \
     docker-compose.solr-cloud.yml;
@@ -76,24 +78,24 @@ apply_devel_changes() {
     docker-compose.monitoring.yml;
 
     # Remove the cron service if this is a devel environment
-    ./yq -i "del(.services.cron)" docker-compose.yml;
+    ./yq -i "del(.services.cron)" docker-compose.catalog.yml;
 
     # Unset parallelism limit for non-production to speed up redeployments on devel stacks
-    ./yq -i "del(.services.catalog.deploy.update_config.parallelism)" docker-compose.yml;
+    ./yq -i "del(.services.catalog.deploy.update_config.parallelism)" docker-compose.catalog.yml;
 
     # Add host router rules
     ./yq -i \
     ".services.mail-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-mail.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/mail\`)\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
     ./yq -i \
     ".services.mail-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-mail.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/mail\`)\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
     ./yq -i \
     ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-links.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
     ./yq -i \
     ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
     ./yq -i \
     ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.aws.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
     docker-compose.solr-cloud.yml;
@@ -116,15 +118,15 @@ apply_devel_changes() {
     ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud-force.yml;
     ./yq -i "del(.services.galera.deploy.update_config.failure_action)" docker-compose.mariadb-cloud-bootstrap.yml;
     ./yq -i "del(.services.cron.deploy.update_config.failure_action)" docker-compose.solr-cloud.yml;
-    ./yq -i "del(.services.catalog.deploy.update_config.failure_action)" docker-compose.yml;
-    ./yq -i "del(.services.croncache.deploy.update_config.failure_action)" docker-compose.yml;
-    ./yq -i "del(.services.cron.deploy.update_config.failure_action)" docker-compose.yml;
+    ./yq -i "del(.services.catalog.deploy.update_config.failure_action)" docker-compose.catalog.yml;
+    ./yq -i "del(.services.croncache.deploy.update_config.failure_action)" docker-compose.catalog.yml;
+    ./yq -i "del(.services.cron.deploy.update_config.failure_action)" docker-compose.catalog.yml;
 
     # Disable healthchecks on catalog service
-    ./yq -i ".services.catalog.healthcheck.disable=true" docker-compose.yml
+    ./yq -i ".services.catalog.healthcheck.disable=true" docker-compose.catalog.yml
 
     # Reduce the catalog service replicas to 1
-    ./yq -i ".services.catalog.deploy.replicas = 1" docker-compose.yml
+    ./yq -i ".services.catalog.deploy.replicas = 1" docker-compose.catalog.yml
 
 }
 
@@ -142,10 +144,10 @@ apply_prod_changes() {
     # Use httpchallenge cert resolver (instead of dnschallenge)
     ./yq -i \
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
     ./yq -i \
     ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.certresolver=msul-letsencrypt\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
     ./yq -i \
     ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls.certresolver=msul-letsencrypt\"" \
     docker-compose.solr-cloud.yml;
@@ -154,39 +156,41 @@ apply_prod_changes() {
     docker-compose.monitoring.yml;
 
     # Remove the croncache service if the stack name is production
-    ./yq -i "del(.services.croncache)" docker-compose.yml;
+    ./yq -i "del(.services.croncache)" docker-compose.catalog.yml;
 
     # Remove mailcatcher service
-    ./yq -i "del(.services.mail-*)" docker-compose.yml;
+    ./yq -i "del(.services.mail-*)" docker-compose.catalog.yml;
 
     ## Changes for catalog-beta and catalog-preview
     if [ "${STACK_NAME}" == "catalog-beta" ] || [ "${STACK_NAME}" == "catalog-preview" ]; then
+        # Restrict both beta/preview to campus IPs only
+        HTTPS_MIDDLEWARES+=("ip-campus")
         ## Only catalog-beta
         if [ "${STACK_NAME}" == "catalog-beta" ]; then
             # Set cron/build placement contraint
-            ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_B}\"]" docker-compose.yml;
+            ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_B}\"]" docker-compose.catalog.yml;
             ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_B}\"]" docker-compose.build.yml;
         fi;
         ## Only catalog-preview
         if [ "${STACK_NAME}" == "catalog-preview" ]; then
             # Set cron/build placement contraint
-            ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_C}\"]" docker-compose.yml;
+            ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_C}\"]" docker-compose.catalog.yml;
             ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_C}\"]" docker-compose.build.yml;
         fi;
         ## both catalog-beta and catalog-preview
         # Override default router rule
         ./yq -i \
         ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" \
-        docker-compose.yml;
+        docker-compose.catalog.yml;
         ./yq -i \
         ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" \
-        docker-compose.yml;
+        docker-compose.catalog.yml;
         ./yq -i \
         ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-links.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
-        docker-compose.yml;
+        docker-compose.catalog.yml;
         ./yq -i \
         ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
-        docker-compose.yml;
+        docker-compose.catalog.yml;
         ./yq -i \
         ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
         docker-compose.solr-cloud.yml;
@@ -204,7 +208,7 @@ apply_prod_changes() {
     ## Changes for catalog-prod
     if [ "${STACK_NAME}" == "catalog-prod" ]; then
         # Set cron/build placement contraint
-        ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_A}\"]" docker-compose.yml;
+        ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_A}\"]" docker-compose.catalog.yml;
         ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_A}\"]" docker-compose.build.yml;
         # Increase Solr RAM to 4 GB (prod is granted more than non-prod envs)
         ./yq -i \
@@ -213,25 +217,25 @@ apply_prod_changes() {
         # Override default router rule
         ./yq -i \
         ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`)\"" \
-        docker-compose.yml;
+        docker-compose.catalog.yml;
         ./yq -i \
         ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`)\"" \
-        docker-compose.yml;
+        docker-compose.catalog.yml;
         ./yq -i \
         ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-links.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
-        docker-compose.yml;
+        docker-compose.catalog.yml;
         ./yq -i \
         ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
-        docker-compose.yml;
+        docker-compose.catalog.yml;
         ./yq -i \
         ".services.catalog.deploy.labels += \"traefik.http.middlewares.${STACK_NAME}-redirect.redirectregex.regex=^https://catalog-prod.lib.msu.edu/(.*)\"" \
-        docker-compose.yml;
+        docker-compose.catalog.yml;
         ./yq -i \
         ".services.catalog.deploy.labels += \"traefik.http.middlewares.${STACK_NAME}-redirect.redirectregex.replacement=https://catalog.lib.msu.edu/\$\${1}\"" \
-        docker-compose.yml;
+        docker-compose.catalog.yml;
         ./yq -i \
         ".services.catalog.deploy.labels += \"traefik.http.middlewares.${STACK_NAME}-redirect.redirectregex.permanent=true\"" \
-        docker-compose.yml;
+        docker-compose.catalog.yml;
         HTTPS_MIDDLEWARES+=("${STACK_NAME}-redirect")
         ./yq -i \
         ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
@@ -246,6 +250,24 @@ apply_prod_changes() {
         ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
         docker-compose.monitoring.yml;
     fi
+}
+
+restrict_oai() {
+    # Restrict OAI access (duplicates https-router then adds middleware and rule path)
+    while read -r LINE; do
+        export LINE; ./yq -i '.services.catalog.deploy.labels += env(LINE)' docker-compose.catalog.yml
+    done < <( \
+        ./yq '.services.catalog.deploy.labels[] | select(. == "traefik.http.routers.*-https-router.*")' docker-compose.catalog.yml |
+        sed -e 's/-https-router/-oai-https-router/' -e 's/middlewares=/middlewares=ip-campus,/' |
+        grep -vF ".rule="
+    );
+
+    # shellcheck disable=SC2006
+    LINE=$(
+        ./yq ".services.catalog.deploy.labels[] | select(. == \"traefik.http.routers.*-https-router.rule=*\") + \" && PathPrefix(`/OAI/Server`)\"" docker-compose.catalog.yml |
+        sed -e 's/-https-router/-oai-https-router/'
+    )
+    export LINE; ./yq -i '.services.catalog.deploy.labels += env(LINE)' docker-compose.catalog.yml
 }
 
 main() {
@@ -272,11 +294,16 @@ main() {
     # Add in middlewares
     ./yq -i \
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.middlewares=$(IFS=, ; echo "${HTTPS_MIDDLEWARES[*]}")\"" \
-    docker-compose.yml;
+    docker-compose.catalog.yml;
+
+    # Limit access to prod OAI; must happen after middleware added
+    if [[ "${STACK_NAME}" == catalog-* ]]; then
+        restrict_oai
+    fi
 
     # Authentication environment changes
     if [[ "${STACK_NAME}" == catalog-* ]] || [ "${STACK_NAME}" == "devel-authentication" ]; then
-      ./yq -i ".services.catalog.volumes += \"/home/deploy/samlcerts/${STACK_NAME}:/mnt/samlcerts:ro\"" docker-compose.yml;
+      ./yq -i ".services.catalog.volumes += \"/home/deploy/samlcerts/${STACK_NAME}:/mnt/samlcerts:ro\"" docker-compose.catalog.yml;
     fi
 
     # Save CI variables
@@ -285,7 +312,7 @@ main() {
 
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191
     sed -i "/^$/d" docker-compose.internal.yml;
-    sed -i "/^$/d" docker-compose.yml;
+    sed -i "/^$/d" docker-compose.catalog.yml;
 
     # Copy the updated compose files to the server
     ssh deploy@"${DEPLOY_HOST_A}" mkdir -p "${COMPOSE_PATH}";

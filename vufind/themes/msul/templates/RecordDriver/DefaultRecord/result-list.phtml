@@ -29,8 +29,11 @@
             <?=$this->escapeHtml($altTitle)?>
           </div>
         <?php endforeach; ?>
+<!-- msul moved authors out of h2 into div below -->
 
-        <?php if (!$this->driver->isCollection()): ?>
+      </h2>
+      <div>
+          <?php if (!$this->driver->isCollection()): ?>
           <?php $summAuthors = $this->driver->getPrimaryAuthorsWithHighlighting(); ?>
           <?php if (!empty($summAuthors)): ?>
             <span class="authors">
@@ -42,8 +45,6 @@
             </span>
           <?php endif; ?>
         <?php endif; ?>
-      </h2>
-      <div>
         <?php if ($this->driver->isCollection()): ?>
           <?=implode('<br>', array_map([$this, 'escapeHtml'], $this->driver->getSummary())); ?>
         <?php else: ?>

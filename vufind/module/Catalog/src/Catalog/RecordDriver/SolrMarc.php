@@ -132,14 +132,61 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getNotes()
     {
-        $notes = array_merge(
-            $this->getNotesMarcFields('515'),
+        return array_merge(
             $this->getNotesMarcFields('541'),
             $this->getNotesMarcFields('561'),
             $this->getNotesMarcFields('563')
         );
-        $allNotes = array_merge($notes, $this->getLocalNotes());
-        return $allNotes;
+    }
+
+    /**
+     * Get the numbering peculiarity notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getNumberingPeculiaritiesNotes()
+    {
+        return $this->getNotesMarcFields('515');
+    }
+
+    /**
+     * Get the language note fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getLanguageNotes()
+    {
+        return $this->getNotesMarcFields('546');
+    }
+
+    /**
+     * Get the scale note fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getScaleNotes()
+    {
+        return $this->getNotesMarcFields('507');
+    }
+
+    /**
+     * Get the cite as note fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getCiteAsNotes()
+    {
+        return $this->getNotesMarcFields('524');
+    }
+
+    /**
+     * Get the dissertation note fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getDissertationNotes()
+    {
+        return $this->getNotesMarcFields('502');
     }
 
     /**
@@ -218,6 +265,16 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getGenres()
     {
         return $this->getSolrField('genre_facet');
+    }
+
+    /**
+     * Get the uniform title
+     *
+     * @return array Content from Solr
+     */
+    public function getUniformTitle()
+    {
+        return $this->getMarcField('130', range('a', 'z'));
     }
 
     /**
@@ -340,6 +397,16 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get the translated from languaes
+     *
+     * @return array Content from Solr
+     */
+    public function getTranslatedFrom()
+    {
+        return $this->getSolrField('translated_from_str_mv');
+    }
+
+    /**
      * Get the eJournal links with date coverage from the z subfield if available
      *
      * @return array Content from Solr
@@ -350,12 +417,13 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         $idx = 0;
         $marc = $this->getMarcReader();
 
-        $marc856s = $marc->getFields('856', ['u', 'y', 'z']);
+        $marc856s = $marc->getFields('856', ['u', 'y', 'z', '3']);
         $marc773s = $marc->getFields('773', ['t']);
 
         foreach ($marc856s as $marc856) {
             $subfields = $marc856['subfields'];
             $rec = [];
+            $suffix = '';
 
             foreach ($subfields as $subfield) {
                 $sfvals[$subfield['code']] = $subfield['data'];
@@ -363,12 +431,19 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                     $rec['url'] = $subfield['data'];
                 } elseif (in_array($subfield['code'], ['y','z'])) {
                     $rec['desc'] = $subfield['data'];
+                } elseif ($subfield['code'] == '3') {
+                    $suffix = ' (' . $subfield['data'] . ')';
                 }
             }
 
             // Fall back to 773 field if we can't find description in the '856z' field
             if ((in_array('z', $subfields) || empty($rec['desc'])) && count($marc773s) >= $idx) {
                 $rec['desc'] = $marc773s[$idx]['subfields'][0]['data'];
+            }
+
+            // Append the 856|3 if present
+            if (!empty($suffix)) {
+                $rec['desc'] .= $suffix;
             }
 
             $data[] = $rec;
@@ -385,5 +460,88 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getPlatform()
     {
         return $this->getMarcFieldUnique('753', ['a']);
+    }
+
+    /**
+     * Get the variant titles
+     *
+     * @return array Content from Solr
+     */
+    public function getVariantTitles()
+    {
+        $titles = [];
+        $marc = $this->getMarcReader();
+        $marcArr246 = $marc->getFields('246', ['a', 'b', 'i']);
+
+        foreach ($marcArr246 as $marc246) {
+            $type = '';
+            $title = '';
+
+            // Make sure there is an 'a' subfield in this record to get the title
+            if (in_array('a', array_column($marc246['subfields'], 'code'))) {
+                $a = $b = '';
+                foreach ($marc246['subfields'] as $subfield) {
+                    switch ($subfield['code']) {
+                        case 'a':
+                            $a = $subfield['data'];
+                            break;
+                        case 'b':
+                            $b = ' ' . $subfield['data'];
+                            break;
+                    }
+                }
+                $title = $a . $b;
+            } else {
+                continue; // don't proces if we don't even have a title
+            }
+
+            if (!empty($marc246['i2'] ?? '')) {
+                // If the 2nd indicator is present, use that as 'type'
+                $type = $marc246['i2'];
+                switch ($marc246['i2']) {
+                    case 0:
+                        $type = 'Portion of title';
+                        break;
+                    case 1:
+                        $type = 'Parallel title';
+                        break;
+                    case 2:
+                        $type = 'Distinctive title';
+                        break;
+                    case 3:
+                        $type = 'Other title';
+                        break;
+                    case 4:
+                        $type = 'Cover title';
+                        break;
+                    case 5:
+                        $type = 'Added title page title';
+                        break;
+                    case 6:
+                        $type = 'Caption title';
+                        break;
+                    case 7:
+                        $type = 'Running title';
+                        break;
+                    case 8:
+                        $type = 'Spine title';
+                        break;
+                }
+            } elseif (in_array('i', array_column($marc246['subfields'], 'code'))) {
+                // otherwise check if subfield 'i' is present, and use that for 'type'
+                foreach ($marc246['subfields'] as $subfield) {
+                    if ($subfield['code'] == 'i') {
+                        $type = $subfield['data'];
+                        break;
+                    }
+                }
+            }
+            // Get the title
+            $titles[] = [
+                'type' => $type,
+                'title' => $title,
+            ];
+        }
+        return $titles;
     }
 }

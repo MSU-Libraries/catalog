@@ -3,9 +3,9 @@
 /**
  * FOLIO REST API driver
  *
- * PHP version 7
+ * PHP version 8
  *
- * Copyright (C) Villanova University 2022.
+ * Copyright (C) Villanova University 2018-2023.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2,
@@ -29,11 +29,12 @@
 
 namespace Catalog\ILS\Driver;
 
-use Catalog\GetThis\RegexLookup as Regex;
+use Catalog\Utils\RegexLookup as Regex;
 use VuFind\Exception\ILS as ILSException;
 
 use function count;
 use function in_array;
+use function is_string;
 
 /**
  * FOLIO REST API driver
@@ -46,56 +47,6 @@ use function in_array;
  */
 class Folio extends \VuFind\ILS\Driver\Folio
 {
-    /**
-     * Support method for getHolding(): extract details from the holding record that
-     * will be needed by formatHoldingItem() below.
-     *
-     * See https://github.com/vufind-org/vufind/pull/2983
-     *
-     * @param object $holding FOLIO holding record (decoded from JSON)
-     *
-     * @return array
-     */
-    protected function getHoldingDetailsForItem($holding): array
-    {
-        $textFormatter = function ($supplement) {
-            $format = '%s %s';
-            $supStat = $supplement->statement ?? '';
-            $supNote = $supplement->note ?? '';
-            $statement = trim(sprintf($format, $supStat, $supNote));
-            return $statement;
-        };
-        $id = $holding->id;
-        $holdingNotes = array_filter(
-            array_map([$this, 'formatNote'], $holding->notes ?? [])
-        );
-        $hasHoldingNotes = !empty(implode($holdingNotes));
-        $holdingsStatements = array_filter(array_map(
-            $textFormatter,
-            $holding->holdingsStatements ?? []
-        ));
-        $holdingsSupplements = array_filter(array_map(
-            $textFormatter,
-            $holding->holdingsStatementsForSupplements ?? []
-        ));
-        $holdingsIndexes = array_filter(array_map(
-            $textFormatter,
-            $holding->holdingsStatementsForIndexes ?? []
-        ));
-        $holdingCallNumber = $holding->callNumber ?? '';
-        $holdingCallNumberPrefix = $holding->callNumberPrefix ?? '';
-        return compact(
-            'id',
-            'holdingNotes',
-            'hasHoldingNotes',
-            'holdingsStatements',
-            'holdingsSupplements',
-            'holdingsIndexes',
-            'holdingCallNumber',
-            'holdingCallNumberPrefix'
-        );
-    }
-
     /**
      * Support method for getHolding() -- given a few key details, format an item
      * for inclusion in the return value.
@@ -249,7 +200,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 // PC-872: Filter out LoM holdings
                 if (
                     !empty($nextItem['location']) && (
-                        str_starts_with($nextItem['location'], 'Library of Michigan') ||
+                        str_starts_with(strtolower($nextItem['location']), 'library of michigan') ||
                         str_starts_with($nextItem['location'], 'Technical migration')
                     )
                 ) {
@@ -823,5 +774,154 @@ class Folio extends \VuFind\ILS\Driver\Folio
             throw new ILSException('Item Not Found');
         }
         return $instances->instances[0];
+    }
+
+    /**
+     * Get the license agreement data for the specific publisher
+     *
+     * @param string $publisherName Publisher name
+     *
+     * @return array of license agreement data
+     */
+    public function getLicenseAgreement($publisherName)
+    {
+        $licenseAgreements = [];
+
+        // Call the package API to get the `id` field
+        $query = [
+            'q' => '"' . $publisherName . '"',
+            'page' => '1',
+            'filter[selected]' => 'true',
+        ];
+        $headers = [
+            'Accept: application/vnd.api+json',
+        ];
+        $response = $this->makeRequest('GET', '/eholdings/packages', $query, $headers);
+        $packages = json_decode($response->getBody());
+        if (count($packages->data) != 1) {
+            throw new ILSException('Could not identify single package for publisher');
+        }
+        $packageId = $packages->data[0]->id ?? '';
+        // Get the license agreements if we were able to locate the package ID
+        if (!empty($packageId)) {
+            $query = [
+                'referenceId' => $packageId,
+            ];
+            $response = $this->makeRequest('GET', '/erm/sas/publicLookup', $query);
+            $licenses = json_decode($response->getBody());
+            $customProperties = $licenses->records[0]?->linkedLicenses[0]?->remoteId_object?->customProperties;
+            $licenseAgreements = [
+                'vendoraccessibilityinfo' => $customProperties?->vendoraccessibilityinfo[0]?->value ?? '',
+                'authorizedusers' => $customProperties?->authorizedusers[0]->value?->label ?? '',
+                'ConcurrentUsers' => $customProperties?->ConcurrentUsers[0]?->value ?? '',
+            ];
+        }
+
+        return $licenseAgreements;
+    }
+
+    /**
+     * Make requests
+     * MSUL Override to update default headers instead of just add to them PC-606
+     *
+     * @param string            $method              GET/POST/PUT/DELETE/etc
+     * @param string            $path                API path (with a leading /)
+     * @param string|array      $params              Query parameters
+     * @param array             $headers             Additional headers
+     * @param true|int[]|string $allowedFailureCodes HTTP failure codes that should
+     * NOT cause an ILSException to be thrown. May be an array of integers, a regular
+     * expression, or boolean true to allow all codes.
+     * @param string|array      $debugParams         Value to use in place of $params
+     * in debug messages (useful for concealing sensitive data, etc.)
+     *
+     * @return \Laminas\Http\Response
+     * @throws ILSException
+     */
+    public function makeRequest(
+        $method = 'GET',
+        $path = '/',
+        $params = [],
+        $headers = [],
+        $allowedFailureCodes = [],
+        $debugParams = null
+    ) {
+        $client = $this->httpService->createClient(
+            $this->config['API']['base_url'] . $path,
+            $method,
+            120
+        );
+
+        // MSUL customization -- Update default headers and parameters when they exist
+        $req_headers = $client->getRequest()->getHeaders();
+        [$req_headers, $params] = $this->preRequest($req_headers, $params);
+        if (!empty($headers)) {
+            foreach ($headers as $header) {
+                $matches = $req_headers->get(explode(':', $header)[0]);
+
+                if ($matches instanceof ArrayIterator) {
+                    foreach ($req_headers as $req_header) {
+                        $req_headers->removeHeader($req_header);
+                    }
+                } elseif ($matches instanceof HeaderInterface) {
+                    $req_headers->removeHeader($matches);
+                }
+                if ($matches != false) {
+                    $req_headers->addHeaderLine($header);
+                }
+            }
+        }
+
+        if ($this->logger) {
+            $this->debugRequest($method, $path, $debugParams ?? $params, $req_headers);
+        }
+
+        // Add params
+        if ($method == 'GET') {
+            $client->setParameterGet($params);
+        } else {
+            if (is_string($params)) {
+                $client->getRequest()->setContent($params);
+            } else {
+                $client->setParameterPost($params);
+            }
+        }
+        try {
+            $response = $client->send();
+        } catch (\Exception $e) {
+            $this->logError('Unexpected ' . $e::class . ': ' . (string)$e);
+            throw new ILSException('Error during send operation.');
+        }
+        $code = $response->getStatusCode();
+        if (
+            !$response->isSuccess()
+            && !$this->failureCodeIsAllowed($code, $allowedFailureCodes)
+        ) {
+            $this->logError(
+                "Unexpected error response; code: $code, body: "
+                . $response->getBody()
+            );
+            throw new ILSException('Unexpected error code.');
+        }
+        if ($jsonLog = ($this->config['API']['json_log_file'] ?? false)) {
+            if (APPLICATION_ENV !== 'development') {
+                throw new \Exception(
+                    'SECURITY: json_log_file enabled outside of development mode'
+                );
+            }
+            $body = $response->getBody();
+            $jsonBody = @json_decode($body);
+            $json = file_exists($jsonLog)
+                ? json_decode(file_get_contents($jsonLog)) : [];
+            $json[] = [
+                'expectedMethod' => $method,
+                'expectedPath' => $path,
+                'expectedParams' => $params,
+                'body' => $jsonBody ? $jsonBody : $body,
+                'bodyType' => $jsonBody ? 'json' : 'string',
+                'code' => $code,
+            ];
+            file_put_contents($jsonLog, json_encode($json));
+        }
+        return $response;
     }
 }

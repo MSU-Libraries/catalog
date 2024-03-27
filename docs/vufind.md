@@ -1,5 +1,13 @@
 # VuFind
 
+## Helpers
+Within the VuFind container, there are a few custom helper scripts that have
+been written to make certain tasks easier.
+
+* `clear-vufind-cache`: Clears the VuFind cache directory; which is helpful when applying
+theme or language file changes.
+* `run-tests`: Run the unit tests and code quality tests as they would be run within the CI/CD.
+
 ## Troubleshooting
 [Vufind's troubleshooting page](https://vufind.org/wiki/development:troubleshooting)
 is a good reference for debugging options, but we'll highlight a few
@@ -35,3 +43,11 @@ exception is thrown, edit the `local/httpd-vufind.conf` file and
 uncomment the line that says: `SetEnv VUFIND_ENV development`. Write
 the changes to the file and then run `apachectl graceful` to apply
 the change.
+
+* To clear VuFind's caches (which can sometimes hang on to old compiled
+stylesheets or language files), you can run the following within any
+VuFind container:
+
+```bash
+clear-vufind-cache
+```

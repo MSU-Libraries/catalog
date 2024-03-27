@@ -9,6 +9,7 @@ return [
     'js' => [
         ['file' => 'get-this-dropdown.js', 'priority' => 450],
         ['file' => 'check_item_statuses.js', 'priority' => 450],
+        ['file' => 'get_license_agreement.js', 'priority' => 450],
     ],
     'favicon' => 'msul-favicon.ico',
     'helpers' => [
@@ -40,8 +41,6 @@ return [
              */
             'send-sms' => 'FontAwesome:mobile',
             'user-list-add' => 'FontAwesome:star',
-
         ],
     ],
-
 ];

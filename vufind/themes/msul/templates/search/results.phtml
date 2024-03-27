@@ -73,7 +73,7 @@
     <?php endforeach; ?>
   <?php endif; ?>
   <?=$this->flashmessages()?>
-	<div class="search-term"><?=$this->escapeHtml($headTitle)?></div>
+	<h1 class="search-term"><?=$this->escapeHtml($headTitle)?></h1>
     <?=$this->context($this)->renderInContext('search/controls/results-tools.phtml', ['results' => $this->results])?>
   <div class="search-header hidden-print">
     <?php // Data-record-total attribute is for analytics use.  Do not remove. ?>

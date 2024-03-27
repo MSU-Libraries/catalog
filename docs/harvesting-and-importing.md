@@ -152,16 +152,23 @@ does is sleep! It is recommended to run these commands in a `screen`.
     the manual job that deploys the updates to the build container (since not all of the
     import scripts are configured to resume where they left off yet).  
 ```bash
-user@catalog-1$ screen
-user@catalog-1$ docker exec -it catalog-prod-catalog_build.12345 bash
-root@vufind:/usr/local/vufind# rm local/harvest/folio/processed/*
-root@vufind:/usr/local/vufind# cp /mnt/shared/oai/${STACK_NAME}/harvest_folio/processed/* local/harvest/folio/
-root@vufind:/usr/local/vufind# /harvest-and-import.sh --verbose --reset-solr --collection biblio-build --batch-import | tee /mnt/shared/logs/folio_import_${STACK_NAME}_$(date -I).log
+# On Host
+screen
+docker exec -it catalog-prod-catalog_build.12345 bash
+
+# Inside container
+rm local/harvest/folio/processed/*
+cp /mnt/shared/oai/${STACK_NAME}/harvest_folio/processed/* local/harvest/folio/
+/harvest-and-import.sh --verbose --reset-solr --collection biblio-build --batch-import | tee /mnt/shared/logs/folio_import_${STACK_NAME}_$(date -I).log
 [Ctrl-a d]
-user@catalog-1$ screen
-user@catalog-1$ docker exec -it catalog-prod-catalog_build.12345 bash
-root@vufind:/usr/local/vufind# cp /mnt/shared/hlm/${STACK_NAME}/current/* local/harvest/hlm/
-root@vufind:/usr/local/vufind# /hlm-harvest-and-import.sh --import --verbose | tee /mnt/shared/logs/hlm_import_${STACK_NAME}_$(date -I).log
+
+# On Host
+screen
+docker exec -it catalog-prod-catalog_build.12345 bash
+
+# Inside container
+cp /mnt/shared/hlm/${STACK_NAME}/current/* local/harvest/hlm/
+/hlm-harvest-and-import.sh --import --verbose | tee /mnt/shared/logs/hlm_import_${STACK_NAME}_$(date -I).log
 [Ctrl-a d]
 ```
 
@@ -170,15 +177,36 @@ root@vufind:/usr/local/vufind# /hlm-harvest-and-import.sh --import --verbose | t
 curl 'http://solr:8983/solr/admin/metrics?nodes=solr1:8983_solr,solr2:8983_solr,solr3:8983_solr&prefix=SEARCHER.searcher.numDocs,SEARCHER.searcher.deletedDocs&wt=json'
 ```
 
+* Build the spellchecking indices
+Building these indices is only necessary for a full import.
+```bash
+curl 'http://solr1:8983/solr/biblio-build/select?q=*:*&spellcheck=true&spellcheck.build=true' & curl 'http://solr2:8983/solr/biblio-build/select?q=*:*&spellcheck=true&spellcheck.build=true' & curl 'http://solr3:8983/solr/biblio-build/select?q=*:*&spellcheck=true&spellcheck.build=true' & wait
+curl 'http://solr1:8983/solr/biblio-build/select?q=*:*&spellcheck.dictionary=basicSpell&spellcheck=true&spellcheck.build=true' & curl 'http://solr2:8983/solr/biblio-build/select?q=*:*&spellcheck.dictionary=basicSpell&spellcheck=true&spellcheck.build=true' & curl 'http://solr3:8983/solr/biblio-build/select?q=*:*&spellcheck.dictionary=basicSpell&spellcheck=true&spellcheck.build=true' & wait
+```
+`/bitnami/solr/server/solr/biblioN/spellShingle` and `/bitnami/solr/server/solr/biblioN/spellchecker` should have a significant size afterwards in the solr container (replace `biblioN` by the `biblio-build` collection)
+
+* Your Solr instance will likely require more memory than it typically needs to do the collection alias swap.
+  Be sure to increase and deploy the stack with additional `SOLR_JAVA_MEM` as required to  ensure no
+  downtime during this step. Currently 6G (which we use in prod) is enough for the swap.
+  Alternatively (for beta and preview), let it crash after these commands and restart the pipeline to
+  help Solr cloud fix itself.
+```bash
+# Open the solr-cloud compose file for your environment
+vim docker-compose.solr-cloud.yml
+
+# Modify the memory line to:
+SOLR_JAVA_MEM: -Xms8192m -Xmx8192m
+
+# Now on the host, run the deploy helper script
+sudo pc-deploy [ENV_NAME] solr-cloud
+```
+
 * Once you are confident in the new data, you are ready to do the swap! **BE SURE TO SWAP THE NAME AND COLLECTION IN THE BELOW COMMAND EXAMPLE**  
 !!! warning
-    Your Solr instance may require more memory than it typically needs to do the collection alias swap
-    Be sure to increase and deploy the stack with additional `SOLR_JAVA_MEM` as required to  ensure no
-    downtime during this step.
-    Currently 4G (which we use in prod) is enough for the swap, but 2G (which we use in beta and preview) is not.
-    Alternatively (for beta and preview), let it crash after these commands and restart the pipeline to
-    help Solr cloud fix itself.
 ```bash
+# Command to check the aliases (repeated from above)
+curl -s "http://solr:8983/solr/admin/collections?action=LISTALIASES" | grep biblio
+
 # This EXAMPLE sets biblio-build to biblio2, and biblio to biblio1
 curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio2'
 curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1'
@@ -193,6 +221,12 @@ curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&col
 ```
 
 * If `SOLR_JAVA_MEM` was increased, lower it to its previous amount.
+
+* Kick off a manual alpha browse re-index if you don't want it to be outdated until the next scheduled run.
+```bash
+# Run this on all of the host's
+docker exec -it $(docker ps -q -f name=[ENV_NAME]-solr_cron) /alpha-browse.sh -v -f
+```
 
 ### `authority` Index
 Similar to the process for HLM records, copy the files from the shared directory into the containers import
