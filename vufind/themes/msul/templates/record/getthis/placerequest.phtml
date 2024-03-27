@@ -27,7 +27,7 @@ $notices = $this->Notices('RequestNotices.yaml');
            <a class="<?=$check ? 'checkRequest ' : ''?>placehold"
              <?php if (!empty($item['linkLightbox'])): ?>data-lightbox <?php endif; ?>
              href="<?=$this->escapeHtmlAttr($this->recordLinker()->getRequestUrl($link))?>">
-             &nbsp;<?=$this->transEsc($check ? 'Check Hold' : 'Place Request') ?>
+             &nbsp;<?=$this->transEsc($check ? 'Check Hold' : 'Place Request for On-Campus Pickup') ?>
            </a>
         <?php endif; ?>
         <?php // PC-804 Add save to list option to Get This when requests are disabled ?>
