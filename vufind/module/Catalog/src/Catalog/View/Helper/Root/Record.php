@@ -232,6 +232,9 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
         if ($holding['duedate'] ?? false) {
             $suffix = $suffix . ' - ' . $transEsc('Due') . ':' . $holding['duedate'];
         }
+        if ($holding['temporary_loan_type'] ?? false) {
+            $suffix = $suffix . '(' . $holding['temporary_loan_type'] . ')';
+        }
         return $suffix;
     }
 
