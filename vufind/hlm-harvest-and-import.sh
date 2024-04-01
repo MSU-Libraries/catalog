@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SCRIPT_NAME="$(basename "$0")"
+
 # Set defaults
 default_args() {
     declare -g -A ARGS
@@ -30,15 +32,15 @@ runhelp() {
     echo "       and import that data into VuFind's Solr."
     echo ""
     echo "Examples: "
-    echo "   /hlm-harvest-and-import.sh --harvest --full --import"
+    echo "   ${SCRIPT_NAME} --harvest --full --import"
     echo "     Do a full harvest from scratch and import that data"
-    echo "   /hlm-harvest-and-import.sh --harvest --import"
+    echo "   ${SCRIPT_NAME} --harvest --import"
     echo "     Do an update harvest with changes made since the"
     echo "     last run, and import that data"
-    echo "   /hlm-harvest-and-import.sh --import"
+    echo "   ${SCRIPT_NAME} --import"
     echo "     Run only a import of data that has already been"
     echo "     harvested and saved to the shared location."
-    echo "   /hlm-harvest-and-import.sh --harvest"
+    echo "   ${SCRIPT_NAME} --harvest"
     echo "     Only run the harvest, but do not proceed to import"
     echo "     the data into VuFind"
     echo ""
@@ -125,21 +127,24 @@ parse_args() {
                 FIRST_PASS=1
             fi
             IGNORE_SUBSTR+=("$2")
-            shift; shift;;
+            shift 2
+            ;;
         -l|--limit)
             ARGS[LIMIT]="$2"
             if [[ ! "${ARGS[LIMIT]}" -gt 0 ]]; then
                 echo "ERROR: -l|--limit only accept positive integers"
                 exit 1
             fi
-            shift; shift ;;
+            shift 2
+            ;;
         -X|--limit-by-delete)
             ARGS[LIMIT_BY_DELETE]="$2"
             if [[ ! "${ARGS[LIMIT_BY_DELETE]}" -gt 0 ]]; then
                 echo "ERROR: -X|--limit-by-delete only accept positive integers"
                 exit 1
             fi
-            shift; shift ;;
+            shift 2
+            ;;
         -d|--vufind-harvest-dir)
             ARGS[VUFIND_HARVEST_DIR]=$( readlink -f "$2" )
             RC=$?
@@ -147,7 +152,8 @@ parse_args() {
                 echo "ERROR: -d|--vufind-harvest-dir path does not exist: $2"
                 exit 1
             fi
-            shift; shift ;;
+            shift 2
+            ;;
         -s|--shared-harvest-dir)
             ARGS[SHARED_DIR]=$( readlink -f "$2" )
             RC=$?
@@ -155,19 +161,24 @@ parse_args() {
                 echo "ERROR: -s|--shared-harvest-dir path does not exist: $2"
                 exit 1
             fi
-            shift; shift ;;
+            shift 2
+            ;;
         -F|--ftp-server)
             ARGS[FTP_SERVER]="$2"
-            shift; shift ;;
+            shift 2
+            ;;
         -D|--ftp-dir)
             ARGS[FTP_DIR]="$2"
-            shift; shift ;;
+            shift 2
+            ;;
         -U|--ftp-user)
             ARGS[FTP_USER]="$2"
-            shift; shift ;;
+            shift 2
+            ;;
         -P|--ftp-password)
             ARGS[FTP_PASSWORD]="$2"
-            shift; shift ;;
+            shift 2
+            ;;
         -v|--verbose)
             ARGS[VERBOSE]=1
             shift;;
@@ -270,7 +281,7 @@ archive_current_harvest() {
     declare -a ARCHIVE_LIST
     while read -r FILE; do
         ARCHIVE_LIST+=("$FILE")
-    done < <( find ./ -mindepth 1 -maxdepth 1 -name '*.marc' )
+    done < <( find ./ -mindepth 1 -maxdepth 1 \( -name '*.marc' -o -name '*.zip' \) )
 
     # Archive all marc files and the last_harvest file, if it exists
     if [[ "${#ARCHIVE_LIST[@]}" -gt 0 ]]; then
@@ -286,20 +297,27 @@ archive_current_harvest() {
 
 clear_harvest_files() {
     countdown 5
-    find "${1}" -mindepth 1 -maxdepth 1 -name '*.marc' -delete
+    find "${1}" -mindepth 1 -maxdepth 1 \( -name '*.marc' -o -name '*.zip' \) -delete
 }
 
 # Determines if a file matches any of the provided ignore substring patterns
-# Returns 0 when the file is not found in any of the ignored substrings
-# Returns 1 if there is a match found.
+# Returns 0 if there is a match found.
+# Returns 1 when the file is not found in any of the ignored substrings
 is_ignored() {
     FILE="${1}"
     for SUBSTR in "${IGNORE_SUBSTR[@]}"; do
         if [[ "${FILE}" == *"${SUBSTR}"* ]]; then
-            return 1
+            return 0
         fi
     done
+    return 1
+}
+
+is_zip_or_marc_file() {
+  if [[ "${1}" == *.marc || "${1}" == *.zip ]]; then
     return 0
+  fi
+  return 1
 }
 
 # Perform an harvest of HLM Records
@@ -320,14 +338,11 @@ harvest() {
 
     verbose "Starting harvest of new files."
     # Check FTP server to compare files for ones we don't have
-    OLD_PWD=$(pwd)
     cd ${ARGS[VUFIND_HARVEST_DIR]}
     while IFS= read -r HLM_FILE
     do
-        # If it is not in the shared storage, it is not and ignored patten, and it is an MARC file, then get it
-        is_ignored "${HLM_FILE}"
-        IGNORED=$? # 0 = not ignored, 1 = ignored
-        if [[ "${IGNORED}" -eq "0" ]] && [ ! -f "${ARGS[SHARED_DIR]}/current/${HLM_FILE}" ] && [[ "${HLM_FILE}" == *.marc ]]; then
+        # If it is not an ignored pattern, not in the shared storage, and it is a MARC or zip file, then get it
+        if ! is_ignored "${HLM_FILE}" && [ ! -f "${ARGS[SHARED_DIR]}/current/${HLM_FILE}" ] && is_zip_or_marc_file "${HLM_FILE}"; then
             verbose "Getting ${HLM_FILE}"
             if [ "${ARGS[DRY_RUN]}" -eq "0" ]; then
                 if ! wget --ftp-user=${ARGS[FTP_USER]} --ftp-password=${ARGS[FTP_PASSWORD]} ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/"${HLM_FILE}" > /dev/null 2>&1; then
@@ -337,7 +352,7 @@ harvest() {
             fi
         fi
     done < <(curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --user ${ARGS[FTP_USER]}:${ARGS[FTP_PASSWORD]} -l -s)
-    cd "${OLD_PWD}"
+    cd -
 
     verbose "Syncing harvest files to shared storage."
     if ! rsync -ai --exclude "processed" --exclude "log" --exclude ".gitkeep" "${ARGS[VUFIND_HARVEST_DIR]}"/ "${ARGS[SHARED_DIR]}/current/" > /dev/null 2>&1; then
@@ -346,10 +361,10 @@ harvest() {
     fi
 }
 
-# Copy MARC files back from shared dir to VuFind dir
+# Copy MARC and zip files back from shared dir to VuFind dir
 copyback_from_shared() {
     assert_vufind_harvest_dir_writable
-    verbose "Replacing any VuFind MARC with files from shared directory."
+    verbose "Replacing any VuFind MARC/ZIP with files from shared directory."
     countdown 5
 
     # Clear out any exising marc files before copying back from shared storage
@@ -363,7 +378,7 @@ copyback_from_shared() {
             # If limit is set, only copy the provided limit of marc files over to the VUFIND_HARVEST_DIR
             break
         fi
-    done < <(find "${ARGS[SHARED_DIR]}/current/" -mindepth 1 -maxdepth 1 -name '*.marc')
+    done < <(find "${ARGS[SHARED_DIR]}/current/" -mindepth 1 -maxdepth 1 \( -name '*.marc' -o -name '*.zip' \))
 
 }
 
@@ -372,6 +387,23 @@ import() {
     assert_vufind_harvest_dir_writable
 
     verbose "Starting import processing..."
+
+    verbose "Extracting zip files..."
+    countdown 5
+    ALREADY_EXTRACTED_ZIP_PATH="${ARGS[VUFIND_HARVEST_DIR]}/extracted_zip"
+    mkdir -p "${ALREADY_EXTRACTED_ZIP_PATH}"
+    while read -r FILE; do
+      verbose "Unzipping \"${FILE}\""
+      unzip -n "${FILE}" -d "${ARGS[VUFIND_HARVEST_DIR]}"
+      if [ $? -eq 0 ]; then
+        verbose "Extracting process complete"
+        mv "${FILE}" "${ALREADY_EXTRACTED_ZIP_PATH}" # Eventually delete them?
+      else
+        verbose "ERROR during extracting process"
+      fi
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}" -mindepth 1 -maxdepth 1 -name '*.zip')
+    verbose "Zip extraction completed"
+
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" ]]; then
         verbose "Will only import ${ARGS[LIMIT_BY_DELETE]} MARC files; others will be deleted."
         countdown 5
