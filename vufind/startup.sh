@@ -81,6 +81,25 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindSearch /usr/local/vufind/module/VuFindSearch
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindTheme /usr/local/vufind/module/VuFindTheme
 
+    SCRIPTS_TO_LINK=(
+      "entrypoint.sh"
+      # "startup.sh" TODO to try as it's being run
+      "startup-build.sh"
+      "startup-cron.sh startup-croncache.sh"
+      "harvest-and-import.sh"
+      "hlm-harvest-and-import.sh"
+      "authority-harvest-and-import.sh"
+      "backup.sh"
+      "restore.sh"
+    )
+
+    for script in "${SCRIPTS_TO_LINK[@]}"; do
+        # Create a symbolic link from ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/ to /
+        rm "/${script}"
+        sudo ln -s "${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/${script}" "/${script}"
+        echo "Created symbolic link for: /${script}"
+    done
+
     # Make sure permissions haven't gotten changed on the share along the way
     # (This can happen no matter what on devel container startup)
     chown msuldevs:msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/*

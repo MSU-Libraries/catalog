@@ -15,6 +15,7 @@ services:
       - vufind_cache:/mnt/vufind_cache
       - /usr/local/bin/pc-locate-oai:/usr/local/bin/pc-locate-oai:ro
       - /etc/bash_completion.d/pc-locate-oai:/etc/bash_completion.d/pc-locate-oai:ro
+      - /mnt/shared/local/${STACK_NAME}/repo/vufind/startup.sh:/startup.sh:ro
     networks:
       - public
       - internal
