@@ -66,11 +66,11 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         $spec->setLine('Language and/or Writing System', 'getLanguageNotes');
 
         // Reorder the fields to get Genre next to Subjects
-        $spec->reorderKeys(['Uniform Title', 'Variant Title', 'Published in', 'New Title', 'Previous Title',
+        $spec->reorderKeys(['Uniform Title', 'Published in', 'New Title', 'Previous Title',
                 'Authors', 'Format', 'Language', 'Translated From', 'Language and/or Writing System',
                 'Published', 'Edition', 'Series',
                 'Subjects', 'Genre', 'Physical Description',
-                'child_records', 'Online Access', 'Related Items', 'Notes', 'Tags']);
+                'child_records', 'Online Access', 'Related Items', 'Notes', 'Tags', 'Variant Title']);
 
         return $spec->getArray();
     }
