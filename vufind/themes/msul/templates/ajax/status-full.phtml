@@ -14,7 +14,6 @@ foreach ($this->statusItems as $item) {
 }
 if ($selected != '') {
   $status = $record->getStatus($selected);
-  $statusSuffix = $record->getStatusSuffix($selected);
   $location = $selected['location'];
   $callnumber = $selected['callnumber'];
   $callNumPrefix = !empty($selected['callnumber_prefix']) ? $selected['callnumber_prefix'] . ' ' : '';
@@ -35,7 +34,6 @@ if ($selected != '') {
       <?php else: ?>
         <strong class="text-success"><?=$this->transEsc($status)?></strong>
       <?php endif; ?>
-      <?=$this->escapeHtml($statusSuffix)?>
     </span>
     <?php if ($location != ''): ?>
       at

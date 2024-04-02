@@ -145,28 +145,47 @@ class GetThisLoader
     public function getStatus($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
-        $status = $this->getItem($item_id)['status'] ?? 'Unknown';
+        $item = $this->getItem($item_id);
+        $status = $item['status'] ?? 'Unknown';
 
         if (
             in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
             'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
             'Unknown', 'Withdrawn'])
         ) {
-            $status = 'Unavailable';
-        } elseif (
-            in_array(
-                $status,
-                ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged', 'Checked out']
-            )
-        ) {
-            $status = 'Checked Out';
+            $status = 'Unavailable' . ' (' . $status . ')';
+        } elseif (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged'])) {
+            $status = 'Checked Out (' . $status . ')';
         } elseif ($status == 'Restricted') {
             $status = 'Library Use Only';
-        } elseif (!in_array($status, ['Available', 'Unavailable'])) {
-            $status = 'Unknown status';
+        } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
+            $status = 'Unknown status (' . $status . ')';
+        } elseif ($item['reserve'] === 'Y') {
+            $status = 'On Reserve';
         }
+        return $status . $this->getStatusSuffix($item);
+    }
 
-        return $status;
+    /**
+     * Determine the holding status suffix (if any)
+     *
+     * @param array $item the holding data
+     *
+     * @return string
+     */
+    public function getStatusSuffix($item)
+    {
+        $suffix = '';
+        if ($item['returnDate'] ?? false) {
+            $suffix = ' - ' . $item['returnDate'];
+        }
+        if ($item['duedate'] ?? false) {
+            $suffix = $suffix . ' - Due:' . $item['duedate'];
+        }
+        if ($item['temporary_loan_type'] ?? false) {
+            $suffix = $suffix . ' (' . $item['temporary_loan_type'] . ')';
+        }
+        return $suffix;
     }
 
     /**
