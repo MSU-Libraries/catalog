@@ -212,7 +212,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
         } elseif ($holding['reserve'] === 'Y') {
             $status = 'On Reserve';
         }
-        return $status;
+        return $status . $this->getStatusSuffix($holding);
     }
 
     /**
@@ -233,7 +233,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             $suffix = $suffix . ' - ' . $transEsc('Due') . ':' . $holding['duedate'];
         }
         if ($holding['temporary_loan_type'] ?? false) {
-            $suffix = $suffix . '(' . $holding['temporary_loan_type'] . ')';
+            $suffix = $suffix . ' (' . $holding['temporary_loan_type'] . ')';
         }
         return $suffix;
     }

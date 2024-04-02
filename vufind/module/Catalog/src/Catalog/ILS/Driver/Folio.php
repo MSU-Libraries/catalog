@@ -167,7 +167,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             'addLink' => true,
             'electronic_access' => $item->electronicAccess,
             'permanent_loan_type' => $permLoanType,
-            'temporary_loan_type' => $tempLoanType
+            'temporary_loan_type' => $tempLoanType,
         ];
     }
 
