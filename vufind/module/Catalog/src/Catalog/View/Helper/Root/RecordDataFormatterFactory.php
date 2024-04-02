@@ -67,12 +67,12 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         $spec->setTemplateLine('Local Note', 'getLocalNotes', 'data-notes.phtml');
         $spec->setTemplateLine('Dissertation Note', 'getDissertationNotes', 'data-notes.phtml');
 
-        $spec->reorderKeys(['Uniform Title', 'Variant Title', 'Published in', 'New Title', 'Previous Title',
+        $spec->reorderKeys(['Uniform Title', 'Published in', 'New Title', 'Previous Title',
                 'Authors', 'Language', 'Translated From', 'Language and/or Writing System',
                 'Published', 'Edition', 'Series',
                 'Subjects', 'Genre', 'Physical Description',
                 'child_records', 'Online Access',
-                'Notes', 'Local Note', 'Dissertation Note', 'Tags']);
+                'Notes', 'Local Note', 'Dissertation Note', 'Tags', 'Variant Title']);
 
         return $spec->getArray();
     }
