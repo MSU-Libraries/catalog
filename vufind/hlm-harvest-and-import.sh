@@ -387,17 +387,16 @@ import() {
     assert_vufind_harvest_dir_writable
 
     verbose "Starting import processing..."
+    mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/processed # needed in case it doesn't already exist
 
     verbose "Extracting zip files..."
     countdown 5
-    ALREADY_EXTRACTED_ZIP_PATH="${ARGS[VUFIND_HARVEST_DIR]}/extracted_zip"
-    mkdir -p "${ALREADY_EXTRACTED_ZIP_PATH}"
     while read -r FILE; do
       verbose "Unzipping \"${FILE}\""
       unzip -n "${FILE}" -d "${ARGS[VUFIND_HARVEST_DIR]}"
       if [ $? -eq 0 ]; then
         verbose "Extracting process complete"
-        mv "${FILE}" "${ALREADY_EXTRACTED_ZIP_PATH}" # Eventually delete them?
+        mv "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/processed" # Eventually delete them?
       else
         verbose "ERROR during extracting process"
       fi
@@ -420,7 +419,6 @@ import() {
     fi
 
     verbose "Pre-processing deletion files to extract IDs from EBSCO MARC records"
-    mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/processed # needed in case it doesn't already exist
     while read -r FILE; do
         DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/$(basename "${FILE}")
         if ! marc2xml "${FILE}" > "${DEL_FILE%.marc}".xml; then
