@@ -93,7 +93,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
      * @param int    $number         The current item number (position within
      * current holdings record)
      * @param string $dueDateValue   The due date to display to the user
-     * @param string $permLoanType   The permanent loan type for the item
      * @param string $tempLoanType   The temporary loan type for the item
      *
      * @return array
@@ -104,7 +103,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $item,
         $number,
         string $dueDateValue,
-        string $permLoanType = null,
         string $tempLoanType = null
     ): array {
         $itemNotes = array_filter(
@@ -166,7 +164,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
             'reserve' => 'TODO',
             'addLink' => true,
             'electronic_access' => $item->electronicAccess,
-            'permanent_loan_type' => $permLoanType,
             'temporary_loan_type' => $tempLoanType,
         ];
     }
@@ -232,7 +229,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $dueDateItemCount++;
                 }
                 // PC-930: Add Loan Type to results
-                $permLoanType = $this->getLoanType($item->permanentLoanTypeId ?? null);
                 $tempLoanType = $this->getLoanType($item->temporaryLoanTypeId ?? null);
 
                 $nextItem = $this->formatHoldingItem(
@@ -241,7 +237,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $item,
                     $number,
                     $dueDateValue,
-                    $permLoanType,
                     $tempLoanType
                 );
                 // PC-872: Filter out LoM holdings
