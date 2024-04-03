@@ -42,7 +42,7 @@
               <?php foreach ($summAuthors as $i => $summAuthor): ?>
                 <a href="<?=$this->record($this->driver)->getLink('author', $this->highlight($summAuthor, null, true, false))?>" class="result-author"><?=$this->highlight(rtrim($summAuthor, ','))?></a><?=$i + 1 < $authorCount ? ',' : ''?>
               <?php endforeach; ?>
-            </span>
+            </span><br>
           <?php endif; ?>
         <?php endif; ?>
         <?php if ($this->driver->isCollection()): ?>

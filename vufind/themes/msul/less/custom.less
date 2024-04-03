@@ -730,8 +730,11 @@ form.searchForm, .record-tabs, .navbar-form {
     margin-bottom:1rem;
   }
 }
-
-
+//align advanced searchbox left
+.mainbody.right .searchbox .navbar-form {
+  padding-left:0;
+  
+}
 
 
 .record-tabs {
@@ -1362,13 +1365,6 @@ body.template-dir-myresearch.template-name-profile {
     display:none;
   }
 }
-//Add left margin to 'edit and start a new searches' for Articles&More
-.template-dir-eds.template-name-search {
-  p.adv_search_links {
-    margin-left:7rem;
-    margin-bottom:1rem;
-  }
-}
 
 // Make See also (.authoritybox) display inline
 
@@ -1380,6 +1376,9 @@ body.template-dir-myresearch.template-name-profile {
 // Remove color background from alert-info on results pages
 
 .template-dir-search.template-name-results, .template-dir-eds.template-name-search, .template-dir-combined.template-name-results {
+  .alert {
+    padding-left:0;
+  }
   .alert-info {
     background:none;
     border:none;
