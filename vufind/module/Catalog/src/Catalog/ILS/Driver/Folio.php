@@ -48,6 +48,41 @@ use function is_string;
 class Folio extends \VuFind\ILS\Driver\Folio
 {
     /**
+     * Support method for getHolding() -- given a loan type ID return the string name for it
+     *
+     * @param string $loanTypeId Loan Type ID (i.e the value of permanentLoanTypeId)
+     *
+     * @return string
+     */
+    protected function getLoanType(string $loanTypeId = null): string|null
+    {
+        $loanType = null;
+
+        // Make sure a value was passed
+        if (empty($loanTypeId)) {
+            return $loanType;
+        }
+
+        // Query the loan type by the ID
+        $query = [
+            'query' => 'id=="' . $loanTypeId . '"',
+        ];
+        foreach (
+            $this->getPagedResults(
+                'loantypes',
+                '/loan-types',
+                $query
+            ) as $loanType
+        ) {
+            // There should only be one result
+            $loanType = $loanType->name;
+            break;
+        }
+
+        return $loanType;
+    }
+
+    /**
      * Support method for getHolding() -- given a few key details, format an item
      * for inclusion in the return value.
      *
@@ -58,6 +93,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
      * @param int    $number         The current item number (position within
      * current holdings record)
      * @param string $dueDateValue   The due date to display to the user
+     * @param string $tempLoanType   The temporary loan type for the item
      *
      * @return array
      */
@@ -66,7 +102,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
         array $holdingDetails,
         $item,
         $number,
-        string $dueDateValue
+        string $dueDateValue,
+        string $tempLoanType = null
     ): array {
         $itemNotes = array_filter(
             array_map([$this, 'formatNote'], $item->notes ?? [])
@@ -127,6 +164,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             'reserve' => 'TODO',
             'addLink' => true,
             'electronic_access' => $item->electronicAccess,
+            'temporary_loan_type' => $tempLoanType,
         ];
     }
 
@@ -190,12 +228,16 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $dueDateValue = $this->getDueDate($item->id, $showTime);
                     $dueDateItemCount++;
                 }
+                // PC-930: Add Loan Type to results
+                $tempLoanType = $this->getLoanType($item->temporaryLoanTypeId ?? null);
+
                 $nextItem = $this->formatHoldingItem(
                     $bibId,
                     $holdingDetails,
                     $item,
                     $number,
-                    $dueDateValue
+                    $dueDateValue,
+                    $tempLoanType
                 );
                 // PC-872: Filter out LoM holdings
                 if (

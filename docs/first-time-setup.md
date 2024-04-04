@@ -93,6 +93,7 @@ with a `POST` request to `/perms/permissions`.
 * `inventory-storage.items.item.get`
 * `inventory-storage.locations.collection.get`
 * `inventory-storage.locations.item.get`
+* `inventory-storage.loan-types.collection.get` (For MSUL customization to display loan type)
 * `inventory-storage.service-points.collection.get`
 * `circulation.loans.collection.get`
 * `circulation.requests.item.post`
