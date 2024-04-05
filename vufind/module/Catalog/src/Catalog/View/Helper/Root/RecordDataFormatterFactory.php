@@ -62,13 +62,13 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         $spec->setLine('Physical Description', 'getPhysicalDescriptions');
         $spec->setLine('Cartographic Data', 'getCartographicData');
         $spec->setLine('Platform', 'getPlatform');
-        $spec->setTemplateLine('Translated From', 'getTranslatedFrom', 'data-notes.phtml');
+        $spec->setTemplateLine('Language of the Original', 'getLanguageOriginal', 'data-notes.phtml');
         $spec->setTemplateLine('Language and/or Writing System', 'getLanguageNotes', 'data-notes.phtml');
         $spec->setTemplateLine('Local Note', 'getLocalNotes', 'data-notes.phtml');
         $spec->setTemplateLine('Dissertation Note', 'getDissertationNotes', 'data-notes.phtml');
 
         $spec->reorderKeys(['Uniform Title', 'Published in', 'New Title', 'Previous Title',
-                'Authors', 'Language', 'Translated From', 'Language and/or Writing System',
+                'Authors', 'Language', 'Language of the Original', 'Language and/or Writing System',
                 'Published', 'Edition', 'Series',
                 'Subjects', 'Genre', 'Physical Description',
                 'child_records', 'Online Access',
