@@ -211,7 +211,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
      *
      * @return array Content from Solr
      */
-    public function getTranslatedFrom()
+    public function getLanguageOriginal()
     {
         return [];
     }
