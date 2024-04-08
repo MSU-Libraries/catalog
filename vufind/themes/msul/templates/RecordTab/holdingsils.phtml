@@ -48,10 +48,23 @@
     <?php endif; ?>
   <?php endif; ?>
 <?php endif; ?>
+<?php # PC-927 Add additional notes fields ?>
 <?php if (!empty($restrictions = $this->driver->getAccessRestrictions())): ?>
   <h2><?=$this->transEsc('Access Restrictions')?></h2>
   <?php foreach ($restrictions as $restriction): ?>
     <span><?= $restriction ?></span>
+  <?php endforeach; ?>
+<?php endif; ?>
+<?php if (!empty($termsOfUse = $this->driver->getTermsOfUseNotes())): ?>
+  <h2><?=$this->transEsc('Terms of Use and Reproduction')?></h2>
+  <?php foreach ($termsOfUse as $term): ?>
+    <span><?= $term ?></span>
+  <?php endforeach; ?>
+<?php endif; ?>
+<?php if (!empty($frequencies = $this->driver->getAccumulationAndFrequencyOfUseNotes())): ?>
+  <h2><?=$this->transEsc('Accumulation and Frequency of Use')?></h2>
+  <?php foreach ($frequencies as $frequency): ?>
+    <span><?= $frequency ?></span>
   <?php endforeach; ?>
 <?php endif; ?>
 <?php $holdingTitleHold = $this->driver->tryMethod('getRealTimeTitleHold'); ?>

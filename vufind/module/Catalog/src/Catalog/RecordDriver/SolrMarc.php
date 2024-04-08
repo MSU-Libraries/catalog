@@ -109,6 +109,45 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Takes a Marc field that notes are stored in (ex: 950) and a list of
+     * sub fields (ex: ['a','b']) optionally as well as what indicator
+     * number and value to filter for
+     * and concatonates the subfields together and returns the fields back
+     * as an array
+     * (ex: ['subA subB subC', 'field2SubA field2SubB'])
+     *
+     * @param string $field    Marc field to search within
+     * @param array  $subfield Sub-fields to return or empty for all
+     * @param string $indNum   The Marc indicator to filter for
+     * @param string $indValue The indicator value to check for
+     *
+     * @return array The values within the subfields under the field
+     */
+    public function getMarcFieldWithInd(
+        string $field,
+        ?array $subfield = null,
+        string $indNum = '',
+        string $indValue = ''
+    ) {
+        $vals = [];
+        $marc = $this->getMarcReader();
+        $marc_fields = $marc->getFields($field, $subfield);
+        foreach ($marc_fields as $marc_data) {
+            $field_vals = [];
+            if (trim(($marc_data['i' . $indNum] ?? '')) == $indValue) {
+                $subfields = $marc_data['subfields'];
+                foreach ($subfields as $subfield) {
+                    $field_vals[] = $subfield['data'];
+                }
+            }
+            if (!empty($field_vals)) {
+                $vals[] = implode(' ', $field_vals);
+            }
+        }
+        return array_unique($vals);
+    }
+
+    /**
      * Takes a Solr field and returns the contents of the field (either
      * a string or array)
      *
@@ -133,10 +172,509 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getNotes()
     {
         return array_merge(
-            $this->getNotesMarcFields('541'),
-            $this->getNotesMarcFields('561'),
-            $this->getNotesMarcFields('563')
+            $this->getMarcFieldWithInd('561', ['a', 'u', '3'], '1', ''),
+            $this->getMarcFieldWithInd('561', ['a', 'u', '3'], '1', '1')
         );
+    }
+
+    /**
+     * Get the binding note fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getBindingNotes()
+    {
+        return $this->getNotesMarcFields('563');
+    }
+
+    /**
+     * Get the computer file or data note
+     *
+     * @return array Note fields from Solr
+     */
+    public function getFileNotes()
+    {
+        return $this->getNotesMarcFields('516');
+    }
+
+    /**
+     * Get the date/time and place of an event note
+     *
+     * @return array Note fields from Solr
+     */
+    public function getEventDetailsNotes()
+    {
+        return $this->getNotesMarcFields('518');
+    }
+
+    /**
+     * Get the type of report and period covered note
+     *
+     * @return array Note fields from Solr
+     */
+    public function getTypeOfReportAndPeriodNotes()
+    {
+        return $this->getNotesMarcFields('513');
+    }
+
+    /**
+     * Get the data quality note
+     *
+     * @return array Note fields from Solr
+     */
+    public function getDataQualityNotes()
+    {
+        return $this->getNotesMarcFields('514');
+    }
+
+    /**
+     * Get the summary note
+     *
+     * @return array Note fields from Solr
+     */
+    public function getSummaryNotes()
+    {
+        return array_merge(
+            $this->getMarcFieldWithInd('520', null, '1', ''),
+            $this->getMarcFieldWithInd('520', null, '1', '0'),
+            $this->getMarcFieldWithInd('520', null, '1', '2'),
+            $this->getMarcFieldWithInd('520', null, '1', '8'),
+        );
+    }
+
+    /**
+     * Get the review by notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getReviewNotes()
+    {
+        return $this->getMarcFieldWithInd('520', null, '1', '1');
+    }
+
+    /**
+     * Get the abstract notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getAbstractNotes()
+    {
+        return $this->getMarcFieldWithInd('520', null, '1', '3');
+    }
+
+    /**
+     * Get the content advice notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getContentAdviceNotes()
+    {
+        return $this->getMarcFieldWithInd('520', null, '1', '4');
+    }
+
+    /**
+     * Get the audience note
+     *
+     * @return array Note fields from Solr
+     */
+    public function getTargetAudienceNotes()
+    {
+        return array_merge(
+            $this->getMarcFieldWithInd('521', null, '1', ''),
+            $this->getMarcFieldWithInd('521', null, '1', '8'),
+        );
+    }
+
+    /**
+     * Get the grade level note
+     *
+     * @return array Note fields from Solr
+     */
+    public function getGradeLevelNotes()
+    {
+        return $this->getMarcFieldWithInd('521', null, '1', '0');
+    }
+
+    /**
+     * Get the interest age level note
+     *
+     * @return array Note fields from Solr
+     */
+    public function getInterestAgeLevelNotes()
+    {
+        return $this->getMarcFieldWithInd('521', null, '1', '1');
+    }
+
+    /**
+     * Get the interest grade level note
+     *
+     * @return array Note fields from Solr
+     */
+    public function getInterestGradeLevelNotes()
+    {
+        return $this->getMarcFieldWithInd('521', null, '1', '2');
+    }
+
+    /**
+     * Get the special audience characteristics note
+     *
+     * @return array Note fields from Solr
+     */
+    public function getSpecialAudienceNotes()
+    {
+        return $this->getMarcFieldWithInd('521', null, '1', '3');
+    }
+
+    /**
+     * Get the motivation interest level note
+     *
+     * @return array Note fields from Solr
+     */
+    public function getInterestLevelNotes()
+    {
+        return $this->getMarcFieldWithInd('521', null, '1', '4');
+    }
+
+    /**
+     * Get the Contents notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getContentsNotes()
+    {
+        $toc = [];
+        if (
+            $fields = array_merge(
+                $this->getMarcFieldWithInd('505', null, '1', '0'),
+                $this->getMarcFieldWithInd('505', null, '1', '8')
+            )
+        ) {
+            foreach ($fields as $field) {
+                // explode on the -- separators (filtering out empty chunks). Due to
+                // inconsistent application of subfield codes, this is the most
+                // reliable way to split up a table of contents.
+                $toc = array_merge($toc, preg_split('/[.\s]--/', $field));
+                //$toc[] = array_filter(array_map('trim', preg_split('/[.\s]--/', $field)));
+            }
+        }
+        return $toc;
+    }
+
+    /**
+     * Get the incomplete contents notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getIncompleteContentsNotes()
+    {
+        $toc = [];
+        if (
+            $fields = $this->getMarcFieldWithInd('505', null, '1', '1')
+        ) {
+            foreach ($fields as $field) {
+                // explode on the -- separators (filtering out empty chunks). Due to
+                // inconsistent application of subfield codes, this is the most
+                // reliable way to split up a table of contents.
+                $toc = array_merge($toc, preg_split('/[.\s]--/', $field));
+            }
+        }
+        return $toc;
+    }
+
+    /**
+     * Get the partial contents notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getPartialContentsNotes()
+    {
+        $toc = [];
+        if (
+            $fields = $this->getMarcFieldWithInd('505', null, '1', '2')
+        ) {
+            foreach ($fields as $field) {
+                // explode on the -- separators (filtering out empty chunks). Due to
+                // inconsistent application of subfield codes, this is the most
+                // reliable way to split up a table of contents.
+                $toc = array_merge($toc, preg_split('/[.\s]--/', $field));
+            }
+        }
+        return $toc;
+    }
+
+    /**
+     * Get the indexed by notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getIndexedByNotes()
+    {
+        return $this->getMarcFieldWithInd('510', null, '1', '0');
+    }
+
+    /**
+     * Get the indexed by notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getIndexedByEntiretyNotes()
+    {
+        return $this->getMarcFieldWithInd('510', null, '1', '1');
+    }
+
+    /**
+     * Get the indexed by notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getIndexedBySelectivelyNotes()
+    {
+        return $this->getMarcFieldWithInd('510', null, '1', '2');
+    }
+
+    /**
+     * Get the indexed by notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getIndexedReferenceNotes()
+    {
+        return array_merge(
+            $this->getMarcFieldWithInd('510', null, '1', '3'),
+            $this->getMarcFieldWithInd('510', null, '1', '4')
+        );
+    }
+
+    /**
+     * Get the participant or performer notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getParticipantNotes()
+    {
+        return $this->getMarcFieldWithInd('511', null, '1', '0');
+    }
+
+    /**
+     * Get the cast notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getCastNotes()
+    {
+        return $this->getMarcFieldWithInd('511', null, '1', '1');
+    }
+
+    /**
+     * Get the geographic coverage notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getGeographicCoverageNotes()
+    {
+        return $this->getNotesMarcFields('522');
+    }
+
+    /**
+     * Get the supplement notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getSupplementNotes()
+    {
+        return $this->getNotesMarcFields('525');
+    }
+
+    /**
+     * Get the reading program notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getReadingProgramNotes()
+    {
+        return $this->getNotesMarcFields('526');
+    }
+
+    /**
+     * Get the a11y notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getA11yNotes()
+    {
+        return $this->getMarcFieldWithInd('532', null, '1', '8');
+    }
+
+    /**
+     * Get the a11y technical details notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getA11yTechnicalDetailsNotes()
+    {
+        return $this->getMarcFieldWithInd('532', null, '1', '0');
+    }
+
+    /**
+     * Get the a11y features notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getA11yFeaturesNotes()
+    {
+        return $this->getMarcFieldWithInd('532', null, '1', '1');
+    }
+
+    /**
+     * Get the a11y deficiencies notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getA11yDeficienciesNotes()
+    {
+        return $this->getMarcFieldWithInd('532', null, '1', '2');
+    }
+
+    /**
+     * Get the reproduction notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getReproductionNotes()
+    {
+        return $this->getNotesMarcFields('533');
+    }
+
+    /**
+     * Get the original version notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getOriginalVersionNotes()
+    {
+        return $this->getNotesMarcFields('534');
+    }
+
+    /**
+     * Get the funding information notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getFundingInformationNotes()
+    {
+        return $this->getNotesMarcFields('536');
+    }
+
+    /**
+     * Get the terms of use notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getTermsOfUseNotes()
+    {
+        return $this->getNotesMarcFields('540');
+    }
+
+    /**
+     * Get the source of acquisition notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getSourceOfAcquisitionNotes()
+    {
+        return array_merge(
+            $this->getMarcFieldWithInd('541', null, '1', ''),
+            $this->getMarcFieldWithInd('541', null, '1', '1')
+        );
+    }
+
+    /**
+     * Get the copyright information notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getCopyrightInformationNotes()
+    {
+        return array_merge(
+            $this->getMarcFieldWithInd('542', null, '1', ''),
+            $this->getMarcFieldWithInd('542', null, '1', '1')
+        );
+    }
+
+    /**
+     * Get the location of other archival materials notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getLocationOfArchivalMaterialsNotes()
+    {
+        return array_merge(
+            $this->getMarcFieldWithInd('544', null, '1', ''),
+            $this->getMarcFieldWithInd('544', null, '1', '0')
+        );
+    }
+
+    /**
+     * Get the location of related materials notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getLocationOfRelatedMaterialsNotes()
+    {
+        return $this->getMarcFieldWithInd('544', null, '1', '1');
+    }
+
+    /**
+     * Get the bibliographical sketch notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getBiographicalSketchNotes()
+    {
+        return array_merge(
+            $this->getMarcFieldWithInd('545', null, '1', ''),
+            $this->getMarcFieldWithInd('545', null, '1', '0')
+        );
+    }
+
+    /**
+     * Get the administrative history notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getAdministrativeHistoryNotes()
+    {
+        return $this->getMarcFieldWithInd('545', null, '1', '1');
+    }
+
+    /**
+     * Get the formal title notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getFormerTitleNotes()
+    {
+        return $this->getNotesMarcFields('547');
+    }
+
+    /**
+     * Get the issuing body notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getIssuingBodyNotes()
+    {
+        return $this->getNotesMarcFields('550');
+    }
+
+    /**
+     * Get th entity and attribute information notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getEntityAttributeInformationNotes()
+    {
+        return $this->getNotesMarcFields('552');
     }
 
     /**
@@ -150,6 +688,26 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get the holder of originals notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getHoldersOfOriginalNotes()
+    {
+        return $this->getMarcFieldWithInd('535', null, '1', '1');
+    }
+
+    /**
+     * Get the holder of duplicates notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getHoldersOfDuplicateNotes()
+    {
+        return $this->getMarcFieldWithInd('535', null, '1', '2');
+    }
+
+    /**
      * Get the language note fields
      *
      * @return array Note fields from Solr
@@ -157,6 +715,135 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getLanguageNotes()
     {
         return $this->getNotesMarcFields('546');
+    }
+
+    /**
+     * Get the cumulative indexes notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getCumulativeIndexesNotes()
+    {
+        return array_merge(
+            $this->getMarcFieldWithInd('555', null, '1', ''),
+            $this->getMarcFieldWithInd('555', null, '1', '8')
+        );
+    }
+
+    /**
+     * Get the finding aid notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getFindingAidNotes()
+    {
+        return $this->getMarcFieldWithInd('555', null, '1', '0');
+    }
+
+    /**
+     * Get the information about documentation note fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getDocumentationInformationNotes()
+    {
+        return $this->getNotesMarcFields('556');
+    }
+
+    /**
+     * Get the copy and version identification note fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getCopyAndVersionNotes()
+    {
+        return $this->getNotesMarcFields('562');
+    }
+
+    /**
+     * Get the case file characteristics fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getCaseFileCharacteristicNotes()
+    {
+        return $this->getNotesMarcFields('565');
+    }
+
+    /**
+     * Get the methodology notes fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getMethodologyNotes()
+    {
+        return $this->getNotesMarcFields('567');
+    }
+
+    /**
+     * Get the publications notes fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getPublicationNotes()
+    {
+        return $this->getNotesMarcFields('581');
+    }
+
+    /**
+     * Get the action notes fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getActionNotes()
+    {
+        return array_merge(
+            $this->getMarcFieldWithInd('583', null, '1', ''),
+            $this->getMarcFieldWithInd('583', null, '1', '1')
+        );
+    }
+
+    /**
+     * Get the accumulation and frequency of use note
+     *
+     * @return array Note fields from Solr
+     */
+    public function getAccumulationAndFrequencyOfUseNotes()
+    {
+        return $this->getNotesMarcFields('584');
+    }
+
+    /**
+     * Get the exhibition notes fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getExhibitionNotes()
+    {
+        return $this->getNotesMarcFields('585');
+    }
+
+    /**
+     * Get the source of description notes fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getSourceOfDescriptionNotes()
+    {
+        return array_merge(
+            $this->getMarcFieldWithInd('588', null, '1', ''),
+            $this->getMarcFieldWithInd('588', null, '1', '0')
+        );
+    }
+
+    /**
+     * Get the latest iossue consulted notes fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getLatestIssueConsultedNotes()
+    {
+        return $this->getMarcFieldWithInd('588', null, '1', '1');
     }
 
     /**
@@ -177,6 +864,16 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getCiteAsNotes()
     {
         return $this->getNotesMarcFields('524');
+    }
+
+    /**
+     * Get the additional physical form note fields
+     *
+     * @return array Note fields from Solr
+     */
+    public function getAdditionalPhysicalFormNotes()
+    {
+        return $this->getNotesMarcFields('530');
     }
 
     /**
@@ -387,16 +1084,6 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
-     * Get the record description
-     *
-     * @return array Content from Solr
-     */
-    public function getSummary()
-    {
-        return $this->getMarcField('520', ['a', 'b', 'c', 'd']);
-    }
-
-    /**
      * Get the translated from languaes
      *
      * @return array Content from Solr
@@ -460,6 +1147,16 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getPlatform()
     {
         return $this->getMarcFieldUnique('753', ['a']);
+    }
+
+    /**
+     * Get general notes on the record.
+     *
+     * @return array
+     */
+    public function getGeneralNotes()
+    {
+        return array_merge($this->getMarcField('500', ['a', '3']), $this->getMarcField('501', ['a']));
     }
 
     /**
