@@ -1,12 +1,9 @@
 <?php /* Depending on the record driver, $field may either be an array with
    "name" and "number" keys or a flat string containing only the series
    name.  We should account for both cases to maximize compatibility. */ ?>
-<?php if (is_array($data[0])): ?>
-  <?php if (!empty($data[0]['name'])): ?>
-    <a href="<?=$this->record($this->driver)->getLink('uniform-title', $data[0]['name'])?>"><?=$this->escapeHtml(implode(' ', $data))?></a>
+<?php foreach ($data as $title): ?>
+  <?php if (!empty($title['name'])): ?>
+    <a href="<?=$this->record($this->driver)->getLink('uniform-title', $title['name'])?>"><?=$this->escapeHtml($title['name'])?></a>
+    &nbsp;<?=$this->escapeHtml($title['value'] ?? '')?>
   <?php endif; ?>
-<?php else: ?>
-  <a href="<?=$this->record($this->driver)->getLink('uniform-title', $data[0])?>"><?=$this->escapeHtml($data[0])?></a>
-  <?php array_shift($data); ?>
-  <?=$this->escapeHtml(implode(' ', $data))?>
-<?php endif; ?>
+<?php endforeach; ?>

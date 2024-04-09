@@ -971,7 +971,40 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getUniformTitle()
     {
-        return $this->getMarcField('130', range('a', 'z'));
+        return array_merge(
+            $this->getUniformTitleFromMarc('130', range('a', 'z')),
+            $this->getUniformTitleFromMarc('240', range('a', 'z')),
+        );
+    }
+
+    /**
+     * Get the uniform title
+     *
+     * @param $field name of the field to search in
+     * @param $codes list of subfield codes to capture
+     *
+     * @return array Content from Solr
+     */
+    public function getUniformTitleFromMarc($field, $codes)
+    {
+        $vals = [];
+        $marc = $this->getMarcReader();
+        $marc_fields = $marc->getFields($field, $codes);
+        foreach ($marc_fields as $marc_data) {
+            $subfields = $marc_data['subfields'];
+            $tmpVal = ['name' => [], 'value' => []];
+            foreach ($subfields as $subfield) {
+                if ($subfield['code'] == 'a' || $subfield['code'] == 'p') {
+                    $tmpVal['name'][] = $subfield['data'];
+                } else {
+                    $tmpVal['value'][] = $subfield['data'];
+                }
+            }
+            $tmpVal['name'] = implode(' ', $tmpVal['name']);
+            $tmpVal['value'] = implode(' ', $tmpVal['value']);
+            $vals[] = $tmpVal;
+        }
+        return $vals;
     }
 
     /**
