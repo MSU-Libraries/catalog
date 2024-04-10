@@ -15,6 +15,8 @@ services:
       - vufind_cache:/mnt/vufind_cache
       - /usr/local/bin/pc-locate-oai:/usr/local/bin/pc-locate-oai:ro
       - /etc/bash_completion.d/pc-locate-oai:/etc/bash_completion.d/pc-locate-oai:ro
+      - /usr/local/bin/pc-record:/usr/local/bin/pc-record:ro
+      - /etc/bash_completion.d/pc-record:/etc/bash_completion.d/pc-record:ro
     networks:
       - public
       - internal
@@ -121,6 +123,8 @@ services:
       - /mnt/shared:/mnt/shared:rw
       - /usr/local/bin/pc-locate-oai:/usr/local/bin/pc-locate-oai:ro
       - /etc/bash_completion.d/pc-locate-oai:/etc/bash_completion.d/pc-locate-oai:ro
+      - /usr/local/bin/pc-record:/usr/local/bin/pc-record:ro
+      - /etc/bash_completion.d/pc-record:/etc/bash_completion.d/pc-record:ro
       # Requires rw so it can restore from backups
       - /mnt/shared/alpha-browse/${STACK_NAME}:/mnt/alpha-browse:rw
     networks:
