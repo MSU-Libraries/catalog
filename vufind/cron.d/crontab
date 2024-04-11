@@ -37,5 +37,5 @@ ${HARV_CRON_MINS} 4    * * *	root    cron-authority.sh
 ${RESRV_CRON_MINS} *	* * *	root    cron-reserves.sh
 
 # Cleanup data
-0 0     * * *   root    cron-searches.sh
-30 0     * * *   root    cron-sessions.sh
+0  0       * * *   root    cron-searches.sh
+15 0,6,18  * * *   root    cron-sessions.sh
