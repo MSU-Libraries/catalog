@@ -148,6 +148,47 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Takes a Marc field that are linked to another field (ex: 880 -> 245) and a list of
+     * sub fields (ex: ['a','b']) optionally as well as what indicator
+     * number and value to filter for
+     * and concatonates the subfields together and returns the fields back
+     * as an array
+     * (ex: ['subA subB subC', 'field2SubA field2SubB'])
+     *
+     * @param string $linkfield Marc field to use for the link data
+     * @param string $field     Marc field to search within
+     * @param array  $subfield  Sub-fields to return or empty for all
+     * @param string $indNum    The Marc indicator to filter for
+     * @param string $indValue  The indicator value to check for
+     *
+     * @return array The values within the subfields under the field
+     */
+    public function getLinkedMarcFieldWithInd(
+        string $linkfield,
+        string $field,
+        ?array $subfield = null,
+        string $indNum = '',
+        string $indValue = ''
+    ) {
+        $vals = [];
+        $marc = $this->getMarcReader();
+        $marc_fields = $marc->getLinkedFieldsSubfields($linkfield, $field, $subfield);
+        foreach ($marc_fields as $marc_data) {
+            $field_vals = [];
+            if (trim(($marc_data['i' . $indNum] ?? '')) == $indValue) {
+                $subfields = $marc_data['subfields'];
+                foreach ($subfields as $subfield) {
+                    $field_vals[] = $subfield['data'];
+                }
+            }
+            if (!empty($field_vals)) {
+                $vals[] = implode(' ', $field_vals);
+            }
+        }
+        return array_unique($vals);
+    }
+
+    /**
      * Takes a Solr field and returns the contents of the field (either
      * a string or array)
      *
@@ -346,7 +387,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         if (
             $fields = array_merge(
                 $this->getMarcFieldWithInd('505', null, '1', '0'),
-                $this->getMarcFieldWithInd('505', null, '1', '8')
+                $this->getMarcFieldWithInd('505', null, '1', '8'),
+                $this->getLinkedMarcFieldWithInd('880', '505', null, '1', '0'),
+                $this->getLinkedMarcFieldWithInd('880', '505', null, '1', '8')
             )
         ) {
             foreach ($fields as $field) {
@@ -1273,5 +1316,78 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             ];
         }
         return $titles;
+    }
+
+    /**
+     * Get all subject headings associated with this record. Each heading is
+     * returned as an array of chunks, increasing from least specific to most
+     * specific.
+     *
+     * @param bool $extended Whether to return a keyed array with the following
+     * keys:
+     * - heading: the actual subject heading chunks
+     * - type: heading type
+     * - source: source vocabulary
+     *
+     * @return array
+     */
+    public function getAllSubjectHeadings($extended = false)
+    {
+        // This is all the collected data:
+        $retval = [];
+
+        // Try each MARC field one at a time:
+        foreach ($this->subjectFields as $field => $fieldType) {
+            // Do we have any results for the current field?  If not, try the next.
+            // MSUL customization PC-936 add linked fields to the results
+            $results = array_merge(
+                $this->getMarcReader()->getFields($field),
+                $this->getMarcReader()->getLinkedFields('880', $field)
+            );
+            if (!$results) {
+                continue;
+            }
+
+            // If we got here, we found results -- let's loop through them.
+            foreach ($results as $result) {
+                // Start an array for holding the chunks of the current heading:
+                $current = [];
+
+                // Get all the chunks and collect them together:
+                foreach ($result['subfields'] as $subfield) {
+                    // Numeric subfields are for control purposes and should not
+                    // be displayed:
+                    if (!is_numeric($subfield['code'])) {
+                        $current[] = $subfield['data'];
+                    }
+                }
+                // If we found at least one chunk, add a heading to our result:
+                if (!empty($current)) {
+                    if ($extended) {
+                        $sourceIndicator = $result['i2'];
+                        $source = '';
+                        if (isset($this->subjectSources[$sourceIndicator])) {
+                            $source = $this->subjectSources[$sourceIndicator] ?? '';
+                        } else {
+                            $source = $this->getSubfield($result, '2');
+                        }
+                        $retval[] = [
+                            'heading' => $current,
+                            'type' => $fieldType,
+                            'source' => $source,
+                            'id' => $this->getSubfield($result, '0'),
+                        ];
+                    } else {
+                        $retval[] = $current;
+                    }
+                }
+            }
+        }
+
+        // Remove duplicates and then send back everything we collected:
+        return array_map(
+            'unserialize',
+            array_unique(array_map('serialize', $retval))
+        );
     }
 }

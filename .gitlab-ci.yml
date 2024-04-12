@@ -14,6 +14,7 @@ variables:
   DEPLOY_HOST_B: catalog-2.aws.lib.msu.edu
   DEPLOY_HOST_C: catalog-3.aws.lib.msu.edu
   COMPOSE_PATH: /home/deploy/$STACK_NAME
+  RUNNER_SCRIPT_TIMEOUT: 20m # Prevent job timeout when deploy script takes longer than the 5m default
 
 Set Stack Name:
   stage: test
