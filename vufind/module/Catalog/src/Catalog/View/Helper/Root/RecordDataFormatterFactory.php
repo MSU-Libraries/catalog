@@ -104,7 +104,6 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         $spec->setTemplateLine('Content Advice', 'getContentAdviceNotes', 'data-notes.phtml');
         $spec->setLine('Note', 'getGeneralNotes');
         $spec->setLine('Call Number', 'getFullCallnumber');
-        $spec->setTemplateLine('Numbering Peculiarities', 'getNumberingPeculiaritiesNotes', 'data-notes.phtml');
         $spec->setLine('Credits', 'getProductionCredits');
         $spec->setLine('Related Materials', 'getRelationshipNotes');
         $spec->setLine('System Details', 'getSystemDetails');
@@ -163,7 +162,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
             'data-notes.phtml'
         );
         $spec->setTemplateLine('Cumulative Indexes', 'getCumulativeIndexesNotes', 'data-notes.phtml');
-        $spec->setTemplateLine('Finding Aid', 'getFindingAidNotes', 'data-notes.phtml');
+        $spec->setTemplateLine('Finding Aids', 'getFindingAidNotes', 'data-notes.phtml');
         $spec->setTemplateLine(
             'Information About Documentation',
             'getDocumentationInformationNotes',
@@ -182,13 +181,12 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         $spec->setTemplateLine('Holder of Duplicates', 'getHolderOfDuplicateNotes', 'data-notes.phtml');
 
         $spec->reorderKeys(['Summary', 'Review', 'Abstract', 'Content Advice', 'Note', 'Call Number',
-                'Numbering Peculiarities', 'Credits',
-                'Related Materials', 'System Details', 'Scale Note', 'Cite As',
+                'Credits', 'Related Materials', 'System Details', 'Scale Note', 'Cite As',
                 'Published', 'Publication Frequency', 'Playing Time',
                 'Audience', 'Reading Grade Level', 'Interest Age Level', 'Interest Grade Level',
                 'Special Audience Characteristics', 'Motivation/Interest Level', 'Awards', 'Bibliography Note',
                 'ISBN', 'ISSN', 'DOI',
-                'Finding Aid', 'Author Notes', 'Credits', 'Related Materials', 'System Details',
+                'Finding Aids', 'Author Notes', 'Credits', 'Related Materials', 'System Details',
                 'Scale Note', 'Indexed By', 'Indexed in its Entirety By', 'Indexed Selectively By',
                 'References', 'Participant or Performer', 'Cast', 'Type of File', 'Event Details',
                 'Type of Report and Period Covered', 'Data Quality', 'Supplement Note', 'Reading Program',

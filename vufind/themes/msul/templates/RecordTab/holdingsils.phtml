@@ -178,3 +178,9 @@
     <span><?= $frequency ?></span>
   <?php endforeach; ?>
 <?php endif; ?>
+<?php if (!empty($frequencies = $this->driver->getNumberingPeculiaritiesNotes())): ?>
+  <h2><?=$this->transEsc('Numbering Peculiarities')?></h2>
+  <?php foreach ($frequencies as $frequency): ?>
+    <span><?= $frequency ?></span>
+  <?php endforeach; ?>
+<?php endif; ?>

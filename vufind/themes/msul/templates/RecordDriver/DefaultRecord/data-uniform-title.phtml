@@ -4,6 +4,6 @@
 <?php foreach ($data as $title): ?>
   <?php if (!empty($title['name'])): ?>
     <a href="<?=$this->record($this->driver)->getLink('uniform-title', $title['name'])?>"><?=$this->escapeHtml($title['name'])?></a>
-    &nbsp;<?=$this->escapeHtml($title['value'] ?? '')?>
+    <?=$this->escapeHtml($title['value'] ?? '')?>
   <?php endif; ?>
 <?php endforeach; ?>
