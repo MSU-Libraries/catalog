@@ -678,6 +678,14 @@ input[type="checkbox"] {
   }
 }
 
+// Prevent wrapping long field names on tabs
+// ex: in00005965624 Special Audience Characteristics
+.tab-content {
+  th {
+    white-space: nowrap;
+  }
+}
+
 form.searchForm, .record-tabs, .navbar-form {
   ul.nav-tabs {
     border-bottom:0;
