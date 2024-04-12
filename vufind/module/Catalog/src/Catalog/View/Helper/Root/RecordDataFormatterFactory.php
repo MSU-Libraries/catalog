@@ -97,6 +97,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         $spec->setLine('Access', null);
         $spec->setLine('Bibliography', null);
         $spec->setLine('Audience', null);
+        $spec->setTemplateLine('Finding Aid', null);
 
         $spec->setTemplateLine('Summary', 'getSummaryNotes', 'data-notes.phtml');
         $spec->setTemplateLine('Review', 'getReviewNotes', 'data-notes.phtml');
