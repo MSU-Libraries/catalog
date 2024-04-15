@@ -46,4 +46,10 @@ class RecordController extends \VuFind\Controller\RecordController
         $view->setTemplate('record/getthis');
         return $view;
     }
+
+    public function forceLogin($msg = null, $extras = [], $forward = true)
+    {
+        // Overriding parent with empty message to prevent error message (PC-972)
+        return parent::forceLogin('', $extras, $forward);
+    }
 }

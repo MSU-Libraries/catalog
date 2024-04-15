@@ -21,7 +21,7 @@ return [
       'Catalog\\Controller\\MyResearchController' => 'VuFind\\Controller\\AbstractBaseFactory',
     ],
     'aliases' => [
-      'VuFind\\Controller\\RecordController' => 'Catalog\\Controller\\RecordController',
+      VuFind\Controller\RecordController::class => Catalog\Controller\RecordController::class,
       'VuFind\\Controller\\MyResearchController' => 'Catalog\\Controller\\MyResearchController',
     ],
   ],
