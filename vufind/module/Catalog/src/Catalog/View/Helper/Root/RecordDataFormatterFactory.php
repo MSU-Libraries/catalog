@@ -37,7 +37,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
     {
         $spec = new SpecBuilder(parent::getDefaultCoreSpecs());
 
-        $spec->setLine('Physical Description', null);
+        $spec->setLine('Physical Description', 'getPhysical');
 
         $spec->setTemplateLine(
             'Uniform Title',
@@ -74,7 +74,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
                 'Published', 'Edition', 'Series',
                 'Subjects', 'Genre', 'child_records', 'Online Access',
                 'Ownership and Custodial History', 'Local Note', 'Dissertation Note',
-                'Binding Information', 'Tags', 'Variant Title']);
+                'Binding Information', 'Physical Description', 'Tags', 'Variant Title']);
 
         return $spec->getArray();
     }
