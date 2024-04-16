@@ -45,7 +45,7 @@ class GetThisLoader
      * Initializes the loader with the given record and item data
      *
      * @param object $record  Record driver object
-     * @param object $items   array of holding items
+     * @param object|array $items   array of holding items
      * @param string $item_id holding record data for the current holding item
      */
     public function __construct($record, $items, $item_id = null)
@@ -199,7 +199,6 @@ class GetThisLoader
      */
     public function getLocation($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         return $this->getItem($item_id)['location'] ?? '';
     }
 
@@ -221,7 +220,7 @@ class GetThisLoader
      *
      * @param string $item_id The holding item UUID. If null (default) will return status for first item
      *
-     * @return array The data required to build a request URL for the item
+     * @return array|string The data required to build a request URL for the item
      */
     public function getLink($item_id = null)
     {

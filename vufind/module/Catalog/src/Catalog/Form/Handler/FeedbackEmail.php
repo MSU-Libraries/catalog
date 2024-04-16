@@ -107,52 +107,32 @@ class FeedbackEmail extends \VuFind\Form\Handler\Email
         $staffFeedback = !empty(array_shift($libstaff)['value']);
 
         $emails = [];
-        //Always send feedback to library:
-        if ($staffFeedback) {
-            // Box Checked / Library Staff
-            // When “Library Staff” checkbox is CHECKED, feedback is sent
-            // To: **cdawg**@**msu**
-            $emails[] = [
-                'recipientName' => $recipients[0]['name'] ?? $recipients[0]['email'],
-                'recipientEmail' => $recipients[0]['email'],
-                'senderName' => $senderName,
-                'senderEmail' => $senderEmail,
-                'replyToName' => $formFromNameField,
-                'replyToEmail' => $formFromEmailField,
-                'emailSubject' => $recipients[0]['subjectPrefix'] . $emailSubject,
-                'emailMessage' => $emailMessage,
-                'ccEmail' => null,
-            ];
-        } else {
-            // Box Unchecked / Not Library Staff
-            // When “Library staff checkbox is UNCHECKED, feedback is sent:
-            // 1st email To: **support**@**libanswers**
-            // 2nd email To: **cdawg**@**msu**
-            $publicRecipients = $form->getRecipientPublic($params->fromPost());
-            $emails[] = [
-                'recipientName' => $publicRecipients[0]['name'] ?? $publicRecipients[0]['email'],
-                'recipientEmail' => $publicRecipients[0]['email'],
-                'senderName' => $senderName,
-                'senderEmail' => $senderEmail,
-                'replyToName' => $senderName,
-                'replyToEmail' => $senderEmail,
-                'emailSubject' => $publicRecipients[0]['subjectPrefix'] . $emailSubject,
-                'emailMessage' => $emailMessage,
-                'ccEmail' => null,
-            ];
+        // 1st email To: **support**@**libanswers** // Ticketing system
+        // 2nd email To: **cdawg**@**msu**
+        $publicRecipients = $form->getRecipientPublic($params->fromPost());
+        $emails[] = [
+            'recipientName' => $publicRecipients[0]['name'] ?? $publicRecipients[0]['email'],
+            'recipientEmail' => $publicRecipients[0]['email'],
+            'senderName' => $senderName,
+            'senderEmail' => $senderEmail,
+            'replyToName' => $senderName,
+            'replyToEmail' => $senderEmail,
+            'emailSubject' => $publicRecipients[0]['subjectPrefix'] . $emailSubject,
+            'emailMessage' => $emailMessage,
+            'ccEmail' => null,
+        ];
 
-            $emails[] = [
-                'recipientName' => $form->ccOriginalOnPublic() ? $recipients[0]['email'] : null,
-                'recipientEmail' => $form->ccOriginalOnPublic() ? $recipients[0]['email'] : null,
-                'senderName' => $senderName,
-                'senderEmail' => $senderEmail,
-                'replyToName' => $senderName,
-                'replyToEmail' => $senderEmail,
-                'emailSubject' => $publicRecipients[0]['subjectPrefix'] . $emailSubject,
-                'emailMessage' => $emailMessage,
-                'ccEmail' => null,
-            ];
-        }
+        $emails[] = [
+            'recipientName' => $form->ccOriginalOnPublic() ? $recipients[0]['email'] : null,
+            'recipientEmail' => $form->ccOriginalOnPublic() ? $recipients[0]['email'] : null,
+            'senderName' => $senderName,
+            'senderEmail' => $senderEmail,
+            'replyToName' => $senderName,
+            'replyToEmail' => $senderEmail,
+            'emailSubject' => $publicRecipients[0]['subjectPrefix'] . $emailSubject,
+            'emailMessage' => $emailMessage,
+            'ccEmail' => null,
+        ];
         // Copy feedback to user if they are logged in
         if ($form->copyUserOnEmail() && $formFromEmailField !== null && $user) {
             // If the user sending feedback is logged in and provided an email address:
