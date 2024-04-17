@@ -89,6 +89,20 @@ return [
           ],
         ],
       ],
+      'recordtab' => [
+        'factories' => [
+            Catalog\RecordTab\Description::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
+            Catalog\RecordTab\HoldingsILS::class => VuFind\RecordTab\HoldingsILSFactory::class,
+            Catalog\RecordTab\HoldingsWorldCat::class => VuFind\RecordTab\HoldingsWorldCatFactory::class,
+            Catalog\RecordTab\TOC::class => VuFind\RecordTab\TOCFactory::class,
+        ],
+        'aliases' => [
+          VuFind\RecordTab\Description::class => Catalog\RecordTab\Description::class,
+          VuFind\RecordTab\HoldingsILS::class => Catalog\RecordTab\HoldingsILS::class,
+          VuFind\RecordTab\HoldingsWorldCat::class => Catalog\RecordTab\HoldingsWorldCat::class,
+          VuFind\RecordTab\TOC::class => Catalog\RecordTab\TOC::class,
+        ],
+      ],
       'search_backend' => [
         'factories' => [
           'EDS' => 'Catalog\\Search\\Factory\\EdsBackendFactory',
