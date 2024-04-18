@@ -4,20 +4,20 @@
  * Record view helper Test Class
  *
  * PHP version 8
-**/
+ *
+ * @category VuFind
+ * @package  Catalog
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/wiki/development:testing:unit_tests Wiki
+ **/
 
 namespace CatalogTest\View\Helper\Root;
 
-use Laminas\Config\Config;
-use Laminas\View\Exception\RuntimeException;
-use VuFind\Cover\Loader;
 use Catalog\View\Helper\Root\Record;
+use Laminas\Config\Config;
+use VuFind\Cover\Loader;
 use VuFindTheme\ThemeInfo;
-use VuFind\View\Helper\Root\TransEsc;
-use VuFind\View\Helper\Root\Translate;
-use VuFindTest\Feature\TranslatorTrait;
-use VuFind\View\Helper\Root\JsTranslations;
-use VuFindTest\Feature\ViewTrait;
 
 use function is_array;
 
@@ -34,9 +34,6 @@ use function is_array;
 class RecordTest extends \PHPUnit\Framework\TestCase
 {
     use \Catalog\Feature\FixtureTrait;
-    use TranslatorTrait;
-    use ViewTrait;
-
 
     /**
      * Theme to use for testing purposes.
@@ -45,42 +42,77 @@ class RecordTest extends \PHPUnit\Framework\TestCase
      */
     protected $testTheme = 'msul';
 
+    /**
+     * Test getStatus not providing a holding record
+     *
+     * @return null
+     */
     public function testGetStatusWithNoHolding()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
         $this->assertEquals('Unknown status ()', $record->getStatus(null, false));
     }
 
+    /**
+     * Test getStatus providing a holding record missing required keys
+     *
+     * @return null
+     */
     public function testGetStatusWithMissingKey()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
         $this->assertEquals('Unknown status ()', $record->getStatus([], false));
     }
 
+    /**
+     * Test getStatus with an available status
+     *
+     * @return null
+     */
     public function testGetStatusAvailable()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
         $this->assertEquals('Available', $record->getStatus(['status' => 'Available'], false));
     }
 
+    /**
+     * Test getStatus with an unavailable status
+     *
+     * @return null
+     */
     public function testGetStatusUnavailable()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
         $this->assertEquals('Unavailable (In process)', $record->getStatus(['status' => 'In process'], false));
     }
 
+    /**
+     * Test getStatus with an restricted status
+     *
+     * @return null
+     */
     public function testGetStatusRestricted()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
         $this->assertEquals('Library Use Only', $record->getStatus(['status' => 'Restricted'], false));
     }
 
+    /**
+     * Test getStatus with an paged status
+     *
+     * @return null
+     */
     public function testGetStatusPaged()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
         $this->assertEquals('Checked Out (Paged)', $record->getStatus(['status' => 'Paged'], false));
     }
 
+    /**
+     * Test getStatus with a reserve flag
+     *
+     * @return null
+     */
     public function testGetStatusReserve()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
@@ -232,27 +264,31 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Get view helpers needed by test.
+     * Get a mock URL helper
      *
-     * @return array
+     * @param string $expectedRoute Route expected by mock helper
+     *
+     * @return \Laminas\View\Helper\Url
      */
-    protected function getViewHelpers()
+    protected function getMockUrl($expectedRoute)
     {
-        $translator = $this->getMockTranslator(
-            [
-                'default' => [
-                    'key1' => 'Translation 1<p>',
-                    'key_html' => '<span>translation</span>',
-                    'key2' => 'Translation 2',
-                ],
-            ]
-        );
-        $translate = new Translate();
-        $translate->setTranslator($translator);
-        return [
-            'translate' => $translate,
-        ];
+        $url = $this->createMock(\Laminas\View\Helper\Url::class);
+        $url->expects($this->once())->method('__invoke')
+            ->with($this->equalTo($expectedRoute))
+            ->will($this->returnValue('http://foo/bar'));
+        return $url;
     }
 
+    /**
+     * Get a mock server URL helper
+     *
+     * @return \Laminas\View\Helper\ServerUrl
+     */
+    protected function getMockServerUrl()
+    {
+        $url = $this->createMock(\Laminas\View\Helper\ServerUrl::class);
+        $url->expects($this->once())->method('__invoke')
+            ->will($this->returnValue('http://server-foo/baz'));
+        return $url;
+    }
 }
-

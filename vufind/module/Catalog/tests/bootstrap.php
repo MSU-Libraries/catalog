@@ -21,15 +21,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * @category VuFind
- * @package  Tests
- * @author   Demian Katz <demian.katz@villanova.edu>
+ * @package  Catalog
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:testing:unit_tests Wiki
  */
 
-define('VUFIND_HOME', getenv('VUFIND_HOME') ?: __DIR__ . '/../../..');
 require __DIR__ . '/bootstrap_constants.php';
-require VUFIND_HOME . '/config/constants.config.php';
+require getenv('VUFIND_HOME') . '/config/constants.config.php';
 
 chdir(APPLICATION_PATH);
 
@@ -41,10 +40,10 @@ if (file_exists('vendor/autoload.php')) {
     $loader->add('VuFindTest', __DIR__ . '/unit-tests/src');
     $loader->add('VuFindTest', __DIR__ . '/../src');
     // Dynamically discover all module src directories:
-    $modules = opendir(VUFIND_HOME . '/module');
+    $modules = opendir(getenv('VUFIND_HOME') . '/module');
     while ($mod = readdir($modules)) {
         $mod = trim($mod, '.'); // ignore . and ..
-        $dir = empty($mod) ? false : realpath(VUFIND_HOME . "/module/{$mod}/src");
+        $dir = empty($mod) ? false : realpath(getenv('VUFIND_HOME') . "/module/{$mod}/src");
         if (!empty($dir) && is_dir($dir . '/' . $mod)) {
             $loader->add($mod, $dir);
         }

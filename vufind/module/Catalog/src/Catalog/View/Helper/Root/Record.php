@@ -189,15 +189,20 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
     /**
      * Determine the holding status
      *
-     * @param array $holding the holding data
+     * @param array $holding   the holding data
+     * @param bool  $translate if the transEsc function should
+     *              be used on the status values
      *
      * @return string
      */
     public function getStatus($holding, $translate = true)
     {
         $transEsc = null;
-        if ($translate === true) $transEsc = $this->getView()->plugin('transEsc');
-        else $translate = false;
+        if ($translate === true) {
+            $transEsc = $this->getView()->plugin('transEsc');
+        } else {
+            $translate = false;
+        }
 
         $status = $holding['status'] ?? '';
         if (
@@ -205,13 +210,16 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
             'Unknown', 'Withdrawn'])
         ) {
-            $status = ($translate ? $transEsc('Unavailable') : 'Unavailable') . ' (' . ($translate ? $transEsc($status) : $status) . ')';
+            $status = ($translate ? $transEsc('Unavailable') : 'Unavailable') .
+                      ' (' . ($translate ? $transEsc($status) : $status) . ')';
         } elseif (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged'])) {
-            $status = ($translate ? $transEsc('Checked Out') : 'Checked Out') . ' (' . ($translate ? $transEsc($status) : $status) . ')';
+            $status = ($translate ? $transEsc('Checked Out') : 'Checked Out') .
+                      ' (' . ($translate ? $transEsc($status) : $status) . ')';
         } elseif ($status == 'Restricted') {
             $status = $translate ? $transEsc('Library Use Only') : 'Library Use Only';
         } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
-            $status = ($translate ? $transEsc('Unknown status') : 'Unknown status') . ' (' . ($translate ? $transEsc($status) : $status) . ')';
+            $status = ($translate ? $transEsc('Unknown status') : 'Unknown status') .
+                      ' (' . ($translate ? $transEsc($status) : $status) . ')';
         }
         if ($holding['reserve'] ?? '' === 'Y') {
             $status = 'On Reserve';

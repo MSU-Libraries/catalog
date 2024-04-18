@@ -51,7 +51,6 @@ trait FixtureTrait
      */
     protected function getFixtureDir($module = 'VuFind')
     {
-        #return __DIR__ . '/../../../../' . $module . '/tests/fixtures/';
         return '/usr/local/vufind/module/' . $module . '/tests/fixtures/';
     }
 
