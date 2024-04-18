@@ -289,7 +289,7 @@ Remove Environment:
     - msul-shared
   retry: 2
   interruptible: true
-  timeout: 5m
+  timeout: 60m
   variables:
     ENCODED_PRIVATE_KEY: $DEPLOY_PRIVATE_KEY
     SERVER: $DEPLOY_HOST_A
