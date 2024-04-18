@@ -293,6 +293,7 @@ Remove Environment:
   variables:
     ENCODED_PRIVATE_KEY: $DEPLOY_PRIVATE_KEY
     SERVER: $DEPLOY_HOST_A
+    RUNNER_SCRIPT_TIMEOUT: 20m # Prevent job timeout when deploy script takes longer than the 5m default
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
