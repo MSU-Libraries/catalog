@@ -35,6 +35,7 @@ use Laminas\View\Renderer\RendererInterface;
 use VuFind\Exception\ILS as ILSException;
 use VuFind\ILS\Connection;
 use VuFind\Session\Settings as SessionSettings;
+use VuFindSearch\Backend\EDS\Backend;
 use VuFindSearch\Query\Query as Query;
 
 use function is_array;
@@ -160,6 +161,10 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
             $resp = $this->epf->search(new Query($title), 0, 3);
 
             // Parse the publisher data to get the names
+            if (!isset($resp->getRecords()[0])) {
+                $this->logWarning('No FullTextHoldings XML element for ' . $title);
+                return $publishers;
+            }
             $fullTextHoldings = $resp->getRecords()[0]->getFullTextHoldings();
             foreach ($fullTextHoldings as $fullTextHolding) {
                 if (!empty($fullTextHolding['Name'] ?? '')) {
