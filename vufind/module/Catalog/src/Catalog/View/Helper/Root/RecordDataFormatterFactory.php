@@ -37,7 +37,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
     {
         $spec = new SpecBuilder(parent::getDefaultCoreSpecs());
 
-        $spec->setLine('Physical Description', null);
+        $spec->setLine('Physical Description', 'getPhysical');
 
         $spec->setTemplateLine(
             'Uniform Title',
@@ -63,18 +63,18 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         );
         $spec->setLine('Cartographic Data', 'getCartographicData');
         $spec->setLine('Platform', 'getPlatform');
-        $spec->setTemplateLine('Translated From', 'getTranslatedFrom', 'data-notes.phtml');
+        $spec->setTemplateLine('Language of the Original', 'getLanguageOriginal', 'data-notes.phtml');
         $spec->setTemplateLine('Language and/or Writing System', 'getLanguageNotes', 'data-notes.phtml');
         $spec->setTemplateLine('Local Note', 'getLocalNotes', 'data-notes.phtml');
         $spec->setTemplateLine('Binding Information', 'getBindingNotes', 'data-notes.phtml');
         $spec->setTemplateLine('Dissertation Note', 'getDissertationNotes', 'data-notes.phtml');
 
         $spec->reorderKeys(['Uniform Title', 'Published in', 'New Title', 'Previous Title',
-                'Authors', 'Language', 'Translated From', 'Language and/or Writing System',
+                'Authors', 'Language', 'Language of the Original', 'Language and/or Writing System',
                 'Published', 'Edition', 'Series',
                 'Subjects', 'Genre', 'child_records', 'Online Access',
                 'Ownership and Custodial History', 'Local Note', 'Dissertation Note',
-                'Binding Information', 'Tags', 'Variant Title']);
+                'Binding Information', 'Physical Description', 'Tags', 'Variant Title']);
 
         return $spec->getArray();
     }
@@ -97,6 +97,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         $spec->setLine('Access', null);
         $spec->setLine('Bibliography', null);
         $spec->setLine('Audience', null);
+        $spec->setLine('Finding Aid', null);
 
         $spec->setTemplateLine('Summary', 'getSummaryNotes', 'data-notes.phtml');
         $spec->setTemplateLine('Review', 'getReviewNotes', 'data-notes.phtml');

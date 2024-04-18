@@ -5,3 +5,4 @@ compiled.css
 vufind/themes/msul/css/less/
 ._*
 .idea/
+.phpunit.result.cache

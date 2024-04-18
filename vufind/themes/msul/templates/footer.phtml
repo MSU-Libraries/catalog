@@ -6,7 +6,7 @@
         <ul>
           <li><a href="<?=$this->url('search-history')?>"><?=$this->transEsc('Search History')?></a></li>
           <li><a href="<?=$this->url('search-advanced')?>"><?=$this->transEsc('Advanced Search')?></a></li>
-          <li><a href="https://eds.lib.msu.edu"><?=$this->transEsc('EDS catalog interface')?><?= $this->icon('fa-external-link', 'fa-external-link') ?></a></li>
+          <li><a href="https://eds.lib.msu.edu" target="_blank"><?=$this->transEsc('EDS catalog interface')?><?= $this->icon('fa-external-link', 'fa-external-link') ?></a></li>
         </ul>
       <?=$this->slot('footer-left')->end(); ?>
     </div>
@@ -26,8 +26,9 @@
       <?php $this->slot('footer-right')->start(); ?>
         <h2><?=$this->transEsc('footer_header_need_help')?></h2>
         <ul>
+          <li><a href="https://lib.msu.edu/callnumbers" target="_blank">Call Number Locations<?= $this->icon('fa-external-link', 'fa-external-link') ?></a></li>
           <li><a href="<?=$this->url('help-home')?>?topic=search&amp;_=<?=time() ?>" data-lightbox class="help-link"><?=$this->transEsc('Search Tips')?></a></li>
-          <li><a href="https://lib.msu.edu/contact/askalib/">Ask a Librarian<?= $this->icon('fa-external-link', 'fa-external-link') ?></a></li>
+          <li><a href="https://lib.msu.edu/contact/askalib/" target="_blank">Ask a Librarian<?= $this->icon('fa-external-link', 'fa-external-link') ?></a></li>
           <li><a href="<?=$this->url('help-home')?>?topic=z3950" data-lightbox><?=$this->transEsc('Z39.50 Access')?></a></li>
 <!--         <li><a href="<?=$this->url('content-page', ['page' => 'faq']) ?>"><?=$this->transEsc('FAQs')?></a></li> -->
           <?php if ($this->cookieConsent()->isEnabled()): ?>

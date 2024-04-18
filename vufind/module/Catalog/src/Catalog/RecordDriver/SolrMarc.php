@@ -1164,9 +1164,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      *
      * @return array Content from Solr
      */
-    public function getTranslatedFrom()
+    public function getLanguageOriginal()
     {
-        return $this->getSolrField('translated_from_str_mv');
+        return $this->getSolrField('language_original_str_mv');
     }
 
     /**

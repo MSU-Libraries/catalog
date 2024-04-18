@@ -50,6 +50,9 @@
   font-size: 23px;
   font-weight: normal;
 }
+.text-decoration-none {
+  text-decoration:none;
+}
 
 
 //Focus indicators
@@ -738,8 +741,11 @@ form.searchForm, .record-tabs, .navbar-form {
     margin-bottom:1rem;
   }
 }
-
-
+//align advanced searchbox left
+.mainbody.right .searchbox .navbar-form {
+  padding-left:0;
+  
+}
 
 
 .record-tabs {
@@ -840,11 +846,9 @@ table tr {
     }
     & :not(:first-child) {
       font-size:14px;
-      line-height:1.6rem;
+      line-height:1.8rem;
    }
-    & > * {
-    margin-bottom:0.2rem;
-    }
+
     .result-formats span {
       font-size:12px;
       line-height:1rem;
@@ -913,7 +917,7 @@ table tr {
 .result-body {
   /* Get this button on the search results page */
   .placehold {
-    padding: .2rem .5rem 0.2rem .5rem;
+    padding: 0 .5rem 0 .5rem;
     font-size: 75%;
     font-weight: 700;
     margin-left: 0;
@@ -925,6 +929,9 @@ table tr {
   /* Hide status tag, as we're using the Get-this button instead */
   .status {
     display: none;
+  }
+  h2 {
+    margin-bottom:0.2rem;
   }
   h2 a {
     color: @msugreen;
@@ -1370,13 +1377,6 @@ body.template-dir-myresearch.template-name-profile {
     display:none;
   }
 }
-//Add left margin to 'edit and start a new searches' for Articles&More
-.template-dir-eds.template-name-search {
-  p.adv_search_links {
-    margin-left:7rem;
-    margin-bottom:1rem;
-  }
-}
 
 // Make See also (.authoritybox) display inline
 
@@ -1388,6 +1388,9 @@ body.template-dir-myresearch.template-name-profile {
 // Remove color background from alert-info on results pages
 
 .template-dir-search.template-name-results, .template-dir-eds.template-name-search, .template-dir-combined.template-name-results {
+  .alert {
+    padding-left:0;
+  }
   .alert-info {
     background:none;
     border:none;
