@@ -193,23 +193,27 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
      *
      * @return string
      */
-    public function getStatus($holding)
+    public function getStatus($holding, $translate = true)
     {
-        $transEsc = $this->getView()->plugin('transEsc');
-        $status = $holding['status'];
+        $transEsc = null;
+        if ($translate === true) $transEsc = $this->getView()->plugin('transEsc');
+        else $translate = false;
+
+        $status = $holding['status'] ?? '';
         if (
             in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
             'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
             'Unknown', 'Withdrawn'])
         ) {
-            $status = $transEsc('Unavailable') . ' (' . $transEsc($status) . ')';
+            $status = ($translate ? $transEsc('Unavailable') : 'Unavailable') . ' (' . ($translate ? $transEsc($status) : $status) . ')';
         } elseif (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged'])) {
-            $status = $transEsc('Checked Out') . ' (' . $transEsc($status) . ')';
+            $status = ($translate ? $transEsc('Checked Out') : 'Checked Out') . ' (' . ($translate ? $transEsc($status) : $status) . ')';
         } elseif ($status == 'Restricted') {
-            $status = $transEsc('Library Use Only');
+            $status = $translate ? $transEsc('Library Use Only') : 'Library Use Only';
         } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
-            $status = $transEsc('Unknown status') . ' (' . $transEsc($status) . ')';
-        } elseif ($holding['reserve'] === 'Y') {
+            $status = ($translate ? $transEsc('Unknown status') : 'Unknown status') . ' (' . ($translate ? $transEsc($status) : $status) . ')';
+        }
+        if ($holding['reserve'] ?? '' === 'Y') {
             $status = 'On Reserve';
         }
         return $status . $this->getStatusSuffix($holding);

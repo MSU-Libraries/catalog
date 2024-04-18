@@ -105,6 +105,9 @@ ln -f -s /mnt/shared/config/BannerNotices.yaml /usr/local/vufind/local/config/vu
 ln -f -s /mnt/shared/config/LocationNotices.yaml /usr/local/vufind/local/config/vufind/LocationNotices.yaml
 ln -f -s /mnt/shared/config/RequestNotices.yaml /usr/local/vufind/local/config/vufind/RequestNotices.yaml
 
+# Update the phing commands to use our module instead of VuFind for tests
+sed -i 's#VuFind/tests#Catalog\/tests#' /usr/local/vufind/build.xml
+
 # Prepare cache cli dir (volume only exists after start)
 clear-vufind-cache
 
