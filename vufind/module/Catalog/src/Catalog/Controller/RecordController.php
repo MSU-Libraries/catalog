@@ -50,9 +50,9 @@ class RecordController extends \VuFind\Controller\RecordController
     /**
      * Redirect the user to the login screen.
      *
-     * @param string $msg Flash message to display on login screen
-     * @param array $extras Associative array of extra fields to store
-     * @param bool $forward True to forward, false to redirect
+     * @param string $msg     Flash message to display on login screen
+     * @param array  $extras  Associative array of extra fields to store
+     * @param bool   $forward True to forward, false to redirect
      *
      * @return mixed
      */
