@@ -47,6 +47,15 @@ class RecordController extends \VuFind\Controller\RecordController
         return $view;
     }
 
+    /**
+     * Redirect the user to the login screen.
+     *
+     * @param string $msg Flash message to display on login screen
+     * @param array $extras Associative array of extra fields to store
+     * @param bool $forward True to forward, false to redirect
+     *
+     * @return mixed
+     */
     public function forceLogin($msg = null, $extras = [], $forward = true)
     {
         // Overriding parent with empty message to prevent error message (PC-972)
