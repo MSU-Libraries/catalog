@@ -111,7 +111,7 @@ class FeedbackEmail extends \VuFind\Form\Handler\Email
             'senderEmail' => $senderEmail,
             'replyToName' => $senderName,
             'replyToEmail' => $senderEmail,
-            'emailSubject' => $publicRecipients[0]['subjectPrefix'] . $emailSubject,
+            'emailSubject' => $emailSubject,
             'emailMessage' => $emailMessage,
             'ccEmail' => null,
         ];
@@ -123,7 +123,7 @@ class FeedbackEmail extends \VuFind\Form\Handler\Email
             'senderEmail' => $senderEmail,
             'replyToName' => $senderName,
             'replyToEmail' => $senderEmail,
-            'emailSubject' => $publicRecipients[0]['subjectPrefix'] . $emailSubject,
+            'emailSubject' => $emailSubject,
             'emailMessage' => $emailMessage,
             'ccEmail' => null,
         ];
