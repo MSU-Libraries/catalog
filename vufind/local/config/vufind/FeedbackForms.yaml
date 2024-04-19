@@ -198,12 +198,6 @@ forms:
           post: feedback_comment_help
         # help: message_help
 
-      - name: libstaff
-        type: checkbox
-        label: Select if you are
-        options:
-          - MSU Libraries Staff
-
   # Example for an acquisition request form
 
   AcquisitionRequest:
@@ -226,7 +220,7 @@ forms:
       - name: receiver
         type: select
         label: acquisition_request_receiver
-        required: true,
+        required: true
         options:
           - Feedback
           - bar
@@ -234,7 +228,7 @@ forms:
       - name: receiver2
         type: select
         label: acquisition_request_receiver
-        required: true,
+        required: true
         optionGroups:
           - label: Library 1
             options:

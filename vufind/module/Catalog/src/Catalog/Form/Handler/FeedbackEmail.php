@@ -100,12 +100,6 @@ class FeedbackEmail extends \VuFind\Form\Handler\Email
         $formFromNameField = $replyToName;
         $formFromEmailField = $replyToEmail;
 
-        // Grab libstaff checkbox (for determining target email)
-        $libstaff = array_filter($fields, function ($val) {
-            return $val['name'] == 'libstaff';
-        });
-        $staffFeedback = !empty(array_shift($libstaff)['value']);
-
         $emails = [];
         // 1st email To: **support**@**libanswers** // Ticketing system
         // 2nd email To: **cdawg**@**msu**
@@ -134,7 +128,7 @@ class FeedbackEmail extends \VuFind\Form\Handler\Email
             'ccEmail' => null,
         ];
         // Copy feedback to user if they are logged in
-        if ($form->copyUserOnEmail() && $formFromEmailField !== null && $user) {
+        if ($form->copyUserOnEmail() && isset($formFromEmailField) && $user) {
             // If the user sending feedback is logged in and provided an email address:
             // Send an independent copy of the feedback to the user:
             // Only that user’s email address will be a recipient;
