@@ -44,9 +44,9 @@ class GetThisLoader
     /**
      * Initializes the loader with the given record and item data
      *
-     * @param object $record  Record driver object
-     * @param object|array $items   array of holding items
-     * @param string $item_id holding record data for the current holding item
+     * @param object       $record Record driver object
+     * @param object|array $items array of holding items
+     * @param string       $item_id holding record data for the current holding item
      */
     public function __construct($record, $items, $item_id = null)
     {
