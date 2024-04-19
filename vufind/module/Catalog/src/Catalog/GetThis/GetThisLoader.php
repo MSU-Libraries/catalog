@@ -144,6 +144,8 @@ class GetThisLoader
      */
     public function getStatus($item_id = null)
     {
+        // NOTE: Make sure this logic matches with getStatus in the Record view helper
+
         $item_id = $this->getItemId($item_id);
         $item = $this->getItem($item_id);
         $status = $item['status'] ?? 'Unknown';
