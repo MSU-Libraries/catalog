@@ -50,7 +50,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusWithNoHolding()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('Unknown status ()', $record->getStatus(null, false));
+        $this->assertEquals('Unavailable (Unknown)', $record->getStatus(null, false));
     }
 
     /**
@@ -61,7 +61,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusWithMissingKey()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('Unknown status ()', $record->getStatus([], false));
+        $this->assertEquals('Unavailable (Unknown)', $record->getStatus([], false));
     }
 
     /**

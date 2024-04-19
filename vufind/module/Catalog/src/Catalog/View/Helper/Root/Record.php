@@ -197,6 +197,8 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
      */
     public function getStatus($holding, $translate = true)
     {
+        // NOTE: Make sure this logic matches with getStatus in the GetThisLoader
+
         $transEsc = null;
         if ($translate === true) {
             $transEsc = $this->getView()->plugin('transEsc');
@@ -204,7 +206,9 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             $translate = false;
         }
 
-        $status = $holding['status'] ?? '';
+        $status = $holding['status'] ?? 'Unknown';
+        $reserve = $holding['reserve'] ?? 'N';
+
         if (
             in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
             'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
@@ -220,8 +224,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
         } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
             $status = ($translate ? $transEsc('Unknown status') : 'Unknown status') .
                       ' (' . ($translate ? $transEsc($status) : $status) . ')';
-        }
-        if ($holding['reserve'] ?? '' === 'Y') {
+        } elseif ($reserve === 'Y') {
             $status = 'On Reserve';
         }
         return $status . $this->getStatusSuffix($holding);
