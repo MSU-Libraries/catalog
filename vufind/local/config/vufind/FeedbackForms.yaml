@@ -168,11 +168,9 @@ forms:
     #  name: Your Library - Site Feedback
     recipient:
       email: "$FEEDBACK_EMAIL"
-      subjectPrefix: "$FEEDBACK_EMAIL_SUBJECT_PREFIX"
     #  name: Your Library
     recipient_public:
       email: "$FEEDBACK_PUBLIC_EMAIL"
-      subjectPrefix: "$FEEDBACK_PUBLIC_EMAIL_SUBJECT_PREFIX"
     # Send a separate copy of feedback to submitting user, if logged in
     recipient_copy_user: true
     # CC the default recipient when sending to public recipient
@@ -198,12 +196,6 @@ forms:
           post: feedback_comment_help
         # help: message_help
 
-      - name: libstaff
-        type: checkbox
-        label: Select if you are
-        options:
-          - MSU Libraries Staff
-
   # Example for an acquisition request form
 
   AcquisitionRequest:
@@ -226,7 +218,7 @@ forms:
       - name: receiver
         type: select
         label: acquisition_request_receiver
-        required: true,
+        required: true
         options:
           - Feedback
           - bar
@@ -234,7 +226,7 @@ forms:
       - name: receiver2
         type: select
         label: acquisition_request_receiver
-        required: true,
+        required: true
         optionGroups:
           - label: Library 1
             options:
