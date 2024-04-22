@@ -51,7 +51,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
 {
     /**
      * Support method for getHolding() -- given a loan type ID return the string name for it
-     ** @param string|null $loanTypeId Loan Type ID (i.e the value of permanentLoanTypeId)
+     * @param string|null $loanTypeId Loan Type ID (i.e the value of permanentLoanTypeId)
      *
      * @return string|null
      * @throws ILSException
@@ -841,30 +841,36 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $packages = json_decode($response->getBody());
         $packageCount = count($packages->data);
         if ($packageCount === 0) {
-            $msg = 'No package for publisher';
-            $this->debug($msg);
-            throw new ILSException($msg);
-            // TODO should we return an empty array instead of an error?
-        } else if ($packageCount > 1) {
+            $this->debug('No package for publisher');
+            return [];
+        } elseif ($packageCount > 1) {
             $this->debug($packageCount . ' packages return for publisher, looking for an exact match');
             for ($i = 0; $i < $packageCount; $i++) {
                 if (isset($packages->data[$i]->attributes->name)
-                    && $packages->data[$i]->attributes->name === $publisherName
-                    && isset($packages->data[$i]->id)) {
-                    $packageId = $packages->data[$i]->id;
-                    $this->debug('Found one at index ' . $i);
-                    break;
+                    && isset($packages->data[$i]->id)
+                ) {
+                    if ($packages->data[$i]->attributes->name === $publisherName) {
+                        $packageId = $packages->data[$i]->id;
+                        $this->debug('Found one at index ' . $i);
+                        break;
+                    } elseif (!isset($tmpPackageId)) {
+                        $tmpPackageId = $packages->data[$i]->id;
+                    }
                 }
             }
-            // TODO if no match found, what to do?
-//            throw new ILSException('Could not identify single package for publisher');
-        } else if (isset($packages->data[0]->id)) {
+            // Assuming it's better to return one of any package than throwing an exception
+            if (!isset($packageId) && isset($tmpPackageId)) {
+                $packageId = $tmpPackageId;
+                $this->warning('Could not identify the correct package among several publishers, ' .
+                    'selected the first found (' . $publisherName . ')');
+            } else {
+                throw new ILSException('Could not identify single package for publisher');
+            }
+        } elseif (isset($packages->data[0]->id)) {
             $packageId = $packages->data[0]->id;
         } else {
-            $msg = 'Unable to get publisher id in package';
-            $this->debug($msg);
+            $this->debug('Unable to get publisher id in package');
             return [];
-//            throw new ILSException($msg); TODO possibility if better than an empty array
         }
         // Get the license agreements if we were able to locate the package ID
         $query = [
