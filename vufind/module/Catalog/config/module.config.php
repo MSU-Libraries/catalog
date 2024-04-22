@@ -4,7 +4,7 @@ return [
   'router' => [
     'routes' => [
       'record-getthis' => [
-        'type' => 'Laminas\\Router\\Http\\Segment',
+        'type' => Laminas\Router\Http\Segment::class,
         'options' => [
           'route' => '/Record/:id/GetThis',
           'defaults' => [
@@ -17,105 +17,90 @@ return [
   ],
   'controllers' => [
     'factories' => [
-      'Catalog\\Controller\\RecordController' => 'VuFind\\Controller\\AbstractBaseWithConfigFactory',
-      'Catalog\\Controller\\MyResearchController' => 'VuFind\\Controller\\AbstractBaseFactory',
+      Catalog\Controller\RecordController::class => VuFind\Controller\AbstractBaseWithConfigFactory::class,
+      Catalog\Controller\MyResearchController::class => VuFind\Controller\AbstractBaseFactory::class,
     ],
     'aliases' => [
       VuFind\Controller\RecordController::class => Catalog\Controller\RecordController::class,
-      'VuFind\\Controller\\MyResearchController' => 'Catalog\\Controller\\MyResearchController',
+      VuFind\Controller\MyResearchController::class => Catalog\Controller\MyResearchController::class,
     ],
   ],
   'vufind' => [
     'plugin_managers' => [
       'ajaxhandler' => [
         'factories' => [
-          'Catalog\\AjaxHandler\\GetItemStatuses' => 'VuFind\\AjaxHandler\\GetItemStatusesFactory',
-          'Catalog\\AjaxHandler\\GetLicenseAgreement' => 'Catalog\\AjaxHandler\\GetLicenseAgreementFactory',
+          Catalog\AjaxHandler\GetItemStatuses::class => VuFind\AjaxHandler\GetItemStatusesFactory::class,
+          Catalog\AjaxHandler\GetLicenseAgreement::class => Catalog\AjaxHandler\GetLicenseAgreementFactory::class,
         ],
         'aliases' => [
-          'getItemStatuses' => 'Catalog\\AjaxHandler\\GetItemStatuses',
-          'getLicenseAgreement' => 'Catalog\\AjaxHandler\\GetLicenseAgreement',
+          'getItemStatuses' => Catalog\AjaxHandler\GetItemStatuses::class,
+          'getLicenseAgreement' => Catalog\AjaxHandler\GetLicenseAgreement::class,
         ],
       ],
       'auth' => [
         'factories' => [
-          'Catalog\\Auth\\SAML' => 'Catalog\\Auth\\SAMLFactory',
-          'Catalog\\Auth\\Okapi' => 'Catalog\\Auth\\OkapiFactory',
+          Catalog\Auth\SAML::class => Catalog\Auth\SAMLFactory::class,
+          Catalog\Auth\Okapi::class => Catalog\Auth\OkapiFactory::class,
         ],
         'aliases' => [
-          'saml' => 'Catalog\\Auth\\SAML',
-          'okapi' => 'Catalog\\Auth\\Okapi',
+          'saml' => Catalog\Auth\SAML::class,
+          'okapi' => Catalog\Auth\Okapi::class,
         ],
       ],
       'command' => [
         'factories' => [
-          'Catalog\\Command\\Util\\IndexReservesCommand' => 'VuFindConsole\\Command\\Util\\AbstractSolrAndIlsCommandFactory',
+          Catalog\Command\Util\IndexReservesCommand::class => VuFindConsole\Command\Util\AbstractSolrAndIlsCommandFactory::class,
         ],
         'aliases' => [
-          'util/index_reserves' => 'Catalog\\Command\\Util\\IndexReservesCommand',
+          'util/index_reserves' => Catalog\Command\Util\IndexReservesCommand::class,
         ],
       ],
       'form_handler' => [
         'factories' => [
-          'Catalog\\Form\\Handler\\FeedbackEmail' => 'VuFind\\Form\\Handler\\EmailFactory',
+          Catalog\Form\Handler\FeedbackEmail::class => VuFind\Form\Handler\EmailFactory::class,
         ],
         'aliases' => [
-          'VuFind\\Form\\Handler\\FeedbackEmail' => 'Catalog\\Form\\Handler\\FeedbackEmail',
-          'FeedbackEmail' => 'Catalog\\Form\\Handler\\FeedbackEmail',
+          'FeedbackEmail' => Catalog\Form\Handler\FeedbackEmail::class,
         ],
       ],
       'ils_driver' => [
         'factories' => [
-          'Catalog\\ILS\\Driver\\Folio' => 'VuFind\\ILS\\Driver\\FolioFactory',
-          'Catalog\\ILS\\Driver\\MultiBackend' => 'VuFind\\ILS\\Driver\\MultiBackendFactory',
+          Catalog\ILS\Driver\Folio::class => VuFind\ILS\Driver\FolioFactory::class,
+          Catalog\ILS\Driver\MultiBackend::class => VuFind\ILS\Driver\MultiBackendFactory::class,
         ],
         'aliases' => [
-          'folio' => 'Catalog\\ILS\\Driver\\Folio',
-          'multibackend' => 'Catalog\\ILS\\Driver\\MultiBackend',
+          'folio' => Catalog\ILS\Driver\Folio::class,
+          'multibackend' => Catalog\ILS\Driver\MultiBackend::class,
         ],
       ],
       'recorddriver' => [
         'factories' => [
-          'Catalog\\RecordDriver\\SolrMarc' => 'VuFind\\RecordDriver\\SolrDefaultFactory',
-          'Catalog\\RecordDriver\\SolrDefault' => 'VuFind\\RecordDriver\\SolrDefaultFactory',
+          Catalog\RecordDriver\SolrMarc::class => VuFind\RecordDriver\SolrDefaultFactory::class,
+          Catalog\RecordDriver\SolrDefault::class => VuFind\RecordDriver\SolrDefaultFactory::class,
         ],
         'aliases' => [
-          'VuFind\\RecordDriver\\SolrMarc' => 'Catalog\\RecordDriver\\SolrMarc',
-          'VuFind\\RecordDriver\\SolrDefault' => 'Catalog\\RecordDriver\\SolrDefault',
+          VuFind\RecordDriver\SolrMarc::class => Catalog\RecordDriver\SolrMarc::class,
+          VuFind\RecordDriver\SolrDefault::class => Catalog\RecordDriver\SolrDefault::class,
         ],
         'delegators' => [
-          'Catalog\\RecordDriver\\SolrMarc' => [
-            0 => 'VuFind\\RecordDriver\\IlsAwareDelegatorFactory',
+          Catalog\RecordDriver\SolrMarc::class => [
+            0 => VuFind\RecordDriver\IlsAwareDelegatorFactory::class,
           ],
-        ],
-      ],
-      'recordtab' => [
-        'factories' => [
-            Catalog\RecordTab\Description::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
-            Catalog\RecordTab\HoldingsILS::class => VuFind\RecordTab\HoldingsILSFactory::class,
-            Catalog\RecordTab\HoldingsWorldCat::class => VuFind\RecordTab\HoldingsWorldCatFactory::class,
-            Catalog\RecordTab\TOC::class => VuFind\RecordTab\TOCFactory::class,
-        ],
-        'aliases' => [
-          VuFind\RecordTab\Description::class => Catalog\RecordTab\Description::class,
-          VuFind\RecordTab\HoldingsILS::class => Catalog\RecordTab\HoldingsILS::class,
-          VuFind\RecordTab\HoldingsWorldCat::class => Catalog\RecordTab\HoldingsWorldCat::class,
-          VuFind\RecordTab\TOC::class => Catalog\RecordTab\TOC::class,
         ],
       ],
       'search_backend' => [
         'factories' => [
-          'EDS' => 'Catalog\\Search\\Factory\\EdsBackendFactory',
+          'EDS' => Catalog\Search\Factory\EdsBackendFactory::class,
         ],
       ],
     ],
   ],
   'service_manager' => [
     'factories' => [
-      'Catalog\\Form\\Form' => 'VuFind\\Form\\FormFactory',
+      Catalog\Form\Form::class => VuFind\Form\FormFactory::class,
     ],
     'aliases' => [
-      'VuFind\\Form\\Form' => 'Catalog\\Form\\Form',
+      VuFind\Form\Form::class => Catalog\Form\Form::class,
     ],
   ],
 ];
