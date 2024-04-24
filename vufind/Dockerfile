@@ -138,7 +138,7 @@ ENV SOLR_URL=$SOLR_URL \
 COPY local/ /usr/local/vufind/local
 COPY themes/msul /usr/local/vufind/themes/msul
 COPY module/Catalog /usr/local/vufind/module/Catalog
-COPY tests/ /usr/local/vufind/tests
+COPY tests/ /tests
 COPY robots.txt /usr/local/vufind/public/robots.txt
 COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
