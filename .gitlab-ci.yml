@@ -3,7 +3,7 @@ stages:
   - Build
   - Deploy
   - Deploy Prod
-  - Deploy Build Envs
+  - Optional Steps
   - Cleanup
   - Release
 
@@ -184,7 +184,7 @@ Deploy Vufind:
 
 Deploy Vufind Build Env:
   extends: .stack_template
-  stage: Deploy Build Envs
+  stage: Optional Steps
   environment:
     name: $CI_COMMIT_BRANCH/deploy-buildenv
     auto_stop_in: 2 weeks
@@ -251,6 +251,7 @@ Populate Vufind Environment:
 
 Populate Course Reserves:
   extends: .stack_template
+  stage: Optional Steps
   environment:
     name: $CI_COMMIT_BRANCH/populate-reserves
     auto_stop_in: 2 weeks
