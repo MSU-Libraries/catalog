@@ -139,6 +139,8 @@ COPY local/ /usr/local/vufind/local
 COPY themes/msul /usr/local/vufind/themes/msul
 COPY module/Catalog /usr/local/vufind/module/Catalog
 COPY tests/ /tests
+# done separately because dotfiles are not matched on mv command
+COPY tests/.eslintrc.js /usr/local/vufind/.eslintrc.js
 COPY robots.txt /usr/local/vufind/public/robots.txt
 COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
@@ -181,7 +183,6 @@ RUN \
     chown -R 1000:1000 /tests && \
     chmod -R 664 /tests && \
     mv /tests/* ${VUFIND_HOME}/tests/ && \
-    mv /tests/.* ${VUFIND_HOME}/tests/ && \
     # TODO Remove this
     ls -l ${VUFIND_HOME}/tests/ && \
     # Install grunt
