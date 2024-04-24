@@ -29,7 +29,9 @@
 
 namespace Catalog\ILS\Driver;
 
+use ArrayIterator;
 use Catalog\Utils\RegexLookup as Regex;
+use Laminas\Http\Header\HeaderInterface;
 use VuFind\Exception\ILS as ILSException;
 
 use function count;
@@ -50,11 +52,12 @@ class Folio extends \VuFind\ILS\Driver\Folio
     /**
      * Support method for getHolding() -- given a loan type ID return the string name for it
      *
-     * @param string $loanTypeId Loan Type ID (i.e the value of permanentLoanTypeId)
+     * @param string|null $loanTypeId Loan Type ID (ie: the value of permanentLoanTypeId)
      *
-     * @return string
+     * @return string|null
+     * @throws ILSException
      */
-    protected function getLoanType(string $loanTypeId = null): string|null
+    protected function getLoanType(string $loanTypeId = null): ?string
     {
         $loanType = null;
 
@@ -261,7 +264,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
 
             // Add any bound items associated with the holding
             $item_ids = array_column($items, 'item_id');
-            foreach ($this->getBoundwithHoldings($holding, $bibId, $instance->id) as $bound_item) {
+            foreach ($this->getBoundwithHoldings($holding, $bibId) as $bound_item) {
                 if (!in_array($bound_item['item_id'], $item_ids)) {
                     array_push($items, $bound_item);
                 }
@@ -282,13 +285,12 @@ class Folio extends \VuFind\ILS\Driver\Folio
     /**
      * Get the bound-with items associated with the instance ID
      *
-     * @param string $bound_holding Holding data to use to populate the item with
+     * @param object $bound_holding Holding data to use to populate the item with
      * @param string $bibId         Bib-level id
-     * @param string $instanceId    Instance-level id
      *
      * @return array An array of associative holding arrays
      */
-    public function getBoundwithHoldings($bound_holding, $bibId, $instanceId)
+    public function getBoundwithHoldings($bound_holding, $bibId)
     {
         $showDueDate = $this->config['Availability']['showDueDate'] ?? true;
         $showTime = $this->config['Availability']['showTime'] ?? false;
@@ -511,7 +513,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
      *
      * @param string $itemId itemId from holdings data
      *
-     * @return associative array of the link data
+     * @return array associative array of the link data
      */
     protected function getElectronicAccessLinks($itemId)
     {
@@ -827,8 +829,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
      */
     public function getLicenseAgreement($publisherName)
     {
-        $licenseAgreements = [];
-
         // Call the package API to get the `id` field
         $query = [
             'q' => '"' . $publisherName . '"',
@@ -840,26 +840,59 @@ class Folio extends \VuFind\ILS\Driver\Folio
         ];
         $response = $this->makeRequest('GET', '/eholdings/packages', $query, $headers);
         $packages = json_decode($response->getBody());
-        if (count($packages->data) != 1) {
-            throw new ILSException('Could not identify single package for publisher');
+        $packageCount = count($packages->data);
+        if ($packageCount === 0) {
+            $this->debug('No package for publisher');
+            return [];
+        } elseif ($packageCount > 1) {
+            $this->debug($packageCount . ' packages return for publisher, looking for an exact match');
+            for ($i = 0; $i < $packageCount; $i++) {
+                if (
+                    isset($packages->data[$i]->attributes->name)
+                    && isset($packages->data[$i]->id)
+                ) {
+                    if ($packages->data[$i]->attributes->name === $publisherName) {
+                        $packageId = $packages->data[$i]->id;
+                        $this->debug('Found one at index ' . $i);
+                        break;
+                    } elseif (!isset($tmpPackageId)) {
+                        $tmpPackageId = $packages->data[$i]->id;
+                    }
+                }
+            }
+            // Assuming it's better to return one of any package than throwing an exception
+            if (!isset($packageId) && isset($tmpPackageId)) {
+                $packageId = $tmpPackageId;
+                $this->warning('Could not identify the correct package among several publishers, ' .
+                    'selected the first found (' . $publisherName . ')');
+            } else {
+                throw new ILSException('Could not identify single package for publisher');
+            }
+        } elseif (isset($packages->data[0]->id)) {
+            $packageId = $packages->data[0]->id;
+        } else {
+            $this->debug('Unable to get publisher id in package');
+            return [];
         }
-        $packageId = $packages->data[0]->id ?? '';
         // Get the license agreements if we were able to locate the package ID
-        if (!empty($packageId)) {
-            $query = [
-                'referenceId' => $packageId,
-            ];
-            $response = $this->makeRequest('GET', '/erm/sas/publicLookup', $query);
-            $licenses = json_decode($response->getBody());
-            $customProperties = $licenses->records[0]?->linkedLicenses[0]?->remoteId_object?->customProperties;
-            $licenseAgreements = [
-                'vendoraccessibilityinfo' => $customProperties?->vendoraccessibilityinfo[0]?->value ?? '',
-                'authorizedusers' => $customProperties?->authorizedusers[0]->value?->label ?? '',
-                'ConcurrentUsers' => $customProperties?->ConcurrentUsers[0]?->value ?? '',
-            ];
-        }
+        $query = [
+            'referenceId' => $packageId,
+        ];
+        $response = $this->makeRequest('GET', '/erm/sas/publicLookup', $query);
+        $licenses = json_decode($response->getBody());
+        $customProperties = $licenses->records[0]?->linkedLicenses[0]?->remoteId_object?->customProperties;
 
-        return $licenseAgreements;
+        $licenseAgreement = [];
+        if (isset($customProperties->vendoraccessibilityinfo[0]->value)) {
+            $licenseAgreement['vendoraccessibilityinfo'] = $customProperties->vendoraccessibilityinfo[0]->value;
+        }
+        if (isset($customProperties->authorizedusers[0]->value->label)) {
+            $licenseAgreement['authorizedusers'] = $customProperties->authorizedusers[0]->value->label;
+        }
+        if (isset($customProperties->ConcurrentUsers[0]->value)) {
+            $licenseAgreement['ConcurrentUsers'] = $customProperties->ConcurrentUsers[0]->value;
+        }
+        return $licenseAgreement;
     }
 
     /**
