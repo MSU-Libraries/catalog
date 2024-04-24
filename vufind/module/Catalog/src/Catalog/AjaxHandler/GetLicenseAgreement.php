@@ -32,11 +32,14 @@ namespace Catalog\AjaxHandler;
 use Laminas\Config\Config;
 use Laminas\Mvc\Controller\Plugin\Params;
 use Laminas\View\Renderer\RendererInterface;
+use VuFind\Config\YamlReader;
 use VuFind\Exception\ILS as ILSException;
 use VuFind\ILS\Connection;
 use VuFind\Session\Settings as SessionSettings;
+use VuFindSearch\Backend\EDS\Backend;
 use VuFindSearch\Query\Query as Query;
 
+use function in_array;
 use function is_array;
 
 /**
@@ -117,6 +120,20 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
     protected $renderer;
 
     /**
+     * Config for record display (ie: concurrent users to hide)
+     *
+     * @var array
+     */
+    protected $recordConfig;
+
+    /**
+     * Concurrent users to hide, fetched from recordConfig
+     *
+     * @var array
+     */
+    private $concurrentUsersToHide;
+
+    /**
      * Constructor
      *
      * @param SessionSettings   $ss       Session settings
@@ -160,6 +177,10 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
             $resp = $this->epf->search(new Query($title), 0, 3);
 
             // Parse the publisher data to get the names
+            if (!isset($resp->getRecords()[0])) {
+                $this->logWarning('No FullTextHoldings XML element for ' . $title);
+                return $publishers;
+            }
             $fullTextHoldings = $resp->getRecords()[0]->getFullTextHoldings();
             foreach ($fullTextHoldings as $fullTextHolding) {
                 if (!empty($fullTextHolding['Name'] ?? '')) {
@@ -184,16 +205,20 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
      *
      * @return array Data from the FOLIO license agreement call
      */
-    protected function getLicenseAgreements($title)
+    protected function getLicenseAgreements(string $title): array
     {
         $licenseAgreements = [];
 
         // Call EDS's Publication Finder API with the title parameter
         $publisherData = $this->getPublishers($title);
+        $arrayToIgnore = $this->getConcurrentUsersToIgnore();
 
         // Call the ILS's getLicenseAgreement method to add in additional data
         foreach ($publisherData as $pubRecord) {
             $record = $this->ils->getLicenseAgreement($pubRecord['publisher']);
+            if (isset($record['ConcurrentUsers']) && in_array($record['ConcurrentUsers'], $arrayToIgnore)) {
+                unset($record['ConcurrentUsers']);
+            }
             $record['publisher'] = $pubRecord['publisher'];
             $record['resource_url'] = $pubRecord['resource_url'];
             $licenseAgreements[] = $record;
@@ -260,5 +285,33 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
         }
 
         return $this->formatResponse(compact('results'));
+    }
+
+    /**
+     * Return recordConfig property and load it if not loaded
+     *
+     * @return array
+     */
+    protected function getRecordConfig(): array
+    {
+        if (!isset($this->recordConfig)) {
+            $yamlReader = new YamlReader();
+            $this->recordConfig = $yamlReader->get('record.yaml') ?? [];
+        }
+        return $this->recordConfig;
+    }
+
+    /**
+     * Return concurrentUsersToHide property and load it if not loaded
+     *
+     * @return array
+     */
+    protected function getConcurrentUsersToIgnore(): array
+    {
+        if (!isset($this->concurrentUsersToHide)) {
+            $this->concurrentUsersToHide =
+                $this->getRecordConfig()['licenseAgreement']['concurrent_users_to_hide'] ?? [];
+        }
+        return $this->concurrentUsersToHide;
     }
 }
