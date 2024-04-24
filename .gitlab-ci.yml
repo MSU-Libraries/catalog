@@ -255,6 +255,8 @@ Populate Course Reserves:
   environment:
     name: $CI_COMMIT_BRANCH/populate-reserves
     auto_stop_in: 2 weeks
+  variables:
+    RUNNER_SCRIPT_TIMEOUT: 90m
   timeout: 90m
   rules:
     - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'

@@ -43,10 +43,23 @@ main() {
         exit 1;
     fi
 
+    # Change to using file sessions
+    if ! OUTPUT=$(ssh deploy@"${FOUND_HOST}" "docker exec ${CONTAINER} sed -i 's/type\s*=\s*Database/type=File/' /usr/local/vufind/local/config/vufind/config.ini"); then
+        echo "ERROR: Could not enable file-based sessions. ${OUTPUT}";
+        exit 1;
+    fi
+
     # Run the index reserve command on the container
     # Note: not running as part of if-statement so that we can see the progress as the command runs
     ssh deploy@"${FOUND_HOST}" "docker exec ${CONTAINER} php public/index.php util/index_reserves -vvv";
     EXIT_CODE=$?;
+
+    # Change to using db sessions; regardless of exit code
+    if ! OUTPUT=$(ssh deploy@"${FOUND_HOST}" "docker exec ${CONTAINER} sed -i 's/type\s*=\s*File/type=Database/' /usr/local/vufind/local/config/vufind/config.ini"); then
+        echo "ERROR: Could not re-enable database-based sessions. ${OUTPUT}";
+    fi
+
+    # Check if reserves successfully ran
     if [[ "${EXIT_CODE}" -ne "0" ]]; then
         echo "ERROR: Failed to index course reserves. Exit code: ${EXIT_CODE}";
         exit 1;
