@@ -180,8 +180,7 @@ RUN \
     # Set permissions on tests dir
     chown -R 1000:1000 /tests && \
     chmod -R 664 /tests && \
-    shopt -s dotglob && \
-    mv /tests/* ${VUFIND_HOME}/tests/ && \
+    mv /tests/{.,}* ${VUFIND_HOME}/tests/ && \
     # TODO Remove this
     ls -l ${VUFIND_HOME}/tests/ && \
     # Install grunt
