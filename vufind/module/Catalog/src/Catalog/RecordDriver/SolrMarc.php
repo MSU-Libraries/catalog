@@ -980,12 +980,12 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the uniform title
      *
-     * @param $field name of the field to search in
-     * @param $codes list of subfield codes to capture
+     * @param $field mixed name of the field to search in
+     * @param $codes mixed list of subfield codes to capture
      *
      * @return array Content from Solr
      */
-    public function getUniformTitleFromMarc($field, $codes)
+    public function getUniformTitleFromMarc($field, $codes): array
     {
         $vals = [];
         $marc = $this->getMarcReader();
@@ -1010,7 +1010,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Sierra bib number
      *
-     * @return array Content from Solr
+     * @return null|string Content from Solr
      */
     public function getSierraBN()
     {
@@ -1055,7 +1055,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the first location
      *
-     * @return array Content from Solr
+     * @return string Content from Solr
      */
     public function getLocation()
     {
@@ -1273,5 +1273,75 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             ];
         }
         return $titles;
+    }
+
+    /**
+     * Modification of the original function in MarcAdvancedTrait.php to display subjects in same order ad marc records
+     * Get all subject headings associated with this record. Each heading is
+     * returned as an array of chunks, increasing from least specific to most
+     * specific.
+     *
+     * @param bool $extended Whether to return a keyed array with the following
+     * keys:
+     * - heading: the actual subject heading chunks
+     * - type: heading type
+     * - source: source vocabulary
+     *
+     * @return array
+     */
+    public function getAllSubjectHeadings($extended = false)
+    {
+        // This is all the collected data:
+        $retval = [];
+
+        /* START MSU */
+        /* This modification replaces the two foreach from the trait */
+        $allFields = $this->getMarcReader()->getAllFields();
+        $subjectFieldsKeys = array_keys($this->subjectFields);
+        // Go through all the fields and handle them if they are part of what we want
+        foreach ($allFields as $result) {
+            if (isset($result['tag']) && in_array($result['tag'], $subjectFieldsKeys)) {
+                $fieldType = $this->subjectFields[$result['tag']];
+                /* END MSU */
+
+                // Start an array for holding the chunks of the current heading:
+                $current = [];
+
+                // Get all the chunks and collect them together:
+                foreach ($result['subfields'] as $subfield) {
+                    // Numeric subfields are for control purposes and should not
+                    // be displayed:
+                    if (!is_numeric($subfield['code'])) {
+                        $current[] = $subfield['data'];
+                    }
+                }
+                // If we found at least one chunk, add a heading to our result:
+                if (!empty($current)) {
+                    if ($extended) {
+                        $sourceIndicator = $result['i2'];
+                        $source = '';
+                        if (isset($this->subjectSources[$sourceIndicator])) {
+                            $source = $this->subjectSources[$sourceIndicator] ?? '';
+                        } else {
+                            $source = $this->getSubfield($result, '2');
+                        }
+                        $retval[] = [
+                            'heading' => $current,
+                            'type' => $fieldType,
+                            'source' => $source,
+                            'id' => $this->getSubfield($result, '0'),
+                        ];
+                    } else {
+                        $retval[] = $current;
+                    }
+                }
+            }
+        }
+
+        // Remove duplicates and then send back everything we collected:
+        return array_map(
+            'unserialize',
+            array_unique(array_map('serialize', $retval))
+        );
     }
 }
