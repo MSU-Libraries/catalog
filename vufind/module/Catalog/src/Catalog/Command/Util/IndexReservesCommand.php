@@ -32,8 +32,11 @@ namespace Catalog\Command\Util;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use VuFindSearch\Backend\Solr\Document\UpdateDocument;
+use VuFindSearch\Backend\Solr\Record\SerializableRecord;
 
 use function count;
+use function in_array;
 use function ini_get;
 
 /**
@@ -67,6 +70,66 @@ class IndexReservesCommand extends \VuFindConsole\Command\Util\IndexReservesComm
      * @var string
      */
     protected $defaultTemplate = 'BIB_ID,COURSE,INSTRUCTOR,DEPARTMENT';
+
+    /**
+     * Build the reserves index from date returned by the ILS driver,
+     * specifically: getInstructors, getDepartments, getCourses, findReserves
+     *
+     * @param array $instructors Array of instructors $instructor_id => $instructor
+     * @param array $courses     Array of courses     $course_id => $course
+     * @param array $departments Array of department  $dept_id => $department
+     * @param array $reserves    Array of reserves records from driver's
+     * findReserves.
+     *
+     * @return UpdateDocument
+     */
+    protected function buildReservesIndex(
+        $instructors,
+        $courses,
+        $departments,
+        $reserves
+    ) {
+        $index = [];
+        foreach ($reserves as $record) {
+            $requiredKeysFound
+                = count(array_intersect(array_keys($record), $this->requiredKeys));
+            if ($requiredKeysFound < count($this->requiredKeys)) {
+                throw new \Exception(
+                    implode(' and/or ', $this->requiredKeys) . ' fields ' .
+                    'not present in reserve records. Please update ILS driver.'
+                );
+            }
+            $instructorId = $record['INSTRUCTOR_ID'];
+            $courseId = $record['COURSE_ID'];
+            $departmentId = $record['DEPARTMENT_ID'];
+            $id = $courseId . '|' . $instructorId . '|' . $departmentId;
+
+            // MSUL customization PC-863 to add default instructor value
+            if (!isset($index[$id])) {
+                $index[$id] = [
+                    'id' => $id,
+                    'bib_id' => [],
+                    'instructor_id' => $instructorId,
+                    'instructor' => $instructors[$instructorId] ?? 'No Instructor Listed',
+                    'course_id' => $courseId,
+                    'course' => $courses[$courseId] ?? '',
+                    'department_id' => $departmentId,
+                    'department' => $departments[$departmentId] ?? '',
+                ];
+            }
+            if (!in_array($record['BIB_ID'], $index[$id]['bib_id'])) {
+                $index[$id]['bib_id'][] = $record['BIB_ID'];
+            }
+        }
+
+        $updates = new UpdateDocument();
+        foreach ($index as $id => $data) {
+            if (!empty($data['bib_id'])) {
+                $updates->addRecord(new SerializableRecord($data));
+            }
+        }
+        return $updates;
+    }
 
     /**
      * Run the command.

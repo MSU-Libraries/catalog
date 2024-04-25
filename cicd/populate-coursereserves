@@ -1,0 +1,72 @@
+#!/bin/bash
+
+# shellcheck disable=SC1091,SC2029
+
+source "${CI_PROJECT_DIR}"/cicd/before-script
+
+runhelp() {
+    echo ""
+    echo "Purpose: Run the index_reserves command to populate course reserve data"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - STACK_NAME: Name of the stack"
+    echo "  - DEPLOY_HOST_A: The first host in the cluster"
+    echo "  - DEPLOY_HOST_B: The second host in the cluster"
+    echo "  - DEPLOY_HOST_C: The third host in the cluster"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - The catalog container is not online on any node"
+    echo "  - The index scripts fail for any reason"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+main() {
+    # Find the catalog container
+    HOSTS="$DEPLOY_HOST_A $DEPLOY_HOST_B $DEPLOY_HOST_C";
+    FOUND_HOST="";
+    for HOST in ${HOSTS}; do
+        CONTAINER=$(ssh deploy@"${HOST}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo ""; 
+        if [[ -n "${CONTAINER}" ]]; then
+            FOUND_HOST="${HOST}";
+            break;
+        fi
+    done
+    
+    # Fail if we didn't find a running container
+    if [[ -z "${CONTAINER}" ]]; then
+        echo "ERROR: Could not find a running container on any host for the service: ${STACK_NAME}-catalog_catalog";
+        exit 1;
+    fi
+
+    # Change to using file sessions
+    if ! OUTPUT=$(ssh deploy@"${FOUND_HOST}" "docker exec ${CONTAINER} sed -i 's/type\s*=\s*Database/type=File/' /usr/local/vufind/local/config/vufind/config.ini"); then
+        echo "ERROR: Could not enable file-based sessions. ${OUTPUT}";
+        exit 1;
+    fi
+
+    # Run the index reserve command on the container
+    # Note: not running as part of if-statement so that we can see the progress as the command runs
+    ssh deploy@"${FOUND_HOST}" "docker exec ${CONTAINER} php public/index.php util/index_reserves -vvv";
+    EXIT_CODE=$?;
+
+    # Change to using db sessions; regardless of exit code
+    if ! OUTPUT=$(ssh deploy@"${FOUND_HOST}" "docker exec ${CONTAINER} sed -i 's/type\s*=\s*File/type=Database/' /usr/local/vufind/local/config/vufind/config.ini"); then
+        echo "ERROR: Could not re-enable database-based sessions. ${OUTPUT}";
+    fi
+
+    # Check if reserves successfully ran
+    if [[ "${EXIT_CODE}" -ne "0" ]]; then
+        echo "ERROR: Failed to index course reserves. Exit code: ${EXIT_CODE}";
+        exit 1;
+    fi
+}
+
+beforescript
+# set xtrace to show commands being run in the CI job logs
+set -o xtrace
+main

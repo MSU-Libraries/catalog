@@ -3,7 +3,7 @@ stages:
   - Build
   - Deploy
   - Deploy Prod
-  - Deploy Build Envs
+  - Optional Steps
   - Cleanup
   - Release
 
@@ -184,7 +184,7 @@ Deploy Vufind:
 
 Deploy Vufind Build Env:
   extends: .stack_template
-  stage: Deploy Build Envs
+  stage: Optional Steps
   environment:
     name: $CI_COMMIT_BRANCH/deploy-buildenv
     auto_stop_in: 2 weeks
@@ -248,6 +248,25 @@ Populate Vufind Environment:
     - Deploy Vufind
   script:
     - bash ./cicd/populate-vufind-environment
+
+Populate Course Reserves:
+  extends: .stack_template
+  stage: Optional Steps
+  environment:
+    name: $CI_COMMIT_BRANCH/populate-reserves
+    auto_stop_in: 2 weeks
+  variables:
+    RUNNER_SCRIPT_TIMEOUT: 90m
+  timeout: 90m
+  rules:
+    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
+      when: manual
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Deploy Vufind
+  script:
+    - bash ./cicd/populate-coursereserves
 
 Run Functional Tests:
   extends: .stack_template
