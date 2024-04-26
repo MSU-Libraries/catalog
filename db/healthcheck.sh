@@ -12,6 +12,12 @@ galera_node_query() {
     return $ROW_CNT
 }
 
+# Check if a sync is in progress, and always return healthy
+if [[ -f "/bitnami/mariadb/data/sst_in_progress" ]]; then
+    echo "Sync in progress"
+    exit 0
+fi
+
 if ! mysqladmin -u root -p"$MARIADB_ROOT_PASSWORD" ping; then
     echo "Failed mysqladmin ping."
     exit 1
@@ -34,8 +40,8 @@ if [[ "${ROW_0[2]}" != "primary" ]]; then
     echo "Node not part of primary cluster."
     exit 1
 fi
-if [[ "${ROW_0[1]}" != "synced" ]]; then
-    echo "Node status not synced."
+if [[ "${ROW_0[1]}" != "synced" && "${ROW_0[1]}" != "donor" ]]; then
+    echo "Node status not synced/donor. ${ROW_0[1]}"
     exit 1
 fi
 
