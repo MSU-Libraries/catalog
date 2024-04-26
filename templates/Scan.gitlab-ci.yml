@@ -31,9 +31,6 @@ Shellcheck CI:
 
 Shellcheck:
   stage: test
-  environment:
-    name: $CI_COMMIT_BRANCH/shellcheck
-    auto_stop_in: 2 weeks
   image: alpine:latest
   timeout: 5m
   tags:
@@ -51,9 +48,6 @@ Shellcheck:
 
 Validate Vufind Build:
   stage: test
-  environment:
-    name: $CI_COMMIT_BRANCH/validate-vufind
-    auto_stop_in: 2 weeks
   variables:
     LATEST: $CI_REGISTRY_IMAGE/vufind:latest
   tags:
