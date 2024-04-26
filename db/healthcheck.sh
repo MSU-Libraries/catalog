@@ -40,7 +40,7 @@ if [[ "${ROW_0[2]}" != "primary" ]]; then
     echo "Node not part of primary cluster."
     exit 1
 fi
-if [[ "${ROW_0[1]}" != "synced" || "${ROW_0[1]}" != "donor" ]]; then
+if [[ "${ROW_0[1]}" != "synced" && "${ROW_0[1]}" != "donor" ]]; then
     echo "Node status not synced/donor. ${ROW_0[1]}"
     exit 1
 fi
