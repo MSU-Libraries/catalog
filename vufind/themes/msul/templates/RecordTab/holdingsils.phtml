@@ -58,7 +58,11 @@
 <?php if (!empty($urls) || $openUrlActive || $doiActive): ?>
   <h2><?=$this->transEsc('Internet')?></h2>
   <?php if (!empty($urls)): ?>
-    <?php foreach ($urls as $current): ?>
+    <?php
+        foreach ($urls as $current):
+          $current['url'] ??= null;
+          $current['desc'] ??= '';
+    ?>
         <a href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url']))?>"><?=$this->escapeHtml($current['desc'])?></a><br>
     <?php endforeach; ?>
   <?php endif; ?>
