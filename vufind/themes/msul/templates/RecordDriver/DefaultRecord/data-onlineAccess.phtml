@@ -9,7 +9,7 @@
 <?php foreach ($urls as $current): ?>
 <?php // MSUL customization to add div required for PC-606 ?>
 <div class='msul-online-access'>
-  <a href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url']))?>"><?=$this->escapeHtml($current['desc'])?></a><br>
+  <a href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url'] ?? ""))?>"><?=$this->escapeHtml($current['desc'] ?? "")?></a><br>
 </div>
 <?php endforeach; ?>
 <?php if ($openUrlActive): ?>

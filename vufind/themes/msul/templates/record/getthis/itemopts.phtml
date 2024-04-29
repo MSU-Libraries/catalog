@@ -5,7 +5,8 @@ $items = $this->getthis->items;
 
 function getDisplay($view, $item)
 {
-    return $view->getthis->getLocation($item['item_id'] ?? null) . ': ' . $view->getthis->getCallNumber($item['item_id'] ?? null);
+    $item['item_id'] ??= null;
+    return $view->getthis->getLocation($item['item_id']) . ': ' . $view->getthis->getCallNumber($item['item_id']);
 }
 ?>
 
@@ -15,9 +16,11 @@ function getDisplay($view, $item)
         <li><a href="#" aria-expanded="false"><?= getDisplay($this, $sel_item) ?></a>
         <div tabindex="-1">
             <ul class="dropdown">
-                <?php foreach ($items as $item) {
-                    $item_class = ($sel_item['item_id'] ?? null == $item['item_id'])
-                        ? 'current' : '';
+                <?php
+                $sel_item['item_id'] ??= -1;
+                foreach ($items as $item) {
+                    $item['item_id'] ??= null;
+                    $item_class = $sel_item['item_id'] == $item['item_id'] ? 'current' : '';
                     ?><li>
                         <a href="<?= $this->url(
                         'record-getthis',
