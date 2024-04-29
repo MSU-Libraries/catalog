@@ -98,7 +98,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
         $label = null;
 
         // Add prefix to bookplate URLs
-        if (str_contains($link['url'], 'bookplate')) {
+        if (isset($link['url']) && str_contains($link['url'], 'bookplate')) {
             $link['desc'] = 'Book Plate: ' . $link['desc'];
         }
 
@@ -113,11 +113,11 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             }
             // Must have one of the regex patterns, otherwise false
             $found = ($mat['desc'] ?? null) || ($mat['url'] ?? null);
-            if ($mat['desc'] ?? null) {
+            if (isset($mat['desc'])) {
                 $found &= preg_match($mat['desc'], $link['desc']);
             }
-            if ($mat['url'] ?? null) {
-                $found &= preg_match($mat['url'], $link['url']);
+            if (isset($mat['url'])) {
+                $found &= preg_match($mat['url'], $link['url'] ?? null);
             }
             if ($found) {
                 $label = $mat['label'];
