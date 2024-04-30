@@ -232,8 +232,9 @@ function uncheckChildrenIfParentChecked(parentItem) {
  * @param item
  */
 function uncheckChildrenIfParentCheckedRoutine(item) {
-  while (item.length > 0) {
-    uncheckChildrenIfParentChecked(item);
+  let tmp = item;
+  while (tmp.length > 0) {
+    tmp = uncheckChildrenIfParentChecked(tmp);
   }
 }
 
