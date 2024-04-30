@@ -233,7 +233,7 @@ function uncheckChildrenIfParentChecked(parentItem) {
  */
 function uncheckChildrenIfParentCheckedRoutine(item) {
   while (item.length > 0) {
-    uncheckChildrenIfParentChecked(item);
+    item = uncheckChildrenIfParentChecked(item);
   }
 }
 
