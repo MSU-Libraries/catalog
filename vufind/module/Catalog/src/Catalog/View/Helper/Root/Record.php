@@ -358,4 +358,50 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             }
         }
     }
+
+    public function getLocation($index = 0)
+    {
+        if(!isset($this->driver)) {
+            $this->logError('The \'driver\' is not set in getLocation for index ' . $index);
+            return '';
+        }
+        $locations = $this->driver->getLocations();
+        return $locations[$index] ?? '';
+    }
+
+    /**
+     * Remove duplicate info from a pair of location strings, returning the concatenated
+     * result after deduplication of data at the beginning of those strings. The
+     * concatenation delimiter is a hyphen surrounded by spaces (` - `).
+     *
+     * @param string $location1 The first location, which will always be returned.
+     * @param string $location2 The location from which to remove duplicated data
+                                before appending to the first location.
+     * @return string           The combined locations with duplicate data removed.
+     */
+    public static function deduplicateLocationStrings($location1, $location2)
+    {
+        $normalize = function($loc) {
+            return strtolower(str_replace(" ", "", $loc));
+        };
+
+        $find_first_char_diff = function($loc1, $loc2) use ($normalize) {
+            $space_char_idxs = array_keys(array_filter(
+                mb_str_split($loc1),
+                function($v) { return $v == " "; })
+            );
+            $first_char_diff = strspn($normalize($loc1) ^ $normalize($loc2), "\0");
+            $spaces_before_diff = array_filter($space_char_idxs,
+                function($v) use ($first_char_diff) { return $v <= $first_char_diff; }
+            );
+
+            return $first_char_diff + count($spaces_before_diff);
+        };
+
+        $char_diff_index = $find_first_char_diff($location1, $location2);
+        if ($char_diff_index > 2) {
+            $location2 = ltrim(mb_substr($location2, $char_diff_index), " -");
+        }
+        return $location1 . (empty($location2) ? "" : " - {$location2}");
+    }
 }

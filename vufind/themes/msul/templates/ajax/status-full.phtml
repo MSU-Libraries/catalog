@@ -3,19 +3,41 @@ use Catalog\GetThis\GetThisLoader;
 
 $selected = '';
 $record = $this->record($this->driver);
+    /*
+  $record is Record Helper but with driver nulls
+    we can also have GetThisLoader but same issue
+  */
+//    var_dump(get_class($this));
+//var_dump(get_class($this->driver)); // NULL
+//var_dump(get_class($record));
+//    $getthis = new GetThisLoader($record, $this->statusItems, $selected['item_id']);
+//    var_dump($getthis);exit;
+//    var_dump($getthis->getLocation());exit;
+$holdingNum = $index = 0;
 foreach ($this->statusItems as $item) {
   if ($selected == '') {
     $selected = $item;
-  } elseif ($selected['status'] != 'Available') {
+    $holdingNum = $index;
+  } 
+  elseif ($selected['status'] != 'Available') {
     if ($item['status'] == 'Available' || ($selected['status'] != 'Restricted' && $item['status'] == 'Restricted')) {
       $selected = $item;
+      $holdingNum = $index;
     }
   }
+  $index++;
 }
 if ($selected != '') {
   $status = $record->getStatus($selected);
   $statusSuffix = $record->getStatusSuffix($selected);
-  $location = $selected['location'];
+  $location = $record->getLocation($holdingNum); // TODO
+  //echo "get_class: " . get_class($record($this->driver)); // Catalog\View\Helper\Root\Record
+  //echo "get_class: " . get_class($this->driver); // null
+  //echo "get_class: " . get_class($record); // Catalog\View\Helper\Root\Record
+ // echo "get_class: " . get_class($solrmarc);
+  //echo "get_class: " . get_class($this->recordHelper); // null 
+  //echo "get_class: " . get_class($this->statusItems); // array
+//  echo "getLocation: " . $location . " (" . $holdingNum . ")";
   $callnumber = $selected['callnumber'];
   $callNumPrefix = !empty($selected['callnumber_prefix']) ? $selected['callnumber_prefix'] . ' ' : '';
 }

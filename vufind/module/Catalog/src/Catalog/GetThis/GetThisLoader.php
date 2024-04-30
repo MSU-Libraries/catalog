@@ -135,6 +135,18 @@ class GetThisLoader
         return $item;
     }
 
+    public function getItemIndex($item_id = null)
+    {
+        $index = 0;
+        for ($i = 0; $i < $this->items; $i++) {
+            if ($this->items[$i]['item_id'] == $item_id) {
+                $index = $i;
+                break;
+            }
+        }
+        return $index;
+    }
+
     /**
      * Get the status for a holding item
      *
@@ -178,8 +190,10 @@ class GetThisLoader
      */
     public function getLocation($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
-        return $this->getItem($item_id)['location'] ?? '';
+        $index = $this->getItemIndex($item_id);
+        // $this->record is Record view helper
+        $location = $this->record->getLocation($index);
+        return $location ?? '';
     }
 
     /**

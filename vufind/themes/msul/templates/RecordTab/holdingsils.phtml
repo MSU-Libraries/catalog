@@ -81,9 +81,61 @@
   ?>
 <?php endif; ?>
 
+<?php $holdingNum = 0; ?>
 <?php foreach ($holdings['holdings'] ?? [] as $holding): ?>
 <h2>
-  <?php $locationTextEsc = $this->transEscWithPrefix('location_', $holding['location']); ?>
+  <?php
+      $a = [
+          'items' => [
+
+              0 => ['callnumber_prefix' => '',
+                  'callnumber' => 'DS119.7 .T83 1974',
+                  'id' => 'folio.in00000383558',
+                  'item_id' => '48d6d1c6-1161-5b33-8152-7b60d6cb270f',
+                  'holdings_id' => '6f970c41-76c7-5d81-9c46-3c05f2dec752',
+                  'number' => '2',
+                  'enumchron' => '',
+                  'barcode' => '31293200768350',
+                  'status' => 'Available',
+                  'duedate' => '',
+                  'availability' => true,
+                  'is_holdable' => true,
+                  'holdings_notes' => NULL,
+                  'item_notes' => NULL,
+                  'issues' => [],
+                  'supplements' => [],
+                  'indexes' => [],
+                  'location' => 'MSU Main Library',
+                  'location_code' => 'mnmn',
+                  'reserve' => 'TODO',
+                  'addLink' => true,
+                  'electronic_access' => [],
+                  'link' => ['action' => 'Hold',
+                      'record' => 'folio.in00000383558',
+                      'source' => 'Solr',
+                      'query' => 'item_id=48d6d1c6-1161-5b33-8152-7b60d6cb270f&holdings_id=6f970c41-76c7-5d81-9c46-3c05f2dec752&status=Available&hashKey=8eede90e6ea59c0b26325660ecf941f6',
+                      'anchor' => '#tabnav',
+                  ],
+                  'linkLightbox' => true,
+              ],
+          ],
+          'location' => 'MSU Main Library - Holds.php1 - Holds.php2',
+          'locationhref' => '',
+      ];
+//      var_export($holding);
+//      echo "<br>";
+//      echo "<br>";
+//      var_export($holding['items']);
+//      echo "<br>";
+//      echo "<br>";
+//      var_export($holding['items'][0]);
+//      echo "<br>";
+//      echo "<br>";
+//      var_dump($holding['items'][0]['number']);
+      /*
+ $this->record($this->driver) is Record Helper
+ */ ?>
+  <?php $locationTextEsc = $this->transEscWithPrefix('location_', $this->record($this->driver)->getLocation($holdingNum)); ?>
   <?php if ($holding['locationhref'] ?? false): ?>
     <a href="<?=$this->escapeHtmlAttr($holding['locationhref'])?>" target="_blank"><?=$locationTextEsc?></a>
   <?php else: ?>
@@ -97,7 +149,7 @@
   ];
 ?>
 <table class="truncate-field" data-truncate="<?=$this->htmlSafeJsonEncode($truncateSettings)?>">
-  <caption class="sr-only"><?=$this->transEsc('holdings_details_from', ['%%location%%' => $this->transEsc($holding['location'])]) ?></caption>
+  <caption class="sr-only"><?=$this->transEsc('holdings_details_from', ['%%location%%' => $this->transEsc($this->record($this->driver)->getLocation($holdingNum++))]) ?></caption>
   <?php $callNos = $this->tab->getUniqueCallNumbers($holding['items'], true); ?>
   <?php if (!empty($callNos)): ?>
   <tr>

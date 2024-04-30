@@ -5,6 +5,7 @@ $items = $this->getthis->items;
 
 function getDisplay($view, $item)
 {
+    // TODO Not sure why this is always returning the first one; item_id is set so it should find it...
     return $view->getthis->getLocation($item['item_id'] ?? null) . ': ' . $view->getthis->getCallNumber($item['item_id'] ?? null);
 }
 ?>

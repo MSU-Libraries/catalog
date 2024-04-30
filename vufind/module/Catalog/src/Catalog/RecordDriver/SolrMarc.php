@@ -18,6 +18,8 @@ use function array_key_exists;
 use function count;
 use function in_array;
 
+use Catalog\View\Helper\Root\Record;
+
 /**
  * Extends the record driver with additional data from Solr
  *
@@ -300,7 +302,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
-     * Get the locations
+     * Get all of the locations from the 952 field
      *
      * @return array Content from Solr
      */
@@ -312,14 +314,21 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         foreach ($marcArr952 as $marc952) {
             $subfields = $marc952['subfields'];
             $sfvals = [];
+            // Parse out all the subfield data
             foreach ($subfields as $subfield) {
                 $sfvals[$subfield['code']] = $subfield['data'];
             }
-            if ($sfvals['b'] == 'Michigan State University') {
-                $locs[] = empty($sfvals['d']) ? $sfvals['c'] : $sfvals['d'];
+            // Ignore non-MSU results
+            if (!isset($sfvals['b']) || $sfvals['b'] != 'Michigan State University') {
+                continue;
+            }
+            // Append the 'd' subfield to 'c' if the values are not the same, otherwise just use 'c'
+            if (isset($sfvals['c'], $sfvals['d'])) {
+                $locs[] = Record::deduplicateLocationStrings($sfvals['c'], $sfvals['d']);
             }
         }
-        return $locs;
+
+        return array_reverse($locs);
     }
 
     /**
