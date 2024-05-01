@@ -1141,7 +1141,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 
         foreach ($marc856s as $marc856) {
             $subfields = $marc856['subfields'];
-            $rec = [];
+            $rec = ['desc' => ''];
             $suffix = '';
 
             foreach ($subfields as $subfield) {
