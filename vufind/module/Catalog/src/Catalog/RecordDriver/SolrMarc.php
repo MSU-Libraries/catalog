@@ -15,7 +15,6 @@
 namespace Catalog\RecordDriver;
 
 use function array_key_exists;
-use function count;
 use function in_array;
 
 /**
@@ -1157,7 +1156,10 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             }
 
             // Fall back to 773 field if we can't find description in the '856z' field
-            if ((in_array('z', $subfields) || empty($rec['desc'])) && count($marc773s) >= $idx) {
+            if (
+                (in_array('z', $subfields) || empty($rec['desc']))
+                && isset($marc773s[$idx]['subfields'][0]['data'])
+            ) {
                 $rec['desc'] = $marc773s[$idx]['subfields'][0]['data'];
             }
 
