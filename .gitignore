@@ -1,4 +1,9 @@
-*.swp
+# GNU Emacs temporary files
+\#*
+.\#*
+*~
+# Vim temporary files
+.*.sw[po]
 .terraform*
 .DS_Store
 compiled.css
@@ -6,3 +11,5 @@ vufind/themes/msul/css/less/
 ._*
 .idea/
 .phpunit.result.cache
+.php_cs_cache
+.phpstan_cache

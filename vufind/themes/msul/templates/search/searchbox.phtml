@@ -53,7 +53,6 @@
   <div class="navbar-form navbar-left flip">
     <?php $tabs = $this->context($this)->renderInContext('search/searchTabs', ['searchTabs' => $tabConfig['tabs'], 'showCounts' => false]); ?>
     <?php if (!empty($tabs)): ?><?=$tabs ?><div class="tab-content clearfix"><?php endif; ?>
-      <!-- <p class="adv_search_terms"><?=$this->transEsc('Your search terms')?>: "<strong><?=$this->escapeHtml($this->lookfor)?></strong>"</p> -->
       <p class="adv_search_links">
         <a href="<?=$this->url($advSearch)?>?edit=<?=$this->escapeHtmlAttr($this->searchId)?>"><?=$this->transEsc('Edit this Advanced Search')?></a> |
         <a href="<?=$this->url($advSearch, [], ['query' => $hiddenFilters])?>"><?=$this->transEsc('Start a new Advanced Search')?></a> |
@@ -78,6 +77,28 @@
   <form id="searchForm" class="searchForm navbar-form navbar-left flip" method="get" action="<?=$this->url($basicSearch)?>" name="searchForm" autocomplete="off">
     <?= $this->context($this)->renderInContext('search/searchTabs', ['searchTabs' => $tabConfig['tabs'], 'showCounts' => $tabConfig['showCounts']]); ?>
     <div class="searchtools"><label for="searchForm_type">Search&nbsp;</label> <!-- msul class for spacing -->
+    <?php
+      $searchboxAttributes = [
+        'id' => 'searchForm_lookfor',
+        'class' => 'searchForm_lookfor form-control search-query',
+        'type' => 'search',
+        'name' => 'lookfor',
+        'value' => $this->lookfor,
+        'aria-label' => $this->translate('search_terms'),
+      ];
+      if ($placeholder = $this->searchbox()->getPlaceholderText($tabConfig['selected']['id'] ?? $this->searchClassId)) {
+        $searchboxAttributes['placeholder'] = $this->translate($placeholder);
+      }
+      if ($this->searchbox()->autocompleteEnabled($this->searchClassId)) {
+        $searchboxAttributes['class'] .= " autocomplete searcher:{$this->searchClassId}"
+          . ($this->searchbox()->autocompleteAutoSubmit($this->searchClassId) ? ' ac-auto-submit' : '');
+        $searchboxAttributes['data-autocomplete-formatting-rules'] = $this->searchbox()->autocompleteFormattingRulesJson($this->searchClassId);
+      }
+    ?>
+    <div class="searchForm-query">
+      <input<?=$this->htmlAttributes($searchboxAttributes)?>>
+      <button id="searchForm-reset" class="searchForm-reset hidden" type="reset" tabindex="-1" aria-label="<?=$this->transEsc('searchform_reset_button')?>"><?=$this->icon('ui-reset-search');?></button>
+    </div>
     <?php if ($handlerCount > 1): ?>
       <select id="searchForm_type" class="searchForm_type form-control" name="type" data-native-menu="false" aria-label="<?=$this->transEscAttr('Search type')?>">
         <?php $currentGroup = $insideGroup = false; ?>
@@ -143,7 +164,7 @@
     <?php $shards = $options->getShards(); ?>
     <?php if ($options->showShardCheckboxes() && !empty($shards)): ?>
       <?php
-        $selectedShards = $this->selectedShards ?? $options->getDefaultSelectedShards();
+      $selectedShards = $this->selectedShards ?? $options->getDefaultSelectedShards();
       ?>
       <br>
       <?php foreach ($shards as $shard => $val): ?>
