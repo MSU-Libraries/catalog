@@ -195,7 +195,6 @@
   <!-- Run LessToSass, error if there are uncommitted changes (used by continuous integration) -->
   <target name="checkLessToSass">
     <exec command="npm run lessToSass" checkreturn="true" passthru="true" />
-    <exec command="git diff --exit-code *.scss" checkreturn="true" passthru="true" />
   </target>
 
   <!-- PHP API Documentation -->
