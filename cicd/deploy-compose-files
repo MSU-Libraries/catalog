@@ -142,7 +142,7 @@ apply_prod_changes() {
     docker-compose.solr-cloud.yml;
     # Increase Docker limit (note: prod is further increased below)
     ./yq -i \
-    ".x-solr-deploy.resources.limits.memory = \"6144M" \
+    ".services.solr.deploy.resources.limits.memory = \"6144M" \
     docker-compose.solr-cloud.yml;
 
     # Use httpchallenge cert resolver (instead of dnschallenge)
@@ -219,7 +219,7 @@ apply_prod_changes() {
         ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms5120m -Xmx5120m -XX:MaxDirectMemorySize=2048m\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
-        ".x-solr-deploy.resources.limits.memory = \"14336M" \
+        ".services.solr.deploy.resources.limits.memory = \"14336M" \
         docker-compose.solr-cloud.yml;
 
         # Override default router rule

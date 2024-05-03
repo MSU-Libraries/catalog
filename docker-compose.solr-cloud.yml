@@ -10,9 +10,6 @@ x-solr-envs: &solr_envs
 x-solrproxy-deploy: &solrproxy_deploy
   mode: replicated
   replicas: 3
-  resources:
-    limits:
-      memory: 1536M
   restart_policy:
     window: 15s
   update_config:
@@ -57,6 +54,9 @@ services:
     deploy:
       mode: replicated
       replicas: 3
+      resources:
+        limits:
+          memory: 1536M
       restart_policy:
         window: 15s
       update_config:
