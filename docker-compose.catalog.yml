@@ -36,6 +36,9 @@ services:
     deploy:
       mode: replicated
       replicas: 3
+      resources:
+        limits:
+          memory: 3072M
       placement:
         max_replicas_per_node: 1
       restart_policy:

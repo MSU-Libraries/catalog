@@ -138,7 +138,11 @@ apply_prod_changes() {
 
     # Increase Solr RAM to 2 GB (note: prod is further increased below)
     ./yq -i \
-    ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms2048m -Xmx2048m\"" \
+    ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms2048m -Xmx2048m -XX:MaxDirectMemorySize=1024m\"" \
+    docker-compose.solr-cloud.yml;
+    # Increase Docker limit (note: prod is further increased below)
+    ./yq -i \
+    ".x-solr-deploy.resources.limits.memory = \"6144M" \
     docker-compose.solr-cloud.yml;
 
     # Use httpchallenge cert resolver (instead of dnschallenge)
@@ -212,8 +216,12 @@ apply_prod_changes() {
         ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_A}\"]" docker-compose.build.yml;
         # Increase Solr RAM to 4 GB (prod is granted more than non-prod envs)
         ./yq -i \
-        ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms4096m -Xmx4096m\"" \
+        ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms5120m -Xmx5120m -XX:MaxDirectMemorySize=2048m\"" \
         docker-compose.solr-cloud.yml;
+        ./yq -i \
+        ".x-solr-deploy.resources.limits.memory = \"14336M" \
+        docker-compose.solr-cloud.yml;
+
         # Override default router rule
         ./yq -i \
         ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`)\"" \
