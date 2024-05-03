@@ -57,7 +57,7 @@
   <property name="phpunit_remote_coverage" value="" /><!-- set to 1 to enable code coverage for Mink tests  -->
   <property name="retain_coverage_files" value="false" /><!-- set to true to keep temporary coverage files from Mink tests -->
 
-  <property name="version" value="9.1" />
+  <property name="version" value="9.1.1" />
 
   <!-- We only need the -p switch if the password is non-blank -->
   <if>
@@ -192,10 +192,9 @@
     <exec command="npm run check:scss" checkreturn="true" passthru="true" />
   </target>
 
-  <!-- Run LessToSass, error if there are uncommitted changes (used by Travis) -->
-  <!-- MSUL customization to remove git clone check -->
+  <!-- Run LessToSass, error if there are uncommitted changes (used by continuous integration) -->
   <target name="checkLessToSass">
-    <exec command="grunt lessToSass" checkreturn="true" passthru="true" />
+    <exec command="npm run lessToSass" checkreturn="true" passthru="true" />
   </target>
 
   <!-- PHP API Documentation -->
