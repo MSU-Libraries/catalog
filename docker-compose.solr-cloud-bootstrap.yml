@@ -9,9 +9,6 @@ x-solr-envs: &solr_envs
 x-solr-deploy: &solr_deploy
   mode: replicated
   replicas: 1
-  resources:
-    limits:
-      memory: 2048M
   restart_policy:
     window: 15s
   update_config:
