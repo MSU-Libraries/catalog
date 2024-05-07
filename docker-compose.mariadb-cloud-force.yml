@@ -62,8 +62,8 @@ services:
         delay: 140s
         monitor: 20s
       placement:
-        ### YOU MUST BRING THE STACK DOWN BEFORE AND AFTER USING THIS FILE AND RE-DEPLOY WIT
-        ### THE NORMAL COMPOSE FILE ONCE GALERA HAS RECOVERED SO THAT BOOTSTRAPINNG CAN BE DISABLED
+        ### YOU MUST BRING THE STACK DOWN BEFORE AND AFTER USING THIS FILE AND RE-DEPLOY WITH
+        ### THE NORMAL COMPOSE FILE ONCE GALERA HAS RECOVERED SO THAT BOOTSTRAPING CAN BE DISABLED
         constraints:
           # Update N to be the Docker Swarm node number with most recent SQL file changes
           - "node.labels.nodeid==N"
