@@ -128,7 +128,7 @@ async def _check_vufind_record_page(node: str, aiohttp_session: ClientSession) -
         result = 'Vufind record page folio.in00006782951 not complete'
     elif '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
         result = 'An error is reported in Vufind record page folio.in00006782951'
-    elif 'Edward R. Barton' not in text:
+    elif 'Bill Konigsberg' not in text:
         result = 'Vufind record page folio.in00006782951 not complete'
     elif 'PS3611.O586 O98 2014' not in text:
         result = 'Vufind record page folio.in00006782951 not complete'

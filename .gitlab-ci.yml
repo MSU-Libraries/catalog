@@ -245,7 +245,7 @@ Populate Vufind Environment:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Deploy Vufind
+    - Verify Stack Health
   script:
     - bash ./cicd/populate-vufind-environment
 
@@ -264,7 +264,7 @@ Populate Course Reserves:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Deploy Vufind
+    - Verify Stack Health
   script:
     - bash ./cicd/populate-coursereserves
 
