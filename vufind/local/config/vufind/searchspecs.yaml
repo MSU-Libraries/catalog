@@ -402,7 +402,7 @@ AuthorBrowse:
 
 TitleBrowse:
   QueryFields:
-    title_full:
+    title_browse:
       - [onephrase, ~]
 
 DeweyBrowse:
