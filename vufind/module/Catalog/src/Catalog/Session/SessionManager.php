@@ -34,6 +34,12 @@ namespace Catalog\Session;
  * ids. This is too prevent bots from creating too many sessions
  * if they fail to pass their already created session id
  * back with subsequent requests.
+ *
+ * @category VuFind
+ * @package  Session_Handlers
+ * @author   Nathan Collins <colli372@msu.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     https://vufind.org/wiki/development Wiki
  */
 class SessionManager extends \Laminas\Session\SessionManager
 {
@@ -54,8 +60,9 @@ class SessionManager extends \Laminas\Session\SessionManager
     /**
      * Start session override with bot protections
      *
-     * @param bool $preserveStorage       If set to true, current session storage will not be overwritten by the
-     *                                    contents of $_SESSION.
+     * @param  bool $preserveStorage If set to true, current session storage will not be overwritten by the
+     *                               contents of $_SESSION.
+     *
      * @return void
      *
      * @throws Exception\RuntimeException
@@ -94,17 +101,17 @@ class SessionManager extends \Laminas\Session\SessionManager
      * from the requested IP address. If a session salt is available, it
      * will be used in generating the session id.
      *
-     * @param string $botName A string used to identify the bot
+     * @param  string $botName A string used to identify the bot
      *
      * @return void
      */
     private function setBotId($botName)
     {
-        // Bot Forced Session prefix can be used to identify these sessions
-        $botId = 'btfs' . preg_replace('/[\W]/', '',
-            base64_encode(hash('sha224',
-                $botName . $_SERVER['REMOTE_ADDR'] . $this->botSalt(), true))
+        $botHash = base64_encode(
+            hash('sha224', $botName . $_SERVER['REMOTE_ADDR'] . $this->botSalt(), true)
         );
+        // Bot Forced Session prefix (btfs) can be used to identify these sessions
+        $botId = 'btfs' . preg_replace('/[\W]/', '', $botHash);
 
         if (!$this->getId()) {
             $this->setId($botId);
@@ -114,7 +121,7 @@ class SessionManager extends \Laminas\Session\SessionManager
     /**
      * Set which bot names to force a bot session for
      *
-     * @param array $botNames The list of botnames
+     * @param  array $botNames The list of botnames
      *
      * @return void
      */
@@ -129,7 +136,7 @@ class SessionManager extends \Laminas\Session\SessionManager
     /**
      * The salt used in creating bot session ids
      *
-     * @param string $botSalt
+     * @param  string $botSalt The salt string
      *
      * @return void
      */
