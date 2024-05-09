@@ -54,11 +54,11 @@ main() {
 
     if [[ "${NUM_RECS}" -eq "0" ]]; then
         # Load some records
-        echo "Running Folio harvest-and-import.sh now";
-        ssh deploy@"${CATALOG_NODE}" "docker exec ${CATALOG_CONTAINER} /folio-harvest-and-import.sh -c /mnt/shared/oai/devel-batch -l 1 -b -r >/dev/null 2>&1";
+        echo "Running Folio import now (pc-import-folio)";
+        ssh deploy@"${CATALOG_NODE}" "docker exec ${CATALOG_CONTAINER} /usr/local/bin/pc-import-folio -c /mnt/shared/oai/devel-batch -l 1 -b -r >/dev/null 2>&1";
         echo "Import completed with exit code $?";
-        echo "Running HLM harvest-and-import.sh now";
-        ssh deploy@"${CATALOG_NODE}" "docker exec ${CATALOG_CONTAINER} /hlm-harvest-and-import.sh -l 1 -c -i -s /mnt/shared/hlm/devel-batch >/dev/null 2>&1";
+        echo "Running HLM import now (pc-import-hlm)";
+        ssh deploy@"${CATALOG_NODE}" "docker exec ${CATALOG_CONTAINER} /usr/local/bin/pc-import-hlm -l 1 -c -i -s /mnt/shared/hlm/devel-batch >/dev/null 2>&1";
         echo "Import completed with exit code $?";
         # Rebuild alphabetic browse databases
         echo "Running Alphabetic browse database build";

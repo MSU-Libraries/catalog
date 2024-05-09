@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SCRIPT_NAME="$(basename "$0")"
+
 # Set defaults
 default_args() {
     declare -g -A ARGS
@@ -31,15 +33,15 @@ runhelp() {
     echo "       and import that data into VuFind's authority Solr index."
     echo ""
     echo "Examples: "
-    echo "   /authority-harvest-and-import.sh --harvest --full --import"
+    echo "   ${SCRIPT_NAME} --harvest --full --import"
     echo "     Do a full harvest from scratch and import that data"
-    echo "   /authority-harvest-and-import.sh --harvest --import"
+    echo "   ${SCRIPT_NAME} --harvest --import"
     echo "     Do an update harvest with changes made since the"
     echo "     last run, and import that data"
-    echo "   /authority-harvest-and-import.sh --import"
+    echo "   ${SCRIPT_NAME} --import"
     echo "     Run only a import of data that has already been"
     echo "     harvested and saved to the shared location."
-    echo "   /authority-harvest-and-import.sh --harvest"
+    echo "   ${SCRIPT_NAME} --harvest"
     echo "     Only run the harvest, but do not proceed to import"
     echo "     the data into VuFind"
     echo ""

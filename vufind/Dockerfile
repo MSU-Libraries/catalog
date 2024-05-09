@@ -138,8 +138,8 @@ COPY tests/.eslintrc.js /usr/local/vufind/.eslintrc.js
 COPY robots.txt /usr/local/vufind/public/robots.txt
 COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
-COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh \
-    folio-harvest-and-import.sh harvest-and-import.sh hlm-harvest-and-import.sh authority-harvest-and-import.sh backup.sh restore.sh /
+COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh backup.sh restore.sh /
+COPY pc-import-folio pc-import-hlm pc-import-authority /usr/local/bin/
 COPY msmtp/aliases msmtp/msmtprc /etc/
 
 # Setup cron and logging for cron

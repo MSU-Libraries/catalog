@@ -39,11 +39,11 @@ then repeat the database migration steps once the pipeline completes.
 
 * It is recommended to do a reindex of Solr to apply the latest schema changes, if the helper script
 detected any. In order to do this, you will need to run the
-[folio-harvest-and-import script](https://github.com/MSU-Libraries/catalog/blob/main/vufind/folio-harvest-and-import.sh)
+[pc-import-folio script](https://github.com/MSU-Libraries/catalog/blob/main/vufind/pc-import-folio)
 copying back the last full harvest and doing only an import:
 ```
 mv /usr/local/vufind/local/harvest/folio/processed/* /usr/local/vufind/local/harvest/folio/
-./folio-harvest-and-import.sh -b
+./pc-import-folio -b
 ```
 
 
@@ -54,7 +54,7 @@ steps. Potentially all you may need is to
 [upload the new configs](https://msu-libraries.github.io/catalog/solr/#updating-the-solr-configuration-files)
 , but there is the chance then when you attempt to index new items into Solr it will not want to overwrite
 the existing index. In that case you will need to need to start with an empty index. You can either clear out
-your current index (using the `--reset-solr` flag in the `folio-harvest-and-import.sh` script), but this will result
+your current index (using the `--reset-solr` flag in the `pc-import-folio` script), but this will result
 in downtime for your site where there will be no results returned for
 a period of time, or follow the below steps to build a temporary alternate collection to index in and then
 swap over to once it has completed. All of these commands should be run from within the Solr containers of
@@ -95,8 +95,8 @@ new collection (i.e. `biblio9` for example). The references should be in the `so
 previous step. Be sure to prepare the data you wish to import as descirbed in the
 [full import documentaion](https://msu-libraries.github.io/catalog/harvesting-and-importing/#full-data-imports).
 ```
-/folio-harvest-and-import.sh --verbose --collection biblio9 --batch-import
-/hlm-harvest-and-import.sh -i
+/usr/local/bin/pc-import-folio --verbose --collection biblio9 --batch-import
+/usr/local/bin/pc-import-hlm -i
 ```
 
 * You can optionally re-run the reserves cron at this time too in order to get that up to date with the current
