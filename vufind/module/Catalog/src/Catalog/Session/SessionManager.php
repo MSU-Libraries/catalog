@@ -60,8 +60,8 @@ class SessionManager extends \Laminas\Session\SessionManager
     /**
      * Start session override with bot protections
      *
-     * @param  bool $preserveStorage If set to true, current session storage will not be overwritten by the
-     *                               contents of $_SESSION.
+     * @param bool $preserveStorage If set to true, current session storage will not be overwritten by the
+     *                              contents of $_SESSION.
      *
      * @return void
      *
@@ -101,7 +101,7 @@ class SessionManager extends \Laminas\Session\SessionManager
      * from the requested IP address. If a session salt is available, it
      * will be used in generating the session id.
      *
-     * @param  string $botName A string used to identify the bot
+     * @param string $botName A string used to identify the bot
      *
      * @return void
      */
@@ -121,7 +121,7 @@ class SessionManager extends \Laminas\Session\SessionManager
     /**
      * Set which bot names to force a bot session for
      *
-     * @param  array $botNames The list of botnames
+     * @param array $botNames The list of botnames
      *
      * @return void
      */
@@ -136,7 +136,7 @@ class SessionManager extends \Laminas\Session\SessionManager
     /**
      * The salt used in creating bot session ids
      *
-     * @param  string $botSalt The salt string
+     * @param string $botSalt The salt string
      *
      * @return void
      */
