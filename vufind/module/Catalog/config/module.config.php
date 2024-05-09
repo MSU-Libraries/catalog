@@ -112,9 +112,12 @@ return [
   'service_manager' => [
     'factories' => [
       Catalog\Form\Form::class => VuFind\Form\FormFactory::class,
+      Catalog\Session\SessionManager::class => Catalog\Session\ManagerFactory::class,
     ],
     'aliases' => [
       VuFind\Form\Form::class => Catalog\Form\Form::class,
+      Laminas\Session\SessionManager::class => Catalog\Session\SessionManager::class,
+      VuFind\Session\ManagerFactory::class => Catalog\Session\ManagerFactory::class,
     ],
   ],
 ];
