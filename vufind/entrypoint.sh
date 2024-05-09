@@ -33,8 +33,8 @@ if [[ "$1" == "/startup-cron.sh" ]]; then
         echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR" >> /etc/environment
         echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment
         echo VUFIND_LOCAL_MODULES="Catalog" >> /etc/environment
-        echo FTP_USER="$FTP_USER" >> /etc/environment
-        echo FTP_PASSWORD="$FTP_PASSWORD" >> /etc/environment
+        echo HLM_FTP_USER="$HLM_FTP_USER" >> /etc/environment
+        echo HLM_FTP_PASSWORD="$HLM_FTP_PASSWORD" >> /etc/environment
         echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment
         echo AUTH_FTP_PASSWORD="$AUTH_FTP_PASSWORD" >> /etc/environment
         echo STACK_NAME="$STACK_NAME" >> /etc/environment
@@ -43,7 +43,7 @@ else
     # Unset variables that are only useful for cron jobs.
     # We are still passing them to the catalog container in the docker-compose, because devel environments
     # don't have the cron container and we might need them in the catalog container when doing a docker exec.
-    unset FTP_USER FTP_PASSWORD AUTH_FTP_USER AUTH_FTP_PASSWORD SOLR_URL
+    unset HLM_FTP_USER HLM_FTP_PASSWORD AUTH_FTP_USER AUTH_FTP_PASSWORD SOLR_URL
 fi
 
 exec "$@"
