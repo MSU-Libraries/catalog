@@ -99,9 +99,11 @@ return [
   'service_manager' => [
     'factories' => [
       'Catalog\\Form\\Form' => 'VuFind\\Form\\FormFactory',
+      'Catalog\\Session\\SessionManager' => 'Catalog\\Session\\ManagerFactory',
     ],
     'aliases' => [
-      'VuFind\\Form\\Form' => 'Catalog\\Form\\Form',
+      'Laminas\\Session\\SessionManager' => 'Catalog\\Session\\SessionManager',
+      'VuFind\\Session\\ManagerFactory' => 'Catalog\\Session\\ManagerFactory',
     ],
   ],
 ];
