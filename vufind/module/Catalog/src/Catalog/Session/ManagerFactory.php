@@ -83,11 +83,7 @@ class ManagerFactory extends \VuFind\Session\ManagerFactory
             ? $config->Session->bot_agent->toArray()
             : []
         );
-        $sessionManager->setBotSalt(
-            isset($config->Session->bot_salt)
-            ? $config->Session->bot_salt
-            : ''
-        );
+        $sessionManager->setBotSalt($config->Session->bot_salt ?? '');
         // MSUL End
 
         // Start up the session:

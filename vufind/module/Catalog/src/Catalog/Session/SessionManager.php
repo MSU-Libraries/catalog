@@ -29,6 +29,9 @@
 
 namespace Catalog\Session;
 
+use function is_array;
+use function is_string;
+
 /**
  * Session manager with added forcing of consistent bot sessions
  * ids. This is too prevent bots from creating too many sessions
