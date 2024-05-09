@@ -1,5 +1,5 @@
 <?php $alt = $this->link ? trim($this->driver->tryMethod('getTitle') ?? '') : ''; ?>
-<?php if ($this->link && !empty($alt)): ?><a tabindex="-1" href="<?=$this->escapeHtmlAttr($this->link)?>" class="record-cover-link"><?php endif; ?> <!--PC-504: added tabindex -->
+<?php if ($this->link && !empty($alt)): ?><a tabindex="-1" aria-hidden="true" href="<?=$this->escapeHtmlAttr($this->link)?>" class="record-cover-link"><?php endif; ?> <!--PC-504: added tabindex & aria hidden-->
 <?php /* Display thumbnail if appropriate: */ ?>
 <?php if ($cover): ?>
   <img src="<?=$this->escapeHtmlAttr($cover); ?>" <?php if ($linkPreview): ?>data-linkpreview="true" <?php endif; ?>class="recordcover" role="presentation" alt=""> <!--PC-504: made empty alt tag, add role="presentation"-->
