@@ -76,7 +76,7 @@ class ManagerFactory extends \VuFind\Session\ManagerFactory
         $sessionManager = new $requestedName($sessionConfig);
         $sessionManager->setSaveHandler($this->getHandler($container));
 
-        // MSUL Start
+        // MSUL Start PC-984
         $config = $container->get(\VuFind\Config\PluginManager::class)->get('config');
         $sessionManager->setBotNames(
             isset($config->Session->bot_agent)
