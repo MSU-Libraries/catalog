@@ -41,7 +41,7 @@
             <?php if (!$missing): ?><a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getUrl($this->driver))?>" class="getFull" data-view="<?=$this->params->getOptions()->getListViewOption() ?>"><?php endif; ?>
               <span class="title"><?=$this->record($this->driver)->getTitleHtml()?></span>
             <?php if (!$missing): ?></a><?php endif; ?>
-            <?php foreach ($this->driver->tryMethod('getTitlesAltScript', [], []) as $altTitle): ?>
+            <?php foreach ($this->driver->tryMethod('getFullTitlesAltScript', [], []) as $altTitle): ?>
               <div class="title-alt">
                 <?=$this->escapeHtml($altTitle)?>
               </div>

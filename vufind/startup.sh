@@ -81,6 +81,9 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindSearch /usr/local/vufind/module/VuFindSearch
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindTheme /usr/local/vufind/module/VuFindTheme
 
+    # Add a link in core-repo so that unit tests work
+    ln -s ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module
+
     # Make sure permissions haven't gotten changed on the share along the way
     # (This can happen no matter what on devel container startup)
     chown msuldevs:msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/*
