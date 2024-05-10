@@ -16,6 +16,8 @@ namespace Catalog\View\Helper\Root;
 
 use VuFind\View\Helper\Root\RecordDataFormatter\SpecBuilder;
 
+use function count;
+
 /**
  * Extends the default display of the record page display
  *
@@ -255,5 +257,55 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         );
 
         return $spec->getArray();
+    }
+
+    /**
+     * Get the callback function for processing authors.
+     *
+     * @return callable
+     */
+    protected function getAuthorFunction()
+    {
+        // MSUL override PC-936 to add 'link' to the author output
+        return function ($data, $options) {
+            // Lookup array of singular/plural labels (note that Other is always
+            // plural right now due to lack of translation strings).
+            $labels = [
+                'primary' => ['Main Author', 'Main Authors'],
+                'corporate' => ['Corporate Author', 'Corporate Authors'],
+                'secondary' => ['Other Authors', 'Other Authors'],
+            ];
+            // Lookup array of schema labels.
+            $schemaLabels = [
+                'primary' => 'author',
+                'corporate' => 'creator',
+                'secondary' => 'contributor',
+            ];
+            // Lookup array of sort orders.
+            $order = ['primary' => 1, 'corporate' => 2, 'secondary' => 3];
+
+            // Sort the data:
+            $final = [];
+            foreach ($data as $type => $values) {
+                $final[] = [
+                    'label' => $labels[$type][count($values) == 1 ? 0 : 1],
+                    'values' => [$type => $values],
+                    'options' => [
+                        'pos' => $options['pos'] + $order[$type],
+                        'renderType' => 'RecordDriverTemplate',
+                        'template' => 'data-authors.phtml',
+                        'context' => [
+                            'type' => $type,
+                            'schemaLabel' => $schemaLabels[$type],
+                            'requiredDataFields' => [
+                                ['name' => 'role', 'prefix' => 'CreatorRoles::'],
+                                ['name' => 'link', 'prefix' => ''],
+                            ],
+                        ],
+                    ],
+                ];
+            }
+            return $final;
+        };
     }
 }

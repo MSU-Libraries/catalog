@@ -15,6 +15,7 @@
 namespace Catalog\RecordDriver;
 
 use function array_key_exists;
+use function count;
 use function in_array;
 
 /**
@@ -161,6 +162,18 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             $val = $this->fields[$field];
         }
         return $val;
+    }
+
+    /**
+     * Get the full titles of the record including section and part information in
+     * alternative scripts.
+     *
+     * @return array
+     */
+    public function getFullTitlesAltScript(): array
+    {
+        return $this->getMarcReader()
+            ->getLinkedFieldsSubfields('880', '245', ['a', 'b', 'c', 'n', 'p']);
     }
 
     /**
@@ -1345,5 +1358,86 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             'unserialize',
             array_unique(array_map('serialize', $retval))
         );
+    }
+
+    /**
+     * Get an array of the transliterated values for each author.
+     *
+     * @return array
+     */
+    public function getPrimaryAuthorsLinks()
+    {
+        return $this->getMarcFieldLinked('100', ['a', 'b', 'c']);
+    }
+
+    /**
+     * Get an array of the transliterated values for each author.
+     *
+     * @return array
+     */
+    public function getSecondaryAuthorsLinks()
+    {
+        return $this->getMarcFieldLinked('700', ['a', 'b', 'c']);
+    }
+
+    /**
+     * Get an array of the transliterated values for each author.
+     *
+     * @return array
+     */
+    public function getCorporateAuthorsLinks()
+    {
+        $authors = [];
+        foreach (['110', '111', '710', '711'] as $field) {
+            $authors = array_merge($authors, $this->getMarcFieldLinked($field, ['a', 'b', 'c']));
+        }
+        return $authors;
+    }
+
+    /**
+     * Get the transliterated values from the given field, mapping using the data in subfield 6
+     *
+     * @param string $field    Marc field to search within
+     * @param array  $subfield Sub-fields to return or empty for all
+     *
+     * @return array the values within the subfields under the field
+     */
+    public function getMarcFieldLinked(string $field, ?array $subfield = null)
+    {
+        $vals = [];
+        $marc = $this->getMarcReader();
+        $marc_fields = $marc->getFields($field, ['6']);
+        foreach ($marc_fields as $marc_data) {
+            $linkedVal = '';
+            $subfields = $marc_data['subfields'];
+            if (count($subfields) == 1 && count(explode('-', $subfields[0]['data'])) > 0) {
+                $index = explode('-', $subfields[0]['data'])[1];
+                $linked = $marc->getLinkedField('880', $field, $index, $subfield);
+                if (isset($linked['subfields'])) {
+                    $val = '';
+                    foreach ($linked['subfields'] as $rec) {
+                        $val = $val . ' ' . $rec['data'];
+                    }
+                    $linkedVal = rtrim(rtrim(trim($val), ','), '.');
+                }
+            }
+
+            $vals[] = $linkedVal;
+        }
+        return $vals;
+    }
+
+    /**
+     * Deduplicate author information into associative array with main/corporate/
+     * secondary keys.
+     *
+     * @param array $dataFields An array of extra data fields to retrieve (see
+     * getAuthorDataFields)
+     *
+     * @return array
+     */
+    public function getDeduplicatedAuthors($dataFields = ['role', 'link'])
+    {
+        return parent::getDeduplicatedAuthors($dataFields);
     }
 }
