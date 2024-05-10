@@ -60,9 +60,10 @@ RUN \
     sed -i 's/<lib dir="\.\.\/jars"/<lib dir="\/solr_confs\/jars"/' /solr_confs/biblio/conf/solrconfig.xml && \
     # Update the field used for title browse PC-686
     sed -i 's/title_fullStr/title_browse/' /solr_confs/biblio/conf/solrconfig.xml && \
+    sed -i 's/      <str name="normalizer">org.vufind.util.TitleNormalizer<\/str>//' /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i '$ d' /solr_confs/biblio/conf/schema.xml && \
     echo ' <!-- CopyFields for Title Browse -->' >> /solr_confs/biblio/conf/schema.xml && \
-    echo ' <field name="title_browse" type="string" indexed="true" stored="false" multiValued="true"/>' >> /solr_confs/biblio/conf/schema.xml && \
+    echo ' <field name="title_browse" type="string" indexed="true" stored="true" multiValued="true"/>' >> /solr_confs/biblio/conf/schema.xml && \
     echo ' <copyField source="title_fullStr" dest="title_browse"/>' >> /solr_confs/biblio/conf/schema.xml && \
     echo ' <copyField source="title_alt" dest="title_browse"/>' >> /solr_confs/biblio/conf/schema.xml && \
     echo ' <copyField source="title_auth" dest="title_browse"/>' >> /solr_confs/biblio/conf/schema.xml && \
