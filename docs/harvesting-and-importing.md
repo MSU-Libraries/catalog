@@ -3,12 +3,12 @@
     All of these commands should be run within the `catalog` or `cron` Docker container
 
 ## Script Summary
-* [harvest-and-import.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/harvest-and-import.sh): 
+* [pc-import-folio](https://github.com/MSU-Libraries/catalog/blob/main/vufind/pc-import-folio): 
 Used to harvest and import FOLIO MARC data into the `biblio` collection of Solr.  
-* [hlm-harvest-and-import.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/hlm-harvest-and-import.sh):
+* [pc-import-hlm](https://github.com/MSU-Libraries/catalog/blob/main/vufind/pc-import-hlm):
 Used to harvest and import EBSCO MARC data into the `biblio` collection of Solr from the FTP location given
 access to by EBSCO. The records contain the HLM dataset that is missing from FOLIO's database.  
-* [authority-harvest-and-import.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/authority-harvest-and-import.sh):
+* [pc-import-authority](https://github.com/MSU-Libraries/catalog/blob/main/vufind/pc-import-authority):
 Used to harvest and import MARC data from Backstage into the `authority` collection in Solr from the FTP location
 provided by Backstage.  
 * [cron-reserves.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/cron-reserves.sh):
@@ -107,7 +107,7 @@ mv /mnt/shared/oai/[STACK_NAME]/harvest_folio/processed/* /mnt/shared/oai/[STACK
 #### Importing FOLIO records in dev environments
 This will import the tests records. In the `catalog` container:
 ```
-./harvest-and-import.sh -c /mnt/shared/oai/devel-batch -l 1 -b -v -r
+./pc-import-folio -c /mnt/shared/oai/devel-batch -l 1 -b -v -r
 ```
 
 #### Importing HLM records using the cron container
@@ -122,7 +122,7 @@ to see if the command has completed.
 cp /mnt/shared/hlm/[STACK_NAME]/current/* /usr/local/vufind/local/harvest/hlm/
 
 # You will want to kick off this command in a screen session, since it can take many hours to run
-/hlm-harvest-and-import.sh -i
+/usr/local/bin/pc-import-hlm -i
 ```
 
 #### How to Use the Collection Aliases to Rebuild and Swap
@@ -159,7 +159,7 @@ docker exec -it catalog-prod-catalog_build.12345 bash
 # Inside container
 rm local/harvest/folio/processed/*
 cp /mnt/shared/oai/${STACK_NAME}/harvest_folio/processed/* local/harvest/folio/
-/harvest-and-import.sh --verbose --reset-solr --collection biblio-build --batch-import | tee /mnt/shared/logs/folio_import_${STACK_NAME}_$(date -I).log
+/usr/local/bin/pc-import-folio --verbose --reset-solr --collection biblio-build --batch-import | tee /mnt/shared/logs/folio_import_${STACK_NAME}_$(date -I).log
 [Ctrl-a d]
 
 # On Host
@@ -168,7 +168,7 @@ docker exec -it catalog-prod-catalog_build.12345 bash
 
 # Inside container
 cp /mnt/shared/hlm/${STACK_NAME}/current/* local/harvest/hlm/
-/hlm-harvest-and-import.sh --import --verbose | tee /mnt/shared/logs/hlm_import_${STACK_NAME}_$(date -I).log
+/usr/local/bin/pc-import-hlm --import --verbose | tee /mnt/shared/logs/hlm_import_${STACK_NAME}_$(date -I).log
 [Ctrl-a d]
 ```
 
@@ -217,7 +217,7 @@ curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&col
 * Clear out the collection that `biblio-build` is pointing to, to avoid having two large indexing stored for a long period of time
 (only after you are confident in the new index's data)
 ```bash
-/harvest-and-import.sh --verbose --reset-solr --collection biblio-build
+/usr/local/bin/pc-import-folio --verbose --reset-solr --collection biblio-build
 ```
 
 * If `SOLR_JAVA_MEM` was increased, lower it to its previous amount.
@@ -240,7 +240,7 @@ command has completed.
 cp /mnt/shared/authority/[STACK_NAME]/current/processed/*.xml /usr/local/vufind/local/harvest/authority/
 
 # You will want to kick off this command in a screen session, since it can take many hours to run
-/authority-harvest-and-import.sh -i -B
+/usr/local/bin/pc-import-authority -i -B
 ```
 
 ### `reserves` Index
@@ -258,7 +258,7 @@ save logs to `/mnt/logs/vufind/reserves_latest.log` and track them in the Monito
 
 ## Using VuFind Utilities
 The preferred method is to use the included wrapper script with this repository.
-The [harvest-and-import.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/harvest-and-import.sh)
+The [pc-import-folio](https://github.com/MSU-Libraries/catalog/blob/main/vufind/pc-import-folio)
 script can run either, or both, the harvest and import of data from FOLIO to Vufind. Use the `--help` flag
 to get information on how to run that script.
 
