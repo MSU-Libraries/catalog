@@ -41,7 +41,7 @@
             <?php if (!$missing): ?><a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getUrl($this->driver))?>" class="getFull" data-view="<?=$this->params->getOptions()->getListViewOption() ?>"><?php endif; ?>
               <span class="title"><?=$this->record($this->driver)->getTitleHtml()?></span>
             <?php if (!$missing): ?></a><?php endif; ?>
-            <?php foreach ($this->driver->tryMethod('getTitlesAltScript', [], []) as $altTitle): ?>
+            <?php foreach ($this->driver->tryMethod('getFullTitlesAltScript', [], []) as $altTitle): ?>
               <div class="title-alt">
                 <?=$this->escapeHtml($altTitle)?>
               </div>
@@ -131,7 +131,7 @@
               <strong><?=$this->transEsc('Saved in')?>:</strong>
               <?php $i = 0; ?>
               <?php foreach ($this->lists as $current): ?>
-                  <a href="<?=$this->url('userList', ['id' => $current->id])?>"><?=$this->escapeHtml($current->title)?></a><?php if ($i++ < count($this->lists) - 1): ?>,<?php endif; ?>
+                <a href="<?=$this->url('userList', ['id' => $current->id])?>"><?=$this->escapeHtml($current->title)?></a><?php if ($i++ < count($this->lists) - 1): ?>,<?php endif; ?>
               <?php endforeach; ?>
               <br>
           <?php endif; ?>

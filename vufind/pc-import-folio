@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SCRIPT_NAME="$(basename "$0")"
+
 # Set defaults
 default_args() {
     declare -g -A ARGS
@@ -28,15 +30,15 @@ runhelp() {
     echo "       and import that data into VuFind's Solr."
     echo ""
     echo "Examples: "
-    echo "   /harvest-and-import.sh --oai-harvest --full --batch-import"
+    echo "   ${SCRIPT_NAME} --oai-harvest --full --batch-import"
     echo "     Do a full harvest from scratch and import that data"
-    echo "   /harvest-and-import.sh --oai-harvest --batch-import"
+    echo "   ${SCRIPT_NAME} --oai-harvest --batch-import"
     echo "     Do an update harvest with changes made since the"
     echo "     last run, and import that data"
-    echo "   /harvest-and-import.sh --batch-import"
+    echo "   ${SCRIPT_NAME} --batch-import"
     echo "     Run only a full import of data that has already been"
     echo "     harvested and saved to the shared location."
-    echo "   /harvest-and-import.sh -o"
+    echo "   ${SCRIPT_NAME} -o"
     echo "     Only run the OAI harvest, but do not proceed to import"
     echo "     the data into VuFind"
     echo ""

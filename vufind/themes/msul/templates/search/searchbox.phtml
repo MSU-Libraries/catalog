@@ -53,7 +53,6 @@
   <div class="navbar-form navbar-left flip">
     <?php $tabs = $this->context($this)->renderInContext('search/searchTabs', ['searchTabs' => $tabConfig['tabs'], 'showCounts' => false]); ?>
     <?php if (!empty($tabs)): ?><?=$tabs ?><div class="tab-content clearfix"><?php endif; ?>
-      <!-- <p class="adv_search_terms"><?=$this->transEsc('Your search terms')?>: "<strong><?=$this->escapeHtml($this->lookfor)?></strong>"</p> -->
       <p class="adv_search_links">
         <a href="<?=$this->url($advSearch)?>?edit=<?=$this->escapeHtmlAttr($this->searchId)?>"><?=$this->transEsc('Edit this Advanced Search')?></a> |
         <a href="<?=$this->url($advSearch, [], ['query' => $hiddenFilters])?>"><?=$this->transEsc('Start a new Advanced Search')?></a> |
@@ -143,7 +142,7 @@
     <?php $shards = $options->getShards(); ?>
     <?php if ($options->showShardCheckboxes() && !empty($shards)): ?>
       <?php
-        $selectedShards = $this->selectedShards ?? $options->getDefaultSelectedShards();
+      $selectedShards = $this->selectedShards ?? $options->getDefaultSelectedShards();
       ?>
       <br>
       <?php foreach ($shards as $shard => $val): ?>

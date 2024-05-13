@@ -98,7 +98,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
         $label = null;
 
         // Add prefix to bookplate URLs
-        if (str_contains($link['url'], 'bookplate')) {
+        if (isset($link['url']) && str_contains($link['url'], 'bookplate')) {
             $link['desc'] = 'Book Plate: ' . $link['desc'];
         }
 
@@ -113,11 +113,11 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             }
             // Must have one of the regex patterns, otherwise false
             $found = ($mat['desc'] ?? null) || ($mat['url'] ?? null);
-            if ($mat['desc'] ?? null) {
+            if (isset($mat['desc'])) {
                 $found &= preg_match($mat['desc'], $link['desc']);
             }
-            if ($mat['url'] ?? null) {
-                $found &= preg_match($mat['url'], $link['url']);
+            if (isset($mat['url'])) {
+                $found &= preg_match($mat['url'], $link['url'] ?? null);
             }
             if ($found) {
                 $label = $mat['label'];
@@ -199,33 +199,44 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
     {
         // NOTE: Make sure this logic matches with getStatus in the GetThisLoader
 
-        $transEsc = null;
         if ($translate === true) {
             $transEsc = $this->getView()->plugin('transEsc');
-        } else {
-            $translate = false;
         }
 
         $status = $holding['status'] ?? 'Unknown';
         $reserve = $holding['reserve'] ?? 'N';
 
         if (
-            in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
-            'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
-            'Unknown', 'Withdrawn'])
+            in_array($status, [
+                'Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
+                'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
+                'Unknown', 'Withdrawn',
+            ])
         ) {
-            $status = ($translate ? $transEsc('Unavailable') : 'Unavailable') .
-                      ' (' . ($translate ? $transEsc($status) : $status) . ')';
+            $statusFirstPart = 'Unavailable';
+            $statusSecondPart = $status;
         } elseif (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged'])) {
-            $status = ($translate ? $transEsc('Checked Out') : 'Checked Out') .
-                      ' (' . ($translate ? $transEsc($status) : $status) . ')';
+            $statusFirstPart = 'Checked Out';
+            $statusSecondPart = $status;
         } elseif ($status == 'Restricted') {
-            $status = $translate ? $transEsc('Library Use Only') : 'Library Use Only';
+            $statusFirstPart = 'Library Use Only';
+            $statusSecondPart = '';
         } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
-            $status = ($translate ? $transEsc('Unknown status') : 'Unknown status') .
-                      ' (' . ($translate ? $transEsc($status) : $status) . ')';
+            $statusFirstPart = 'Unknown status';
+            $statusSecondPart = $status;
         } elseif ($reserve === 'Y') {
-            $status = 'On Reserve';
+            $statusFirstPart = 'On Reserve';
+            $statusSecondPart = '';
+        }
+        if (isset($statusFirstPart, $statusSecondPart)) {
+            if (isset($transEsc)) {
+                $statusFirstPart = $transEsc($statusFirstPart);
+                $statusSecondPart = $transEsc($statusSecondPart);
+            }
+            if (!empty($statusSecondPart)) {
+                $statusSecondPart = ' (' . $statusSecondPart . ')';
+            }
+            $status = $statusFirstPart . $statusSecondPart;
         }
         return $status . $this->getStatusSuffix($holding);
     }
@@ -293,7 +304,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
      *
      * @param string $doi the DOI to validate with LibKey and build the URL with
      *
-     * @return string  JSON data returned from LibKey within the 'data' element
+     * @return string|array  JSON data returned from LibKey within the 'data' element
      */
     private function getLibKeyJSON($doi)
     {
@@ -344,7 +355,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
     /**
      * Load the LibKey configurations from the BrowZine.ini file
      *
-     * @return Null No data returned from this, only sets the configs in class vars
+     * @return void No data returned from this, only sets the configs in class vars
      */
     private function loadLibKeyConfigs()
     {

@@ -19,7 +19,7 @@ RUN \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php \
         php-curl php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml \
-        libapache2-mod-security2 modsecurity-crs && \
+        libapache2-mod-security2 modsecurity-crs uuid-runtime && \
     # TEMP(PART2): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/99
     apt install -y ant && \
     git clone --depth 1 --branch 2.9.4 https://github.com/marc4j/marc4j.git /tmp/marc4j && \
@@ -84,11 +84,6 @@ RUN \
     # Enable bash completion for all users
     echo ". /usr/share/bash-completion/bash_completion" >> /etc/bash.bashrc
 
-# TEMP (VuFind 9.1.1 Cover image vulnerability fix)
-RUN \
-    wget -q 'https://raw.githubusercontent.com/vufind-org/vufind/release-9.1/module/VuFind/src/VuFind/Controller/CoverControllerFactory.php' -O /usr/local/vufind/module/VuFind/src/VuFind/Controller/CoverControllerFactory.php && \
-    wget -q 'https://raw.githubusercontent.com/vufind-org/vufind/release-9.1/module/VuFind/src/VuFind/Controller/CoverController.php' -O /usr/local/vufind/module/VuFind/src/VuFind/Controller/CoverController.php
-
 # TEMP(PART3): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/99
 RUN \
     rm /usr/local/vufind/import/lib/marc4j*.jar && \
@@ -143,8 +138,8 @@ COPY tests/.eslintrc.js /usr/local/vufind/.eslintrc.js
 COPY robots.txt /usr/local/vufind/public/robots.txt
 COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
-COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh \
-    harvest-and-import.sh hlm-harvest-and-import.sh authority-harvest-and-import.sh backup.sh restore.sh /
+COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh backup.sh restore.sh /
+COPY pc-import-folio pc-import-hlm pc-import-authority /usr/local/bin/
 COPY msmtp/aliases msmtp/msmtprc /etc/
 
 # Setup cron and logging for cron

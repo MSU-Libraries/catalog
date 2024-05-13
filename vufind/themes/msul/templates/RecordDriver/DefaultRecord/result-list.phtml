@@ -24,7 +24,7 @@
         <a href="<?=$this->escapeHtmlAttr($recordLinker->getUrl($this->driver))?>" class="title getFull" data-view="<?=isset($this->params) ? $this->params->getOptions()->getListViewOption() : 'list' ?>">
           <?=$this->record($this->driver)->getTitleHtml()?>
         </a>
-        <?php foreach ($this->driver->tryMethod('getTitlesAltScript', [], []) as $altTitle): ?>
+        <?php foreach ($this->driver->tryMethod('getFullTitlesAltScript', [], []) as $altTitle): ?>
           <div class="title-alt">
             <?=$this->escapeHtml($altTitle)?>
           </div>
@@ -170,7 +170,11 @@
 
         <?php $urls = is_array($urls) ? $urls : []; ?>
         <?php if (!$this->driver->isCollection()): ?>
-          <?php foreach ($urls as $current): ?>
+          <?php
+              foreach ($urls as $current):
+                $current['url'] ??= null;
+                $current['desc'] ??= '';
+          ?>
             <?=$this->icon('external-link', 'icon-link__icon') ?>
             <a class="fulltext icon-link" href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url']))?>" target="new">
               <span class="icon-link__label"><?=($current['url'] == $current['desc']) ? $this->transEsc('Get full text') : $this->escapeHtml($current['desc'])?></span>

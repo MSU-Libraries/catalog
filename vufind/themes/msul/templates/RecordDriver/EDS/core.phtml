@@ -13,8 +13,64 @@
     $cover = $coverDetails['html'];
     $libkeyData = $this->record($this->driver)->getLibKeyData($this->driver->getCleanDOI());
 ?>
-<div class="media" vocab="http://schema.org/" resource="#record" typeof="<?=$this->driver->getSchemaOrgFormats()?> Product">
-  <div class="media-left medium img-col">
+<div class="media" vocab="http://schema.org/" resource="#record" typeof="<?=$this->driver->getSchemaOrgFormats()?> Product"> <!--changed order of .media-body and .media-left for a11y PC-502-->
+  <div class="media-body info-col">
+    <h1 property="name"><?=$this->driver->getTitle()?></h1>
+
+    <?php if ($this->driver->getExtraDetail('cached_record') && !$this->translationEmpty('cached_record_warning')): ?>
+      <div class="alert alert-warning">
+        <?=$this->transEsc('cached_record_warning')?>
+      </div>
+    <?php endif; ?>
+
+    <table class="table table-striped">
+      <caption class="sr-only"><?=$this->transEsc('Bibliographic Details')?></caption>
+      <?php foreach ($items as $key => $item): ?>
+        <?php if (!empty($item['Data'])): ?>
+        <tr>
+          <th><?=empty($item['Label']) ? '' : $this->transEsc($item['Label']) . ':'?></th>
+          <td><?=$this->driver->linkUrls($item['Data'])?></td>
+        </tr>
+        <?php endif; ?>
+      <?php endforeach; ?>
+
+      <?php if ($dbLabel): ?>
+        <tr>
+          <th><?=$this->transEsc('Database')?>:</th>
+          <td><?=$this->escapeHtml($dbLabel)?></td>
+        </tr>
+      <?php endif; ?>
+
+    </table>
+
+    <div class="resultItemLine4 custom-links">
+
+    <?php $customLinks = array_merge($this->driver->getFTCustomLinks(), $this->driver->getCustomLinks());
+    if (!empty($customLinks)): ?>
+      <?php foreach ($customLinks as $customLink): ?>
+        <?php
+          $url = $customLink['Url'] ?? '';
+          $mot = $customLink['MouseOverText'] ?? '';
+          $icon = $customLink['Icon'] ?? '';
+          $name = $customLink['Text'] ?? '';
+        ?>
+        <div>
+          <?php if ($icon): ?><img src="<?=$this->escapeHtmlAttr($icon)?>" />
+          <?php else: ?><?=$this->icon('external-link', 'icon-link__icon') ?><?php endif; ?>
+          <a href="<?=$this->escapeHtmlAttr($url)?>" target="_blank" title="<?=$this->escapeHtmlAttr($mot)?>" class="custom-link">
+            <?=$this->escapeHtml($name)?>
+          </a>
+        </div>
+      <?php endforeach; ?>
+    <?php endif; ?>
+
+    <?php $doi = $this->doi($this->driver, 'record'); ?>
+    <?php if ($doi->isActive()): ?>
+      <div><?=$doi->renderTemplate()?></div>
+    <?php endif; ?>
+    </div>
+  </div>
+    <div class="media-left medium img-col">
     <?php if ($cover): ?>
       <?=$cover?>
     <?php endif; ?>
@@ -77,61 +133,5 @@
     <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['issue'],
                                            'label' => 'View Full Issue',
                                            'openAccess' => $libkeyData['openAccess']]); ?>
-  </div>
-  <div class="media-body info-col">
-    <h1 property="name"><?=$this->driver->getTitle()?></h1>
-
-    <?php if ($this->driver->getExtraDetail('cached_record') && !$this->translationEmpty('cached_record_warning')): ?>
-      <div class="alert alert-warning">
-        <?=$this->transEsc('cached_record_warning')?>
-      </div>
-    <?php endif; ?>
-
-    <table class="table table-striped">
-      <caption class="sr-only"><?=$this->transEsc('Bibliographic Details')?></caption>
-      <?php foreach ($items as $key => $item): ?>
-        <?php if (!empty($item['Data'])): ?>
-        <tr>
-          <th><?=empty($item['Label']) ? '' : $this->transEsc($item['Label']) . ':'?></th>
-          <td><?=$this->driver->linkUrls($item['Data'])?></td>
-        </tr>
-        <?php endif; ?>
-      <?php endforeach; ?>
-
-      <?php if ($dbLabel): ?>
-        <tr>
-          <th><?=$this->transEsc('Database')?>:</th>
-          <td><?=$this->escapeHtml($dbLabel)?></td>
-        </tr>
-      <?php endif; ?>
-
-    </table>
-
-    <div class="resultItemLine4 custom-links">
-
-    <?php $customLinks = array_merge($this->driver->getFTCustomLinks(), $this->driver->getCustomLinks());
-    if (!empty($customLinks)): ?>
-      <?php foreach ($customLinks as $customLink): ?>
-        <?php
-          $url = $customLink['Url'] ?? '';
-          $mot = $customLink['MouseOverText'] ?? '';
-          $icon = $customLink['Icon'] ?? '';
-          $name = $customLink['Text'] ?? '';
-        ?>
-        <div>
-          <?php if ($icon): ?><img src="<?=$this->escapeHtmlAttr($icon)?>" />
-          <?php else: ?><?=$this->icon('external-link', 'icon-link__icon') ?><?php endif; ?>
-          <a href="<?=$this->escapeHtmlAttr($url)?>" target="_blank" title="<?=$this->escapeHtmlAttr($mot)?>" class="custom-link">
-            <?=$this->escapeHtml($name)?>
-          </a>
-        </div>
-      <?php endforeach; ?>
-    <?php endif; ?>
-
-    <?php $doi = $this->doi($this->driver, 'record'); ?>
-    <?php if ($doi->isActive()): ?>
-      <div><?=$doi->renderTemplate()?></div>
-    <?php endif; ?>
-    </div>
   </div>
 </div>

@@ -50,3 +50,22 @@ pc-locate-oai in01234 catalog-beta
 # then extract the data for those specific records into a temp file
 pc-locate-oai in00005342798,in00001442723 --extract
 ```
+
+## Record manipulation ([pc-record](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-record?ref_type=heads))
+Helper to manipulate records
+Currently available :
+- Delete :
+delete records from provided files and or inline ids. The script is available on the host
+machines as well as within the `catalog`, `cron` and `build` containers in the `catalog` stack.
+
+```bash
+# delete the record with id hlm.in01234 on catalog-beta
+pc-record delete catalog-beta hlm.in01234
+
+# delete records with ids in input file on devel-robby being verbose
+pc-record delete devel-robby --input file_containing_ids.txt --debug
+
+# show the command to delete the record with id in01234 (folio.in01234 with prefix) on catalog-beta being verbose 
+pc-record delete catalog-beta in01234 --dry-run --vvv --prefix folio
+
+```

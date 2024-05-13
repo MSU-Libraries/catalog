@@ -131,8 +131,8 @@ resources such as Solr and the Traefik dashboard
 * `FOLIO_TENANT`: Tenant ID 
 * `FOLIO_URL`: Okapi URL for FOLIO used by Vufind 
 * `FOLIO_USER`: Application user used by Vufind for ILS calls 
-* `FTP_PASSWORD`: Password for `FTP_USER`
-* `FTP_USER`: User name for the EBSCO FTP server
+* `HLM_FTP_PASSWORD`: Password for `HLM_FTP_USER`
+* `HLM_FTP_USER`: User name for the EBSCO FTP server
 * `GITHUB_USER_TOKEN`: Token used to publish releases to GitHub repository 
 * `MATOMO_SEARCHBACKEND_DIMENSION`: ID for the custom dimension in Matomo to track the search backend used for the request
 * `MATOMO_SITE_ID`: Matomo site identifer for the website you want the analytics sent to
@@ -142,6 +142,7 @@ resources such as Solr and the Traefik dashboard
 * `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation
 * `REGISTRY_ACCESS_TOKEN`: Read-only registry access token used by deploy user
 * `RW_CICD_TOKEN`: Read-Write access token to this repository used to create release tags 
+* `SESSION_BOT_SALT`: Secure random string used in creating persisting session ids for bots (when bot_agent values are set)
 * `SIMPLESAMLPHP_ADMIN_PW`: Password to the admin interface of SimpleSAMLphp
 * `SIMPLESAMLPHP_SALT`: Random salt for SimpleSAMLphp
 

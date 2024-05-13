@@ -856,17 +856,20 @@ class Folio extends \VuFind\ILS\Driver\Folio
                         $this->debug('Found one at index ' . $i);
                         break;
                     } elseif (!isset($tmpPackageId)) {
+                        // Assuming it's better to return one of any package than throwing an exception
+                        // Get the first package id available even if not matching the publisher name
                         $tmpPackageId = $packages->data[$i]->id;
                     }
                 }
             }
-            // Assuming it's better to return one of any package than throwing an exception
-            if (!isset($packageId) && isset($tmpPackageId)) {
-                $packageId = $tmpPackageId;
-                $this->warning('Could not identify the correct package among several publishers, ' .
-                    'selected the first found (' . $publisherName . ')');
-            } else {
-                throw new ILSException('Could not identify single package for publisher');
+            if (!isset($packageId)) {
+                if (isset($tmpPackageId)) {
+                    $packageId = $tmpPackageId;
+                    $this->warning('Could not identify the correct package among several publishers, ' .
+                        'selected the first found (' . $publisherName . ')');
+                } else {
+                    throw new ILSException('Could not identify single package for publisher');
+                }
             }
         } elseif (isset($packages->data[0]->id)) {
             $packageId = $packages->data[0]->id;

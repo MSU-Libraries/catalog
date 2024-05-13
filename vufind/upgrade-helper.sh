@@ -9,7 +9,7 @@ runhelp() {
     echo "Examples: "
     echo "   /upgrade-helper.sh --release v8.1"
     echo "     Updates the local directories to have new data from the v8.1 release tag"
-    echo "   /upgrade-helper.sh --release v8.1 --vufind-repo-path /some/path"
+    echo "   /upgrade-helper.sh --release v8.1 --repo-path /some/path"
     echo "     Updates the local directories to have new data from the v8.1 release tag"
     echo "     and will use the already cloned Vufind repository at /some/path"
     echo ""
@@ -18,6 +18,8 @@ runhelp() {
     echo "     (Required) The release to use for upgrading the local files to"
     echo "  -p|--repo-path PATH"
     echo "     Path to the already cloned Vufind repository. Default: ${VUFIND_HOME}"
+    echo "  -c|--current-release RELEASE"
+    echo "     (Required) The release you are currently on"
     echo "  -v|--verbose"
     echo "      Show verbose output"
     echo ""
@@ -35,6 +37,7 @@ default_args() {
     ARGS[VERBOSE]=0
     ARGS[REPO_PATH]=${VUFIND_HOME}
     ARGS[RELEASE]=
+    ARGS[CURRENT_RELEASE]=
 }
 
 # Parse command arguments
@@ -44,6 +47,9 @@ parse_args() {
         case $1 in
         -r|--release)
             ARGS[RELEASE]="$2"
+            shift; shift ;;
+        -c|--current-release)
+            ARGS[CURRENT_RELEASE]="$2"
             shift; shift ;;
         -p|--repo-path)
             ARGS[REPO_PATH]=$( readlink -f "$2" )
@@ -68,7 +74,7 @@ parse_args() {
 }
 
 required_flags() {
-    REQUIRED=( RELEASE )
+    REQUIRED=( RELEASE CURRENT_RELEASE )
     for REQ in "${REQUIRED[@]}"; do
         if [[ -z "${ARGS[$REQ]}" ]]; then
             echo "FAILURE: Missing required flag --${REQ,,}"
@@ -89,6 +95,7 @@ verbose() {
 main() {
     compare_theme
     compare_local
+    compare_diffs
     compare_db
     compare_solr
 
@@ -120,32 +127,40 @@ main() {
 compare_db() {
     verbose "Comparing database changes made in release ${ARGS[RELEASE]}"
 
-    if ! git -C "${ARGS[REPO_PATH]}" diff HEAD:module/VuFind/sql/mysql.sql --exit-code "${ARGS[RELEASE]}":module/VuFind/sql/mysql.sql; then
+    if ! git -C "${ARGS[REPO_PATH]}" diff ${ARGS[CURRENT_RELEASE]}:module/VuFind/sql/mysql.sql --exit-code "${ARGS[RELEASE]}":module/VuFind/sql/mysql.sql; then
         SUMMARY+=("Database changes detected in ${ARGS[RELEASE]}:module/VuFind/sql/mysql.sql. Will be applied during build and deploy jobs in pipeline.")
     fi
 }
 
 compare_solr() {
     verbose "Comparing Solr changes made in release ${ARGS[RELEASE]}"
-    
-    if ! git -C "${ARGS[REPO_PATH]}" diff --quiet HEAD:solr/ "${ARGS[RELEASE]}":solr/; then
+
+    if ! git -C "${ARGS[REPO_PATH]}" diff --quiet ${ARGS[CURRENT_RELEASE]}:solr/ "${ARGS[RELEASE]}":solr/; then
         SUMMARY+=("Solr changes detected in ${ARGS[RELEASE]}:solr/. Full re-import detected to apply new index")
     fi
 }
 
 compare_theme(){
     verbose "Checking for changes to bootstrap3 theme in ${ARGS[RELEASE]}"
-    
+
     while read -r file; do
         # See if we overrode that file in our theme and will need to apply the updates to it
         if [ -f themes/msul/"$file" ]; then
             SUMMARY+=("${file} --> ${ARGS[RELEASE]}:themes/bootstrap3/$file")
             # Don't print the diff for any compiled files since those are not helpful at all
             if [[ ! "$file" =~ "compiled" ]]; then
-                git -C "${ARGS[REPO_PATH]}" diff HEAD:themes/bootstrap3/$file "${ARGS[RELEASE]}":themes/bootstrap3/$file
+                git -C "${ARGS[REPO_PATH]}" diff ${ARGS[CURRENT_RELEASE]}:themes/bootstrap3/$file "${ARGS[RELEASE]}":themes/bootstrap3/$file
             fi
         fi
-    done < <(git -C "${ARGS[REPO_PATH]}" diff --name-only HEAD:themes/bootstrap3 "${ARGS[RELEASE]}":themes/bootstrap3) 
+    done < <(git -C "${ARGS[REPO_PATH]}" diff --name-only ${ARGS[CURRENT_RELEASE]}:themes/bootstrap3 "${ARGS[RELEASE]}":themes/bootstrap3)
+}
+
+compare_diffs(){
+    verbose "Looking for equivilent files in changes"
+
+    while read -r file; do
+        SUMMARY+=("${file} May have had it's core file updated this release")
+    done < <(git -C ../vufind diff --name-only ${ARGS[CURRENT_RELEASE]} ${ARGS[RELEASE]} | xargs -n1 basename | xargs -n1 find . -name)
 }
 
 compare_local() {
@@ -166,7 +181,7 @@ compare_local() {
             local repoPath="${current#local/}"
             repoPath=${repoPath:1}
             SUMMARY+=("${orig/\/\//\/} -->  ${ARGS[RELEASE]}:${repoPath}")
-            git -C "${ARGS[REPO_PATH]}" diff HEAD:"$repoPath" "${ARGS[RELEASE]}":"$repoPath"
+            git -C "${ARGS[REPO_PATH]}" diff ${ARGS[CURRENT_RELEASE]}:"$repoPath" "${ARGS[RELEASE]}":"$repoPath"
           fi
         fi
     done

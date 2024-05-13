@@ -14,8 +14,8 @@ default_args() {
     ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/hlm
     ARGS[FTP_SERVER]=atozftp.ebsco.com
     ARGS[FTP_DIR]=s8364774/vufind/
-    ARGS[FTP_USER]=${FTP_USER}
-    ARGS[FTP_PASSWORD]=${FTP_PASSWORD}
+    ARGS[FTP_USER]=${HLM_FTP_USER}
+    ARGS[FTP_PASSWORD]=${HLM_FTP_PASSWORD}
     ARGS[SHARED_DIR]=/mnt/hlm
     ARGS[DRY_RUN]=0
     ARGS[VERBOSE]=0
@@ -85,10 +85,10 @@ runhelp() {
     echo "      Default: ${ARGS[FTP_DIR]}"
     echo "  -U|--ftp-user FTP_USER"
     echo "      User for connecting to the FTP server"
-    echo "      Default: Stored in the environment variable \$FTP_USER"
+    echo "      Default: Stored in the environment variable \$HLM_FTP_USER"
     echo "  -P|--ftp-password FTP_PASSWORD"
     echo "      Password for connecting to the FTP server"
-    echo "      Default: Stored in the environment variable \$FTP_PASSWORD"
+    echo "      Default: Stored in the environment variable \$HLM_FTP_PASSWORD"
     echo "  -v|--verbose"
     echo "      Show verbose output."
     echo ""
