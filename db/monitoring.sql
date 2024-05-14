@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS `data` (
     `response_time` INT
 );
 
-GRANT ALL PRIVILEGES ON monitoring.* TO 'monitoring'@'%' identified by '${MARIADB_MONITORING_PASSWORD}';
+-- GRANT ALL PRIVILEGES ON monitoring.* TO 'monitoring'@'%' identified by '${MARIADB_MONITORING_PASSWORD}'; -- TODO
+# GRANT ALL PRIVILEGES ON monitoring.* TO 'monitoring'@'%' identified by '${MARIADB_MONITORING_PASSWORD_FILE}';
+GRANT ALL PRIVILEGES ON monitoring.* TO 'monitoring'@'%' identified by '${MARIADB_MONITORING_PASSWORD_TMP}';
 
 FLUSH PRIVILEGES;
