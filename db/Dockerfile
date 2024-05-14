@@ -24,4 +24,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=45s --retries=12 \
   CMD /healthcheck.sh
 
 ENTRYPOINT [ "/cloud-entrypoint.sh" ]
-CMD [ "/cloud-startup.sh" ]
+CMD [ "/cloud-startup.sh", "test-debug" ]

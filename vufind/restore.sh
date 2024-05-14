@@ -227,6 +227,7 @@ restore_db() {
     fi
     BACKUP="$(find /tmp/restore -type f -name "galera${NODE}-*.sql.gz")"
 
+    # TODO Here MARIADB_ROOT_PASSWORD_FILE seems to come from vufind container
     verbose "Temporarily setting Galera node to desychronized state"
     if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SET GLOBAL wsrep_desync = ON" 2>&1); then
         # Check if it was a false negative and the state was actually set
