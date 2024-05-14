@@ -9,7 +9,7 @@ runhelp() {
     echo "Expected User-defined Variables:"
     echo "  - STACK_NAME: Name of the stack"
     echo "  - SITE_HOSTNAME: URL for the site"
-    echo "  - BASICAUTH_FOR_RESOURCES: Authenication to use for developer resources (i.e. Traefik and Solr)"
+    echo "  - BASICAUTH_FOR_RESOURCES: Authentication to use for developer resources (i.e. Traefik and Solr)"
     echo "  - GITHUB_USER_TOKEN: Used when downloading yq from Github"
     echo "  - DEPLOY_HOST_A: The first host in the cluster"
     echo "  - COMPOSE_PATH: Where to put the docker-compose files on the DEPLOY_HOST_A server"
@@ -211,7 +211,7 @@ apply_prod_changes() {
 
     ## Changes for catalog-prod
     if [ "${STACK_NAME}" == "catalog-prod" ]; then
-        # Set cron/build placement contraint
+        # Set cron/build placement constraint
         ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_A}\"]" docker-compose.catalog.yml;
         ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_A}\"]" docker-compose.build.yml;
         # Increase Solr RAM to 4 GB (prod is granted more than non-prod envs)
@@ -279,6 +279,12 @@ restrict_oai() {
 }
 
 main() {
+    echo "
+  MARIADB_ROOT_PASSWORD: \"${MARIADB_ROOT_PASSWORD}\"
+  MARIADB_GALERA_MARIABACKUP_PASSWORD: \"${MARIADB_GALERA_MARIABACKUP_PASSWORD}\"
+  MARIADB_PASSWORD: \"${MARIADB_VUFIND_PASSWORD}\"
+  MARIADB_MONITORING_PASSWORD: \"${MARIADB_MONITORING_PASSWORD}\""
+  exit 1
     # Install yq, enbsubst, and sponge
     apk add wget gettext moreutils;
     wget --header="Authorization: token ${GITHUB_USER_TOKEN}" \
