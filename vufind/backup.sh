@@ -231,9 +231,9 @@ backup_collection() {
 reset_db() {
     # DB_NODE is declared in backup_db() function
     verbose "Re-enabling Galera node to sychronized state"
-    if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SET GLOBAL wsrep_desync = OFF" 2>&1); then
+    if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p < "$MARIADB_ROOT_PASSWORD_FILE" -e "SET GLOBAL wsrep_desync = OFF" 2>&1); then
         # Check if it was a false negative and the state was actually set
-        if ! mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
+        if ! mysql -h "$DB_NODE" -u root -p < "$MARIADB_ROOT_PASSWORD_FILE" -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
           | grep 0 > /dev/null 2>&1; then
             verbose "ERROR: Failed to re-set node to synchronized state after dump was complete. ${OUTPUT}" 1
             exit 1
@@ -254,9 +254,9 @@ backup_db() {
     trap reset_db SIGTERM SIGINT EXIT
 
     verbose "Temporarily setting Galera node to desychronized state (using node $DB_NODE)"
-    if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SET GLOBAL wsrep_desync = ON" 2>&1); then
+    if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p < "$MARIADB_ROOT_PASSWORD_FILE" -e "SET GLOBAL wsrep_desync = ON" 2>&1); then
         # Check if it was a false negative and the state was actually set
-        if ! mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
+        if ! mysql -h "$DB_NODE" -u root -p < "$MARIADB_ROOT_PASSWORD_FILE" -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
           | grep 1 > /dev/null 2>&1; then
             verbose "ERROR: Failed to set node to desychronized state. Unsafe to continue backup. ${OUTPUT}" 1
             exit 1
@@ -268,11 +268,11 @@ backup_db() {
     verbose "Starting backup of database"
     TIMESTAMP=$( date +%Y%m%d%H%M%S )
     for DB in "${DBS[@]}"; do
-        if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p"$MARIADB_ROOT_PASSWORD" --triggers --routines --single-transaction --skip-lock-tables --column-statistics=0 --no-data  vufind 2>&1 > >(gzip > ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql.gz )); then
+        if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p < "$MARIADB_ROOT_PASSWORD_FILE" --triggers --routines --single-transaction --skip-lock-tables --column-statistics=0 --no-data  vufind 2>&1 > >(gzip > ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql.gz )); then
             verbose "ERROR: Failed to successfully backup the database structure from ${DB}. ${OUTPUT}" 1
             exit 1
         fi
-        if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p"$MARIADB_ROOT_PASSWORD" --quick --single-transaction --skip-lock-tables --column-statistics=0 --no-create-info --ignore-table=vufind.session --ignore-table=vufind.SimpleSAMLphp_kvstore --ignore-table=vufind.SimpleSAMLphp_saml_LogoutStore vufind 2>&1 > >(gzip >> ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql.gz )); then
+        if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p < "$MARIADB_ROOT_PASSWORD_FILE" --quick --single-transaction --skip-lock-tables --column-statistics=0 --no-create-info --ignore-table=vufind.session --ignore-table=vufind.SimpleSAMLphp_kvstore --ignore-table=vufind.SimpleSAMLphp_saml_LogoutStore vufind 2>&1 > >(gzip >> ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql.gz )); then
 
             verbose "ERROR: Failed to successfully backup the database from ${DB}. ${OUTPUT}" 1
             exit 1
