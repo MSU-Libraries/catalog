@@ -9,7 +9,7 @@ runhelp() {
     echo "Expected User-defined Variables:"
     echo "  - STACK_NAME: Name of the stack"
     echo "  - SITE_HOSTNAME: URL for the site"
-    echo "  - BASICAUTH_FOR_RESOURCES: Authenication to use for developer resources (i.e. Traefik and Solr)"
+    echo "  - BASICAUTH_FOR_RESOURCES: Authentication to use for developer resources (i.e. Traefik and Solr)"
     echo "  - GITHUB_USER_TOKEN: Used when downloading yq from Github"
     echo "  - DEPLOY_HOST_A: The first host in the cluster"
     echo "  - COMPOSE_PATH: Where to put the docker-compose files on the DEPLOY_HOST_A server"
@@ -211,7 +211,7 @@ apply_prod_changes() {
 
     ## Changes for catalog-prod
     if [ "${STACK_NAME}" == "catalog-prod" ]; then
-        # Set cron/build placement contraint
+        # Set cron/build placement constraint
         ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_A}\"]" docker-compose.catalog.yml;
         ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_A}\"]" docker-compose.build.yml;
         # Increase Solr RAM to 4 GB (prod is granted more than non-prod envs)
@@ -278,8 +278,25 @@ restrict_oai() {
     export LINE; ./yq -i '.services.catalog.deploy.labels += env(LINE)' docker-compose.catalog.yml
 }
 
+# set_or_update_docker_secret $SECRET_NAME $SECRET_VALUE
+set_or_update_docker_secret() {
+    SECRET_NAME="${STACK_NAME}-$1"
+    SECRET_VALUE="$2"
+    # Check if the secret exists and creating it
+    if ! ssh deploy@"${DEPLOY_HOST_A}" docker secret inspect "${SECRET_NAME}" > /dev/null 2>&1; then
+        echo "Creating secret ${SECRET_NAME}"
+        printf "%s" "${SECRET_VALUE}" | ssh deploy@"${DEPLOY_HOST_A}" docker secret create "${SECRET_NAME}" -
+    fi
+}
+
 main() {
-    # Install yq, enbsubst, and sponge
+    set_or_update_docker_secret "MARIADB_MONITORING_PASSWORD" "${MARIADB_MONITORING_PASSWORD}"
+    set_or_update_docker_secret "MARIADB_ROOT_PASSWORD" "${MARIADB_ROOT_PASSWORD}"
+    set_or_update_docker_secret "MARIADB_GALERA_MARIABACKUP_PASSWORD" "${MARIADB_GALERA_MARIABACKUP_PASSWORD}"
+    set_or_update_docker_secret "MARIADB_PASSWORD" "${MARIADB_VUFIND_PASSWORD}"
+    set_or_update_docker_secret "MARIADB_VUFIND_PASSWORD" "${MARIADB_VUFIND_PASSWORD}"
+
+    # Install yq, envsubst, and sponge
     apk add wget gettext moreutils;
     wget --header="Authorization: token ${GITHUB_USER_TOKEN}" \
     "https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64" -O ./yq;
@@ -289,6 +306,15 @@ main() {
     for f in *.yml; do
         sed -i -e "/#include vufind-envs/r vufind-envs" -e "/#include vufind-envs/d" "$f"
     done
+
+    # Replace secret pattern to specify their stack :
+    # /run/secrets/MARIADB_ROOT_PASSWORD => /run/secrets/${STACK_NAME}-MARIADB_ROOT_PASSWORD
+    for f in *.yml; do
+        sed -i "s|/run/secrets/|/run/secrets/${STACK_NAME}-|g" "$f"
+    done
+    yq eval ".services.galera.secrets |= map(\"${STACK_NAME}-\" + .)" ./*.yml
+    # /!\ if we add secrets which are not external they will also be prefixed
+    yq eval ".secrets |= with_entries(.key |= \"${STACK_NAME}-\" + .)" docker-compose.mariadb-cloud.yml
 
     # Development environment changes
     if [[ "${STACK_NAME}" != catalog-* ]]; then
