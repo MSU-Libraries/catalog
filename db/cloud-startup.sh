@@ -119,6 +119,23 @@ galera_node_query() {
         (( ROW_CNT+=1 ))
         declare -g -a ROW_$ROW_CNT
     done < <( timeout 2 mysql -h "$NODE" -u root -p"$MARIADB_ROOT_PASSWORD" --silent -e "$QUERY" )
+#    done < <( timeout 2 mysql -h "$NODE" -u root -p"$(ls "${MARIADB_ROOT_PASSWORD_FILE}")" --silent -e "$QUERY" )
+#    # TODO HERE MARIADB_ROOT_PASSWORD_FILE is empty
+#    verbose "test1 \"${MARIADB_ROOT_PASSWORD_FILE}\""
+#    verbose "test2 \"${MARIADB_ROOT_PASSWORD_FILE2}\""
+#    verbose "test3 \"${MARIADB_ROOT_PASSWORD_FILE3}\""
+#    verbose "test4 $(cat "${MARIADB_ROOT_PASSWORD_FILE}")"
+#    verbose "test5 $(cat "${MARIADB_ROOT_PASSWORD_FILE}")"
+#    verbose "test6 $(cat "/run/secrets/MARIADB_ROOT_PASSWORD")"
+#    verbose "test7 \"${MARIADB_ROOT_PASSWORD_TEST}\""
+# ::galera1 [2024-05-17 16:23:29]: test ""
+# ::galera1 [2024-05-17 16:23:29]: test-2 "/run/secrets/MARIADB_ROOT_PASSWORD"
+# ::galera1 [2024-05-17 16:23:29]: test-3 "/healthcheck.sh"
+# cat: '': No such file or directory
+# ::galera1 [2024-05-17 16:23:29]: test2
+# ::galera1 [2024-05-17 16:23:29]: test3 uk1Vn8BQWTQ0R2HK
+
+
     return $ROW_CNT
 }
 
@@ -444,5 +461,13 @@ catch_sig() {
 
 # Using WINCH as USR1 and USR2 may be used by mysqld
 trap catch_sig SIGWINCH
+
+verbose "test1 \"${MARIADB_ROOT_PASSWORD_FILE}\""
+verbose "test2 \"${MARIADB_ROOT_PASSWORD_FILE2}\""
+verbose "test3 \"${MARIADB_ROOT_PASSWORD_FILE3}\""
+verbose "test4 $(cat "${MARIADB_ROOT_PASSWORD_FILE}")"
+verbose "test5 $(cat "${MARIADB_ROOT_PASSWORD_FILE}")"
+verbose "test6 $(cat "/run/secrets/MARIADB_ROOT_PASSWORD")"
+verbose "test7 \"${MARIADB_ROOT_PASSWORD_TEST}\""
 
 galera_slow_startup
