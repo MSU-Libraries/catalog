@@ -46,6 +46,12 @@ prunevols() {
     fi
 }
 
+removesecrets() {
+    # shellcheck disable=SC2207
+    SECRET_IDS=($(ssh deploy@"${DEPLOY_HOST_A}" "docker secret ls --filter name=${STACK_NAME} --format \"{{.ID}}\""))
+    ssh deploy@"${DEPLOY_HOST_A}" "docker secret rm ${SECRET_IDS[*]}"
+}
+
 main() {
     # Add .aws credentials
     envsubst < provision-dns-playbook/variables.yml | sponge provision-dns-playbook/variables.yml;
