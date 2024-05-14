@@ -8,8 +8,12 @@ set -o pipefail
 # set -o xtrace # Uncomment this line for debugging purposes
 
 # Set monitoring db password in sql file, then unset the env variable
-envsubst < /docker-entrypoint-initdb.d/monitoring.sql | sponge /docker-entrypoint-initdb.d/monitoring.sql
-unset MARIADB_MONITORING_PASSWORD
+#MARIADB_MONITORING_PASSWORD_TMP=$(cat "$MARIADB_MONITORING_PASSWORD_FILE")
+#envsubst < /docker-entrypoint-initdb.d/monitoring.sql | sponge /docker-entrypoint-initdb.d/monitoring.sql
+sed "s|\${MARIADB_MONITORING_PASSWORD_FILE}|$(<"$MARIADB_MONITORING_PASSWORD_FILE")|g" \
+    /docker-entrypoint-initdb.d/monitoring.sql | sponge /docker-entrypoint-initdb.d/monitoring.sql
+#unset MARIADB_MONITORING_PASSWORD_TMP # TODO
+#unset MARIADB_MONITORING_PASSWORD # TODO
 
 # Load libraries
 . /opt/bitnami/scripts/libbitnami.sh

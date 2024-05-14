@@ -119,6 +119,12 @@ galera_node_query() {
         (( ROW_CNT+=1 ))
         declare -g -a ROW_$ROW_CNT
     done < <( timeout 2 mysql -h "$NODE" -u root -p"$MARIADB_ROOT_PASSWORD" --silent -e "$QUERY" )
+#    done < <( timeout 2 mysql -h "$NODE" -u root -p"$(ls "${MARIADB_ROOT_PASSWORD_FILE}")" --silent -e "$QUERY" )
+    # TODO HERE MARIADB_ROOT_PASSWORD_FILE is empty
+    verbose "test \"${MARIADB_ROOT_PASSWORD_FILE}\""
+    verbose "test2 $(cat "${MARIADB_ROOT_PASSWORD_FILE}")"
+    verbose "test3 $(cat "/run/secrets/MARIADB_ROOT_PASSWORD")"
+    verbose "test4 \"${MARIADB_ROOT_PASSWORD_TEST}\""
     return $ROW_CNT
 }
 

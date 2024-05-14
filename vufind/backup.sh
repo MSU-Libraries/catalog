@@ -231,6 +231,7 @@ backup_collection() {
 reset_db() {
     # DB_NODE is declared in backup_db() function
     verbose "Re-enabling Galera node to sychronized state"
+    # TODO Here MARIADB_ROOT_PASSWORD_FILE seems to come from vufind container
     if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SET GLOBAL wsrep_desync = OFF" 2>&1); then
         # Check if it was a false negative and the state was actually set
         if ! mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
@@ -254,6 +255,7 @@ backup_db() {
     trap reset_db SIGTERM SIGINT EXIT
 
     verbose "Temporarily setting Galera node to desychronized state (using node $DB_NODE)"
+    # TODO Here MARIADB_ROOT_PASSWORD_FILE seems to come from vufind container
     if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SET GLOBAL wsrep_desync = ON" 2>&1); then
         # Check if it was a false negative and the state was actually set
         if ! mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
@@ -268,6 +270,7 @@ backup_db() {
     verbose "Starting backup of database"
     TIMESTAMP=$( date +%Y%m%d%H%M%S )
     for DB in "${DBS[@]}"; do
+        # TODO Here MARIADB_ROOT_PASSWORD_FILE seems to come from vufind container
         if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p"$MARIADB_ROOT_PASSWORD" --triggers --routines --single-transaction --skip-lock-tables --column-statistics=0 --no-data  vufind 2>&1 > >(gzip > ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql.gz )); then
             verbose "ERROR: Failed to successfully backup the database structure from ${DB}. ${OUTPUT}" 1
             exit 1
