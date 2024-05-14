@@ -39,7 +39,7 @@ then repeat the database migration steps once the pipeline completes.
 
 * It is recommended to do a reindex of Solr to apply the latest schema changes, if the helper script
 detected any. In order to do this, you will need to run the
-[pc-import-folio script](https://github.com/MSU-Libraries/catalog/blob/main/vufind/pc-import-folio)
+[pc-import-folio script](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-folio)
 copying back the last full harvest and doing only an import:
 ```
 mv /usr/local/vufind/local/harvest/folio/processed/* /usr/local/vufind/local/harvest/folio/
