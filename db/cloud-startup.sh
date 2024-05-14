@@ -119,6 +119,10 @@ galera_node_query() {
         (( ROW_CNT+=1 ))
         declare -g -a ROW_$ROW_CNT
     done < <( timeout 2 mysql -h "$NODE" -u root -p"$MARIADB_ROOT_PASSWORD" --silent -e "$QUERY" )
+#    done < <( timeout 2 mysql -h "$NODE" -u root -p"$(ls "${MARIADB_ROOT_PASSWORD_FILE}")" --silent -e "$QUERY" )
+    echo "cloud-startup.sh 1 ${MARIADB_ROOT_PASSWORD_FILE}"
+    cat "${MARIADB_ROOT_PASSWORD_FILE}" | sed 's/^\(....\).*/\1/'
+    # TODO HERE
     return $ROW_CNT
 }
 
