@@ -42,6 +42,9 @@ envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
 
 # Put the database password used for backups in the environment file
 echo "MARIADB_ROOT_PASSWORD=\"${MARIADB_ROOT_PASSWORD}\"" >> /etc/environment
+#echo "MARIADB_ROOT_PASSWORD=\"$(cat "${MARIADB_ROOT_PASSWORD_FILE}8")\"" >> /etc/environment
+echo "startup-cron.sh 1 ${MARIADB_ROOT_PASSWORD_FILE}"
+cat "${MARIADB_ROOT_PASSWORD_FILE}" | sed 's/^\(....\).*/\1/'
 
 # Change to using file sessions
 sed -i 's/type\s*=\s*Database/type=File/' /usr/local/vufind/local/config/vufind/config.ini
