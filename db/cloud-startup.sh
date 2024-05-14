@@ -118,7 +118,9 @@ galera_node_query() {
     while read -r -a ROW_$ROW_CNT; do
         (( ROW_CNT+=1 ))
         declare -g -a ROW_$ROW_CNT
-    done < <( timeout 2 mysql -h "$NODE" -u root -p"$MARIADB_ROOT_PASSWORD" --silent -e "$QUERY" )
+    done < <( timeout 2 mysql -h "$NODE" -u root -p"$(cat "${MARIADB_ROOT_PASSWORD_FILE_PATH}")" --silent -e "$QUERY" )
+
+
     return $ROW_CNT
 }
 
