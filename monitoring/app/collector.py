@@ -80,8 +80,11 @@ def main():
     response_time = log_results['response_time']
     conn = None
     try:
-        conn = db.connect(user='monitoring', password=os.getenv('MARIADB_MONITORING_PASSWORD'), host='galera',
-            database="monitoring")
+        with open(os.getenv('MARIADB_MONITORING_PASSWORD_FILE'), 'r') as f:
+            password = f.read().strip()
+            f.close()
+        conn = db.connect(user='monitoring', password=password, host='galera', database="monitoring")
+        del password
         cur = conn.cursor()
         statement = "INSERT INTO data (node, time, available_memory, available_disk_space, " \
             "apache_requests, response_time) VALUES (%s, %s, %s, %s, %s, %s)"
