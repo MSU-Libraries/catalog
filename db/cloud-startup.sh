@@ -119,6 +119,23 @@ galera_node_query() {
         (( ROW_CNT+=1 ))
         declare -g -a ROW_$ROW_CNT
     done < <( timeout 2 mysql -h "$NODE" -u root -p"$MARIADB_ROOT_PASSWORD" --silent -e "$QUERY" )
+#    done < <( timeout 2 mysql -h "$NODE" -u root -p"$(ls "${MARIADB_ROOT_PASSWORD_FILE}")" --silent -e "$QUERY" )
+    # TODO HERE MARIADB_ROOT_PASSWORD_FILE is empty
+    verbose "test \"${MARIADB_ROOT_PASSWORD_FILE}\""
+    verbose "test-2 \"${MARIADB_ROOT_PASSWORD_FILE2}\""
+    verbose "test-3 \"${MARIADB_ROOT_PASSWORD_FILE3}\""
+    verbose "test2 $(cat "${MARIADB_ROOT_PASSWORD_FILE}")"
+    verbose "test-3 $(cat "${MARIADB_ROOT_PASSWORD_FILE}")"
+    verbose "test3 $(cat "/run/secrets/MARIADB_ROOT_PASSWORD")"
+    verbose "test4 \"${MARIADB_ROOT_PASSWORD_TEST}\""
+# ::galera2 [2024-05-17 16:00:13]: test ""
+# cat: '': No such file or directory
+# ::galera2 [2024-05-17 16:00:13]: test2
+# ::galera2 [2024-05-17 16:00:13]: test3 uk1Vn8BQWTQ0R2HK
+# ::galera2 [2024-05-17 16:00:13]: test4 "COUCOU"
+# ::galera2 [2024-05-17 16:00:13]: Number of rows returned from 10.0.15.147: 2
+# ::galera2 [2024-05-17 16:00:13]: After checking cluster, found node 2 0 time(s) in the cluster
+
     return $ROW_CNT
 }
 
