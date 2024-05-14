@@ -13,8 +13,11 @@ from util import ExecException, async_exec, multiple_get, async_single_get, get_
 
 async def _node_cluster_state_uuid() -> str:
     try:
+        with open(os.getenv('MARIADB_VUFIND_PASSWORD_FILE'), 'r') as f:
+            password = f.read().strip()
+            f.close()
         return await async_exec("mysql", "-h", "galera", "-u", "vufind",
-            f"-p{os.getenv('MARIADB_VUFIND_PASSWORD')}", "-ss", "-e",
+            f"-p{password}", "-ss", "-e",
             "SELECT variable_value from information_schema.global_status WHERE " \
             "variable_name='wsrep_cluster_state_uuid';")
     except ExecException as ex:
@@ -30,9 +33,13 @@ def _check_cluster_state_uuid(statuses: list[dict]) -> bool:
 
 async def get_galera_status(statuses: list[dict]) -> str:
     try:
+        with open(os.getenv('MARIADB_VUFIND_PASSWORD_FILE'), 'r') as f:
+            password = f.read().strip()
+            f.close()
         cluster_size = await async_exec("mysql", "-h", "galera", "-u", "vufind",
-            f"-p{os.getenv('MARIADB_VUFIND_PASSWORD')}", "-ss", "-e",
+            f"-p{password}", "-ss", "-e",
             "SELECT variable_value from information_schema.global_status WHERE variable_name='wsrep_cluster_size';")
+        del password
     except ExecException as ex:
         return f"Error checking the galera status: {ex}"
     except asyncio.TimeoutError:
