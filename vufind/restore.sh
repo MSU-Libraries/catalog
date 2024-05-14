@@ -229,8 +229,10 @@ restore_db() {
 
     verbose "Temporarily setting Galera node to desychronized state"
     if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SET GLOBAL wsrep_desync = ON" 2>&1); then
+#    if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p"$(cat "${MARIADB_ROOT_PASSWORD_FILE}7")" -e "SET GLOBAL wsrep_desync = ON" 2>&1); then
         # Check if it was a false negative and the state was actually set
         if ! mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
+#        if ! mysql -h "$DB_NODE" -u root -p"$(cat "$MARIADB_ROOT_PASSWORD_FILE")" -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
           | grep 1 > /dev/null 2>&1; then
             verbose "ERROR: Failed to set node to desychronized state. Unsafe to continue restore. ${OUTPUT}" 1
             exit 1
@@ -239,14 +241,17 @@ restore_db() {
 
     verbose "Starting restore of database using ${BACKUP}"
     if ! OUTPUT=$(gunzip < "${BACKUP}" | mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" vufind 2>&1); then
+#    if ! OUTPUT=$(gunzip < "${BACKUP}" | mysql -h "$DB_NODE" -u root -p"$(cat "$MARIADB_ROOT_PASSWORD_FILE")" vufind 2>&1); then
         verbose "ERROR: Failed to successfully restore the database. ${OUTPUT}" 1
         exit 1
     fi
 
     verbose "Re-enabling Galera node to sychronized state"
     if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SET GLOBAL wsrep_desync = OFF" 2>&1); then
+#    if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p"$(cat "$MARIADB_ROOT_PASSWORD_FILE")" -e "SET GLOBAL wsrep_desync = OFF" 2>&1); then
         # Check if it was a false negative and the state was actually set
         if ! mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
+#        if ! mysql -h "$DB_NODE" -u root -p"$(cat "$MARIADB_ROOT_PASSWORD_FILE")" -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
           | grep 0 > /dev/null 2>&1; then
             verbose "ERROR: Failed to re-set node to synchronized state after restore was complete. ${OUTPUT}" 1
             exit 1
