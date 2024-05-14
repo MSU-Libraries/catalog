@@ -3,12 +3,12 @@
     All of these commands should be run within the `catalog` or `cron` Docker container
 
 ## Script Summary
-* [pc-import-folio](https://github.com/MSU-Libraries/catalog/blob/main/vufind/pc-import-folio): 
+* [pc-import-folio](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-folio): 
 Used to harvest and import FOLIO MARC data into the `biblio` collection of Solr.  
-* [pc-import-hlm](https://github.com/MSU-Libraries/catalog/blob/main/vufind/pc-import-hlm):
+* [pc-import-hlm](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-hlm):
 Used to harvest and import EBSCO MARC data into the `biblio` collection of Solr from the FTP location given
 access to by EBSCO. The records contain the HLM dataset that is missing from FOLIO's database.  
-* [pc-import-authority](https://github.com/MSU-Libraries/catalog/blob/main/vufind/pc-import-authority):
+* [pc-import-authority](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-authority):
 Used to harvest and import MARC data from Backstage into the `authority` collection in Solr from the FTP location
 provided by Backstage.  
 * [cron-reserves.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/cron-reserves.sh):
@@ -258,7 +258,7 @@ save logs to `/mnt/logs/vufind/reserves_latest.log` and track them in the Monito
 
 ## Using VuFind Utilities
 The preferred method is to use the included wrapper script with this repository.
-The [pc-import-folio](https://github.com/MSU-Libraries/catalog/blob/main/vufind/pc-import-folio)
+The [pc-import-folio](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-folio)
 script can run either, or both, the harvest and import of data from FOLIO to Vufind. Use the `--help` flag
 to get information on how to run that script.
 
