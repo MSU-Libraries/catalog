@@ -75,19 +75,25 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      * as an array
      * (ex: ['subA subB subC', 'field2SubA field2SubB'])
      *
-     * @param string $field    Marc field to search within
-     * @param array  $subfield Sub-fields to return or empty for all
+     * @param string $field Marc field to search within
+     * @param array  $codes Sub-fields to return or empty for all
      *
      * @return array The values within the subfields under the field
      */
-    public function getNotesMarcFields(string $field, ?array $subfield = null)
+    public function getNotesMarcFields(string $field, ?array $codes = [])
     {
         $vals = [];
         $marc = $this->getMarcReader();
-        $marc_fields = $marc->getFields($field, $subfield);
+        // Add '6' to codes if not null
+        if ($codes != null && count($codes) != 0) {
+            $codes[] = '6';
+        }
+        $marc_fields = $marc->getFields($field, $codes);
         foreach ($marc_fields as $marc_data) {
             $exclude = false;
+            $tmp = [];
             $val = '';
+            $link = '';
             $subfields = $marc_data['subfields'];
             foreach ($subfields as $subfield) {
                 // exclude field from display if value of subfield 5 is not MiEM
@@ -99,10 +105,24 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 if ($subfield['code'] == '5') {
                     continue;
                 }
-                $val .= $subfield['data'] . ' ';
+                if ($subfield['code'] == '6' && count(explode('-', $subfield['data'])) > 0) {
+                    $index = explode('-', $subfield['data'])[1];
+                    $linked = $marc->getLinkedField('880', $field, $index, $codes);
+                    if (isset($linked['subfields'])) {
+                        $linkval = '';
+                        foreach ($linked['subfields'] as $rec) {
+                            $linkval = $linkval . ' ' . $rec['data'];
+                        }
+                        $link = rtrim(rtrim(trim($linkval), ','), '.');
+                    }
+                } elseif ($subfield['code'] != '6') {
+                    $val .= $subfield['data'] . ' ';
+                }
             }
             if (!$exclude) {
-                $vals[] = trim($val);
+                $tmp['note'] = trim($val);
+                $tmp['link'] = $link;
+                $vals[] = $tmp;
             }
         }
         return $vals;
@@ -986,6 +1006,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         return array_merge(
             $this->getUniformTitleFromMarc('130', range('a', 'z')),
             $this->getUniformTitleFromMarc('240', range('a', 'z')),
+            $this->getUniformTitleFromMarc('830', range('a', 'z')),
         );
     }
 
@@ -1001,14 +1022,31 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         $vals = [];
         $marc = $this->getMarcReader();
+        // Add '6' to codes if not null
+        if ($codes != null && count($codes) != 0) {
+            $codes[] = '6';
+        }
         $marc_fields = $marc->getFields($field, $codes);
         foreach ($marc_fields as $marc_data) {
             $subfields = $marc_data['subfields'];
-            $tmpVal = ['name' => [], 'value' => []];
+            $tmpVal = ['name' => [], 'value' => [], 'link' => ''];
             foreach ($subfields as $subfield) {
-                if ($subfield['code'] == 'a' || $subfield['code'] == 'p') {
+                // check if it has link data
+                if ($subfield['code'] == '6' && count(explode('-', $subfield['data'])) > 0) {
+                    $index = explode('-', $subfield['data'])[1];
+                    $linked = $marc->getLinkedField('880', $field, $index, $codes);
+                    if (isset($linked['subfields'])) {
+                        $val = '';
+                        foreach ($linked['subfields'] as $rec) {
+                            $val = $val . ' ' . $rec['data'];
+                        }
+                        $tmpVal['link'] = rtrim(rtrim(trim($val), ','), '.');
+                    }
+                } elseif ($subfield['code'] == 'a' || $subfield['code'] == 'p') {
+                    // get the title name used for the search link
                     $tmpVal['name'][] = $subfield['data'];
                 } else {
+                    // get the data to display
                     $tmpVal['value'][] = $subfield['data'];
                 }
             }
@@ -1216,11 +1254,12 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         $titles = [];
         $marc = $this->getMarcReader();
-        $marcArr246 = $marc->getFields('246', ['a', 'b', 'i']);
+        $marcArr246 = $marc->getFields('246', ['a', 'b', 'i', '6']);
 
         foreach ($marcArr246 as $marc246) {
             $type = '';
             $title = '';
+            $link = '';
 
             // Make sure there is an 'a' subfield in this record to get the title
             if (in_array('a', array_column($marc246['subfields'], 'code'))) {
@@ -1232,6 +1271,20 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                             break;
                         case 'b':
                             $b = ' ' . $subfield['data'];
+                            break;
+                        case '6':
+                            // check if it has link data
+                            if (count(explode('-', $subfield['data'])) > 0) {
+                                $index = explode('-', $subfield['data'])[1];
+                                $linked = $marc->getLinkedField('880', '246', $index, ['a', 'b']);
+                                if (isset($linked['subfields'])) {
+                                    $val = '';
+                                    foreach ($linked['subfields'] as $rec) {
+                                        $val = $val . ' ' . $rec['data'];
+                                    }
+                                    $link = rtrim(rtrim(trim($val), ','), '.');
+                                }
+                            }
                             break;
                     }
                 }
@@ -1285,6 +1338,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             $titles[] = [
                 'type' => $type,
                 'title' => $title,
+                'link' => $link,
             ];
         }
         return $titles;

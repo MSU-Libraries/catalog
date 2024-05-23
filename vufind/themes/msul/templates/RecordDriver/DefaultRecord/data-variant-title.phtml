@@ -3,7 +3,8 @@
       <div class="variant-line" property="keywords">
           <?php $title = trim($field['title'] ?? ''); ?>
           <?php $type = trim($field['type'] ?? ''); ?>
-          <?=trim($this->escapeHtml($title))?><?= empty($this->escapeHtml($type)) ? '' : ' [' . $this->escapeHtml($type) . ']'?>
+          <?php $link = trim($field['link'] ?? ''); ?>
+          <?=trim($this->escapeHtml($title))?><?= empty($this->escapeHtml($link)) ? '' : ' = ' . $this->escapeHtml($link)?><?= empty($this->escapeHtml($type)) ? '' : ' [' . $this->escapeHtml($type) . ']'?>
       </div>
   <?php endforeach; ?>
 <?php endif; ?>
