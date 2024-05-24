@@ -1,13 +1,13 @@
 ---
-x-mariadb-envs: &mariadb_envs # secrets are prefixed with stack name in deploy-compose
+x-mariadb-envs: &mariadb_envs
   TZ: America/Detroit
   MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://galera1,galera2,galera3
-  MARIADB_ROOT_PASSWORD_FILE: /run/secrets/MARIADB_ROOT_PASSWORD
-  MARIADB_GALERA_MARIABACKUP_PASSWORD_FILE: /run/secrets/MARIADB_GALERA_MARIABACKUP_PASSWORD
+  MARIADB_ROOT_PASSWORD_FILE: /run/secrets/${STACK_NAME}-MARIADB_ROOT_PASSWORD
+  MARIADB_GALERA_MARIABACKUP_PASSWORD_FILE: /run/secrets/${STACK_NAME}-MARIADB_GALERA_MARIABACKUP_PASSWORD
   MARIADB_DATABASE: vufind
   MARIADB_USER: vufind
-  MARIADB_PASSWORD_FILE: /run/secrets/MARIADB_PASSWORD
-  MARIADB_MONITORING_PASSWORD_FILE: /run/secrets/MARIADB_MONITORING_PASSWORD
+  MARIADB_PASSWORD_FILE: /run/secrets/${STACK_NAME}-MARIADB_PASSWORD
+  MARIADB_MONITORING_PASSWORD_FILE: /run/secrets/${STACK_NAME}-MARIADB_MONITORING_PASSWORD
   MARIADB_SKIP_TEST_DB: "yes"
   MARIADB_CHARACTER_SET: utf8mb4
   MARIADB_COLLATE: utf8mb4_unicode_ci
@@ -27,11 +27,11 @@ services:
       # This flag is only needed when starting cluster from node where grastate.dat has "safe_to_bootstrap: 0"
       #MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP: "yes"
       <<: *mariadb_envs
-    secrets: # secrets are prefixed with stack name in deploy-compose
-      - MARIADB_MONITORING_PASSWORD
-      - MARIADB_ROOT_PASSWORD
-      - MARIADB_GALERA_MARIABACKUP_PASSWORD
-      - MARIADB_PASSWORD
+    secrets:
+      - ${STACK_NAME}-MARIADB_MONITORING_PASSWORD
+      - ${STACK_NAME}-MARIADB_ROOT_PASSWORD
+      - ${STACK_NAME}-MARIADB_GALERA_MARIABACKUP_PASSWORD
+      - ${STACK_NAME}-MARIADB_PASSWORD
     volumes:
       - db-bitnami:/bitnami
       - logs:/mnt/logs
@@ -61,12 +61,12 @@ volumes:
     external: true
     name: "${STACK_NAME}_logs"
 
-secrets: # secrets are prefixed with stack name in deploy-compose
-  MARIADB_MONITORING_PASSWORD:
+secrets:
+  ${STACK_NAME}-MARIADB_MONITORING_PASSWORD:
     external: true
-  MARIADB_ROOT_PASSWORD:
+  ${STACK_NAME}-MARIADB_ROOT_PASSWORD:
     external: true
-  MARIADB_GALERA_MARIABACKUP_PASSWORD:
+  ${STACK_NAME}-MARIADB_GALERA_MARIABACKUP_PASSWORD:
     external: true
-  MARIADB_PASSWORD:
+  ${STACK_NAME}-MARIADB_PASSWORD:
     external: true

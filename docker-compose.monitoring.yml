@@ -20,12 +20,11 @@ services:
     environment:
       NODE: "{{slice .Node.Hostname 8 9}}"
       STACK_NAME: "${STACK_NAME}"
-      # secrets are prefixed with stack name in deploy-compose
-      MARIADB_MONITORING_PASSWORD_FILE: /run/secrets/MARIADB_MONITORING_PASSWORD
-      MARIADB_VUFIND_PASSWORD_FILE: /run/secrets/MARIADB_VUFIND_PASSWORD
-    secrets: # secrets are prefixed with stack name in deploy-compose
-      - MARIADB_MONITORING_PASSWORD
-      - MARIADB_VUFIND_PASSWORD
+      MARIADB_MONITORING_PASSWORD_FILE: /run/secrets/${STACK_NAME}-MARIADB_MONITORING_PASSWORD
+      MARIADB_VUFIND_PASSWORD_FILE: /run/secrets/${STACK_NAME}-MARIADB_VUFIND_PASSWORD
+    secrets:
+      - ${STACK_NAME}-MARIADB_MONITORING_PASSWORD
+      - ${STACK_NAME}-MARIADB_VUFIND_PASSWORD
     deploy:
       mode: replicated
       replicas: 3
@@ -89,8 +88,8 @@ volumes:
     external: true
     name: "traefik_logs"
 
-secrets: # secrets are prefixed with stack name in deploy-compose
-  MARIADB_MONITORING_PASSWORD:
+secrets:
+  ${STACK_NAME}-MARIADB_MONITORING_PASSWORD:
     external: true
-  MARIADB_VUFIND_PASSWORD:
+  ${STACK_NAME}-MARIADB_VUFIND_PASSWORD:
     external: true

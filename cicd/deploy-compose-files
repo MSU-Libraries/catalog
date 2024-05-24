@@ -305,15 +305,6 @@ main() {
     for f in *.yml; do
         # Replace custom includes with related files
         sed -i -e "/#include vufind-envs/r vufind-envs" -e "/#include vufind-envs/d" "$f"
-
-        # Secrets prefixing with ${STACK_NAME}-
-        if [[ $(./yq '.secrets' "$f") != null ]]; then
-            # Replace secret pattern to specify their stack :
-            # /run/secrets/MARIADB_ROOT_PASSWORD => /run/secrets/${STACK_NAME}-MARIADB_ROOT_PASSWORD
-            sed -i "s|/run/secrets/|/run/secrets/${STACK_NAME}-|g" "$f"
-            ./yq -i ".services |= with_entries(select(.value.secrets |= map(\"${STACK_NAME}-\" + .)))" "$f"
-            ./yq -i ".secrets |= with_entries(select(.value.external == true) .key |= \"${STACK_NAME}-\" + .)" "$f"
-        fi
     done
 
     # Development environment changes
