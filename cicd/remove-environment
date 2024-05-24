@@ -46,6 +46,16 @@ prunevols() {
     fi
 }
 
+removesecrets() {
+    echo "Deleting secrets for stack \"${STACK_NAME}\""
+    # shellcheck disable=SC2207
+    SECRET_IDS=($(ssh deploy@"${DEPLOY_HOST_A}" "docker secret ls --filter name=\"${STACK_NAME}-\" --format \"{{.ID}}\""))
+    # shellcheck disable=SC2207
+    SECRETS=($(ssh deploy@"${DEPLOY_HOST_A}" "docker secret ls --filter name=\"${STACK_NAME}-\" --format \"{{.ID}}: {{.Name}}\""))
+    echo "Secrets to delete : ${SECRETS[*]}"
+    ssh deploy@"${DEPLOY_HOST_A}" "docker secret rm ${SECRET_IDS[*]}"
+}
+
 main() {
     # Add .aws credentials
     envsubst < provision-dns-playbook/variables.yml | sponge provision-dns-playbook/variables.yml;
@@ -80,6 +90,8 @@ main() {
     prunevols "${DEPLOY_HOST_A}";
     prunevols "${DEPLOY_HOST_B}";
     prunevols "${DEPLOY_HOST_C}";
+
+    removesecrets
 }
 
 beforescript
