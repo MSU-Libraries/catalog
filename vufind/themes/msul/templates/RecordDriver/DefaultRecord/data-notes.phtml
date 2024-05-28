@@ -2,9 +2,9 @@
     <?php $link = trim($field['link'] ?? ''); ?>
     <div class="notes-line" property="keywords">
     <?php if (is_array($field) && !array_key_exists('url', $field)): ?>
-	  <?=trim($this->escapeHtml($field['note']))?><?= empty($this->escapeHtml($link)) ? '' : ' = ' . $this->escapeHtml($link)?>
+	  <?=trim($this->escapeHtml($field['note']))?><?= empty($link) ? '' : ' = ' . $this->escapeHtml($link)?>
     <?php elseif (is_array($field) && array_key_exists('url', $field)): ?>
-	  <a href="<?=trim($this->escapeHtml($field['url']))?>"><?=trim($this->escapeHtml($field['note']))?></a><?= empty($this->escapeHtml($link)) ? '' : ' = ' . $this->escapeHtml($link)?>
+	  <a href="<?=trim($this->escapeHtml($field['url']))?>"><?=trim($this->escapeHtml($field['note']))?></a><?= empty($link) ? '' : ' = ' . $this->escapeHtml($link)?>
     <?php else: ?>
 	  <?=trim($this->escapeHtml($field))?>
     <?php endif; ?>

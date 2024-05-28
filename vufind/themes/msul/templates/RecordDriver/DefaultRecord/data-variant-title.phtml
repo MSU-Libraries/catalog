@@ -4,7 +4,7 @@
           <?php $title = trim($field['title'] ?? ''); ?>
           <?php $type = trim($field['type'] ?? ''); ?>
           <?php $link = trim($field['link'] ?? ''); ?>
-          <?=trim($this->escapeHtml($title))?><?= empty($this->escapeHtml($link)) ? '' : ' = ' . $this->escapeHtml($link)?><?= empty($this->escapeHtml($type)) ? '' : ' [' . $this->escapeHtml($type) . ']'?>
+          <?=trim($this->escapeHtml($title))?><?= empty($link) ? '' : ' = ' . $this->escapeHtml($link)?><?= empty($type) ? '' : ' [' . $this->escapeHtml($type) . ']'?>
       </div>
   <?php endforeach; ?>
 <?php endif; ?>

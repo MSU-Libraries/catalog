@@ -85,13 +85,12 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         $vals = [];
         $marc = $this->getMarcReader();
         // Add '6' to codes if not null
-        if ($codes != null && count($codes) != 0) {
+        if ($codes !== null && !empty($codes)) {
             $codes[] = '6';
         }
         $marc_fields = $marc->getFields($field, $codes);
         foreach ($marc_fields as $marc_data) {
             $exclude = false;
-            $tmp = [];
             $val = '';
             $link = '';
             $subfields = $marc_data['subfields'];
@@ -102,11 +101,12 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                     break;
                 }
                 // exclude subfield 5 from display
-                if ($subfield['code'] == '5') {
+                if ($subfield['code'] === '5') {
                     continue;
                 }
-                if ($subfield['code'] == '6' && count(explode('-', $subfield['data'])) > 0) {
-                    $index = explode('-', $subfield['data'])[1];
+                $explodedSubfield = explode('-', $subfield['data']);
+                if ($subfield['code'] === '6' && count($explodedSubfield) > 1) {
+                    $index = $explodedSubfield[1];
                     $linked = $marc->getLinkedField('880', $field, $index, $codes);
                     if (isset($linked['subfields'])) {
                         $linkval = '';
@@ -115,14 +115,15 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                         }
                         $link = rtrim(rtrim(trim($linkval), ','), '.');
                     }
-                } elseif ($subfield['code'] != '6') {
+                } elseif ($subfield['code'] !== '6') {
                     $val .= $subfield['data'] . ' ';
                 }
             }
             if (!$exclude) {
-                $tmp['note'] = trim($val);
-                $tmp['link'] = $link;
-                $vals[] = $tmp;
+                $vals[] = [
+                    'note' => trim($val),
+                    'link' => $link,
+                ];
             }
         }
         return $vals;
@@ -1023,7 +1024,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         $vals = [];
         $marc = $this->getMarcReader();
         // Add '6' to codes if not null
-        if ($codes != null && count($codes) != 0) {
+        if ($codes !== null && !empty($codes)) {
             $codes[] = '6';
         }
         $marc_fields = $marc->getFields($field, $codes);
@@ -1032,8 +1033,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             $tmpVal = ['name' => [], 'value' => [], 'link' => ''];
             foreach ($subfields as $subfield) {
                 // check if it has link data
-                if ($subfield['code'] == '6' && count(explode('-', $subfield['data'])) > 0) {
-                    $index = explode('-', $subfield['data'])[1];
+                $explodedSubfield = explode('-', $subfield['data']);
+                if ($subfield['code'] === '6' && count($explodedSubfield) > 1) {
+                    $index = $explodedSubfield[1];
                     $linked = $marc->getLinkedField('880', $field, $index, $codes);
                     if (isset($linked['subfields'])) {
                         $val = '';
@@ -1042,7 +1044,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                         }
                         $tmpVal['link'] = rtrim(rtrim(trim($val), ','), '.');
                     }
-                } elseif ($subfield['code'] == 'a' || $subfield['code'] == 'p') {
+                } elseif ($subfield['code'] === 'a' || $subfield['code'] === 'p') {
                     // get the title name used for the search link
                     $tmpVal['name'][] = $subfield['data'];
                 } else {
@@ -1274,8 +1276,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                             break;
                         case '6':
                             // check if it has link data
-                            if (count(explode('-', $subfield['data'])) > 0) {
-                                $index = explode('-', $subfield['data'])[1];
+                            $explodedSubfield = explode('-', $subfield['data']);
+                            if (count($explodedSubfield) > 1) {
+                                $index = $explodedSubfield[1];
                                 $linked = $marc->getLinkedField('880', '246', $index, ['a', 'b']);
                                 if (isset($linked['subfields'])) {
                                     $val = '';
@@ -1464,15 +1467,18 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         foreach ($marc_fields as $marc_data) {
             $linkedVal = '';
             $subfields = $marc_data['subfields'];
-            if (count($subfields) == 1 && count(explode('-', $subfields[0]['data'])) > 0) {
-                $index = explode('-', $subfields[0]['data'])[1];
-                $linked = $marc->getLinkedField('880', $field, $index, $subfield);
-                if (isset($linked['subfields'])) {
-                    $val = '';
-                    foreach ($linked['subfields'] as $rec) {
-                        $val = $val . ' ' . $rec['data'];
+            if (count($subfields) === 1) {
+                $explodedSubfield = explode('-', $subfields[0]['data']);
+                if (count($explodedSubfield) > 1) {
+                    $index = $explodedSubfield[1];
+                    $linked = $marc->getLinkedField('880', $field, $index, $subfield);
+                    if (isset($linked['subfields'])) {
+                        $val = '';
+                        foreach ($linked['subfields'] as $rec) {
+                            $val = $val . ' ' . $rec['data'];
+                        }
+                        $linkedVal = rtrim(rtrim(trim($val), ','), '.');
                     }
-                    $linkedVal = rtrim(rtrim(trim($val), ','), '.');
                 }
             }
 
