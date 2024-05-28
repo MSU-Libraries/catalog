@@ -6,7 +6,7 @@
 ?>
 <nav class="record-nav" aria-label="<?=$this->transEscAttr('ajaxview_label_tools'); ?>">
   <ul class="action-toolbar">
-    <?php if (method_exists($this->driver, 'getLocation') && !empty($this->driver->getLocation())): ?>
+    <?php if (method_exists($this->driver, 'getLocation') && !empty($this->driver->getLocation()) && !str_contains(strtolower($this->driver->getLocation()), 'remote storage')): ?>
       <li>
         <a class="map-record toolbar-btn" data-lightbox href="<?= $this->record($this->driver)->getLink('mapit', null) ?>" rel="nofollow" target="_blank" aria-hidden="true"> <!--msul added aria-hidden="true"-->
           <?=$this->icon('format-map') ?>
