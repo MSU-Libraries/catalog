@@ -5,5 +5,9 @@
   <?php if (!empty($title['name'])): ?>
     <a href="<?=$this->record($this->driver)->getLink('uniform-title', $title['name'])?>"><?=$this->escapeHtml($title['name'])?></a>
     <?=$this->escapeHtml($title['value'] ?? '')?>
+    <?php if (!empty($title['link'])): ?>
+      = <?=$this->escapeHtml($title['link'] ?? '')?>
+    <?php endif; ?>
+    <br/>
   <?php endif; ?>
 <?php endforeach; ?>

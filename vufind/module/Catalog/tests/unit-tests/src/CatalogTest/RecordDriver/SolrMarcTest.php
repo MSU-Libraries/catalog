@@ -151,4 +151,17 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $this->getDriver('linkedauthors2.xml')->getCorporateAuthorsLinks());
         $this->assertEquals(94, strlen($this->getDriver('linkedauthors2.xml')->getCorporateAuthorsLinks()[0]));
     }
+
+    /**
+     * Test that the linked 880 fields are retrieved from the marc record.
+     *
+     * @return void
+     */
+    public function testGetUniformTitleWithLinks()
+    {
+        // Verifying the count since the values non-printable characters
+        $this->assertCount(1, $this->getDriver('linkedtitle.xml')->getUniformTitle());
+        $this->assertArrayHasKey('link', $this->getDriver('linkedtitle.xml')->getUniformTitle()[0]);
+        $this->assertEquals(46, strlen($this->getDriver('linkedtitle.xml')->getUniformTitle()[0]['link']));
+    }
 }
