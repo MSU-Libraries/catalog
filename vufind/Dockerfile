@@ -114,10 +114,11 @@ RUN envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apac
     a2enmod remoteip && \
     a2enconf simplesamlphp.conf && \
     chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR} && \
-    # Add VuFind to Apache as well before restarting to test (or maybe configtest would be enough)
+    # Add VuFind to Apache as well before testing config
     ln -s /usr/local/vufind/local/httpd-vufind.conf /etc/apache2/conf-enabled/vufind.conf && \
+    a2enmod rewrite && \
     a2enconf catalog.conf && \
-    service apache2 restart
+    apachectl configtest
 
 # Build Arguments
 ARG SOLR_URL=http://solr:8983/solr
