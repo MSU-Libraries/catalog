@@ -59,7 +59,7 @@ RUN \
     # Install VuFind
     tar -xzvf vufind-${VUFIND_VERSION}.tar.gz -C /usr/local && \
     mv /usr/local/vufind-${VUFIND_VERSION} /usr/local/vufind && \
-    rm vufind_${VUFIND_VERSION}.tar.gz && \
+    rm vufind-${VUFIND_VERSION}.tar.gz && \
     # Update some dependencies
     sed -i 's/"php": "7\.4\.1"/"php": "8.0.0"/' /usr/local/vufind/composer.json && \
     sed -i 's/"laminas\/laminas-diactoros": "2\.17\.0"/"laminas\/laminas-diactoros": "2.18.1"/' /usr/local/vufind/composer.json && \
