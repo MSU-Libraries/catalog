@@ -113,7 +113,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                         foreach ($linked['subfields'] as $rec) {
                             $linkval = $linkval . ' ' . $rec['data'];
                         }
-                        $link = rtrim(rtrim(trim($linkval), ','), '.');
+                        $link = rtrim(trim($linkval), ',.');
                     }
                 } elseif ($subfield['code'] !== '6') {
                     $val .= $subfield['data'] . ' ';
