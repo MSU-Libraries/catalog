@@ -1,35 +1,35 @@
 FROM ubuntu:22.04
 
-ENV TZ=America/Detroit
-ENV DEBIAN_FRONTEND=noninteractive
-ENV VUFIND_LOCAL_DIR=/usr/local/vufind/local
-ENV VUFIND_HOME=/usr/local/vufind
-ENV JAVA_HOME=/usr/lib/jvm/default-java
-ENV VUFIND_CACHE_DIR=/mnt/vufind_cache
+ENV TZ=America/Detroit \
+    DEBIAN_FRONTEND=noninteractive \
+    VUFIND_LOCAL_DIR=/usr/local/vufind/local \
+    VUFIND_HOME=/usr/local/vufind \
+    JAVA_HOME=/usr/lib/jvm/default-java \
+    VUFIND_CACHE_DIR=/mnt/vufind_cache
 
-# TEMP(PART1): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/99
+# TEMP(PART1): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/100
 COPY patches/ /tmp/patches/
 # END TEMP(PART1)
 RUN \
     # Perform updates
-    apt update && \
-    apt install -y wget vim-nox lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
+    apt-get update && \
+    apt-get install -y wget vim-nox lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
         gettext-base locales msmtp-mta rsync screen libxml-xpath-perl xmlstarlet \
         nodejs npm git pigz libxml2-utils libmarc-xml-perl bash-completion \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php \
         php-curl php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml \
         libapache2-mod-security2 modsecurity-crs uuid-runtime && \
-    # TEMP(PART2): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/99
-    apt install -y ant && \
+    # TEMP(PART2): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/100
+    apt-get install -y ant && \
     git clone --depth 1 --branch 2.9.4 https://github.com/marc4j/marc4j.git /tmp/marc4j && \
     cd /tmp/marc4j/ && \
     git apply /tmp/patches/marc4j_fieldMatches_LNK.patch && \
     rm -r /tmp/patches && \
     ant jar && \
-    apt purge -y ant && \
+    apt-get purge -y ant && \
     # END TEMP(PART2)
-    apt clean && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     (umask 077; mkdir -p \
         /opt/modsecurity/tmp /opt/modsecurity/var/data \
@@ -38,7 +38,7 @@ RUN \
 
 COPY modsecurity/ /etc/modsecurity/
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
-RUN apt install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
+RUN apt-get install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
 
 ARG GITHUB_USER_TOKEN
 ARG VUFIND_VERSION
@@ -54,14 +54,12 @@ RUN \
     /install-composer.sh && \
     mv /composer.phar /usr/local/bin/composer && \
     rm /install-composer.sh && \
-    # Get the VuFind package
-    wget https://github.com/vufind-org/vufind/releases/download/v${VUFIND_VERSION}/vufind_${VUFIND_VERSION}.deb && \
-    # Install the package
-    service apache2 restart && \
-    dpkg -i --ignore-depends=php-dev,default-jdk,java-compiler,mysql-server,virtual-mysql-server-core \
-        ./vufind_${VUFIND_VERSION}.deb && \
-    apt clean && \
-    rm vufind_${VUFIND_VERSION}.deb && \
+    # Get the VuFind tar
+    wget https://github.com/vufind-org/vufind/releases/download/v${VUFIND_VERSION}/vufind-${VUFIND_VERSION}.tar.gz && \
+    # Install VuFind
+    tar -xzvf vufind-${VUFIND_VERSION}.tar.gz -C /usr/local && \
+    mv /usr/local/vufind-${VUFIND_VERSION} /usr/local/vufind && \
+    rm vufind_${VUFIND_VERSION}.tar.gz && \
     # Update some dependencies
     sed -i 's/"php": "7\.4\.1"/"php": "8.0.0"/' /usr/local/vufind/composer.json && \
     sed -i 's/"laminas\/laminas-diactoros": "2\.17\.0"/"laminas\/laminas-diactoros": "2.18.1"/' /usr/local/vufind/composer.json && \
@@ -84,7 +82,7 @@ RUN \
     # Enable bash completion for all users
     echo ". /usr/share/bash-completion/bash_completion" >> /etc/bash.bashrc
 
-# TEMP(PART3): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/99
+# TEMP(PART3): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/100
 RUN \
     rm /usr/local/vufind/import/lib/marc4j*.jar && \
     mv /tmp/marc4j/build/marc4j*.jar /usr/local/vufind/import/lib/ && \
@@ -120,14 +118,16 @@ RUN envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apac
     a2enmod remoteip && \
     a2enconf simplesamlphp.conf && \
     chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR} && \
-    a2enconf catalog.conf
+    # Add VuFind to Apache as well before reloading
+    ln -s /usr/local/vufind/local/httpd-vufind.conf /etc/apache2/conf-enabled/vufind.conf && \
+    a2enconf catalog.conf && \
+    service apache2 reload
 
 # Build Arguments
 ARG SOLR_URL=http://solr:8983/solr
 
 ENV SOLR_URL=$SOLR_URL \
     VUFIND_LOCAL_MODULES=Catalog
-
 
 # Add file customizations
 COPY local/ /usr/local/vufind/local
