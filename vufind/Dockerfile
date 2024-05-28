@@ -60,10 +60,6 @@ RUN \
     tar -xzvf vufind-${VUFIND_VERSION}.tar.gz -C /usr/local && \
     mv /usr/local/vufind-${VUFIND_VERSION} /usr/local/vufind && \
     rm vufind-${VUFIND_VERSION}.tar.gz && \
-    # Update some dependencies
-    sed -i 's/"php": "7\.4\.1"/"php": "8.0.0"/' /usr/local/vufind/composer.json && \
-    sed -i 's/"laminas\/laminas-diactoros": "2\.17\.0"/"laminas\/laminas-diactoros": "2.18.1"/' /usr/local/vufind/composer.json && \
-    sed -i 's/"league\/oauth2-server": "8\.4\.1"/"league\/oauth2-server": "8.4.2"/' /usr/local/vufind/composer.json && \
     # Install VuFind dev dependencies, for the tests
     composer --working-dir=/usr/local/vufind/ update && \
     # Remove unused dependencies after Vufind is installed
@@ -118,10 +114,10 @@ RUN envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apac
     a2enmod remoteip && \
     a2enconf simplesamlphp.conf && \
     chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR} && \
-    # Add VuFind to Apache as well before reloading
+    # Add VuFind to Apache as well before restarting to test (or maybe configtest would be enough)
     ln -s /usr/local/vufind/local/httpd-vufind.conf /etc/apache2/conf-enabled/vufind.conf && \
     a2enconf catalog.conf && \
-    service apache2 reload
+    service apache2 restart
 
 # Build Arguments
 ARG SOLR_URL=http://solr:8983/solr
