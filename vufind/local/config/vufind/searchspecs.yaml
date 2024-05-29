@@ -417,7 +417,7 @@ LccBrowse:
 
 SeriesBrowse:
   QueryFields:
-    series_browse:
+    series_browse_str_mv:
       - [onephrase, ~]
 
 CallNumber:
