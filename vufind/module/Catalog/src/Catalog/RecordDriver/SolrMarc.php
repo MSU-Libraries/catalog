@@ -111,6 +111,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                     if (isset($linked['subfields'])) {
                         $linkval = '';
                         foreach ($linked['subfields'] as $rec) {
+                            if ($rec['code'] === '6') {
+                                continue;
+                            }
                             $linkval = $linkval . ' ' . $rec['data'];
                         }
                         $link = rtrim(trim($linkval), ',.');
@@ -1040,6 +1043,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                     if (isset($linked['subfields'])) {
                         $val = '';
                         foreach ($linked['subfields'] as $rec) {
+                            if ($rec['code'] === '6') {
+                                continue;
+                            }
                             $val = $val . ' ' . $rec['data'];
                         }
                         $tmpVal['link'] = rtrim(rtrim(trim($val), ','), '.');
@@ -1475,6 +1481,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                     if (isset($linked['subfields'])) {
                         $val = '';
                         foreach ($linked['subfields'] as $rec) {
+                            if ($rec['code'] === '6') {
+                                continue;
+                            }
                             $val = $val . ' ' . $rec['data'];
                         }
                         $linkedVal = rtrim(rtrim(trim($val), ','), '.');
