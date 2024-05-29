@@ -186,10 +186,6 @@ VuFind.register('sideFacets', function SideFacets() {
   let globalRemovedParams = [];
   let multiFacetsSelection = true;
   let currentParams = window.location.search.substring(1).split('&');
-  let overlay = '<div class="facet-loading-overlay">'
-    + '<span class="facet-loading-overlay-label">'
-    + VuFind.loading()
-    + "</span></div>";
 
   function getHrefWithNewParams() {
     $('form#publishDateFilter .date-fields input').each(function checkDateParams() {
@@ -216,6 +212,10 @@ VuFind.register('sideFacets', function SideFacets() {
   }
 
   function applyMultiFacetsSelection() {
+    let overlay = '<div class="facet-loading-overlay">'
+      + '<span class="facet-loading-overlay-label">'
+      + VuFind.loading()
+      + "</span></div>";
     $("#search-sidebar .collapse").append(overlay);
     window.location.assign(getHrefWithNewParams());
   }
@@ -255,6 +255,10 @@ VuFind.register('sideFacets', function SideFacets() {
 
   function showLoadingOverlay(e, data) {
     e.preventDefault();
+    var overlay = '<div class="facet-loading-overlay">'
+      + '<span class="facet-loading-overlay-label">'
+      + VuFind.loading()
+      + "</span></div>";
     if (multiFacetsSelection === false) {
       $(this).closest(".collapse").append(overlay);
     }
