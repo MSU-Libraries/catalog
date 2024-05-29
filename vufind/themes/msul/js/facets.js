@@ -182,13 +182,86 @@ function initFacetTree(treeNode, inSidebar)
 
 /* --- Side Facets --- */
 VuFind.register('sideFacets', function SideFacets() {
+  let globalAddedParams = [];
+  let globalRemovedParams = [];
+  let multiFacetsSelection = true;
+  let currentParams = window.location.search.substring(1).split('&');
+
+  function getHrefWithNewParams() {
+    $('form#publishDateFilter .date-fields input').each(function checkDateParams() {
+      if (window.location.search.match(this.name)) {
+        // If the parameter is already present we update it
+        let count = currentParams.length;
+        for (let i = 0; i < count; i++) {
+          if (currentParams[i].startsWith(this.name + '=')) {
+            currentParams[i] = this.name + '=' + this.value;
+            break;
+          }
+        }
+      } else {
+        globalAddedParams.push(encodeURI(this.name + '=' + this.value));
+      }
+    });
+    let dateRangeParam = 'daterange[]=publishDate';
+    if (!window.location.search.match(dateRangeParam)) {
+      globalAddedParams.push(encodeURI('daterange[]=publishDate'));
+    }
+    currentParams = currentParams.filter(function tmp(obj) { return !globalRemovedParams.includes(obj); });
+    currentParams = currentParams.concat(globalAddedParams);
+    return window.location.pathname + '?' + currentParams.join('&');
+  }
+
+  function applyMultiFacetsSelection() {
+    let overlay = '<div class="facet-loading-overlay">'
+      + '<span class="facet-loading-overlay-label">'
+      + VuFind.loading()
+      + "</span></div>";
+    $("#search-sidebar .collapse").append(overlay);
+    window.location.assign(getHrefWithNewParams());
+  }
+
+  function stickApplyFiltersButtonAtTopWhenScrolling() {
+    let applyFilters = $('#apply-filters');
+    let blankBrick = $('#blank-brick');
+    let applyFiltersOffset;
+    $(window).scroll(function fixButton() {
+      // To handle delayed loading elements changing the elements offset in the page
+      // We update the offset, depending if we past the button or not
+      if (blankBrick.offset().top < applyFilters.offset().top) {
+        applyFiltersOffset = blankBrick.offset().top;
+      } else {
+        applyFiltersOffset = applyFilters.offset().top;
+      }
+      if ($(window).scrollTop() > applyFiltersOffset) {
+        applyFilters.addClass('fixed');
+      } else {
+        applyFilters.removeClass('fixed');
+      }
+    });
+  }
+
+  function multiFacetsSelectionInit() {
+    $('form#publishDateFilter input[type="submit"]').remove();
+    $('#search-sidebar h2').first().after(
+      '<div id="apply-filters">' +
+      '<button id="applyMultiFacetsSelection" type="submit" class="btn btn-primary">Apply filters</button>' +
+      '</div>' +
+      '<div id="blank-brick">' +
+      '</div>'
+    );
+    $('#applyMultiFacetsSelection').click(applyMultiFacetsSelection);
+    stickApplyFiltersButtonAtTopWhenScrolling();
+  }
+
   function showLoadingOverlay(e, data) {
     e.preventDefault();
     var overlay = '<div class="facet-loading-overlay">'
       + '<span class="facet-loading-overlay-label">'
       + VuFind.loading()
       + "</span></div>";
-    $(this).closest(".collapse").append(overlay);
+    if (multiFacetsSelection === false) {
+      $(this).closest(".collapse").append(overlay);
+    }
     if (typeof data !== "undefined") {
       // Remove jstree-clicked class from JSTree links to avoid the color change:
       data.instance.get_node(data.node, true).children().removeClass('jstree-clicked');
@@ -197,7 +270,23 @@ VuFind.register('sideFacets', function SideFacets() {
     // if the data element is undefined, we assume we are handling a click.
     var href = typeof data === "undefined" || typeof data.node.data.url === "undefined"
       ? $(this).attr('href') : data.node.data.url;
-    window.location.assign(href);
+
+    if (multiFacetsSelection === true) {
+      $(this).toggleClass('active');
+      $(this).find('.icon').toggleClass('fa-check-square-o');
+      $(this).find('.icon').toggleClass('fa-square-o');
+      let newParams = href.substring(window.location.pathname.length + 1).split('&');
+      let addedParams = newParams.filter(function isAdded(obj) {
+        return !currentParams.includes(obj);
+      });
+      let removedParams = currentParams.filter(function isRemoved(obj) {
+        return !newParams.includes(obj);
+      });
+      globalAddedParams = globalAddedParams.concat(addedParams);
+      globalRemovedParams = globalRemovedParams.concat(removedParams);
+    } else {
+      window.location.assign(href);
+    }
     return false;
   }
 
@@ -319,6 +408,9 @@ VuFind.register('sideFacets', function SideFacets() {
         $dropdown.removeClass("dropdown-menu-right");
       }
     });
+    if (multiFacetsSelection === true) {
+      multiFacetsSelectionInit();
+    }
   }
 
   return { init: init, showLoadingOverlay: showLoadingOverlay };
