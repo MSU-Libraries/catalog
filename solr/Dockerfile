@@ -44,6 +44,7 @@ RUN \
     cp /vufind-${VUFIND_VERSION}/import/*.jar /solr_confs/import/ && \
     rm -rf /vufind-${VUFIND_VERSION}
 COPY index-alphabetic-browse.sh /solr_confs/
+COPY series_browse.txt /tmp/
 RUN \
     chmod -R go-w /solr_confs /*.sh && \
     chmod ugo+x /*.sh /solr_confs/*.sh && \
@@ -58,7 +59,10 @@ RUN \
     sed -i 's/<lib dir="\.\.\/\.\.\/vendor\/modules\/analysis-extras\/lib"/<lib dir="\/opt\/bitnami\/solr\/modules\/analysis-extras\/lib"/' \
         /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i 's/<lib dir="\.\.\/jars"/<lib dir="\/solr_confs\/jars"/' /solr_confs/biblio/conf/solrconfig.xml && \
-    # Update the field used for title browse PC-686
+    # Add series browse request handler PC-110
+    sed -i '/hierarchy<\/str>/ r /tmp/series_browse.txt' /solr_confs/biblio/conf/solrconfig.xml && \
+    sed -i 's/topic,author,title,lcc,dewey,hierarchy/topic,author,title,lcc,dewey,hierarchy,series/' /solr_confs/biblio/conf/solrconfig.xml && \
+    # Update the field used for alpha browse PC-686, PC-110
     sed -i 's/title_fullStr/title_browse/' /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i 's/      <str name="normalizer">org.vufind.util.TitleNormalizer<\/str>//' /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i '$ d' /solr_confs/biblio/conf/schema.xml && \

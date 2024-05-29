@@ -415,6 +415,11 @@ LccBrowse:
     callnumber-raw:
       - [onephrase, ~]
 
+SeriesBrowse:
+  QueryFields:
+    series_browse_str_mv:
+      - [onephrase, ~]
+
 CallNumber:
   # We use two similar munges here -- one for exact matches, which will get
   # a very high boost factor, and one for left-anchored wildcard searches,

@@ -1,0 +1,5 @@
+    
+    <lst name="series">
+      <str name="DBpath">${solr.solr.home:./solr}/alphabetical_browse/series_browse.db</str>
+      <str name="field">series_browse_str_mv</str>
+    </lst>
