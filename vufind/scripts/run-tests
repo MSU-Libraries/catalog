@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Fail if any of these steps fail
+set -e
+
 cd /usr/local/vufind
 echo "Running unit tests"
 vendor/bin/phing phpunitfaster -Dphpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/
