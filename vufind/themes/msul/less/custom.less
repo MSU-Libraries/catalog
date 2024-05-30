@@ -476,6 +476,18 @@ input[type="checkbox"] {
 
 //searchbox responsive styling
 .searchbox {
+      #searchForm-reset {
+        right: 3px;
+        top:0.37em;
+        line-height:1em;
+        width:1.5em;
+        height:1.5em;
+    }
+      .search-tips-mobile {
+        position:absolute;
+        right:4rem;
+        margin-top:0.5rem;
+      }
   @media only screen and (max-width : 767px) {
     label, input, select, button {
       width:100%;
@@ -500,6 +512,10 @@ input[type="checkbox"] {
     input, select {
       width:100% !important;
     }
+    a.help-link {
+      display:none;
+    }
+
 
   }
 
@@ -514,6 +530,22 @@ input[type="checkbox"] {
       width: 100%;
       max-width: initial;
     }
+    .search-tips-icon {
+      position: absolute;
+      background-color:#fff;
+      border:0;
+      padding:.3rem .3rem 0 .3rem;
+      top:2px;
+      right:10px;
+      height:2em;
+      width:2em;
+    }
+    .search-tips-mobile {
+      display:none;
+    }
+    #searchForm-reset {
+      right: 45px;
+    }
     button[type=submit].btn-primary {
       position: relative;
       z-index: 2;
@@ -521,9 +553,10 @@ input[type="checkbox"] {
       margin-left: -1rem;
       vertical-align: top;
     }
-    #searchForm-reset {
-      right: 10px;
-    }
+  }
+    @media only screen and (min-width : 1236px) {
+
+
   }
 }
 
@@ -557,18 +590,14 @@ input[type="checkbox"] {
         border-radius: 2rem;
         margin-left:0;
       }
-      #searchForm-reset {
-        right: 3px;
-      }
+
     }
     @media only screen and (min-width : 1236px) {
       button[type=submit].btn-primary {
         border-radius: 0 0.5rem 0.5rem 0;
         margin-left: -1rem;
       }
-      #searchForm-reset {
-        right: 10px;
-      }
+
     }
   }
   @media only screen and (min-width : 768px) {
