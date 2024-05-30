@@ -212,6 +212,7 @@ VuFind.register('sideFacets', function SideFacets() {
   }
 
   function applyMultiFacetsSelection() {
+    $('#applyMultiFacetsSelection').off();
     let overlay = '<div class="facet-loading-overlay">'
       + '<span class="facet-loading-overlay-label">'
       + VuFind.loading()
