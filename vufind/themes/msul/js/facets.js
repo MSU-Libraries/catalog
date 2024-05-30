@@ -55,6 +55,7 @@ function buildFacetNodes(facetName, data, currentPath, allowExclude, excludeTitl
     const linkEl = el('a', (orFacet ? ' icon-link' : ''));
     linkEl.setAttribute('href', currentPath + facet.href);
     linkEl.setAttribute('title', facet.displayText);
+    linkEl.setAttribute('rel', 'nofollow');
     linkEl.append(textEl);
 
     // Create facet element
