@@ -30,6 +30,7 @@
 namespace Catalog\Controller;
 
 use VuFind\Controller\Feature\RecordVersionsSearchTrait;
+
 use function in_array;
 
 /**
@@ -64,8 +65,8 @@ class AbstractSolrSearch extends \Catalog\Controller\AbstractSearch
             = $this->getHierarchicalFacets($view->options->getFacetsIni());
         $view->hierarchicalFacetsSortOptions
             = $this->getAdvancedHierarchicalFacetsSortOptions(
-            $view->options->getFacetsIni()
-        );
+                $view->options->getFacetsIni()
+            );
         $view->facetList = $this->processAdvancedFacets(
             $facets,
             $view->saved,
