@@ -184,28 +184,50 @@ function initFacetTree(treeNode, inSidebar)
 VuFind.register('sideFacets', function SideFacets() {
   let globalAddedParams = [];
   let globalRemovedParams = [];
-  let multiFacetsSelection = true;
   let currentParams = window.location.search.substring(1).split('&');
+  let dateSelectorId;
 
-  function getHrefWithNewParams() {
-    $('form#publishDateFilter .date-fields input').each(function checkDateParams() {
+  function handleDateSelector() {
+    if (dateSelectorId === undefined) {
+      return;
+    }
+
+    let dateParams = [];
+    let allEmptyDateParams = true;
+    $('form#' + dateSelectorId + ' .date-fields input').each(function checkDateParams() {
       if (window.location.search.match(this.name)) {
         // If the parameter is already present we update it
         let count = currentParams.length;
         for (let i = 0; i < count; i++) {
           if (currentParams[i].startsWith(this.name + '=')) {
-            currentParams[i] = this.name + '=' + this.value;
+            currentParams[i] = encodeURI(this.name + '=' + this.value); // Update
+            // If not empty we add it to date params
+            if (this.value !== '') {
+              allEmptyDateParams = false;
+            }
             break;
           }
         }
       } else {
-        globalAddedParams.push(encodeURI(this.name + '=' + this.value));
+        dateParams.push(encodeURI(this.name + '=' + this.value));
+        if (this.value !== '') {
+          allEmptyDateParams = false;
+        }
       }
     });
-    let dateRangeParam = 'daterange[]=publishDate';
-    if (!window.location.search.match(dateRangeParam)) {
-      globalAddedParams.push(encodeURI('daterange[]=publishDate'));
+    // If at least one parameter is not null we continue the routine for the final URL
+    if (allEmptyDateParams === false) {
+      globalAddedParams = globalAddedParams.concat(dateParams);
+      let fieldName = $('form#' + dateSelectorId + ' input[name="daterange[]"]').val();
+      let dateRangeParam = encodeURI('daterange[]=' + fieldName);
+      if (!window.location.search.match(dateRangeParam)) {
+        globalAddedParams.push(dateRangeParam);
+      }
     }
+  }
+
+  function getHrefWithNewParams() {
+    handleDateSelector();
     currentParams = currentParams.filter(function tmp(obj) { return !globalRemovedParams.includes(obj); });
     currentParams = currentParams.concat(globalAddedParams);
     return window.location.pathname + '?' + currentParams.join('&');
@@ -241,8 +263,15 @@ VuFind.register('sideFacets', function SideFacets() {
     });
   }
 
+  function dateSelectorInit() {
+    dateSelectorId = $('div.facet form .date-fields').parent().attr('id');
+    if (dateSelectorId !== undefined) {
+      $('form#' + dateSelectorId + ' input[type="submit"]').remove();
+    }
+  }
+
   function multiFacetsSelectionInit() {
-    $('form#publishDateFilter input[type="submit"]').remove();
+    dateSelectorInit();
     $('#search-sidebar h2').first().after(
       '<div id="apply-filters">' +
       '<button id="applyMultiFacetsSelection" type="submit" class="btn btn-primary">Apply filters</button>' +
@@ -273,9 +302,17 @@ VuFind.register('sideFacets', function SideFacets() {
       ? $(this).attr('href') : data.node.data.url;
 
     if (multiFacetsSelection === true) {
-      $(this).toggleClass('active');
-      $(this).find('.icon').toggleClass('fa-check-square-o');
-      $(this).find('.icon').toggleClass('fa-square-o');
+      if ($(this).hasClass('facet')) {
+        $(this).toggleClass('active');
+      }
+      let icon = $(this).find('.icon');
+      if (icon.hasClass('fa-check-square-o')) {
+        icon.removeClass('fa-check-square-o');
+        icon.addClass('fa-square-o');
+      } else if (icon.hasClass('fa-square-o')) {
+        icon.addClass('fa-check-square-o');
+        icon.removeClass('fa-square-o');
+      }
       let newParams = href.substring(window.location.pathname.length + 1).split('&');
       let addedParams = newParams.filter(function isAdded(obj) {
         return !currentParams.includes(obj);

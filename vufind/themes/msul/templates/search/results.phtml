@@ -51,6 +51,8 @@
       $this->headScript()->appendFile('record.js');
       $this->headScript()->appendFile('embedded_record.js');
   }
+  $multiFacetsSelection = $this->multiFacetsSelection ? 'true' : 'false';
+  $this->headScript()->appendScript('var multiFacetsSelection = ' . $multiFacetsSelection . ';');
 ?>
 
 <div class="<?=$this->layoutClass('mainbody')?>">
