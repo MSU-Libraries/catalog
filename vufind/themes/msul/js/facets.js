@@ -181,6 +181,8 @@ function initFacetTree(treeNode, inSidebar)
   }
 }
 
+var multiFacetsSelection; // Defined in results.php, here to prevent pipeline from failing
+
 /* --- Side Facets --- */
 VuFind.register('sideFacets', function SideFacets() {
   let globalAddedParams = [];
