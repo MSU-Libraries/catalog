@@ -7,7 +7,9 @@ ENV TZ=America/Detroit \
     JAVA_HOME=/usr/lib/jvm/default-java \
     VUFIND_CACHE_DIR=/mnt/vufind_cache
 
-# TEMP(PART1): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/100
+# TEMP(PART1):
+# - Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/100
+# - Patch and replace solrmarc due to delete logic hardcode to MARC 001 as id instead of .properties defined id
 COPY patches/ /tmp/patches/
 # END TEMP(PART1)
 RUN \
@@ -20,13 +22,19 @@ RUN \
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php \
         php-curl php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml \
         libapache2-mod-security2 modsecurity-crs uuid-runtime && \
-    # TEMP(PART2): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/100
+    # TEMP(PART2):
+    # - Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/100
+    # - Patch and replace solrmarc due to delete logic hardcode to MARC 001 as id instead of .properties defined id
     apt-get install -y ant && \
     git clone --depth 1 --branch 2.9.4 https://github.com/marc4j/marc4j.git /tmp/marc4j && \
     cd /tmp/marc4j/ && \
     git apply /tmp/patches/marc4j_fieldMatches_LNK.patch && \
-    rm -r /tmp/patches && \
     ant jar && \
+    git clone --depth 1 --branch 3.5 https://github.com/solrmarc/solrmarc.git /tmp/solrmarc && \
+    cd /tmp/solrmarc/ && \
+    git apply /tmp/patches/solrmarc_delete_on_docid.patch && \
+    ant package && \
+    rm -r /tmp/patches && \
     apt-get purge -y ant && \
     # END TEMP(PART2)
     apt-get clean && \
@@ -78,11 +86,16 @@ RUN \
     # Enable bash completion for all users
     echo ". /usr/share/bash-completion/bash_completion" >> /etc/bash.bashrc
 
-# TEMP(PART3): Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/100
+# TEMP(PART3):
+# - Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/100
+# - Patch and replace solrmarc due to delete logic hardcode to MARC 001 as id instead of .properties defined id
 RUN \
     rm /usr/local/vufind/import/lib/marc4j*.jar && \
     mv /tmp/marc4j/build/marc4j*.jar /usr/local/vufind/import/lib/ && \
-    rm -r /tmp/marc4j/
+    rm -r /tmp/marc4j/ && \
+    rm /usr/local/vufind/import/solrmarc_core_3.5.jar && \
+    mv /tmp/solrmarc/dist/solrmarc_core_*.jar /usr/local/vufind/import/solrmarc_core_3.5.jar && \
+    rm -r /tmp/solrmarc/
 # END TEMP(PART3)
 
 # User configs for root
