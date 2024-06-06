@@ -69,3 +69,23 @@ pc-record delete devel-robby --input file_containing_ids.txt --debug
 pc-record delete catalog-beta in01234 --dry-run --vvv --prefix folio
 
 ```
+
+## Connect to container ([pc-connect](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-connect?ref_type=heads))
+Helper to connect to a container for a given service (and optionally, on a particular node).
+Also has the option to override the `bash` command with anything else, or with helpers to
+run the `mysql` or `zh-shell` commands.
+
+```bash
+# Connect to the catalog instance with verbose logging
+pc-connect catalog-prod-catalog_cron -v
+
+# Connect to the database on node 3
+pc-connect catalog-prod-mariadb_galera 3
+
+# Connect to zk-shell
+pc-connect catalog-prod-solr_solr --zk
+
+# Dry-run to locate an instance
+pc-connect devel-test-catalog_catalog -n
+
+```
