@@ -2,8 +2,9 @@
 
 ## Helpers
 
-To quick-connect to the database within the container
-(without having to lookup the password from the Docker secret or CI variable), simply use the `connect` command.
+To quick-connect to the [zk-shell](https://pypi.org/project/zk-shell/#usage)
+within the container (without having to pass the ZK hosts)
+simply use the `solr-zk-shell` command.
 
 ```bash
 docker exec -it $(docker ps -q -f name=catalog-prod-solr_solr) solr-zk-shell
