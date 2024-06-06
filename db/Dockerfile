@@ -19,6 +19,7 @@ USER 1001
 
 COPY ./cloud-entrypoint.sh ./cloud-startup.sh ./healthcheck.sh /
 COPY ./my_custom.cnf /opt/bitnami/mariadb/conf/
+COPY ./connect.sh /usr/local/bin/connect
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=45s --retries=12 \
   CMD /healthcheck.sh
