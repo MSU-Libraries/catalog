@@ -1,5 +1,14 @@
 # Solr
 
+## Helpers
+
+To quick-connect to the database within the container
+(without having to lookup the password from the Docker secret or CI variable), simply use the `connect` command.
+
+```bash
+docker exec -it $(docker ps -q -f name=catalog-prod-solr_solr) solr-zk-shell
+
+```
 ## Collection Structure
 Most of the collections do not have an alias associated with them. But, `biblio` is special!
 For that collection we are using Solr aliases because we want to be able to clear out the
