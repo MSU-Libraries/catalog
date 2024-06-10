@@ -19,10 +19,16 @@ return [
     'factories' => [
       Catalog\Controller\RecordController::class => VuFind\Controller\AbstractBaseWithConfigFactory::class,
       Catalog\Controller\MyResearchController::class => VuFind\Controller\AbstractBaseFactory::class,
+      Catalog\Controller\SearchController::class => VuFind\Controller\AbstractBaseFactory::class,
+      Catalog\Controller\EdsController::class => VuFind\Controller\AbstractBaseFactory::class,
     ],
     'aliases' => [
       VuFind\Controller\RecordController::class => Catalog\Controller\RecordController::class,
       VuFind\Controller\MyResearchController::class => Catalog\Controller\MyResearchController::class,
+      VuFind\Controller\SearchController::class => Catalog\Controller\SearchController::class,
+      VuFind\Controller\EdsController::class => Catalog\Controller\EdsController::class,
+      'EDS' => Catalog\Controller\EdsController::class,
+      'eds' => Catalog\Controller\EdsController::class,
     ],
   ],
   'vufind' => [
