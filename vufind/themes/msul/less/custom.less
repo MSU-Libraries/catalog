@@ -984,7 +984,7 @@ table tr {
   text-decoration:none;
 
   &:hover {
-     border: 2px solid @parakeetgreen;
+    border: 2px solid @parakeetgreen;
     text-decoration:none;
     color:@darkparakeetgreen;
   }
@@ -1019,12 +1019,30 @@ table tr {
   h3 {
     color: black;
   }
+  #apply-filters {
+    height: 3.5em;
+    z-index: 500;
+  }
+  #apply-filters.fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 1em 1em 3.5em;
+    background: white;
+    border-bottom: 1px solid #C1C1C1;
+    width: 100%;
+  }
+  #apply-filters.fixed + #blank-brick {
+    height: 3.5em;
+  }
 }
 
 @media only screen and (min-width : 768px) {
   .sidebar.left {
-    //border-right:1px solid @medgray;
     border-right: 1px solid #C1C1C1;
+    #apply-filters.fixed {
+      width: 25%;
+    }
   }
   .record .mainbody.right {
     float:left;
