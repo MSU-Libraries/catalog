@@ -129,7 +129,7 @@ function buildFacetTree(treeNode, facetData, inSidebar) {
   treeNode[0].replaceChildren(facetList);
 
   if (inSidebar) {
-    treeNode.find('a').click(VuFind.sideFacets.showLoadingOverlay);
+    treeNode.find('a').click(VuFind.sideFacets.facetLinkClicked);
     if (treeNode.parent().hasClass('truncate-hierarchy')) {
       VuFind.truncate.initTruncate(treeNode.parent(), 'div > ul > li');
     }
@@ -186,8 +186,40 @@ var multiFacetsSelection; // Defined in results.php, here to prevent pipeline fr
 VuFind.register('sideFacets', function SideFacets() {
   let globalAddedParams = [];
   let globalRemovedParams = [];
-  let currentParams = window.location.search.substring(1).split('&');
+  let initialRawParams = window.location.search.substring(1).split('&');
+  let initialFilteredParams = initialRawParams.filter(function isFilter(obj) {
+    return obj.startsWith(encodeURI('filter[]='));
+  });
   let dateSelectorId;
+
+  function stickApplyFiltersButtonAtTopWhenScrolling() {
+    let applyFilters = $('#apply-filters');
+    let blankBrick = $('#blank-brick');
+    $(window).scroll(function fixButton() {
+      // To handle delayed loading elements changing the elements offset in the page
+      // We update the offset, depending if we past the button or not
+      if ($(window).scrollTop() > blankBrick.offset().top) {
+        applyFilters.addClass('fixed');
+      } else {
+        applyFilters.removeClass('fixed');
+      }
+    });
+  }
+
+  function showLoadingOverlay() {
+    let elem;
+    if (this === undefined) {
+      elem = $('#search-sidebar .collapse');
+    } else {
+      elem = $(this).closest(".collapse");
+    }
+    elem.append(
+      '<div class="facet-loading-overlay">'
+      + '<span class="facet-loading-overlay-label">'
+      + VuFind.loading()
+      + '</span></div>'
+    );
+  }
 
   function handleDateSelector() {
     if (dateSelectorId === undefined) {
@@ -199,10 +231,10 @@ VuFind.register('sideFacets', function SideFacets() {
     $('form#' + dateSelectorId + ' .date-fields input').each(function checkDateParams() {
       if (window.location.search.match(this.name)) {
         // If the parameter is already present we update it
-        let count = currentParams.length;
+        let count = initialRawParams.length;
         for (let i = 0; i < count; i++) {
-          if (currentParams[i].startsWith(this.name + '=')) {
-            currentParams[i] = encodeURI(this.name + '=' + this.value); // Update
+          if (initialRawParams[i].startsWith(this.name + '=')) {
+            initialRawParams[i] = encodeURI(this.name + '=' + this.value); // Update
             // If not empty we add it to date params
             if (this.value !== '') {
               allEmptyDateParams = false;
@@ -230,39 +262,21 @@ VuFind.register('sideFacets', function SideFacets() {
 
   function getHrefWithNewParams() {
     handleDateSelector();
-    currentParams = currentParams.filter(function tmp(obj) { return !globalRemovedParams.includes(obj); });
-    currentParams = currentParams.concat(globalAddedParams);
-    return window.location.pathname + '?' + currentParams.join('&');
+    // Unique parameters
+    initialRawParams = initialRawParams.filter(function onlyUnique(value, index, array) {
+      return array.indexOf(value) === index;
+    });
+    // Removing parameters
+    initialRawParams = initialRawParams.filter(function tmp(obj) { return !globalRemovedParams.includes(obj); });
+    // Adding parameters
+    initialRawParams = initialRawParams.concat(globalAddedParams);
+    return window.location.pathname + '?' + initialRawParams.join('&');
   }
 
   function applyMultiFacetsSelection() {
     $('#applyMultiFacetsSelection').off();
-    let overlay = '<div class="facet-loading-overlay">'
-      + '<span class="facet-loading-overlay-label">'
-      + VuFind.loading()
-      + "</span></div>";
-    $("#search-sidebar .collapse").append(overlay);
+    showLoadingOverlay();
     window.location.assign(getHrefWithNewParams());
-  }
-
-  function stickApplyFiltersButtonAtTopWhenScrolling() {
-    let applyFilters = $('#apply-filters');
-    let blankBrick = $('#blank-brick');
-    let applyFiltersOffset;
-    $(window).scroll(function fixButton() {
-      // To handle delayed loading elements changing the elements offset in the page
-      // We update the offset, depending if we past the button or not
-      if (blankBrick.offset().top < applyFilters.offset().top) {
-        applyFiltersOffset = blankBrick.offset().top;
-      } else {
-        applyFiltersOffset = applyFilters.offset().top;
-      }
-      if ($(window).scrollTop() > applyFiltersOffset) {
-        applyFilters.addClass('fixed');
-      } else {
-        applyFilters.removeClass('fixed');
-      }
-    });
   }
 
   function dateSelectorInit() {
@@ -272,67 +286,107 @@ VuFind.register('sideFacets', function SideFacets() {
     }
   }
 
+  function multiFacetsSelectionHandling(e) {
+    e.preventDefault();
+    let elem = $(e.currentTarget);
+
+    if (elem.hasClass('facet')) {
+      elem.toggleClass('active');
+    }
+    let icon = elem.find('.icon');
+    if (icon.hasClass('fa-check-square-o')) {
+      icon.removeClass('fa-check-square-o');
+      icon.addClass('fa-square-o');
+    } else if (icon.hasClass('fa-square-o')) {
+      icon.addClass('fa-check-square-o');
+      icon.removeClass('fa-square-o');
+    }
+    let href = elem.attr('href');
+    if (href[0] === '?') {
+      href = href.substring(1);
+    } else {
+      href = href.substring(window.location.pathname.length + 1);
+    }
+    let clickedParams = href.split('&').filter(function isAdded(obj) {
+      if (!obj.startsWith(encodeURI('filter[]='))) {
+        return false;
+      }
+      // If the element was previously added (in JS)
+      // we remove it from the corresponding array (coming back to initial state)
+      let indexAdd = globalAddedParams.indexOf(obj);
+      if (indexAdd !== -1) {
+        globalAddedParams.splice(indexAdd, 1);
+        return false;
+      } else {
+        return true;
+      }
+    });
+    let addedParams = clickedParams.filter(function isAdded(obj) {
+      // We want to keep only if they are not already in current params
+      return !initialFilteredParams.includes(obj);
+    });
+    let removedParams = initialFilteredParams.filter(function isRemoved(obj) {
+      // If param present in clicked but not initial
+      if (clickedParams.includes(obj) === false) {
+        // If the element was previously removed (in JS)
+        // we remove it from the corresponding array (coming back to initial state)
+        let indexRemoved = globalRemovedParams.indexOf(obj);
+        if (indexRemoved !== -1) {
+          globalRemovedParams.splice(indexRemoved, 1);
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        // If param in both clicked and initial we don't want it
+        return false;
+      }
+    });
+    if (addedParams.length !== 1 || addedParams[0] !== "") {
+      // We don't concat if there is only one empty element
+      globalAddedParams = globalAddedParams.concat(addedParams);
+    }
+    if (removedParams.length !== 1 || removedParams[0] !== "") {
+      // We don't concat if there is only one empty element
+      globalRemovedParams = globalRemovedParams.concat(removedParams);
+    }
+  }
+
+  function facetLinkClicked(e) {
+    if (multiFacetsSelection === true) {
+      multiFacetsSelectionHandling(e);
+    } else {
+      showLoadingOverlay();
+    }
+  }
+
   function multiFacetsSelectionInit() {
+    $('a.facet,.facet a').click(multiFacetsSelectionHandling);
     dateSelectorInit();
+    // Adding the button
     $('#search-sidebar h2').first().after(
+      '<div id="blank-brick">' +
+      '</div>' +
       '<div id="apply-filters">' +
       '<button id="applyMultiFacetsSelection" type="submit" class="btn btn-primary">Apply filters</button>' +
-      '</div>' +
-      '<div id="blank-brick">' +
       '</div>'
     );
     $('#applyMultiFacetsSelection').click(applyMultiFacetsSelection);
     stickApplyFiltersButtonAtTopWhenScrolling();
   }
 
-  function showLoadingOverlay(e, data) {
-    e.preventDefault();
-    var overlay = '<div class="facet-loading-overlay">'
-      + '<span class="facet-loading-overlay-label">'
-      + VuFind.loading()
-      + "</span></div>";
-    if (multiFacetsSelection === false) {
-      $(this).closest(".collapse").append(overlay);
-    }
-    if (typeof data !== "undefined") {
-      // Remove jstree-clicked class from JSTree links to avoid the color change:
-      data.instance.get_node(data.node, true).children().removeClass('jstree-clicked');
-    }
-    // This callback operates both as a click handler and a JSTree callback;
-    // if the data element is undefined, we assume we are handling a click.
-    var href = typeof data === "undefined" || typeof data.node.data.url === "undefined"
-      ? $(this).attr('href') : data.node.data.url;
-
-    if (multiFacetsSelection === true) {
-      if ($(this).hasClass('facet')) {
-        $(this).toggleClass('active');
-      }
-      let icon = $(this).find('.icon');
-      if (icon.hasClass('fa-check-square-o')) {
-        icon.removeClass('fa-check-square-o');
-        icon.addClass('fa-square-o');
-      } else if (icon.hasClass('fa-square-o')) {
-        icon.addClass('fa-check-square-o');
-        icon.removeClass('fa-square-o');
-      }
-      let newParams = href.substring(window.location.pathname.length + 1).split('&');
-      let addedParams = newParams.filter(function isAdded(obj) {
-        return !currentParams.includes(obj);
-      });
-      let removedParams = currentParams.filter(function isRemoved(obj) {
-        return !newParams.includes(obj);
-      });
-      globalAddedParams = globalAddedParams.concat(addedParams);
-      globalRemovedParams = globalRemovedParams.concat(removedParams);
-    } else {
-      window.location.assign(href);
-    }
-    return false;
+  function activateFacetBlocking(context) {
+    let finalContext = (typeof context === "undefined") ? $(document.body) : context;
+    finalContext.find('a.facet:not(.narrow-toggle),.facet a').click(showLoadingOverlay);
   }
 
-  function activateFacetBlocking(context) {
-    var finalContext = (typeof context === "undefined") ? $(document.body) : context;
-    finalContext.find('a.facet:not(.narrow-toggle),.facet a').click(showLoadingOverlay);
+  function facetClickHandling(context) {
+    if (multiFacetsSelection === true) {
+      let finalContext = (typeof context === "undefined") ? $(document.body) : context;
+      finalContext.find('a.facet:not(.narrow-toggle),.facet a').click(multiFacetsSelectionHandling);
+    } else {
+      activateFacetBlocking(context);
+    }
   }
 
   function activateSingleAjaxFacetContainer() {
@@ -373,7 +427,7 @@ VuFind.register('sideFacets', function SideFacets() {
             }
           } else if (typeof facetData.html !== 'undefined') {
             $facetContainer.html(VuFind.updateCspNonce(facetData.html));
-            activateFacetBlocking($facetContainer);
+            facetClickHandling($facetContainer);
           } else {
             var treeNode = $facetContainer.find('.jstree-facet');
             VuFind.emit('VuFind.sidefacets.treenodeloaded', {node: treeNode});
@@ -407,8 +461,12 @@ VuFind.register('sideFacets', function SideFacets() {
   }
 
   function init() {
-    // Display "loading" message after user clicks facet:
-    activateFacetBlocking();
+    if (multiFacetsSelection === true) {
+      multiFacetsSelectionInit();
+    } else {
+      // Display "loading" message after user clicks facet:
+      activateFacetBlocking();
+    }
 
     // Side facet status saving
     $('.facet-group .collapse').each(function openStoredFacets(index, item) {
@@ -428,8 +486,11 @@ VuFind.register('sideFacets', function SideFacets() {
         }
       }
     });
-    $('.facet-group').on('shown.bs.collapse', facetSessionStorage);
-    $('.facet-group').on('hidden.bs.collapse', facetSessionStorage);
+
+    // Save state on collapse/expand:
+    let facetGroup = $('.facet-group');
+    facetGroup.on('shown.bs.collapse', (e) => facetSessionStorage(e, 'in'));
+    facetGroup.on('hidden.bs.collapse', (e) => facetSessionStorage(e, 'collapsed'));
 
     // Side facets loaded with AJAX
     $('.side-facets-container-ajax')
@@ -448,12 +509,9 @@ VuFind.register('sideFacets', function SideFacets() {
         $dropdown.removeClass("dropdown-menu-right");
       }
     });
-    if (multiFacetsSelection === true) {
-      multiFacetsSelectionInit();
-    }
   }
 
-  return { init: init, showLoadingOverlay: showLoadingOverlay };
+  return { init: init, showLoadingOverlay: showLoadingOverlay, facetLinkClicked: facetLinkClicked };
 });
 
 /* --- Lightbox Facets --- */
