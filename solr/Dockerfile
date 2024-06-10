@@ -16,7 +16,6 @@ RUN \
     apt remove -y python3-pip && \
     apt autoremove -y && \
     rm -rf /var/lib/apt/lists/* && \
-    echo 'alias solr-zk-shell="zk-shell $SOLR_ZK_HOSTS"' >> /etc/bash.bashrc && \
     (umask 0022; mkdir /.zk_shell) && \
     (umask 0133; touch /.zk_shell/config) && \
     (umask 0177; touch /.zk_shell/history) && \
@@ -81,6 +80,8 @@ RUN \
     # Use /mnt/logs/solr for the Solr logs
     rm -rf /opt/bitnami/solr/logs && \
     ln -s /mnt/logs/solr /opt/bitnami/solr/logs
+
+COPY solr-zk-shell.sh /usr/local/bin/solr-zk-shell
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
     CMD /healthcheck.sh

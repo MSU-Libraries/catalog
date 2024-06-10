@@ -1,5 +1,15 @@
 # Solr
 
+## Helpers
+
+To quick-connect to the [zk-shell](https://pypi.org/project/zk-shell/#usage)
+within the container (without having to pass the ZK hosts)
+simply use the `solr-zk-shell` command.
+
+```bash
+docker exec -it $(docker ps -q -f name=catalog-prod-solr_solr) solr-zk-shell
+
+```
 ## Collection Structure
 Most of the collections do not have an alias associated with them. But, `biblio` is special!
 For that collection we are using Solr aliases because we want to be able to clear out the

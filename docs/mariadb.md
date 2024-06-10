@@ -1,5 +1,14 @@
 # MariaDB
 
+## Helpers
+
+To quick-connect to the database within the container
+(without having to lookup the password from the Docker secret or CI variable), simply use the `connect` command.
+
+```bash
+docker exec -it $(docker ps -q -f name=catalog-prod-mariadb_galera) connect
+```
+
 ## Troubleshooting
 
 In the event of the database getting de-clustered, where the nodes are un-able to bootstrap themselves, you
