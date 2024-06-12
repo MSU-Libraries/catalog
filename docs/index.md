@@ -21,3 +21,4 @@ suggestions you have!
 * [Traefik](traefik.md)
 * [Load Testing](load-testing.md)
 * [Helper Scripts](helper-scripts.md)
+* [Bots](bots.md)
