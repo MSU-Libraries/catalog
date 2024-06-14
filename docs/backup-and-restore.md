@@ -1,7 +1,7 @@
 # Backup and Restore
 
 # Backup
-Included with this repository is a script and automated job to backup both the MariaDB
+Included with this repository is a script and automated job to back up both the MariaDB
 database, the Solr index, and the alphabetical browse database files to the shared storage
 location (`/mnt/shared`).
 
@@ -27,7 +27,7 @@ The schedule for the automated cron job can be found at:
 
 ## Manual backup
 If you want to manually run the script from the `catalog_cron` container (
-or the `catalog_catalog` container) to ensure it runs sucessfully you could
+or the `catalog_catalog` container) to ensure it runs successfully you could
 run something similar to:
 ```bash
 ./backup.sh --db --solr --verbose
@@ -57,6 +57,6 @@ Examples for restoring from backups:
 # Restoring the `authority` and `biblio` index
 ./restore -b /tmp/biblio.tar.gz -a /tmp/authority.tar.gz -v
 
-# Restoring the alhpabrowse database
+# Restoring the alphabrowse database
 ./restore.sh --alpha /mnt/shared/backups/alpha/20240116152918.tar
 ```

@@ -1,12 +1,12 @@
 # Upgrading
 
-## Vufind
-For general documentation on how to upgrade Vufind, see the
+## VuFind
+For general documentation on how to upgrade VuFind, see the
 [official documentation](https://vufind.org/wiki/installation:migration_notes#vufind_migration_notes).
 This documentation will focus on how to upgrade specific to this environment setup.
 
-* Clone the [vufind repository](https://github.com/vufind-org/vufind) locally as well as
-[this repository](https://github.com/MSU-Libraries/catalog) and check out the Vufind repository
+* Clone the [VuFind repository](https://github.com/vufind-org/vufind) locally as well as
+[this repository](https://github.com/MSU-Libraries/catalog) and check out the VuFind repository
 to the release tag that your environment is currently on.
 
 * Run the [upgrade-helper.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/upgrade-helper.sh)
@@ -34,7 +34,7 @@ It will likely prompt for the database credentials, which can be found in the
 file within the environment variables. **Remember to disable the `autoConfigure` once complete**.
 Then ensure that everything still works post-upgrade and that data is preserved.
 
-* Once thurough testing is complete, take a backup of the database on `main`, merge the branch into `main`,
+* Once thorough testing is complete, take a backup of the database on `main`, merge the branch into `main`,
 then repeat the database migration steps once the pipeline completes.
 
 * It is recommended to do a reindex of Solr to apply the latest schema changes, if the helper script
@@ -53,7 +53,7 @@ the update. But if the schema or solr config are being updated you'll likely nee
 steps. Potentially all you may need is to
 [upload the new configs](https://msu-libraries.github.io/catalog/solr/#updating-the-solr-configuration-files)
 , but there is the chance then when you attempt to index new items into Solr it will not want to overwrite
-the existing index. In that case you will need to need to start with an empty index. You can either clear out
+the existing index. In that case you will need to start with an empty index. You can either clear out
 your current index (using the `--reset-solr` flag in the `pc-import-folio` script), but this will result
 in downtime for your site where there will be no results returned for
 a period of time, or follow the below steps to build a temporary alternate collection to index in and then
@@ -92,8 +92,8 @@ the `local/import/import.properties` file replacing the `biblio` collection refe
 new collection (i.e. `biblio9` for example). The references should be in the `solr.core.name` and the `solr.hosturl`.
 
 * Index data into the new collection from the cron container where you modified the `import.properties` file in the
-previous step. Be sure to prepare the data you wish to import as descirbed in the
-[full import documentaion](https://msu-libraries.github.io/catalog/harvesting-and-importing/#full-data-imports).
+previous step. Be sure to prepare the data you wish to import as described in the
+[full import documentation](https://msu-libraries.github.io/catalog/harvesting-and-importing/#full-data-imports).
 ```
 /usr/local/bin/pc-import-folio --verbose --collection biblio9 --batch-import
 /usr/local/bin/pc-import-hlm -i
@@ -101,7 +101,7 @@ previous step. Be sure to prepare the data you wish to import as descirbed in th
 
 * You can optionally re-run the reserves cron at this time too in order to get that up to date with the current
 set of instance IDs, otherwise it may potentially be out of sync until the nightly run and some course reserve
-search results may have inconsistant counts.
+search results may have inconsistent counts.
 
 * Then verify the index in Solr and in VuFind by manually updating
 the `config.ini` to point to the new collection name temporarily. Once satisfied with the output, move

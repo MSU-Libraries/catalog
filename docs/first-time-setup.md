@@ -1,6 +1,6 @@
 # First Time Setup
 
-## Building the Vufind image
+## Building the VuFind image
 Before bringing up the application stack, you need to build the custom
 VuFind images. There are helper scripts in this repository to build one
 for each service, such as VuFind and Solr.
@@ -8,7 +8,7 @@ for each service, such as VuFind and Solr.
 The [CICD](CICD.md) will do this for you automatically, but if you want to
 do it manually you can still use the scripts.
 
-The more complex one, VuFind, has it's
+The more complex one, VuFind, has its
 [own script](https://github.com/MSU-Libraries/catalog/blob/main/cicd/build-vufind)
 which includes the documentation on which environment variables it expects
 to be defined when calling the script. For example:
@@ -38,14 +38,14 @@ LATEST=legacylinks:latest CURR=legacylinks:new COMPONENT=legacylinks VUFIND_VERS
 ```
 
 ## To start the application stack
-During the first time you are bring up the stack, you will need
+During the first time you are bringing up the stack, you will need
 to run these first to bootstrap Solr and MariaDB:
 ```bash
 docker stack deploy -c <(source .env; envsubst <docker-compose.solr-cloud-bootstrap.yml) solr
 docker stack deploy -c <(source .env; envsubst <docker-compose.mariadb-cloud-bootstrap.yml) mariadb
 ```
 
-Subsequently you will run these commands (during the inital deploy
+Subsequently, you will run these commands (during the initial deploy
 and whenever you need to deploy updates):
 ```bash
 # Public network
@@ -63,7 +63,7 @@ docker stack deploy -c <(source .env; envsubst <docker-compose.mariadb-cloud.yml
 # The rest of the Solr cloud stack
 docker stack deploy -c <(source .env; envsubst <docker-compose.solr-cloud.yml) solr
 
-# The vufind stack
+# The VuFind stack
 docker stack deploy -c <(source .env; envsubst <docker-compose.catalog.yml) catalog
 
 # Deploy the swarm cleanup stack
@@ -74,10 +74,10 @@ docker stack deploy -c <(source .env; envsubst <docker-compose.monitoring.yml) m
 ```
 
 ## Creating a FOLIO user
-In order for Vufind to connect to FOLIO to make API calls, it
+In order for VuFind to connect to FOLIO to make API calls, it
 requires a generic user to be created, called `vufind`.
 
-The users credentials are provided as build arguments to the vufind image:
+The users credentials are provided as build arguments to the VuFind image:
 `FOLIO_USER` and `FOLIO_PASS`.
 
 The `vufind` application user (set in `local/confing/vufind/folio.ini`) requires the
@@ -126,11 +126,11 @@ There are a number of variables that are required for the CI/CD pipeline to run.
 ## For local development
 To make changes to the theme, custom module, or files stored within `local` you can either
 modify them directly inside the containers, or you can mount the shared storage and make
-changes there. Changes to the live storage are symboliclly linked to the containers and will
+changes there. Changes to the live storage are symbolically linked to the containers and will
 appear real time in the environment -- very handy for theme development!
+This is only available for development environment starting with devel-*.
 
-Within the shared storage there will be a sub-directory for each branch name. This documentation
-assumes that the share has been set up and configured already on the hosts. The sub-directory
+Within the shared storage there will be a subdirectory for each branch name. This documentation assumes that the share has been set up and configured already on the hosts. The subdirectory
 will contain a clone of this repository which can be easily used to track changes between
 subsequent deploys to the same branch.
 
