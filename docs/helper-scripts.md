@@ -2,11 +2,9 @@
 As part of our [infrastructure repository](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure)
 (soon to be open source), we have a set of helper scripts to help with common tasks that have long or
 hard to remember commands.
+The following documentation serves as a quick reference to know which scripts are available.
 
-The best place to get more detailed information on running these is from the `--help` flag
-on each of these, but this will serve as a quick reference to know which scripts are
-available.
-
+Each script has its own `--help` flag to get more detailed information.
 Each script also offers tab completion for ease-of-use.
 
 ## Deploy Helper ([pc-deploy](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-deploy?ref_type=heads))
@@ -54,9 +52,10 @@ pc-locate-oai in00005342798,in00001442723 --extract
 ## Record manipulation ([pc-record](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-record?ref_type=heads))
 Helper to manipulate records
 Currently available :
+
 - Delete :
-delete records from provided files and or inline ids. The script is available on the host
-machines as well as within the `catalog`, `cron` and `build` containers in the `catalog` stack.
+    delete records from provided files and or inline ids. The script is available on the host
+    machines as well as within the `catalog`, `cron` and `build` containers in the `catalog` stack.
 
 ```bash
 # delete the record with id hlm.in01234 on catalog-beta

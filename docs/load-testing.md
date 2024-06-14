@@ -11,7 +11,7 @@ combination of parameters is the limit your instance can handle. For example, yo
 might start to consistently see 100% CPU usage and return failed request responses with slow
 response times when you get past 200 users for the search page URL, but the same 200 users
 might be fine for the home page URL. This can help you focus your efforts on what pages or
-areas of your infrastructure to optomize and know what limits you can expect of your servers.
+areas of your infrastructure to optimize and know what limits you can expect of your servers.
 
 The script itself has instructions for using it, but as a quick example, you could quickly
 run these tests locally within a Docker container:
@@ -31,5 +31,5 @@ this VuFind image and is part of most Ubuntu installations.
 ab -l -n 100 -c 10 "https://catalog.lib.msu.edu/"
 ```
 
-The advantage with this output is it is much simpler so it can be quicker to get a high level picture of
+The advantage with this output is it is much simpler, so it can be quicker to get a high level picture of
 performance gains when comparing the before-and-after of a code change.

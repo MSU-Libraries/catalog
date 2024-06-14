@@ -3,7 +3,7 @@
 ## Helpers
 
 To quick-connect to the database within the container
-(without having to lookup the password from the Docker secret or CI variable), simply use the `connect` command.
+(without having to look up the password from the Docker secret or CI variable), simply use the `connect` command.
 
 ```bash
 docker exec -it $(docker ps -q -f name=catalog-prod-mariadb_galera) connect
@@ -21,7 +21,7 @@ To do this, first remove the database stack so that all the containers can be st
 docker stack rm [STACK_NAME]-mariadb
 ```
 
-Then look at the MariaDb volume data on each of the nodes to determine which had the latest timestamps on it's files
+Then look at the MariaDb volume data on each of the nodes to determine which had the latest timestamps on its files
 across all the nodes. This can vary on a file-by-file basis, but generally there should be a node that is more ahead
 than others or a table that is more important than others and is more up-to-date (i.e. user data vs session data).
 
@@ -57,7 +57,7 @@ docker service logs -f
 ```
 
 Watch the logs until the state is happy and ready for connections (meaning that it will say "ready for connections"
-in the logs towards the end and stop printing messages). Then *bring the stack down again* so it
+in the logs towards the end and stop printing messages). Then *bring the stack down again*, so it
 can be re-deployed with the regular cloud compose file. It is important to bring the stack down first so that
 it can cleanly stop first and disable its bootstrap state before the other nodes come online.
 
@@ -67,9 +67,12 @@ docker stack rm [STACK_NAME]-mariadb
 docker stack deploy --with-registry-auth -c <(source .env; envsubst <docker-compose.mariadb-cloud.yml) [STACK_NAME]-mariadb
 ```
 
-The stack should now come back up with all of the nodes being healthy and joined to the cluster.
+The stack should now come back up with all the nodes being healthy and joined to the cluster.
 
-### Verifying cluter health
+!!! note
+    Remember to restore the `docker-compose.mariadb-cloud-force.yml` file !
+
+### Verifying cluster health
 
 You can verify that all nodes are joined to the cluster via the Docker service logs and scrolling up to look
 for the members list. There should be a list similar to:
@@ -89,4 +92,4 @@ SHOW GLOBAL STATUS LIKE '%wsrep%'\G
 ```
 
 some key values are the `wsrep_cluster_size` (which should match the number of nodes you have) and the
-`wsrep_cluster_state_uuid` (which should be the same on all of the nodes).
+`wsrep_cluster_state_uuid` (which should be the same on all the nodes).

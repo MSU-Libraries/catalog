@@ -19,7 +19,7 @@ htpasswd -n -B -C 10 mylogin
 
 * To debug performance issues in Traefik, you can enable debug
 mode by adding to the traefik service: `--api.debug=true`.
-This enables all of the [debug endpoints](https://doc.traefik.io/traefik/operations/api/#debug).
+This enables all the [debug endpoints](https://doc.traefik.io/traefik/operations/api/#debug).
 
 ```bash
 curl -u user:passwd https://your-site/debug/pprof/heap -o heap.pprof
