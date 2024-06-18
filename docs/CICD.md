@@ -148,6 +148,7 @@ resources such as Solr and the Traefik dashboard
 * `RECAPTCHA_SECRET_KEY`: Secret key for reCaptcha form validation
 * `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation
 * `REGISTRY_ACCESS_TOKEN`: Read-only registry access token used by deploy user
+* `ROUND_ROBIN_DNS`: The DNS A-record entry that is a round-robin to all nodes in the cluster
 * `RW_CICD_TOKEN`: Read-Write access token to this repository used to create release tags 
 * `SESSION_BOT_SALT`: Secure random string used in creating persisting session ids for bots (when bot_agent values are set)
 * `SIMPLESAMLPHP_ADMIN_PW`: Password to the admin interface of SimpleSAMLphp
