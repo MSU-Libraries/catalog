@@ -31,9 +31,6 @@ Set Stack Name:
   before_script:
     - apk add --no-cache bash
   script:
-    # TODO REMOVE - this is for testing
-    - echo $DEPLOY_HOST_1
-    - exit 1
     - bash ./cicd/set-stack-name
   artifacts:
     reports:
