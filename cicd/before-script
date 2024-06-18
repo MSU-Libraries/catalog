@@ -6,9 +6,9 @@ runhelp() {
     echo ""
     echo "Expected User-defined Variables:"
     echo "  - STACK_NAME: Name of the stack"
-    echo "  - DEPLOY_HOST_A: The first host in the cluster"
-    echo "  - DEPLOY_HOST_B: The second host in the cluster"
-    echo "  - DEPLOY_HOST_C: The third host in the cluster"
+    echo "  - DEPLOY_HOST_1: The first host in the cluster"
+    echo "  - DEPLOY_HOST_2: The second host in the cluster"
+    echo "  - DEPLOY_HOST_3: The third host in the cluster"
     echo "  - ENCODED_PRIVATE_KEY: Private SSH key that has been base64 encoded"
     echo ""
     echo "Failure Scenarios:"
@@ -49,12 +49,12 @@ beforescript() {
     ( umask 022; touch ~/.ssh/known_hosts );
     {
         ssh-keyscan "$SERVER"
-        ssh-keyscan "$DEPLOY_HOST_B"
-        ssh-keyscan "$DEPLOY_HOST_C"
+        ssh-keyscan "$DEPLOY_HOST_2"
+        ssh-keyscan "$DEPLOY_HOST_3"
     } >> ~/.ssh/known_hosts;
 
     # Docker login to all servers
-    ssh deploy@"$DEPLOY_HOST_A" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
-    ssh deploy@"$DEPLOY_HOST_B" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
-    ssh deploy@"$DEPLOY_HOST_C" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
+    ssh deploy@"$DEPLOY_HOST_1" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
+    ssh deploy@"$DEPLOY_HOST_2" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
+    ssh deploy@"$DEPLOY_HOST_3" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
 }

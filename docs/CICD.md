@@ -119,6 +119,9 @@ For example: `devel-mytest*`.
 resources such as Solr and the Traefik dashboard
 * `BROWZINE_LIBRARY`: Library ID for BrowZine (LibKey)
 * `BROWZINE_TOKEN`: BrowZine API token (LibKey)
+* `DEPLOY_HOST_1`: Server FQDN for the for first node in the cluster to deploy to
+* `DEPLOY_HOST_2`: Server FQDN for the for second node in the cluster to deploy to
+* `DEPLOY_HOST_3`: Server FQDN for the for thirds node in the cluster to deploy to
 * `DEPLOY_KEY`: GitLab read-only deploy key base64 encoded
 * `DEPLOY_PRIVATE_KEY`: The `base64` encoded private ssh key to the deploy server
 * `EDS_ORG`: Organization ID for the EDS API

@@ -8,8 +8,8 @@ runhelp() {
     echo ""
     echo "Expected User-defined Variables:"
     echo "  - STACK_NAME: Name of the stack"
-    echo "  - DEPLOY_HOST_A: The first host in the cluster"
-    echo "  - COMPOSE_PATH: Where the docker-compose files are located on the DEPLOY_HOST_A"
+    echo "  - DEPLOY_HOST_1: The first host in the cluster"
+    echo "  - COMPOSE_PATH: Where the docker-compose files are located on the DEPLOY_HOST_1"
     echo ""
     echo "Failure Scenarios:"
     echo "  - The stack deploy command fails"
@@ -25,7 +25,7 @@ main() {
       # TODO Make the db bootstrap more intelligent to check when it has completed startup, then wait until it has completed shutdown
       # otherwise this can cause occassional errors on the Verify Stack Health when it checks galera because the service logs will
       # report that it needs to be run with force_bootstrap
-      ssh deploy@"${DEPLOY_HOST_A}" \
+      ssh deploy@"${DEPLOY_HOST_1}" \
       "(docker volume ls | grep -q ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.mariadb-cloud-bootstrap.yml) ${STACK_NAME}-mariadb && sleep 30 && docker stack rm ${STACK_NAME}-mariadb && sleep 25)) &&
       (docker volume ls | grep -q ${STACK_NAME}-solr_zk || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.zk.yml) ${STACK_NAME}-solr && sleep 60)) &&
       (docker volume ls | grep -q ${STACK_NAME}-solr_bitnami || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.solr-cloud-bootstrap.yml) ${STACK_NAME}-solr && sleep 90))"

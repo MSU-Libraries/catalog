@@ -8,9 +8,9 @@ runhelp() {
     echo ""
     echo "Expected User-defined Variables:"
     echo "  - STACK_NAME: Stack name"
-    echo "  - DEPLOY_HOST_A: The first host in the cluster"
-    echo "  - DEPLOY_HOST_B: The second host in the cluster"
-    echo "  - DEPLOY_HOST_C: The third host in the cluster"
+    echo "  - DEPLOY_HOST_1: The first host in the cluster"
+    echo "  - DEPLOY_HOST_2: The second host in the cluster"
+    echo "  - DEPLOY_HOST_3: The third host in the cluster"
     echo ""
     echo "Failure Scenarios:"
     echo "  - Deploying the stack fails"
@@ -24,19 +24,19 @@ fi
 
 main() {
     # Pull images now to save time with stack deploy
-    ssh deploy@"${DEPLOY_HOST_A}" "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA" &
-    ssh deploy@"${DEPLOY_HOST_B}" "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA" & 
-    ssh deploy@"${DEPLOY_HOST_C}" "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA";
+    ssh deploy@"${DEPLOY_HOST_1}" "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA" &
+    ssh deploy@"${DEPLOY_HOST_2}" "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA" & 
+    ssh deploy@"${DEPLOY_HOST_3}" "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA";
     wait
 
     echo "Preparing $STACK_NAME deploy at $COMPOSE_PATH"
-    ssh deploy@"${DEPLOY_HOST_A}" sudo mkdir -p /mnt/shared/local/"${STACK_NAME}"/deploy/proxymonitoring
+    ssh deploy@"${DEPLOY_HOST_1}" sudo mkdir -p /mnt/shared/local/"${STACK_NAME}"/deploy/proxymonitoring
     # Temporarily stash proxymonitoring.conf in compose directory for permissions reasons
-    scp monitoring/proxymonitoring/proxymonitoring.conf deploy@"${DEPLOY_HOST_A}":"${COMPOSE_PATH}"/
-    ssh deploy@"${DEPLOY_HOST_A}" sudo mv "${COMPOSE_PATH}"/proxymonitoring.conf /mnt/shared/local/"${STACK_NAME}"/deploy/proxymonitoring/
+    scp monitoring/proxymonitoring/proxymonitoring.conf deploy@"${DEPLOY_HOST_1}":"${COMPOSE_PATH}"/
+    ssh deploy@"${DEPLOY_HOST_1}" sudo mv "${COMPOSE_PATH}"/proxymonitoring.conf /mnt/shared/local/"${STACK_NAME}"/deploy/proxymonitoring/
 
     echo "Issuing deploy command now"
-    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --prune --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.monitoring.yml) ${STACK_NAME}-monitoring";
+    ssh deploy@"${DEPLOY_HOST_1}" "docker stack deploy --prune --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.monitoring.yml) ${STACK_NAME}-monitoring";
 }
 
 beforescript
