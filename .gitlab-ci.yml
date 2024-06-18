@@ -10,9 +10,6 @@ stages:
 variables:
   VUFIND_VERSION: "9.1.1"
   SIMPLESAMLPHP_VERSION: "2.1.1"
-  DEPLOY_HOST_A: catalog-1.aws.lib.msu.edu
-  DEPLOY_HOST_B: catalog-2.aws.lib.msu.edu
-  DEPLOY_HOST_C: catalog-3.aws.lib.msu.edu
   COMPOSE_PATH: /home/deploy/$STACK_NAME
 
 Set Stack Name:
@@ -311,7 +308,7 @@ Remove Environment:
   timeout: 60m
   variables:
     ENCODED_PRIVATE_KEY: $DEPLOY_PRIVATE_KEY
-    SERVER: $DEPLOY_HOST_A
+    SERVER: $DEPLOY_HOST_1
     RUNNER_SCRIPT_TIMEOUT: 20m # Prevent job timeout when deploy script takes longer than the 5m default
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'

@@ -9,9 +9,9 @@ runhelp() {
     echo ""
     echo "Expected User-defined Variables:"
     echo "  - STACK_NAME: Name of the stack"
-    echo "  - DEPLOY_HOST_A: The first host in the cluster"
-    echo "  - DEPLOY_HOST_B: The second host in the cluster"
-    echo "  - DEPLOY_HOST_C: The third host in the cluster"
+    echo "  - DEPLOY_HOST_1: The first host in the cluster"
+    echo "  - DEPLOY_HOST_2: The second host in the cluster"
+    echo "  - DEPLOY_HOST_3: The third host in the cluster"
     echo ""
     echo "Failure Scenarios:"
     echo "  - If creation of the volumes failed"
@@ -26,7 +26,7 @@ fi
 
 main() {
     # Create logs volume and set permissions for /mnt/logs/mariadb so that mariadb can write the log there (same for solr)
-    HOSTS="$DEPLOY_HOST_A $DEPLOY_HOST_B $DEPLOY_HOST_C";
+    HOSTS="$DEPLOY_HOST_1 $DEPLOY_HOST_2 $DEPLOY_HOST_3";
     for HOST in ${HOSTS}; do
         ssh deploy@"${HOST}" \
         "docker volume create ${STACK_NAME}_logs &&

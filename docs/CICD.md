@@ -119,6 +119,9 @@ For example: `devel-mytest*`.
 resources such as Solr and the Traefik dashboard
 * `BROWZINE_LIBRARY`: Library ID for BrowZine (LibKey)
 * `BROWZINE_TOKEN`: BrowZine API token (LibKey)
+* `DEPLOY_HOST_1`: Server FQDN for the for first node in the cluster to deploy to
+* `DEPLOY_HOST_2`: Server FQDN for the for second node in the cluster to deploy to
+* `DEPLOY_HOST_3`: Server FQDN for the for thirds node in the cluster to deploy to
 * `DEPLOY_KEY`: GitLab read-only deploy key base64 encoded
 * `DEPLOY_PRIVATE_KEY`: The `base64` encoded private ssh key to the deploy server
 * `EDS_ORG`: Organization ID for the EDS API
@@ -145,6 +148,7 @@ resources such as Solr and the Traefik dashboard
 * `RECAPTCHA_SECRET_KEY`: Secret key for reCaptcha form validation
 * `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation
 * `REGISTRY_ACCESS_TOKEN`: Read-only registry access token used by deploy user
+* `ROUND_ROBIN_DNS`: The DNS A-record entry that is a round-robin to all nodes in the cluster
 * `RW_CICD_TOKEN`: Read-Write access token to this repository used to create release tags 
 * `SESSION_BOT_SALT`: Secure random string used in creating persisting session ids for bots (when bot_agent values are set)
 * `SIMPLESAMLPHP_ADMIN_PW`: Password to the admin interface of SimpleSAMLphp

@@ -8,9 +8,9 @@ runhelp() {
     echo ""
     echo "Expected User-defined Variables:"
     echo "  - STACK_NAME: Name of the stack"
-    echo "  - DEPLOY_HOST_A: The first host in the cluster"
-    echo "  - DEPLOY_HOST_B: The second host in the cluster"
-    echo "  - DEPLOY_HOST_C: The third host in the cluster"
+    echo "  - DEPLOY_HOST_1: The first host in the cluster"
+    echo "  - DEPLOY_HOST_2: The second host in the cluster"
+    echo "  - DEPLOY_HOST_3: The third host in the cluster"
     echo ""
     echo "Failure Scenarios:"
     echo "  - The catalog container is not online on the node"
@@ -26,11 +26,11 @@ fi
 
 main() {
     # Determine if records are already loaded
-    CATALOG_NODE=$(ssh deploy@"${DEPLOY_HOST_A}" "docker service ps -f 'desired-state=running' --format '{{ .Node }}' ${STACK_NAME}-catalog_catalog") || echo "";
+    CATALOG_NODE=$(ssh deploy@"${DEPLOY_HOST_1}" "docker service ps -f 'desired-state=running' --format '{{ .Node }}' ${STACK_NAME}-catalog_catalog") || echo "";
     CATALOG_CONTAINER=$(ssh deploy@"${CATALOG_NODE}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "";
-    S_CONTAINER_A=$(ssh deploy@"${DEPLOY_HOST_A}" "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo "";
-    S_CONTAINER_B=$(ssh deploy@"${DEPLOY_HOST_B}" "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo "";
-    S_CONTAINER_C=$(ssh deploy@"${DEPLOY_HOST_C}" "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo "";
+    S_CONTAINER_A=$(ssh deploy@"${DEPLOY_HOST_1}" "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo "";
+    S_CONTAINER_B=$(ssh deploy@"${DEPLOY_HOST_2}" "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo "";
+    S_CONTAINER_C=$(ssh deploy@"${DEPLOY_HOST_3}" "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo "";
 
     if [ -z "${CATALOG_NODE}" ] || [ -z "${CATALOG_CONTAINER}" ] ; then
         echo "Could not find container for ${STACK_NAME}-catalog_catalog. Node: ${CATALOG_NODE}. Container: ${CATALOG_CONTAINER}";
@@ -42,7 +42,7 @@ main() {
         exit 1;
     fi;
 
-    STAT_CD=$(ssh deploy@"${DEPLOY_HOST_A}" "docker exec ${S_CONTAINER_A} curl 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' --write-out %{http_code} --silent --output /dev/null") || echo "-1";
+    STAT_CD=$(ssh deploy@"${DEPLOY_HOST_1}" "docker exec ${S_CONTAINER_A} curl 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' --write-out %{http_code} --silent --output /dev/null") || echo "-1";
 
     if [[ "${STAT_CD}" -ne 200 ]]; then
         echo "Failed to get number of records from Solr. Curl returned ${STAT_CD}. Sleeping for 5 seconds to add delay before retry.";
@@ -50,7 +50,7 @@ main() {
         exit 1;
     fi;
 
-    NUM_RECS=$(ssh deploy@"${DEPLOY_HOST_A}" "docker exec ${S_CONTAINER_A} curl -s 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' | jq '.response.numFound'") ||  echo "-1";
+    NUM_RECS=$(ssh deploy@"${DEPLOY_HOST_1}" "docker exec ${S_CONTAINER_A} curl -s 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' | jq '.response.numFound'") ||  echo "-1";
 
     if [[ "${NUM_RECS}" -eq "0" ]]; then
         # Load some records
@@ -62,9 +62,9 @@ main() {
         echo "Import completed with exit code $?";
         # Rebuild alphabetic browse databases
         echo "Running Alphabetic browse database build";
-        ssh deploy@"${DEPLOY_HOST_A}" "docker exec ${S_CONTAINER_A} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
-        ssh deploy@"${DEPLOY_HOST_B}" "docker exec ${S_CONTAINER_B} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
-        ssh deploy@"${DEPLOY_HOST_C}" "docker exec ${S_CONTAINER_C} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+        ssh deploy@"${DEPLOY_HOST_1}" "docker exec ${S_CONTAINER_A} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+        ssh deploy@"${DEPLOY_HOST_2}" "docker exec ${S_CONTAINER_B} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+        ssh deploy@"${DEPLOY_HOST_3}" "docker exec ${S_CONTAINER_C} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
         echo "Completed alphabetic browse database build";
     else
         echo "${NUM_RECS} loaded records already exist. Doing nothing.";

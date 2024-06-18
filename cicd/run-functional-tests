@@ -8,7 +8,7 @@ runhelp() {
     echo ""
     echo "Expected User-defined Variables:"
     echo "  - STACK_NAME: Name of the stack"
-    echo "  - DEPLOY_HOST_A: The first host in the cluster"
+    echo "  - DEPLOY_HOST_1: The first host in the cluster"
     echo ""
     echo "Failure Scenarios:"
     echo "  - If the functional tests fail"
@@ -23,7 +23,7 @@ fi
 
 main() {
     echo "Finding container to run tests against for stack ${STACK_NAME}-catalog_catalog..."
-    NODE=$(ssh deploy@"${DEPLOY_HOST_A}" "docker service ps -f 'desired-state=running' --format '{{ .Node }}' ${STACK_NAME}-catalog_catalog | head -n 1") || echo "";
+    NODE=$(ssh deploy@"${DEPLOY_HOST_1}" "docker service ps -f 'desired-state=running' --format '{{ .Node }}' ${STACK_NAME}-catalog_catalog | head -n 1") || echo "";
     CONTAINER=$(ssh deploy@"${NODE}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "";
 
     if [ -z "${NODE}" ] || [ -z "${CONTAINER}" ] ; then

@@ -10,9 +10,9 @@ runhelp() {
     echo "  - AWS_KEY: Used for populating the variables.yml file"
     echo "  - AWS_SECRET: Used for populating the variables.yml file"
     echo "  - STACK_NAME: Used for populating the main.tf file"
-    echo "  - DEPLOY_HOST_A: The first node in the cluster"
-    echo "  - DEPLOY_HOST_B: The second node in the cluster"
-    echo "  - DEPLOY_HOST_C: The third node in the cluster"
+    echo "  - DEPLOY_HOST_1: The first node in the cluster"
+    echo "  - DEPLOY_HOST_2: The second node in the cluster"
+    echo "  - DEPLOY_HOST_3: The third node in the cluster"
     echo ""
     echo "Failure Scenarios:"
     echo "  - The branch does not exist in GitLab anymore"
@@ -49,11 +49,11 @@ prunevols() {
 removesecrets() {
     echo "Deleting secrets for stack \"${STACK_NAME}\""
     # shellcheck disable=SC2207
-    SECRET_IDS=($(ssh deploy@"${DEPLOY_HOST_A}" "docker secret ls --filter name=\"${STACK_NAME}-\" --format \"{{.ID}}\""))
+    SECRET_IDS=($(ssh deploy@"${DEPLOY_HOST_1}" "docker secret ls --filter name=\"${STACK_NAME}-\" --format \"{{.ID}}\""))
     # shellcheck disable=SC2207
-    SECRETS=($(ssh deploy@"${DEPLOY_HOST_A}" "docker secret ls --filter name=\"${STACK_NAME}-\" --format \"{{.ID}}: {{.Name}}\""))
+    SECRETS=($(ssh deploy@"${DEPLOY_HOST_1}" "docker secret ls --filter name=\"${STACK_NAME}-\" --format \"{{.ID}}: {{.Name}}\""))
     echo "Secrets to delete : ${SECRETS[*]}"
-    ssh deploy@"${DEPLOY_HOST_A}" "docker secret rm ${SECRET_IDS[*]}"
+    ssh deploy@"${DEPLOY_HOST_1}" "docker secret rm ${SECRET_IDS[*]}"
 }
 
 main() {
@@ -67,13 +67,13 @@ main() {
     ansible-playbook provision-dns-playbook/decommission.yml;
 
     # Remove the alphabetic browse databases
-    CONTAINER=$(ssh deploy@"${DEPLOY_HOST_A}" "docker ps -q -f name=${STACK_NAME}-solr_cron");
+    CONTAINER=$(ssh deploy@"${DEPLOY_HOST_1}" "docker ps -q -f name=${STACK_NAME}-solr_cron");
     if [ -n "${CONTAINER}" ]; then
-        ssh deploy@"${DEPLOY_HOST_A}" "docker exec ${CONTAINER} rm -rf /mnt/shared/alpha-browse/${STACK_NAME}";
+        ssh deploy@"${DEPLOY_HOST_1}" "docker exec ${CONTAINER} rm -rf /mnt/shared/alpha-browse/${STACK_NAME}";
     fi
 
     # Cleanup volumes/networks/images/containers
-    ssh deploy@"${DEPLOY_HOST_A}" \
+    ssh deploy@"${DEPLOY_HOST_1}" \
     "docker stack rm ${STACK_NAME}-solr;
     docker stack rm ${STACK_NAME}-mariadb;
     docker stack rm ${STACK_NAME}-catalog;
@@ -82,14 +82,14 @@ main() {
     rm -rf $COMPOSE_PATH;";
 
     # Wait for the containers to stop now the services have been removed
-    waitforstop "${DEPLOY_HOST_A}";
-    waitforstop "${DEPLOY_HOST_B}";
-    waitforstop "${DEPLOY_HOST_C}";
+    waitforstop "${DEPLOY_HOST_1}";
+    waitforstop "${DEPLOY_HOST_2}";
+    waitforstop "${DEPLOY_HOST_3}";
 
     # Prune the volumes
-    prunevols "${DEPLOY_HOST_A}";
-    prunevols "${DEPLOY_HOST_B}";
-    prunevols "${DEPLOY_HOST_C}";
+    prunevols "${DEPLOY_HOST_1}";
+    prunevols "${DEPLOY_HOST_2}";
+    prunevols "${DEPLOY_HOST_3}";
 
     removesecrets
 }
