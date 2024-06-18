@@ -9,8 +9,8 @@ runhelp() {
     echo ""
     echo "Expected User-defined Variables:"
     echo "  - STACK_NAME: Name of the stack"
-    echo "  - DEPLOY_HOST_A: The first host in the cluster"
-    echo "  - COMPOSE_PATH: Where the docker-compose files are located on the DEPLOY_HOST_A"
+    echo "  - DEPLOY_HOST_1: The first host in the cluster"
+    echo "  - COMPOSE_PATH: Where the docker-compose files are located on the DEPLOY_HOST_1"
     echo ""
     echo "Failure Scenarios:"
     echo "  - The stack deploy command fails"
@@ -23,7 +23,7 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
-    ssh deploy@"${DEPLOY_HOST_A}" "docker stack deploy --prune -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.internal.yml) ${STACK_NAME}-internal"
+    ssh deploy@"${DEPLOY_HOST_1}" "docker stack deploy --prune -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.internal.yml) ${STACK_NAME}-internal"
 
     sleep 15
 }
