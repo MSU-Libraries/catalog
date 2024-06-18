@@ -1109,7 +1109,7 @@ label {
 }
 
 .search-term {
-  background-color:#f1f1f1;
+  background-color:@lightgray;
   padding:0.5rem 1rem;
   border-radius:0.5rem;
   color:@gray-darker;
@@ -1233,6 +1233,23 @@ body.template-dir-myresearch.template-name-profile {
 .table-striped {
   > tbody > tr:nth-of-type(odd) {
     background-color: #ffffff;
+  }
+}
+
+//add hover to browse (.alphabrowse) and border radius rounded
+
+.alphabrowse tbody tr {
+  &:hover {
+    background-color:@lightgray;
+  }
+  td {
+    border-radius:0.5rem;
+    &:first-child {
+      border-radius:0.5rem 0 0 0.5rem;
+    }
+    &:last-child {
+      border-radius:0 0.5rem 0.5rem 0;
+    }
   }
 }
 
