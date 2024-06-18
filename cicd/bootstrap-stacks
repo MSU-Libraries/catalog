@@ -22,6 +22,20 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
+      # Pull images now to save time with stack deploy
+      ssh deploy@"${DEPLOY_HOST_1}" "docker pull $CI_REGISTRY_IMAGE/db:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
+      ssh deploy@"${DEPLOY_HOST_2}" "docker pull $CI_REGISTRY_IMAGE/db:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
+      ssh deploy@"${DEPLOY_HOST_3}" "docker pull $CI_REGISTRY_IMAGE/db:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}";
+      wait
+      ssh deploy@"${DEPLOY_HOST_1}" "docker pull $CI_REGISTRY_IMAGE/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
+      ssh deploy@"${DEPLOY_HOST_2}" "docker pull $CI_REGISTRY_IMAGE/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
+      ssh deploy@"${DEPLOY_HOST_3}" "docker pull $CI_REGISTRY_IMAGE/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}";
+      wait
+      ssh deploy@"${DEPLOY_HOST_1}" "docker pull $CI_REGISTRY_IMAGE/zk:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
+      ssh deploy@"${DEPLOY_HOST_2}" "docker pull $CI_REGISTRY_IMAGE/zk:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
+      ssh deploy@"${DEPLOY_HOST_3}" "docker pull $CI_REGISTRY_IMAGE/zk:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}";
+      wait
+
       # TODO Make the db bootstrap more intelligent to check when it has completed startup, then wait until it has completed shutdown
       # otherwise this can cause occassional errors on the Verify Stack Health when it checks galera because the service logs will
       # report that it needs to be run with force_bootstrap
