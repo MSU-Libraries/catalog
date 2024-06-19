@@ -1015,6 +1015,16 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get the other uniform title
+     *
+     * @return array Content from Solr
+     */
+    public function getOtherUniformTitle()
+    {
+        return $this->getUniformTitleFromMarc('730', range('a', 'z'));
+    }
+
+    /**
      * Get the uniform title
      *
      * @param $field mixed name of the field to search in
@@ -1027,7 +1037,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         $vals = [];
         $marc = $this->getMarcReader();
         // Add '6' to codes if not null
-        if ($codes !== null && !empty($codes)) {
+        if (!empty($codes)) {
             $codes[] = '6';
         }
         $marc_fields = $marc->getFields($field, $codes);
