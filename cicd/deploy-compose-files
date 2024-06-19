@@ -260,24 +260,6 @@ apply_prod_changes() {
     fi
 }
 
-restrict_oai() {
-    # Restrict OAI access (duplicates https-router then adds middleware and rule path)
-    while read -r LINE; do
-        export LINE; ./yq -i '.services.catalog.deploy.labels += env(LINE)' docker-compose.catalog.yml
-    done < <( \
-        ./yq '.services.catalog.deploy.labels[] | select(. == "traefik.http.routers.*-https-router.*")' docker-compose.catalog.yml |
-        sed -e 's/-https-router/-oai-https-router/' -e 's/middlewares=/middlewares=ip-campus,/' |
-        grep -vF ".rule="
-    );
-
-    # shellcheck disable=SC2006
-    LINE=$(
-        ./yq ".services.catalog.deploy.labels[] | select(. == \"traefik.http.routers.*-https-router.rule=*\") + \" && PathPrefix(`/OAI/Server`)\"" docker-compose.catalog.yml |
-        sed -e 's/-https-router/-oai-https-router/'
-    )
-    export LINE; ./yq -i '.services.catalog.deploy.labels += env(LINE)' docker-compose.catalog.yml
-}
-
 # set_or_update_docker_secret $SECRET_NAME $SECRET_VALUE
 set_or_update_docker_secret() {
     SECRET_NAME="${STACK_NAME}-$1"
@@ -329,11 +311,6 @@ main() {
     ./yq -i \
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.middlewares=$(IFS=, ; echo "${HTTPS_MIDDLEWARES[*]}")\"" \
     docker-compose.catalog.yml;
-
-    # Limit access to prod OAI; must happen after middleware added
-    if [[ "${STACK_NAME}" == catalog-* ]]; then
-        restrict_oai
-    fi
 
     # Authentication environment changes
     if [[ "${STACK_NAME}" == catalog-* ]] || [ "${STACK_NAME}" == "devel-authentication" ]; then
