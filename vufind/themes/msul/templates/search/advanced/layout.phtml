@@ -86,7 +86,13 @@
       <?php endif; ?>
       <div class="clearfix">
         <h1 class="pull-left flip"><?=$this->transEsc($this->headerLookup)?></h1>
-        <div id="groupJoin" class="form-inline pull-right flip">
+      </div>
+      <div class="adv-group-msul bg-color-lightgray" aria-atomic="true" aria-live="polite"> <!-- added div, classes and aria labels msul-->
+      <a role="button" class="icon-link hidden adv-group-terms" id="groupPlaceHolder" href="#"> <!--added class adv-group-terms for layout-->
+        <?=$this->icon('ui-add', 'icon-link__icon') ?>
+        <span class="icon-link__label"><?= $this->transEsc('add_search_group') ?></span>
+      </a>
+      <div id="groupJoin" class="adv-group-match ml-neg-pt5"> <!--moved to bottom of form and added class msul -->
         <label for="groupJoinOptions"><?=$this->transEsc('search_match')?>:</label>
           <select id="groupJoinOptions" name="join" class="form-control">
             <option value="AND"<?php if ($searchDetails && $searchDetails->getOperator() == 'ALL'):?> selected<?php endif; ?>><?= $this->transEsc('group_AND') ?></option>
@@ -94,10 +100,6 @@
           </select>
         </div>
       </div>
-      <a role="button" class="icon-link hidden" id="groupPlaceHolder" href="#">
-        <?=$this->icon('ui-add', 'icon-link__icon') ?>
-        <span class="icon-link__label"><?= $this->transEsc('add_search_group') ?></span>
-      </a>
       <?php /* fallback to a fixed set of search groups/fields if JavaScript is turned off */ ?>
       <div class="no-js">
         <?php if (!empty($this->formOverride)): ?>
@@ -107,7 +109,7 @@
             <?php if ($group == 0): ?>
               <div id="new_group_template">
             <?php endif; ?>
-            <div id="group<?=$group ?>" class="adv-group">
+            <div id="group<?=$group ?>" class="adv-group bg-color-white">
               <div class="adv-group-terms">
                 <label class="adv-group-label"><?=$this->transEsc('adv_search_label')?>:</label>
                 <?php for($search = 0; $search < 3 || (isset($setQueries[$group]) && $search < count($setQueries[$group])); $search++): ?>
@@ -157,6 +159,7 @@
           <?php endfor; ?>
         <?php endif; ?>
       </div>
+
       <div class="adv-submit">
         <input class="clear-btn btn btn-default" type="button" value="<?= $this->transEscAttr('Clear')?>">
         <button type="submit" class="btn btn-primary"><?=$this->icon('search') ?> <?=$this->transEsc('Search')?></button>
