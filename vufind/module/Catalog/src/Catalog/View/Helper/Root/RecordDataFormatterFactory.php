@@ -54,6 +54,12 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         );
 
         $spec->setTemplateLine(
+            'Other Uniform Title',
+            'getOtherUniformTitle',
+            'data-uniform-title.phtml'
+        );
+
+        $spec->setTemplateLine(
             'Genre',
             'getGenres',
             'data-genre.phtml'
@@ -76,7 +82,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
                 'Published', 'Edition', 'Series',
                 'Subjects', 'Genre', 'child_records', 'Online Access',
                 'Ownership and Custodial History', 'Local Note', 'Dissertation Note',
-                'Binding Information', 'Physical Description', 'Tags', 'Variant Title']);
+                'Binding Information', 'Physical Description', 'Tags', 'Variant Title', 'Other Uniform Title']);
 
         return $spec->getArray();
     }
