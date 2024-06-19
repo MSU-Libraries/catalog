@@ -64,7 +64,6 @@ RUN \
     # Update the field used for alpha browse PC-686, PC-110
     sed -i 's/title_fullStr/title_browse_str_mv/' /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i 's/      <str name="normalizer">org.vufind.util.TitleNormalizer<\/str>//' /solr_confs/biblio/conf/solrconfig.xml && \
-    sed -i '$ d' /solr_confs/biblio/conf/schema.xml && \
     # Now rename biblio to biblio1 and duplicate it to biblio2, then update the datadir path
     # since we have two separate collections, one to build in and one for live searching
     mv /solr_confs/biblio /solr_confs/biblio1 && \
