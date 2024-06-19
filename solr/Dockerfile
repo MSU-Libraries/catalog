@@ -62,15 +62,9 @@ RUN \
     sed -i '/hierarchy<\/str>/ r /tmp/series_browse.txt' /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i 's/topic,author,title,lcc,dewey,hierarchy/topic,author,title,lcc,dewey,hierarchy,series/' /solr_confs/biblio/conf/solrconfig.xml && \
     # Update the field used for alpha browse PC-686, PC-110
-    sed -i 's/title_fullStr/title_browse/' /solr_confs/biblio/conf/solrconfig.xml && \
+    sed -i 's/title_fullStr/title_browse_str_mv/' /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i 's/      <str name="normalizer">org.vufind.util.TitleNormalizer<\/str>//' /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i '$ d' /solr_confs/biblio/conf/schema.xml && \
-    echo ' <!-- CopyFields for Title Browse -->' >> /solr_confs/biblio/conf/schema.xml && \
-    echo ' <field name="title_browse" type="string" indexed="true" stored="true" multiValued="true"/>' >> /solr_confs/biblio/conf/schema.xml && \
-    echo ' <copyField source="title_fullStr" dest="title_browse"/>' >> /solr_confs/biblio/conf/schema.xml && \
-    echo ' <copyField source="title_alt" dest="title_browse"/>' >> /solr_confs/biblio/conf/schema.xml && \
-    echo ' <copyField source="title_auth" dest="title_browse"/>' >> /solr_confs/biblio/conf/schema.xml && \
-    echo '</schema>' >> /solr_confs/biblio/conf/schema.xml && \
     # Now rename biblio to biblio1 and duplicate it to biblio2, then update the datadir path
     # since we have two separate collections, one to build in and one for live searching
     mv /solr_confs/biblio /solr_confs/biblio1 && \

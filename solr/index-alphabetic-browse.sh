@@ -130,7 +130,7 @@ function build_browse
 }
 # These parameters should match the ones in solr/vufind/biblio/conf/solrconfig.xml - BrowseRequestHandler
 build_browse "hierarchy" "hierarchy_browse"
-build_browse "title" "title_browse"
+build_browse "title" "title_browse_str_mv"
 build_browse "topic" "topic_browse"
 build_browse "author" "author_browse"
 build_browse "lcc" "callnumber-raw" 1 "-Dbrowse.normalizer=org.vufind.util.LCCallNormalizer"
