@@ -1,6 +1,11 @@
 package org.msu.index;
 
 import org.marc4j.marc.ControlField;
+import org.marc4j.marc.Record;
+import org.marc4j.marc.DataField;
+import org.marc4j.marc.VariableField;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FormatCalculator extends org.vufind.index.FormatCalculator {
 
@@ -19,4 +24,35 @@ public class FormatCalculator extends org.vufind.index.FormatCalculator {
         return super.definitelyNotBookBasedOnRecordType(recordType, marc008);
     }
 
+    /**
+     * Determines record formats using 33x fields.
+     *
+     * This is not currently comprehensive; it is designed to supplement but not
+     * replace existing support for 007 analysis and can be expanded in future.
+     *
+     * @param  Record record
+     * @return Set format(s) of record
+     */
+    @Override protected List<String> getFormatsFrom33xFields(Record record) {
+        boolean isOnline = isOnlineAccordingTo338(record);
+        List<String> formats = new ArrayList<String>();
+        for (VariableField variableField : record.getVariableFields("336")) {
+            DataField typeField = (DataField) variableField;
+            String desc = getSubfieldOrDefault(typeField, 'a', "");
+            String code = getSubfieldOrDefault(typeField, 'b', "");
+            String source = getSubfieldOrDefault(typeField, '2', "");
+            if ((desc.equals("two-dimensional moving image") || code.equals("tdi")) && source.equals("rdacontent")) {
+                formats.add("Video");
+                if (isOnline) {
+                    formats.add("VideoOnline");
+                }
+            }
+            boolean computerOrCartographicDS = desc.equals("computer dataset") || desc.equals("cartographic dataset");
+            boolean crdOrCod = code.equals("crd") || code.equals("cod");
+            if (source.equals("rdacontent") && (computerOrCartographicDS || crdOrCod)) {
+                formats.add("DataSet");
+            }
+        }
+        return formats;
+    }
 }

@@ -11,8 +11,8 @@ runhelp() {
     echo "  - SITE_HOSTNAME: URL for the site"
     echo "  - BASICAUTH_FOR_RESOURCES: Authentication to use for developer resources (i.e. Traefik and Solr)"
     echo "  - GITHUB_USER_TOKEN: Used when downloading yq from Github"
-    echo "  - DEPLOY_HOST_A: The first host in the cluster"
-    echo "  - COMPOSE_PATH: Where to put the docker-compose files on the DEPLOY_HOST_A server"
+    echo "  - DEPLOY_HOST_1: The first host in the cluster"
+    echo "  - COMPOSE_PATH: Where to put the docker-compose files on the DEPLOY_HOST_1 server"
     echo ""
     echo "Failure Scenarios:"
     echo "  - If any of the yq commands fail"
@@ -172,14 +172,14 @@ apply_prod_changes() {
         ## Only catalog-beta
         if [ "${STACK_NAME}" == "catalog-beta" ]; then
             # Set cron/build placement contraint
-            ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_B}\"]" docker-compose.catalog.yml;
-            ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_B}\"]" docker-compose.build.yml;
+            ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_2}\"]" docker-compose.catalog.yml;
+            ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_2}\"]" docker-compose.build.yml;
         fi;
         ## Only catalog-preview
         if [ "${STACK_NAME}" == "catalog-preview" ]; then
             # Set cron/build placement contraint
-            ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_C}\"]" docker-compose.catalog.yml;
-            ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_C}\"]" docker-compose.build.yml;
+            ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_3}\"]" docker-compose.catalog.yml;
+            ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_3}\"]" docker-compose.build.yml;
         fi;
         ## both catalog-beta and catalog-preview
         # Override default router rule
@@ -212,8 +212,8 @@ apply_prod_changes() {
     ## Changes for catalog-prod
     if [ "${STACK_NAME}" == "catalog-prod" ]; then
         # Set cron/build placement constraint
-        ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_A}\"]" docker-compose.catalog.yml;
-        ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_A}\"]" docker-compose.build.yml;
+        ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.catalog.yml;
+        ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.build.yml;
         # Increase Solr RAM to 4 GB (prod is granted more than non-prod envs)
         ./yq -i \
         ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms5120m -Xmx5120m -XX:MaxDirectMemorySize=2048m\"" \
@@ -260,32 +260,14 @@ apply_prod_changes() {
     fi
 }
 
-restrict_oai() {
-    # Restrict OAI access (duplicates https-router then adds middleware and rule path)
-    while read -r LINE; do
-        export LINE; ./yq -i '.services.catalog.deploy.labels += env(LINE)' docker-compose.catalog.yml
-    done < <( \
-        ./yq '.services.catalog.deploy.labels[] | select(. == "traefik.http.routers.*-https-router.*")' docker-compose.catalog.yml |
-        sed -e 's/-https-router/-oai-https-router/' -e 's/middlewares=/middlewares=ip-campus,/' |
-        grep -vF ".rule="
-    );
-
-    # shellcheck disable=SC2006
-    LINE=$(
-        ./yq ".services.catalog.deploy.labels[] | select(. == \"traefik.http.routers.*-https-router.rule=*\") + \" && PathPrefix(`/OAI/Server`)\"" docker-compose.catalog.yml |
-        sed -e 's/-https-router/-oai-https-router/'
-    )
-    export LINE; ./yq -i '.services.catalog.deploy.labels += env(LINE)' docker-compose.catalog.yml
-}
-
 # set_or_update_docker_secret $SECRET_NAME $SECRET_VALUE
 set_or_update_docker_secret() {
     SECRET_NAME="${STACK_NAME}-$1"
     SECRET_VALUE="$2"
     # Check if the secret exists and creating it
-    if ! ssh deploy@"${DEPLOY_HOST_A}" docker secret inspect "${SECRET_NAME}" > /dev/null 2>&1; then
+    if ! ssh deploy@"${DEPLOY_HOST_1}" docker secret inspect "${SECRET_NAME}" > /dev/null 2>&1; then
         echo "Creating secret ${SECRET_NAME}"
-        printf "%s" "${SECRET_VALUE}" | ssh deploy@"${DEPLOY_HOST_A}" docker secret create "${SECRET_NAME}" -
+        printf "%s" "${SECRET_VALUE}" | ssh deploy@"${DEPLOY_HOST_1}" docker secret create "${SECRET_NAME}" -
     fi
 }
 
@@ -330,11 +312,6 @@ main() {
     ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.middlewares=$(IFS=, ; echo "${HTTPS_MIDDLEWARES[*]}")\"" \
     docker-compose.catalog.yml;
 
-    # Limit access to prod OAI; must happen after middleware added
-    if [[ "${STACK_NAME}" == catalog-* ]]; then
-        restrict_oai
-    fi
-
     # Authentication environment changes
     if [[ "${STACK_NAME}" == catalog-* ]] || [ "${STACK_NAME}" == "devel-authentication" ]; then
       ./yq -i ".services.catalog.volumes += \"/home/deploy/samlcerts/${STACK_NAME}:/mnt/samlcerts:ro\"" docker-compose.catalog.yml;
@@ -349,8 +326,8 @@ main() {
     sed -i "/^$/d" docker-compose.catalog.yml;
 
     # Copy the updated compose files to the server
-    ssh deploy@"${DEPLOY_HOST_A}" mkdir -p "${COMPOSE_PATH}";
-    scp docker-compose* .env deploy@"${DEPLOY_HOST_A}":"${COMPOSE_PATH}"/;
+    ssh deploy@"${DEPLOY_HOST_1}" mkdir -p "${COMPOSE_PATH}";
+    scp docker-compose* .env deploy@"${DEPLOY_HOST_1}":"${COMPOSE_PATH}"/;
     rm .env
     echo "Copying files to ${COMPOSE_PATH}"
 }

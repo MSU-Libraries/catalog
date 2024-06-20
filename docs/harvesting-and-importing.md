@@ -1,5 +1,5 @@
 # Harvesting & Importing
-!!! note 
+!!! note
     All of these commands should be run within the `catalog` or `cron` Docker container
 
 ## Script Summary
@@ -12,16 +12,15 @@ access to by EBSCO. The records contain the HLM dataset that is missing from FOL
 Used to harvest and import MARC data from Backstage into the `authority` collection in Solr from the FTP location
 provided by Backstage.  
 * [cron-reserves.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/cron-reserves.sh):
-Used to update the refresh the `reserves` index in Solr with data from FOLIO's API, replacing it entirely each run.  
-
+Used to update or refresh the `reserves` index in Solr with data from FOLIO's API, replacing it entirely each run.  
 
 ## Full Data Harvests
-This section describes the steps needed to re-harvest all of the data from each source.
+This section describes the steps needed to re-harvest all the data from each source.
 
 ### FOLIO
-1. Ensure that your OAI settings on the FOLIO tennant are what you want them to be for this particular
-harvest. For example, if you wish to include storage and inventory records (i.e. the records without a MARC source)
-then you will need to modify the "Record Source" field in the OAI Settings.
+1. Ensure that your OAI settings on the FOLIO tenant are what you want them to be for this particular harvest.
+For example, if you wish to include storage and inventory records (i.e. the records without a MARC source)
+then you will need to modify the "Record Source" field in the OAI Settings in FOLIO.
 
 2. Next you will need to clear out the contents of the `harvest_folio` directory before the next cron job will run.
 Assuming you want to preserve the last harvest for the time being, you can simply move those directories somewhere
@@ -29,54 +28,54 @@ else and rename them. Below is an example, but certainly not the only option. Th
 directory has no files in it, but can have the `log` and `processed` directories within it as long as they are empty
 (they technically can have files in them, you just will not want them to have files since they will get mixed in with
 your new harvest).
-```
-cd /mnt/shared/oai/[STACK_NAME]/harvest_folio/
-mv processed processed_old
-mv log log_old
-mv last_state.txt last_state.txt.old
-mv harvest.log harvest.log.old
-```
+    ```
+    cd /mnt/shared/oai/[STACK_NAME]/harvest_folio/
+    mv processed processed_old
+    mv log log_old
+    mv last_state.txt last_state.txt.old
+    mv harvest.log harvest.log.old
+    ```
 
 3. Monitor progress after it starts via the cron job in the monitoring app or in the log file on the container or volume
 (`/mnt/logs/harvests/`).
 
 ### HLM
-This can just be done with the script's `--full` `--harvest` flags in a one off run, but if you prefer to have
+This can just be done with the script's `--full` `--harvest` flags in a one-off run, but if you prefer to have
 it run via the cron job use it's normal flags, here are the steps you would need to do in order to prepare
 the environment.
 
 1. Remove all files from the `/mnt/shared/hlm/[STACK_NAME]/current/` directory and remove all files from the
 container's `local/harvest/hlm`. You can also just move them somewhere else if you want to preserve a copy
 of them.
-```
-find /mnt/shared/hlm/[STACK_NAME]/current/ -maxdepth 1 -name '*.marc' -print0 | tar -czf archive_[SOME_DATE].tar.gz --null -T -
-find /mnt/shared/hlm/[STACK_NAME]/current/ -maxdepth 1 -name '*.marc' -delete
-
-# exec in to the container and run
-find /usr/local/vufind/local/harvest/hlm -mindepth 1 -maxdepth 1 -name '*.marc' -delete
-rm /usr/local/vufind/local/harvest/hlm/processed/*
-```
+    ```
+    find /mnt/shared/hlm/[STACK_NAME]/current/ -maxdepth 1 -name '*.marc' -print0 | tar -czf archive_[SOME_DATE].tar.gz --null -T -
+    find /mnt/shared/hlm/[STACK_NAME]/current/ -maxdepth 1 -name '*.marc' -delete
+    
+    # exec in to the container and run
+    find /usr/local/vufind/local/harvest/hlm -mindepth 1 -maxdepth 1 -name '*.marc' -delete
+    rm /usr/local/vufind/local/harvest/hlm/processed/*
+    ```
 
 2. Monitor progress after it starts via the cron job in the monitoring app or in the log file on the container or volume
 (`/mnt/logs/harvests/`).
 
 ### Backstage (Authority records)
-This can just be done with the script's `--full` `--harvest` flags in a one off run, but if you prefer to have
+This can just be done with the script's `--full` `--harvest` flags in a one-off run, but if you prefer to have
 it run via the cron job use it's normal flags, here are the steps you would need to do in order to prepare
 the environment.
 
 1. Remove all files from the `/mnt/shared/authority/[STACK_NAME]/current/` directory and remove all files from the
 container's `local/authority/hlm`. You can also just move them somewhere else if you want to preserve a copy
 of them.
-```
-tar -czf archive_[SOME_DATE].tar.gz /mnt/shared/authority/[STACK_NAME]/current/
-rm /mnt/shared/authority/[STACK_NAME]/current/processed/*
-rm /mnt/shared/authority/[STACK_NAME]/current/*
-
-# exec in to the container and run
-rm /usr/local/vufind/local/harvest/authority/*
-rm /usr/local/vufind/local/harvest/authority/processed/*
-```
+    ```
+    tar -czf archive_[SOME_DATE].tar.gz /mnt/shared/authority/[STACK_NAME]/current/
+    rm /mnt/shared/authority/[STACK_NAME]/current/processed/*
+    rm /mnt/shared/authority/[STACK_NAME]/current/*
+    
+    # exec in to the container and run
+    rm /usr/local/vufind/local/harvest/authority/*
+    rm /usr/local/vufind/local/harvest/authority/processed/*
+    ```
 
 2. Monitor progress after it starts via the cron job in the monitoring app or in the log file on the container or volume
 (`/mnt/logs/harvests/`).
@@ -115,7 +114,7 @@ Assuming HLM records also need to be updated in the `biblio` index as well, you 
 the shared directory into the container prior to starting the script. Then start a `screen` session and connect to the
 container again and run the command to import the files. Note that this will get terminated and not be recoverable if
 the container stops due to a deploy like the previous command was. Process can be monitored by seeing the remaining
-files in the `/usr/local/harvest/hlm/` directoy and by re-attaching to the `screen` (by using `screen -r`)
+files in the `/usr/local/harvest/hlm/` directory and by re-attaching to the `screen` (by using `screen -r`)
 to see if the command has completed.
 ```
 # Done inside the container
@@ -128,7 +127,7 @@ cp /mnt/shared/hlm/[STACK_NAME]/current/* /usr/local/vufind/local/harvest/hlm/
 #### How to Use the Collection Aliases to Rebuild and Swap
 As mentioned in the [Solr documentation](solr.md#collection-structure), `biblio` uses aliases to manage directing
 VuFind to the collection in Solr that have the "live" biblio data that should be used for searching: `biblio1` or `biblio2`.
-This means we will on occassion need to swap them. This occassion being when we rebuild the index,
+This means we will on occasion need to swap them. This occasion being when we rebuild the index,
 such as when we're adding new data fields or doing a VuFind version upgrade (...which typically
 add new data fields).
 
@@ -139,9 +138,9 @@ This is not done automatically so that other updates to the main branch can be d
 (i.e. is `biblio` pointing to `biblio1` or `biblio2`) and confirm the **other** collection is what `biblio-build` is
 pointing to.
 To get the list of aliases, from a container:
-```bash
-curl -s "http://solr:8983/solr/admin/collections?action=LISTALIASES" | grep biblio
-```
+    ```bash
+    curl -s "http://solr:8983/solr/admin/collections?action=LISTALIASES" | grep biblio
+    ```
 
 * Rebuild the index on `biblio-build` using the `catalog_build` container. This has
 everything that the `catalog_cron` containers have access to, but do not run `cron`
@@ -149,91 +148,102 @@ jobs since rebuilds do not happen at regular or frequent intervals. In fact, all
 does is sleep! It is recommended to run these commands in a `screen`.  
 !!! warning
     If you run a deploy pipeline while this is running, you will not want to run
-    the manual job that deploys the updates to the build container (since not all of the
+    the manual job that deploys the updates to the build container (since not all the
     import scripts are configured to resume where they left off yet).  
-```bash
-# On Host
-screen
-docker exec -it catalog-prod-catalog_build.12345 bash
-
-# Inside container
-rm local/harvest/folio/processed/*
-cp /mnt/shared/oai/${STACK_NAME}/harvest_folio/processed/* local/harvest/folio/
-/usr/local/bin/pc-import-folio --verbose --reset-solr --collection biblio-build --batch-import | tee /mnt/shared/logs/folio_import_${STACK_NAME}_$(date -I).log
-[Ctrl-a d]
-
-# On Host
-screen
-docker exec -it catalog-prod-catalog_build.12345 bash
-
-# Inside container
-cp /mnt/shared/hlm/${STACK_NAME}/current/* local/harvest/hlm/
-/usr/local/bin/pc-import-hlm --import --verbose | tee /mnt/shared/logs/hlm_import_${STACK_NAME}_$(date -I).log
-[Ctrl-a d]
-```
+    ```bash
+    # On Host
+    screen
+    docker exec -it catalog-prod-catalog_build.12345 bash
+    
+    # Inside container
+    rm local/harvest/folio/processed/*
+    cp /mnt/shared/oai/${STACK_NAME}/harvest_folio/processed/* local/harvest/folio/
+    /usr/local/bin/pc-import-folio --verbose --reset-solr --collection biblio-build --batch-import | tee /mnt/shared/logs/folio_import_${STACK_NAME}_$(date -I).log
+    [Ctrl-a d]
+    
+    # On Host
+    screen
+    docker exec -it catalog-prod-catalog_build.12345 bash
+    
+    # Inside container
+    cp /mnt/shared/hlm/${STACK_NAME}/current/* local/harvest/hlm/
+    /usr/local/bin/pc-import-hlm --import --verbose | tee /mnt/shared/logs/hlm_import_${STACK_NAME}_$(date -I).log
+    [Ctrl-a d]
+    ```
 
 * Verify the counts are what you expect on the `biblio-build` collection using the following command
-```bash
-curl 'http://solr:8983/solr/admin/metrics?nodes=solr1:8983_solr,solr2:8983_solr,solr3:8983_solr&prefix=SEARCHER.searcher.numDocs,SEARCHER.searcher.deletedDocs&wt=json'
-```
+    ```bash
+    curl 'http://solr:8983/solr/admin/metrics?nodes=solr1:8983_solr,solr2:8983_solr,solr3:8983_solr&prefix=SEARCHER.searcher.numDocs,SEARCHER.searcher.deletedDocs&wt=json'
+    ```
 
 * Build the spellchecking indices
-Building these indices is only necessary for a full import.
-```bash
-curl 'http://solr1:8983/solr/biblio-build/select?q=*:*&spellcheck=true&spellcheck.build=true' & curl 'http://solr2:8983/solr/biblio-build/select?q=*:*&spellcheck=true&spellcheck.build=true' & curl 'http://solr3:8983/solr/biblio-build/select?q=*:*&spellcheck=true&spellcheck.build=true' & wait
-curl 'http://solr1:8983/solr/biblio-build/select?q=*:*&spellcheck.dictionary=basicSpell&spellcheck=true&spellcheck.build=true' & curl 'http://solr2:8983/solr/biblio-build/select?q=*:*&spellcheck.dictionary=basicSpell&spellcheck=true&spellcheck.build=true' & curl 'http://solr3:8983/solr/biblio-build/select?q=*:*&spellcheck.dictionary=basicSpell&spellcheck=true&spellcheck.build=true' & wait
-```
-`/bitnami/solr/server/solr/biblioN/spellShingle` and `/bitnami/solr/server/solr/biblioN/spellchecker` should have a significant size afterwards in the solr container (replace `biblioN` by the `biblio-build` collection)
+
+    Building these indices is only necessary for a full import.
+    ```bash
+    curl 'http://solr1:8983/solr/biblio-build/select?q=*:*&spellcheck=true&spellcheck.build=true' & curl 'http://solr2:8983/solr/biblio-build/select?q=*:*&spellcheck=true&spellcheck.build=true' & curl 'http://solr3:8983/solr/biblio-build/select?q=*:*&spellcheck=true&spellcheck.build=true' & wait
+    curl 'http://solr1:8983/solr/biblio-build/select?q=*:*&spellcheck.dictionary=basicSpell&spellcheck=true&spellcheck.build=true' & curl 'http://solr2:8983/solr/biblio-build/select?q=*:*&spellcheck.dictionary=basicSpell&spellcheck=true&spellcheck.build=true' & curl 'http://solr3:8983/solr/biblio-build/select?q=*:*&spellcheck.dictionary=basicSpell&spellcheck=true&spellcheck.build=true' & wait
+    ```
+    `/bitnami/solr/server/solr/biblioN/spellShingle` and `/bitnami/solr/server/solr/biblioN/spellchecker` should have a significant size afterward in the solr container (replace `biblioN` by the `biblio-build` collection)
 
 * Your Solr instance will likely require more memory than it typically needs to do the collection alias swap.
   Be sure to increase and deploy the stack with additional `SOLR_JAVA_MEM` as required to  ensure no
-  downtime during this step. Currently 6G (which we use in prod) is enough for the swap.
+  downtime during this step. Currently, 6G (which we use in prod) is enough for the swap.
   Alternatively (for beta and preview), let it crash after these commands and restart the pipeline to
   help Solr cloud fix itself.
-```bash
-# Open the solr-cloud compose file for your environment
-vim docker-compose.solr-cloud.yml
-
-# Modify the memory line to:
-SOLR_JAVA_MEM: -Xms8192m -Xmx8192m
-
-# Now on the host, run the deploy helper script
-sudo pc-deploy [ENV_NAME] solr-cloud
-```
+    ```bash
+    # Open the solr-cloud compose file for your environment
+    vim docker-compose.solr-cloud.yml
+    
+    # Modify the memory line to:
+    SOLR_JAVA_MEM: -Xms8192m -Xmx8192m
+    
+    # Now on the host, run the deploy helper script
+    sudo pc-deploy [ENV_NAME] solr-cloud
+    ```
 
 * Once you are confident in the new data, you are ready to do the swap! **BE SURE TO SWAP THE NAME AND COLLECTION IN THE BELOW COMMAND EXAMPLE**  
 !!! warning
-```bash
-# Command to check the aliases (repeated from above)
-curl -s "http://solr:8983/solr/admin/collections?action=LISTALIASES" | grep biblio
-
-# This EXAMPLE sets biblio-build to biblio2, and biblio to biblio1
-curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio2'
-curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1'
-```
+    ```bash
+    # Command to check the aliases (repeated from above)
+    curl -s "http://solr:8983/solr/admin/collections?action=LISTALIASES" | grep biblio
+    ```
+    ```bash
+    # This EXAMPLE sets biblio-build to biblio2, and biblio to biblio1
+    # biblio-build => biblio2
+    # biblio       => biblio1
+    curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio2'
+    curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1'
+    ```
+    ```bash
+    # This EXAMPLE sets biblio-build to biblio1, and biblio to biblio2
+    # biblio-build => biblio1
+    # biblio       => biblio2
+    curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio1'
+    curl 'http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio2'
+    ```
 
 * If needed, back-date the timestamp on your `last_harvest.txt` re-harvest some of the OAI changes since you started the import
 
 * Clear out the collection that `biblio-build` is pointing to, to avoid having two large indexing stored for a long period of time
 (only after you are confident in the new index's data)
-```bash
-/usr/local/bin/pc-import-folio --verbose --reset-solr --collection biblio-build
-```
+    ```bash
+    /usr/local/bin/pc-import-folio --verbose --reset-solr --collection biblio-build
+    ```
 
 * If `SOLR_JAVA_MEM` was increased, lower it to its previous amount.
 
 * Kick off a manual alpha browse re-index if you don't want it to be outdated until the next scheduled run.
-```bash
-# Run this on all of the host's
-docker exec -it $(docker ps -q -f name=[ENV_NAME]-solr_cron) /alpha-browse.sh -v -f
-```
+    ```bash
+    # Run this on all of the host's
+    docker exec -it $(docker ps -q -f name=[ENV_NAME]-solr_cron) /alpha-browse.sh -v -f
+    ```
 
 ### `authority` Index
 Similar to the process for HLM records, copy the files from the shared directory into the containers import
 location prior to starting the script. Then start a `screen` session and connect to the container again and run
 the command to import the files. Note that this will get terminated and not be in a recoverable state if the
 container is stopped due to a deploy. Process can be monitored by seeing the remaining files in the
-`/usr/local/harvest/authority` directoy and by re-attaching to the `screen` (by using `screen -r`) to see if the
+`/usr/local/harvest/authority` directory and by re-attaching to the `screen` (by using `screen -r`) to see if the
 command has completed.
 ```
 # Done inside the container
@@ -259,10 +269,10 @@ save logs to `/mnt/logs/vufind/reserves_latest.log` and track them in the Monito
 ## Using VuFind Utilities
 The preferred method is to use the included wrapper script with this repository.
 The [pc-import-folio](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-folio)
-script can run either, or both, the harvest and import of data from FOLIO to Vufind. Use the `--help` flag
+script can run either, or both, the harvest and import of data from FOLIO to VuFind. Use the `--help` flag
 to get information on how to run that script.
 
-But should you choose to run the commands included directly with Vufind, below is documentation on how to
+But should you choose to run the commands included directly with VuFind, below is documentation on how to
 do that.
 
 ### Harvesting from Folio
@@ -277,7 +287,7 @@ mkdir unmerged
 mv *oai*.xml unmerged/
 ```
 
-### Importing into Vufind
+### Importing into VuFind
 ```bash
 cd /usr/local/vufind/harvest
 ./batch-import-marc.sh folio
