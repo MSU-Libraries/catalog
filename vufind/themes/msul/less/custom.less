@@ -23,6 +23,9 @@
 .mr-1 {
   margin-right:0.25rem !important;
 }
+.ml-neg-pt5 {
+  margin-left:-0.5rem;
+}
 .fw-light {
   font-weight:300 !important;
 }
@@ -55,6 +58,13 @@
 }
 .text-decoration-none {
   text-decoration:none;
+}
+
+.bg-color-lightgray {
+  background-color:@lightgray;
+}
+.bg-color-white {
+  background-color:#ffffff;
 }
 
 
@@ -1109,7 +1119,7 @@ label {
 }
 
 .search-term {
-  background-color:#f1f1f1;
+  background-color:@lightgray;
   padding:0.5rem 1rem;
   border-radius:0.5rem;
   color:@gray-darker;
@@ -1233,6 +1243,23 @@ body.template-dir-myresearch.template-name-profile {
 .table-striped {
   > tbody > tr:nth-of-type(odd) {
     background-color: #ffffff;
+  }
+}
+
+//add hover to browse (.alphabrowse) and border radius rounded
+
+.alphabrowse tbody tr {
+  &:hover {
+    background-color:@lightgray;
+  }
+  td {
+    border-radius:0.5rem;
+    &:first-child {
+      border-radius:0.5rem 0 0 0.5rem;
+    }
+    &:last-child {
+      border-radius:0 0.5rem 0.5rem 0;
+    }
   }
 }
 
@@ -1544,6 +1571,15 @@ fieldset.solr-facets {
   margin-bottom:1rem;
 }
 
+//outer gray box around groups
+.adv-group-msul {
+  .clearfix();
+  position: relative;
+  margin-bottom: .5rem;
+  padding: 1rem;
+  border-radius: @border-radius-base;
+  margin-bottom:1rem;
+}
 
 // catalog advanced search
 // spacing between selection boxes

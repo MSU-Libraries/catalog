@@ -5,7 +5,7 @@
       <div class="home-facet-container">
         <?php $alphaBrowseTypes = $this->config()->get('config')->AlphaBrowse_Types; ?>
         <form class="form-inline" method="get" action="<?=$this->url('alphabrowse-home')?>" name="alphaBrowseForm" id="alphaBrowseForm">
-          <label for="alphaBrowseForm_source"><?=$this->transEsc('Browse Alphabetically') ?></label>
+          <label for="alphaBrowseForm_source"><?=$this->transEsc('Browse by') ?></label>
           <select id="alphaBrowseForm_source" name="source" class="form-control">
             <?php foreach ($alphaBrowseTypes as $key => $item): ?>
               <option value="<?=$this->escapeHtmlAttr($key) ?>"<?php if ($this->source == $key): ?> selected="selected"<?php endif; ?>><?=$this->transEsc($item) ?></option>

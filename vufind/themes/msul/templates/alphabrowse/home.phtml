@@ -52,7 +52,7 @@
   <div class="search container navbar">
   <h1 class="mb-5">Browse Alphabetically</h1>
   <form class="form-inline" method="get" action="<?=$this->url('alphabrowse-home')?>" name="alphaBrowseForm" id="alphaBrowseForm">
-    <label for="alphaBrowseForm_source"><?=$this->transEsc('Browse Alphabetically') ?></label>
+    <label for="alphaBrowseForm_source"><?=$this->transEsc('Browse by') ?></label>
     <select id="alphaBrowseForm_source" name="source" class="form-control">
       <?php foreach ($this->alphaBrowseTypes as $key => $item): ?>
         <option value="<?=$this->escapeHtmlAttr($key) ?>"<?php if ($this->source == $key): ?> selected="selected"<?php endif; ?>><?=$this->transEsc($item) ?></option>
@@ -82,7 +82,7 @@
 
 <?php if ($this->result): ?>
   <?=$pageLinks ?>
-  <table class="alphabrowse table table-striped">
+  <table class="alphabrowse table"> <!--removed .table-striped class-->
     <thead>
       <tr>
         <th class="<?=$this->source ?>">
