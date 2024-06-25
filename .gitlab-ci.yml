@@ -8,7 +8,7 @@ stages:
   - Release
 
 variables:
-  VUFIND_VERSION: "9.1.1"
+  VUFIND_VERSION: "9.1.2"
   SIMPLESAMLPHP_VERSION: "2.1.1"
   COMPOSE_PATH: /home/deploy/$STACK_NAME
 
