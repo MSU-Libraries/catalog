@@ -22,7 +22,7 @@ fi
 
 main() {
     LOCAL_DIR="/mnt/shared/local/${STACK_NAME}"
-    if ! OUTPUT=$(ssh deploy@"${DEPLOY_HOST_1}" "[[ -d ${LOCAL_DIR} ]] && rm -rf ${LOCAL_DIR}"); then
+    if ! OUTPUT=$(ssh deploy@"${DEPLOY_HOST_1}" "[[ -d ${LOCAL_DIR} ]] && sudo rm -rf ${LOCAL_DIR}"); then
         echo "Failed to remove the files at ${LOCAL_DIR}. Error: ${OUTPUT}"
         exit 1
     fi
