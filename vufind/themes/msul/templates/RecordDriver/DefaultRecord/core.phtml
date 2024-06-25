@@ -6,7 +6,8 @@
 <div class="media" vocab="http://schema.org/" resource="#record" typeof="<?=$this->driver->getSchemaOrgFormats()?> Product">
   <?php
     $QRCode = $this->record($this->driver)->getQRCode('core');
-    $coverDetails = $this->record($this->driver)->getCoverDetails('core', 'medium', $this->record($this->driver)->getThumbnail('large'));
+    # MSUL customization - PC-1017 Remove link from cover image on record page
+    $coverDetails = $this->record($this->driver)->getCoverDetails('core', 'medium', false);
     $cover = $coverDetails['html'];
     $preview = ($this->previewOverride ?? false)
       ? $this->previewOverride : $this->record($this->driver)->getPreviews();
