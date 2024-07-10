@@ -16,6 +16,8 @@
 namespace Catalog\Controller;
 
 use Catalog\GetThis\GetThisLoader;
+use Catalog\Search\SearchOrigin\SearchOriginFactory;
+use Exception;
 
 /**
  * Helper class for the GetThis Loader containing
@@ -60,5 +62,25 @@ class RecordController extends \VuFind\Controller\RecordController
     {
         // Overriding parent with empty message to prevent error message (PC-972)
         return parent::forceLogin('', $extras, $forward);
+    }
+
+    /**
+     * Display a particular tab.
+     * // TODO PC-895 To remove after PR
+     *
+     * @param string $tab  Name of tab to display
+     * @param bool   $ajax Are we in AJAX mode?
+     *
+     * @return mixed
+     */
+    protected function showTab($tab, $ajax = false)
+    {
+        try {
+            $searchOrigin = SearchOriginFactory::createObject($this->params()->fromQuery());
+        } catch (Exception) {
+            $searchOrigin = null;
+        }
+        $this->layout()->setVariable('searchOrigin', $searchOrigin);
+        return parent::showTab($tab, $ajax);
     }
 }
