@@ -19,10 +19,22 @@ return [
     'factories' => [
       Catalog\Controller\RecordController::class => VuFind\Controller\AbstractBaseWithConfigFactory::class,
       Catalog\Controller\MyResearchController::class => VuFind\Controller\AbstractBaseFactory::class,
+      // TODO PC-895 To remove after PR - START
+      Catalog\Controller\SearchController::class => VuFind\Controller\AbstractBaseFactory::class,
+      Catalog\Controller\EdsController::class => VuFind\Controller\AbstractBaseFactory::class,
+      Catalog\Controller\AlphabrowseController::class => VuFind\Controller\AbstractBaseFactory::class,
+      // TODO PC-895 To remove after PR - END
     ],
     'aliases' => [
       VuFind\Controller\RecordController::class => Catalog\Controller\RecordController::class,
       VuFind\Controller\MyResearchController::class => Catalog\Controller\MyResearchController::class,
+      // TODO PC-895 To remove after PR - START
+      VuFind\Controller\SearchController::class => Catalog\Controller\SearchController::class,
+      VuFind\Controller\EdsController::class => Catalog\Controller\EdsController::class,
+      'EDS' => Catalog\Controller\EdsController::class,
+      'eds' => Catalog\Controller\EdsController::class,
+      VuFind\Controller\AlphabrowseController::class => Catalog\Controller\AlphabrowseController::class,
+      // TODO PC-895 To remove after PR - END
     ],
   ],
   'vufind' => [
