@@ -534,7 +534,7 @@ batch_import() {
 
     update_processed_delete_files
 
-    if ! /usr/local/vufind/harvest/batch-import-marc.sh folio; then
+    if ! /usr/local/vufind/harvest/batch-import-marc.sh -x 40 folio; then
         echo "ERROR: Batch import failed with code: $?"
         exit 1
     fi
