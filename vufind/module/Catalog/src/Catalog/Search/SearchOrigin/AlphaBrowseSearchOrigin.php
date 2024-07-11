@@ -150,7 +150,7 @@ class AlphaBrowseSearchOrigin extends AbstractSearchOrigin
      */
     public function getDisplayName(): string
     {
-        return $this->source . ' browse';
+        return ucwords($this->source) . ' Browse';
     }
 
     /**

@@ -147,7 +147,7 @@
             '/href="(.*)"/',
             'href="$1&' . http_build_query($searchOrigin->getSearchUrlParamsArray()) . '"',
             $backlink
-          );
+        );
       }
     } else {
       $backlink = '<a href="/Search">Back to the catalog</a>';
