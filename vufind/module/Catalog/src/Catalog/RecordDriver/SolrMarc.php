@@ -1369,6 +1369,8 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      * returned as an array of chunks, increasing from least specific to most
      * specific.
      *
+     * Additional modification for PC-1018 to add transliterated values to the subjects
+     *
      * @param bool $extended Whether to return a keyed array with the following
      * keys:
      * - heading: the actual subject heading chunks
@@ -1395,12 +1397,49 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 // Start an array for holding the chunks of the current heading:
                 $current = [];
 
+                /* START MSU */
+                // Get the transliterated 880 values for each result
+                // if it has a subfield 6
+                $linked = [];
+                foreach ($result['subfields'] as $subfield) {
+                    if ($subfield['code'] == '6') {
+                        $explodedSubfield = explode('-', $subfield['data']);
+                        if (count($explodedSubfield) > 1) {
+                            $index = $explodedSubfield[1];
+                            $linked = $this->getMarcReader()->getLinkedField(
+                                '880',
+                                $result['tag'],
+                                $index,
+                                range('a', 'z')
+                            );
+                            break;
+                        }
+                    }
+                }
+                /* END MSU */
+
                 // Get all the chunks and collect them together:
                 foreach ($result['subfields'] as $subfield) {
                     // Numeric subfields are for control purposes and should not
                     // be displayed:
                     if (!is_numeric($subfield['code'])) {
-                        $current[] = $subfield['data'];
+                        /* MSU START */
+                        $linkedVal = '';
+                        if (array_key_exists('subfields', $linked)) {
+                            foreach ($linked['subfields'] as $linkedSubfield) {
+                                // Use if we found the matching subfield code
+                                // and it is not the same value as the original
+                                if (
+                                    $linkedSubfield['code'] == $subfield['code'] &&
+                                    $linkedSubfield['data'] != $subfield['data']
+                                ) {
+                                    $linkedVal = $linkedSubfield['data'];
+                                    break;
+                                }
+                            }
+                        }
+                        $current[] = ['subject' => $subfield['data'], 'linked' => $linkedVal];
+                        /* MSU END */
                     }
                 }
                 // If we found at least one chunk, add a heading to our result:
