@@ -1392,7 +1392,6 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         foreach ($allFields as $result) {
             if (isset($result['tag']) && in_array($result['tag'], $subjectFieldsKeys)) {
                 $fieldType = $this->subjectFields[$result['tag']];
-                /* END MSU */
 
                 // Start an array for holding the chunks of the current heading:
                 $current = [];
@@ -1416,32 +1415,46 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                         }
                     }
                 }
-                /* END MSU */
 
                 // Get all the chunks and collect them together:
+                // Track the previous subfield code and index so we can get the
+                // correct linked one.
+                $prevCode = '';
+                $codeIndex = 0;
                 foreach ($result['subfields'] as $subfield) {
+                    if ($prevCode == $subfield['code']) {
+                        $codeIndex = $codeIndex + 1;
+                    }
                     // Numeric subfields are for control purposes and should not
                     // be displayed:
                     if (!is_numeric($subfield['code'])) {
-                        /* MSU START */
                         $linkedVal = '';
                         if (array_key_exists('subfields', $linked)) {
+                            $linkedPrevCode = '';
+                            $linkedCodeIndex = 0;
                             foreach ($linked['subfields'] as $linkedSubfield) {
+                                if ($linkedPrevCode == $linkedSubfield['code']) {
+                                    $linkedCodeIndex = $linkedCodeIndex + 1;
+                                }
                                 // Use if we found the matching subfield code
                                 // and it is not the same value as the original
                                 if (
                                     $linkedSubfield['code'] == $subfield['code'] &&
+                                    $linkedCodeIndex == $codeIndex &&
                                     $linkedSubfield['data'] != $subfield['data']
                                 ) {
                                     $linkedVal = $linkedSubfield['data'];
                                     break;
                                 }
+                                $linkedPrevCode = $linkedSubfield['code'];
                             }
                         }
                         $current[] = ['subject' => $subfield['data'], 'linked' => $linkedVal];
-                        /* MSU END */
+                        $prevCode = $subfield['code'];
                     }
                 }
+                /* MSU END */
+
                 // If we found at least one chunk, add a heading to our result:
                 if (!empty($current)) {
                     if ($extended) {
