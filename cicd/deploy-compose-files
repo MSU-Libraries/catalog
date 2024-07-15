@@ -136,13 +136,13 @@ apply_prod_changes() {
     # Build extra environment suffix for image tag
     export EXTRA_TAG_SUFFIX="-main";
 
-    # Increase Solr RAM to 2 GB (note: prod is further increased below)
+    # Increase Solr RAM to 3.5+1.5GB (note: prod is further increased below)
     ./yq -i \
-    ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms2048m -Xmx2048m -XX:MaxDirectMemorySize=1024m\"" \
+    ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms3584m -Xmx3584m -XX:MaxDirectMemorySize=1536m\"" \
     docker-compose.solr-cloud.yml;
     # Increase Docker limit (note: prod is further increased below)
     ./yq -i \
-    ".services.solr.deploy.resources.limits.memory = \"6144M\"" \
+    ".services.solr.deploy.resources.limits.memory = \"10240M\"" \
     docker-compose.solr-cloud.yml;
 
     # Use httpchallenge cert resolver (instead of dnschallenge)
@@ -214,48 +214,38 @@ apply_prod_changes() {
         # Set cron/build placement constraint
         ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.catalog.yml;
         ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.build.yml;
-        # Increase Solr RAM to 4 GB (prod is granted more than non-prod envs)
+        # Increase Solr RAM to 6+2GB (prod is granted more than non-prod envs)
         ./yq -i \
-        ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms5120m -Xmx5120m -XX:MaxDirectMemorySize=2048m\"" \
+        ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms6144m -Xmx6144m -XX:MaxDirectMemorySize=2048m\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
-        ".services.solr.deploy.resources.limits.memory = \"14336M\"" \
+        ".services.solr.deploy.resources.limits.memory = \"16384M\"" \
         docker-compose.solr-cloud.yml;
 
         # Override default router rule
         ./yq -i \
-        ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`)\"" \
+        ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-router.rule=Host(\`catalog.lib.msu.edu\`)\"" \
         docker-compose.catalog.yml;
         ./yq -i \
-        ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`)\"" \
+        ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`catalog.lib.msu.edu\`)\"" \
         docker-compose.catalog.yml;
         ./yq -i \
-        ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-links.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
+        ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-http-links.rule=Host(\`catalog.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
         docker-compose.catalog.yml;
         ./yq -i \
-        ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
+        ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`catalog.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
         docker-compose.catalog.yml;
         ./yq -i \
-        ".services.catalog.deploy.labels += \"traefik.http.middlewares.${STACK_NAME}-redirect.redirectregex.regex=^https://catalog-prod.lib.msu.edu/(.*)\"" \
-        docker-compose.catalog.yml;
-        ./yq -i \
-        ".services.catalog.deploy.labels += \"traefik.http.middlewares.${STACK_NAME}-redirect.redirectregex.replacement=https://catalog.lib.msu.edu/\$\${1}\"" \
-        docker-compose.catalog.yml;
-        ./yq -i \
-        ".services.catalog.deploy.labels += \"traefik.http.middlewares.${STACK_NAME}-redirect.redirectregex.permanent=true\"" \
-        docker-compose.catalog.yml;
-        HTTPS_MIDDLEWARES+=("${STACK_NAME}-redirect")
-        ./yq -i \
-        ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
+        ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.rule=Host(\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
-        ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
+        ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
-        ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
+        ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-msul-proxymonitoring-router.rule=Host(\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
         docker-compose.monitoring.yml;
         ./yq -i \
-        ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`,\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
+        ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
         docker-compose.monitoring.yml;
     fi
 }

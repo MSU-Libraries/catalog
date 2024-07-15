@@ -8,7 +8,7 @@ stages:
   - Release
 
 variables:
-  VUFIND_VERSION: "9.1.1"
+  VUFIND_VERSION: "9.1.2"
   SIMPLESAMLPHP_VERSION: "2.1.1"
   COMPOSE_PATH: /home/deploy/$STACK_NAME
 
@@ -296,6 +296,22 @@ Remove Environment:
     - Deploy Vufind
   script:
     - ./cicd/remove-environment
+
+Cleanup Files:
+  stage: Cleanup
+  extends: .stack_template
+  image: $CI_REGISTRY_IMAGE/ansible:latest
+  environment:
+    name: $CI_COMMIT_BRANCH/cleanup-files
+  rules:
+    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
+      when: manual
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Remove Environment
+  script:
+    - ./cicd/cleanup-files
 
 ############# Templates ###############
 

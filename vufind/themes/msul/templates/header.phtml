@@ -1,4 +1,7 @@
-<?php $account = $this->auth()->getManager(); ?>
+<?php
+  /** @var \Laminas\View\Renderer\PhpRenderer $this */
+  $account = $this->auth()->getManager();
+?>
 <div class="banner container navbar">
   <div class="navbar-header">
     <div class="navbar-msubrand"><a href="https://msu.edu/" rel="nofollow"><img alt="Michigan State University" src="/themes/msul/images/masthead-helmet-white.png"></a></div>
@@ -132,16 +135,26 @@
   </div>
 <?php else: ?>
   <?php
+    // Adding the parameter in the URL because we can't extend some model in vufind to get the Search Origin
+    // saved in the params and just have the sid
+    // TODO PC-895 To adapt after PR
+    /** @var \Catalog\Search\SearchOrigin\AbstractSearchOrigin|null $searchOrigin */
+    $searchOrigin = $this->get('searchOrigin');
     if ($this->layout()->showSearchBacklink ?? false) {
       $backlink = $this->searchMemory()->getLastSearchLink($this->transEsc('Back to Search Results'));
+      if (isset($searchOrigin)) {
+        $backlink = preg_replace(
+            '/href="(.*)"/',
+            'href="$1&' . http_build_query($searchOrigin->getSearchUrlParamsArray()) . '"',
+            $backlink
+        );
+      }
     } else {
-      $backlink = '';
-    }
-    if ($backlink == '') {
       $backlink = '<a href="/Search">Back to the catalog</a>';
     }
   ?>
   <div class="backtocat container">
     <p><?= $backlink ?></p>
   </div>
+  <?= $this->render('search/backtoorigin.phtml', ['searchOrigin' => $searchOrigin]); ?>
 <?php endif; ?>

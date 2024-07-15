@@ -76,8 +76,27 @@
 <?php else: ?>
   <form id="searchForm" class="searchForm navbar-form navbar-left flip" method="get" action="<?=$this->url($basicSearch)?>" name="searchForm" autocomplete="off">
     <?= $this->context($this)->renderInContext('search/searchTabs', ['searchTabs' => $tabConfig['tabs'], 'showCounts' => $tabConfig['showCounts']]); ?>
-    <div class="searchtools"><label for="searchForm_type">Search&nbsp;</label> <!-- msul class for spacing -->
+    <div class="searchtools">
+    <?php
+      $searchboxAttributes = [
+        'id' => 'searchForm_lookfor',
+        'class' => 'searchForm_lookfor form-control search-query',
+        'type' => 'search',
+        'name' => 'lookfor',
+        'value' => $this->lookfor,
+        'aria-label' => $this->translate('search_terms'),
+      ];
+      if ($placeholder = $this->searchbox()->getPlaceholderText($tabConfig['selected']['id'] ?? $this->searchClassId)) {
+        $searchboxAttributes['placeholder'] = $this->translate($placeholder);
+      }
+      if ($this->searchbox()->autocompleteEnabled($this->searchClassId)) {
+        $searchboxAttributes['class'] .= " autocomplete searcher:{$this->searchClassId}"
+          . ($this->searchbox()->autocompleteAutoSubmit($this->searchClassId) ? ' ac-auto-submit' : '');
+        $searchboxAttributes['data-autocomplete-formatting-rules'] = $this->searchbox()->autocompleteFormattingRulesJson($this->searchClassId);
+      }
+    ?>
     <?php if ($handlerCount > 1): ?>
+      <label for="searchForm_type">Search&nbsp;</label> <!-- msul class for spacing -->
       <select id="searchForm_type" class="searchForm_type form-control" name="type" data-native-menu="false" aria-label="<?=$this->transEscAttr('Search type')?>">
         <?php $currentGroup = $insideGroup = false; ?>
         <?php foreach ($handlers as $handler): ?>
@@ -102,31 +121,13 @@
         <?php endif; ?>
       </select>
       <label for="searchForm_lookfor">&nbsp;for&nbsp;</label>
-      <?php
-        $searchboxAttributes = [
-          'id' => 'searchForm_lookfor',
-          'class' => 'searchForm_lookfor form-control search-query',
-          'type' => 'search',
-          'name' => 'lookfor',
-          'value' => $this->lookfor,
-          'aria-label' => $this->translate('search_terms'),
-        ];
-        if ($placeholder = $this->searchbox()->getPlaceholderText($tabConfig['selected']['id'] ?? $this->searchClassId)) {
-          $searchboxAttributes['placeholder'] = $this->translate($placeholder);
-        }
-        if ($this->searchbox()->autocompleteEnabled($this->searchClassId)) {
-          $searchboxAttributes['class'] .= " autocomplete searcher:{$this->searchClassId}"
-            . ($this->searchbox()->autocompleteAutoSubmit($this->searchClassId) ? ' ac-auto-submit' : '');
-          $searchboxAttributes['data-autocomplete-formatting-rules'] = $this->searchbox()->autocompleteFormattingRulesJson($this->searchClassId);
-        }
-      ?>
-      <div class="searchForm-query">
-        <input<?=$this->htmlAttributes($searchboxAttributes)?>>
-        <button id="searchForm-reset" class="searchForm-reset hidden" type="reset" tabindex="-1" aria-label="<?=$this->transEsc('searchform_reset_button')?>"><?=$this->icon('ui-reset-search');?></button>
-        <a href="/Help/Home?topic=search&amp;_=1716862211" data-lightbox="" class="help-link"> 
-          <button type="button" class="search-tips-icon" title="Search Tips" aria-label="Search Tips"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-info"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></button>
-        </a> <!-- msul add info icon for search bar at desktop -->
-      </div>
+    <div class="searchForm-query">
+      <input<?=$this->htmlAttributes($searchboxAttributes)?>>
+      <button id="searchForm-reset" class="searchForm-reset hidden" type="reset" tabindex="-1" aria-label="<?=$this->transEsc('searchform_reset_button')?>"><?=$this->icon('ui-reset-search');?></button>
+      <a href="/Help/Home?topic=search&amp;_=1716862211" data-lightbox="" class="help-link">
+        <button type="button" class="search-tips-icon" title="Search Tips" aria-label="Search Tips"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-info"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></button>
+      </a> <!-- msul add info icon for search bar at desktop -->
+    </div>
     <?php elseif ($handlerCount == 1): ?>
       <input type="hidden" name="type" value="<?=$this->escapeHtmlAttr($handlers[0]['value'])?>">
     <?php endif; ?>
@@ -137,9 +138,8 @@
         $advSearchLink = $this->url($advSearch, [], ['query' => $advSearchQuery]);
       ?>
       <a href="<?=$advSearchLink?>" class="advanced-search-link btn btn-link" rel="nofollow"><?=$this->transEsc('Advanced')?></a>
-    <a class="search-tips-mobile" href="/Help/Home?topic=search&amp;_=1716862211">Search Tips</a> <!-- msul added search tips link for mobile -->
-  </div>
     <?php endif; ?>
+    <a class="search-tips-mobile" href="/Help/Home?topic=search&amp;_=1716862211">Search Tips</a> <!-- msul added search tips link for mobile -->
     <?php if ($geoUrl = $this->geocoords()->getSearchUrl($options)) : ?>
         <a href="<?=$geoUrl ?>" class="btn btn-link"><?=$this->transEsc('Geographic Search')?></a>
     <?php endif; ?>
@@ -179,7 +179,7 @@
       if (!empty($lastLimit)) {
         echo '<input type="hidden" name="limit" value="' . $this->escapeHtmlAttr($lastLimit) . '">';
       }
-      if (!empty($lastSort)) {
+      if (!empty($lastSort) && $lastSort !== $params?->getDefaultSort()) {
         echo '<input type="hidden" name="sort" value="' . $this->escapeHtmlAttr($lastSort) . '">';
       }
     ?>
@@ -194,5 +194,6 @@
           'searchType' => $this->searchType,
         ]
     );?>
+    </div>
   </form>
 <?php endif; ?>

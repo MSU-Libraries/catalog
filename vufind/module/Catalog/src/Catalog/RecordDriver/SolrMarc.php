@@ -1369,6 +1369,8 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      * returned as an array of chunks, increasing from least specific to most
      * specific.
      *
+     * Additional modification for PC-1018 to add transliterated values to the subjects
+     *
      * @param bool $extended Whether to return a keyed array with the following
      * keys:
      * - heading: the actual subject heading chunks
@@ -1390,19 +1392,69 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         foreach ($allFields as $result) {
             if (isset($result['tag']) && in_array($result['tag'], $subjectFieldsKeys)) {
                 $fieldType = $this->subjectFields[$result['tag']];
-                /* END MSU */
 
                 // Start an array for holding the chunks of the current heading:
                 $current = [];
 
-                // Get all the chunks and collect them together:
+                /* START MSU */
+                // Get the transliterated 880 values for each result
+                // if it has a subfield 6
+                $linked = [];
                 foreach ($result['subfields'] as $subfield) {
+                    if ($subfield['code'] == '6') {
+                        $explodedSubfield = explode('-', $subfield['data']);
+                        if (count($explodedSubfield) > 1) {
+                            $index = $explodedSubfield[1];
+                            $linked = $this->getMarcReader()->getLinkedField(
+                                '880',
+                                $result['tag'],
+                                $index,
+                                range('a', 'z')
+                            );
+                            break;
+                        }
+                    }
+                }
+
+                // Get all the chunks and collect them together:
+                // Track the previous subfield code and index so we can get the
+                // correct linked one.
+                $prevCode = '';
+                $codeIndex = 0;
+                foreach ($result['subfields'] as $subfield) {
+                    if ($prevCode == $subfield['code']) {
+                        $codeIndex = $codeIndex + 1;
+                    }
                     // Numeric subfields are for control purposes and should not
                     // be displayed:
                     if (!is_numeric($subfield['code'])) {
-                        $current[] = $subfield['data'];
+                        $linkedVal = '';
+                        if (array_key_exists('subfields', $linked)) {
+                            $linkedPrevCode = '';
+                            $linkedCodeIndex = 0;
+                            foreach ($linked['subfields'] as $linkedSubfield) {
+                                if ($linkedPrevCode == $linkedSubfield['code']) {
+                                    $linkedCodeIndex = $linkedCodeIndex + 1;
+                                }
+                                // Use if we found the matching subfield code
+                                // and it is not the same value as the original
+                                if (
+                                    $linkedSubfield['code'] == $subfield['code'] &&
+                                    $linkedCodeIndex == $codeIndex &&
+                                    $linkedSubfield['data'] != $subfield['data']
+                                ) {
+                                    $linkedVal = $linkedSubfield['data'];
+                                    break;
+                                }
+                                $linkedPrevCode = $linkedSubfield['code'];
+                            }
+                        }
+                        $current[] = ['subject' => $subfield['data'], 'linked' => $linkedVal];
+                        $prevCode = $subfield['code'];
                     }
                 }
+                /* MSU END */
+
                 // If we found at least one chunk, add a heading to our result:
                 if (!empty($current)) {
                     if ($extended) {
@@ -1465,6 +1517,16 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             $authors = array_merge($authors, $this->getMarcFieldLinked($field, ['a', 'b', 'c']));
         }
         return $authors;
+    }
+
+    /**
+     * Get the place of publication
+     *
+     * @return array Content from Solr
+     */
+    public function getPlaceOfPublication()
+    {
+        return $this->getMarcField('264', ['a']);
     }
 
     /**
