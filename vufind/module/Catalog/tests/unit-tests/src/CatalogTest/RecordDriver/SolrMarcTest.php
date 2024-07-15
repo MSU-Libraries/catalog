@@ -90,7 +90,37 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
     public function testGetAllSubjectHeadings()
     {
         $this->assertCount(3, $this->getDriver('linkedauthors.xml')->getAllSubjectHeadings()[0]);
-        $this->assertEquals('1814-1841', $this->getDriver('linkedauthors.xml')->getAllSubjectHeadings()[0][1]);
+        $this->assertEquals(
+            '1814-1841',
+            $this->getDriver('linkedauthors.xml')->getAllSubjectHeadings()[0][1]['subject']
+        );
+    }
+
+    /**
+     * Test that subject headings retrieve the linked value if found
+     *
+     * @return void
+     */
+    public function testGetAllSubjectHeadingsLinked()
+    {
+        $subjects = $this->getDriver('linkedsubjects.xml')->getAllSubjectHeadings();
+        // Verify total count of subjects
+        $this->assertCount(9, $subjects);
+        // Verify 1st subject's 2nd part value
+        $this->assertEquals(
+            '1878-1935.',
+            $subjects[0][1]['subject']
+        );
+        // Verify 1st subject's 1st part has a linked value
+        $this->assertEquals(
+            54,
+            strlen($subjects[0][0]['linked'])
+        );
+        // Verify the 1st subject's 2nd part does not have a linked value
+        $this->assertEquals(
+            0,
+            strlen($subjects[0][1]['linked'])
+        );
     }
 
     /**
