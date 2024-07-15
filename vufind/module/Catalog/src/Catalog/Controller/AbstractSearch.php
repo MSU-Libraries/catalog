@@ -63,7 +63,7 @@ class AbstractSearch extends \VuFind\Controller\AbstractSearch
         return $view;
     }
 
-    /*
+    /**
      * Send search results to results view
      *
      * @return Response | ViewModel
