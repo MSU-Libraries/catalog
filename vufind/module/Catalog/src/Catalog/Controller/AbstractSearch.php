@@ -62,9 +62,11 @@ class AbstractSearch extends \VuFind\Controller\AbstractSearch
         $view->multiFacetsSelection = $config?->get('Advanced_Settings')?->get('multiFacetsSelection') === '1';
         return $view;
     }
+
+    /*
      * Send search results to results view
      *
-     * @return Response|ViewModel
+     * @return Response | ViewModel
      */
     public function resultsAction()
     {
