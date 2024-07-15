@@ -1507,6 +1507,16 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get the place of publication
+     *
+     * @return array Content from Solr
+     */
+    public function getPlaceOfPublication()
+    {
+        return $this->getMarcField('264', ['a']);
+    }
+
+    /**
      * Get the transliterated values from the given field, mapping using the data in subfield 6
      *
      * @param string $field    Marc field to search within
