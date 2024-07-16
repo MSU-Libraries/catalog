@@ -137,7 +137,7 @@ RUN envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apac
 ARG SOLR_URL=http://solr:8983/solr
 
 ENV SOLR_URL=$SOLR_URL \
-    VUFIND_LOCAL_MODULES=Catalog
+    VUFIND_LOCAL_MODULES=
 
 # Add file customizations
 COPY local/ /usr/local/vufind/local
