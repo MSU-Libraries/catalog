@@ -142,7 +142,7 @@ ENV SOLR_URL=$SOLR_URL \
 # Add file customizations
 COPY local/ /usr/local/vufind/local
 COPY themes/msul /usr/local/vufind/themes/msul
-COPY module/Catalog /usr/local/vufind/module/Catalog
+#COPY module/Catalog /usr/local/vufind/module/Catalog
 COPY tests/ /tests
 COPY tests/.eslintrc.js /usr/local/vufind/.eslintrc.js
 COPY robots.txt /usr/local/vufind/public/robots.txt
@@ -171,11 +171,11 @@ RUN \
     # Set permissions on local, theme, and Catalog
     chown -R 1000:1000 ${VUFIND_LOCAL_DIR} && \
     chown -R 33:1000 ${VUFIND_HOME}/themes/msul && \
-    chown -R 1000:1000 ${VUFIND_HOME}/module/Catalog && \
+    #chown -R 1000:1000 ${VUFIND_HOME}/module/Catalog && \
     rsync -aip --chmod=D2775,F664 ${VUFIND_CACHE_DIR}/ ${VUFIND_CACHE_DIR}/ && \
     rsync -aip --chmod=D2775,F664 ${VUFIND_LOCAL_DIR}/ ${VUFIND_LOCAL_DIR}/ && \
     rsync -aip --chmod=D2775,F664 ${VUFIND_HOME}/themes/msul/ ${VUFIND_HOME}/themes/msul/ && \
-    rsync -aip --chmod=D2775,F664 ${VUFIND_HOME}/module/Catalog/ ${VUFIND_HOME}/module/Catalog/ && \
+    #rsync -aip --chmod=D2775,F664 ${VUFIND_HOME}/module/Catalog/ ${VUFIND_HOME}/module/Catalog/ && \
     # Set permissions on Robots.txt
     chown 1000:1000 ${VUFIND_HOME}/public/robots.txt && \
     chmod 664 ${VUFIND_HOME}/public/robots.txt && \
