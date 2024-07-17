@@ -299,6 +299,22 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get the abstract and summary notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getAbstractAndSummaryNotes()
+    {
+        return array_merge(
+            $this->getMarcFieldWithInd('520', null, '1', ''),
+            $this->getMarcFieldWithInd('520', null, '1', '0'),
+            $this->getMarcFieldWithInd('520', null, '1', '2'),
+            $this->getMarcFieldWithInd('520', null, '1', '3'),
+            $this->getMarcFieldWithInd('520', null, '1', '8'),
+        );
+    }
+
+    /**
      * Get the content advice notes
      *
      * @return array Note fields from Solr
