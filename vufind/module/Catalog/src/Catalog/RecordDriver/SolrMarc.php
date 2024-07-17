@@ -1026,7 +1026,6 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         return array_merge(
             $this->getUniformTitleFromMarc('130', range('a', 'z')),
             $this->getUniformTitleFromMarc('240', range('a', 'z')),
-            $this->getUniformTitleFromMarc('830', range('a', 'z')),
         );
     }
 
@@ -1533,6 +1532,132 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             $authors = array_merge($authors, $this->getMarcFieldLinked($field, ['a', 'b', 'c']));
         }
         return $authors;
+    }
+
+    /**
+     * Get an array of all series names containing the record. Array entries may
+     * be either the name string, or an associative array with 'name' and 'number'
+     * keys.
+     *
+     * @return array
+     */
+    public function getSeries()
+    {
+        $matches = [];
+
+        // Get data for the primary series fields
+        // subfield v is excluded here because getSeriesFromMarc will uses v
+        // to get the series number
+        $primaryFields = [
+            '400' => ['p', 't'],
+            '410' => ['p', 't'],
+            '411' => ['p', 't'],
+            '440' => [range('a', 'w')],
+            '800' => [range('f', 'u')],
+            '810' => [range('f', 'u')],
+            '811' => [range('f', 'u')],
+            '830' => ['a', 'd', 'f', 'g', 'k', 'l', 'm', 'n','o', 'p', 'r', 's', 't', 'w', 'x', 'y'],
+        ];
+        $matches = $this->getSeriesFromMARC($primaryFields);
+
+        // Get 490 field data if no other series data found
+        // if ind 1 == 0
+        if (empty($matches)) {
+            $marc = $this->getMarcReader();
+            $marc_fields = $marc->getFields('490', ['a', 'n', 'p', 'v', '6']);
+            foreach ($marc_fields as $marc_data) {
+                $field_vals = [];
+                $field_num = '';
+                $field_linked = '';
+                if (trim(($marc_data['i1'] ?? '')) == '0') {
+                    $subfields = $marc_data['subfields'];
+                    foreach ($subfields as $subfield) {
+                        if ($subfield['code'] == 'v') {
+                            $field_num = $subfield['data'];
+                        } elseif ($subfield['code'] == '6') {
+                            $explodedSubfield = explode('-', $subfield['data']);
+                            if (count($explodedSubfield) > 1) {
+                                $index = $explodedSubfield[1];
+                                $linked = $this->getMarcReader()->getLinkedField(
+                                    '880',
+                                    '490',
+                                    $index,
+                                    range('a', 'z')
+                                );
+                                $field_linked = implode(' ', $this->getSubfieldArray($linked, range('a', 'z')));
+                            }
+                        } else {
+                            $field_vals[] = $subfield['data'];
+                        }
+                    }
+                }
+                if (!empty($field_vals)) {
+                    $matches[] = [
+                                'name' => implode(' ', $field_vals),
+                                'number' => $field_num,
+                                'linked' => $field_linked,
+                    ];
+                }
+            }
+        }
+        return $matches;
+    }
+
+    /**
+     * Support method for getSeries() -- given a field specification, look for
+     * series information in the MARC record.
+     *
+     * @param array $fieldInfo Associative array of field => subfield information
+     * (used to find series name)
+     *
+     * @return array
+     */
+    protected function getSeriesFromMARC($fieldInfo)
+    {
+        $matches = [];
+
+        // Loop through the field specification....
+        foreach ($fieldInfo as $field => $subfields) {
+            // Did we find any matching fields?
+            $series = $this->getMarcReader()->getFields($field);
+            foreach ($series as $currentField) {
+                // Can we find a name using the specified subfield list?
+                $name = $this->getSubfieldArray($currentField, $subfields);
+                if (isset($name[0])) {
+                    $currentArray = ['name' => $name[0]];
+
+                    // Can we find a number in subfield v?  (Note that number is
+                    // always in subfield v regardless of whether we are dealing
+                    // with 440, 490, 800 or 830 -- hence the hard-coded array
+                    // rather than another parameter in $fieldInfo).
+                    $number = $this->getSubfieldArray($currentField, ['v']);
+                    if (isset($number[0])) {
+                        $currentArray['number'] = $number[0];
+                    }
+
+                    // Check for a linked value
+                    $linkedField = $this->getSubfieldArray($currentField, ['6']);
+                    if (isset($linkedField[0])) {
+                        $explodedSubfield = explode('-', $linkedField[0]);
+                        if (count($explodedSubfield) > 1) {
+                            $index = $explodedSubfield[1];
+                            $linked = $this->getMarcReader()->getLinkedField(
+                                '880',
+                                $currentField['tag'],
+                                $index,
+                                range('a', 'z')
+                            );
+                            $currentArray['linked'] = implode(' ', $this->getSubfieldArray($linked, range('a', 'z')));
+                        }
+                    }
+
+                    // Save the current match:
+                    $matches[] = $currentArray;
+                }
+            }
+        }
+
+        return $matches;
     }
 
     /**

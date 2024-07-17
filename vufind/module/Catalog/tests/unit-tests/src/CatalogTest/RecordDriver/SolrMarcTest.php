@@ -124,6 +124,42 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Test that series are retrieved with the correct array elements from the marc record.
+     *
+     * @return void
+     */
+    public function testSeries()
+    {
+        $this->assertCount(2, $this->getDriver('series.xml')->getSeries());
+        $this->assertEquals(
+            '"Da jia xiao shuo" xi lie ;',
+            $this->getDriver('series.xml')->getSeries()[0]['name']
+        );
+        $this->assertEquals(
+            '7.',
+            $this->getDriver('series.xml')->getSeries()[0]['number']
+        );
+    }
+
+    /**
+     * Test that series with transliterated values in the 880 field are populated.
+     *
+     * @return void
+     */
+    public function testLinkedSeries()
+    {
+        $this->assertCount(1, $this->getDriver('linkedseries.xml')->getSeries());
+        $this->assertEquals(
+            'Fa zhan he gai ge lan pi shu = Blue book of development and reform',
+            $this->getDriver('linkedseries.xml')->getSeries()[0]['name']
+        );
+        $this->assertEquals(
+            62,
+            strlen($this->getDriver('linkedseries.xml')->getSeries()[0]['linked'])
+        );
+    }
+
+    /**
      * Test that no failure happens when passing an invalid marc field to getMarcFieldLinked
      *
      * @return void
