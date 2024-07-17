@@ -158,7 +158,7 @@ if ($doi = $this->driver->tryMethod('getCleanDOI')) {
 }
 
 // MSU START PC-750
-$abstract = $this->driver->tryMethod('getAbstractNotes');
+$abstract = $this->driver->tryMethod('getAbstractAndSummaryNotes');
 if (is_array($abstract)) {
     foreach ($abstract as $note) {
         echo 'AB  - ' . "$note\r\n";
