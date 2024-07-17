@@ -17,6 +17,7 @@ namespace Catalog\RecordDriver;
 use function array_key_exists;
 use function count;
 use function in_array;
+use function is_array;
 
 /**
  * Extends the record driver with additional data from Solr
@@ -1596,5 +1597,52 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getDeduplicatedAuthors($dataFields = ['role', 'link'])
     {
         return parent::getDeduplicatedAuthors($dataFields);
+    }
+
+    /**
+     * PC-789 Return first non-empty highlighted text
+     * Pick one line from the highlighted text (if any) to use as a snippet.
+     *
+     * @return mixed False if no snippet found, otherwise associative array
+     * with 'snippet' and 'caption' keys.
+     */
+    public function getHighlightedSnippet()
+    {
+        // Only process snippets if the setting is enabled:
+        if ($this->snippet) {
+            // First check for preferred fields:
+            foreach ($this->preferredSnippetFields as $current) {
+                foreach ($this->highlightDetails[$current] as $hl) {
+                    if (!empty($hl)) {
+                        return [
+                            'snippet' => $hl,
+                            'caption' => $this->getSnippetCaption($current),
+                        ];
+                    }
+                }
+            }
+
+            // No preferred field found, so try for a non-forbidden field:
+            if (
+                isset($this->highlightDetails)
+                && is_array($this->highlightDetails)
+            ) {
+                foreach ($this->highlightDetails as $key => $value) {
+                    if ($value && !in_array($key, $this->forbiddenSnippetFields)) {
+                        foreach ($value as $hl) {
+                            if (!empty($hl)) {
+                                return [
+                                    'snippet' => $hl,
+                                    'caption' => $this->getSnippetCaption($key),
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // If we got this far, no snippet was found:
+        return false;
     }
 }
