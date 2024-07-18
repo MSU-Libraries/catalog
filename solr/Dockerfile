@@ -1,4 +1,4 @@
-FROM bitnami/solr:9.3.0
+FROM bitnami/solr:9.6
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Detroit
