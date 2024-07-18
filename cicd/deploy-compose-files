@@ -136,13 +136,13 @@ apply_prod_changes() {
     # Build extra environment suffix for image tag
     export EXTRA_TAG_SUFFIX="-main";
 
-    # Increase Solr RAM to 3.5+1.5GB (note: prod is further increased below)
+    # Increase Solr RAM to 4+1.5GB (note: prod is further increased below)
     ./yq -i \
-    ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms3584m -Xmx3584m -XX:MaxDirectMemorySize=1536m\"" \
+    ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms4096m -Xmx4096m -XX:MaxDirectMemorySize=1536m\"" \
     docker-compose.solr-cloud.yml;
     # Increase Docker limit (note: prod is further increased below)
     ./yq -i \
-    ".services.solr.deploy.resources.limits.memory = \"10240M\"" \
+    ".services.solr.deploy.resources.limits.memory = \"8192M\"" \
     docker-compose.solr-cloud.yml;
 
     # Use httpchallenge cert resolver (instead of dnschallenge)
@@ -214,9 +214,9 @@ apply_prod_changes() {
         # Set cron/build placement constraint
         ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.catalog.yml;
         ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.build.yml;
-        # Increase Solr RAM to 6+2GB (prod is granted more than non-prod envs)
+        # Increase Solr RAM to 8+2.5GB (prod is granted more than non-prod envs)
         ./yq -i \
-        ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms6144m -Xmx6144m -XX:MaxDirectMemorySize=2048m\"" \
+        ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms8192m -Xmx8192m -XX:MaxDirectMemorySize=2560m\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
         ".services.solr.deploy.resources.limits.memory = \"16384M\"" \
