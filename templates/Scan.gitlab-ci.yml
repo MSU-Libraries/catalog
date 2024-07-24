@@ -65,8 +65,12 @@ Validate Vufind Build:
     - bash ./cicd/validate-vufind-build
 
 Load Testing:
-  extends: .stack_template
   stage: Optional Steps
+  tags:
+    - msul-shared
+  retry: 1
+  timeout: 15m
+  interruptible: true
   environment:
     name: $CI_COMMIT_BRANCH/load-testing
     auto_stop_in: 2 weeks
