@@ -79,19 +79,17 @@ Load Performance:
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
-  before_script:
-    - mkdir results
-    - chmod 777 results
-    - mkdir tests
-    - cp vufind/tests/load_test.js tests/
-    - chmod -R 777 tests
-    - ls -l $(pwd)/tests
   script:
-    - docker run --rm -v $(pwd)/results:/results -v $(pwd)/tests:/tests grafana/k6 run -u 10 -d 30s /tests/load_test.js --env URL="https://$URL" --summary-export=/results/load-performance.json
-    - ls -l results
+    - pwd
+    - chmod 777 $(pwd)/vufind/tests/load_test.js
+    - touch $(pwd)/vufind/tests/load-performance.json
+    - chmod 777 $(pwd)/vufind/tests/load-performance.json
+    - ls -l $(pwd)/vufind/tests
+    - docker run --rm -v $(pwd):/catalog grafana/k6 run -u 10 -d 30s /catalog/vufind/tests/load_test.js --env URL="https://$URL" --summary-export=/catalog/vufind/tests/load-performance.json
+    - ls -l $(pwd)/vufind/tests
   artifacts:
     reports:
-      load_performance: results/load-performance.json
+      load_performance: vufind/tests/load-performance.json
 
 
 
