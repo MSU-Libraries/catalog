@@ -91,7 +91,7 @@ Load Performance:
     - ls -l results
   artifacts:
     reports:
-      load_performance: /results/load-performance.json
+      load_performance: results/load-performance.json
 
 
 
