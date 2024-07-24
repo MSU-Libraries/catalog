@@ -178,6 +178,8 @@ Deploy Vufind:
   artifacts:
     reports:
       dotenv: deploy.env
+    paths:
+      - url.env
 
 Deploy Vufind Build Env:
   extends: .stack_template

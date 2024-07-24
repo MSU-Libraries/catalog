@@ -50,7 +50,7 @@ Validate Vufind Build:
   stage: test
   variables:
     LATEST: $CI_REGISTRY_IMAGE/vufind:latest
-  timeout: 5m
+  timeout: 15m
   tags:
     - msul-shared
   interruptible: true
@@ -75,8 +75,9 @@ load_performance:
   needs:
     - job: Deploy Vufind
       artifacts: true
+    - Populate Vufind Environment
   variables:
-    K6_DOCKER_OPTIONS: '--env-file deploy.env'
+    K6_DOCKER_OPTIONS: '--env-file url.env'
     K6_DURATION: '1m'
     K6_VUS: 10
   rules:

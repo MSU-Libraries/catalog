@@ -37,7 +37,7 @@ main() {
     # Report the environemnt URL to GitLab
     echo "URL=${URL}" >> deploy.env;
     # Separate variable for k6 performance testing
-    echo "ENVIRONMENT_URL=${URL}" >> deploy.env;
+    echo "ENVIRONMENT_URL=https://${URL}" >> url.env;
 }
 
 beforescript
