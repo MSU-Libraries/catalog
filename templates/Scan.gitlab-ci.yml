@@ -96,6 +96,11 @@ load_performance:
       fi
     - ls -l /tmp/load-performance.json
     - docker run --rm -v "$(pwd)":/k6 -w /k6 $K6_DOCKER_OPTIONS $K6_IMAGE:$K6_VERSION run $K6_TEST_FILE --summary-export=/tmp/load-performance.json $K6_OPTIONS
+    - ls -l /tmp/load-performance.json
+  artifacts:
+    reports:
+      load_performance: /tmp/load-performance.json
+
 
 
 # Commenting this out since the https://docs.gitlab.com/ee/user/application_security/container_scanning/#vulnerability-allowlisting
