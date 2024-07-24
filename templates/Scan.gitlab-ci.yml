@@ -86,7 +86,7 @@ load_performance:
   before_script:
     - touch /tmp/load-performance.json
     - chmod 644 /tmp/load-performance.json
-    - ltr -ltr /tmp
+    - ls -ltr /tmp
   script:
     - |
       if ! docker info &>/dev/null; then
