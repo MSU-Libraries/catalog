@@ -83,10 +83,10 @@ load_performance:
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
-  after_script:
+  before_script:
+    - touch load-performance.json
     - chmod 644 load-performance.json
     - ls -ltr
-
 
 # Commenting this out since the https://docs.gitlab.com/ee/user/application_security/container_scanning/#vulnerability-allowlisting
 # wasn't being respecting in attempts at storing it at top level or at vufind level
