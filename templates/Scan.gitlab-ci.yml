@@ -82,6 +82,7 @@ Load Performance:
   before_script:
     - mkdir results
     - chmod 777 results
+    - chmod 777 vufind/tests/load_test.js
   script:
     - ls -l $(pwd)/vufind/tests
     - docker run --rm -v $(pwd)/results:/results -v $(pwd)/vufind/tests:/tests grafana/k6 run -u 10 -v -d 30s /tests/load_test.js --env URL="https://$URL" --summary-export=/results/load-performance.json
