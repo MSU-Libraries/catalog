@@ -83,11 +83,11 @@ Load Performance:
     - mkdir results
     - chmod 777 results
     - mkdir tests
-    - chmod -R 777 tests
     - cp vufind/tests/load_test.js tests/
-  script:
+    - chmod -R 777 tests
     - ls -l $(pwd)/tests
-    - docker run --rm -v $(pwd)/results:/results -v $(pwd)/tests:/tests grafana/k6 run -u 10 -v -d 30s /tests/load_test.js --env URL="https://$URL" --summary-export=/results/load-performance.json
+  script:
+    - docker run --rm -v $(pwd)/results:/results -v $(pwd)/tests:/tests grafana/k6 run -u 10 -d 30s /tests/load_test.js --env URL="https://$URL" --summary-export=/results/load-performance.json
     - ls -l results
   artifacts:
     reports:
