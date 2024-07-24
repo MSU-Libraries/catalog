@@ -64,6 +64,23 @@ Validate Vufind Build:
   script:
     - bash ./cicd/validate-vufind-build
 
+Load Testing:
+  extends: .stack_template
+  stage: Optional Steps
+  environment:
+    name: $CI_COMMIT_BRANCH/load-testing
+    auto_stop_in: 2 weeks
+  needs:
+    - job: Deploy Vufind
+      artifacts: true
+  variables:
+    K6_DOCKER_OPTIONS: '--env-file deploy.env'
+    K6_DURATION: '1m'
+    K6_VUS: 10
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
+
 # Commenting this out since the https://docs.gitlab.com/ee/user/application_security/container_scanning/#vulnerability-allowlisting
 # wasn't being respecting in attempts at storing it at top level or at vufind level
 #container_scanning:
@@ -120,3 +137,4 @@ Validate Vufind Build:
 include:
 #  - template: Security/Container-Scanning.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Verify/Load-Performance-Testing.gitlab-ci.yml
