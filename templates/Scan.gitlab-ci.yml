@@ -84,7 +84,7 @@ Load Performance:
     - chmod 777 results
   script:
     - echo $URL
-    - docker run --rm -v $(pwd)/results:/results -v $(pwd)/load_test.js:/load_test.js grafana/k6 run -u 10 -v -d 30s /load_test.js --env URL="https://$URL" --summary-export=/results/load-performance.json
+    - docker run --rm -v $(pwd)/results:/results -v $(pwd)/vufind/tests/load_test.js:/load_test.js grafana/k6 run -u 10 -v -d 30s /load_test.js --env URL="https://$URL" --summary-export=/results/load-performance.json
     - ls -l /results
   artifacts:
     reports:
