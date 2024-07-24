@@ -63,9 +63,12 @@ Validate Vufind Build:
   script:
     - bash ./cicd/validate-vufind-build
 
-Load Testing:
+load_performance:
   stage: Optional Steps
   interruptible: true
+  timeout: 5m
+  tags:
+    - msul-shared
   environment:
     name: $CI_COMMIT_BRANCH/load-testing
     auto_stop_in: 2 weeks
