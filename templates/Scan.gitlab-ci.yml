@@ -63,7 +63,7 @@ Validate Vufind Build:
   script:
     - bash ./cicd/validate-vufind-build
 
-load_performance:
+Load Performance:
   stage: Optional Steps
   interruptible: true
   timeout: 5m
@@ -76,30 +76,19 @@ load_performance:
     - job: Deploy Vufind
       artifacts: true
     - Populate Vufind Environment
-  variables:
-    K6_DOCKER_OPTIONS: '--env-file url.env'
-    K6_DURATION: '1m'
-    K6_VUS: 10
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
   before_script:
-    - touch /tmp/load-performance.json
-    - chmod 644 /tmp/load-performance.json
-    - ls -ltr /tmp
+    - mkdir results
+    - chmod 777 results
   script:
-    - |
-      if ! docker info &>/dev/null; then
-        if [ -z "$DOCKER_HOST" ] && [ -n "$KUBERNETES_PORT" ]; then
-          export DOCKER_HOST='tcp://localhost:2375'
-        fi
-      fi
-    - ls -l /tmp/load-performance.json
-    - docker run --rm -v "$(pwd)":/k6 -w /k6 $K6_DOCKER_OPTIONS $K6_IMAGE:$K6_VERSION run $K6_TEST_FILE --summary-export=/tmp/load-performance.json $K6_OPTIONS
-    - ls -l /tmp/load-performance.json
+    - echo $URL
+    - docker run --rm -v $(pwd)/results:/results -v $(pwd)/load_test.js:/load_test.js grafana/k6 run -u 10 -v -d 30s /load_test.js --env URL="https://$URL" --summary-export=/results/load-performance.json
+    - ls -l /results
   artifacts:
     reports:
-      load_performance: /tmp/load-performance.json
+      load_performance: /results/load-performance.json
 
 
 
@@ -159,4 +148,3 @@ load_performance:
 include:
 #  - template: Security/Container-Scanning.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
-  - template: Verify/Load-Performance-Testing.gitlab-ci.yml
