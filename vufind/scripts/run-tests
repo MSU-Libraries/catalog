@@ -5,9 +5,7 @@ set -e
 
 cd /usr/local/vufind
 echo "Running unit tests"
-vendor/bin/phing phpunitfaster -D "phpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/ --log-junit reports/report.xml"
-ls -l reports/
-find . -type f -name report.xml
+vendor/bin/phing phpunitfaster -D "phpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/"
 
-#echo "Running code quality tests"
-#vendor/bin/phing eslint jshint phpcs-console php-cs-fixer-dryrun checkLessToSass phpstan-console
+echo "Running code quality tests"
+vendor/bin/phing eslint jshint phpcs-console php-cs-fixer-dryrun checkLessToSass phpstan-console

@@ -37,8 +37,8 @@ main() {
     fi;
 
     echo "Running PHP unit tests and code quality scan";
-    #docker run --rm validate run-tests; # TODO commenting out while debugging
-    #EC=$?;
+    docker run --rm validate run-tests;
+    EC=$?;
 
     if [[ ${EC} -ne 0 ]]; then
         echo "One or more unit tests or code quality tests failed. Run the following command in a VuFind container to debug";
