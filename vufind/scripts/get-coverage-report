@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Fail if any of these steps fail
+set -e
+
+cd /usr/local/vufind
+vendor/bin/phing phpunitfaster -D "phpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/ --log-junit reports/report.xml" > /dev/null 2>&1
+XDEBUG_MODE=coverage vendor/bin/phing phpunitfaster -D "phpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/ --coverage-cobertura reports/coverage.xml" > /dev/null 2>&1
+cat reports/coverage.xml
