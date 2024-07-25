@@ -37,16 +37,19 @@ main() {
     fi;
 
     echo "Running PHP unit tests and code quality scan";
-    docker run -v "$(pwd)"/reports:/usr/local/vufind/reports --rm validate run-tests;
+    #docker run --rm validate run-tests; # TODO commenting out while debugging
     EC=$?;
-
-    ls -ltr "$(pwd)"
 
     if [[ ${EC} -ne 0 ]]; then
         echo "One or more unit tests or code quality tests failed. Run the following command in a VuFind container to debug";
         echo "run-tests";
         exit ${EC};
     fi;
+
+    echo "Getting the unit test report"
+    mkdir -p reports/
+    docker run -v --rm validate "get-unittest-report" > reports/report.xml
+    ls -ltr "$(pwd)"
 
     docker image rm validate;
     echo "All validations have passed";
