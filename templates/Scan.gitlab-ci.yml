@@ -63,6 +63,11 @@ Validate Vufind Build:
     - apk add --no-cache bash
   script:
     - bash ./cicd/validate-vufind-build
+  artifacts:
+    when: always
+    expire_in: 30 days
+    reports:
+      junit: reports/report.xml
 
 # Commenting this out since the https://docs.gitlab.com/ee/user/application_security/container_scanning/#vulnerability-allowlisting
 # wasn't being respecting in attempts at storing it at top level or at vufind level

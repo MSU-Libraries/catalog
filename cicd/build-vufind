@@ -27,7 +27,6 @@ main() {
     echo "Building image"
     DOCKER_BUILDKIT=1 docker build \
         --build-arg BUILDKIT_INLINE_CACHE=1 \
-        --build-arg GITHUB_USER_TOKEN="${GITHUB_USER_TOKEN}" \
         --build-arg VUFIND_VERSION="${VUFIND_VERSION}" \
         --build-arg SOLR_URL=http://solr:8983/solr \
         --build-arg SIMPLESAMLPHP_VERSION="${SIMPLESAMLPHP_VERSION}" \

@@ -48,7 +48,6 @@ COPY modsecurity/ /etc/modsecurity/
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
 RUN apt-get install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
 
-ARG GITHUB_USER_TOKEN
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
 
