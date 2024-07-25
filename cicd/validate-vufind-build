@@ -49,6 +49,8 @@ main() {
     echo "Getting the unit test report"
     mkdir -p reports/
     docker run --rm validate "get-unittest-report" > reports/report.xml
+    # Remove first line of the output (entrypoint prints)
+    sed -i '1d' reports/report.xml
 
     sleep 1; # Allow time for container to exit
     docker image rm validate;
