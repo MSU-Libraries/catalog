@@ -22,16 +22,12 @@ main() {
     echo "Building image"
     DOCKER_BUILDKIT=1 docker build \
         --build-arg BUILDKIT_INLINE_CACHE=1 \
-        --build-arg GITHUB_USER_TOKEN="${GITHUB_USER_TOKEN}" \
         --build-arg VUFIND_VERSION="${VUFIND_VERSION}" \
         --build-arg SOLR_URL=http://solr:8983/solr \
         --build-arg SIMPLESAMLPHP_VERSION="${SIMPLESAMLPHP_VERSION}" \
         --tag validate \
         --cache-from "${LATEST}" \
         vufind/;
-    # 1/23/24 - Trying to add it back in now
-    # Removed the below flag because it sometimes caused inaccurate failures when it incorrectly cached from :latest in some cases
-    #--cache-from "${LATEST}"
 
     EC=$?;
     if [[ ${EC} -ne 0 ]]; then
@@ -40,9 +36,8 @@ main() {
         exit ${EC};
     fi;
 
-    echo "Running PHP unit tests";
-    echo "vendor/bin/phing phpunitfaster -Dphpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/";
-    docker run --rm validate run-tests;
+    echo "Running PHP unit tests and code quality scan";
+    docker run -v $(pwd)/reports:/usr/local/vufind/reports --rm validate run-tests;
     EC=$?;
 
     if [[ ${EC} -ne 0 ]]; then

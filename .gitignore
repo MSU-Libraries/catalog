@@ -13,3 +13,4 @@ vufind/themes/msul/css/less/
 .phpunit.result.cache
 .php_cs_cache
 .phpstan_cache
+reports/
