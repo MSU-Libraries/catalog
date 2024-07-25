@@ -40,7 +40,7 @@ main() {
     docker run -v "$(pwd)"/reports:/usr/local/vufind/reports --rm validate run-tests;
     EC=$?;
 
-    ls -l "$(pwd)"/reports
+    ls -ltr "$(pwd)"
 
     if [[ ${EC} -ne 0 ]]; then
         echo "One or more unit tests or code quality tests failed. Run the following command in a VuFind container to debug";
