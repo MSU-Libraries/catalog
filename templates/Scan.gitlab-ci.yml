@@ -63,8 +63,6 @@ Validate Vufind Build:
     - apk add --no-cache bash
   script:
     - bash ./cicd/validate-vufind-build
-    - find . -type f -name report.xml
-    - ls -ltr "$(pwd)"/
   artifacts:
     when: always
     expire_in: 30 days

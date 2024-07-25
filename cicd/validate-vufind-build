@@ -38,7 +38,7 @@ main() {
 
     echo "Running PHP unit tests and code quality scan";
     #docker run --rm validate run-tests; # TODO commenting out while debugging
-    EC=$?;
+    #EC=$?;
 
     if [[ ${EC} -ne 0 ]]; then
         echo "One or more unit tests or code quality tests failed. Run the following command in a VuFind container to debug";
@@ -48,9 +48,9 @@ main() {
 
     echo "Getting the unit test report"
     mkdir -p reports/
-    docker run -v --rm validate "get-unittest-report" > reports/report.xml
-    ls -ltr "$(pwd)"
+    docker run --rm validate "get-unittest-report" > reports/report.xml
 
+    sleep 1; # Allow time for container to exit
     docker image rm validate;
     echo "All validations have passed";
 }
