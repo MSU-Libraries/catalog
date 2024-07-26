@@ -59,6 +59,9 @@ main() {
     # Replace the path with the correct relative path
     sed -i 's/\/usr\/local\/vufind/vufind/g' reports/coverage.xml
 
+    echo "Getting the coverage summary"
+    docker run --rm validate "get-coverage-summary"
+
     sleep 1; # Allow time for container to exit
     docker image rm validate;
     echo "All validations have passed";
