@@ -21,10 +21,8 @@ fi
 main() {
     # Get the number of retries for this job
     apk add jq curl || apt install -y jq curl;
-    curl -s --header "PRIVATE-TOKEN: ${RW_CICD_TOKEN}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${CI_PIPELINE_ID}/jobs?include_retried=true"
-    curl -s --header "PRIVATE-TOKEN: ${RW_CICD_TOKEN}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${CI_PIPELINE_ID}/jobs?include_retried=true" | jq "[.[] | select(.name == \"${CI_JOB_NAME}\")] | length"
-    RETRIES=$(curl -s --header "PRIVATE-TOKEN: ${RW_CICD_TOKEN}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${CI_PIPELINE_ID}/jobs?include_retried=true" | jq "[.[] | select(.name == \"${CI_JOB_NAME}\")] | length")
-    echo "${CI_JOB_NAME// /}_retries" "${RETRIES}" >> metrics.txt 
+    RETRIES=$(curl -s --header "PRIVATE-TOKEN: ${RO_CICD_TOKEN}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${CI_PIPELINE_ID}/jobs?include_retried=true" | jq "[.[] | select(.name == \"${CI_JOB_NAME}\")] | length")
+    echo "${CI_JOB_NAME// /_}_retries" "${RETRIES}" >> metrics.txt 
 
     echo "Building image"
     DOCKER_BUILDKIT=1 docker build \
