@@ -19,6 +19,11 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
+    # Get the number of retries for this job
+    apk add jq curl || apt install -y jq curl;
+    RETRIES=$(curl --header "PRIVATE-TOKEN: ${CI_JOB_TOKEN}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${CI_PIPELINE_ID}/jobs?include_retried=true" | jq "[.[] | select(.name == \"${CI_JOB_NAME}\")] | length")
+    echo "$(echo "${CI_JOB_NAME}" | sed 's/ //g')_retries" "${RETRIES}" >> metrics.txt
+
     echo "Building image"
     DOCKER_BUILDKIT=1 docker build \
         --build-arg BUILDKIT_INLINE_CACHE=1 \
