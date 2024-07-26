@@ -23,7 +23,7 @@ fi
 
 main() {
       # Log the start of the pipeline stage
-      echo "$(date +%s)" >> ${CI_JOB_STAGE}_start.txt
+      date +%s >> "${CI_JOB_STAGE}"_start.txt
 
       # Pull images now to save time with stack deploy
       ssh deploy@"${DEPLOY_HOST_1}" "docker pull $CI_REGISTRY_IMAGE/db:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
