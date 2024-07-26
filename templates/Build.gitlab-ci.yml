@@ -76,6 +76,9 @@ Build Vufind Image:
     - apk add --no-cache bash
   script:
     - bash ./cicd/build-vufind
+  artifacts:
+    reports:
+      metrics: metrics.txt
 
 ############# Templates ###############
 
@@ -100,3 +103,6 @@ Build Vufind Image:
       artifacts: true
   script:
     - bash ./cicd/build-general
+  artifacts:
+    reports:
+      metrics: metrics.txt

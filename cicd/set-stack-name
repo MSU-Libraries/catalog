@@ -20,6 +20,9 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
+    # Determine job start time; used to calculate runtime metrics
+    START=$(date +%s)
+
     STACK_NAME=
     SITE_HOSTNAME=
     MAIL_HOST=host.docker.internal
@@ -49,6 +52,15 @@ main() {
 
     test -n "${STACK_NAME}"
     test -f build.env
+
+    # Get the number of attempts for this job
+    apk add jq curl || apt install -y jq curl;
+    ATTEMPTS=$(curl -s --header "PRIVATE-TOKEN: ${RO_CICD_TOKEN}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${CI_PIPELINE_ID}/jobs?include_retried=true" | jq "[.[] | select(.name == \"${CI_JOB_NAME}\")] | length")
+    echo "${CI_JOB_NAME// /_}_JobAttempts" "${ATTEMPTS}" >> metrics.txt
+
+    # Get runtime metrics
+    END=$(date +%s); RUNTIME=$((END-START)); HOURS=$((RUNTIME / 3600)); MINUTES=$(( (RUNTIME % 3600) / 60 )); SECONDS=$(( (RUNTIME % 3600) % 60 ));
+    echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
 }
 
 # exit script if any command fails
