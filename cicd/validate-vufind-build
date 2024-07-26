@@ -57,7 +57,7 @@ main() {
     # Remove first line of the output (entrypoint prints)
     sed -i '1d' reports/coverage.xml
     # Replace the path with the correct relative path
-    sed -i 's/\/usr\/local\/vufind/vufind\/module/g' reports/coverage.xml
+    sed -i 's/\/usr\/local\/vufind/vufind/g' reports/coverage.xml
 
     sleep 1; # Allow time for container to exit
     docker image rm validate;
