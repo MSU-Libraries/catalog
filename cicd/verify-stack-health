@@ -54,6 +54,12 @@ main() {
     check zk
     check galera
     check docker
+
+    # Get metrics for stage runtime
+    STAGE_END=$(date +%s);
+    STAGE_START=$(cat "${CI_JOB_STAGE}"_start.txt);
+    STAGE_RUNTIME=$((STAGE_END-STAGE_START)); STAGE_HOURS=$((STAGE_RUNTIME / 3600)); STAGE_MINUTES=$(( (STAGE_RUNTIME % 3600) / 60 )); STAGE_SECONDS=$(( (STAGE_RUNTIME % 3600) % 60 ));
+    echo "${CI_JOB_STAGE}_StageRuntime" $STAGE_HOURS:$STAGE_MINUTES:$STAGE_SECONDS >> metrics.txt;
 }
 
 beforescript
