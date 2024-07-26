@@ -99,6 +99,11 @@ Bootstrap Stacks:
     - Build Solr Image
   script:
     - bash ./cicd/bootstrap-stacks
+  artifacts:
+    reports:
+      metrics: metrics.txt
+    paths:
+      - ${CI_JOB_STAGE}_start.txt
 
 Deploy ZK:
   extends: .stack_template
@@ -278,6 +283,8 @@ Run Functional Tests:
     - if: '$CI_COMMIT_BRANCH == "catalog-preview"'
   needs:
     - job: Set Stack Name
+      artifacts: true
+    - job: Bootstrap Stacks
       artifacts: true
     - Verify Stack Health
   script:
