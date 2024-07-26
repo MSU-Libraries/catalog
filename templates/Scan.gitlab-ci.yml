@@ -28,6 +28,9 @@ Shellcheck CI:
     - apk add shellcheck || apt install shellcheck
   script:
     - SHELLCHECK_OPTS="--exclude SC2029,SC1091" shellcheck cicd/*
+  artifacts:
+    reports:
+      metrics: metrics.txt
 
 Shellcheck:
   stage: test
@@ -45,6 +48,9 @@ Shellcheck:
   script:
     # TODO eventually have this fail the job, but for now it's informational
     - shellcheck $(find . -name "*.sh") || exit 0
+  artifacts:
+    reports:
+      metrics: metrics.txt
 
 Validate Vufind Build:
   stage: test
@@ -72,6 +78,7 @@ Validate Vufind Build:
       coverage_report:
         coverage_format: cobertura
         path: reports/coverage.xml
+      metrics: metrics.txt
 
 # Commenting this out since the https://docs.gitlab.com/ee/user/application_security/container_scanning/#vulnerability-allowlisting
 # wasn't being respecting in attempts at storing it at top level or at vufind level

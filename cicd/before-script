@@ -57,4 +57,9 @@ beforescript() {
     ssh deploy@"$DEPLOY_HOST_1" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
     ssh deploy@"$DEPLOY_HOST_2" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
     ssh deploy@"$DEPLOY_HOST_3" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
+
+    # Get the number of retries for this job
+    apk add jq curl || apt install -y jq curl;
+    RETRIES=$(curl --header "PRIVATE-TOKEN: ${CI_JOB_TOKEN}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${CI_PIPELINE_ID}/jobs?include_retried=true" | jq "[.[] | select(.name == \"${CI_JOB_NAME}\")] | length")
+    echo "$(echo "${CI_JOB_NAME}" | sed 's/ //g')_retries" "${RETRIES}" >> metrics.txt 
 }

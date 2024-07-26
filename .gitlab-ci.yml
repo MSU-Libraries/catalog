@@ -35,6 +35,7 @@ Set Stack Name:
   artifacts:
     reports:
       dotenv: build.env
+      metrics: metrics.txt
 
 Create DNS:
   extends: .stack_template
