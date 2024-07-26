@@ -179,6 +179,7 @@ Deploy Vufind:
   artifacts:
     reports:
       dotenv: deploy.env
+      metrics: metrics.txt
 
 Deploy Vufind Build Env:
   extends: .stack_template
@@ -200,6 +201,7 @@ Deploy Vufind Build Env:
   artifacts:
     reports:
       dotenv: deploy.env
+      metrics: metrics.txt
 
 Deploy Monitoring:
   extends: .stack_template
@@ -336,6 +338,9 @@ Cleanup Files:
     - Deploy Compose Files
   before_script:
     - apk add --no-cache bash || true
+  artifacts:
+    reports:
+      metrics: metrics.txt
 
 include:
   - 'templates/*.gitlab-ci.yml'
