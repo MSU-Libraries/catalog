@@ -24,7 +24,7 @@ main() {
     curl --header "PRIVATE-TOKEN: ${CI_JOB_TOKEN}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${CI_PIPELINE_ID}/jobs?include_retried=true"
     curl --header "PRIVATE-TOKEN: ${CI_JOB_TOKEN}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${CI_PIPELINE_ID}/jobs?include_retried=true" | jq "[.[] | select(.name == \"${CI_JOB_NAME}\")] | length"
     RETRIES=$(curl --header "PRIVATE-TOKEN: ${CI_JOB_TOKEN}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${CI_PIPELINE_ID}/jobs?include_retried=true" | jq "[.[] | select(.name == \"${CI_JOB_NAME}\")] | length")
-    echo "${CI_JOB_NAME// /}" | sed 's/ //g')_retries" "${RETRIES}" >> metrics.txt 
+    echo "${CI_JOB_NAME// /}_retries" "${RETRIES}" >> metrics.txt 
 
     echo "Building image"
     DOCKER_BUILDKIT=1 docker build \
