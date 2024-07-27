@@ -262,6 +262,9 @@ set_or_update_docker_secret() {
 }
 
 main() {
+    # Log the start of the pipeline stage
+    date +%s >> "${CI_JOB_STAGE}"_start.txt
+
     set_or_update_docker_secret "MARIADB_MONITORING_PASSWORD" "${MARIADB_MONITORING_PASSWORD}"
     set_or_update_docker_secret "MARIADB_ROOT_PASSWORD" "${MARIADB_ROOT_PASSWORD}"
     set_or_update_docker_secret "MARIADB_GALERA_MARIABACKUP_PASSWORD" "${MARIADB_GALERA_MARIABACKUP_PASSWORD}"

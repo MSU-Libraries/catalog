@@ -22,9 +22,6 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
-      # Log the start of the pipeline stage
-      date +%s >> "${CI_JOB_STAGE}"_start.txt
-
       # Pull images now to save time with stack deploy
       ssh deploy@"${DEPLOY_HOST_1}" "docker pull $CI_REGISTRY_IMAGE/db:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
       ssh deploy@"${DEPLOY_HOST_2}" "docker pull $CI_REGISTRY_IMAGE/db:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
@@ -47,9 +44,9 @@ main() {
       (docker volume ls | grep -q ${STACK_NAME}-solr_zk || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.zk.yml) ${STACK_NAME}-solr && sleep 60)) &&
       (docker volume ls | grep -q ${STACK_NAME}-solr_bitnami || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.solr-cloud-bootstrap.yml) ${STACK_NAME}-solr && sleep 90))"
 
-    # Get runtime metrics
-    END=$(date +%s); RUNTIME=$((END-START)); HOURS=$((RUNTIME / 3600)); MINUTES=$(( (RUNTIME % 3600) / 60 )); SECONDS=$(( (RUNTIME % 3600) % 60 ));
-    echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
+      # Get runtime metrics
+      END=$(date +%s); RUNTIME=$((END-START)); HOURS=$((RUNTIME / 3600)); MINUTES=$(( (RUNTIME % 3600) / 60 )); SECONDS=$(( (RUNTIME % 3600) % 60 ));
+      echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
 }
 
 beforescript
