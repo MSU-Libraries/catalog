@@ -64,6 +64,11 @@ Deploy Compose Files:
       artifacts: true
   script:
     - bash ./cicd/deploy-compose-files
+  artifacts:
+    reports:
+      metrics: metrics.txt
+    paths:
+      - ${CI_JOB_STAGE}_start.txt
 
 Initialize Log Dirs:
   extends: .stack_template
@@ -228,6 +233,8 @@ Verify Stack Health:
   timeout: 20m
   needs:
     - job: Set Stack Name
+      artifacts: true
+    - job: Deploy Compose Files
       artifacts: true
     - Deploy Monitoring
     - Deploy Vufind

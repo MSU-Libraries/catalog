@@ -37,6 +37,10 @@ main() {
 
     echo "Issuing deploy command now"
     ssh deploy@"${DEPLOY_HOST_1}" "docker stack deploy --prune --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.monitoring.yml) ${STACK_NAME}-monitoring";
+
+    # Get runtime metrics
+    END=$(date +%s); RUNTIME=$((END-START)); HOURS=$((RUNTIME / 3600)); MINUTES=$(( (RUNTIME % 3600) / 60 )); SECONDS=$(( (RUNTIME % 3600) % 60 ));
+    echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
 }
 
 beforescript

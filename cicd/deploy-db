@@ -27,6 +27,10 @@ main() {
 
     # TODO eventually have this query the WSREP status and loop until ready instead of sleeping
     sleep 45
+
+    # Get runtime metrics
+    END=$(date +%s); RUNTIME=$((END-START)); HOURS=$((RUNTIME / 3600)); MINUTES=$(( (RUNTIME % 3600) / 60 )); SECONDS=$(( (RUNTIME % 3600) % 60 ));
+    echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
 }
 
 beforescript
