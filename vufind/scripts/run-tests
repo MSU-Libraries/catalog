@@ -7,5 +7,9 @@ cd /usr/local/vufind
 echo "Running unit tests"
 vendor/bin/phing phpunitfaster -D "phpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/"
 
-echo "Running code quality tests"
-vendor/bin/phing eslint jshint phpcs-console php-cs-fixer-dryrun checkLessToSass phpstan-console
+if [[ -n "${1}" ]] && [[ "${1}" == "--unit" ]]; then
+    echo "Skipping code quality tests"
+else
+    echo "Running code quality tests"
+    vendor/bin/phing eslint jshint phpcs-console php-cs-fixer-dryrun checkLessToSass phpstan-console
+fi;
