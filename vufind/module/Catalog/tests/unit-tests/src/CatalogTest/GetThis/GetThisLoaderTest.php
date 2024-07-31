@@ -263,7 +263,10 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetStatusCheckedOut()
     {
-        $this->assertEquals('Checked Out (In transit) - 1/1/2000', $this->callMethod($this->getHandler(), 'getStatus', ['789']));
+        $this->assertEquals(
+            'Checked Out (In transit) - 1/1/2000',
+            $this->callMethod($this->getHandler(), 'getStatus', ['789'])
+        );
     }
 
     /**
@@ -293,7 +296,10 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetStatusCheckedOutDueDate()
     {
-        $this->assertEquals('Checked Out (In transit) - Due:12/12/2000', $this->callMethod($this->getHandler(), 'getStatus', ['012']));
+        $this->assertEquals(
+            'Checked Out (In transit) - Due:12/12/2000',
+            $this->callMethod($this->getHandler(), 'getStatus', ['012'])
+        );
     }
 
     /**
@@ -331,7 +337,7 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
             [
                 'item_id' => '789',
                 'status' => 'In transit',
-                'returnDate' => '1/1/2000'
+                'returnDate' => '1/1/2000',
             ],
             [
                 'item_id' => '321',
@@ -364,7 +370,7 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
      */
     protected function getDriver($id = 'test', $source = 'Solr')
     {
-        #$driver = $this->createMock(\VuFind\RecordDriver\AbstractBase::class);
+        // $driver = $this->createMock(\VuFind\RecordDriver\AbstractBase::class);
         $driver = $this->createMock(\Catalog\RecordDriver\SolrDefault::class);
         $driver->expects($this->any())->method('getUniqueId')
             ->will($this->returnValue($id));
