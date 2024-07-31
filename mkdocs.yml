@@ -42,3 +42,5 @@ nav:
     - Load Testing: load-testing.md
     - Helper Scripts: helper-scripts.md
     - Bots: bots.md
+- Developing:
+    - Writing &amp; Running Tests: testing.md

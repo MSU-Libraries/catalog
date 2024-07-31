@@ -23,3 +23,6 @@ suggestions you have!
 * [Load Testing](load-testing.md)
 * [Helper Scripts](helper-scripts.md)
 * [Bots](bots.md)
+
+## Developing
+* [Writing & Running Tests](testing.md)

@@ -97,14 +97,15 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
     {
         $label = null;
 
+        if (!array_key_exists('desc', $link)) {
+            $link['desc'] = '';
+        }
+
         // Add prefix to bookplate URLs
         if (isset($link['url']) && str_contains($link['url'], 'bookplate')) {
             $link['desc'] = 'Book Plate: ' . $link['desc'];
         }
 
-        if (!array_key_exists('desc', $link)) {
-            $link['desc'] = '';
-        }
         // Add labels to links
         foreach ($this->linkLabels as $mat) {
             // Skip entries missing the 'label' field
@@ -228,35 +229,40 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             $statusFirstPart = 'On Reserve';
             $statusSecondPart = '';
         }
+
         if (isset($statusFirstPart, $statusSecondPart)) {
-            if (isset($transEsc)) {
-                $statusFirstPart = $transEsc($statusFirstPart);
-                $statusSecondPart = $transEsc($statusSecondPart);
-            }
+            $statusFirstPart = isset($transEsc) ? $transEsc($statusFirstPart) : $statusFirstPart;
+            $statusSecondPart = isset($transEsc) ? $transEsc($statusSecondPart) : $statusSecondPart;
             if (!empty($statusSecondPart)) {
                 $statusSecondPart = ' (' . $statusSecondPart . ')';
             }
             $status = $statusFirstPart . $statusSecondPart;
         }
-        return $status . $this->getStatusSuffix($holding);
+
+        return $status . $this->getStatusSuffix($holding, $translate);
     }
 
     /**
      * Determine the holding status suffix (if any)
      *
-     * @param array $holding the holding data
+     * @param array $holding   the holding data
+     * @param bool  $translate if the transEsc function should
+     *              be used on the status values
      *
      * @return string
      */
-    public function getStatusSuffix($holding)
+    public function getStatusSuffix($holding, $translate = true)
     {
-        $transEsc = $this->getView()->plugin('transEsc');
+        if ($translate === true) {
+            $transEsc = $this->getView()->plugin('transEsc');
+        }
         $suffix = '';
         if ($holding['returnDate'] ?? false) {
             $suffix = ' - ' . $holding['returnDate'];
         }
         if ($holding['duedate'] ?? false) {
-            $suffix = $suffix . ' - ' . $transEsc('Due') . ':' . $holding['duedate'];
+            $due = isset($transEsc) ? $transEsc('Due') : 'Due';
+            $suffix = $suffix . ' - ' . $due . ':' . $holding['duedate'];
         }
         if ($holding['temporary_loan_type'] ?? false) {
             $suffix = $suffix . ' (' . $holding['temporary_loan_type'] . ')';

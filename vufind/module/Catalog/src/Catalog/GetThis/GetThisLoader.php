@@ -149,22 +149,37 @@ class GetThisLoader
         $item_id = $this->getItemId($item_id);
         $item = $this->getItem($item_id);
         $status = $item['status'] ?? 'Unknown';
+        $reserve = $item['reserve'] ?? 'N';
 
+        $statusSecondPart = $status;
         if (
             in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
             'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
             'Unknown', 'Withdrawn'])
         ) {
-            $status = 'Unavailable' . ' (' . $status . ')';
+            $statusFirstPart = 'Unavailable';
+            $statusSecondPart = $status;
         } elseif (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged'])) {
-            $status = 'Checked Out (' . $status . ')';
+            $statusFirstPart = 'Checked Out';
+            $statusSecondPart = $status;
         } elseif ($status == 'Restricted') {
-            $status = 'Library Use Only';
+            $statusFirstPart = 'Library Use Only';
+            $statusSecondPart = '';
         } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
-            $status = 'Unknown status (' . $status . ')';
-        } elseif ($item['reserve'] === 'Y') {
-            $status = 'On Reserve';
+            $statusFirstPart = 'Unknown status';
+            $statusSecondPart = $status;
+        } elseif ($reserve === 'Y') {
+            $statusFirstPart = 'On Reserve';
+            $statusSecondPart = '';
         }
+
+        if (isset($statusFirstPart, $statusSecondPart)) {
+            if (!empty($statusSecondPart)) {
+                $statusSecondPart = ' (' . $statusSecondPart . ')';
+            }
+            $status = $statusFirstPart . $statusSecondPart;
+        }
+
         return $status . $this->getStatusSuffix($item);
     }
 
@@ -211,7 +226,6 @@ class GetThisLoader
      */
     public function getLocationCode($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         return $this->getItem($item_id)['location_code'] ?? '';
     }
 
