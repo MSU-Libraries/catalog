@@ -157,6 +157,8 @@ Verify Prod Stack Health:
   needs:
     - job: Begin Prod Deploy
       artifacts: true
+    - job: Deploy Prod Compose Files
+      artifacts: true
     - Deploy Prod Monitoring
     - Deploy Prod Vufind
 

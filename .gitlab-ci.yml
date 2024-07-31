@@ -68,7 +68,7 @@ Deploy Compose Files:
     reports:
       metrics: metrics.txt
     paths:
-      - ${CI_JOB_STAGE}_start.txt
+      - ${CI_JOB_STAGE// /_}_start.txt
 
 Initialize Log Dirs:
   extends: .stack_template
