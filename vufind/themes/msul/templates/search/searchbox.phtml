@@ -76,7 +76,6 @@
 <?php else: ?>
   <form id="searchForm" class="searchForm navbar-form navbar-left flip" method="get" action="<?=$this->url($basicSearch)?>" name="searchForm" autocomplete="off">
     <?= $this->context($this)->renderInContext('search/searchTabs', ['searchTabs' => $tabConfig['tabs'], 'showCounts' => $tabConfig['showCounts']]); ?>
-    <div class="searchtools">
     <?php
       $searchboxAttributes = [
         'id' => 'searchForm_lookfor',
@@ -194,6 +193,5 @@
           'searchType' => $this->searchType,
         ]
     );?>
-    </div>
   </form>
 <?php endif; ?>
