@@ -262,6 +262,9 @@ set_or_update_docker_secret() {
 }
 
 main() {
+    # Log the start of the pipeline stage
+    date +%s >> "${CI_JOB_STAGE// /_}"_start.txt
+
     set_or_update_docker_secret "MARIADB_MONITORING_PASSWORD" "${MARIADB_MONITORING_PASSWORD}"
     set_or_update_docker_secret "MARIADB_ROOT_PASSWORD" "${MARIADB_ROOT_PASSWORD}"
     set_or_update_docker_secret "MARIADB_GALERA_MARIABACKUP_PASSWORD" "${MARIADB_GALERA_MARIABACKUP_PASSWORD}"
@@ -320,6 +323,10 @@ main() {
     scp docker-compose* .env deploy@"${DEPLOY_HOST_1}":"${COMPOSE_PATH}"/;
     rm .env
     echo "Copying files to ${COMPOSE_PATH}"
+
+    # Get runtime metrics
+    END=$(date +%s); RUNTIME=$((END-START)); HOURS=$((RUNTIME / 3600)); MINUTES=$(( (RUNTIME % 3600) / 60 )); SECONDS=$(( (RUNTIME % 3600) % 60 ));
+    echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
 }
 
 beforescript

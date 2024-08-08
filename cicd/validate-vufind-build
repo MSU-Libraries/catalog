@@ -19,19 +19,23 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
+    # Get the number of attempts for this job
+    apk add jq curl || apt install -y jq curl;
+    ATTEMPTS=$(curl -s --header "PRIVATE-TOKEN: ${RO_CICD_TOKEN}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${CI_PIPELINE_ID}/jobs?include_retried=true" | jq "[.[] | select(.name == \"${CI_JOB_NAME}\")] | length")
+    echo "${CI_JOB_NAME// /_}_JobAttempts" "${ATTEMPTS}" >> metrics.txt
+
+    # Determine job start time; used to calculate runtime metrics
+    START=$(date +%s)
+
     echo "Building image"
     DOCKER_BUILDKIT=1 docker build \
         --build-arg BUILDKIT_INLINE_CACHE=1 \
-        --build-arg GITHUB_USER_TOKEN="${GITHUB_USER_TOKEN}" \
         --build-arg VUFIND_VERSION="${VUFIND_VERSION}" \
         --build-arg SOLR_URL=http://solr:8983/solr \
         --build-arg SIMPLESAMLPHP_VERSION="${SIMPLESAMLPHP_VERSION}" \
         --tag validate \
         --cache-from "${LATEST}" \
         vufind/;
-    # 1/23/24 - Trying to add it back in now
-    # Removed the below flag because it sometimes caused inaccurate failures when it incorrectly cached from :latest in some cases
-    #--cache-from "${LATEST}"
 
     EC=$?;
     if [[ ${EC} -ne 0 ]]; then
@@ -40,8 +44,7 @@ main() {
         exit ${EC};
     fi;
 
-    echo "Running PHP unit tests";
-    echo "vendor/bin/phing phpunitfaster -Dphpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/";
+    echo "Running PHP unit tests and code quality scan";
     docker run --rm validate run-tests;
     EC=$?;
 
@@ -51,8 +54,29 @@ main() {
         exit ${EC};
     fi;
 
+    echo "Getting the unit test report"
+    mkdir -p reports/
+    docker run --rm validate "get-unittest-report" > reports/report.xml
+    # Remove first line of the output (entrypoint prints)
+    sed -i '1d' reports/report.xml
+
+    echo "Getting the coverage report"
+    docker run --rm validate "get-coverage-report" > reports/coverage.xml
+    # Remove first line of the output (entrypoint prints)
+    sed -i '1d' reports/coverage.xml
+    # Replace the path with the correct relative path
+    sed -i 's/\/usr\/local\/vufind/vufind/g' reports/coverage.xml
+
+    echo "Getting the coverage summary"
+    docker run --rm validate "get-coverage-summary"
+
+    sleep 1; # Allow time for container to exit
     docker image rm validate;
     echo "All validations have passed";
+
+    # Get runtime metrics
+    END=$(date +%s); RUNTIME=$((END-START)); HOURS=$((RUNTIME / 3600)); MINUTES=$(( (RUNTIME % 3600) / 60 )); SECONDS=$(( (RUNTIME % 3600) % 60 ));
+    echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
 }
 
 # exit script if any command fails

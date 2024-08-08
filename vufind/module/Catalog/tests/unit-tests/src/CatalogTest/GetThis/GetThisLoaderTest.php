@@ -33,13 +33,116 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
     use \VuFindTest\Feature\ReflectionTrait;
 
     /**
+     * Test isHLM
+     *
+     * @return null
+     */
+    public function testIsHLM()
+    {
+        $this->assertFalse($this->callMethod($this->getHandler(), 'isHLM', []));
+    }
+
+    /**
+     * Test getLocation
+     *
+     * @return null
+     */
+    public function testGetLocationEmpty()
+    {
+        $this->assertEquals('', $this->getHandler()->getLocation());
+    }
+
+    /**
+     * Test getLocation
+     *
+     * @return null
+     */
+    public function testGetLocationSet()
+    {
+        $this->assertEquals('Main Library', $this->getHandler()->getLocation('456'));
+    }
+
+    /**
+     * Test getLocationCode
+     *
+     * @return null
+     */
+    public function testGetLocationCode()
+    {
+        $this->assertEquals('ML', $this->getHandler()->getLocationCode('456'));
+    }
+
+    /**
+     * Test isOnlineResource
+     *
+     * @return null
+     */
+    public function testIsOnlineResource()
+    {
+        $this->assertFalse($this->getHandler()->isOnlineResource('456'));
+    }
+
+    /**
+     * Test makerspaceLocation
+     *
+     * @return null
+     */
+    public function testMakerspaceLocation()
+    {
+        $this->assertTrue($this->getHandler()->makerspaceLocation(['location_code' => 'mnmst']));
+    }
+
+    /**
+     * Test getDescription
+     *
+     * @return null
+     */
+    public function testGetDescription()
+    {
+        $this->assertEquals('Solr', $this->getHandler()->getDescription());
+    }
+
+    /**
+     * Test isSerial
+     *
+     * @return null
+     */
+    public function testIsSerial()
+    {
+        $this->assertTrue($this->getHandler()->isSerial());
+    }
+
+    /**
+     * Test isOut
+     *
+     * @return null
+     */
+    public function testIsOut()
+    {
+        $this->assertTrue($this->getHandler()->isOut('789'));
+        $this->assertFalse($this->getHandler()->isOut('123'));
+    }
+
+    /**
+     * Get getting an item id when no items are added to the object
+     *
+     * @return null
+     */
+    public function testGetItemIdNoItems()
+    {
+        $handler = $this->getHandler(null);
+        $this->setProperty($handler, 'items', []);
+        $this->assertEquals(null, $this->callMethod($handler, 'getItemId', []));
+    }
+
+    /**
      * Get getting an item id when null is passed
      *
      * @return null
      */
     public function testGetItemIdNullPassed()
     {
-        $this->assertEquals('123', $this->callMethod($this->getHandler(), 'getItemId', []));
+        $this->assertEquals('123', $this->callMethod($this->getHandler(null), 'getItemId', []));
     }
 
     /**
@@ -110,7 +213,7 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetItemInvalidId()
     {
-        $this->assertEquals(null, $this->callMethod($this->getHandler(), 'getItem', ['999']));
+        $this->assertEquals(null, $this->callMethod($this->getHandler(), 'getItem', ['0000']));
     }
 
     /**
@@ -120,7 +223,7 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetStatusNullPassed()
     {
-        $this->assertEquals('Available', $this->callMethod($this->getHandler(), 'getStatus', []));
+        $this->assertEquals('Available (test)', $this->callMethod($this->getHandler(), 'getStatus', []));
     }
 
     /**
@@ -130,7 +233,7 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetStatusAvailable()
     {
-        $this->assertEquals('Available', $this->callMethod($this->getHandler(), 'getStatus', ['123']));
+        $this->assertEquals('Available (test)', $this->callMethod($this->getHandler(), 'getStatus', ['123']));
     }
 
     /**
@@ -144,13 +247,26 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Test getStatus with unknown status
+     *
+     * @return null
+     */
+    public function testGetStatusUnknown()
+    {
+        $this->assertEquals('Unknown status (test)', $this->callMethod($this->getHandler(), 'getStatus', ['999']));
+    }
+
+    /**
      * Get getting an item status with a checked out item
      *
      * @return null
      */
     public function testGetStatusCheckedOut()
     {
-        $this->assertEquals('Checked Out (In transit)', $this->callMethod($this->getHandler(), 'getStatus', ['789']));
+        $this->assertEquals(
+            'Checked Out (In transit) - 1/1/2000',
+            $this->callMethod($this->getHandler(), 'getStatus', ['789'])
+        );
     }
 
     /**
@@ -171,6 +287,19 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusReserve()
     {
         $this->assertEquals('On Reserve', $this->callMethod($this->getHandler(), 'getStatus', ['654']));
+    }
+
+    /**
+     * Get getting status of a checked out item
+     *
+     * @return null
+     */
+    public function testGetStatusCheckedOutDueDate()
+    {
+        $this->assertEquals(
+            'Checked Out (In transit) - Due:12/12/2000',
+            $this->callMethod($this->getHandler(), 'getStatus', ['012'])
+        );
     }
 
     /**
@@ -197,14 +326,18 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
                 'item_id' => '123',
                 'status' => 'Available',
                 'reserve' => 'N',
+                'temporary_loan_type' => 'test',
             ],
             [
                 'item_id' => '456',
                 'status' => 'Missing',
+                'location' => 'Main Library',
+                'location_code' => 'ML',
             ],
             [
                 'item_id' => '789',
                 'status' => 'In transit',
+                'returnDate' => '1/1/2000',
             ],
             [
                 'item_id' => '321',
@@ -214,6 +347,15 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
                 'item_id' => '654',
                 'status' => 'Available',
                 'reserve' => 'Y',
+            ],
+            [
+                'item_id' => '999',
+                'status' => 'test',
+            ],
+            [
+                'item_id' => '012',
+                'status' => 'In transit',
+                'duedate' => '12/12/2000',
             ],
         ];
     }
@@ -228,11 +370,16 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
      */
     protected function getDriver($id = 'test', $source = 'Solr')
     {
-        $driver = $this->createMock(\VuFind\RecordDriver\AbstractBase::class);
+        // $driver = $this->createMock(\VuFind\RecordDriver\AbstractBase::class);
+        $driver = $this->createMock(\Catalog\RecordDriver\SolrDefault::class);
         $driver->expects($this->any())->method('getUniqueId')
             ->will($this->returnValue($id));
         $driver->expects($this->any())->method('getSourceIdentifier')
             ->will($this->returnValue($source));
+        $driver->expects($this->any())->method('getSummary')
+            ->will($this->returnValue([$source]));
+        $driver->expects($this->any())->method('getFormats')
+            ->will($this->returnValue(['Serial', 'Book']));
         return $driver;
     }
 }
