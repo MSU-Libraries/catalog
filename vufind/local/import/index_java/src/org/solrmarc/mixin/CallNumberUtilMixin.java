@@ -2,6 +2,7 @@ package org.solrmarc.mixin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
@@ -41,7 +42,9 @@ public class CallNumberUtilMixin extends SolrIndexerMixin {
                 continue;
             }
             DataField df = (DataField)vf;
-            values.addAll(df.getSubfields(subfieldCodes).stream().map(f -> f.getData()).toList());
+            values.addAll(df.getSubfields(subfieldCodes).stream()
+                .map(f -> f.getData())
+                .collect(Collectors.toList()));
         }
         return(values);
     }
