@@ -1,3 +1,6 @@
+/* This is for the Metropolis font */
+@import url("https://msu-p-001.sitecorecontenthub.cloud/api/public/content/1a1d46b45afb40eda6ebf4ed44077295");
+
 @import "bootstrap"; /* Include bootstrap theme's less base */
 @import "vendor/bootstrap/variables";
 @import "components/variables";
@@ -67,6 +70,11 @@
   background-color:#ffffff;
 }
 
+
+//Font changes for the whole document
+body {
+  letter-spacing: .04rem;
+}
 
 //Focus indicators
 a.record-cover-link:focus {
@@ -185,6 +193,7 @@ header {
       color:#fff;
     }
     padding:1rem;
+    letter-spacing: 0.1rem;
   }
   .navbar-msubrand {
     margin-bottom:1rem;
@@ -1295,6 +1304,7 @@ body.template-dir-myresearch.template-name-profile {
 //monospace font for staff view
 .tab-content .details-tab {
   font-family: @font-family-monospace;
+  letter-spacing: 0;
 }
 
 //spacing around full text finder link in EDS
@@ -1319,6 +1329,7 @@ body.template-dir-myresearch.template-name-profile {
 // Turn ul into a dropdown
 .get-this-dropdown {
   font-family: monospace;
+  letter-spacing: 0;
 
   a {
     text-decoration: none;
