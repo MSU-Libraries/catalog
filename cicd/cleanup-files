@@ -1,0 +1,36 @@
+#!/bin/bash
+
+source "${CI_PROJECT_DIR}"/cicd/before-script
+
+runhelp() {
+    echo ""
+    echo "Purpose: Remove files in the shared storage for the environment"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - STACK_NAME: Name of the stack"
+    echo "  - DEPLOY_HOST_1: The first host in the cluster"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - If deletion of the files occurs (likely due to them being in use still)"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+main() {
+    LOCAL_DIR="/mnt/shared/local/${STACK_NAME}"
+    if ! OUTPUT=$(ssh deploy@"${DEPLOY_HOST_1}" "[[ -d ${LOCAL_DIR} ]] && sudo rm -rf ${LOCAL_DIR}"); then
+        echo "Failed to remove the files at ${LOCAL_DIR}. Error: ${OUTPUT}"
+        exit 1
+    fi
+
+    # Get runtime metrics
+    END=$(date +%s); RUNTIME=$((END-START)); HOURS=$((RUNTIME / 3600)); MINUTES=$(( (RUNTIME % 3600) / 60 )); SECONDS=$(( (RUNTIME % 3600) % 60 ));
+    echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
+}
+
+beforescript
+main

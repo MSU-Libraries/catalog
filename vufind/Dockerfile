@@ -16,7 +16,7 @@ RUN \
     # Perform updates
     apt-get update && \
     apt-get install -y wget vim-nox lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
-        gettext-base locales msmtp-mta rsync screen libxml-xpath-perl xmlstarlet \
+        gettext-base locales msmtp-mta rsync screen libxml-xpath-perl xmlstarlet php-xdebug \
         nodejs npm git pigz libxml2-utils libmarc-xml-perl bash-completion \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php \
@@ -48,7 +48,6 @@ COPY modsecurity/ /etc/modsecurity/
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
 RUN apt-get install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
 
-ARG GITHUB_USER_TOKEN
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
 

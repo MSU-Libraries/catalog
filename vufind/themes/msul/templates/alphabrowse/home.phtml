@@ -1,4 +1,5 @@
 <?php
+  /** @var \Laminas\View\Renderer\PhpRenderer $this */
   $this->headTitle($this->translate('Browse the Collection Alphabetically'));
   $this->layout()->breadcrumbs = '<li><a href="' . $this->url('alphabrowse-home') . '">' . $this->transEsc('Browse Alphabetically') . '</a></li>';
   $baseQuery = ['source' => $this->source, 'from' => $this->from];
@@ -52,7 +53,7 @@
   <div class="search container navbar">
   <h1 class="mb-5">Browse Alphabetically</h1>
   <form class="form-inline" method="get" action="<?=$this->url('alphabrowse-home')?>" name="alphaBrowseForm" id="alphaBrowseForm">
-    <label for="alphaBrowseForm_source"><?=$this->transEsc('Browse Alphabetically') ?></label>
+    <label for="alphaBrowseForm_source"><?=$this->transEsc('Browse by') ?></label>
     <select id="alphaBrowseForm_source" name="source" class="form-control">
       <?php foreach ($this->alphaBrowseTypes as $key => $item): ?>
         <option value="<?=$this->escapeHtmlAttr($key) ?>"<?php if ($this->source == $key): ?> selected="selected"<?php endif; ?>><?=$this->transEsc($item) ?></option>
@@ -129,7 +130,7 @@
                   endforeach;
                 endif;
               ?>
-              <?php if ($url = $this->alphabrowse()->getUrl($this->source, $item)): ?>
+              <?php if ($url = $this->alphabrowse()->getUrl($this->source, $item, $this->origin)): ?>
                 <a href="<?=$this->escapeHtmlAttr($url)?>"><?=preg_replace('/ --$/', '', $label)?></a><?php if(str_ends_with($label, ' --')) {
                    echo "<span class='fw-normal'> [chapter/part]</span>";
                 }?>

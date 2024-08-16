@@ -19,6 +19,7 @@ suggestions you have!
 * [Solr](solr.md)
 * [MariaDB](mariadb.md)
 * [Traefik](traefik.md)
+* [Monitoring App](monitoring.md)
 * [Load Testing](load-testing.md)
 * [Helper Scripts](helper-scripts.md)
 * [Bots](bots.md)

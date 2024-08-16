@@ -36,6 +36,11 @@ main() {
     ssh deploy@"${NODE}" "docker exec ${CONTAINER} vendor/bin/phing phpunitfast -Dphpunit_extra_params=/usr/local/vufind/module/Catalog/tests/integration-tests/";
     EC=$?;
     echo "Tests complete with exit code ${EC}";
+
+    # Get runtime metrics
+    END=$(date +%s); RUNTIME=$((END-START)); HOURS=$((RUNTIME / 3600)); MINUTES=$(( (RUNTIME % 3600) / 60 )); SECONDS=$(( (RUNTIME % 3600) % 60 ));
+    echo "${CI_JOB_NAME// /_}_Runtime" "$HOURS:$MINUTES:$SECONDS" >> metrics.txt
+    
     exit ${EC};
 }
 

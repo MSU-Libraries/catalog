@@ -17,6 +17,7 @@ namespace Catalog\RecordDriver;
 use function array_key_exists;
 use function count;
 use function in_array;
+use function is_array;
 
 /**
  * Extends the record driver with additional data from Solr
@@ -296,6 +297,22 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getAbstractNotes()
     {
         return $this->getMarcFieldWithInd('520', null, '1', '3');
+    }
+
+    /**
+     * Get the abstract and summary notes
+     *
+     * @return array Note fields from Solr
+     */
+    public function getAbstractAndSummaryNotes()
+    {
+        return array_merge(
+            $this->getMarcFieldWithInd('520', null, '1', ''),
+            $this->getMarcFieldWithInd('520', null, '1', '0'),
+            $this->getMarcFieldWithInd('520', null, '1', '2'),
+            $this->getMarcFieldWithInd('520', null, '1', '3'),
+            $this->getMarcFieldWithInd('520', null, '1', '8'),
+        );
     }
 
     /**
@@ -1010,7 +1027,6 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         return array_merge(
             $this->getUniformTitleFromMarc('130', range('a', 'z')),
             $this->getUniformTitleFromMarc('240', range('a', 'z')),
-            $this->getUniformTitleFromMarc('830', range('a', 'z')),
         );
     }
 
@@ -1369,6 +1385,8 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      * returned as an array of chunks, increasing from least specific to most
      * specific.
      *
+     * Additional modification for PC-1018 to add transliterated values to the subjects
+     *
      * @param bool $extended Whether to return a keyed array with the following
      * keys:
      * - heading: the actual subject heading chunks
@@ -1390,19 +1408,69 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         foreach ($allFields as $result) {
             if (isset($result['tag']) && in_array($result['tag'], $subjectFieldsKeys)) {
                 $fieldType = $this->subjectFields[$result['tag']];
-                /* END MSU */
 
                 // Start an array for holding the chunks of the current heading:
                 $current = [];
 
-                // Get all the chunks and collect them together:
+                /* START MSU */
+                // Get the transliterated 880 values for each result
+                // if it has a subfield 6
+                $linked = [];
                 foreach ($result['subfields'] as $subfield) {
+                    if ($subfield['code'] == '6') {
+                        $explodedSubfield = explode('-', $subfield['data']);
+                        if (count($explodedSubfield) > 1) {
+                            $index = $explodedSubfield[1];
+                            $linked = $this->getMarcReader()->getLinkedField(
+                                '880',
+                                $result['tag'],
+                                $index,
+                                range('a', 'z')
+                            );
+                            break;
+                        }
+                    }
+                }
+
+                // Get all the chunks and collect them together:
+                // Track the previous subfield code and index so we can get the
+                // correct linked one.
+                $prevCode = '';
+                $codeIndex = 0;
+                foreach ($result['subfields'] as $subfield) {
+                    if ($prevCode == $subfield['code']) {
+                        $codeIndex = $codeIndex + 1;
+                    }
                     // Numeric subfields are for control purposes and should not
                     // be displayed:
                     if (!is_numeric($subfield['code'])) {
-                        $current[] = $subfield['data'];
+                        $linkedVal = '';
+                        if (array_key_exists('subfields', $linked)) {
+                            $linkedPrevCode = '';
+                            $linkedCodeIndex = 0;
+                            foreach ($linked['subfields'] as $linkedSubfield) {
+                                if ($linkedPrevCode == $linkedSubfield['code']) {
+                                    $linkedCodeIndex = $linkedCodeIndex + 1;
+                                }
+                                // Use if we found the matching subfield code
+                                // and it is not the same value as the original
+                                if (
+                                    $linkedSubfield['code'] == $subfield['code'] &&
+                                    $linkedCodeIndex == $codeIndex &&
+                                    $linkedSubfield['data'] != $subfield['data']
+                                ) {
+                                    $linkedVal = $linkedSubfield['data'];
+                                    break;
+                                }
+                                $linkedPrevCode = $linkedSubfield['code'];
+                            }
+                        }
+                        $current[] = ['subject' => $subfield['data'], 'linked' => $linkedVal];
+                        $prevCode = $subfield['code'];
                     }
                 }
+                /* MSU END */
+
                 // If we found at least one chunk, add a heading to our result:
                 if (!empty($current)) {
                     if ($extended) {
@@ -1468,6 +1536,142 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get an array of all series names containing the record. Array entries may
+     * be either the name string, or an associative array with 'name' and 'number'
+     * keys.
+     *
+     * @return array
+     */
+    public function getSeries()
+    {
+        $matches = [];
+
+        // Get data for the primary series fields
+        // subfield v is excluded here because getSeriesFromMarc will uses v
+        // to get the series number
+        $primaryFields = [
+            '400' => ['p', 't'],
+            '410' => ['p', 't'],
+            '411' => ['p', 't'],
+            '440' => [range('a', 'w')],
+            '800' => [range('f', 'u')],
+            '810' => [range('f', 'u')],
+            '811' => [range('f', 'u')],
+            '830' => ['a', 'd', 'f', 'g', 'k', 'l', 'm', 'n','o', 'p', 'r', 's', 't', 'w', 'x', 'y'],
+        ];
+        $matches = $this->getSeriesFromMARC($primaryFields);
+
+        // Get 490 field data if no other series data found
+        // if ind 1 == 0
+        if (empty($matches)) {
+            $marc = $this->getMarcReader();
+            $marc_fields = $marc->getFields('490', ['a', 'n', 'p', 'v', '6']);
+            foreach ($marc_fields as $marc_data) {
+                $field_vals = [];
+                $field_num = '';
+                $field_linked = '';
+                if (trim(($marc_data['i1'] ?? '')) == '0') {
+                    $subfields = $marc_data['subfields'];
+                    foreach ($subfields as $subfield) {
+                        if ($subfield['code'] == 'v') {
+                            $field_num = $subfield['data'];
+                        } elseif ($subfield['code'] == '6') {
+                            $explodedSubfield = explode('-', $subfield['data']);
+                            if (count($explodedSubfield) > 1) {
+                                $index = $explodedSubfield[1];
+                                $linked = $this->getMarcReader()->getLinkedField(
+                                    '880',
+                                    '490',
+                                    $index,
+                                    range('a', 'z')
+                                );
+                                $field_linked = implode(' ', $this->getSubfieldArray($linked, range('a', 'z')));
+                            }
+                        } else {
+                            $field_vals[] = $subfield['data'];
+                        }
+                    }
+                }
+                if (!empty($field_vals)) {
+                    $matches[] = [
+                                'name' => implode(' ', $field_vals),
+                                'number' => $field_num,
+                                'linked' => $field_linked,
+                    ];
+                }
+            }
+        }
+        return $matches;
+    }
+
+    /**
+     * Support method for getSeries() -- given a field specification, look for
+     * series information in the MARC record.
+     *
+     * @param array $fieldInfo Associative array of field => subfield information
+     * (used to find series name)
+     *
+     * @return array
+     */
+    protected function getSeriesFromMARC($fieldInfo)
+    {
+        $matches = [];
+
+        // Loop through the field specification....
+        foreach ($fieldInfo as $field => $subfields) {
+            // Did we find any matching fields?
+            $series = $this->getMarcReader()->getFields($field);
+            foreach ($series as $currentField) {
+                // Can we find a name using the specified subfield list?
+                $name = $this->getSubfieldArray($currentField, $subfields);
+                if (isset($name[0])) {
+                    $currentArray = ['name' => $name[0]];
+
+                    // Can we find a number in subfield v?  (Note that number is
+                    // always in subfield v regardless of whether we are dealing
+                    // with 440, 490, 800 or 830 -- hence the hard-coded array
+                    // rather than another parameter in $fieldInfo).
+                    $number = $this->getSubfieldArray($currentField, ['v']);
+                    if (isset($number[0])) {
+                        $currentArray['number'] = $number[0];
+                    }
+
+                    // Check for a linked value
+                    $linkedField = $this->getSubfieldArray($currentField, ['6']);
+                    if (isset($linkedField[0])) {
+                        $explodedSubfield = explode('-', $linkedField[0]);
+                        if (count($explodedSubfield) > 1) {
+                            $index = $explodedSubfield[1];
+                            $linked = $this->getMarcReader()->getLinkedField(
+                                '880',
+                                $currentField['tag'],
+                                $index,
+                                range('a', 'z')
+                            );
+                            $currentArray['linked'] = implode(' ', $this->getSubfieldArray($linked, range('a', 'z')));
+                        }
+                    }
+
+                    // Save the current match:
+                    $matches[] = $currentArray;
+                }
+            }
+        }
+
+        return $matches;
+    }
+
+    /**
+     * Get the place of publication
+     *
+     * @return array Content from Solr
+     */
+    public function getPlaceOfPublication()
+    {
+        return $this->getMarcField('264', ['a']);
+    }
+
+    /**
      * Get the transliterated values from the given field, mapping using the data in subfield 6
      *
      * @param string $field    Marc field to search within
@@ -1518,5 +1722,52 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getDeduplicatedAuthors($dataFields = ['role', 'link'])
     {
         return parent::getDeduplicatedAuthors($dataFields);
+    }
+
+    /**
+     * PC-789 Return first non-empty highlighted text
+     * Pick one line from the highlighted text (if any) to use as a snippet.
+     *
+     * @return mixed False if no snippet found, otherwise associative array
+     * with 'snippet' and 'caption' keys.
+     */
+    public function getHighlightedSnippet()
+    {
+        // Only process snippets if the setting is enabled:
+        if ($this->snippet) {
+            // First check for preferred fields:
+            foreach ($this->preferredSnippetFields as $current) {
+                foreach ($this->highlightDetails[$current] as $hl) {
+                    if (!empty($hl)) {
+                        return [
+                            'snippet' => $hl,
+                            'caption' => $this->getSnippetCaption($current),
+                        ];
+                    }
+                }
+            }
+
+            // No preferred field found, so try for a non-forbidden field:
+            if (
+                isset($this->highlightDetails)
+                && is_array($this->highlightDetails)
+            ) {
+                foreach ($this->highlightDetails as $key => $value) {
+                    if ($value && !in_array($key, $this->forbiddenSnippetFields)) {
+                        foreach ($value as $hl) {
+                            if (!empty($hl)) {
+                                return [
+                                    'snippet' => $hl,
+                                    'caption' => $this->getSnippetCaption($key),
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // If we got this far, no snippet was found:
+        return false;
     }
 }

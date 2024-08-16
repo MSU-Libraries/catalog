@@ -173,18 +173,18 @@
 <?php if (!empty($termsOfUse = $this->driver->getTermsOfUseNotes())): ?>
   <h2><?=$this->transEsc('Terms of Use and Reproduction')?></h2>
   <?php foreach ($termsOfUse as $term): ?>
-    <span><?= $term ?></span>
+    <span><?= is_array($term) && array_key_exists('note', $term) ? $term['note'] : $term ?></span>
   <?php endforeach; ?>
 <?php endif; ?>
 <?php if (!empty($frequencies = $this->driver->getAccumulationAndFrequencyOfUseNotes())): ?>
   <h2><?=$this->transEsc('Accumulation and Frequency of Use')?></h2>
   <?php foreach ($frequencies as $frequency): ?>
-    <span><?= $frequency ?></span>
+    <span><?= is_array($frequency) && array_key_exists('note', $frequency) ? $frequency['note'] : $frequency ?></span>
   <?php endforeach; ?>
 <?php endif; ?>
 <?php if (!empty($frequencies = $this->driver->getNumberingPeculiaritiesNotes())): ?>
   <h2><?=$this->transEsc('Numbering Peculiarities')?></h2>
   <?php foreach ($frequencies as $frequency): ?>
-    <span><?= $frequency['note'] ?></span>
+    <span><?= is_array($frequency) && array_key_exists('note', $frequency) ? $frequency['note'] : $frequency ?></span>
   <?php endforeach; ?>
 <?php endif; ?>
