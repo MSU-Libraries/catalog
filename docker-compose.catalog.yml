@@ -33,6 +33,9 @@ services:
       NODE: "{{slice .Node.Hostname 8 9}}"
       DEPLOY_KEY_FILE: /run/secrets/DEPLOY_KEY
       <<: *vufind_envs
+    secrets: # secrets are prefixed with stack name in deploy-compose
+      - DEPLOY_KEY
+      - MARIADB_VUFIND_PASSWORD
     deploy:
       mode: replicated
       replicas: 3
@@ -148,6 +151,8 @@ services:
       NODE: "{{slice .Node.Hostname 8 9}}"
       MARIADB_ROOT_PASSWORD: "${MARIADB_ROOT_PASSWORD}"
       <<: *vufind_envs
+    secrets: # secrets are prefixed with stack name in deploy-compose
+      - HLM_FTP_PASSWORD
     deploy:
       mode: replicated
       replicas: 1
