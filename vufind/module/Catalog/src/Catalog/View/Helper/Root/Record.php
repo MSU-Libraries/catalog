@@ -15,6 +15,7 @@
 namespace Catalog\View\Helper\Root;
 
 use VuFind\Config\YamlReader;
+use Catalog\Utils\RegexLookup as Regex;
 
 use function array_key_exists;
 use function in_array;
@@ -206,13 +207,14 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
 
         $status = $holding['status'] ?? 'Unknown';
         $reserve = $holding['reserve'] ?? 'N';
+        $loc = $holding['location'];
 
         if (
             in_array($status, [
                 'Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
                 'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
                 'Unknown', 'Withdrawn',
-            ])
+            ]) || Regex::SPEC_COLL($loc)
         ) {
             $statusFirstPart = 'Unavailable';
             $statusSecondPart = $status;

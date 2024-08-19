@@ -150,12 +150,13 @@ class GetThisLoader
         $item = $this->getItem($item_id);
         $status = $item['status'] ?? 'Unknown';
         $reserve = $item['reserve'] ?? 'N';
+        $loc = $item['location'];
 
         $statusSecondPart = $status;
         if (
             in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
             'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
-            'Unknown', 'Withdrawn'])
+            'Unknown', 'Withdrawn']) || Regex::SPEC_COLL($loc)
         ) {
             $statusFirstPart = 'Unavailable';
             $statusSecondPart = $status;
@@ -715,16 +716,16 @@ class GetThisLoader
      */
     public function showSpcAeon($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
-        $stat = $this->getStatus($item_id);
-        $loc = $this->getLocation($item_id);
+        // $item_id = $this->getItemId($item_id);
+        // $stat = $this->getStatus($item_id);
+        // $loc = $this->getLocation($item_id);
 
-        if (
-            (Regex::SPEC_COLL_REMOTE($loc) && (Regex::LIB_USE_ONLY($stat) || Regex::ON_DISPLAY($stat))) ||
-             Regex::SPEC_COLL($loc)
-        ) {
-            return true;
-        }
+        // if (
+        //     (Regex::SPEC_COLL_REMOTE($loc) && (Regex::LIB_USE_ONLY($stat) || Regex::ON_DISPLAY($stat))) ||
+        //      Regex::SPEC_COLL($loc)
+        // ) {
+        //     return true;
+        // }
         return false;
     }
 
@@ -749,7 +750,7 @@ class GetThisLoader
         // only if the item is on reserve, non-circulating (lib use only), checked out or unavailable
         if (
             Regex::RESERV($loc) || $this->isOut($item_id) || $this->isLibUseOnly($item_id)
-            || $this->isUnavailable($item_id)
+            || $this->isUnavailable($item_id) || Regex::SPEC_COLL($loc)
         ) {
             return true;
         }
