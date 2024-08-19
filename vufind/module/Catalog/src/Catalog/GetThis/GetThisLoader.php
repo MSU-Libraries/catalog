@@ -150,7 +150,7 @@ class GetThisLoader
         $item = $this->getItem($item_id);
         $status = $item['status'] ?? 'Unknown';
         $reserve = $item['reserve'] ?? 'N';
-        $loc = $item['location'];
+        $loc = $item['location'] ?? '';
 
         $statusSecondPart = $status;
         if (
