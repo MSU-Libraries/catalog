@@ -153,10 +153,13 @@ class GetThisLoader
         $loc = $item['location'] ?? '';
 
         $statusSecondPart = $status;
-        if (
+        if (Regex::SPEC_COLL($loc)) {
+            $statusFirstPart = 'Unavailable';
+            $statusSecondPart = '';
+        } elseif (
             in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
             'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
-            'Unknown', 'Withdrawn']) || Regex::SPEC_COLL($loc)
+            'Unknown', 'Withdrawn'])
         ) {
             $statusFirstPart = 'Unavailable';
             $statusSecondPart = $status;
