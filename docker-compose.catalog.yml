@@ -36,6 +36,7 @@ services:
     secrets: # secrets are prefixed with stack name in deploy-compose
       - DEPLOY_KEY
       - MARIADB_VUFIND_PASSWORD
+      - SIMPLESAMLPHP_ADMIN_PW
     deploy:
       mode: replicated
       replicas: 3
@@ -219,4 +220,6 @@ secrets: # secrets are prefixed with stack name in deploy-compose
   HLM_FTP_PASSWORD:
     external: true
   DEPLOY_KEY:
+    external: true
+  SIMPLESAMLPHP_ADMIN_PW:
     external: true
