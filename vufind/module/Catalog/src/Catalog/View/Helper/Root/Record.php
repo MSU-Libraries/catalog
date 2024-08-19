@@ -207,7 +207,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
 
         $status = $holding['status'] ?? 'Unknown';
         $reserve = $holding['reserve'] ?? 'N';
-        $loc = $holding['location'];
+        $loc = $holding['location'] ?? '';
 
         if (
             in_array($status, [
