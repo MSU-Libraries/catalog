@@ -16,13 +16,15 @@ envsubst < /etc/aliases | sponge /etc/aliases
 ls -l /run/secrets/
 echo "-- SIMPLESAMLPHP_ADMIN_PW_FILE --"
 echo "${SIMPLESAMLPHP_ADMIN_PW_FILE}"
+echo "\"$(cat "${SIMPLESAMLPHP_ADMIN_PW_FILE}")\""
 echo "---"
 echo "-- SIMPLESAMLPHP_ADMIN_PW --"
-echo "${SIMPLESAMLPHP_ADMIN_PW}"
+echo "\"${SIMPLESAMLPHP_ADMIN_PW}\""
 echo "---"
 # Finish SimpleSAMLphp config setup
 envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW_FILE} ${SIMPLESAMLPHP_CUSTOM_DIR} ${MARIADB_VUFIND_PASSWORD_FILE}' < ${SIMPLESAMLPHP_CONFIG_DIR}/config.php | \
     sponge ${SIMPLESAMLPHP_CONFIG_DIR}/config.php
+cat ${SIMPLESAMLPHP_CONFIG_DIR}/config.php
 
 # Unset env variables that are just used in config files and don't need to be in the environment after this.
 # MARIADB_VUFIND_PASSWORD, SIMPLESAMLPHP_HOME, BROWZINE_LIBRARY and BROWZINE_TOKEN
