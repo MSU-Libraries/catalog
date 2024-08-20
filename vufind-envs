@@ -33,3 +33,4 @@ x-vufind-envs: &vufind_envs
   # secrets are prefixed with stack name in deploy-compose
   HLM_FTP_PASSWORD_FILE: /run/secrets/HLM_FTP_PASSWORD
   SIMPLESAMLPHP_ADMIN_PW_FILE: /run/secrets/SIMPLESAMLPHP_ADMIN_PW
+  MARIADB_VUFIND_PASSWORD_FILE: /run/secrets/MARIADB_VUFIND_PASSWORD
