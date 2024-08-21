@@ -14,9 +14,6 @@ envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini
 envsubst < /etc/aliases | sponge /etc/aliases
 
 # Finish SimpleSAMLphp config setup
-# TODO ${SIMPLESAMLPHP_ADMIN_PW_FILE} ${MARIADB_VUFIND_PASSWORD_FILE}
-#  Should we either keep this way and unset the env variables
-#  Or don't do the envsubst here and use file_get_contents(getenv('${SIMPLESAMLPHP_ADMIN_PW_FILE}')) instead of file_get_contents('${SIMPLESAMLPHP_ADMIN_PW_FILE}')
 envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW_FILE} ${SIMPLESAMLPHP_CUSTOM_DIR} ${MARIADB_VUFIND_PASSWORD_FILE}' < ${SIMPLESAMLPHP_CONFIG_DIR}/config.php | \
     sponge ${SIMPLESAMLPHP_CONFIG_DIR}/config.php
 
