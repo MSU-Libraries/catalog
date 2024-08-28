@@ -71,11 +71,6 @@
 }
 
 
-//Font changes for the whole document
-body {
-  letter-spacing: .04rem;
-}
-
 //Focus indicators
 a.record-cover-link:focus {
   outline-offset: 0.25rem;
@@ -193,7 +188,6 @@ header {
       color:#fff;
     }
     padding:1rem;
-    letter-spacing: 0.2rem;
   }
   .navbar-msubrand {
     margin-bottom:1rem;
@@ -1203,10 +1197,9 @@ label {
       >  th {
         border:0;
         width:auto;
-        padding-right:2rem;
 
         @media only screen and (max-width : 992px) {
-          display:block;
+          display:revert; // headings in alphabrowse don't collapse at mobile
           padding-bottom:0;
         }
       }
@@ -1219,7 +1212,6 @@ label {
         overflow-wrap: anywhere;
 
         @media only screen and (max-width : 992px) {
-          display:block;
         }
       }
     }
@@ -1260,14 +1252,8 @@ body.template-dir-myresearch.template-name-profile {
   &:hover {
     background-color:@lightgray;
   }
-  td {
-    border-radius:0.5rem;
-    &:first-child {
-      border-radius:0.5rem 0 0 0.5rem;
-    }
-    &:last-child {
-      border-radius:0 0.5rem 0.5rem 0;
-    }
+  &.title {
+    min-width:10rem;
   }
 }
 
