@@ -143,28 +143,56 @@ async def _check_vufind_record_page(node: str, aiohttp_session: ClientSession) -
         result = 'OK'
     return result
 
-async def _check_vufind_search_page(node: str, aiohttp_session: ClientSession) -> str:
-    url = f'http://vufind{node}/Search/Results?limit=5&dfApplied=1&lookfor=Out+of+the+pocket&type=AllFields'
+async def _check_vufind_search_base(aiohttp_session: ClientSession, url: str, lookfor: str, page: str) -> str:
     try:
         text = await async_single_get(aiohttp_session, url)
     except asyncio.TimeoutError:
-        return 'Timeout when reading vufind search page'
+        return f'Timeout when reading vufind {page} page'
     except ClientError as err:
-        return f'Error reading vufind search page: {err}'
+        return f'Error reading vufind {page} page: {err}'
     if '</html>' not in text:
-        return 'Vufind search page not complete'
+        return f'Vufind {page} page not complete'
     if '<h1>An error has occurred' in text or '<p>An error has occurred' in text:
-        return 'An error is reported in Vufind search page'
-    if 'folio.in00006782951' not in text:
-        return 'Vufind search page not complete'
+        return f'An error is reported in Vufind {page} page'
+    if lookfor not in text:
+        return f'Vufind {page} page not complete'
     return 'OK'
+
+async def _check_vufind_search_page(node: str, aiohttp_session: ClientSession) -> str:
+    url = f'http://vufind{node}/Search/Results?limit=5&dfApplied=1&lookfor=Out+of+the+pocket&type=AllFields'
+    return await _check_vufind_search_base(aiohttp_session, url, 'folio.in00006782951', 'search')
+
+async def _check_vufind_browse_by_subject_page(node: str, aiohttp_session: ClientSession) -> str:
+    url = f'http://vufind{node}/Alphabrowse/Home?source=topic&from=Science+Fiction'
+    return await _check_vufind_search_base(aiohttp_session, url, '>Science fiction.</a>', 'browse by subject')
+
+async def _check_vufind_browse_by_author_page(node: str, aiohttp_session: ClientSession) -> str:
+    url = f'http://vufind{node}/Alphabrowse/Home?source=author&from=Hoek'
+    return await _check_vufind_search_base(aiohttp_session, url, '>Hoek, Marga</a>', 'browse by author')
+
+async def _check_vufind_browse_by_title_page(node: str, aiohttp_session: ClientSession) -> str:
+    url = f'http://vufind{node}/Alphabrowse/Home?source=title&from=Artificial+Intelligence+and+the+City'
+    return await _check_vufind_search_base(aiohttp_session, url, 'Urbanistic Perspectives on AI', 'browse by title')
+
+async def _check_vufind_browse_by_call_number_page(node: str, aiohttp_session: ClientSession) -> str:
+    url = f'http://vufind{node}/Alphabrowse/Home?source=lcc&from=DC96'
+    return await _check_vufind_search_base(aiohttp_session, url, 'DC96 .S25 2022', 'browse by call number')
+
+async def _check_vufind_browse_by_series_page(node: str, aiohttp_session: ClientSession) -> str:
+    url = f'http://vufind{node}/Alphabrowse/Home?source=series&from=Concise'
+    return await _check_vufind_search_base(aiohttp_session, url, '>Concise Hornbook Series</a>', 'browse by series')
 
 async def _node_vufind_status(aiohttp_session: ClientSession) -> str:
     node = os.getenv('NODE')
     results = await asyncio.gather(
         _check_vufind_home_page(node, aiohttp_session),
         _check_vufind_record_page(node, aiohttp_session),
-        _check_vufind_search_page(node, aiohttp_session)
+        _check_vufind_search_page(node, aiohttp_session),
+        _check_vufind_browse_by_subject_page(node, aiohttp_session),
+        _check_vufind_browse_by_author_page(node, aiohttp_session),
+        _check_vufind_browse_by_title_page(node, aiohttp_session),
+        _check_vufind_browse_by_call_number_page(node, aiohttp_session),
+        _check_vufind_browse_by_series_page(node, aiohttp_session),
     )
     for res in results:
         if res != 'OK':
