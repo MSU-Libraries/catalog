@@ -167,7 +167,7 @@ async def _check_vufind_browse_by_subject_page(node: str, aiohttp_session: Clien
     return await _check_vufind_search_base(aiohttp_session, url, '>Science fiction.</a>', 'browse by subject')
 
 async def _check_vufind_browse_by_author_page(node: str, aiohttp_session: ClientSession) -> str:
-    url = f'http://vufind{node}/Alphabrowse/Home?source=author&from=Hoek'
+    url = f'http://vufind{node}/Alphabrowse/Home?source=author&from=Hoek%2C+M'
     return await _check_vufind_search_base(aiohttp_session, url, '>Hoek, Marga</a>', 'browse by author')
 
 async def _check_vufind_browse_by_title_page(node: str, aiohttp_session: ClientSession) -> str:
@@ -175,11 +175,11 @@ async def _check_vufind_browse_by_title_page(node: str, aiohttp_session: ClientS
     return await _check_vufind_search_base(aiohttp_session, url, 'Urbanistic Perspectives on AI', 'browse by title')
 
 async def _check_vufind_browse_by_call_number_page(node: str, aiohttp_session: ClientSession) -> str:
-    url = f'http://vufind{node}/Alphabrowse/Home?source=lcc&from=DC96'
+    url = f'http://vufind{node}/Alphabrowse/Home?source=lcc&from=DC96.S'
     return await _check_vufind_search_base(aiohttp_session, url, 'DC96 .S25 2022', 'browse by call number')
 
 async def _check_vufind_browse_by_series_page(node: str, aiohttp_session: ClientSession) -> str:
-    url = f'http://vufind{node}/Alphabrowse/Home?source=series&from=Concise'
+    url = f'http://vufind{node}/Alphabrowse/Home?source=series&from=Concise+H'
     return await _check_vufind_search_base(aiohttp_session, url, '>Concise Hornbook Series</a>', 'browse by series')
 
 async def _node_vufind_status(aiohttp_session: ClientSession) -> str:
