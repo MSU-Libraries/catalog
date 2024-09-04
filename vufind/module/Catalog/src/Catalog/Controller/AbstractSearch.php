@@ -48,9 +48,25 @@ use Laminas\View\Model\ViewModel;
 class AbstractSearch extends \VuFind\Controller\AbstractSearch
 {
     /**
-     * Send search results to results view
+     * Perform a search and send results to a results view
+     *
+     * @param callable $setupCallback Optional setup callback that overrides the
+     * default one
      *
      * @return Response|ViewModel
+     */
+    protected function getSearchResultsView($setupCallback = null)
+    {
+        $view = parent::getSearchResultsView($setupCallback);
+        $config = $this->getConfig('facets');
+        $view->multiFacetsSelection = $config?->get('Advanced_Settings')?->get('multiFacetsSelection') === '1';
+        return $view;
+    }
+
+    /**
+     * Send search results to results view
+     *
+     * @return Response | ViewModel
      */
     public function resultsAction()
     {

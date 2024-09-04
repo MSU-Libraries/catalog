@@ -997,7 +997,7 @@ table tr {
   text-decoration:none;
 
   &:hover {
-     border: 2px solid @parakeetgreen;
+    border: 2px solid @parakeetgreen;
     text-decoration:none;
     color:@darkparakeetgreen;
   }
@@ -1032,11 +1032,21 @@ table tr {
   h3 {
     color: black;
   }
+  #apply-filters {
+    height: 3.5em;
+    z-index: 500;
+    position: sticky;
+    padding: 1em 1em 3.5em;
+    border-bottom: 1px solid #C1C1C1;
+    background: white;
+  }
+  #apply-filters.fixed {
+    top: 0;
+  }
 }
 
 @media only screen and (min-width : 768px) {
   .sidebar.left {
-    //border-right:1px solid @medgray;
     border-right: 1px solid #C1C1C1;
   }
   .record .mainbody.right {

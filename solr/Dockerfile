@@ -1,4 +1,4 @@
-FROM bitnami/solr:9.3.0
+FROM bitnami/solr:9.6.1
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Detroit
@@ -11,8 +11,9 @@ RUN \
 # Install additional packages, including zk-shell
     apt update && \
     apt install -y wget vim-nox htop rsyslog cron moreutils gettext-base jq \
-                   python3 python3-distutils python3-pip && \
-    pip install zk-shell && \
+                   python3 python3-distutils python3-pip pipx && \
+    pipx install zk-shell && \
+    pipx ensurepath && \
     apt remove -y python3-pip && \
     apt autoremove -y && \
     rm -rf /var/lib/apt/lists/* && \
