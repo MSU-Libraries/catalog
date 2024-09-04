@@ -229,7 +229,9 @@ copy_to_solr() {
 
     if [[ -n $(find "${ARGS[SHARED_PATH]}/" -type f -mmin -$(( ARGS[MAX_AGE_HOURS] * 60 )) ! -name "*lock" ) ]]; then
         verbose "Identified existing database files that can be used; starting copy."
-        cp -p "${ARGS[SHARED_PATH]}/"* /bitnami/solr/server/solr/alphabetical_browse/ && \
+        # Copy database files first, then the "-ready" files indicating they are ready to be used
+        cp -p "${ARGS[SHARED_PATH]}/"*db-updated /bitnami/solr/server/solr/alphabetical_browse/ && \
+        cp -p "${ARGS[SHARED_PATH]}/"*db-ready /bitnami/solr/server/solr/alphabetical_browse/ && \
         chown 1001 /bitnami/solr/server/solr/alphabetical_browse/*
         RCODE=$?
     fi

@@ -1,3 +1,6 @@
+/* This is for the Metropolis font */
+@import url("https://msu-p-001.sitecorecontenthub.cloud/api/public/content/1a1d46b45afb40eda6ebf4ed44077295");
+
 @import "bootstrap"; /* Include bootstrap theme's less base */
 @import "vendor/bootstrap/variables";
 @import "components/variables";
@@ -880,16 +883,19 @@ table tr {
     width:1.25rem;
   }
   .result-body {
+    font-size: 1.1rem;
+    h2 {
+      font-size: 1.15rem;
+    }
     .fulltext {
       display:inline;
     }
     & :not(:first-child) {
-      font-size:14px;
-      line-height:1.8rem;
+      line-height:1.7rem;
    }
 
     .result-formats span {
-      font-size:12px;
+      font-size:13px;
       line-height:1rem;
       margin-top:0.5rem;
     }
@@ -1201,11 +1207,9 @@ label {
       >  th {
         border:0;
         width:auto;
-        min-width:20rem;
-        padding-right:2rem;
 
         @media only screen and (max-width : 992px) {
-          display:block;
+          display:revert; // headings in alphabrowse don't collapse at mobile
           padding-bottom:0;
         }
       }
@@ -1218,7 +1222,6 @@ label {
         overflow-wrap: anywhere;
 
         @media only screen and (max-width : 992px) {
-          display:block;
         }
       }
     }
@@ -1259,14 +1262,8 @@ body.template-dir-myresearch.template-name-profile {
   &:hover {
     background-color:@lightgray;
   }
-  td {
-    border-radius:0.5rem;
-    &:first-child {
-      border-radius:0.5rem 0 0 0.5rem;
-    }
-    &:last-child {
-      border-radius:0 0.5rem 0.5rem 0;
-    }
+  &.title {
+    min-width:10rem;
   }
 }
 
@@ -1305,6 +1302,8 @@ body.template-dir-myresearch.template-name-profile {
 //monospace font for staff view
 .tab-content .details-tab {
   font-family: @font-family-monospace;
+  font-size: 1.1rem;
+  letter-spacing: 0;
 }
 
 //spacing around full text finder link in EDS
@@ -1329,6 +1328,8 @@ body.template-dir-myresearch.template-name-profile {
 // Turn ul into a dropdown
 .get-this-dropdown {
   font-family: monospace;
+  font-size: 1.1rem;
+  letter-spacing: 0;
 
   a {
     text-decoration: none;

@@ -117,11 +117,11 @@ the container stops due to a deploy like the previous command was. Process can b
 files in the `/usr/local/harvest/hlm/` directory and by re-attaching to the `screen` (by using `screen -r`)
 to see if the command has completed.
 ```
-# Done inside the container
+# Done inside the catalog_cron container
 cp /mnt/shared/hlm/[STACK_NAME]/current/* /usr/local/vufind/local/harvest/hlm/
 
 # You will want to kick off this command in a screen session, since it can take many hours to run
-/usr/local/bin/pc-import-hlm -i
+/usr/local/bin/pc-import-hlm -i -v
 ```
 
 #### How to Use the Collection Aliases to Rebuild and Swap

@@ -56,7 +56,7 @@
     <?php endif; ?>
 
     <?php foreach ($this->driver->tryMethod('getFullTitlesAltScript', [], []) as $altTitle): ?>
-      <div class="title-alt">
+      <div class="title-alt mb-3">
         <?=$this->escapeHtml($altTitle)?>
       </div>
     <?php endforeach; ?>
