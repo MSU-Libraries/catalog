@@ -369,15 +369,14 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
 
         // parse the access_token and library_id fields
         if (isset($this->browzineConfig->General)) {
-            if (isset($this->browzineConfig->General->access_token)) {
-                // TODO After upgrade to version containing PR with SecretTrait, switch to it
+            // TODO After upgrade to version containing PR with SecretTrait, switch to it
+            if (
+                isset($this->browzineConfig->General->access_token_file)
+                && $content = file_get_contents($this->browzineConfig->General->access_token_file)
+            ) {
+                $this->libkeyAccessToken = $content;
+            } elseif (isset($this->browzineConfig->General->access_token)) {
                 $this->libkeyAccessToken = $this->browzineConfig->General->access_token;
-                if (
-                    $this->browzineConfig->General->access_token_file !== null
-                    && $content = file_get_contents($this->browzineConfig->General->access_token_file)
-                ) {
-                    $this->libkeyAccessToken = $content;
-                }
             }
             if (isset($this->browzineConfig->General->library_id)) {
                 $this->libkeyLibraryId = $this->browzineConfig->General->library_id;
