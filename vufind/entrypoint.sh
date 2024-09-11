@@ -1,7 +1,6 @@
 #!/bin/bash
 
 echo "Entrypoint script..."
-#VUFIND_CORE_INSTALLATION=1 # TODO
 
 # Replace environment variables in template ini files
 envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.ini
@@ -33,9 +32,8 @@ if [[ "$1" == "/startup-cron.sh" ]]; then
         echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment
         echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR" >> /etc/environment
         echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment
-        echo 'Debug '
         if [[ "${STACK_NAME}" == devel-* && ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
-          echo 'Devel environment, core-vufind asked'
+          echo 'Devel environment, core-vufind asked, set with modules empty'
           echo VUFIND_LOCAL_MODULES="" >> /etc/environment
         else
           echo VUFIND_LOCAL_MODULES="Catalog" >> /etc/environment
