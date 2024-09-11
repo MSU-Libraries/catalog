@@ -11,6 +11,8 @@ secret_detection:
 
 gemnasium-python-dependency_scanning:
   interruptible: true
+  variables:
+    DS_MAX_DEPTH: -1
   environment:
     name: $CI_COMMIT_BRANCH/dependency-scan
     auto_stop_in: 2 weeks
