@@ -13,14 +13,16 @@ gemnasium-python-dependency_scanning:
   interruptible: true
   variables:
     DS_MAX_DEPTH: -1
+    SECURE_LOG_LEVEL: debug
   environment:
     name: $CI_COMMIT_BRANCH/dependency-scan
     auto_stop_in: 2 weeks
   tags:
     - msul-shared
   script:
-    - /analyzer --help
-    - /analyzer -v run
+    # Overriding to allow mariadb pip package install to work for analyzer
+    - apt update
+    - apt install -y libmariadb-dev
     - /analyzer run
 
 # Does not have the environment tag due to this being run on merge requests
