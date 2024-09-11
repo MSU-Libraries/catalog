@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo "Entrypoint script..."
+#VUFIND_CORE_INSTALLATION=1 # TODO
 
 # Replace environment variables in template ini files
 envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.ini
@@ -32,7 +33,11 @@ if [[ "$1" == "/startup-cron.sh" ]]; then
         echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment
         echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR" >> /etc/environment
         echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment
-        echo VUFIND_LOCAL_MODULES="Catalog" >> /etc/environment
+        if [[ "${STACK_NAME}" == devel-* && ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
+          echo VUFIND_LOCAL_MODULES="" >> /etc/environment
+        else
+          echo VUFIND_LOCAL_MODULES="Catalog" >> /etc/environment
+        fi
         echo HLM_FTP_USER="$HLM_FTP_USER" >> /etc/environment
         echo HLM_FTP_PASSWORD="$HLM_FTP_PASSWORD" >> /etc/environment
         echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment
@@ -45,5 +50,7 @@ else
     # don't have the cron container and we might need them in the catalog container when doing a docker exec.
     unset HLM_FTP_USER HLM_FTP_PASSWORD AUTH_FTP_USER AUTH_FTP_PASSWORD SOLR_URL
 fi
+
+unset VUFIND_CORE_INSTALLATION
 
 exec "$@"
