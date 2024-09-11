@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo "Startup script..."
+#VUFIND_CORE_INSTALLATION=1 # TODO
 
 SHARED_STORAGE="/mnt/shared/local"
 TIMESTAMP=$( date +%Y%m%d%H%M%S )
@@ -62,16 +63,26 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     rm -rf /usr/local/vufind/local
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/local-confs /usr/local/vufind/local
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/themes/msul /usr/local/vufind/themes
-    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog /usr/local/vufind/module
+    echo 'Debug 1'
+    if [[ ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
+      echo 'Basic install, linking Catalog files'
+      ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog /usr/local/vufind/module
+    fi
 
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/public /usr/local/vufind/public
     mv /usr/local/vufind/vendor ${SHARED_STORAGE}/${STACK_NAME}/core-repo
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/vendor /usr/local/vufind/vendor
 
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootprint3 /usr/local/vufind/themes/bootprint3
+    echo 'Debug 2'
+    if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
+        echo 'Devel environment, core-vufind asked, linking all the themes'
+      ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootprint3 /usr/local/vufind/themes/bootprint3
+      ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/sandal /usr/local/vufind/themes/sandal
+      ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/sandal5 /usr/local/vufind/themes/sandal5
+      ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootstrap5 /usr/local/vufind/themes/bootstrap5
+    fi
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootstrap3 /usr/local/vufind/themes/bootstrap3
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/root /usr/local/vufind/themes/root
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/sandal /usr/local/vufind/themes/sandal
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFind /usr/local/vufind/module/VuFind
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindAdmin /usr/local/vufind/module/VuFindAdmin
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindApi /usr/local/vufind/module/VuFindApi
@@ -81,8 +92,12 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindSearch /usr/local/vufind/module/VuFindSearch
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindTheme /usr/local/vufind/module/VuFindTheme
 
-    # Add a link in core-repo so that unit tests work
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module
+    echo 'Debug 3'
+    if [[ ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
+      # Add a link in core-repo so that unit tests work
+      echo 'Basic install, adding a link for unit test'
+      ln -s ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module
+    fi
 
     # Make sure permissions haven't gotten changed on the share along the way
     # (This can happen no matter what on devel container startup)
@@ -90,6 +105,14 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/msul/
     chown msuldevs:msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/local-confs/*
     rsync -aip --chmod=D2775,F664 --exclude "*.sh" --exclude "cicd" --exclude "*scripts*" "${SHARED_STORAGE}/${STACK_NAME}"/ "${SHARED_STORAGE}/${STACK_NAME}"/
+
+    echo 'Debug 4'
+    if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
+      # Commenting the setEnv directive
+      echo 'Devel environment, core-vufind asked, commenting apache directive + changing theme in config'
+      sed -i -r 's/^\s+SetEnv VUFIND_LOCAL_MODULES Catalog/#&/' /usr/local/vufind/local/httpd-vufind.conf
+      sed -i -r 's/^(theme\s+= )msul/\1bootstrap3/' /usr/local/vufind/local/config/vufind/config.ini
+    fi
 fi
 
 # Save the logs in the logs docker volume
@@ -108,8 +131,12 @@ ln -f -s /mnt/shared/config/BannerNotices.yaml /usr/local/vufind/local/config/vu
 ln -f -s /mnt/shared/config/LocationNotices.yaml /usr/local/vufind/local/config/vufind/LocationNotices.yaml
 ln -f -s /mnt/shared/config/RequestNotices.yaml /usr/local/vufind/local/config/vufind/RequestNotices.yaml
 
-# Update the phing commands to use our module instead of VuFind for tests
-sed -i 's#VuFind/tests#Catalog\/tests#' /usr/local/vufind/build.xml
+echo 'Debug 5'
+if [[ "${STACK_NAME}" != devel-* || ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
+  # Update the phing commands to use our module instead of VuFind for tests
+    echo 'Basic install, Update the phing commands to use our module instead of VuFind for tests'
+  sed -i 's#VuFind/tests#Catalog\/tests#' /usr/local/vufind/build.xml
+fi
 
 # Prepare cache cli dir (volume only exists after start)
 clear-vufind-cache
@@ -181,7 +208,7 @@ if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
 fi
 
 # Unset environment variables that are no longer necessary before starting Apache
-unset DEPLOY_KEY
+unset DEPLOY_KEY VUFIND_CORE_INSTALLATION
 
 # Start Apache
 tail -f /var/log/vufind/vufind.log & apachectl -DFOREGROUND
