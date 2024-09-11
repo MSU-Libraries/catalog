@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo "Startup script..."
+VUFIND_CORE_INSTALLATION=1 # TODO
 
 SHARED_STORAGE="/mnt/shared/local"
 TIMESTAMP=$( date +%Y%m%d%H%M%S )
@@ -62,16 +63,22 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     rm -rf /usr/local/vufind/local
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/local-confs /usr/local/vufind/local
     ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/themes/msul /usr/local/vufind/themes
-    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog /usr/local/vufind/module
+    if [[ ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
+      ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog /usr/local/vufind/module
+    fi
 
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/public /usr/local/vufind/public
     mv /usr/local/vufind/vendor ${SHARED_STORAGE}/${STACK_NAME}/core-repo
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/vendor /usr/local/vufind/vendor
 
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootprint3 /usr/local/vufind/themes/bootprint3
+    if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
+      ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootprint3 /usr/local/vufind/themes/bootprint3
+      ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/sandal /usr/local/vufind/themes/sandal
+      ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/sandal5 /usr/local/vufind/themes/sandal5
+      ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootstrap5 /usr/local/vufind/themes/bootstrap5
+    fi
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootstrap3 /usr/local/vufind/themes/bootstrap3
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/root /usr/local/vufind/themes/root
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/sandal /usr/local/vufind/themes/sandal
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFind /usr/local/vufind/module/VuFind
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindAdmin /usr/local/vufind/module/VuFindAdmin
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindApi /usr/local/vufind/module/VuFindApi
@@ -81,8 +88,10 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindSearch /usr/local/vufind/module/VuFindSearch
     ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindTheme /usr/local/vufind/module/VuFindTheme
 
-    # Add a link in core-repo so that unit tests work
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module
+    if [[ ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
+      # Add a link in core-repo so that unit tests work
+      ln -s ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module
+    fi
 
     # Make sure permissions haven't gotten changed on the share along the way
     # (This can happen no matter what on devel container startup)
@@ -90,6 +99,12 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/msul/
     chown msuldevs:msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/local-confs/*
     rsync -aip --chmod=D2775,F664 --exclude "*.sh" --exclude "cicd" --exclude "*scripts*" "${SHARED_STORAGE}/${STACK_NAME}"/ "${SHARED_STORAGE}/${STACK_NAME}"/
+
+    if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
+      # Commenting the setEnv directive
+      sed -i 's/^\s+SetEnv VUFIND_LOCAL_MODULES Catalog/#&/' /usr/local/vufind/local/httpd-vufind.conf
+      sed -i -r 's/^(theme\s+= )msul/\1bootstrap5/' /usr/local/vufind/local/config/vufind/config.ini
+    fi
 fi
 
 # Save the logs in the logs docker volume
@@ -108,8 +123,10 @@ ln -f -s /mnt/shared/config/BannerNotices.yaml /usr/local/vufind/local/config/vu
 ln -f -s /mnt/shared/config/LocationNotices.yaml /usr/local/vufind/local/config/vufind/LocationNotices.yaml
 ln -f -s /mnt/shared/config/RequestNotices.yaml /usr/local/vufind/local/config/vufind/RequestNotices.yaml
 
-# Update the phing commands to use our module instead of VuFind for tests
-sed -i 's#VuFind/tests#Catalog\/tests#' /usr/local/vufind/build.xml
+if [[ "${STACK_NAME}" != devel-* || ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
+  # Update the phing commands to use our module instead of VuFind for tests
+  sed -i 's#VuFind/tests#Catalog\/tests#' /usr/local/vufind/build.xml
+fi
 
 # Prepare cache cli dir (volume only exists after start)
 clear-vufind-cache
