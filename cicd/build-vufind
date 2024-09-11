@@ -1,5 +1,7 @@
 #!/bin/bash
 
+VUFIND_CORE_INSTALLATION=1 # TODO
+
 runhelp() {
     echo ""
     echo "Purpose: Build the Vufind image"
@@ -31,6 +33,11 @@ main() {
 
     # Determine job start time; used to calculate runtime metrics
     START=$(date +%s)
+
+    if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
+      sed -i 's/VUFIND_LOCAL_MODULES=Catalog/VUFIND_LOCAL_MODULES=/' vufind/Dockerfile
+#      sed -i 's/^\s+SetEnv VUFIND_LOCAL_MODULES Catalog/#&/' vufind/local/httpd-vufind.conf
+    fi
 
     echo "Building image"
     DOCKER_BUILDKIT=1 docker build \
