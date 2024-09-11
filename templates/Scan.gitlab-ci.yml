@@ -18,7 +18,7 @@ gemnasium-python-dependency_scanning:
     auto_stop_in: 2 weeks
   tags:
     - msul-shared
-  scan:
+  script:
     - /analyzer --help
     - /analyzer -v run
     - /analyzer run
