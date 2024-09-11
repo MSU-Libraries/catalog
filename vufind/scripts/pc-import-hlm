@@ -383,6 +383,28 @@ copyback_from_shared() {
 
 }
 
+# Remove processed .delete entries matching ids in the last harvest
+update_processed_delete_files() {
+    verbose "Updating past delete files (in case some records were undeleted)..."
+    shopt -s nullglob
+    DELETE_FILES=("${ARGS[VUFIND_HARVEST_DIR]}"/processed/*.delete)
+    shopt -u nullglob
+    if [[ ${#DELETE_FILES[@]} -eq 0 ]]; then
+        verbose "No delete file in processed directory, skipping."
+        return
+    fi
+    IDS=$(LANG=C grep -oUaP "(?<=\x1e)ebs[0-9]+e(?=\x1e)" "${ARGS[VUFIND_HARVEST_DIR]}"/*.marc | sort)
+    for DFILE in "${DELETE_FILES[@]}"; do
+        comm -2 -3 <(sort "$DFILE") <(echo "$IDS") >"${DFILE}_2"
+        if [[ "$?" -eq 0 ]]; then
+            mv "${DFILE}_2" "$DFILE"
+        else
+            echo "ERROR updating delete file ${DFILE}"
+            rm -f "${DFILE}_2"
+        fi
+    done
+}
+
 # Perform VuFind batch import of HLM records
 import() {
     assert_vufind_harvest_dir_writable
@@ -422,16 +444,12 @@ import() {
     verbose "Pre-processing deletion files to extract IDs from EBSCO MARC records"
     while read -r FILE; do
         DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/$(basename "${FILE}")
-        if ! marc2xml "${FILE}" > "${DEL_FILE%.marc}".xml; then
-            verbose "ERROR: marc2xml failed on ${FILE} with code: $?" 1
-            rm -f "${DEL_FILE%.marc}".xml
-            exit 1
-        fi
-        grep -o 'tag="001">[^<]*<' "${DEL_FILE%.marc}".xml | sed -e 's/.*>\([^<]*\)</hlm.\1/' > "${DEL_FILE%.marc}".delete
+        LANG=C grep -oUaP "(?<=\x1e)ebs[0-9]+e(?=\x1e)" "${FILE}" > "${DEL_FILE%.marc}".delete
         # Cleanup the other files that the batch-delete.sh script won't move to the processed dir
-        rm "${DEL_FILE%.marc}".xml
         mv "${FILE}" ${ARGS[VUFIND_HARVEST_DIR]}/processed
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*-Del-*.marc')
+
+    update_processed_delete_files
 
     verbose "Running batch import"
     if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
