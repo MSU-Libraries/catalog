@@ -1,5 +1,7 @@
 #!/bin/bash
 
+VUFIND_CORE_INSTALLATION=1 # TODO
+
 runhelp() {
     echo ""
     echo "Purpose: Sets the stack name variables for the deployment based"
@@ -41,6 +43,10 @@ main() {
         STACK_NAME="${CI_COMMIT_BRANCH}"
         SITE_HOSTNAME="${STACK_NAME}.aws.lib.msu.edu"
         MAIL_HOST="mail-${STACK_NAME}"
+      if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
+        sed -i 's/VUFIND_LOCAL_MODULES=Catalog/VUFIND_LOCAL_MODULES=/' /usr/local/vufind/local/httpd-vufind.conf
+        sed -i 's/^(theme\s+= )msul/\1bootstrap5/' /usr/local/vufind/local/httpd-vufind.conf
+      fi
     fi
 
     {

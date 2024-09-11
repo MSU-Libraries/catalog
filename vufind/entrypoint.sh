@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo "Entrypoint script..."
+VUFIND_CORE_INSTALLATION=1 # TODO
 
 # Replace environment variables in template ini files
 envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.ini
@@ -25,6 +26,11 @@ unset FOLIO_URL FOLIO_USER FOLIO_PASS FOLIO_TENANT FOLIO_REC_ID FOLIO_CANCEL_ID 
     RECAPTCHA_SITE_KEY RECAPTCHA_SECRET_KEY MATOMO_URL MATOMO_SITE_ID MATOMO_SEARCHBACKEND_DIMENSION \
     SESSION_BOT_SALT SIMPLESAMLPHP_SALT SIMPLESAMLPHP_ADMIN_PW SIMPLESAMLPHP_VERSION SIMPLESAMLPHP_CUSTOM_DIR
 
+if [[ "${STACK_NAME}" == devel-* && ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
+  # Commenting the setEnv directive
+  sed -i 's/^SetEnv VUFIND_LOCAL_MODULES Catalog/#&/' /usr/local/vufind/local/httpd-vufind.conf
+fi
+
 if [[ "$1" == "/startup-cron.sh" ]]; then
     if ! grep -q STACK_NAME /etc/environment; then
         # Set required environment variables so cron jobs have access to them
@@ -32,7 +38,11 @@ if [[ "$1" == "/startup-cron.sh" ]]; then
         echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment
         echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR" >> /etc/environment
         echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment
-        echo VUFIND_LOCAL_MODULES="Catalog" >> /etc/environment
+        if [[ "${STACK_NAME}" == devel-* && ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
+          echo VUFIND_LOCAL_MODULES="" >> /etc/environment
+        else
+          echo VUFIND_LOCAL_MODULES="Catalog" >> /etc/environment
+        fi
         echo HLM_FTP_USER="$HLM_FTP_USER" >> /etc/environment
         echo HLM_FTP_PASSWORD="$HLM_FTP_PASSWORD" >> /etc/environment
         echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment
