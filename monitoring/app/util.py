@@ -64,6 +64,7 @@ async def async_single_get(session: aiohttp.ClientSession, url: str, convert_to_
 
 def multiple_get(urls: list[str], convert_to_json: bool=False, timeout: int=DEFAULT_TIMEOUT) -> list:
     async def gather_with_concurrency():
+        loop = get_eventloop()
         semaphore = asyncio.Semaphore(MAX_PARALLEL_REQUESTS)
         aiohttp_timeout = aiohttp.ClientTimeout(total=timeout)
         session = aiohttp.ClientSession(connector=conn, timeout=aiohttp_timeout, raise_for_status=True)
