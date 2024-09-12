@@ -15,7 +15,7 @@ default_args() {
     ARGS[FTP_SERVER]=atozftp.ebsco.com
     ARGS[FTP_DIR]=s8364774/vufind/
     ARGS[FTP_USER]=${HLM_FTP_USER}
-    ARGS[FTP_PASSWORD]=${HLM_FTP_PASSWORD}
+    ARGS[FTP_PASSWORD]=$(cat "${HLM_FTP_PASSWORD_FILE}")
     ARGS[SHARED_DIR]=/mnt/hlm
     ARGS[DRY_RUN]=0
     ARGS[VERBOSE]=0
@@ -89,7 +89,7 @@ runhelp() {
     echo "      Default: Stored in the environment variable \$HLM_FTP_USER"
     echo "  -P|--ftp-password FTP_PASSWORD"
     echo "      Password for connecting to the FTP server"
-    echo "      Default: Stored in the environment variable \$HLM_FTP_PASSWORD"
+    echo "      Default: Stored in the filepath stocked in environment variable \$HLM_FTP_PASSWORD_FILE"
     echo "  -v|--verbose"
     echo "      Show verbose output."
     echo ""

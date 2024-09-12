@@ -31,8 +31,12 @@ services:
     environment:
       STACK_NAME: "${STACK_NAME}"
       NODE: "{{slice .Node.Hostname 8 9}}"
-      DEPLOY_KEY: "${DEPLOY_KEY}"
+      DEPLOY_KEY_FILE: /run/secrets/DEPLOY_KEY
       <<: *vufind_envs
+    secrets: # secrets are prefixed with stack name in deploy-compose
+      - DEPLOY_KEY
+      - MARIADB_VUFIND_PASSWORD
+      - SIMPLESAMLPHP_ADMIN_PW
     deploy:
       mode: replicated
       replicas: 3
@@ -148,6 +152,8 @@ services:
       NODE: "{{slice .Node.Hostname 8 9}}"
       MARIADB_ROOT_PASSWORD: "${MARIADB_ROOT_PASSWORD}"
       <<: *vufind_envs
+    secrets: # secrets are prefixed with stack name in deploy-compose
+      - HLM_FTP_PASSWORD
     deploy:
       mode: replicated
       replicas: 1
@@ -207,3 +213,13 @@ volumes:
     external: true
     name: "${STACK_NAME}_logs"
   vufind_cache:
+
+secrets: # secrets are prefixed with stack name in deploy-compose
+  MARIADB_VUFIND_PASSWORD:
+    external: true
+  HLM_FTP_PASSWORD:
+    external: true
+  DEPLOY_KEY:
+    external: true
+  SIMPLESAMLPHP_ADMIN_PW:
+    external: true
