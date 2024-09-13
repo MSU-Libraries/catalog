@@ -284,6 +284,7 @@ def _node_cron_exit_codes() -> dict[str, str]:
         'authority': '/mnt/logs/harvests/authority_exit_code',
         'reserves': '/mnt/logs/vufind/reserves_exit_code',
         'searches': '/mnt/logs/vufind/searches_exit_code',
+        'sessions': '/mnt/logs/vufind/sessions_exit_code',
         'solr': '/mnt/logs/backups/solr_exit_code',
         'db': '/mnt/logs/backups/db_exit_code',
         'alpha': '/mnt/logs/backups/alpha_exit_code',
