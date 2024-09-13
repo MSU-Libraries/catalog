@@ -32,7 +32,7 @@ main() {
     # Determine job start time; used to calculate runtime metrics
     START=$(date +%s)
 
-    if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
+    if [[ "${STACK_NAME}" == devel-* && ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
       # Removing Catalog from available modules
       sed -i 's/VUFIND_LOCAL_MODULES=Catalog/VUFIND_LOCAL_MODULES=/' vufind/Dockerfile
     fi
