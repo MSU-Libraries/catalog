@@ -195,7 +195,7 @@ $config = [
      * metadata listing and diagnostics pages.
      * You can also put a hash here; run "bin/pwgen.php" to generate one.
      */
-    'auth.adminpassword' => '${SIMPLESAMLPHP_ADMIN_PW}',
+    'auth.adminpassword' => file_get_contents('${SIMPLESAMLPHP_ADMIN_PW_FILE}'), // Replaced by envsubst in entrypoint.sh
 
     /*
      * Set this option to true if you want to require administrator password to access the metadata.
@@ -1209,8 +1209,7 @@ $config = [
      * The username and password to use when connecting to the database.
      */
     'store.sql.username' => 'vufind',
-    'store.sql.password' => getenv('MARIADB_VUFIND_PASSWORD'),
-
+    'store.sql.password' => file_get_contents('${MARIADB_VUFIND_PASSWORD_FILE}'), // Replaced by envsubst in entrypoint.sh
     /*
      * The prefix we should use on our tables.
      */

@@ -21,7 +21,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}/repo
     # Set up deploy key
     install -d -m 700 ~/.ssh/
-    echo "$DEPLOY_KEY" | base64 -d > ~/.ssh/id_ed25519
+    cat "$DEPLOY_KEY_FILE" | base64 -d > ~/.ssh/id_ed25519
     ( umask 022; touch ~/.ssh/known_hosts )
     chmod 600 ~/.ssh/id_ed25519
     ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
@@ -200,7 +200,7 @@ if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
 fi
 
 # Unset environment variables that are no longer necessary before starting Apache
-unset DEPLOY_KEY VUFIND_CORE_INSTALLATION
+unset DEPLOY_KEY_FILE VUFIND_CORE_INSTALLATION
 
 # Start Apache
 tail -f /var/log/vufind/vufind.log & apachectl -DFOREGROUND
