@@ -20,6 +20,7 @@ def homepage() -> str:
     status_list['reserves_update'] = status.get_cron_status('reserves', statuses)
     status_list['alphabrowse'] = status.get_cron_status('alphabrowse', statuses)
     status_list['searches_cleanup'] = status.get_cron_status('searches', statuses)
+    status_list['sessions_cleanup'] = status.get_cron_status('sessions', statuses)
     status_list['solr_backup'] = status.get_cron_status('solr', statuses)
     status_list['db_backup'] = status.get_cron_status('db', statuses)
     status_list['alpha_backup'] = status.get_cron_status('alpha', statuses)
