@@ -111,8 +111,7 @@ if (is_array($genres)) {
     }
 }
 
-// MSU PC-946
-$topics = $this->driver->tryMethod('getAllSubjectHeadings');
+$topics = $this->driver->tryMethod('getTopics');
 if (is_array($topics)) {
     foreach ($topics as $topic) {
         echo 'KW  - ' . "$topic\r\n";
@@ -151,10 +150,7 @@ if (is_array($notes)) {
 }
 
 // MSU PC-946
-$urls = $this->driver->tryMethod('getURLs');
-if (is_array($urls) &&  isset($urls[0])) {
-    echo 'UR  - ' . "$urls[0]['url']\r\n";
-}
+echo 'L4  - ' . $this->serverUrl($this->recordLinker()->getUrl($this->driver)) . "\r\n";
 
 foreach ($this->record($this->driver)->getUrlList() as $url) {
     echo 'UR  - ' . "$url\r\n";

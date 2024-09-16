@@ -1018,6 +1018,29 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get the topics
+     *
+     * @return array Content from Solr
+     */
+    public function getTopics()
+    {
+        $topics = [];
+        $subjects = $this->getAllSubjectHeadings();
+        if (is_array($subjects)) {
+            foreach ($subjects as $subj) {
+                $headings = array_map(
+                    function ($item) {
+                        return $item['subject'];
+                    },
+                    $subj
+                );
+                $topics[] = implode(' > ', $headings);
+            }
+        }
+        return $topics;
+    }
+
+    /**
      * Get the uniform title
      *
      * @return array Content from Solr
