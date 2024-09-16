@@ -52,6 +52,34 @@ class AlphaBrowseSearchOrigin extends AbstractSearchOrigin
     protected const NAME = 'AB';
 
     /**
+     * Name of the route to get back to
+     *
+     * @var string
+     */
+    protected const ROUTE_NAME = 'alphabrowse-home';
+
+    /**
+     * Config key for translation
+     *
+     * @var string
+     */
+    protected const TRANSLATION_KEY = 'back_to_browse_by';
+
+    /**
+     * Config key for translation for the purpose of breadcrumbs
+     *
+     * @var string
+     */
+    protected const BREADCRUMBS_TRANSLATION_KEY = 'Browse Alphabetically';
+
+    /**
+     * URL Parameter for "source to display" in search URL to be displayed (e.g., "call number" instead of "lcc")
+     *
+     * @var string
+     */
+    public const SEARCH_SOURCE_DISPLAY_PARAM = 'AB-sd';
+
+    /**
      * URL Parameter for "source" in search URL
      *
      * @var string
@@ -94,6 +122,13 @@ class AlphaBrowseSearchOrigin extends AbstractSearchOrigin
     public const ORIGIN_PAGE_PARAM = 'page';
 
     /**
+     * Value of the parameter for "sourceDisplay"
+     *
+     * @var string
+     */
+    protected $sourceDisplay;
+
+    /**
      * Value of the parameter for "source"
      *
      * @var string
@@ -117,17 +152,19 @@ class AlphaBrowseSearchOrigin extends AbstractSearchOrigin
     /**
      *  Constructor
      *
-     * @param string|null $source source parameter for alpha browse search
-     * @param string|null $from   from parameter for alpha browse search
-     * @param int|null    $page   page parameter for alpha browse search
+     * @param string|null $sourceDisplay Display source parameter for alpha browse search
+     * @param string|null $source        source parameter for alpha browse search
+     * @param string|null $from          from parameter for alpha browse search
+     * @param int|null    $page          page parameter for alpha browse search
      *
      * @throws Exception
      */
-    public function __construct(?string $source, ?string $from, ?int $page = null)
+    public function __construct(?string $sourceDisplay, ?string $source, ?string $from, ?int $page = null)
     {
-        if (isset($source, $from) !== true) {
+        if (isset($sourceDisplay, $source, $from) !== true) {
             throw new Exception('Missing parameters');
         }
+        $this->sourceDisplay = $sourceDisplay;
         $this->source = $source;
         $this->from = $from;
         $this->page = $page;
@@ -150,7 +187,7 @@ class AlphaBrowseSearchOrigin extends AbstractSearchOrigin
      */
     public function getDisplayName(): string
     {
-        return ucwords($this->source) . ' Browse';
+        return $this->sourceDisplay;
     }
 
     /**
@@ -162,6 +199,7 @@ class AlphaBrowseSearchOrigin extends AbstractSearchOrigin
     {
         $return = [
             self::PARAM_NAME => self::getName(),
+            self::SEARCH_SOURCE_DISPLAY_PARAM => $this->sourceDisplay,
             self::SEARCH_SOURCE_PARAM => $this->source,
             self::SEARCH_FROM_PARAM => $this->from,
         ];
@@ -186,5 +224,35 @@ class AlphaBrowseSearchOrigin extends AbstractSearchOrigin
             $return[self::ORIGIN_PAGE_PARAM] = $this->page;
         }
         return $return;
+    }
+
+    /**
+     * Get route name to generate the url
+     *
+     * @return string
+     */
+    public function getRouteName(): string
+    {
+        return self::ROUTE_NAME;
+    }
+
+    /**
+     * Get translation label
+     *
+     * @return string
+     */
+    public function getLinkTranslationKey(): string
+    {
+        return self::TRANSLATION_KEY;
+    }
+
+    /**
+     * Get translation label for breadcrumbs
+     *
+     * @return string
+     */
+    public function getBreadcrumbsTranslationKey(): string
+    {
+        return self::BREADCRUMBS_TRANSLATION_KEY;
     }
 }

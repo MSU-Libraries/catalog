@@ -69,4 +69,25 @@ abstract class AbstractSearchOrigin
      * @return array
      */
     abstract public function getOriginUrlParamsArray(): array;
+
+    /**
+     * Get route name to generate the url
+     *
+     * @return string
+     */
+    abstract public function getRouteName(): string;
+
+    /**
+     * Get translation label
+     *
+     * @return string
+     */
+    abstract public function getLinkTranslationKey(): string;
+
+    /**
+     * Get translation label for breadcrumbs
+     *
+     * @return string
+     */
+    abstract public function getBreadcrumbsTranslationKey(): string;
 }

@@ -140,8 +140,12 @@
     // TODO PC-895 To adapt after PR
     /** @var \Catalog\Search\SearchOrigin\AbstractSearchOrigin|null $searchOrigin */
     $searchOrigin = $this->get('searchOrigin');
+    $arrow = $this->icon('fa-long-arrow-left', 'fa-long-arrow-left') . ' ';
     if ($this->layout()->showSearchBacklink ?? false) {
       $backlink = $this->searchMemory()->getLastSearchLink($this->transEsc('Back to Search Results'));
+      if (!empty($backlink)) {
+          $backlink = $arrow . $backlink;
+      }
       if (isset($searchOrigin)) {
         $backlink = preg_replace(
             '/href="(.*)"/',
@@ -150,11 +154,11 @@
         );
       }
     } else {
-      $backlink = '<a href="/Search">Back to the catalog</a>';
+      $backlink = $arrow . '<a href="/Search">Back to the catalog</a>';
     }
   ?>
   <div class="backtocat container">
     <p><?= $backlink ?></p>
   </div>
-  <?= $this->render('search/backtoorigin.phtml', ['searchOrigin' => $searchOrigin]); ?>
+  <?= $this->render('search/back-to-origin.phtml', ['searchOrigin' => $searchOrigin]); ?>
 <?php endif; ?>
