@@ -9,6 +9,22 @@ secret_detection:
   tags:
     - msul-shared
 
+gemnasium-python-dependency_scanning:
+  interruptible: true
+  variables:
+    DS_MAX_DEPTH: -1
+    SECURE_LOG_LEVEL: debug
+  environment:
+    name: $CI_COMMIT_BRANCH/dependency-scan
+    auto_stop_in: 2 weeks
+  tags:
+    - msul-shared
+  script:
+    # Overriding to allow mariadb pip package install to work for analyzer
+    - apt update
+    - apt install -y libmariadb-dev
+    - /analyzer run
+
 # Does not have the environment tag due to this being run on merge requests
 # and the $CI_COMMIT_BRANCH variable may not exist yet and could cause this error:
 # "This job could not be executed because it would create an environment with an invalid parameter."
@@ -136,3 +152,4 @@ Validate Vufind Build:
 include:
 #  - template: Security/Container-Scanning.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
