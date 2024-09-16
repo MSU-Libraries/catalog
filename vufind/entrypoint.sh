@@ -33,7 +33,12 @@ if [[ "$1" == "/startup-cron.sh" ]]; then
         echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment
         echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR" >> /etc/environment
         echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment
-        echo VUFIND_LOCAL_MODULES="Catalog" >> /etc/environment
+        if [[ "${STACK_NAME}" == devel-* && ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
+          echo 'Devel environment, core-vufind asked, set with modules empty'
+          echo VUFIND_LOCAL_MODULES="" >> /etc/environment
+        else
+          echo VUFIND_LOCAL_MODULES="Catalog" >> /etc/environment
+        fi
         echo HLM_FTP_USER="$HLM_FTP_USER" >> /etc/environment
         echo HLM_FTP_PASSWORD_FILE="$HLM_FTP_PASSWORD_FILE" >> /etc/environment
         echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment
