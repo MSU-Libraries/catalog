@@ -32,6 +32,7 @@ if (!empty($title)) {
 // MSU PC-946
 $shortTitle = $this->driver->getShortTitle();
 if (!empty($shortTitle)) {
+    $shortTitle = rtrim(rtrim($shortTitle, ' /'), ' :');
     echo 'ST  - ' . "$shortTitle\r\n";
 }
 
