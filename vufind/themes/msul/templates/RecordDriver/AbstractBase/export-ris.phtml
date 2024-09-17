@@ -172,6 +172,8 @@ foreach ($this->record($this->driver)->getUrlList() as $url) {
 }
 
 if ($doi = $this->driver->tryMethod('getCleanDOI')) {
+    // MSU PC-946
+    $doi = strip_tags($doi);
     echo "DO  - $doi\r\n";
 }
 
