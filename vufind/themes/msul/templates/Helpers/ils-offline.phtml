@@ -2,7 +2,5 @@
   <h2><?=$this->transEsc('ils_offline_title')?></h2>
   <p><strong><?=$this->transEsc('ils_offline_status')?></strong></p>
   <p><?=$this->transEsc($this->offlineModeMsg)?></p>
-  Please contact Reference and Discovery Services via their
-  <a href="https://lib.msu.edu/rds/askus?ref=catalog">Contact Form</a> or call them
-  directly at: 517-353-8700 for assistance.
+  <?=$this->render('error/contact_discovery.phtml')?>
 </div>

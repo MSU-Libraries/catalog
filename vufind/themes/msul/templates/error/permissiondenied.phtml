@@ -16,9 +16,5 @@
       <div class="alert alert-danger"><?=$this->transEsc($msg)?></div>
     <?php endif; ?>
   </p>
-  <p>
-    Please contact Reference and Discovery Services via their
-    <a href="https://lib.msu.edu/rds/askus?ref=catalog">Contact Form</a> or call them
-    directly at: 517-353-8700 for assistance.
-  </p>
+  <?=$this->render('error/contact_discovery.phtml')?>
 </div>
