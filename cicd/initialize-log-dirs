@@ -31,6 +31,10 @@ main() {
         ssh deploy@"${HOST}" \
         "docker volume create ${STACK_NAME}_logs &&
         docker run --rm -v ${STACK_NAME}_logs:/mnt/logs alpine sh -c 'mkdir -p /mnt/logs/mariadb /mnt/logs/solr && chown 1001 /mnt/logs/mariadb /mnt/logs/solr'";
+
+        # Create a bind mount for the nagios user
+        ssh deploy@"$HOST" \
+        "sudo /usr/local/bin/pc-mount-logs ${STACK_NAME} /home/nagios/ -v";
     done
 }
 
