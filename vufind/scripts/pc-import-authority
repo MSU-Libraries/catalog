@@ -219,7 +219,7 @@ assert_ftp_readable() {
 create_netrc_if_needed() {
   WRITE=0
   if [[ -f ~/.netrc ]]; then
-    if ! grep "machine ${ARGS[FTP_SERVER]}"; then
+    if ! grep ~/.netrc -e "machine ${ARGS[FTP_SERVER]}"; then
       WRITE=1
     fi
   else
