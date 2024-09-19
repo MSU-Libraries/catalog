@@ -1668,6 +1668,21 @@ fieldset.solr-facets {
   }
 }
 
+//add group numbers on advanced search
+.template-dir-search.template-name-advanced {
+  counter-reset: adv-group-num;
+    .msul-adv-group-num {
+      margin-top:0;
+      &::after {
+      counter-increment: adv-group-num;
+      content: "Group " counter(adv-group-num) " "
+    }
+  }
+}
+
+
+
+
 //override vertical align
 @media (min-width: 768px) {
   .navbar-form .form-control {
