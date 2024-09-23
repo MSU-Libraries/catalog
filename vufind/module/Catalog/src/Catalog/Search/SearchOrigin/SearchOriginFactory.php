@@ -53,21 +53,34 @@ class SearchOriginFactory
      */
     public static function createObject(array $params): ?AbstractSearchOrigin
     {
-        $nameParam = AbstractSearchOrigin::PARAM_NAME;
-        if (empty($params[$nameParam])) {
+        if (empty($params[AbstractSearchOrigin::PARAM_NAME])) {
             return null;
         }
         try {
-            return match ($params[$nameParam]) {
-                AlphaBrowseSearchOrigin::getName() => new AlphaBrowseSearchOrigin(
-                    $params[AlphaBrowseSearchOrigin::SEARCH_SOURCE_PARAM] ?? null,
-                    $params[AlphaBrowseSearchOrigin::SEARCH_FROM_PARAM] ?? null,
-                    $params[AlphaBrowseSearchOrigin::SEARCH_PAGE_PARAM] ?? null
-                ),
-                default => null,
-            };
-        } catch (Exception) {
+            return self::createObjectByName($params);
+        } catch (Exception $e) {
             return null;
         }
+    }
+
+    /**
+     * From (request) parameters return an AbstractSearchOrigin object by name
+     *
+     * @param array $params Parameters
+     *
+     * @return AlphaBrowseSearchOrigin|null
+     * @throws Exception
+     */
+    public static function createObjectByName(array $params): ?AlphaBrowseSearchOrigin
+    {
+        return match ($params[AbstractSearchOrigin::PARAM_NAME]) {
+            AlphaBrowseSearchOrigin::getName() => new AlphaBrowseSearchOrigin(
+                $params[AlphaBrowseSearchOrigin::SEARCH_SOURCE_DISPLAY_PARAM] ?? null,
+                $params[AlphaBrowseSearchOrigin::SEARCH_SOURCE_PARAM] ?? null,
+                $params[AlphaBrowseSearchOrigin::SEARCH_FROM_PARAM] ?? null,
+                $params[AlphaBrowseSearchOrigin::SEARCH_PAGE_PARAM] ?? null
+            ),
+            default => null,
+        };
     }
 }

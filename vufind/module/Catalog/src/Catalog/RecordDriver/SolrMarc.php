@@ -1018,6 +1018,29 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get the topics
+     *
+     * @return array Content from Solr
+     */
+    public function getTopics()
+    {
+        $topics = [];
+        $subjects = $this->getAllSubjectHeadings();
+        if (is_array($subjects)) {
+            foreach ($subjects as $subj) {
+                $headings = array_map(
+                    function ($item) {
+                        return $item['subject'];
+                    },
+                    $subj
+                );
+                $topics[] = implode(' > ', $headings);
+            }
+        }
+        return $topics;
+    }
+
+    /**
      * Get the uniform title
      *
      * @return array Content from Solr
@@ -1405,8 +1428,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         $allFields = $this->getMarcReader()->getAllFields();
         $subjectFieldsKeys = array_keys($this->subjectFields);
         // Go through all the fields and handle them if they are part of what we want
+        // and does NOT have ind2 = 6
         foreach ($allFields as $result) {
-            if (isset($result['tag']) && in_array($result['tag'], $subjectFieldsKeys)) {
+            if (isset($result['tag']) && in_array($result['tag'], $subjectFieldsKeys) && $result['i2'] != '6') {
                 $fieldType = $this->subjectFields[$result['tag']];
 
                 // Start an array for holding the chunks of the current heading:

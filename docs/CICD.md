@@ -122,7 +122,7 @@ resources such as Solr and the Traefik dashboard
 * `DEPLOY_HOST_1`: Server FQDN for the for first node in the cluster to deploy to
 * `DEPLOY_HOST_2`: Server FQDN for the for second node in the cluster to deploy to
 * `DEPLOY_HOST_3`: Server FQDN for the for thirds node in the cluster to deploy to
-* `DEPLOY_KEY`: GitLab read-only deploy key base64 encoded
+* `DEPLOY_KEY_FILE`: Filepath containing GitLab read-only deploy key base64 encoded
 * `DEPLOY_PRIVATE_KEY`: The `base64` encoded private ssh key to the deploy server
 * `EDS_ORG`: Organization ID for the EDS API
 * `EDS_PASS`: Password for the `EDS_USER` username
@@ -138,7 +138,7 @@ resources such as Solr and the Traefik dashboard
 * `FOLIO_TENANT`: Tenant ID 
 * `FOLIO_URL`: Okapi URL for FOLIO used by VuFind 
 * `FOLIO_USER`: Application user used by VuFind for ILS calls 
-* `HLM_FTP_PASSWORD`: Password for `HLM_FTP_USER`
+* `HLM_FTP_PASSWORD_FILE`: Filepath containing the password for `HLM_FTP_USER`
 * `HLM_FTP_USER`: Username for the EBSCO FTP server
 * `GITHUB_USER_TOKEN`: Token used to publish releases to GitHub repository 
 * `MATOMO_SEARCHBACKEND_DIMENSION`: ID for the custom dimension in Matomo to track the search backend used for the request
@@ -152,8 +152,9 @@ resources such as Solr and the Traefik dashboard
 * `RO_CICD_TOKEN`: Read-only access token to this repository used to query the API during the CI
 * `RW_CICD_TOKEN`: Read-Write access token to this repository used to create release tags 
 * `SESSION_BOT_SALT`: Secure random string used in creating persisting session ids for bots (when bot_agent values are set)
-* `SIMPLESAMLPHP_ADMIN_PW`: Password to the admin interface of SimpleSAMLphp
+* `SIMPLESAMLPHP_ADMIN_PW_FILE`: Filepath containing the password to the admin interface of SimpleSAMLphp
 * `SIMPLESAMLPHP_SALT`: Random salt for SimpleSAMLphp
+* `VUFIND_CORE_INSTALLATION`: Default `0`, set to `1` in the pipelines to install core-vufind without MSUL Catalog module
 
 ## Scheduled Pipelines
 For the Ansible image to build overnight, saving time on regular daily builds, we can set up a scheduled pipeline to

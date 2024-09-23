@@ -2,7 +2,7 @@
 # pip install pur
 # pur -r requirements.txt
 
-aiohttp==3.8.6
+aiohttp==3.9.5
 APScheduler==3.10.4
 Flask==3.0.0
 mariadb==1.1.8

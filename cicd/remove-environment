@@ -46,6 +46,14 @@ prunevols() {
     fi
 }
 
+removemount() {
+    HOST=$1
+    # Remove the bind mount for the nagios user
+    ssh deploy@"$HOST" \
+    "sudo /usr/local/bin/pc-mount-logs ${STACK_NAME} /home/nagios/ --remove -v";
+
+}
+
 removesecrets() {
     echo "Deleting secrets for stack \"${STACK_NAME}\""
     # shellcheck disable=SC2207

@@ -87,6 +87,10 @@ a.record-cover-link:focus {
 }
 /* ------ Layout ------ */
 
+body, button, select, input {
+  letter-spacing:.04rem;
+}
+
 /* --- Header ---- */
 
 .template-dir-search.template-name-home header, .template-dir-eds.template-name-home header, .template-dir-combined.template-name-home header {
@@ -277,7 +281,7 @@ header {
   padding-left:2rem;
   background-color: @parakeetgreen;
   color:#fff;
-  font-weight:500;
+  font-weight:600;
   img.msul_logo {
     max-width:240px;
     margin-bottom:1rem;
@@ -297,7 +301,7 @@ header {
   a:focus {
     outline: 1px dashed #fff;
   }
-  .msul-address-icon, .a-address, .a-phone-icon, .msul-phone {
+  .msul-address-icon, .msul-address, .a-address, .a-phone-icon, .msul-phone-icon, .msul-phone {
     display: inline-flex;
     vertical-align:top;
     margin-bottom:1rem;
@@ -463,9 +467,6 @@ input[type="checkbox"] {
 .backtocat>p>a,
 .backtoorigin>p>a {
   text-decoration: none;
-  &::before {
-    content:"← ";
-  }
 }
 
 .template-dir-search.template-name-home,
@@ -1228,6 +1229,12 @@ label {
   }
 }
 
+// reduce space in staff view between field number and content (core set at 15%)
+
+.staff-view--marc .marc__tag {
+  width:8%;
+}
+
 body.template-dir-myresearch.template-name-profile {
   .table {
     tbody {
@@ -1657,6 +1664,21 @@ fieldset.solr-facets {
     }
   }
 }
+
+//add group numbers on advanced search
+.template-dir-search.template-name-advanced {
+  counter-reset: adv-group-num;
+    .msul-adv-group-num {
+      margin-top:0;
+      &::after {
+      counter-increment: adv-group-num;
+      content: " " counter(adv-group-num) " "
+    }
+  }
+}
+
+
+
 
 //override vertical align
 @media (min-width: 768px) {

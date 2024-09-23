@@ -110,6 +110,7 @@
               <div id="new_group_template">
             <?php endif; ?>
             <div id="group<?=$group ?>" class="adv-group bg-color-white">
+              <h2 class="msul-adv-group-num">Group</h2> <!-- msul add group #'s for a11y" -->
               <div class="adv-group-terms">
                 <label class="adv-group-label"><?=$this->transEsc('adv_search_label')?>:</label>
                 <?php for($search = 0; $search < 3 || (isset($setQueries[$group]) && $search < count($setQueries[$group])); $search++): ?>
