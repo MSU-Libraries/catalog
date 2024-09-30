@@ -4,7 +4,7 @@ DEFAULT_LOCKFILE=/mnt/shared/alpha-browse/rebuild_lock
 LOCKFILE_TIMEOUT_HOURS=12
 
 # Script help text
-runhelp() {
+run_help() {
     echo ""
     echo "Usage: Get/set the lock file state."
     echo ""
@@ -30,7 +30,7 @@ runhelp() {
 }
 
 if [[ $1 == "-h" || $1 == "--help" || $1 == "help" || -z "$1" ]]; then
-    runhelp
+    run_help
     exit 0
 fi
 
@@ -96,51 +96,54 @@ main() {
         verbose "Setting flock wait: ${FLOCK_WAIT}"
     fi
 
+    # TODO make sure it's good to do the if that way
     # If lockfile is not empty, yet exceeds timeout hours since last modified, assume lock timeout and allow fresh lock
-    flock $FLOCK_WAIT "${ARGS[LOCKFILE]}" bash <<- SCRIPT
-    STATE=\$(< ${ARGS[LOCKFILE]})
-    if [[ -n "\$STATE" && -n \$( find "${ARGS[LOCKFILE]}" -mmin +\$(( ${LOCKFILE_TIMEOUT_HOURS} * 60 )) ) ]]; then
-        echo -n > ${ARGS[LOCKFILE]}
-        false
-    fi
-	SCRIPT
-    if [[ $? -ne 0 ]]; then
+    if ! flock "$FLOCK_WAIT" "${ARGS[LOCKFILE]}" bash <<- SCRIPT
+    	STATE=\$(< ${ARGS[LOCKFILE]})
+    	if [[ -n "\$STATE" && -n \$( find "${ARGS[LOCKFILE]}" -mmin +\$(( ${LOCKFILE_TIMEOUT_HOURS} * 60 )) ) ]]; then
+    	    echo -n > ${ARGS[LOCKFILE]}
+    	    false
+    	fi
+		SCRIPT
+    then
         verbose "Lockfile state over ${LOCKFILE_TIMEOUT_HOURS} hours old. Assuming expired and resetting state."
     fi
 
     if [[ "${ARGS[TARGET_STATE]}" == "unset" ]]; then
         verbose "Acquiring lock to unset state..."
+        # TODO make sure it's good to do the if that way
         # Decrement copy count if > 1, else clear lockfile contents
-        flock $FLOCK_WAIT "${ARGS[LOCKFILE]}" bash <<- SCRIPT
-        STATE=\$(< ${ARGS[LOCKFILE]})
-        if [[ "\$STATE" =~ ^[0-9]+$ && "\$STATE" -gt 1 ]]; then
-            echo -n \$(( STATE - 1 )) > ${ARGS[LOCKFILE]}
-        else
-            echo -n > ${ARGS[LOCKFILE]}
-        fi
-		SCRIPT
-        if [[ $? -ne 0 ]]; then exit 1; fi
+        if ! flock "$FLOCK_WAIT" "${ARGS[LOCKFILE]}" bash <<- SCRIPT
+        	STATE=\$(< ${ARGS[LOCKFILE]})
+        	if [[ "\$STATE" =~ ^[0-9]+$ && "\$STATE" -gt 1 ]]; then
+        	    echo -n \$(( STATE - 1 )) > ${ARGS[LOCKFILE]}
+        	else
+        	    echo -n > ${ARGS[LOCKFILE]}
+        	fi
+			SCRIPT
+        then exit 1; fi
         verbose "Done; lock released."
     elif [[ -n "${ARGS[TARGET_STATE]}" ]]; then
         verbose "Acquiring lock to set new state..."
+        # TODO make sure it's good to do the if that way
         # Set lockfile value, increment if copy lock, else return false
-        flock $FLOCK_WAIT "${ARGS[LOCKFILE]}" bash <<- SCRIPT
-        STATE=\$(< ${ARGS[LOCKFILE]})
-        if [[ -z "\$STATE" ]]; then
-            echo -n ${ARGS[TARGET_STATE]} > ${ARGS[LOCKFILE]}
-        elif [[ "\$STATE" =~ ^[0-9]+$ && "${ARGS[TARGET_STATE]}" == "1" ]]; then
-            echo -n \$(( STATE + 1 )) > ${ARGS[LOCKFILE]}
-        else
-            false
-        fi
-		SCRIPT
-        if [[ $? -ne 0 ]]; then exit 1; fi
+        if ! flock "$FLOCK_WAIT" "${ARGS[LOCKFILE]}" bash <<- SCRIPT
+        	STATE=\$(< ${ARGS[LOCKFILE]})
+        	if [[ -z "\$STATE" ]]; then
+        	    echo -n ${ARGS[TARGET_STATE]} > ${ARGS[LOCKFILE]}
+        	elif [[ "\$STATE" =~ ^[0-9]+$ && "${ARGS[TARGET_STATE]}" == "1" ]]; then
+        	    echo -n \$(( STATE + 1 )) > ${ARGS[LOCKFILE]}
+        	else
+        	    false
+        	fi
+			SCRIPT
+        then exit 1; fi
         verbose "Done; lock released."
     fi
 
     if [[ "${ARGS[GET]}" -eq 1 ]]; then
         verbose "Acquiring lock to get current state..."
-        flock $FLOCK_WAIT "${ARGS[LOCKFILE]}" cat "${ARGS[LOCKFILE]}" || exit 1
+        flock "$FLOCK_WAIT" "${ARGS[LOCKFILE]}" cat "${ARGS[LOCKFILE]}" || exit 1
         verbose "Done; lock released."
     fi
 }
