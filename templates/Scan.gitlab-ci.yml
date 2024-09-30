@@ -43,8 +43,7 @@ Shellcheck CI:
   before_script:
     - apk add shellcheck || apt install shellcheck
   script:
-    # TODO remove the OPTS when merged
-    - SHELLCHECK_OPTS="--exclude SC2029" shellcheck cicd/*
+    - shellcheck cicd/*
   artifacts:
     reports:
       metrics: metrics.txt

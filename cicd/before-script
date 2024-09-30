@@ -54,9 +54,13 @@ beforescript() {
     } >> ~/.ssh/known_hosts;
 
     # Docker login to all servers
-    ssh deploy@"$DEPLOY_HOST_1" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
-    ssh deploy@"$DEPLOY_HOST_2" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
-    ssh deploy@"$DEPLOY_HOST_3" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
+    SSH_COMMAND="docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY"
+    # shellcheck disable=SC2029
+    ssh deploy@"$DEPLOY_HOST_1" "$SSH_COMMAND";
+    # shellcheck disable=SC2029
+    ssh deploy@"$DEPLOY_HOST_2" "$SSH_COMMAND";
+    # shellcheck disable=SC2029
+    ssh deploy@"$DEPLOY_HOST_3" "$SSH_COMMAND";
 
     # Get the number of attempts for this job
     apk add jq curl || apt install -y jq curl;

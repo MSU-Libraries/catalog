@@ -22,31 +22,44 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
-      # Pull images now to save time with stack deploy
-      ssh deploy@"${DEPLOY_HOST_1}" "docker pull $CI_REGISTRY_IMAGE/db:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
-      ssh deploy@"${DEPLOY_HOST_2}" "docker pull $CI_REGISTRY_IMAGE/db:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
-      ssh deploy@"${DEPLOY_HOST_3}" "docker pull $CI_REGISTRY_IMAGE/db:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}";
-      wait
-      ssh deploy@"${DEPLOY_HOST_1}" "docker pull $CI_REGISTRY_IMAGE/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
-      ssh deploy@"${DEPLOY_HOST_2}" "docker pull $CI_REGISTRY_IMAGE/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
-      ssh deploy@"${DEPLOY_HOST_3}" "docker pull $CI_REGISTRY_IMAGE/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}";
-      wait
-      ssh deploy@"${DEPLOY_HOST_1}" "docker pull $CI_REGISTRY_IMAGE/zk:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
-      ssh deploy@"${DEPLOY_HOST_2}" "docker pull $CI_REGISTRY_IMAGE/zk:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
-      ssh deploy@"${DEPLOY_HOST_3}" "docker pull $CI_REGISTRY_IMAGE/zk:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}";
-      wait
+    # Pull images now to save time with stack deploy
+    SSH_COMMAND="docker pull $CI_REGISTRY_IMAGE/db:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}"
+    # shellcheck disable=SC2029
+    ssh deploy@"${DEPLOY_HOST_1}" "$SSH_COMMAND" &
+    # shellcheck disable=SC2029
+    ssh deploy@"${DEPLOY_HOST_2}" "$SSH_COMMAND" &
+    # shellcheck disable=SC2029
+    ssh deploy@"${DEPLOY_HOST_3}" "$SSH_COMMAND";
+    wait
+    SSH_COMMAND="docker pull $CI_REGISTRY_IMAGE/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}"
+    # shellcheck disable=SC2029
+    ssh deploy@"${DEPLOY_HOST_1}" "$SSH_COMMAND" &
+    # shellcheck disable=SC2029
+    ssh deploy@"${DEPLOY_HOST_2}" "$SSH_COMMAND" &
+    # shellcheck disable=SC2029
+    ssh deploy@"${DEPLOY_HOST_3}" "$SSH_COMMAND";
+    wait
+    SSH_COMMAND="docker pull $CI_REGISTRY_IMAGE/zk:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}"
+    # shellcheck disable=SC2029
+    ssh deploy@"${DEPLOY_HOST_1}" "$SSH_COMMAND" &
+    # shellcheck disable=SC2029
+    ssh deploy@"${DEPLOY_HOST_2}" "$SSH_COMMAND" &
+    # shellcheck disable=SC2029
+    ssh deploy@"${DEPLOY_HOST_3}" "$SSH_COMMAND";
+    wait
 
-      # TODO Make the db bootstrap more intelligent to check when it has completed startup, then wait until it has completed shutdown
-      # otherwise this can cause occassional errors on the Verify Stack Health when it checks galera because the service logs will
-      # report that it needs to be run with force_bootstrap
-      ssh deploy@"${DEPLOY_HOST_1}" \
-      "(docker volume ls | grep -q ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.mariadb-cloud-bootstrap.yml) ${STACK_NAME}-mariadb && sleep 30 && docker stack rm ${STACK_NAME}-mariadb && sleep 25)) &&
-      (docker volume ls | grep -q ${STACK_NAME}-solr_zk || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.zk.yml) ${STACK_NAME}-solr && sleep 60)) &&
-      (docker volume ls | grep -q ${STACK_NAME}-solr_bitnami || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.solr-cloud-bootstrap.yml) ${STACK_NAME}-solr && sleep 90))"
+    # TODO Make the db bootstrap more intelligent to check when it has completed startup, then wait until it has completed shutdown
+    # otherwise this can cause occasional errors on the Verify Stack Health when it checks galera because the service logs will
+    # report that it needs to be run with force_bootstrap
+    SSH_COMMAND="(docker volume ls | grep -q ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.mariadb-cloud-bootstrap.yml) ${STACK_NAME}-mariadb && sleep 30 && docker stack rm ${STACK_NAME}-mariadb && sleep 25)) &&
+    (docker volume ls | grep -q ${STACK_NAME}-solr_zk || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.zk.yml) ${STACK_NAME}-solr && sleep 60)) &&
+    (docker volume ls | grep -q ${STACK_NAME}-solr_bitnami || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.solr-cloud-bootstrap.yml) ${STACK_NAME}-solr && sleep 90))"
+    # shellcheck disable=SC2029
+    ssh deploy@"${DEPLOY_HOST_1}" "$SSH_COMMAND"
 
-      # Get runtime metrics
-      END=$(date +%s); RUNTIME=$((END-START)); HOURS=$((RUNTIME / 3600)); MINUTES=$(( (RUNTIME % 3600) / 60 )); SECONDS=$(( (RUNTIME % 3600) % 60 ));
-      echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
+    # Get runtime metrics
+    END=$(date +%s); RUNTIME=$((END-START)); HOURS=$((RUNTIME / 3600)); MINUTES=$(( (RUNTIME % 3600) / 60 )); SECONDS=$(( (RUNTIME % 3600) % 60 ));
+    echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
 }
 
 beforescript

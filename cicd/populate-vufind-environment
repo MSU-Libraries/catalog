@@ -26,10 +26,15 @@ fi
 
 main() {
     # Determine if records are already loaded
+    # shellcheck disable=SC2029
     CATALOG_NODE=$(ssh deploy@"${DEPLOY_HOST_1}" "docker service ps -f 'desired-state=running' --format '{{ .Node }}' ${STACK_NAME}-catalog_catalog") || echo "";
+    # shellcheck disable=SC2029
     CATALOG_CONTAINER=$(ssh deploy@"${CATALOG_NODE}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "";
+    # shellcheck disable=SC2029
     S_CONTAINER_A=$(ssh deploy@"${DEPLOY_HOST_1}" "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo "";
+    # shellcheck disable=SC2029
     S_CONTAINER_B=$(ssh deploy@"${DEPLOY_HOST_2}" "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo "";
+    # shellcheck disable=SC2029
     S_CONTAINER_C=$(ssh deploy@"${DEPLOY_HOST_3}" "docker ps -q -f name=${STACK_NAME}-solr_cron") || echo "";
 
     if [ -z "${CATALOG_NODE}" ] || [ -z "${CATALOG_CONTAINER}" ] ; then
@@ -42,6 +47,7 @@ main() {
         exit 1;
     fi;
 
+    # shellcheck disable=SC2029
     STAT_CD=$(ssh deploy@"${DEPLOY_HOST_1}" "docker exec ${S_CONTAINER_A} curl 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' --write-out %{http_code} --silent --output /dev/null") || echo "-1";
 
     if [[ "${STAT_CD}" -ne 200 ]]; then
@@ -50,20 +56,26 @@ main() {
         exit 1;
     fi;
 
+    # shellcheck disable=SC2029
     NUM_RECS=$(ssh deploy@"${DEPLOY_HOST_1}" "docker exec ${S_CONTAINER_A} curl -s 'http://solr:8983/solr/biblio/select?indent=true&q.op=OR&q=*%3A*&rows=0' | jq '.response.numFound'") ||  echo "-1";
 
     if [[ "${NUM_RECS}" -eq "0" ]]; then
         # Load some records
         echo "Running Folio import now (pc-import-folio)";
+        # shellcheck disable=SC2029
         ssh deploy@"${CATALOG_NODE}" "docker exec ${CATALOG_CONTAINER} /usr/local/bin/pc-import-folio -c /mnt/shared/oai/devel-batch -l 1 -b -r >/dev/null 2>&1";
         echo "Import completed with exit code $?";
         echo "Running HLM import now (pc-import-hlm)";
+        # shellcheck disable=SC2029
         ssh deploy@"${CATALOG_NODE}" "docker exec ${CATALOG_CONTAINER} /usr/local/bin/pc-import-hlm -l 1 -c -i -s /mnt/shared/hlm/devel-batch >/dev/null 2>&1";
         echo "Import completed with exit code $?";
         # Rebuild alphabetic browse databases
         echo "Running Alphabetic browse database build";
+        # shellcheck disable=SC2029
         ssh deploy@"${DEPLOY_HOST_1}" "docker exec ${S_CONTAINER_A} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+        # shellcheck disable=SC2029
         ssh deploy@"${DEPLOY_HOST_2}" "docker exec ${S_CONTAINER_B} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
+        # shellcheck disable=SC2029
         ssh deploy@"${DEPLOY_HOST_3}" "docker exec ${S_CONTAINER_C} /alpha-browse.sh -v -p /mnt/shared/alpha-browse/${STACK_NAME}";
         echo "Completed alphabetic browse database build";
     else
