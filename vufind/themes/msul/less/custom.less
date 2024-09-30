@@ -1665,14 +1665,17 @@ fieldset.solr-facets {
   }
 }
 
-//add group numbers on advanced search
+//add group numbers on catalog advanced search
 .template-dir-search.template-name-advanced {
-  counter-reset: adv-group-num;
-    .msul-adv-group-num {
-      margin-top:0;
-      &::after {
-      counter-increment: adv-group-num;
-      content: " " counter(adv-group-num) " "
+    .msul-adv-group-num  {
+      counter-reset: adv-group-num; {
+        h2 {
+          margin-top:0;
+        &::after {
+          counter-increment: adv-group-num;
+          content: counter(adv-group-num);
+        }
+      }
     }
   }
 }
