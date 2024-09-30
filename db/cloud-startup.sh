@@ -3,7 +3,7 @@
 ## Reference variables ##
 # Get array of Galera nodes from env var
 # MARIADB_GALERA_CLUSTER_ADDRESS=gcomm://galera1,galera2,galera3
-# Bootstap variable; tells Galera to attempt to bootstrap the cluster
+# Bootstrap variable; tells Galera to attempt to bootstrap the cluster
 #MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes
 # This var tells Galera to force bootstap even when grastate.dat has "safe_to_bootstrap: 0"
 #MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP=yes
@@ -64,7 +64,7 @@ hostname_from_ip() {
 to_hostname() {
     ARG="$1"
     HOST=$( hostname_from_ip "$ARG" )
-    if [[ "$?" -ne 0 ]]; then
+    if [[ -z "$HOST" ]]; then
         HOST="$ARG" # Assuming ARG isn't some other random value; we could check NODES_ARR here
     fi
     echo "$HOST"
