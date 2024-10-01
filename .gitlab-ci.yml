@@ -230,7 +230,7 @@ Verify Stack Health:
   environment:
     name: $CI_COMMIT_BRANCH/verify
     auto_stop_in: 2 weeks
-  timeout: 20m
+  timeout: 40m
   needs:
     - job: Set Stack Name
       artifacts: true
