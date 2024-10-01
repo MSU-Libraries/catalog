@@ -266,6 +266,14 @@ Alternatively, you can also modify the cron entry (or add a temporary additional
 container for the `cron-reserves.sh` command to run at an earlier time. The benefit of this would be it would
 save logs to `/mnt/logs/vufind/reserves_latest.log` and track them in the Monitoring site.
 
+## Ignoring certain HLM files
+If your EBSCO FTP server is set up in a way where it contains all of the sets ever generated for you, then
+you'll likely want a way to have the `pc-import-hlm` script ignore the past sets assuming you get new full
+sets periodically. This can be done by adding a new substring pattern to ignore to the top level of the `hlm`
+directory in the shared storage (`/mnt/shared/hlm/ignore_patterns.txt`). This file is used automatically and
+created on the cron containers startup if it doesn't exist. You can override the file path by using the
+`-p|--ignore-file` flag.
+
 ## Using VuFind Utilities
 The preferred method is to use the included wrapper script with this repository.
 The [pc-import-folio](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-folio)
