@@ -51,6 +51,9 @@ if [[ "${STACK_NAME}" != catalog-prod ]]; then
     rm /etc/cron.d/backups
 fi
 
+# Create the HLM ignore substring file if it doesn't exist
+touch /mnt/shared/hlm/ignore_patterns.txt
+
 # Start up syslog (required for cron)
 rsyslogd
 
