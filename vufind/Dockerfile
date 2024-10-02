@@ -73,7 +73,7 @@ RUN \
     mv /usr/local/vufind/solr /tmp && \
     mkdir -p /usr/local/vufind/solr/vendor/modules/analysis-extras /usr/local/vufind/solr/vendor/server/solr-webapp/webapp/WEB-INF && \
     mv /tmp/solr/vendor/modules/analysis-extras/lib /usr/local/vufind/solr/vendor/modules/analysis-extras && \
-    mv /tmp/solr/vendor/server/solr-webapp/webapp/WEB-INF/lib/ /usr/local/solr/vendor/server/solr-webapp/webapp/WEB-INF && \
+    mv /tmp/solr/vendor/server/solr-webapp/webapp/WEB-INF/lib/ /usr/local/vufind/solr/vendor/server/solr-webapp/webapp/WEB-INF && \
     rm -rf /tmp/solr && \
     # Fix world writable vendor dirs (TODO find out why these happen in the first place)
     find /usr/local/vufind/vendor -type d -perm -o+w -exec chmod o-w \; && \
