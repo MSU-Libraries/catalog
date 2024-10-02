@@ -198,7 +198,7 @@ if (is_array($notes)) {
     }
 }
 
-$results = $this->driver->tryMethod('getFullCallNumber');
+$results = $this->driver->tryMethod('getCallNumbers');
 if (is_array($results)) {
     foreach ($results as $result) {
         echo 'CN  - ' . "$result\r\n";

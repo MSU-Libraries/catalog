@@ -141,7 +141,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
      *
      * @return array
      */
-    public function getFullCallNumber()
+    public function getCallNumbers()
     {
         return [];
     }

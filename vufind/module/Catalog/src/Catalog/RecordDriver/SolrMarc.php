@@ -1191,16 +1191,13 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
-     * Get the full call number
+     * Return an array of call numbers from the Solr field "callnumber-raw".
      *
-     * @return array Content from Solr
+     * @return array the call numbers
      */
-    public function getFullCallNumber()
+    public function getCallNumbers()
     {
-        // return $this->getSolrField('099', ['f', 'a']);
-        return array_unique(
-            $this->getMarcField('952', ['f', 'e'])
-        );
+        return array_unique($this->fields['callnumber-raw'] ?? []);
     }
 
     /**
