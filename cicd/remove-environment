@@ -94,6 +94,11 @@ main() {
     waitforstop "${DEPLOY_HOST_2}";
     waitforstop "${DEPLOY_HOST_3}";
 
+    # Remove the nagios mount point
+    removemount "${DEPLOY_HOST_1}";
+    removemount "${DEPLOY_HOST_2}";
+    removemount "${DEPLOY_HOST_3}";
+
     # Prune the volumes
     prunevols "${DEPLOY_HOST_1}";
     prunevols "${DEPLOY_HOST_2}";
