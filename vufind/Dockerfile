@@ -72,7 +72,6 @@ RUN \
     # Remove unused Solr dependencies after Vufind is installed
     mv /usr/local/vufind/solr /tmp && \
     mkdir -p /usr/local/vufind/solr/vendor/modules/analysis-extras /usr/local/vufind/solr/vendor/server/solr-webapp/webapp/WEB-INF && \
-    mv /tmp/solr/vendor/.solrj /usr/local/vufind/solr/vendor && \
     mv /tmp/solr/vendor/modules/analysis-extras/lib /usr/local/vufind/solr/vendor/modules/analysis-extras && \
     mv /tmp/solr/vendor/server/solr-webapp/webapp/WEB-INF/lib/ /usr/local/solr/vendor/server/solr-webapp/webapp/WEB-INF && \
     rm -rf /tmp/solr && \
