@@ -163,7 +163,7 @@ rebuild_databases() {
     fi
 
     # Change ownership so it is correct before we copy to shared
-    chown -f 1001 ${ARGS[BUILD_PATH]}/alphabetical_browse/*
+    chown -f 1001 "${ARGS[BUILD_PATH]}"/alphabetical_browse/*
 
     return $RCODE
 }
