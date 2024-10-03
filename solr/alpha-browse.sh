@@ -162,6 +162,9 @@ rebuild_databases() {
         verbose "Rebuild complete"
     fi
 
+    # Change ownership so it is correct before we copy to shared
+    chown -f 1001 ${ARGS[BUILD_PATH]}/alphabetical_browse/*
+
     return $RCODE
 }
 
@@ -229,11 +232,15 @@ copy_to_solr() {
 
     if [[ -n $(find "${ARGS[SHARED_PATH]}/" -type f -mmin -$(( ARGS[MAX_AGE_HOURS] * 60 )) ! -name "*lock" ) ]]; then
         verbose "Identified existing database files that can be used; starting copy."
+        # First remove any remaining db-ready files so updates are not triggered before we copy the databases
+        rm -f /bitnami/solr/server/solr/alphabetical_browse/*db-ready
         # Copy database files first, then the "-ready" files indicating they are ready to be used
         cp -p "${ARGS[SHARED_PATH]}/"*db-updated /bitnami/solr/server/solr/alphabetical_browse/ && \
-        cp -p "${ARGS[SHARED_PATH]}/"*db-ready /bitnami/solr/server/solr/alphabetical_browse/ && \
-        chown 1001 /bitnami/solr/server/solr/alphabetical_browse/*
         RCODE=$?
+        if [[ "$RCODE" -eq 0 ]]; then
+            cp -p "${ARGS[SHARED_PATH]}/"*db-ready /bitnami/solr/server/solr/alphabetical_browse/ && \
+            RCODE=$?
+        fi
     fi
 
     verbose "Releasing copy lock."
@@ -266,6 +273,11 @@ main() {
         if [[ "$RCODE" -ne 0 ]]; then
             verbose "Rebuild failed. Exiting without copying to Solr."
             exit $RCODE
+        fi
+        # Cleanup /tmp/alpha-browse if we were using it as a build path and if there was no error
+        if [[ "${ARGS[BUILD_PATH]}" =~ ^/tmp/alpha-browse/ ]]; then
+            verbose "Clearing ${ARGS[BUILD_PATH]}"
+            rm -rf "${ARGS[BUILD_PATH]}"
         fi
     fi
 
