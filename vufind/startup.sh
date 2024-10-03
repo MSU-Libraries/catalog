@@ -7,29 +7,29 @@ TIMESTAMP=$( date +%Y%m%d%H%M%S )
 
 if [[ "${STACK_NAME}" != catalog-prod ]]; then
     echo "Replacing robots.txt file with disallow contents"
-    echo "User-agent: *" > ${VUFIND_HOME}/public/robots.txt
-    echo "Disallow: /" >> ${VUFIND_HOME}/public/robots.txt
+    echo "User-agent: *" > "${VUFIND_HOME}/public/robots.txt"
+    echo "Disallow: /" >> "${VUFIND_HOME}/public/robots.txt"
 fi
 
 # Create symlinks to the shared storage for non-production environments
 # Populating the shared storage if empty
 if [[ "${STACK_NAME}" == devel-* ]]; then
     echo "Setting up links for module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
-    mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/local-confs
-    mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/repo
-    chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}/local-confs
-    chmod g+ws ${SHARED_STORAGE}/${STACK_NAME}/repo
+    mkdir -p "${SHARED_STORAGE}/${STACK_NAME}/local-confs"
+    mkdir -p "${SHARED_STORAGE}/${STACK_NAME}/repo"
+    chmod g+ws "${SHARED_STORAGE}/${STACK_NAME}/local-confs"
+    chmod g+ws "${SHARED_STORAGE}/${STACK_NAME}/repo"
     # Set up deploy key
     install -d -m 700 ~/.ssh/
-    cat "$DEPLOY_KEY_FILE" | base64 -d > ~/.ssh/id_ed25519
+    base64 -d "$DEPLOY_KEY_FILE" > ~/.ssh/id_ed25519
     ( umask 022; touch ~/.ssh/known_hosts )
     chmod 600 ~/.ssh/id_ed25519
     ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
     # Set up the "repo" dir
     if [ ! -d "${SHARED_STORAGE}/${STACK_NAME}/repo/.git" ]; then
         # Clone repository
-        git clone -b ${STACK_NAME} git@gitlab.msu.edu:msu-libraries/devops/catalog.git ${SHARED_STORAGE}/${STACK_NAME}/repo
-        # Set up the repository for group editting
+        git clone -b "${STACK_NAME}" git@gitlab.msu.edu:msu-libraries/devops/catalog.git "${SHARED_STORAGE}/${STACK_NAME}/repo"
+        # Set up the repository for group editing
         git config --system --add safe.directory \*
         git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo config core.sharedRepository group
         chgrp -R msuldevs "${SHARED_STORAGE}/${STACK_NAME}"/repo
@@ -41,56 +41,56 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     fi
     git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch
     # Setting up "local" sync dir
-    if [[ $( ls -1 ${SHARED_STORAGE}/${STACK_NAME}/local-confs/* | wc -l ) -gt 0 ]]; then
+    if [[ -n $(ls -A "${SHARED_STORAGE}/${STACK_NAME}/local-confs/*") ]]; then
         # archive the last pipeline's configs
-        mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
-        mv ${SHARED_STORAGE}/${STACK_NAME}/local-confs/* ${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}
+        mkdir -p "${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}"
+        mv "${SHARED_STORAGE}/${STACK_NAME}/local-confs/*" "${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}"
     fi
     # Sync over the current pipeline's configs
-    rsync -ai /usr/local/vufind/local/ ${SHARED_STORAGE}/${STACK_NAME}/local-confs/
+    rsync -ai /usr/local/vufind/local/ "${SHARED_STORAGE}/${STACK_NAME}/local-confs/"
 
     # Shallow clone of vufind core's code
-    mkdir -p ${SHARED_STORAGE}/${STACK_NAME}/core-repo
-    git clone -n /mnt/shared/vufind ${SHARED_STORAGE}/${STACK_NAME}/core-repo
-    git -C ${SHARED_STORAGE}/${STACK_NAME}/core-repo sparse-checkout init
-    git -C ${SHARED_STORAGE}/${STACK_NAME}/core-repo sparse-checkout set module themes public
-    git -C ${SHARED_STORAGE}/${STACK_NAME}/core-repo checkout v${VUFIND_VERSION}
+    mkdir -p "${SHARED_STORAGE}/${STACK_NAME}/core-repo"
+    git clone -n /mnt/shared/vufind "${SHARED_STORAGE}/${STACK_NAME}/core-repo"
+    git -C "${SHARED_STORAGE}/${STACK_NAME}/core-repo" sparse-checkout init
+    git -C "${SHARED_STORAGE}/${STACK_NAME}/core-repo" sparse-checkout set module themes public
+    git -C "${SHARED_STORAGE}/${STACK_NAME}/core-repo" checkout "v${VUFIND_VERSION}"
 
     # Set up the symlink to be able to access code from host machine
     rm -rf /usr/local/vufind/themes/*
     rm -rf /usr/local/vufind/module/*
     rm -rf /usr/local/vufind/local
-    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/local-confs /usr/local/vufind/local
-    ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/themes/msul /usr/local/vufind/themes
+    ln -sf "${SHARED_STORAGE}/${STACK_NAME}/local-confs" /usr/local/vufind/local
+    ln -sf "${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/themes/msul" /usr/local/vufind/themes
     if [[ ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
-      ln -sf ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog /usr/local/vufind/module
+      ln -sf "${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog" /usr/local/vufind/module
     fi
 
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/public /usr/local/vufind/public
-    mv /usr/local/vufind/vendor ${SHARED_STORAGE}/${STACK_NAME}/core-repo
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/vendor /usr/local/vufind/vendor
+    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/public" /usr/local/vufind/public
+    mv /usr/local/vufind/vendor "${SHARED_STORAGE}/${STACK_NAME}/core-repo"
+    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/vendor" /usr/local/vufind/vendor
 
     if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
       # Linking all the themes
-      ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootprint3 /usr/local/vufind/themes/bootprint3
-      ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/sandal /usr/local/vufind/themes/sandal
-      ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/sandal5 /usr/local/vufind/themes/sandal5
-      ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootstrap5 /usr/local/vufind/themes/bootstrap5
+      ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootprint3" /usr/local/vufind/themes/bootprint3
+      ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/sandal" /usr/local/vufind/themes/sandal
+      ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/sandal5" /usr/local/vufind/themes/sandal5
+      ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootstrap5" /usr/local/vufind/themes/bootstrap5
     fi
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootstrap3 /usr/local/vufind/themes/bootstrap3
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/root /usr/local/vufind/themes/root
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFind /usr/local/vufind/module/VuFind
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindAdmin /usr/local/vufind/module/VuFindAdmin
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindApi /usr/local/vufind/module/VuFindApi
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindConsole /usr/local/vufind/module/VuFindConsole
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindDevTools /usr/local/vufind/module/VuFindDevTools
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindLocalTemplate /usr/local/vufind/module/VuFindLocalTemplate
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindSearch /usr/local/vufind/module/VuFindSearch
-    ln -s ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindTheme /usr/local/vufind/module/VuFindTheme
+    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootstrap3" /usr/local/vufind/themes/bootstrap3
+    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/root" /usr/local/vufind/themes/root
+    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFind" /usr/local/vufind/module/VuFind
+    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindAdmin" /usr/local/vufind/module/VuFindAdmin
+    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindApi" /usr/local/vufind/module/VuFindApi
+    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindConsole" /usr/local/vufind/module/VuFindConsole
+    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindDevTools" /usr/local/vufind/module/VuFindDevTools
+    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindLocalTemplate" /usr/local/vufind/module/VuFindLocalTemplate
+    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindSearch" /usr/local/vufind/module/VuFindSearch
+    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindTheme" /usr/local/vufind/module/VuFindTheme
 
     if [[ ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
       # Add a link in core-repo so that unit tests work
-      ln -s ${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog ${SHARED_STORAGE}/${STACK_NAME}/core-repo/module
+      ln -s "${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog" "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module"
     fi
 
     # Make sure permissions haven't gotten changed on the share along the way
@@ -143,7 +143,7 @@ done
 
 # Sleep before creating collections so all
 # nodes don't try at the same time
-let SLEEP_TIME=${NODE}*4
+SLEEP_TIME=$(( NODE*4 ))
 sleep $SLEEP_TIME
 
 # Create Solr collections
@@ -162,7 +162,7 @@ do
 
         # Create collection
         OUTPUT=$(curl -s "http://solr:8983/solr/admin/collections?action=CREATE&name=${COLL}&numShards=1&replicationFactor=3&wt=xml&collection.configName=${COLL}")
-        HAS_ERROR=$(echo ${OUTPUT} | grep "SolrException" | wc -l)
+        HAS_ERROR=$(echo "${OUTPUT}" | grep -c "SolrException")
 
         if [[ ${HAS_ERROR} -gt 0 ]]; then
             echo "Failed to create Solr collection ${COLL}. ${OUTPUT}"
@@ -178,7 +178,7 @@ done
 
 echo "If there are no aliases create them"
 if ! ALIASES=$(curl "http://solr:8983/solr/admin/collections?action=LISTALIASES&wt=json" -s); then
-    echo "Failed to query to the collection alaises in Solr. Exiting. ${ALIASES}"
+    echo "Failed to query to the collection aliases in Solr. Exiting. ${ALIASES}"
     exit 1
 fi
 if ! [[ "${ALIASES}" =~ .*"biblio".* ]]; then

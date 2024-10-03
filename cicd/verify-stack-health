@@ -30,6 +30,7 @@ check() {
         ATTEMPTS=0;
         while [[ "${ATTEMPTS}" -le 60 ]]; do
             echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): Checking ${SERVICE} health...";
+            # shellcheck disable=SC2029
             if ssh deploy@"${HOST}" "/usr/local/ncpa/plugins/check_${SERVICE}.sh ${STACK_NAME}"; then
                 echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} is healthy!";
                 HEALTHY=1;

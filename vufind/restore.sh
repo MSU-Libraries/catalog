@@ -14,7 +14,7 @@ default_args() {
 default_args
 
 # Script help text
-runhelp() {
+run_help() {
     echo ""
     echo "Usage: Runs a restore of the Solr, the database, and/or the alphabrowse"
     echo "       files from backups."
@@ -52,7 +52,7 @@ runhelp() {
 }
 
 if [[ -z "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
-    runhelp
+    run_help
     exit 0
 fi
 
@@ -159,7 +159,7 @@ restore_collection() {
     BACKUP_FILE="$(basename "${BACKUP_PATH}")"
     BACKUP_FILE=${BACKUP_FILE//.tar.gz}
 
-    mkdir -p ${ARGS[SHARED_DIR]}/solr_dropbox/"${COLL}"/"${BACKUP_FILE}"
+    mkdir -p "${ARGS[SHARED_DIR]}/solr_dropbox/${COLL}/${BACKUP_FILE}"
 
     verbose "Extracting the backup ${BACKUP_PATH} to ${ARGS[SHARED_DIR]}/solr_dropbox/${COLL}"
     if ! tar -xzf "${BACKUP_PATH}" -C "${ARGS[SHARED_DIR]}"/solr_dropbox/"${COLL}"; then
@@ -167,8 +167,8 @@ restore_collection() {
         exit 1
     fi
 
-    chmod -R 777 ${ARGS[SHARED_DIR]}/solr_dropbox/
-    chown -R 1001:1001 ${ARGS[SHARED_DIR]}/solr_dropbox
+    chmod -R 777 "${ARGS[SHARED_DIR]}/solr_dropbox/"
+    chown -R 1001:1001 "${ARGS[SHARED_DIR]}/solr_dropbox"
 
     # Trigger the backup in Solr
     verbose "Starting restore of '${COLL}' index"
@@ -221,18 +221,18 @@ restore_db() {
     trap cleanup SIGTERM SIGINT EXIT
 
     verbose "Extracting the backup"
-    if ! tar -xf ${ARGS[DB]} -C /tmp/restore; then
+    if ! tar -xf "${ARGS[DB]}" -C /tmp/restore; then
         verbose "ERROR: could not extract ${ARGS[DB]} to /tmp/restore" 1
         exit 1
     fi
     BACKUP="$(find /tmp/restore -type f -name "galera${NODE}-*.sql.gz")"
 
-    verbose "Temporarily setting Galera node to desychronized state"
+    verbose "Temporarily setting Galera node to desynchronized state"
     if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SET GLOBAL wsrep_desync = ON" 2>&1); then
         # Check if it was a false negative and the state was actually set
         if ! mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
           | grep 1 > /dev/null 2>&1; then
-            verbose "ERROR: Failed to set node to desychronized state. Unsafe to continue restore. ${OUTPUT}" 1
+            verbose "ERROR: Failed to set node to desynchronized state. Unsafe to continue restore. ${OUTPUT}" 1
             exit 1
         fi
     fi
@@ -269,20 +269,20 @@ restore_alpha() {
         exit 1
     fi
 
-    if ! OUTPUT=$(tar -xf ${ARGS[ALPHA]} -C /tmp/restore); then
+    if ! OUTPUT=$(tar -xf "${ARGS[ALPHA]}" -C /tmp/restore); then
         verbose "ERROR: could not extract ${ARGS[ALPHA]} to /tmp/restore. ${OUTPUT}" 1
         exit 1
     fi
 
     verbose "Starting restore."
-    if ! OUTPUT=$(find /tmp/restore/ -type f -exec cp {} ${ARGS[ALPHA_DIR]}/ \;); then
+    if ! OUTPUT=$(find /tmp/restore/ -type f -exec cp {} "${ARGS[ALPHA_DIR]}/" \;); then
         verbose "ERROR: failed to restore ${ARGS[ALPHA]} to ${ARGS[ALPHA_DIR]}. ${OUTPUT}" 1
         exit 1
     fi
 
     verbose "Touching files to update timestamp"
     verbose "(so that the alpha-browse script recognizes them as the most up-to-date files to use)"
-    if ! OUTPUT=$(touch ${ARGS[ALPHA_DIR]}/*); then
+    if ! OUTPUT=$(touch "${ARGS[ALPHA_DIR]}/*"); then
         verbose "ERROR: failed to update the timestamp of the files in ${ARGS[ALPHA_DIR]}. ${OUTPUT}" 1
         exit 1
     fi

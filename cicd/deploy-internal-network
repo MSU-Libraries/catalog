@@ -23,6 +23,7 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
+    # shellcheck disable=SC2029
     ssh deploy@"${DEPLOY_HOST_1}" "docker stack deploy --prune -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.internal.yml) ${STACK_NAME}-internal"
 
     sleep 15
