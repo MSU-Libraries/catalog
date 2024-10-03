@@ -1758,6 +1758,12 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         if ($this->snippet) {
             // First check for preferred fields:
             foreach ($this->preferredSnippetFields as $current) {
+                if (
+                    empty($this->highlightDetails) ||
+                    !in_array($current, $this->highlightDetails)
+                ) {
+                    continue;
+                }
                 foreach ($this->highlightDetails[$current] as $hl) {
                     if (!empty($hl)) {
                         return [
