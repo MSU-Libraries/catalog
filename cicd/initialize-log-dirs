@@ -29,8 +29,8 @@ main() {
     HOSTS="$DEPLOY_HOST_1 $DEPLOY_HOST_2 $DEPLOY_HOST_3";
     for HOST in ${HOSTS}; do
         SSH_COMMAND="docker volume create ${STACK_NAME}_logs &&
-                    docker run --rm -v ${STACK_NAME}_logs:/mnt/logs alpine sh -c
-                        \"mkdir -p /mnt/logs/mariadb /mnt/logs/solr && chown 1001 /mnt/logs/mariadb /mnt/logs/solr\""
+                    docker run --rm -v ${STACK_NAME}_logs:/mnt/logs \
+                    alpine sh -c \"mkdir -p /mnt/logs/mariadb /mnt/logs/solr && chown 1001 /mnt/logs/mariadb /mnt/logs/solr\""
         # shellcheck disable=SC2029
         ssh deploy@"${HOST}" "$SSH_COMMAND";
 
