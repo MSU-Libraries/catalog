@@ -39,14 +39,17 @@ RUN \
     # END TEMP(PART2)
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    (umask 077; mkdir -p \
-        /opt/modsecurity/tmp /opt/modsecurity/var/data \
-        /opt/modsecurity/var/upload /opt/modsecurity/var/audit) && \
+    (umask 057; mkdir -p \
+        /opt/modsecurity/tmp /opt/modsecurity/var/{data,upload,audit,log} && \
     a2enmod security2
 
 COPY modsecurity/ /etc/modsecurity/
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
-RUN apt-get install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
+RUN \
+    chmod -R g-w,o-rwx /etc/modsecurity && \
+    # modsecurity/var/log/ excluded from chown intentionally (logs are root owned)
+    chown -R www-data: /opt/modsecurity/tmp /opt/modsecurity/var/{data,upload,audit} && \
+    apt-get install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
 
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
