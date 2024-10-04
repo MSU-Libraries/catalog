@@ -14,8 +14,9 @@ envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini
 envsubst < /etc/aliases | sponge /etc/aliases
 
 # Finish SimpleSAMLphp config setup
-envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW_FILE} ${SIMPLESAMLPHP_CUSTOM_DIR} ${MARIADB_VUFIND_PASSWORD_FILE}' < ${SIMPLESAMLPHP_CONFIG_DIR}/config.php | \
-    sponge ${SIMPLESAMLPHP_CONFIG_DIR}/config.php
+# shellcheck disable=SC2016
+envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW_FILE} ${SIMPLESAMLPHP_CUSTOM_DIR} ${MARIADB_VUFIND_PASSWORD_FILE}' < "${SIMPLESAMLPHP_CONFIG_DIR}/config.php" | \
+    sponge "${SIMPLESAMLPHP_CONFIG_DIR}/config.php"
 
 # Unset env variables that are just used in config files and don't need to be in the environment after this.
 # SIMPLESAMLPHP_HOME, BROWZINE_LIBRARY and BROWZINE_TOKEN
@@ -29,21 +30,25 @@ unset FOLIO_URL FOLIO_USER FOLIO_PASS FOLIO_TENANT FOLIO_REC_ID FOLIO_CANCEL_ID 
 if [[ "$1" == "/startup-cron.sh" ]]; then
     if ! grep -q STACK_NAME /etc/environment; then
         # Set required environment variables so cron jobs have access to them
-        echo JAVA_HOME="$JAVA_HOME" >> /etc/environment
-        echo VUFIND_HOME="$VUFIND_HOME"  >> /etc/environment
-        echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR" >> /etc/environment
-        echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR" >> /etc/environment
         if [[ "${STACK_NAME}" == devel-* && ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
           echo 'Devel environment, core-vufind asked, set with modules empty'
-          echo VUFIND_LOCAL_MODULES="" >> /etc/environment
+          VUFIND_LOCAL_MODULES='VUFIND_LOCAL_MODULES=""'
         else
-          echo VUFIND_LOCAL_MODULES="Catalog" >> /etc/environment
+          # shellcheck disable=SC2089
+          VUFIND_LOCAL_MODULES='VUFIND_LOCAL_MODULES="Catalog"'
         fi
-        echo HLM_FTP_USER="$HLM_FTP_USER" >> /etc/environment
-        echo HLM_FTP_PASSWORD_FILE="$HLM_FTP_PASSWORD_FILE" >> /etc/environment
-        echo AUTH_FTP_USER="$AUTH_FTP_USER" >> /etc/environment
-        echo AUTH_FTP_PASSWORD="$AUTH_FTP_PASSWORD" >> /etc/environment
-        echo STACK_NAME="$STACK_NAME" >> /etc/environment
+        {
+            echo JAVA_HOME="$JAVA_HOME"
+            echo VUFIND_HOME="$VUFIND_HOME"
+            echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR"
+            echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR"
+            echo "$VUFIND_LOCAL_MODULES"
+            echo HLM_FTP_USER="$HLM_FTP_USER"
+            echo HLM_FTP_PASSWORD_FILE="$HLM_FTP_PASSWORD_FILE"
+            echo AUTH_FTP_USER="$AUTH_FTP_USER"
+            echo AUTH_FTP_PASSWORD="$AUTH_FTP_PASSWORD"
+            echo STACK_NAME="$STACK_NAME"
+        } >> /etc/environment
     fi
 else
     # Unset variables that are only useful for cron jobs.

@@ -25,7 +25,7 @@ default_args() {
 default_args
 
 # Script help text
-runhelp() {
+run_help() {
     echo ""
     echo "Usage: Harvest HLM records from EBSCO via their FTP server"
     echo "       and import that data into VuFind's Solr."
@@ -94,7 +94,7 @@ runhelp() {
 }
 
 if [[ -z "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
-    runhelp
+    run_help
     exit 0
 fi
 
@@ -218,7 +218,7 @@ assert_vufind_harvest_dir_writable() {
 }
 
 assert_ebsco_ftp_readable() {
-    if ! curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --netrc > /dev/null 2>&1; then
+    if ! curl "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}" --netrc > /dev/null 2>&1; then
         echo "ERROR: EBSCO HLM harvest location is not readable: ${ARGS[FTP_SERVER]}"
         exit 1
     fi
@@ -364,21 +364,21 @@ harvest() {
 
     verbose "Starting harvest of new files."
     # Check FTP server to compare files for ones we don't have
-    cd ${ARGS[VUFIND_HARVEST_DIR]}
+    cd "${ARGS[VUFIND_HARVEST_DIR]}" || (verbose "ERROR: Failed to cd to \"${ARGS[VUFIND_HARVEST_DIR]}\"" 1 && exit 1)
     while IFS= read -r HLM_FILE
     do
         # If it is not an ignored pattern, not in the shared storage, and it is a MARC or zip file, then get it
         if ! is_ignored "${HLM_FILE}" && [ ! -f "${ARGS[SHARED_DIR]}/current/${HLM_FILE}" ] && is_zip_or_marc_file "${HLM_FILE}"; then
             verbose "Getting ${HLM_FILE}"
             if [ "${ARGS[DRY_RUN]}" -eq "0" ]; then
-                if ! wget ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/"${HLM_FILE}" > /dev/null 2>&1; then
+                if ! wget "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${HLM_FILE}" > /dev/null 2>&1; then
                     verbose "ERROR: Failed to retrieve ${HLM_FILE} from FTP server" 1
                     exit 1
                 fi
             fi
         fi
-    done < <(curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --netrc -l -s)
-    cd -
+    done < <(curl "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}" --netrc -l -s)
+    cd - || (verbose "ERROR: Failed to cd to previous dir" 1 && exit 1)
 
     verbose "Syncing harvest files to shared storage."
     if ! rsync -ai --exclude "processed" --exclude "log" --exclude ".gitkeep" "${ARGS[VUFIND_HARVEST_DIR]}"/ "${ARGS[SHARED_DIR]}/current/" > /dev/null 2>&1; then
@@ -388,7 +388,7 @@ harvest() {
 }
 
 # Copy MARC and zip files back from shared dir to VuFind dir
-copyback_from_shared() {
+copy_back_from_shared() {
     assert_vufind_harvest_dir_writable
     verbose "Replacing any VuFind MARC/ZIP with files from shared directory."
     countdown 5
@@ -420,8 +420,7 @@ update_processed_delete_files() {
     fi
     IDS=$(LANG=C grep -oUaP "(?<=\x1e)ebs[0-9]+e(?=\x1e)" "${ARGS[VUFIND_HARVEST_DIR]}"/*.marc | sed -e 's/^/hlm./' | sort)
     for DFILE in "${DELETE_FILES[@]}"; do
-        comm -2 -3 <(sort "$DFILE") <(echo "$IDS") >"${DFILE}_2"
-        if [[ "$?" -eq 0 ]]; then
+        if comm -2 -3 <(sort "$DFILE") <(echo "$IDS") >"${DFILE}_2"; then
             mv "${DFILE}_2" "$DFILE"
         else
             echo "ERROR updating delete file ${DFILE}"
@@ -435,14 +434,13 @@ import() {
     assert_vufind_harvest_dir_writable
 
     verbose "Starting import processing..."
-    mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/processed # needed in case it doesn't already exist
+    mkdir -p "${ARGS[VUFIND_HARVEST_DIR]}/processed" # needed in case it doesn't already exist
 
     verbose "Extracting zip files..."
     countdown 5
     while read -r FILE; do
       verbose "Unzipping \"${FILE}\""
-      unzip -n "${FILE}" -d "${ARGS[VUFIND_HARVEST_DIR]}"
-      if [ $? -eq 0 ]; then
+      if unzip -n "${FILE}" -d "${ARGS[VUFIND_HARVEST_DIR]}"; then
         verbose "Extracting process complete"
         mv "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/processed" # Eventually delete them?
       else
@@ -471,7 +469,7 @@ import() {
         DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/$(basename "${FILE}")
         LANG=C grep -oUaP "(?<=\x1e)ebs[0-9]+e(?=\x1e)" "${FILE}" | sed -e 's/^/hlm./' > "${DEL_FILE%.marc}".delete
         # Cleanup the other files that the batch-delete.sh script won't move to the processed dir
-        mv "${FILE}" ${ARGS[VUFIND_HARVEST_DIR]}/processed
+        mv "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/processed"
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*-Del-*.marc')
 
     update_processed_delete_files
@@ -516,19 +514,19 @@ main() {
     LOG_FILE=$(mktemp)
     verbose "Logging to ${LOG_FILE}"
     verbose "Using VUFIND_HOME of ${VUFIND_HOME}"
-    pushd "${VUFIND_HOME}" 2> /dev/null
+    pushd "${VUFIND_HOME}" 2> /dev/null || (verbose "ERROR: Failed to pushd \"${ARGS[VUFIND_HOME]}\"" 1 && exit 1)
     verbose "Starting processing for ${STACK_NAME}"
 
     if [[ "${ARGS[HARVEST]}" -eq 1 ]]; then
         harvest
     elif [[ "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
-        copyback_from_shared
+        copy_back_from_shared
     fi
     if [[ "${ARGS[IMPORT]}" -eq 1 ]]; then
         import
     fi
 
-    popd 2> /dev/null
+    popd 2> /dev/null || (verbose "ERROR: Failed to popd" 1 && exit 1)
     verbose "All processing complete!"
 }
 

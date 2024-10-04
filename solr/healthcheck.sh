@@ -18,7 +18,7 @@ if [ "${EC}" != "0" ]; then
 fi
 
 # Validate the node is online
-MATCHED=$( echo "${CLUSTER_STATUS}" | jq ".cluster.live_nodes[]" | grep ${HOSTNAME})
+MATCHED=$( echo "${CLUSTER_STATUS}" | jq ".cluster.live_nodes[]" | grep "${HOSTNAME}")
 if [[ ${MATCHED} = ${HOSTNAME}* ]]; then
     echo "ERROR: ${HOSTNAME} not found in list of live nodes in cluster!"
     EXIT_CODE=1
@@ -38,6 +38,7 @@ for COLLECTION in $COLLECTIONS; do
             # Check replicas hosted on the current node
             if [[ ${NODE} = ${HOSTNAME}* ]]; then
                 # Validate replica state
+                # shellcheck disable=SC2076
                 if [[ " ${FAIL_STATES[*]} " =~ " ${STATE} " ]]; then
                     echo "ERROR: (${HOSTNAME}) ${COLLECTION}.${SHARD}.${REPLICA} has a state of ${STATE}!"
                     EXIT_CODE=1

@@ -24,9 +24,13 @@ fi
 
 main() {
     # Pull images now to save time with stack deploy
-    ssh deploy@"${DEPLOY_HOST_1}" "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA" &
-    ssh deploy@"${DEPLOY_HOST_2}" "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA" & 
-    ssh deploy@"${DEPLOY_HOST_3}" "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA";
+    SSH_COMMAND="docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA"
+    # shellcheck disable=SC2029
+    ssh deploy@"${DEPLOY_HOST_1}" "$SSH_COMMAND" &
+    # shellcheck disable=SC2029
+    ssh deploy@"${DEPLOY_HOST_2}" "$SSH_COMMAND" &
+    # shellcheck disable=SC2029
+    ssh deploy@"${DEPLOY_HOST_3}" "$SSH_COMMAND";
     wait
 
     echo "Preparing $STACK_NAME deploy at $COMPOSE_PATH"
@@ -36,6 +40,7 @@ main() {
     ssh deploy@"${DEPLOY_HOST_1}" sudo mv "${COMPOSE_PATH}"/proxymonitoring.conf /mnt/shared/local/"${STACK_NAME}"/deploy/proxymonitoring/
 
     echo "Issuing deploy command now"
+    # shellcheck disable=SC2029
     ssh deploy@"${DEPLOY_HOST_1}" "docker stack deploy --prune --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.monitoring.yml) ${STACK_NAME}-monitoring";
 
     # Get runtime metrics

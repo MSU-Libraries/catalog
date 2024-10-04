@@ -27,18 +27,22 @@ fi
 
 waitforstop() {
     HOST=$1
+    # shellcheck disable=SC2029
     SERVICES=$(ssh deploy@"${HOST}" "docker ps --filter name=${STACK_NAME} --format '{{.Names}}' | wc -l")
     while [[ "${SERVICES}" -gt 0 ]]; do
         echo "There are still ${SERVICES} services running on ${HOST} for ${STACK_NAME}..."
         sleep 3
+        # shellcheck disable=SC2029
         SERVICES=$(ssh deploy@"${HOST}" "docker ps --filter name=${STACK_NAME} --format '{{.Names}}' | wc -l")
     done
 }
 
 prunevols() {
     HOST=$1
+    # shellcheck disable=SC2029
     VOLS=$(ssh deploy@"${HOST}" "docker volume ls --filter name=$STACK_NAME --format '{{.Name}}'")
     if [ -n "${VOLS}" ]; then
+        # shellcheck disable=SC2029
         if ! OUTPUT=$(ssh deploy@"${HOST}" "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"); then
             echo "Failed to remove one or more volumes from ${HOST} for ${VOLS}. ${OUTPUT}"
             exit 1
@@ -49,18 +53,21 @@ prunevols() {
 removemount() {
     HOST=$1
     # Remove the bind mount for the nagios user
-    ssh deploy@"$HOST" \
-    "sudo /usr/local/bin/pc-mount-logs ${STACK_NAME} /home/nagios/ --remove -v";
+    # shellcheck disable=SC2029
+    ssh deploy@"$HOST" "sudo /usr/local/bin/pc-mount-logs ${STACK_NAME} /home/nagios/ --remove -v";
 
 }
 
 removesecrets() {
     echo "Deleting secrets for stack \"${STACK_NAME}\""
     # shellcheck disable=SC2207
+    # shellcheck disable=SC2029
     SECRET_IDS=($(ssh deploy@"${DEPLOY_HOST_1}" "docker secret ls --filter name=\"${STACK_NAME}-\" --format \"{{.ID}}\""))
     # shellcheck disable=SC2207
+    # shellcheck disable=SC2029
     SECRETS=($(ssh deploy@"${DEPLOY_HOST_1}" "docker secret ls --filter name=\"${STACK_NAME}-\" --format \"{{.ID}}: {{.Name}}\""))
     echo "Secrets to delete : ${SECRETS[*]}"
+    # shellcheck disable=SC2029
     ssh deploy@"${DEPLOY_HOST_1}" "docker secret rm ${SECRET_IDS[*]}"
 }
 
@@ -75,19 +82,22 @@ main() {
     ansible-playbook provision-dns-playbook/decommission.yml;
 
     # Remove the alphabetic browse databases
+    # shellcheck disable=SC2029
     CONTAINER=$(ssh deploy@"${DEPLOY_HOST_1}" "docker ps -q -f name=${STACK_NAME}-solr_cron");
     if [ -n "${CONTAINER}" ]; then
+        # shellcheck disable=SC2029
         ssh deploy@"${DEPLOY_HOST_1}" "docker exec ${CONTAINER} rm -rf /mnt/shared/alpha-browse/${STACK_NAME}";
     fi
 
     # Cleanup volumes/networks/images/containers
-    ssh deploy@"${DEPLOY_HOST_1}" \
-    "docker stack rm ${STACK_NAME}-solr;
-    docker stack rm ${STACK_NAME}-mariadb;
-    docker stack rm ${STACK_NAME}-catalog;
-    docker stack rm ${STACK_NAME}-monitoring;
-    docker stack rm ${STACK_NAME}-internal;
-    rm -rf $COMPOSE_PATH;";
+    SSH_COMMAND="docker stack rm ${STACK_NAME}-solr;
+                docker stack rm ${STACK_NAME}-mariadb;
+                docker stack rm ${STACK_NAME}-catalog;
+                docker stack rm ${STACK_NAME}-monitoring;
+                docker stack rm ${STACK_NAME}-internal;
+                rm -rf $COMPOSE_PATH;"
+    # shellcheck disable=SC2029
+    ssh deploy@"${DEPLOY_HOST_1}" "$SSH_COMMAND";
 
     # Wait for the containers to stop now the services have been removed
     waitforstop "${DEPLOY_HOST_1}";

@@ -1,13 +1,13 @@
 #!/bin/bash
 
-rm -r "${VUFIND_CACHE_DIR}"/*
+rm -r "${VUFIND_CACHE_DIR:?}/*"
 
 # Re-initialize dirs
-mkdir -p ${VUFIND_CACHE_DIR}/cli \
-         ${VUFIND_CACHE_DIR}/covers \
-         ${VUFIND_CACHE_DIR}/objects \
-         ${VUFIND_CACHE_DIR}/yamls \
-         ${VUFIND_CACHE_DIR}/searchspecs
-chown 33:33 ${VUFIND_CACHE_DIR}/*
-chmod g+sw ${VUFIND_CACHE_DIR}/cli ${VUFIND_CACHE_DIR}/covers
-chmod g+s ${VUFIND_CACHE_DIR}/objects ${VUFIND_CACHE_DIR}/yamls
+mkdir -p "${VUFIND_CACHE_DIR}/cli" \
+         "${VUFIND_CACHE_DIR}/covers" \
+         "${VUFIND_CACHE_DIR}/objects" \
+         "${VUFIND_CACHE_DIR}/yamls" \
+         "${VUFIND_CACHE_DIR}/searchspecs"
+chown 33:33 "${VUFIND_CACHE_DIR}/*"
+chmod g+sw "${VUFIND_CACHE_DIR}/cli" "${VUFIND_CACHE_DIR}/covers"
+chmod g+s "${VUFIND_CACHE_DIR}/objects" "${VUFIND_CACHE_DIR}/yamls"

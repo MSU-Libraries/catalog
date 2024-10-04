@@ -11,18 +11,18 @@ OUTPUT_LOG=0
 
 TIMESTAMP=$( date +%Y%m%d%H%M%S )
 LATEST_PATH_WITH_TS="${LATEST_PATH}.${TIMESTAMP}"
-$CRON_COMMAND >$LATEST_PATH_WITH_TS 2>&1
+$CRON_COMMAND > "${LATEST_PATH_WITH_TS}" 2>&1
 EXIT_CODE=$?
 
-cat $LATEST_PATH_WITH_TS >>$LOG_PATH
+cat "${LATEST_PATH_WITH_TS}" >>$LOG_PATH
 
 echo $EXIT_CODE >$EXIT_CODE_PATH
 
 if [[ $EXIT_CODE -ne 0 ]]; then
-    cat $LATEST_PATH_WITH_TS | logger -t $DOCKER_TAG
+    logger -t "$DOCKER_TAG" -f "${LATEST_PATH_WITH_TS}"
     if [[ $OUTPUT_LOG -eq 1 ]]; then
-        cat $LATEST_PATH_WITH_TS
+        cat "${LATEST_PATH_WITH_TS}"
     fi
 fi
 
-rm -f "$LATEST_PATH_WITH_TS"
+rm -f "${LATEST_PATH_WITH_TS}"

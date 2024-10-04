@@ -23,7 +23,9 @@ fi
 
 main() {
     echo "Finding container to run tests against for stack ${STACK_NAME}-catalog_catalog..."
+    # shellcheck disable=SC2029
     NODE=$(ssh deploy@"${DEPLOY_HOST_1}" "docker service ps -f 'desired-state=running' --format '{{ .Node }}' ${STACK_NAME}-catalog_catalog | head -n 1") || echo "";
+    # shellcheck disable=SC2029
     CONTAINER=$(ssh deploy@"${NODE}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "";
 
     if [ -z "${NODE}" ] || [ -z "${CONTAINER}" ] ; then
@@ -33,6 +35,7 @@ main() {
     echo "Found container ${CONTAINER}!";
 
     echo "Running Vufind functional tests...";
+    # shellcheck disable=SC2029
     ssh deploy@"${NODE}" "docker exec ${CONTAINER} vendor/bin/phing phpunitfast -Dphpunit_extra_params=/usr/local/vufind/module/Catalog/tests/integration-tests/";
     EC=$?;
     echo "Tests complete with exit code ${EC}";

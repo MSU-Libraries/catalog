@@ -24,7 +24,7 @@ default_args() {
 default_args
 
 # Script help text
-runhelp() {
+run_help() {
     echo ""
     echo "Usage: Harvest data from FOLIO via OAI-PMH"
     echo "       and import that data into VuFind's Solr."
@@ -88,13 +88,13 @@ runhelp() {
     echo "      Skip the countdown delays before each stage of the script."
     echo "  -T|--test-harvest HARVEST_TGZ"
     echo "      Instead of calling VuFind's harvest script, instead extract"
-    echo "      this gzip'd tar file into the VUFIND_HARVEST_DIR. This flag"
+    echo "      this gzip-ed tar file into the VUFIND_HARVEST_DIR. This flag"
     echo "      is used to test this script (only used with --oai-harvest)."
     echo ""
 }
 
 if [[ -z "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
-    runhelp
+    run_help
     exit 0
 fi
 
@@ -104,9 +104,8 @@ parse_args() {
     while [[ $# -gt 0 ]]; do
         case $1 in
         -h|--help)
-            runhelp
-            exit 0
-            shift;;
+            run_help
+            exit 0;;
         -o|--oai-harvest)
             ARGS[OAI_HARVEST]=1
             shift;;
@@ -316,7 +315,7 @@ oai_harvest_combiner() {
     verbose "Combining ${#COMBINE_FILES[@]} xml files into ${COMBINE_TARGET}"
     xml_grep --wrap collection --cond "marc:record" "${COMBINE_FILES[@]}" > "${ARGS[VUFIND_HARVEST_DIR]}/${COMBINE_TARGET}"
     verbose_inline "Done combining ${COMBINE_TARGET}; now removing pre-combined files "
-    while read -r LINE; do verbose_inline "."
+    while read -r; do verbose_inline "."
     done < <( rm -v "${COMBINE_FILES[@]}" )
     verbose_inline "\n"
     verbose "Done removing ${#COMBINE_FILES[@]} files."
@@ -349,13 +348,15 @@ oai_delete_combiner() {
     verbose "Combining and converting ${#DELETE_FILES[@]} delete files into ${COMBINE_TARGET}"
     for DFILE in "${DELETE_FILES[@]}"; do
         # Ensure file ends in newline
-        sed -i '$a\' "$DFILE"
+        if [[ $(tail -c 1 "$DFILE") != '' ]]; then
+            echo '' >> "$DFILE"
+        fi
         while read -r UUID; do
             append_hrid_given_uuid "$UUID" "$COMBINE_TARGET"
         done < "$DFILE"
     done
     verbose_inline "Done combining ${COMBINE_TARGET}; now removing pre-combined files "
-    while read -r LINE; do verbose_inline "."
+    while read -r; do verbose_inline "."
     done < <( rm -v "${DELETE_FILES[@]}" )
     verbose_inline "\n"
     verbose "Done removing ${#DELETE_FILES[@]} files."
@@ -456,7 +457,7 @@ oai_harvest() {
 }
 
 # Copy XML files to VuFind harvest dir
-copyback_files_to_import() {
+copy_back_files_to_import() {
     assert_vufind_harvest_dir_writable
     verbose "Replacing any VuFind combined XML with files from --copy-from directory."
     countdown 5
@@ -491,8 +492,7 @@ update_processed_delete_files() {
     fi
     IDS=$(grep -o '001">[^<]*<' "${ARGS[VUFIND_HARVEST_DIR]}"/combined_*.xml | sed -e 's/.*001">\([^<]*\)</folio.\1/' | sort)
     for DFILE in "${DELETE_FILES[@]}"; do
-        comm -2 -3 <(sort "$DFILE") <(echo "$IDS") >"${DFILE}_2"
-        if [[ "$?" -eq 0 ]]; then
+        if comm -2 -3 <(sort "$DFILE") <(echo "$IDS") >"${DFILE}_2"; then
             mv "${DFILE}_2" "$DFILE"
         else
             echo "ERROR updating delete file ${DFILE}"
@@ -577,7 +577,7 @@ main() {
     if [[ "${ARGS[OAI_HARVEST]}" -eq 1 ]]; then
         oai_harvest
     elif [[ -n "${ARGS[COPY_DIR]}" ]]; then
-        copyback_files_to_import
+        copy_back_files_to_import
     fi
     if [[ "${ARGS[RESET_SOLR]}" -eq 1 ]]; then
         reset_solr
