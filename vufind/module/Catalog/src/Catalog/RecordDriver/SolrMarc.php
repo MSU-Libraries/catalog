@@ -173,6 +173,53 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Added in PC-1105
+     * Takes a Marc field that notes are stored in (ex: 950) and a list of
+     * sub fields (ex: ['a','b']) optionally as well as what indicator
+     * numbers and values to exclude, then concatenates the subfields
+     * together and returns the fields back as an array
+     * (ex: ['subA subB subC', 'field2SubA field2SubB'])
+     *
+     * @param string $field    Marc field to search within
+     * @param array  $subfield Sub-fields to return or empty for all
+     * @param array  $indData  Array containing the indicator number as the key
+     *                         and the value as an array of strings for the
+     *                         allowed indicator values
+     *                         ex: [['1' => '1', '2', '2' => '']]
+     *                         would filter ind1 = 1 or 2 and ind2 = blank
+     *
+     * @return array The values within the subfields under the field
+     */
+    public function getMarcFieldWithoutInd(
+        string $field,
+        ?array $subfield = null,
+        array $indData = []
+    ) {
+        $vals = [];
+        $marc = $this->getMarcReader();
+        $marc_fields = $marc->getFields($field, $subfield);
+        foreach ($marc_fields as $marc_data) {
+            $field_vals = [];
+            // Check if that field has either indicator (MARC only has up to 2 indicators)
+            foreach (range(1, 2) as $indNum) {
+                if (
+                    array_key_exists($indNum, $indData) &&
+                    !in_array(trim(($marc_data['i' . $indNum] ?? '')), $indData[$indNum])
+                ) {
+                    $subfields = $marc_data['subfields'];
+                    foreach ($subfields as $subfield) {
+                        $field_vals[] = $subfield['data'];
+                    }
+                }
+            }
+            if (!empty($field_vals)) {
+                $vals[] = implode(' ', $field_vals);
+            }
+        }
+        return array_unique($vals);
+    }
+
+    /**
      * Takes a Solr field and returns the contents of the field (either
      * a string or array)
      *
@@ -1064,6 +1111,52 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get the added title
+     *
+     * @return array Content from Solr
+     */
+    public function getAddedTitle()
+    {
+        // PC-1105
+        $subfields = range('a', 'z');
+        $subfields[] = '3';
+        return $this->getMarcFieldWithInd('711', $subfields, '2', '2');
+    }
+
+    /**
+     * Get the distributed value
+     *
+     * @return array Content from Solr
+     */
+    public function getDistributed()
+    {
+        // PC-1105
+        return $this->getMarcFieldWithInd('264', ['a', 'b', 'c', '3'], '2', '2');
+    }
+
+    /**
+     * Get the manufactured value
+     *
+     * @return array Content from Solr
+     */
+    public function getManufactured()
+    {
+        // PC-1105
+        return $this->getMarcFieldWithInd('264', ['a', 'b', 'c', '3'], '2', '3');
+    }
+
+    /**
+     * Get the copyright date
+     *
+     * @return array Content from Solr
+     */
+    public function getCopyrightDate()
+    {
+        // PC-1105
+        return $this->getMarcFieldWithInd('264', ['a', 'b', 'c', '3'], '2', '4');
+    }
+
+    /**
      * Get the uniform title
      *
      * @param $field mixed name of the field to search in
@@ -1308,7 +1401,8 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         $titles = [];
         $marc = $this->getMarcReader();
-        $marcArr246 = $marc->getFields('246', ['a', 'b', 'i', '6']);
+        // PC-1105 update subfields
+        $marcArr246 = $marc->getFields('246', ['a', 'b', 'f', 'g', 'h', 'i', 'n', 'p', '6']);
 
         foreach ($marcArr246 as $marc246) {
             $type = '';
@@ -1317,14 +1411,19 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 
             // Make sure there is an 'a' subfield in this record to get the title
             if (in_array('a', array_column($marc246['subfields'], 'code'))) {
-                $a = $b = '';
                 foreach ($marc246['subfields'] as $subfield) {
                     switch ($subfield['code']) {
                         case 'a':
-                            $a = $subfield['data'];
-                            break;
                         case 'b':
-                            $b = ' ' . $subfield['data'];
+                        case 'f':
+                        case 'g':
+                        case 'h':
+                        case 'n':
+                        case 'p':
+                            $title = $title . (empty($title) ? '' : ' ') . $subfield['data'];
+                            break;
+                        case 'i':
+                            $type = $subfield['data'];
                             break;
                         case '6':
                             // check if it has link data
@@ -1343,12 +1442,11 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                             break;
                     }
                 }
-                $title = $a . $b;
             } else {
                 continue; // don't proces if we don't even have a title
             }
 
-            if (!empty($marc246['i2'] ?? '')) {
+            if (!empty(trim($marc246['i2'] ?? ''))) {
                 // If the 2nd indicator is present, use that as 'type'
                 $type = $marc246['i2'];
                 switch ($marc246['i2']) {
@@ -1379,14 +1477,6 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                     case 8:
                         $type = 'Spine title';
                         break;
-                }
-            } elseif (in_array('i', array_column($marc246['subfields'], 'code'))) {
-                // otherwise check if subfield 'i' is present, and use that for 'type'
-                foreach ($marc246['subfields'] as $subfield) {
-                    if ($subfield['code'] == 'i') {
-                        $type = $subfield['data'];
-                        break;
-                    }
                 }
             }
             // Get the title
@@ -1543,15 +1633,32 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get an array of all corporate authors (complementing getPrimaryAuthor()).
+     *
+     * @return array
+     */
+    public function getCorporateAuthors()
+    {
+        // MSUL PC-1105
+        return array_merge(
+            $this->getFieldArray('110', ['a', 'b']),
+            $this->getFieldArray('111', range('a', 'z')),
+            $this->getFieldArray('710', ['a', 'b']),
+            $this->getMarcFieldWithoutInd('711', ['a', 'b'], ['2' => ['2']])
+        );
+    }
+
+    /**
      * Get an array of the transliterated values for each author.
      *
      * @return array
      */
     public function getCorporateAuthorsLinks()
     {
+        // PC-1105
         $authors = [];
         foreach (['110', '111', '710', '711'] as $field) {
-            $authors = array_merge($authors, $this->getMarcFieldLinked($field, ['a', 'b', 'c']));
+            $authors = array_merge($authors, $this->getMarcFieldLinked($field, range('a', 'z')));
         }
         return $authors;
     }
@@ -1567,6 +1674,11 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         $matches = [];
 
+        // MSUL PC-1105 Update subfields to match spreadsheet
+        $subfieldsFor800s = range('a', 'w');
+        $subfieldsFor800s[] = 'x';
+        $subfieldsFor800s[] = '3';
+
         // Get data for the primary series fields
         // subfield v is excluded here because getSeriesFromMarc will uses v
         // to get the series number
@@ -1575,9 +1687,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             '410' => ['p', 't'],
             '411' => ['p', 't'],
             '440' => [range('a', 'w')],
-            '800' => [range('f', 'u')],
-            '810' => [range('f', 'u')],
-            '811' => [range('f', 'u')],
+            '800' => $subfieldsFor800s,
+            '810' => $subfieldsFor800s,
+            '811' => $subfieldsFor800s,
             '830' => ['a', 'd', 'f', 'g', 'k', 'l', 'm', 'n','o', 'p', 'r', 's', 't', 'w', 'x', 'y'],
         ];
         $matches = $this->getSeriesFromMARC($primaryFields);
@@ -1683,16 +1795,6 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
-     * Get the place of publication
-     *
-     * @return array Content from Solr
-     */
-    public function getPlaceOfPublication()
-    {
-        return $this->getMarcField('264', ['a']);
-    }
-
-    /**
      * Get the transliterated values from the given field, mapping using the data in subfield 6
      *
      * @param string $field    Marc field to search within
@@ -1743,6 +1845,52 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getDeduplicatedAuthors($dataFields = ['role', 'link'])
     {
         return parent::getDeduplicatedAuthors($dataFields);
+    }
+
+    /**
+     * Get the edition of the current record.
+     *
+     * @return string
+     */
+    public function getEdition()
+    {
+        // PC-1105
+        return $this->getFieldArray('250', ['a', 'b', '3']);
+    }
+
+    /**
+     * Get the former publication frequency
+     *
+     * @return string
+     */
+    public function getFormerPublicationFrequency()
+    {
+        // PC-1105
+        return $this->getFieldArray('321', ['a', 'b']);
+    }
+
+    /**
+     * Get the date coverage for a record which spans a period of time (i.e. a
+     * journal). Use getPublicationDates for publication dates of particular
+     * monographic items.
+     *
+     * @return array
+     */
+    public function getDateSpan()
+    {
+        // PC-1105, add more subfields
+        return $this->getFieldArray('362', ['a', 'z']);
+    }
+
+    /**
+     * Get the Produced field for the current record.
+     *
+     * @return string
+     */
+    public function getProduced()
+    {
+        // PC-1105
+        return $this->getMarcFieldWithInd('264', ['a', 'b', '3'], '2', '0');
     }
 
     /**
