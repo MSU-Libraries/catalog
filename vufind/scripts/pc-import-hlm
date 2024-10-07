@@ -451,6 +451,16 @@ import() {
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}" -mindepth 1 -maxdepth 1 -name '*.zip')
     verbose "Zip extraction completed"
 
+    verbose "Cleaning up filenames of extracted files"
+    countdown 5
+    while read -r FILE; do
+        CLEAN_NAME="$(echo "${FILE}" | sed -e "s/.marc$//" -e "s/.mrc$//" -e "s/ /_/g")".marc
+        if [ "${FILE}" != "${CLEAN_NAME}" ]; then
+            verbose "Renaming ${FILE} -> ${CLEAN_NAME}"
+            mv "${FILE}" "${CLEAN_NAME}"
+        fi
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -iname '*.m*c')
+
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" ]]; then
         verbose "Will only import ${ARGS[LIMIT_BY_DELETE]} MARC files; others will be deleted."
         countdown 5
@@ -468,11 +478,11 @@ import() {
 
     verbose "Pre-processing deletion files to extract IDs from EBSCO MARC records"
     while read -r FILE; do
-        DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/$(basename "${FILE}")
+        DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/"$(basename "${FILE}")"
         LANG=C grep -oUaP "(?<=\x1e)ebs[0-9]+e(?=\x1e)" "${FILE}" | sed -e 's/^/hlm./' > "${DEL_FILE%.marc}".delete
         # Cleanup the other files that the batch-delete.sh script won't move to the processed dir
         mv "${FILE}" ${ARGS[VUFIND_HARVEST_DIR]}/processed
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*-Del-*.marc')
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -iname '*-Del*.marc')
 
     update_processed_delete_files
 
