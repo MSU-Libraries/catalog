@@ -65,6 +65,19 @@ def _analyse_log() -> dict[str, int | None]:
         'response_time': None if response_time_count == 0 else response_time_total // response_time_count,
     }
 
+def _read_docker_stats():
+    variables = {}
+    with open(f'/mnt/shared/docker_stats/{os.getenv('NODE')}/{os.getenv('STACK_NAME')}', 'r', encoding='UTF-8') as f:
+        while True:
+            line = f.readline()
+            if not line:
+                break
+            parts = line.split()
+            if len(parts) == 3:
+                variables[f'{parts[0]}_cpu'] = parts[1]
+                variables[f'{parts[0]}_mem'] = parts[2]
+    return variables
+
 def main():
     time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     node = os.getenv('NODE')
@@ -75,20 +88,28 @@ def main():
     ))
     memory = results[0]
     disk = results[1]
+    stats = _read_docker_stats()
     log_results = _analyse_log()
     nb_requests = log_results['request_count']
     response_time = log_results['response_time']
     conn = None
     try:
-        with open(os.getenv('MARIADB_MONITORING_PASSWORD_FILE'), 'r') as f:
+        with open(os.getenv('MARIADB_MONITORING_PASSWORD_FILE'), 'r', encoding='UTF-8') as f:
             password = f.read().strip()
             f.close()
         conn = db.connect(user='monitoring', password=password, host='galera', database="monitoring")
         del password
         cur = conn.cursor()
         statement = "INSERT INTO data (node, time, available_memory, available_disk_space, " \
-            "apache_requests, response_time) VALUES (%s, %s, %s, %s, %s, %s)"
-        data = (node, time, memory, disk, nb_requests, response_time)
+            "apache_requests, response_time, solr_solr_cpu, solr_solr_mem, solr_cron_cpu, solr_cron_mem, " \
+            "solr_zk_cpu, solr_zk_mem, catalog_catalog_cpu, catalog_catalog_mem, mariadb_galera_cpu, " \
+            "mariadb_galera_mem) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        data = (
+            node, time, memory, disk, nb_requests, response_time, stats.get('solr_solr_cpu'),
+            stats.get('solr_solr_mem'), stats.get('solr_cron_cpu'), stats.get('solr_cron_mem'),
+            stats.get('solr_zk_cpu'), stats.get('solr_zk_mem'), stats.get('catalog_catalog_cpu'),
+            stats.get('catalog_catalog_mem'), stats.get('mariadb_galera_cpu'), stats.get('mariadb_galera_mem')
+        )
         cur.execute(statement, data)
         conn.commit()
     except db.Error as err:
