@@ -5,6 +5,8 @@ function plot(variable, period, data) {
         ytitle = 'Apache average hits / minute';
     else if (variable == 'response_time')
         ytitle = 'Average VuFind search response time (ms)';
+    else if (variable.endsWith('_cpu'))
+        ytitle = 'Average ' + variable_with_spaces + ' (%)';
     else
         ytitle = 'Minimum ' + variable_with_spaces + ' (%)';
     var title = variable_with_spaces.charAt(0).toUpperCase() + variable_with_spaces.slice(1) +

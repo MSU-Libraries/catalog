@@ -61,7 +61,7 @@ def _sql_query(variable: str, period_start: datetime, period_end: datetime, grou
     }
     sql_group = sql_group_by_group[group]
     node = os.getenv('NODE')
-    if variable in ['apache_requests', 'response_time']:
+    if variable in ['apache_requests', 'response_time'] or variable.endswith('_cpu'):
         aggreg = 'AVG'
     else:
         aggreg = 'MIN'
