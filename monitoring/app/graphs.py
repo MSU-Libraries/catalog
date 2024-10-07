@@ -63,6 +63,8 @@ def _sql_query(variable: str, period_start: datetime, period_end: datetime, grou
     node = os.getenv('NODE')
     if variable in ['apache_requests', 'response_time'] or variable.endswith('_cpu'):
         aggreg = 'AVG'
+    elif variable.endswith('_mem'):
+        aggreg = 'MAX'
     else:
         aggreg = 'MIN'
     return f'SELECT {sql_select}, {aggreg}({variable}) AS {variable} FROM data ' \
