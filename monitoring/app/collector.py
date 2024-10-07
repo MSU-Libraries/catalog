@@ -67,7 +67,7 @@ def _analyse_log() -> dict[str, int | None]:
 
 def _read_docker_stats():
     variables = {}
-    with open(f'/mnt/shared/docker_stats/{os.getenv('NODE')}/{os.getenv('STACK_NAME')}', 'r', encoding='UTF-8') as f:
+    with open(f'/mnt/shared/docker_stats/{os.getenv("NODE")}/{os.getenv("STACK_NAME")}', 'r', encoding='UTF-8') as f:
         while True:
             line = f.readline()
             if not line:
