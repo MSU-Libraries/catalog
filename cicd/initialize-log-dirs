@@ -34,7 +34,7 @@ main() {
 
         # Create a bind mount for the nagios user
         ssh deploy@"$HOST" \
-        "sudo /usr/local/bin/pc-mount-logs ${STACK_NAME} /home/nagios/ -v";
+        "sudo /usr/local/bin/pc-mount-logs ${STACK_NAME} /home/nagios/ -v --create-service";
     done
 }
 
