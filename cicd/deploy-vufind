@@ -24,12 +24,9 @@ fi
 
 main() {
     # Pull images now to save time with stack deploy
-    ssh deploy@"${DEPLOY_HOST_1}" "docker pull $CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
-    ssh deploy@"${DEPLOY_HOST_2}" "docker pull $CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" &
-    ssh deploy@"${DEPLOY_HOST_3}" "docker pull $CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}";
-    wait
+    run_on_all_nodes "docker pull $CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}"
 
-    ssh deploy@"${DEPLOY_HOST_1}" "docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.catalog.yml) ${STACK_NAME}-catalog";
+    run_on_node 1 "docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.catalog.yml) ${STACK_NAME}-catalog";
 
     # Set URL
     URL="${SITE_HOSTNAME}";
@@ -42,5 +39,5 @@ main() {
     echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
 }
 
-beforescript
+before_script
 main

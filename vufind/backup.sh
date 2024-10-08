@@ -14,7 +14,7 @@ default_args() {
 default_args
 
 # Script help text
-runhelp() {
+run_help() {
     echo ""
     echo "Usage: Runs a backup of the Solr and/or the database and"
     echo "       saves it to the shared storage path."
@@ -52,7 +52,7 @@ runhelp() {
 }
 
 if [[ -z "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
-    runhelp
+    run_help
     exit 0
 fi
 
@@ -105,7 +105,7 @@ parse_args() {
 
 catch_invalid_args() {
     if [[ "${ARGS[SOLR]}" -eq 0 && "${ARGS[DB]}" -eq 0 && "${ARGS[ALPHA]}" -eq 0 ]]; then
-        echo "ERROR: Neither --solr, --alpha, or --db flag is set. Please selet at least one to use this tool."
+        echo "ERROR: Neither --solr, --alpha, or --db flag is set. Please select at least one to use this tool."
         exit 1
     fi
 }
@@ -122,20 +122,20 @@ verbose() {
 }
 
 backup_alpha() {
-    mkdir -p ${ARGS[SHARED_DIR]}/alpha
-    remove_old_backups ${ARGS[SHARED_DIR]}/alpha
+    mkdir -p "${ARGS[SHARED_DIR]}/alpha"
+    remove_old_backups "${ARGS[SHARED_DIR]}/alpha"
 
     verbose "Taking a backup of the alphabrowse databases"
     TIMESTAMP=$( date +%Y%m%d%H%M%S )
-    mkdir -p ${ARGS[SHARED_DIR]}/alpha/"${TIMESTAMP}"
+    mkdir -p "${ARGS[SHARED_DIR]}/alpha/${TIMESTAMP}"
 
-    if ! OUTPUT=$(cp ${ARGS[ALPHA_DIR]}/* ${ARGS[SHARED_DIR]}/alpha/"${TIMESTAMP}"/); then
+    if ! OUTPUT=$(cp "${ARGS[ALPHA_DIR]}"/* "${ARGS[SHARED_DIR]}/alpha/${TIMESTAMP}"/); then
         verbose "ERROR: failed to make a backup of the alphabrowse databases. $OUTPUT" 1
         exit 1
     fi
 
     verbose "Compressing the backup"
-    if ! tar -cf ${ARGS[SHARED_DIR]}/alpha/"${TIMESTAMP}".tar -C ${ARGS[SHARED_DIR]}/alpha/"${TIMESTAMP}" --remove-files ./; then
+    if ! tar -cf "${ARGS[SHARED_DIR]}/alpha/${TIMESTAMP}".tar -C "${ARGS[SHARED_DIR]}/alpha/${TIMESTAMP}" --remove-files ./; then
         verbose "ERROR: Failed to compress the alphabrowse databases." 1
         exit 1
     fi
@@ -158,9 +158,9 @@ backup_collection() {
     SOLR_NODE="${SOLR_NODES[$SOLR_IDX]}"
     COLL="$1"
 
-    mkdir -p ${ARGS[SHARED_DIR]}/solr/"${COLL}"
-    mkdir -p ${ARGS[SHARED_DIR]}/solr_dropbox/"${COLL}"
-    chmod -R 777 ${ARGS[SHARED_DIR]}/solr_dropbox/
+    mkdir -p "${ARGS[SHARED_DIR]}/solr/${COLL}"
+    mkdir -p "${ARGS[SHARED_DIR]}/solr_dropbox/${COLL}"
+    chmod -R 777 "${ARGS[SHARED_DIR]}/solr_dropbox/"
 
     # Trigger the backup in Solr
     verbose "Starting backup of '${COLL}' index (using node $SOLR_NODE)"
@@ -193,18 +193,18 @@ backup_collection() {
         fi
         sleep 3
         EXPECTED="$(curl -sS "http://$SOLR_NODE:8983/solr/${COLL}/replication?command=details&wt=json" | jq '.details.commits[0][5]|length')"
-        ACTUAL="$(find ${ARGS[SHARED_DIR]}/solr_dropbox/"${COLL}"/"${SNAPSHOT}" -type f 2>/dev/null | wc -l)"
+        ACTUAL="$(find "${ARGS[SHARED_DIR]}/solr_dropbox/${COLL}/${SNAPSHOT}" -type f 2>/dev/null | wc -l)"
         CUR_WAIT=$((CUR_WAIT+1))
     done
 
     # Move the backups from the dropbox, remove Solr's access, and compress
-    mv ${ARGS[SHARED_DIR]}/solr_dropbox/"${COLL}"/"${SNAPSHOT}" ${ARGS[SHARED_DIR]}/solr/"${COLL}"/
-    chown -R root:root ${ARGS[SHARED_DIR]}/solr/"${COLL}"
-    chmod -R 660 ${ARGS[SHARED_DIR]}/solr/"${COLL}"
+    mv "${ARGS[SHARED_DIR]}/solr_dropbox/${COLL}/${SNAPSHOT}" "${ARGS[SHARED_DIR]}/solr/${COLL}/"
+    chown -R root:root "${ARGS[SHARED_DIR]}/solr/${COLL}"
+    chmod -R 660 "${ARGS[SHARED_DIR]}/solr/${COLL}"
 
     verbose "Compressing the backup"
     PREV_CWD="$(pwd)"
-    if ! cd ${ARGS[SHARED_DIR]}/solr/"${COLL}"; then
+    if ! cd "${ARGS[SHARED_DIR]}/solr/${COLL}"; then
         verbose "ERROR: Could not navigate into index backup directory (${ARGS[SHARED_DIR]}/solr/${COLL})" 1
         exit 1
     fi
@@ -224,13 +224,13 @@ backup_collection() {
 
     verbose "Backup completed for '${COLL}' index."
 
-    remove_old_backups ${ARGS[SHARED_DIR]}/solr/"${COLL}"
+    remove_old_backups "${ARGS[SHARED_DIR]}/solr/${COLL}"
 }
 
 # Return database back to normal
 reset_db() {
     # DB_NODE is declared in backup_db() function
-    verbose "Re-enabling Galera node to sychronized state"
+    verbose "Re-enabling Galera node to synchronized state"
     if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SET GLOBAL wsrep_desync = OFF" 2>&1); then
         # Check if it was a false negative and the state was actually set
         if ! mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
@@ -245,34 +245,34 @@ backup_db() {
     DBS=( galera1 galera2 galera3 )
     DB_IDX="$(( RANDOM % ${#DBS[@]} ))"
     declare -g DB_NODE="${DBS[$DB_IDX]}"
-    mkdir -p ${ARGS[SHARED_DIR]}/db
+    mkdir -p "${ARGS[SHARED_DIR]}/db"
 
     verbose "Removing leftover uncompressed sql files"
-    rm ${ARGS[SHARED_DIR]}/db/*.sql 2>/dev/null
+    rm "${ARGS[SHARED_DIR]}"/db/*.sql 2>/dev/null
 
     # If interrupted, we'll try to reset the database before exiting
     trap reset_db SIGTERM SIGINT EXIT
 
-    verbose "Temporarily setting Galera node to desychronized state (using node $DB_NODE)"
+    verbose "Temporarily setting Galera node to desynchronized state (using node $DB_NODE)"
     if ! OUTPUT=$(mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SET GLOBAL wsrep_desync = ON" 2>&1); then
         # Check if it was a false negative and the state was actually set
         if ! mysql -h "$DB_NODE" -u root -p"$MARIADB_ROOT_PASSWORD" -e "SHOW GLOBAL STATUS LIKE 'wsrep_desync_count'" 2>/dev/null \
           | grep 1 > /dev/null 2>&1; then
-            verbose "ERROR: Failed to set node to desychronized state. Unsafe to continue backup. ${OUTPUT}" 1
+            verbose "ERROR: Failed to set node to desynchronized state. Unsafe to continue backup. ${OUTPUT}" 1
             exit 1
         fi
     fi
 
-    remove_old_backups ${ARGS[SHARED_DIR]}/db
+    remove_old_backups "${ARGS[SHARED_DIR]}/db"
 
     verbose "Starting backup of database"
     TIMESTAMP=$( date +%Y%m%d%H%M%S )
     for DB in "${DBS[@]}"; do
-        if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p"$MARIADB_ROOT_PASSWORD" --triggers --routines --single-transaction --skip-lock-tables --column-statistics=0 --no-data  vufind 2>&1 > >(gzip > ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql.gz )); then
+        if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p"$MARIADB_ROOT_PASSWORD" --triggers --routines --single-transaction --skip-lock-tables --column-statistics=0 --no-data  vufind 2>&1 > >(gzip > "${ARGS[SHARED_DIR]}/db/${DB}-${TIMESTAMP}.sql.gz" )); then
             verbose "ERROR: Failed to successfully backup the database structure from ${DB}. ${OUTPUT}" 1
             exit 1
         fi
-        if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p"$MARIADB_ROOT_PASSWORD" --quick --single-transaction --skip-lock-tables --column-statistics=0 --no-create-info --ignore-table=vufind.session --ignore-table=vufind.SimpleSAMLphp_kvstore --ignore-table=vufind.SimpleSAMLphp_saml_LogoutStore vufind 2>&1 > >(gzip >> ${ARGS[SHARED_DIR]}/db/"${DB}"-"${TIMESTAMP}".sql.gz )); then
+        if ! OUTPUT=$(mysqldump -h "${DB}" -u root -p"$MARIADB_ROOT_PASSWORD" --quick --single-transaction --skip-lock-tables --column-statistics=0 --no-create-info --ignore-table=vufind.session --ignore-table=vufind.SimpleSAMLphp_kvstore --ignore-table=vufind.SimpleSAMLphp_saml_LogoutStore vufind 2>&1 > >(gzip >> "${ARGS[SHARED_DIR]}/db/${DB}-${TIMESTAMP}.sql.gz" )); then
 
             verbose "ERROR: Failed to successfully backup the database from ${DB}. ${OUTPUT}" 1
             exit 1
@@ -285,7 +285,7 @@ backup_db() {
 
     verbose "Compressing the backup"
     PREV_CWD="$(pwd)"
-    if ! cd ${ARGS[SHARED_DIR]}/db; then
+    if ! cd "${ARGS[SHARED_DIR]}/db"; then
         verbose "ERROR: Could not navigate into database backup directory (${ARGS[SHARED_DIR]}/db)" 1
         exit 1
     fi

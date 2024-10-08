@@ -2,7 +2,7 @@
 
 source "${CI_PROJECT_DIR}"/cicd/before-script
 
-runhelp() {
+run_help() {
     echo ""
     echo "Purpose: Performs updates to the docker-compose files and deploys them to the server"
     echo ""
@@ -21,7 +21,7 @@ runhelp() {
 }
 
 if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
-    runhelp
+    run_help
     exit 0
 fi
 
@@ -255,7 +255,7 @@ set_or_update_docker_secret() {
     SECRET_NAME="${STACK_NAME}-$1"
     SECRET_VALUE="$2"
     # Check if the secret exists and creating it
-    if ! ssh deploy@"${DEPLOY_HOST_1}" docker secret inspect "${SECRET_NAME}" > /dev/null 2>&1; then
+    if ! run_on_node 1 "docker secret inspect \"${SECRET_NAME}\"" > /dev/null 2>&1; then
         echo "Creating secret ${SECRET_NAME}"
         printf "%s" "${SECRET_VALUE}" | ssh deploy@"${DEPLOY_HOST_1}" docker secret create "${SECRET_NAME}" -
     fi
@@ -332,5 +332,5 @@ main() {
     echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
 }
 
-beforescript
+before_script
 main
