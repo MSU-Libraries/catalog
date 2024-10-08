@@ -1675,7 +1675,8 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         $matches = [];
 
         // MSUL PC-1105 Update subfields to match spreadsheet
-        $subfieldsFor800s = range('a', 'w');
+        $subfieldsFor800s = range('a', 'u');
+        $subfieldsFor800s[] = 'w';
         $subfieldsFor800s[] = 'x';
         $subfieldsFor800s[] = '3';
 

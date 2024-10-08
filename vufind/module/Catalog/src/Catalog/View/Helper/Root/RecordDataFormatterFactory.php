@@ -84,9 +84,9 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
 
         $spec->reorderKeys(['Uniform Title', 'Published in', 'New Title', 'Previous Title',
                 'Authors', 'Language', 'Language of the Original', 'Language and/or Writing System',
-                'Published', 'Edition', 'Series',
+                'Published', 'Distributed', 'Edition', 'Series',
                 'Subjects', 'Genre', 'child_records', 'Online Access',
-                'Ownership and Custodial History', 'Local Note', 'Dissertation Note', 'Produced', 'Distributed',
+                'Ownership and Custodial History', 'Local Note', 'Dissertation Note', 'Produced',
                 'Manufactured', 'Binding Information', 'Physical Description', 'Tags', 'Variant Title',
                 'Copyright Date', 'Other Uniform Title', 'Added Title']);
 
