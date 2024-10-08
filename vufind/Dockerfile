@@ -39,7 +39,7 @@ RUN \
     # END TEMP(PART2)
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    (umask 057; mkdir -p /opt/modsecurity/tmp \
+    (umask 027; mkdir -p /opt/modsecurity/tmp \
         /opt/modsecurity/var/data \
         /opt/modsecurity/var/upload \
         /opt/modsecurity/var/audit \
