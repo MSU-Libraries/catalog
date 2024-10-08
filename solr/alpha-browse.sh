@@ -8,7 +8,7 @@ if [[ -n "${STACK_NAME}" ]]; then
 fi
 
 # Script help text
-runhelp() {
+run_help() {
     echo ""
     echo "Usage: Update the alphabetical browse databases used by Solr."
     echo ""
@@ -40,7 +40,7 @@ runhelp() {
 }
 
 if [[ $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
-    runhelp
+    run_help
     exit 0
 fi
 
@@ -132,8 +132,8 @@ rebuild_databases() {
     mkdir -p "${ARGS[BUILD_PATH]}/alphabetical_browse"
 
     # Create required symlink if it doesn't already exist
-    if [[ ! -h ${ARGS[BUILD_PATH]}/jars ]]; then
-        ln -s /solr_confs/jars ${ARGS[BUILD_PATH]}/jars
+    if [[ ! -h "${ARGS[BUILD_PATH]}/jars" ]]; then
+        ln -s /solr_confs/jars "${ARGS[BUILD_PATH]}/jars"
     fi
 
     # Always recreate the biblio link (collections might have changed)
@@ -143,20 +143,20 @@ rebuild_databases() {
         echo "Failed to query the collection aliases in Solr. Output: ${ALIASES}"
         return 1
     fi
-    BIBLIO_COLLECTION_NAME=`echo "$ALIASES" | grep '"biblio"' | sed -e 's/.*>\([^<]*\)<.*/\1/'`
+    BIBLIO_COLLECTION_NAME=$(echo "$ALIASES" | grep '"biblio"' | sed -e 's/.*>\([^<]*\)<.*/\1/')
     BIBLIO_COLLECTION_PATH="/bitnami/solr/server/solr/${BIBLIO_COLLECTION_NAME}"
-    if [ ! -d $BIBLIO_COLLECTION_PATH ]; then
+    if [ ! -d "$BIBLIO_COLLECTION_PATH" ]; then
         echo "Could not find the collection directory at $BIBLIO_COLLECTION_PATH"
         return 1
     fi
-    ln -s $BIBLIO_COLLECTION_PATH ${ARGS[BUILD_PATH]}/biblio
+    ln -s "$BIBLIO_COLLECTION_PATH" "${ARGS[BUILD_PATH]}/biblio"
 
     if [[ ! -h ${ARGS[BUILD_PATH]}/authority ]]; then
-        ln -s /bitnami/solr/server/solr/authority ${ARGS[BUILD_PATH]}/authority
+        ln -s /bitnami/solr/server/solr/authority "${ARGS[BUILD_PATH]}/authority"
     fi
 
     if ! JAVA_HOME=/opt/bitnami/java SOLR_HOME=${ARGS[BUILD_PATH]} SOLR_JAR_PATH=/opt/bitnami/solr VUFIND_HOME=/solr_confs /solr_confs/index-alphabetic-browse.sh; then
-        verbose "Error occured while running index-alphabetic-browse.sh script!"
+        verbose "Error occurred while running index-alphabetic-browse.sh script!"
         RCODE=1
     else
         verbose "Rebuild complete"
@@ -171,17 +171,17 @@ rebuild_databases() {
 update_shared() {
     # Remove all files from the shared storage alphabetical browse folder
     verbose "Cleaning up old db files from ${ARGS[SHARED_PATH]} (with age > ${ARGS[MAX_AGE_HOURS]} hour(s))."
-    find ${ARGS[SHARED_PATH]} -type f -mmin +$(( ARGS[MAX_AGE_HOURS] * 60 )) -name "*.db*" ! -name "*lock" -delete
+    find "${ARGS[SHARED_PATH]}" -type f -mmin +$(( ARGS[MAX_AGE_HOURS] * 60 )) -name "*.db*" ! -name "*lock" -delete
 
     # Copy all database files to the shared storage
     verbose "Copying database files from: ${ARGS[BUILD_PATH]}/alphabetical_browse/*db-* to ${ARGS[SHARED_PATH]}"
-    cp -p ${ARGS[BUILD_PATH]}/alphabetical_browse/*db-* ${ARGS[SHARED_PATH]}/
+    cp -p "${ARGS[BUILD_PATH]}"/alphabetical_browse/*db-* "${ARGS[SHARED_PATH]}/"
 }
 
 lock_state() {
     MAX_SLEEP=$(( 6 * 60 * 60 ))
     CUR_SLEEP=0
-    while ! /lock-state.sh $@; do
+    while ! /lock-state.sh "$@"; do
         sleep 5;
         (( CUR_SLEEP += 5 ))
         if [[ "$CUR_SLEEP" -gt "$MAX_SLEEP" ]]; then
