@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS `data` (
     `mariadb_galera_mem` FLOAT
 );
 
-CREATE INDEX IF NOT EXISTS idx_node ON data(node);
 CREATE INDEX IF NOT EXISTS idx_time ON data(time);
 
 GRANT ALL PRIVILEGES ON monitoring.* TO 'monitoring'@'%' identified by '${MARIADB_MONITORING_PASSWORD}';
