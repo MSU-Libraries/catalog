@@ -27,7 +27,7 @@ default_args
 
 
 # Script help text
-runhelp() {
+run_help() {
     echo ""
     echo "Usage: Harvest authority records from via the FTP server"
     echo "       and import that data into VuFind's authority Solr index."
@@ -99,7 +99,7 @@ runhelp() {
 }
 
 if [[ -z "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
-    runhelp
+    run_help
     exit 0
 fi
 
@@ -210,7 +210,7 @@ assert_vufind_harvest_dir_writable() {
 }
 
 assert_ftp_readable() {
-    if ! curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --netrc > /dev/null 2>&1; then
+    if ! curl "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}" --netrc > /dev/null 2>&1; then
         echo "ERROR: FTP harvest location is not readable: ${ARGS[FTP_SERVER]}"
         exit 1
     fi
@@ -338,7 +338,7 @@ harvest() {
 
     # Check FTP server to compare files for ones we don't have
     OLD_PWD=$(pwd)
-    if ! cd ${ARGS[VUFIND_HARVEST_DIR]}; then
+    if ! cd "${ARGS[VUFIND_HARVEST_DIR]}"; then
         verbose "Failed to change directory into the harvest dir" 1
         exit 1
     fi
@@ -346,20 +346,20 @@ harvest() {
     do
         # If it is not in the harvest dir and it is an zip file, then get it
         if [ ! -f "${ARGS[SHARED_DIR]}/current/${AUTH_FILE}" ] && [[ ${AUTH_FILE} == *.zip ]]; then
-            if ! wget ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/"${AUTH_FILE}" > /dev/null 2>&1; then
+            if ! wget "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${AUTH_FILE}" > /dev/null 2>&1; then
                 verbose "ERROR: Failed to retrieve ${AUTH_FILE} from FTP server" 1
                 exit 1
             fi
-            mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/tmp
-            unzip -qq "${AUTH_FILE}" -d ${ARGS[VUFIND_HARVEST_DIR]}/tmp
+            mkdir -p "${ARGS[VUFIND_HARVEST_DIR]}/tmp"
+            unzip -qq "${AUTH_FILE}" -d "${ARGS[VUFIND_HARVEST_DIR]}/tmp"
             for F in tmp/* ; do if [[ ${F} == *.MRC ]]; then mv "${F}" "${AUTH_FILE%.zip}"_"${F#tmp/}"; fi done
-            rm -rf ${ARGS[VUFIND_HARVEST_DIR]}/tmp
+            rm -rf "${ARGS[VUFIND_HARVEST_DIR]}/tmp"
 
             # Remove the files we don't currently import
-            find ${ARGS[VUFIND_HARVEST_DIR]} -maxdepth 1 \( -name "*FAST*" -o -name "*MESH.GENRE*" -o -name "*MESH.NAME*" \
+            find "${ARGS[VUFIND_HARVEST_DIR]}" -maxdepth 1 \( -name "*FAST*" -o -name "*MESH.GENRE*" -o -name "*MESH.NAME*" \
                 -o -name "*_NAME.CHG*" -o -name "*_NAME.NEW*" \) -delete
         fi
-    done < <(curl ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]} --netrc -l -s)
+    done < <(curl "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}" --netrc -l -s)
     if ! cd "${OLD_PWD}"; then
         verbose "Failed to change directory to original path" 1
         exit 1
@@ -373,7 +373,7 @@ harvest() {
 }
 
 # Copy MRC files back from shared dir to VuFind dir
-copyback_from_shared() {
+copy_back_from_shared() {
     assert_vufind_harvest_dir_writable
     verbose "Replacing any VuFind files with files from shared directory."
     countdown 5
@@ -414,16 +414,16 @@ import() {
     fi
 
     # Create required sub directories in case they don't already exist on the container
-    mkdir -p ${ARGS[VUFIND_HARVEST_DIR]}/processed
+    mkdir -p "${ARGS[VUFIND_HARVEST_DIR]}/processed"
 
     # Convert each file from .MRC to .xml
     verbose "Pre-processing files to convert from .MRC to .xml"
     while read -r FILE; do
         marc2xml "${FILE}" > "${FILE%.MRC}".xml
-        mv "${FILE}" ${ARGS[VUFIND_HARVEST_DIR]}/processed/
+        mv "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/processed/"
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.MRC')
 
-    # Pre-process xml files to split contents by type placing each in separate subdirs
+    # Pre-process xml files to split contents by type placing each in separate sub-dirs
     if [[ "${ARGS[BYPASS_PREPROCESS]}" -eq 0 ]]; then
         slice_marc_files
     fi
@@ -619,7 +619,7 @@ main() {
     if [[ "${ARGS[HARVEST]}" -eq 1 ]]; then
         harvest
     elif [[ "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
-        copyback_from_shared
+        copy_back_from_shared
     fi
     if [[ "${ARGS[RESET_SOLR]}" -eq 1 ]]; then
         reset_solr
