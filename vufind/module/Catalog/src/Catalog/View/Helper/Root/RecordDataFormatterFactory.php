@@ -88,7 +88,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
                 'Edition', 'Series', 'Subjects', 'Genre', 'child_records', 'Online Access',
                 'Ownership and Custodial History', 'Local Note', 'Dissertation Note',
                 'Binding Information', 'Physical Description', 'Tags', 'Variant Title',
-                'Copyright Date', 'Other Uniform Title', 'Added Title']);
+                'Other Uniform Title', 'Added Title']);
 
         return $spec->getArray();
     }
