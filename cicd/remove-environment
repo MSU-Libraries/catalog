@@ -2,7 +2,7 @@
 
 source "${CI_PROJECT_DIR}"/cicd/before-script
 
-runhelp() {
+run_help() {
     echo ""
     echo "Purpose: Remove the environment from the nodes and cleanup the data left behind"
     echo ""
@@ -21,25 +21,25 @@ runhelp() {
 }
 
 if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
-    runhelp
+    run_help
     exit 0
 fi
 
 waitforstop() {
     HOST=$1
-    SERVICES=$(ssh deploy@"${HOST}" "docker ps --filter name=${STACK_NAME} --format '{{.Names}}' | wc -l")
+    SERVICES=$(run_on_node "${HOST}" "docker ps --filter name=${STACK_NAME} --format '{{.Names}}' | wc -l")
     while [[ "${SERVICES}" -gt 0 ]]; do
         echo "There are still ${SERVICES} services running on ${HOST} for ${STACK_NAME}..."
         sleep 3
-        SERVICES=$(ssh deploy@"${HOST}" "docker ps --filter name=${STACK_NAME} --format '{{.Names}}' | wc -l")
+        SERVICES=$(run_on_node "${HOST}" "docker ps --filter name=${STACK_NAME} --format '{{.Names}}' | wc -l")
     done
 }
 
 prunevols() {
     HOST=$1
-    VOLS=$(ssh deploy@"${HOST}" "docker volume ls --filter name=$STACK_NAME --format '{{.Name}}'")
+    VOLS=$(run_on_node "${HOST}" "docker volume ls --filter name=$STACK_NAME --format '{{.Name}}'")
     if [ -n "${VOLS}" ]; then
-        if ! OUTPUT=$(ssh deploy@"${HOST}" "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"); then
+        if ! OUTPUT=$(run_on_node "${HOST}" "docker system prune -a -f; docker volume ls --filter name=$STACK_NAME --format '{{.Name}}' | xargs -n 1 docker volume rm"); then
             echo "Failed to remove one or more volumes from ${HOST} for ${VOLS}. ${OUTPUT}"
             exit 1
         fi
@@ -49,19 +49,18 @@ prunevols() {
 removemount() {
     HOST=$1
     # Remove the bind mount for the nagios user
-    ssh deploy@"$HOST" \
-    "sudo /usr/local/bin/pc-mount-logs ${STACK_NAME} /home/nagios/ --remove -v";
+    run_on_node "${HOST}" "sudo /usr/local/bin/pc-mount-logs ${STACK_NAME} /home/nagios/ --remove -v";
 
 }
 
 removesecrets() {
     echo "Deleting secrets for stack \"${STACK_NAME}\""
     # shellcheck disable=SC2207
-    SECRET_IDS=($(ssh deploy@"${DEPLOY_HOST_1}" "docker secret ls --filter name=\"${STACK_NAME}-\" --format \"{{.ID}}\""))
+    SECRET_IDS=($(run_on_node 1 "docker secret ls --filter name=\"${STACK_NAME}-\" --format \"{{.ID}}\""))
     # shellcheck disable=SC2207
-    SECRETS=($(ssh deploy@"${DEPLOY_HOST_1}" "docker secret ls --filter name=\"${STACK_NAME}-\" --format \"{{.ID}}: {{.Name}}\""))
+    SECRETS=($(run_on_node 1 "docker secret ls --filter name=\"${STACK_NAME}-\" --format \"{{.ID}}: {{.Name}}\""))
     echo "Secrets to delete : ${SECRETS[*]}"
-    ssh deploy@"${DEPLOY_HOST_1}" "docker secret rm ${SECRET_IDS[*]}"
+    run_on_node 1 "docker secret rm ${SECRET_IDS[*]}"
 }
 
 main() {
@@ -75,34 +74,33 @@ main() {
     ansible-playbook provision-dns-playbook/decommission.yml;
 
     # Remove the alphabetic browse databases
-    CONTAINER=$(ssh deploy@"${DEPLOY_HOST_1}" "docker ps -q -f name=${STACK_NAME}-solr_cron");
+    CONTAINER=$(run_on_node 1 "docker ps -q -f name=${STACK_NAME}-solr_cron");
     if [ -n "${CONTAINER}" ]; then
-        ssh deploy@"${DEPLOY_HOST_1}" "docker exec ${CONTAINER} rm -rf /mnt/shared/alpha-browse/${STACK_NAME}";
+        run_on_node 1 "docker exec ${CONTAINER} rm -rf /mnt/shared/alpha-browse/${STACK_NAME}";
     fi
 
     # Cleanup volumes/networks/images/containers
-    ssh deploy@"${DEPLOY_HOST_1}" \
-    "docker stack rm ${STACK_NAME}-solr;
-    docker stack rm ${STACK_NAME}-mariadb;
-    docker stack rm ${STACK_NAME}-catalog;
-    docker stack rm ${STACK_NAME}-monitoring;
-    docker stack rm ${STACK_NAME}-internal;
-    rm -rf $COMPOSE_PATH;";
+    run_on_node 1 "docker stack rm ${STACK_NAME}-solr;
+                docker stack rm ${STACK_NAME}-mariadb;
+                docker stack rm ${STACK_NAME}-catalog;
+                docker stack rm ${STACK_NAME}-monitoring;
+                docker stack rm ${STACK_NAME}-internal;
+                rm -rf $COMPOSE_PATH;"
 
     # Wait for the containers to stop now the services have been removed
-    waitforstop "${DEPLOY_HOST_1}";
-    waitforstop "${DEPLOY_HOST_2}";
-    waitforstop "${DEPLOY_HOST_3}";
+    waitforstop 1;
+    waitforstop 2;
+    waitforstop 3;
 
     # Prune the volumes
-    prunevols "${DEPLOY_HOST_1}";
-    prunevols "${DEPLOY_HOST_2}";
-    prunevols "${DEPLOY_HOST_3}";
+    prunevols 1;
+    prunevols 2;
+    prunevols 3;
 
     removesecrets
 }
 
-beforescript
+before_script
 if ! main; then
     echo "Failed to build ${COMPONENT}. Sleeping to add delay before potential retry.";
     sleep 3;

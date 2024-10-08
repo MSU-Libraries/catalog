@@ -2,7 +2,7 @@
 
 source "${CI_PROJECT_DIR}"/cicd/before-script
 
-runhelp() {
+run_help() {
     echo ""
     echo "Purpose: Create the volume for the logs and initialize the directory with"
     echo "         proper permissions for MariaDB and Solr"
@@ -20,23 +20,19 @@ runhelp() {
 }
 
 if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
-    runhelp
+    run_help
     exit 0
 fi
 
 main() {
     # Create logs volume and set permissions for /mnt/logs/mariadb so that mariadb can write the log there (same for solr)
-    HOSTS="$DEPLOY_HOST_1 $DEPLOY_HOST_2 $DEPLOY_HOST_3";
-    for HOST in ${HOSTS}; do
-        ssh deploy@"${HOST}" \
-        "docker volume create ${STACK_NAME}_logs &&
-        docker run --rm -v ${STACK_NAME}_logs:/mnt/logs alpine sh -c 'mkdir -p /mnt/logs/mariadb /mnt/logs/solr && chown 1001 /mnt/logs/mariadb /mnt/logs/solr'";
+    run_on_all_nodes "docker volume create ${STACK_NAME}_logs &&
+                docker run --rm -v ${STACK_NAME}_logs:/mnt/logs \
+                    alpine sh -c 'mkdir -p /mnt/logs/mariadb /mnt/logs/solr && chown 1001 /mnt/logs/mariadb /mnt/logs/solr'"
 
-        # Create a bind mount for the nagios user
-        ssh deploy@"$HOST" \
-        "sudo /usr/local/bin/pc-mount-logs ${STACK_NAME} /home/nagios/ -v";
-    done
+    # Create a bind mount for the nagios user
+    run_on_all_nodes "sudo /usr/local/bin/pc-mount-logs ${STACK_NAME} /home/nagios/ -v";
 }
 
-beforescript
+before_script
 main
