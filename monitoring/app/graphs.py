@@ -9,7 +9,11 @@ import aiohttp
 import util
 
 
-KNOWN_VARIABLES = ['available_memory', 'available_disk_space', 'apache_requests', 'response_time']
+KNOWN_VARIABLES = [
+    'available_memory', 'available_disk_space', 'apache_requests', 'response_time',
+    'solr_solr_cpu', 'solr_solr_mem', 'solr_cron_cpu', 'solr_cron_mem', 'solr_zk_cpu', 'solr_zk_mem',
+    'catalog_catalog_cpu', 'catalog_catalog_mem', 'mariadb_galera_cpu', 'mariadb_galera_mem'
+]
 
 
 def _times_by_period(period: str) -> list[datetime]:
@@ -57,8 +61,10 @@ def _sql_query(variable: str, period_start: datetime, period_end: datetime, grou
     }
     sql_group = sql_group_by_group[group]
     node = os.getenv('NODE')
-    if variable in ['apache_requests', 'response_time']:
+    if variable in ['apache_requests', 'response_time'] or variable.endswith('_cpu'):
         aggreg = 'AVG'
+    elif variable.endswith('_mem'):
+        aggreg = 'MAX'
     else:
         aggreg = 'MIN'
     return f'SELECT {sql_select}, {aggreg}({variable}) AS {variable} FROM data ' \
@@ -74,7 +80,7 @@ def node_graph_data(variable: str, period: str) -> dict[str, list] | str:
     group = _group_by_times(period_start, period_end)
     conn = None
     try:
-        with open(os.getenv('MARIADB_MONITORING_PASSWORD_FILE'), 'r') as f:
+        with open(os.getenv('MARIADB_MONITORING_PASSWORD_FILE'), 'r', encoding='UTF-8') as f:
             password = f.read().strip()
             f.close()
         conn = db.connect(user='monitoring', password=password, host='galera', database="monitoring")
