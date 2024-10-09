@@ -2,7 +2,7 @@
 
 source "${CI_PROJECT_DIR}"/cicd/before-script
 
-runhelp() {
+run_help() {
     echo ""
     echo "Purpose: Verify the health of the stack by calling the check"
     echo "         scripts used by the NCPA plugin"
@@ -19,36 +19,35 @@ runhelp() {
 }
 
 if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
-    runhelp
+    run_help
     exit 0
 fi
 
 check() {
     SERVICE=$1;
     HEALTHY=0;
-    for HOST in ${HOSTS}; do
+    for HOST in {1..3}; do
         ATTEMPTS=0;
+        NODE_HOSTNAME=$(node_hostname "${HOST}")
         while [[ "${ATTEMPTS}" -le 60 ]]; do
-            echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): Checking ${SERVICE} health...";
-            if ssh deploy@"${HOST}" "/usr/local/ncpa/plugins/check_${SERVICE}.sh ${STACK_NAME}"; then
-                echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} is healthy!";
+            echo "$(date +'%m-%d-%Y %T %z') -- (${NODE_HOSTNAME}): Checking ${SERVICE} health...";
+            if run_on_node "${HOST}" "/usr/local/ncpa/plugins/check_${SERVICE}.sh ${STACK_NAME}"; then
+                echo "$(date +'%m-%d-%Y %T %z') -- (${NODE_HOSTNAME}): ${SERVICE} is healthy!";
                 HEALTHY=1;
                 break;
             fi
-            echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} not healthy yet. Waiting...";
+            echo "$(date +'%m-%d-%Y %T %z') -- (${NODE_HOSTNAME}): ${SERVICE} not healthy yet. Waiting...";
             sleep 15;
             ATTEMPTS=$((ATTEMPTS+1));
         done
         if [[ "${HEALTHY}" -ne 1 ]]; then
-            echo "$(date +'%m-%d-%Y %T %z') -- (${HOST}): ${SERVICE} not healthy after max attempts. Failing job!";
+            echo "$(date +'%m-%d-%Y %T %z') -- (${NODE_HOSTNAME}): ${SERVICE} not healthy after max attempts. Failing job!";
             exit 1;
         fi;
     done
 }
 
 main() {
-    HOSTS="$DEPLOY_HOST_1 $DEPLOY_HOST_2 $DEPLOY_HOST_3";
-
     echo "Run checks using the NCPA scripts"
     check solr
     check zk
@@ -66,5 +65,5 @@ main() {
     echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
 }
 
-beforescript
+before_script
 main

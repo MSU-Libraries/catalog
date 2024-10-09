@@ -39,5 +39,5 @@ main() {
     echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
 }
 
-beforescript
+before_script
 main

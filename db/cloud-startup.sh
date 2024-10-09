@@ -3,7 +3,7 @@
 ## Reference variables ##
 # Get array of Galera nodes from env var
 # MARIADB_GALERA_CLUSTER_ADDRESS=gcomm://galera1,galera2,galera3
-# Bootstap variable; tells Galera to attempt to bootstrap the cluster
+# Bootstrap variable; tells Galera to attempt to bootstrap the cluster
 #MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes
 # This var tells Galera to force bootstap even when grastate.dat has "safe_to_bootstrap: 0"
 #MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP=yes
@@ -12,7 +12,10 @@
 
 GALERA_STATE_FILE=/bitnami/mariadb/data/grastate.dat
 NODES_STR="${MARIADB_GALERA_CLUSTER_ADDRESS##gcomm://}"
-NODES_ARR=(${NODES_STR//,/ })
+OLD_IFS="$IFS"
+IFS=','
+read -r -a NODES_ARR <<< "${NODES_STR}"
+IFS="$OLD_IFS"
 declare -g -A NODE_IPS
 declare -g GALERA_PID
 
@@ -64,7 +67,7 @@ hostname_from_ip() {
 to_hostname() {
     ARG="$1"
     HOST=$( hostname_from_ip "$ARG" )
-    if [[ "$?" -ne 0 ]]; then
+    if [[ -z "$HOST" ]]; then
         HOST="$ARG" # Assuming ARG isn't some other random value; we could check NODES_ARR here
     fi
     echo "$HOST"
@@ -408,7 +411,7 @@ galera_slow_shutdown() {
 
     verbose "Scanning to see if other nodes are online."
     # Scan other nodes to see if they are up
-    NODES_ONLINE=($(scan_for_online_nodes))
+    readarray -t NODES_ONLINE < <(scan_for_online_nodes | tr ' ' '\n')
     verbose "Lowest online node number: ${NODES_ONLINE[0]:-None}"
 
     # Wait to give other node scans time to complete

@@ -2,7 +2,7 @@
 
 source "${CI_PROJECT_DIR}"/cicd/before-script
 
-runhelp() {
+run_help() {
     echo ""
     echo "Purpose: Deploy the monitoring application stack"
     echo ""
@@ -18,30 +18,27 @@ runhelp() {
 }
 
 if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
-    runhelp
+    run_help
     exit 0
 fi
 
 main() {
     # Pull images now to save time with stack deploy
-    ssh deploy@"${DEPLOY_HOST_1}" "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA" &
-    ssh deploy@"${DEPLOY_HOST_2}" "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA" & 
-    ssh deploy@"${DEPLOY_HOST_3}" "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA";
-    wait
+    run_on_all_nodes "docker pull $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA"
 
     echo "Preparing $STACK_NAME deploy at $COMPOSE_PATH"
-    ssh deploy@"${DEPLOY_HOST_1}" sudo mkdir -p /mnt/shared/local/"${STACK_NAME}"/deploy/proxymonitoring
+    run_on_node 1 "sudo mkdir -p '/mnt/shared/local/${STACK_NAME}/deploy/proxymonitoring'"
     # Temporarily stash proxymonitoring.conf in compose directory for permissions reasons
     scp monitoring/proxymonitoring/proxymonitoring.conf deploy@"${DEPLOY_HOST_1}":"${COMPOSE_PATH}"/
-    ssh deploy@"${DEPLOY_HOST_1}" sudo mv "${COMPOSE_PATH}"/proxymonitoring.conf /mnt/shared/local/"${STACK_NAME}"/deploy/proxymonitoring/
+    run_on_node 1 "sudo mv '${COMPOSE_PATH}/proxymonitoring.conf' '/mnt/shared/local/${STACK_NAME}/deploy/proxymonitoring/'"
 
     echo "Issuing deploy command now"
-    ssh deploy@"${DEPLOY_HOST_1}" "docker stack deploy --prune --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.monitoring.yml) ${STACK_NAME}-monitoring";
+    run_on_node 1 "docker stack deploy --prune --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.monitoring.yml) ${STACK_NAME}-monitoring";
 
     # Get runtime metrics
     END=$(date +%s); RUNTIME=$((END-START)); HOURS=$((RUNTIME / 3600)); MINUTES=$(( (RUNTIME % 3600) / 60 )); SECONDS=$(( (RUNTIME % 3600) % 60 ));
     echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
 }
 
-beforescript
+before_script
 main
