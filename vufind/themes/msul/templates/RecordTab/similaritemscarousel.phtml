@@ -2,13 +2,11 @@
   $i = 1;
 ?>
 <h2><?=$this->transEsc('Similar Items')?></h2>
-<ol class="<?=$this->escapeHtmlAttr(trim('record-list ' . ($this->resultsClass ?? '')))?>" start="1">
+<ol class="record-list" start="1">
   <?php foreach ($this->tab->getResults() as $current): ?>
-    <?php $recordNumber = $i ?>
-    <?php // Data-record-number attribute is for analytics use.  Do not remove. ?>
-    <li<?php if (empty($this->excludeResultIds)): ?> id="result<?=$i?>"<?php endif; ?> class="result<?=$current->supportsAjaxStatus() ? ' ajaxItem' : ''?>" data-record-number="<?=$this->escapeHtmlAttr($recordNumber)?>">
+    <li class="result">
       <div class="record-number">
-        <?=$recordNumber ?>
+        <?=$i ?>
       </div>
       <?=$this->record($current)->getSearchResult('list', $this->tab)?>
     </li>
