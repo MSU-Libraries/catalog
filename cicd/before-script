@@ -1,6 +1,6 @@
 #!/bin/sh
 
-runhelp() {
+run_help() {
     echo ""
     echo "Purpose: Setup SSH access to all the deploy servers"
     echo ""
@@ -18,11 +18,21 @@ runhelp() {
 }
 
 if [ -n "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
-    runhelp
+    run_help
     exit 0
 fi
 
-beforescript() {
+get_pc_common() {
+    git archive --remote=git@gitlab.msu.edu:msu-libraries/devops/catalog-infrastructure.git HEAD configure-playbook/roles/deploy-helper-scripts/files/pc-common | tar xO > pc-common
+    # shellcheck disable=SC1091
+    if ! . pc-common > /dev/null; then
+        echo "Can not source pc-common. Aborting." >&2
+        exit 1
+    fi
+}
+
+before_script() {
+    get_pc_common
     # exit script if any command fails
     set -e
 
@@ -54,9 +64,7 @@ beforescript() {
     } >> ~/.ssh/known_hosts;
 
     # Docker login to all servers
-    ssh deploy@"$DEPLOY_HOST_1" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
-    ssh deploy@"$DEPLOY_HOST_2" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
-    ssh deploy@"$DEPLOY_HOST_3" "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY";
+    run_on_all_nodes "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY"
 
     # Get the number of attempts for this job
     apk add jq curl || apt install -y jq curl;
