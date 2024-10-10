@@ -44,3 +44,4 @@ nav:
     - Bots: bots.md
 - Developing:
     - Writing &amp; Running Tests: testing.md
+    - Using Core VuFind Only: core-vufind.md
