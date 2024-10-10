@@ -23,7 +23,9 @@ if [ -n "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; t
 fi
 
 get_pc_common() {
-    git archive --remote=git@gitlab.msu.edu:msu-libraries/devops/catalog-infrastructure.git HEAD configure-playbook/roles/deploy-helper-scripts/files/pc-common | tar xO > pc-common
+    git clone "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure.git" /tmp/catalog-infrastructure/
+    cp /tmp/catalog-infrastructure/configure-playbook/roles/deploy-helper-scripts/files/pc-common .
+    rm -rf /tmp/catalog-infrastructure/
     # shellcheck disable=SC1091
     if ! . pc-common > /dev/null; then
         echo "Can not source pc-common. Aborting." >&2
@@ -32,7 +34,6 @@ get_pc_common() {
 }
 
 before_script() {
-    get_pc_common
     # exit script if any command fails
     set -e
 
@@ -58,10 +59,14 @@ before_script() {
     install -d -m 700 ~/.ssh/;
     ( umask 022; touch ~/.ssh/known_hosts );
     {
+        ssh-keyscan "gitlab.msu.edu"
         ssh-keyscan "$SERVER"
         ssh-keyscan "$DEPLOY_HOST_2"
         ssh-keyscan "$DEPLOY_HOST_3"
     } >> ~/.ssh/known_hosts;
+
+    # Setup access to pc-common script
+    get_pc_common
 
     # Docker login to all servers
     run_on_all_nodes "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY"

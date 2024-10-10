@@ -11,6 +11,7 @@ variables:
   VUFIND_VERSION: "9.1.2"
   SIMPLESAMLPHP_VERSION: "2.1.1"
   COMPOSE_PATH: /home/deploy/$STACK_NAME
+  SSH_USER: "deploy"
 
 Set Stack Name:
   stage: test
