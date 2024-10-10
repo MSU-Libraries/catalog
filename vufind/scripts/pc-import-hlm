@@ -333,7 +333,7 @@ is_ignored() {
 }
 
 is_zip_or_marc_file() {
-  if [[ "${1}" == *.marc || "${1}" == *.zip ]]; then
+  if [[ "${1}" == *.m*c || "${1}" == *.zip ]]; then
     return 0
   fi
   return 1
