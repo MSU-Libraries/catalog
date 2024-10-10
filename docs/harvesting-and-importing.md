@@ -7,7 +7,9 @@
 Used to harvest and import FOLIO MARC data into the `biblio` collection of Solr.  
 * [pc-import-hlm](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-hlm):
 Used to harvest and import EBSCO MARC data into the `biblio` collection of Solr from the FTP location given
-access to by EBSCO. The records contain the HLM dataset that is missing from FOLIO's database.  
+access to by EBSCO. The records contain the HLM dataset that is missing from FOLIO's database. All files with
+`*.m*c` and `*.zip` will be harvested from the FTP location and `*-del*.m*c` (case insensitive) files will be
+designated as deletion files (including files inside the zip archives). 
 * [pc-import-authority](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-authority):
 Used to harvest and import MARC data from Backstage into the `authority` collection in Solr from the FTP location
 provided by Backstage.  
