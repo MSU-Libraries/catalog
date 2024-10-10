@@ -26,4 +26,4 @@ suggestions you have!
 
 ## Developing
 * [Writing & Running Tests](testing.md)
-* [Using core-vufind only](core-vufind.md)
+* [Using Core VuFind Only](core-vufind.md)
