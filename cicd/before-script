@@ -68,6 +68,11 @@ before_script() {
     # Setup access to pc-common script
     get_pc_common
 
+    echo "${SSH_USER}"
+    ssh catalog-1-dev.aws.lib.msu.edu ls -l /tmp/
+    ssh deploy@catalog-1-dev.aws.lib.msu.edu ls -l /tmp/
+    ssh deploy@catalog-1-dev.aws.lib.msu.edu docker ps
+    ssh deploy@catalog-1-dev.aws.lib.msu.edu secret ls
     # Docker login to all servers
     run_on_all_nodes "docker login -u cicd -p $REGISTRY_ACCESS_TOKEN $CI_REGISTRY"
 

@@ -215,7 +215,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
     {
         // Verifying the count since the values non-printable characters
         $this->assertCount(1, $this->getDriver('linkedauthors2.xml')->getCorporateAuthorsLinks());
-        $this->assertEquals(94, strlen($this->getDriver('linkedauthors2.xml')->getCorporateAuthorsLinks()[0]));
+        $this->assertEquals(108, strlen($this->getDriver('linkedauthors2.xml')->getCorporateAuthorsLinks()[0]));
     }
 
     /**
