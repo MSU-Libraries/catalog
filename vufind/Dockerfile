@@ -50,6 +50,7 @@ COPY modsecurity/ /etc/modsecurity/
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
 RUN \
     chmod -R g-w,o-rwx /etc/modsecurity && \
+    chgrp www-data /opt/modsecurity /opt/modsecurity/var && \
     # modsecurity/var/log/ excluded from chown intentionally (logs are root owned)
     chown -R www-data: /opt/modsecurity/tmp \
         /opt/modsecurity/var/data \
