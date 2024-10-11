@@ -7,7 +7,9 @@
 Used to harvest and import FOLIO MARC data into the `biblio` collection of Solr.  
 * [pc-import-hlm](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-hlm):
 Used to harvest and import EBSCO MARC data into the `biblio` collection of Solr from the FTP location given
-access to by EBSCO. The records contain the HLM dataset that is missing from FOLIO's database.  
+access to by EBSCO. The records contain the HLM dataset that is missing from FOLIO's database. All files with
+`*.m*c` and `*.zip` will be harvested from the FTP location and `*-del*.m*c` (case insensitive) files will be
+designated as deletion files (including files inside the zip archives). 
 * [pc-import-authority](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-authority):
 Used to harvest and import MARC data from Backstage into the `authority` collection in Solr from the FTP location
 provided by Backstage.  
@@ -265,6 +267,14 @@ php /usr/local/vufind/util/index_reserves.php
 Alternatively, you can also modify the cron entry (or add a temporary additional cron entry) in the cron
 container for the `cron-reserves.sh` command to run at an earlier time. The benefit of this would be it would
 save logs to `/mnt/logs/vufind/reserves_latest.log` and track them in the Monitoring site.
+
+## Ignoring certain HLM files
+If your EBSCO FTP server is set up in a way where it contains all of the sets ever generated for you, then
+you'll likely want a way to have the `pc-import-hlm` script ignore the past sets assuming you get new full
+sets periodically. This can be done by adding a new substring pattern to ignore to the top level of the `hlm`
+directory in the shared storage (`/mnt/shared/hlm/ignore_patterns.txt`). This file is used automatically and
+created on the cron containers startup if it doesn't exist. You can override the file path by using the
+`-p|--ignore-file` flag.
 
 ## Using VuFind Utilities
 The preferred method is to use the included wrapper script with this repository.

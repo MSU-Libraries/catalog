@@ -11,6 +11,7 @@ variables:
   VUFIND_VERSION: "9.1.2"
   SIMPLESAMLPHP_VERSION: "2.1.1"
   COMPOSE_PATH: /home/deploy/$STACK_NAME
+  SSH_USER: "deploy"
 
 Set Stack Name:
   stage: test
@@ -230,7 +231,7 @@ Verify Stack Health:
   environment:
     name: $CI_COMMIT_BRANCH/verify
     auto_stop_in: 2 weeks
-  timeout: 20m
+  timeout: 40m
   needs:
     - job: Set Stack Name
       artifacts: true

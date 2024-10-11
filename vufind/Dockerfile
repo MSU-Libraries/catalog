@@ -39,14 +39,24 @@ RUN \
     # END TEMP(PART2)
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    (umask 077; mkdir -p \
-        /opt/modsecurity/tmp /opt/modsecurity/var/data \
-        /opt/modsecurity/var/upload /opt/modsecurity/var/audit) && \
+    (umask 027; mkdir -p /opt/modsecurity/tmp \
+        /opt/modsecurity/var/data \
+        /opt/modsecurity/var/upload \
+        /opt/modsecurity/var/audit \
+        /opt/modsecurity/var/log) && \
     a2enmod security2
 
 COPY modsecurity/ /etc/modsecurity/
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
-RUN apt-get install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
+RUN \
+    chmod -R g-w,o-rwx /etc/modsecurity && \
+    chgrp www-data /opt/modsecurity /opt/modsecurity/var && \
+    # modsecurity/var/log/ excluded from chown intentionally (logs are root owned)
+    chown -R www-data: /opt/modsecurity/tmp \
+        /opt/modsecurity/var/data \
+        /opt/modsecurity/var/upload \
+        /opt/modsecurity/var/audit && \
+    apt-get install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb
 
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
@@ -69,14 +79,14 @@ RUN \
     rm vufind-${VUFIND_VERSION}.tar.gz && \
     # Install VuFind dev dependencies, for the tests
     composer --working-dir=/usr/local/vufind/ update && \
-    # Remove unused dependencies after Vufind is installed
-    # Disabled for upgrade to Solr 9
-    # mv /usr/local/vufind/solr /tmp && \
-    # mkdir -p /usr/local/vufind/solr/vendor/dist && \
-    # mkdir -p /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
-    # mv /tmp/solr/vendor/dist/solr* /usr/local/vufind/solr/vendor/dist/ && \
-    # mv /tmp/solr/vendor/contrib/analysis-extras/lib /usr/local/vufind/solr/vendor/contrib/analysis-extras && \
-    # rm -rf /tmp/solr && \
+    # Remove unused Solr dependencies after Vufind is installed
+    mv /usr/local/vufind/solr /tmp && \
+    mkdir -p /usr/local/vufind/solr/vendor/modules/analysis-extras /usr/local/vufind/solr/vendor/server/solr-webapp/webapp/WEB-INF && \
+    mv /tmp/solr/vendor/modules/analysis-extras/lib /usr/local/vufind/solr/vendor/modules/analysis-extras && \
+    mv /tmp/solr/vendor/server/solr-webapp/webapp/WEB-INF/lib/ /usr/local/vufind/solr/vendor/server/solr-webapp/webapp/WEB-INF && \
+    rm -rf /tmp/solr && \
+    # Fix world writable vendor dirs (TODO find out why these happen in the first place)
+    find /usr/local/vufind/vendor -type d -perm -o+w -exec chmod o-w \; && \
     # Create user for grunt
     groupadd -g 1000 msuldevs && \
     useradd msuldevs -u 1000 -g 1000 && \
