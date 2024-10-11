@@ -31,6 +31,24 @@ use function is_array;
 class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 {
     /**
+     * Fields that may contain subject headings, and their descriptions
+     *
+     * @var array
+     */
+    protected $subjectFields = [
+        '600' => 'personal name',
+        '610' => 'corporate name',
+        '611' => 'meeting name',
+        '630' => 'uniform title',
+        '648' => 'chronological',
+        '650' => 'topic',
+        '651' => 'geographic',
+        '653' => '',
+//        '655' => 'genre/form', // MSU commented
+        '656' => 'occupation',
+    ];
+
+    /**
      * Takes a Marc field (ex: 950) and a list of sub fields (ex: ['a','b'])
      * and returns the values inside those fields in an array
      * (ex: ['val 1', 'val 2'])
