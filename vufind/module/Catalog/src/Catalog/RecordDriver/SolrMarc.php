@@ -228,7 +228,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         }
         return [
             $this->getMarcFieldWithInd($field, $subfield, $indNum, $indValue, false),
-            $linkVals
+            $linkVals,
         ];
     }
 
@@ -470,11 +470,11 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 $fsplits = preg_split('/[.\s]--/', $fdata);
                 $lsplits = preg_split('/[.\s]--/', $ldata);
                 $max_size = max(count($fsplits), count($lsplits));
-                $fsplits = array_pad($fsplits, $max_size, "");
-                $lsplits = array_pad($lsplits, $max_size, "");
+                $fsplits = array_pad($fsplits, $max_size, '');
+                $lsplits = array_pad($lsplits, $max_size, '');
 
                 array_map(function ($fval, $lval) use (&$toc) {
-                    $toc[] = $fval . ($lval ? " = ${lval}" : "");
+                    $toc[] = $fval . ($lval ? " = ${lval}" : '');
                 }, $fsplits, $lsplits);
             }, $arr1, $arr2);
         }
