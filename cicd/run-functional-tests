@@ -23,8 +23,9 @@ fi
 
 main() {
     echo "Finding container to run tests against for stack ${STACK_NAME}-catalog_catalog..."
-    NODE=$(ssh deploy@"${DEPLOY_HOST_1}" "docker service ps -f 'desired-state=running' --format '{{ .Node }}' ${STACK_NAME}-catalog_catalog | head -n 1") || echo "";
-    CONTAINER=$(ssh deploy@"${NODE}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "";
+    # TODO refacto sed command into pc-common
+    NODE=$(run_on_node 1 "docker service ps -f 'desired-state=running' --format '{{ .Node }}' ${STACK_NAME}-catalog_catalog | head -n 1" | sed -re "s/\w*-([1-3]).*/\1/") || echo "";
+    CONTAINER=$(run_on_node "${NODE}" "docker ps -q -f name=${STACK_NAME}-catalog_catalog") || echo "";
 
     if [ -z "${NODE}" ] || [ -z "${CONTAINER}" ] ; then
         echo "Could not find container for ${STACK_NAME}-catalog_catalog. Node: ${NODE}. Container: ${CONTAINER}";
@@ -33,7 +34,7 @@ main() {
     echo "Found container ${CONTAINER}!";
 
     echo "Running Vufind functional tests...";
-    ssh deploy@"${NODE}" "docker exec ${CONTAINER} vendor/bin/phing phpunitfast -Dphpunit_extra_params=/usr/local/vufind/module/Catalog/tests/integration-tests/";
+    run_on_node "${NODE}" "docker exec ${CONTAINER} vendor/bin/phing phpunitfast -Dphpunit_extra_params=/usr/local/vufind/module/Catalog/tests/integration-tests/";
     EC=$?;
     echo "Tests complete with exit code ${EC}";
 
@@ -45,6 +46,6 @@ main() {
 }
 
 
-beforescript
+before_script
 main
 

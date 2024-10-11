@@ -43,7 +43,7 @@ Shellcheck CI:
   before_script:
     - apk add shellcheck || apt install shellcheck
   script:
-    - SHELLCHECK_OPTS="--exclude SC2029,SC1091" shellcheck cicd/*
+    - shellcheck cicd/*
   artifacts:
     reports:
       metrics: metrics.txt
@@ -62,8 +62,7 @@ Shellcheck:
   before_script:
     - apk add shellcheck || apt install shellcheck
   script:
-    # TODO eventually have this fail the job, but for now it's informational
-    - shellcheck $(find . -name "*.sh") || exit 0
+    - shellcheck $(find . -name "*.sh" -o -name "pc-*")
   artifacts:
     reports:
       metrics: metrics.txt
@@ -82,6 +81,7 @@ Validate Vufind Build:
       when: never
     - if: '$CI_PIPELINE_SOURCE != "schedule"'
   before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - apk add --no-cache bash
   script:
     - bash ./cicd/validate-vufind-build

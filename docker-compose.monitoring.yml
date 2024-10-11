@@ -6,8 +6,9 @@ services:
     image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/monitoring:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     hostname: monitoring{{slice .Node.Hostname 8 9}}
     volumes:
-      - logs:/mnt/logs
-      - traefik_logs:/mnt/traefik_logs
+      - logs:/mnt/logs:ro
+      - traefik_logs:/mnt/traefik_logs:ro
+      - /mnt/shared:/mnt/shared:ro
     networks:
       - internal
     extra_hosts:

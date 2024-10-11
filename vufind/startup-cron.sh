@@ -2,16 +2,16 @@
 
 # Map harvest directories onto the shared storage
 # FOLIO
-mkdir -p /mnt/shared/oai/${STACK_NAME}/harvest_folio/ /mnt/shared/oai/${STACK_NAME}/current/ /mnt/shared/oai/${STACK_NAME}/archives/
+mkdir -p "/mnt/shared/oai/${STACK_NAME}/harvest_folio/" "/mnt/shared/oai/${STACK_NAME}/current/" "/mnt/shared/oai/${STACK_NAME}/archives/"
 mv /usr/local/vufind/local/harvest/folio/ /tmp/
-ln -s /mnt/shared/oai/${STACK_NAME}/harvest_folio/ /usr/local/vufind/local/harvest/folio
-ln -s /mnt/shared/oai/${STACK_NAME}/ /mnt/oai
+ln -s "/mnt/shared/oai/${STACK_NAME}/harvest_folio/" /usr/local/vufind/local/harvest/folio
+ln -s "/mnt/shared/oai/${STACK_NAME}"/ /mnt/oai
 # HLM
-mkdir -p /mnt/shared/hlm/${STACK_NAME}/current/ /mnt/shared/hlm/${STACK_NAME}/archives/
-ln -s /mnt/shared/hlm/${STACK_NAME}/ /mnt/hlm
+mkdir -p "/mnt/shared/hlm/${STACK_NAME}/current/" "/mnt/shared/hlm/${STACK_NAME}/archives/"
+ln -s "/mnt/shared/hlm/${STACK_NAME}/" /mnt/hlm
 # AUTHORITY
-mkdir -p /mnt/shared/authority/${STACK_NAME}/current/ /mnt/shared/authority/${STACK_NAME}/archives/
-ln -s /mnt/shared/authority/${STACK_NAME}/ /mnt/authority
+mkdir -p "/mnt/shared/authority/${STACK_NAME}/current/" "/mnt/shared/authority/${STACK_NAME}/archives/"
+ln -s "/mnt/shared/authority/${STACK_NAME}/" /mnt/authority
 
 # Save the logs in the logs docker volume
 mkdir -p /mnt/logs/vufind /mnt/logs/harvests
@@ -19,7 +19,7 @@ ln -sf /mnt/logs/vufind /var/log/vufind
 touch /mnt/logs/vufind/vufind.log
 
 # Create backups dir symlink
-ln -s /mnt/shared/backups/${STACK_NAME}/ /mnt/backups
+ln -s "/mnt/shared/backups/${STACK_NAME}/" /mnt/backups
 
 # Set custom cron minute offsets for OAI harvesting
 FOLIO_CRON_MINS="0,30"  # catalog-prod
@@ -50,6 +50,9 @@ sed -i 's/type\s*=\s*Database/type=File/' /usr/local/vufind/local/config/vufind/
 if [[ "${STACK_NAME}" != catalog-prod ]]; then
     rm /etc/cron.d/backups
 fi
+
+# Create the HLM ignore substring file if it doesn't exist
+touch /mnt/shared/hlm/ignore_patterns.txt
 
 # Start up syslog (required for cron)
 rsyslogd

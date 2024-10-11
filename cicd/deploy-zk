@@ -2,7 +2,7 @@
 
 source "${CI_PROJECT_DIR}"/cicd/before-script
 
-runhelp() {
+run_help() {
     echo ""
     echo "Purpose: Deploy Zookeeper"
     echo ""
@@ -18,22 +18,19 @@ runhelp() {
 }
 
 if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
-    runhelp
+    run_help
     exit 0
 fi
 
 main() {
     # Pull images now to save time with stack deploy
     echo "Pre-pulling Docker images"
-    ssh deploy@"${DEPLOY_HOST_1}" "docker pull $CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA" &
-    ssh deploy@"${DEPLOY_HOST_2}" "docker pull $CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA" &
-    ssh deploy@"${DEPLOY_HOST_3}" "docker pull $CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA";
-    wait
+    run_on_all_nodes "docker pull $CI_REGISTRY_IMAGE/zk:$CI_COMMIT_SHORT_SHA"
 
     echo "Issuing deploy command now"
-    ssh deploy@"${DEPLOY_HOST_1}" "docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.zk.yml) ${STACK_NAME}-solr";
+    run_on_node 1 "docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.zk.yml) ${STACK_NAME}-solr";
 }
 
-beforescript
+before_script
 main
 

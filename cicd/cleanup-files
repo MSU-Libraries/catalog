@@ -22,8 +22,14 @@ fi
 
 main() {
     LOCAL_DIR="/mnt/shared/local/${STACK_NAME}"
-    if ! OUTPUT=$(ssh deploy@"${DEPLOY_HOST_1}" "[[ -d ${LOCAL_DIR} ]] && sudo rm -rf ${LOCAL_DIR}"); then
+    if ! OUTPUT=$(run_on_node 1 "if [[ -d ${LOCAL_DIR} ]]; then sudo rm -rf ${LOCAL_DIR}; fi"); then
         echo "Failed to remove the files at ${LOCAL_DIR}. Error: ${OUTPUT}"
+        exit 1
+    fi
+
+    DOCKER_STATS_FILES="/mnt/shared/docker_stats/*/${STACK_NAME}"
+    if ! OUTPUT=$(run_on_node 1 "sudo rm -f ${DOCKER_STATS_FILES}"); then
+        echo "Failed to remove the docker stats files. Error: ${OUTPUT}"
         exit 1
     fi
 
@@ -32,5 +38,5 @@ main() {
     echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
 }
 
-beforescript
+before_script
 main

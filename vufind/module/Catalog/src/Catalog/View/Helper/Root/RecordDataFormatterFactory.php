@@ -70,7 +70,12 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
             'data-notes.phtml'
         );
         $spec->setLine('Cartographic Data', 'getCartographicData');
+        $spec->setLine('Produced', 'getProduced');
         $spec->setLine('Platform', 'getPlatform');
+        $spec->setLine('Added Title', 'getAddedTitle');
+        $spec->setLine('Distributed', 'getDistributed');
+        $spec->setLine('Manufactured', 'getManufactured');
+        $spec->setLine('Copyright Date', 'getCopyrightDate');
         $spec->setTemplateLine('Language of the Original', 'getLanguageOriginal', 'data-notes.phtml');
         $spec->setTemplateLine('Language and/or Writing System', 'getLanguageNotes', 'data-notes.phtml');
         $spec->setTemplateLine('Local Note', 'getLocalNotes', 'data-notes.phtml');
@@ -79,10 +84,11 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
 
         $spec->reorderKeys(['Uniform Title', 'Published in', 'New Title', 'Previous Title',
                 'Authors', 'Language', 'Language of the Original', 'Language and/or Writing System',
-                'Published', 'Edition', 'Series',
-                'Subjects', 'Genre', 'child_records', 'Online Access',
+                'Published', 'Produced', 'Distributed', 'Manufactured', 'Copyright Date',
+                'Edition', 'Series', 'Subjects', 'Genre', 'child_records', 'Online Access',
                 'Ownership and Custodial History', 'Local Note', 'Dissertation Note',
-                'Binding Information', 'Physical Description', 'Tags', 'Variant Title', 'Other Uniform Title']);
+                'Binding Information', 'Physical Description', 'Tags', 'Variant Title',
+                'Other Uniform Title', 'Added Title']);
 
         return $spec->getArray();
     }
@@ -106,13 +112,15 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         $spec->setLine('Bibliography', null);
         $spec->setLine('Audience', null);
         $spec->setLine('Finding Aid', null);
+        $spec->setLine('Publication Frequency', null);
+        $spec->setLine('Published', null);
 
         $spec->setTemplateLine('Summary', 'getSummaryNotes', 'data-notes.phtml');
         $spec->setTemplateLine('Review', 'getReviewNotes', 'data-notes.phtml');
         $spec->setTemplateLine('Abstract', 'getAbstractNotes', 'data-notes.phtml');
         $spec->setTemplateLine('Content Advice', 'getContentAdviceNotes', 'data-notes.phtml');
         $spec->setLine('Note', 'getGeneralNotes');
-        $spec->setLine('Call Number', 'getFullCallnumber');
+        $spec->setLine('Call Number', 'getCallNumbers');
         $spec->setLine('Credits', 'getProductionCredits');
         $spec->setLine('Related Materials', 'getRelationshipNotes');
         $spec->setLine('System Details', 'getSystemDetails');
@@ -188,10 +196,14 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         $spec->setTemplateLine('Additional Physical Form', 'getAdditionalPhysicalFormNotes', 'data-notes.phtml');
         $spec->setTemplateLine('Holder of Originals', 'getHolderOfOriginalNotes', 'data-notes.phtml');
         $spec->setTemplateLine('Holder of Duplicates', 'getHolderOfDuplicateNotes', 'data-notes.phtml');
+        $spec->setLine('Current Publication Frequency', 'getPublicationFrequency');
+        $spec->setLine('Former Publication Frequency', 'getFormerPublicationFrequency');
+        $spec->setLine('Publication Dates and/or Sequencing', 'getDateSpan');
 
         $spec->reorderKeys(['Summary', 'Review', 'Abstract', 'Content Advice', 'Note', 'Call Number',
                 'Credits', 'Related Materials', 'System Details', 'Scale Note', 'Cite As',
-                'Published', 'Publication Frequency', 'Playing Time',
+                'Publication Dates and/or Sequencing', 'Current Publication Frequency',
+                'Former Publication Frequency', 'Playing Time',
                 'Audience', 'Reading Grade Level', 'Interest Age Level', 'Interest Grade Level',
                 'Special Audience Characteristics', 'Motivation/Interest Level', 'Awards', 'Bibliography Note',
                 'ISBN', 'ISSN', 'DOI',

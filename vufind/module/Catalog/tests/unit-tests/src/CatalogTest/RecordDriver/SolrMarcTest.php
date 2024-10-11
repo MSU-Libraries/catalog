@@ -105,7 +105,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
     {
         $subjects = $this->getDriver('linkedsubjects.xml')->getAllSubjectHeadings();
         // Verify total count of subjects
-        $this->assertCount(9, $subjects);
+        $this->assertCount(8, $subjects);
         // Verify 1st subject's 2nd part value
         $this->assertEquals(
             '1878-1935.',
@@ -215,7 +215,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
     {
         // Verifying the count since the values non-printable characters
         $this->assertCount(1, $this->getDriver('linkedauthors2.xml')->getCorporateAuthorsLinks());
-        $this->assertEquals(94, strlen($this->getDriver('linkedauthors2.xml')->getCorporateAuthorsLinks()[0]));
+        $this->assertEquals(108, strlen($this->getDriver('linkedauthors2.xml')->getCorporateAuthorsLinks()[0]));
     }
 
     /**

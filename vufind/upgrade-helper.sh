@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script help text
-runhelp() {
+run_help() {
     echo ""
     echo "Usage: Detect changes in files in the local directory with"
     echo "       changes made to the given release."
@@ -26,7 +26,7 @@ runhelp() {
 }
 
 if [[ -z "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
-    runhelp
+    run_help
     exit 0
 fi
 
@@ -127,7 +127,7 @@ main() {
 compare_db() {
     verbose "Comparing database changes made in release ${ARGS[RELEASE]}"
 
-    if ! git -C "${ARGS[REPO_PATH]}" diff ${ARGS[CURRENT_RELEASE]}:module/VuFind/sql/mysql.sql --exit-code "${ARGS[RELEASE]}":module/VuFind/sql/mysql.sql; then
+    if ! git -C "${ARGS[REPO_PATH]}" diff "${ARGS[CURRENT_RELEASE]}":module/VuFind/sql/mysql.sql --exit-code "${ARGS[RELEASE]}":module/VuFind/sql/mysql.sql; then
         SUMMARY+=("Database changes detected in ${ARGS[RELEASE]}:module/VuFind/sql/mysql.sql. Will be applied during build and deploy jobs in pipeline.")
     fi
 }
@@ -135,7 +135,7 @@ compare_db() {
 compare_solr() {
     verbose "Comparing Solr changes made in release ${ARGS[RELEASE]}"
 
-    if ! git -C "${ARGS[REPO_PATH]}" diff --quiet ${ARGS[CURRENT_RELEASE]}:solr/ "${ARGS[RELEASE]}":solr/; then
+    if ! git -C "${ARGS[REPO_PATH]}" diff --quiet "${ARGS[CURRENT_RELEASE]}":solr/ "${ARGS[RELEASE]}":solr/; then
         SUMMARY+=("Solr changes detected in ${ARGS[RELEASE]}:solr/. Full re-import detected to apply new index")
     fi
 }
@@ -145,22 +145,22 @@ compare_theme(){
 
     while read -r file; do
         # See if we overrode that file in our theme and will need to apply the updates to it
-        if [ -f themes/msul/"$file" ]; then
-            SUMMARY+=("${file} --> ${ARGS[RELEASE]}:themes/bootstrap3/$file")
+        if [ -f themes/msul/"${file}" ]; then
+            SUMMARY+=("${file} --> ${ARGS[RELEASE]}:themes/bootstrap3/${file}")
             # Don't print the diff for any compiled files since those are not helpful at all
-            if [[ ! "$file" =~ "compiled" ]]; then
-                git -C "${ARGS[REPO_PATH]}" diff ${ARGS[CURRENT_RELEASE]}:themes/bootstrap3/$file "${ARGS[RELEASE]}":themes/bootstrap3/$file
+            if [[ ! "${file}" =~ "compiled" ]]; then
+                git -C "${ARGS[REPO_PATH]}" diff "${ARGS[CURRENT_RELEASE]}:themes/bootstrap3/${file}" "${ARGS[RELEASE]}:themes/bootstrap3/${file}"
             fi
         fi
-    done < <(git -C "${ARGS[REPO_PATH]}" diff --name-only ${ARGS[CURRENT_RELEASE]}:themes/bootstrap3 "${ARGS[RELEASE]}":themes/bootstrap3)
+    done < <(git -C "${ARGS[REPO_PATH]}" diff --name-only "${ARGS[CURRENT_RELEASE]}":themes/bootstrap3 "${ARGS[RELEASE]}":themes/bootstrap3)
 }
 
 compare_diffs(){
-    verbose "Looking for equivilent files in changes"
+    verbose "Looking for equivalent files in changes"
 
     while read -r file; do
         SUMMARY+=("${file} May have had it's core file updated this release")
-    done < <(git -C ../vufind diff --name-only ${ARGS[CURRENT_RELEASE]} ${ARGS[RELEASE]} | xargs -n1 basename | xargs -n1 find . -name)
+    done < <(git -C ../vufind diff --name-only "${ARGS[CURRENT_RELEASE]}" "${ARGS[RELEASE]}" | xargs -n1 basename | xargs -n1 find . -name)
 }
 
 compare_local() {
@@ -181,7 +181,7 @@ compare_local() {
             local repoPath="${current#local/}"
             repoPath=${repoPath:1}
             SUMMARY+=("${orig/\/\//\/} -->  ${ARGS[RELEASE]}:${repoPath}")
-            git -C "${ARGS[REPO_PATH]}" diff ${ARGS[CURRENT_RELEASE]}:"$repoPath" "${ARGS[RELEASE]}":"$repoPath"
+            git -C "${ARGS[REPO_PATH]}" diff "${ARGS[CURRENT_RELEASE]}:$repoPath" "${ARGS[RELEASE]}":"$repoPath"
           fi
         fi
     done

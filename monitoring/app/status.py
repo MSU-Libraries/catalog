@@ -13,7 +13,7 @@ from util import ExecException, async_exec, multiple_get, async_single_get, get_
 
 async def _node_cluster_state_uuid() -> str:
     try:
-        with open(os.getenv('MARIADB_VUFIND_PASSWORD_FILE'), 'r') as f:
+        with open(os.getenv('MARIADB_VUFIND_PASSWORD_FILE'), 'r', encoding='UTF-8') as f:
             password = f.read().strip()
             f.close()
         return await async_exec("mysql", "-h", "galera", "-u", "vufind",
@@ -33,7 +33,7 @@ def _check_cluster_state_uuid(statuses: list[dict]) -> bool:
 
 async def get_galera_status(statuses: list[dict]) -> str:
     try:
-        with open(os.getenv('MARIADB_VUFIND_PASSWORD_FILE'), 'r') as f:
+        with open(os.getenv('MARIADB_VUFIND_PASSWORD_FILE'), 'r', encoding='UTF-8') as f:
             password = f.read().strip()
             f.close()
         cluster_size = await async_exec("mysql", "-h", "galera", "-u", "vufind",
