@@ -455,25 +455,27 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      * If the first array is empty, an empty array is returned.
      * If the second array does not have a split counterpart, only the first array's split
      * will be returned for that iteration.
+     *
      * @param array $arr1 The primary array
      * @param array $arr2 The secondary array
+     *
      * @return array The array with joined strings
      */
-    private function splitAndMergeArrayValues($arr1, $arr2) {
-        # TODO we could have the delimiter and join string passed as customizable arguments
+    private function splitAndMergeArrayValues($arr1, $arr2)
+    {
+        // TODO we could have the delimiter and join string passed as customizable arguments
         $toc = [];
         if (!empty($arr1)) {
-            array_map(function($fdata, $ldata) use (&$toc, $split) {
+            array_map(function ($fdata, $ldata) use (&$toc, $split) {
                 $fsplits = preg_split('/[.\s]--/', $fdata);
                 $lsplits = preg_split('/[.\s]--/', $ldata);
                 $max_size = max(count($fsplits), count($lsplits));
                 $fsplits = array_pad($fsplits, $max_size, "");
                 $lsplits = array_pad($lsplits, $max_size, "");
 
-                array_map(function($fval, $lval) use (&$toc) {
+                array_map(function ($fval, $lval) use (&$toc) {
                     $toc[] = $fval . ($lval ? " = ${lval}" : "");
                 }, $fsplits, $lsplits);
-
             }, $arr1, $arr2);
         }
         return array_filter($toc);
@@ -487,7 +489,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getContentsNotes()
     {
         $toc = [];
-        # Assumption: only one of indicator "1=0" or "1=8" will exist on any given record
+        // Assumption: only one of indicator "1=0" or "1=8" will exist on any given record
         $marc505_0 = $this->getMarcFieldWithIndAndLinked('505', ['a','g','r','t','u'], '1', '0');
         $fields = $marc505_0[0];
         $linked = $marc505_0[1] ?? array_pad($marc505_0[1] ?? [], count($marc505_0[0]), '');
