@@ -466,7 +466,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         // TODO we could have the delimiter and join string passed as customizable arguments
         $toc = [];
         if (!empty($arr1)) {
-            array_map(function ($fdata, $ldata) use (&$toc, $split) {
+            array_map(function ($fdata, $ldata) use (&$toc) {
                 $fsplits = preg_split('/[.\s]--/', $fdata);
                 $lsplits = preg_split('/[.\s]--/', $ldata);
                 $max_size = max(count($fsplits), count($lsplits));
