@@ -1,0 +1,115 @@
+#!/bin/bash
+
+# shellcheck disable=SC2155,SC1091
+
+SCRIPT_DIR=$( dirname "$0" )
+source "${SCRIPT_DIR}/pc-common"
+please_do_not_run_me
+
+init_log_level
+
+run_help_sessions() {
+    run_help "Helper script to clear VuFind sessions"
+}
+
+# shellcheck disable=SC2034
+parse_flags_max_attempts() {
+    VAR_NAME=MAX_ATTEMPTS
+    FLAG_PATTERN="--max-attempts"
+    HELP_TEXT="Max attempts to clear the session before exiting"
+    VAR_DEFAULT=5
+    VAR_IS_BOOL=0
+    format_flag_info
+}
+
+# shellcheck disable=SC2034
+parse_flags_batch_size() {
+    VAR_NAME=BATCH_SIZE
+    FLAG_PATTERN="--batch-size"
+    HELP_TEXT="Number of sessions to clear at once"
+    VAR_DEFAULT=1000
+    VAR_IS_BOOL=0
+    format_flag_info
+}
+
+# shellcheck disable=SC2034
+parse_flags_exiration_days() {
+    VAR_NAME=EXPIRATION_DAYS
+    FLAG_PATTERN="--expiration-days"
+    HELP_TEXT="Number of days old a session should be before deletion"
+    VAR_DEFAULT=0.5
+    VAR_IS_BOOL=0
+    format_flag_info
+}
+
+pc_hook_clear_sessions() {
+    LOG_LEVEL=$(( LOG_LEVEL < 2 ? 2 : LOG_LEVEL ))
+    ATTEMPTS=1
+
+    echo "$LOG_LEVEL"
+    print_info "Running session clearing helper."
+    print_info "Max attempts: $ARG_MAX_ATTEMPTS"
+    print_info "Batch size: $ARG_BATCH_SIZE"
+    print_info "Expiration days: $ARG_EXPIRATION_DAYS"
+    print_info "This will attempt to clear sessions for $STACK_NAME"
+
+    if [[ -z "$STACK_NAME" ]]; then
+        die "STACK_NAME is not set. Are you running within a VuFind container?"
+    fi
+
+    # Run the session clearing command
+    while (( ATTEMPTS <= ARG_MAX_ATTEMPTS )); do
+        print_info "(Attempt $ATTEMPTS/$ARG_MAX_ATTEMPTS) Attempting session clearing"
+
+        # Redirect stderr to a temporary file
+        TMPFILE=$(mktemp)
+        exec 2> "$TMPFILE"
+
+        # Run command
+        #run_in_node_service 1 "$ARG_STACK" catalog_catalog "php ./public/index.php util/expire_sessions --batch $ARG_BATCH_SIZE $ARG_EXPIRATION_DAYS"
+        php ./public/index.php util/expire_sessions --batch "$ARG_BATCH_SIZE" "$ARG_EXPIRATION_DAYS"
+        EC=$?
+
+        # Capture stderr from the temporary file and restore stderr output to terminal
+        exec 2>&1
+        ERR=$(cat "$TMPFILE")
+        rm "$TMPFILE"
+
+        # Verify exit code and stderr
+        print_info "Exit Code: $EC. Error: $ERR"
+        if [[ $EC -eq 0 ]]; then
+            print_info "(Attempt $ATTEMPTS/$ARG_MAX_ATTEMPTS) Successfully ran session expiration."
+            exit 0
+        elif [[ $ERR == *"Deadlock"* ]]; then
+            print_info "(Attempt $ATTEMPTS/$ARG_MAX_ATTEMPTS) Session table in use."
+        else
+            die "(Attempt $ATTEMPTS/$ARG_MAX_ATTEMPTS) Failed to clear sessions. Non-deadlock error (Exit code: $EC) exiting." 1
+        fi
+
+        ((ATTEMPTS++))
+        # Add a bit of a delay to give the lock on the table to release
+        sleep 1
+    done
+
+    print_info "Completed processing."
+}
+
+# Load dynamically created flags
+load_flags
+
+# Capture all the common pleads for help
+if [[ -z "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    run_help_sessions
+    exit 0
+fi
+
+# shellcheck disable=SC2046
+parse_args $(split_flags "$@")
+declare -a HOOK_FUNCS
+readarray -t HOOK_FUNCS < <(list_funcs_startswith pc_hook_)
+for HOOK_FUNC in "${HOOK_FUNCS[@]}"; do
+    ${HOOK_FUNC}
+    RC=$?
+    if [[ $RC -ne 255 ]]; then exit $RC; fi
+done
+die "Nothing to run. Exiting."
