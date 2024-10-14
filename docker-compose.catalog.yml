@@ -19,7 +19,6 @@ services:
       - /usr/local/bin/pc-record-delete:/usr/local/bin/pc-record-delete:ro
       - /etc/bash_completion.d/pc-record:/etc/bash_completion.d/pc-record:ro
       - /usr/local/bin/pc-common:/usr/local/bin/pc-common:ro
-      - /usr/local/bin/pc-clear-sessions:/usr/local/bin/pc-clear-sessions:ro
     networks:
       - public
       - internal
@@ -137,7 +136,6 @@ services:
       - /usr/local/bin/pc-record-delete:/usr/local/bin/pc-record-delete:ro
       - /etc/bash_completion.d/pc-record:/etc/bash_completion.d/pc-record:ro
       - /usr/local/bin/pc-common:/usr/local/bin/pc-common:ro
-      - /usr/local/bin/pc-clear-sessions:/usr/local/bin/pc-clear-sessions:ro
       # Requires rw so it can restore from backups
       - /mnt/shared/alpha-browse/${STACK_NAME}:/mnt/alpha-browse:rw
     networks:
