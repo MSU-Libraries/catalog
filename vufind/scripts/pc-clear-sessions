@@ -66,8 +66,7 @@ pc_hook_clear_sessions() {
         exec 2> "$TMPFILE"
 
         # Run command
-        #run_in_node_service 1 "$ARG_STACK" catalog_catalog "php ./public/index.php util/expire_sessions --batch $ARG_BATCH_SIZE $ARG_EXPIRATION_DAYS"
-        php ./public/index.php util/expire_sessions --batch "$ARG_BATCH_SIZE" "$ARG_EXPIRATION_DAYS"
+        php /usr/local/vufind/public/index.php util/expire_sessions --batch "$ARG_BATCH_SIZE" "$ARG_EXPIRATION_DAYS"
         EC=$?
 
         # Capture stderr from the temporary file and restore stderr output to terminal
@@ -76,7 +75,7 @@ pc_hook_clear_sessions() {
         rm "$TMPFILE"
 
         # Verify exit code and stderr
-        print_info "Exit Code: $EC. Error: $ERR"
+        print_info "Exit Code: $EC. $ERR"
         if [[ $EC -eq 0 ]]; then
             print_info "(Attempt $ATTEMPTS/$ARG_MAX_ATTEMPTS) Successfully ran session expiration."
             exit 0
