@@ -8,6 +8,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FormatCalculator extends org.vufind.index.FormatCalculator {
+    /**
+     * Return the best format string based on codes extracted from 007; return
+     * blank string for ambiguous/irrelevant results.
+     *
+     * @param char formatCode
+     * @param String formatString
+     * @return String
+     */
+    @Override protected String getFormatFrom007(char formatCode, String formatString) {
+        if (formatCode == 'v' && formatString.length() > 4 && formatString.charAt(1) == 'd' && formatString.charAt(4) == 'g') {
+            return "LaserDisc";
+        }
+        return super.getFormatFrom007(formatCode, formatString);
+    }
 
     /**
      * Determine whether a record cannot be a book due to findings in leader
