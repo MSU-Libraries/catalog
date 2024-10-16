@@ -1,6 +1,5 @@
 #!/bin/bash
 
-VUFIND_HARVEST_DIR=/usr/local/vufind/local/harvest/hlm
 FTP_SERVER=atozftp.ebsco.com
 FTP_DIR=s8364774/vufind/
 FTP_USER=${HLM_FTP_USER}
