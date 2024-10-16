@@ -1,0 +1,33 @@
+#!/bin/bash
+
+VUFIND_HARVEST_DIR=/usr/local/vufind/local/harvest/hlm
+FTP_SERVER=atozftp.ebsco.com
+FTP_DIR=s8364774/vufind/
+FTP_USER=${HLM_FTP_USER}
+FTP_PASSWORD=$(cat "${HLM_FTP_PASSWORD_FILE}")
+
+create_netrc_if_needed() {
+  WRITE=0
+  if [[ -f ~/.netrc ]]; then
+    if ! grep ~/.netrc -e "machine ${FTP_SERVER}"; then
+      WRITE=1
+    fi
+  else
+    WRITE=1
+    verbose "Creating ~/.netrc file"
+    touch ~/.netrc
+    chmod 600 ~/.netrc
+  fi
+  if [[ WRITE -eq 1 ]]; then
+    verbose "Adding content to ~/.netrc file"
+    {
+      echo "machine ${FTP_SERVER}"
+      echo "login ${FTP_USER}"
+      echo "password ${FTP_PASSWORD}"
+    } >> ~/.netrc
+  fi
+}
+
+create_netrc_if_needed
+curl "ftp://${FTP_SERVER}/${FTP_DIR}" --netrc -l -s
+

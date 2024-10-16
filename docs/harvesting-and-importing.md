@@ -7,14 +7,27 @@
 Used to harvest and import FOLIO MARC data into the `biblio` collection of Solr.  
 * [pc-import-hlm](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-hlm):
 Used to harvest and import EBSCO MARC data into the `biblio` collection of Solr from the FTP location given
-access to by EBSCO. The records contain the HLM dataset that is missing from FOLIO's database. All files with
-`*.m*c` and `*.zip` will be harvested from the FTP location and `*-del*.m*c` (case insensitive) files will be
-designated as deletion files (including files inside the zip archives). 
+access to by EBSCO. The records contain the HLM dataset that is missing from FOLIO's database. 
 * [pc-import-authority](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-authority):
 Used to harvest and import MARC data from Backstage into the `authority` collection in Solr from the FTP location
 provided by Backstage.  
 * [cron-reserves.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/cron-reserves.sh):
 Used to update or refresh the `reserves` index in Solr with data from FOLIO's API, replacing it entirely each run.  
+
+## HLM Data
+One of our sources is HLM (Holdings Link Management) which is files from EBSCO's FTP server with electronic
+resources our library has access to which are not in FOLIO. To automate the retrieval and import of these
+files we have a wrapper script, `pc-import-hlm`.
+
+Since occassionally EBSCO sends us full sets of data, we want to be able to exclude all previous sets from them,
+so to do this we have an ignore files `/mnt/shared/oai/ignore_patterns.txt` with will check to see if the file
+name contains any of those substrings and ignore them if they match.
+
+Also, we will only harvest files that match the pattern `*.m*c` and `*.zip`. `*.m*c` files will be imported with
+the exception of `-del*.m*c` (case insensitive) or `.delete` files which will instead be tagged as deletion files.
+
+If you simply want to see what files are on the FTP server currently, you can run our helper script, `pc-list-hlm-remote`,
+to list all the files. If you want to download a specific file, run `pc-get-hlm-remote [NAME OF FILE]`.
 
 ## Full Data Harvests
 This section describes the steps needed to re-harvest all the data from each source.
