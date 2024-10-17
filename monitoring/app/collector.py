@@ -1,3 +1,4 @@
+'''Data collector'''
 import asyncio
 import pathlib
 import os
@@ -7,17 +8,24 @@ from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 import mariadb as db
 
-import status
-from util import get_eventloop
+import status # pylint: disable=import-error
+from util import get_eventloop, DBConnection # pylint: disable=import-error
 
 
 ACCESS_LOG_PATH = '/mnt/logs/apache/access.log'
 
 
 def init(debug: bool):
+    '''
+    Initialize the data collector
+    Args:
+        debug (bool): If true, do not start the scheduler
+    '''
     if not debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
         scheduler = BackgroundScheduler()
-        scheduler.add_job(func=main, id='collector', replace_existing=True, trigger='interval', minutes=1)
+        scheduler.add_job(
+            func=main, id='collector', replace_existing=True, trigger='interval', minutes=1
+        )
         scheduler.start()
 
 def _analyse_log() -> dict[str, int | None]:
@@ -62,12 +70,14 @@ def _analyse_log() -> dict[str, int | None]:
         }
     return {
         'request_count': request_count,
-        'response_time': None if response_time_count == 0 else response_time_total // response_time_count,
+        'response_time':
+            None if response_time_count == 0 else response_time_total // response_time_count,
     }
 
 def _read_docker_stats():
     variables = {}
-    with open(f'/mnt/shared/docker_stats/{os.getenv("NODE")}/{os.getenv("STACK_NAME")}', 'r', encoding='UTF-8') as f:
+    stats_file = f'/mnt/shared/docker_stats/{os.getenv("NODE")}/{os.getenv("STACK_NAME")}'
+    with open(stats_file, 'r', encoding='UTF-8') as f:
         while True:
             line = f.readline()
             if not line:
@@ -79,10 +89,11 @@ def _read_docker_stats():
     return variables
 
 def main():
+    '''
+    Get the node statistics and insert them into the database
+    '''
     time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    node = os.getenv('NODE')
-    event_loop = get_eventloop()
-    results = event_loop.run_until_complete(asyncio.gather(
+    results = get_eventloop().run_until_complete(asyncio.gather(
         status.node_available_memory(),
         status.node_available_disk_space()
     ))
@@ -94,25 +105,21 @@ def main():
     response_time = log_results['response_time']
     conn = None
     try:
-        with open(os.getenv('MARIADB_MONITORING_PASSWORD_FILE'), 'r', encoding='UTF-8') as f:
-            password = f.read().strip()
-            f.close()
-        conn = db.connect(user='monitoring', password=password, host='galera', database="monitoring")
-        del password
-        cur = conn.cursor()
-        statement = "INSERT INTO data (node, time, available_memory, available_disk_space, " \
-            "apache_requests, response_time, solr_solr_cpu, solr_solr_mem, solr_cron_cpu, solr_cron_mem, " \
-            "solr_zk_cpu, solr_zk_mem, catalog_catalog_cpu, catalog_catalog_mem, mariadb_galera_cpu, " \
-            "mariadb_galera_mem) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        data = (
-            node, time, memory, disk, nb_requests, response_time, stats.get('solr_solr_cpu'),
-            stats.get('solr_solr_mem'), stats.get('solr_cron_cpu'), stats.get('solr_cron_mem'),
-            stats.get('solr_zk_cpu'), stats.get('solr_zk_mem'), stats.get('catalog_catalog_cpu'),
-            stats.get('catalog_catalog_mem'), stats.get('mariadb_galera_cpu'), stats.get('mariadb_galera_mem')
-        )
-        cur.execute(statement, data)
-        conn.commit()
+        with DBConnection() as conn:
+            cur = conn.cursor()
+            statement = "INSERT INTO data (node, time, available_memory, available_disk_space, " \
+                "apache_requests, response_time, solr_solr_cpu, solr_solr_mem, solr_cron_cpu, " \
+                "solr_cron_mem, solr_zk_cpu, solr_zk_mem, catalog_catalog_cpu, " \
+                "catalog_catalog_mem, mariadb_galera_cpu, mariadb_galera_mem) " \
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            data = (
+                os.getenv('NODE'), time, memory, disk, nb_requests, response_time,
+                stats.get('solr_solr_cpu'), stats.get('solr_solr_mem'), stats.get('solr_cron_cpu'),
+                stats.get('solr_cron_mem'), stats.get('solr_zk_cpu'), stats.get('solr_zk_mem'),
+                stats.get('catalog_catalog_cpu'), stats.get('catalog_catalog_mem'),
+                stats.get('mariadb_galera_cpu'), stats.get('mariadb_galera_mem')
+            )
+            cur.execute(statement, data)
+            conn.commit()
     except db.Error as err:
         print(f"Error adding entry to database: {err}", file=sys.stderr)
-    if conn is not None:
-        conn.close()

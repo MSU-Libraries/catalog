@@ -1,3 +1,4 @@
+'''Status checker'''
 import os
 import pathlib
 import asyncio
@@ -6,7 +7,7 @@ import re
 from aiohttp import ClientError, ClientSession
 import humanize
 
-from util import ExecException, async_exec, multiple_get, async_single_get, get_aiohttp_session
+from util import ExecException, async_exec, multiple_get, async_single_get, get_aiohttp_session # pylint: disable=import-error
 
 
 # Galera
@@ -32,13 +33,21 @@ def _check_cluster_state_uuid(statuses: list[dict]) -> bool:
     return uuid0 == uuid1 and uuid0 == uuid2
 
 async def get_galera_status(statuses: list[dict]) -> str:
+    '''
+    Get the current status from Galera
+    Args:
+        statuses (list): Status data
+    Returns:
+        (str):  Error message or 'OK'
+    '''
     try:
         with open(os.getenv('MARIADB_VUFIND_PASSWORD_FILE'), 'r', encoding='UTF-8') as f:
             password = f.read().strip()
             f.close()
         cluster_size = await async_exec("mysql", "-h", "galera", "-u", "vufind",
             f"-p{password}", "-ss", "-e",
-            "SELECT variable_value from information_schema.global_status WHERE variable_name='wsrep_cluster_size';")
+            "SELECT variable_value from information_schema.global_status " \
+            "WHERE variable_name='wsrep_cluster_size';")
         del password
     except ExecException as ex:
         return f"Error checking the galera status: {ex}"
@@ -102,6 +111,13 @@ async def _node_solr_status(aiohttp_session: ClientSession) -> str:
     return 'OK'
 
 def get_solr_status(statuses: list[dict]) -> str:
+    '''
+    Get the current status from Solr
+    Args:
+        statuses (list): Status data
+    Returns:
+        (str):  Error message or 'OK'
+    '''
     for node in range(1, 4):
         node_status = statuses[node-1]['solr']
         if node_status != 'OK':
@@ -126,7 +142,9 @@ async def _check_vufind_home_page(node: str, aiohttp_session: ClientSession) -> 
 
 async def _check_vufind_record_page(node: str, aiohttp_session: ClientSession) -> str:
     try:
-        text = await async_single_get(aiohttp_session, f'http://vufind{node}/Record/folio.in00006782951')
+        text = await async_single_get(
+            aiohttp_session, f'http://vufind{node}/Record/folio.in00006782951'
+        )
     except asyncio.TimeoutError:
         return 'Timeout when reading vufind record page'
     except ClientError as err:
@@ -143,7 +161,7 @@ async def _check_vufind_record_page(node: str, aiohttp_session: ClientSession) -
         result = 'OK'
     return result
 
-async def _check_vufind_search_base(aiohttp_session: ClientSession, url: str, lookfor: str, page: str) -> str:
+async def _check_vufind_search_base(aiohttp_session: ClientSession, url: str, lookfor: str, page: str) -> str: # pylint: disable=line-too-long
     try:
         text = await async_single_get(aiohttp_session, url)
     except asyncio.TimeoutError:
@@ -159,28 +177,40 @@ async def _check_vufind_search_base(aiohttp_session: ClientSession, url: str, lo
     return 'OK'
 
 async def _check_vufind_search_page(node: str, aiohttp_session: ClientSession) -> str:
-    url = f'http://vufind{node}/Search/Results?limit=5&dfApplied=1&lookfor=Out+of+the+pocket&type=AllFields'
-    return await _check_vufind_search_base(aiohttp_session, url, 'folio.in00006782951', 'search')
+    url = f'http://vufind{node}/Search/Results?limit=5&dfApplied=1&lookfor=Out+of+the+pocket&type=AllFields' # pylint: disable=line-too-long
+    return await _check_vufind_search_base(
+        aiohttp_session, url, 'folio.in00006782951', 'search'
+    )
 
 async def _check_vufind_browse_by_subject_page(node: str, aiohttp_session: ClientSession) -> str:
     url = f'http://vufind{node}/Alphabrowse/Home?source=topic&from=Science+Fiction'
-    return await _check_vufind_search_base(aiohttp_session, url, '>Science fiction.</a>', 'browse by subject')
+    return await _check_vufind_search_base(
+        aiohttp_session, url, '>Science fiction.</a>', 'browse by subject'
+    )
 
 async def _check_vufind_browse_by_author_page(node: str, aiohttp_session: ClientSession) -> str:
     url = f'http://vufind{node}/Alphabrowse/Home?source=author&from=Hoek%2C+M'
-    return await _check_vufind_search_base(aiohttp_session, url, '>Hoek, Marga</a>', 'browse by author')
+    return await _check_vufind_search_base(
+        aiohttp_session, url, '>Hoek, Marga</a>', 'browse by author'
+    )
 
 async def _check_vufind_browse_by_title_page(node: str, aiohttp_session: ClientSession) -> str:
-    url = f'http://vufind{node}/Alphabrowse/Home?source=title&from=Artificial+Intelligence+and+the+City'
-    return await _check_vufind_search_base(aiohttp_session, url, 'Urbanistic Perspectives on AI', 'browse by title')
+    url = f'http://vufind{node}/Alphabrowse/Home?source=title&from=Artificial+Intelligence+and+the+City' # pylint: disable=line-too-long
+    return await _check_vufind_search_base(
+        aiohttp_session, url, 'Urbanistic Perspectives on AI', 'browse by title'
+    )
 
-async def _check_vufind_browse_by_call_number_page(node: str, aiohttp_session: ClientSession) -> str:
+async def _check_vufind_browse_by_call_number_page(node: str, aiohttp_session: ClientSession) -> str: # pylint: disable=line-too-long
     url = f'http://vufind{node}/Alphabrowse/Home?source=lcc&from=DC96.S'
-    return await _check_vufind_search_base(aiohttp_session, url, 'DC96 .S25 2022', 'browse by call number')
+    return await _check_vufind_search_base(
+        aiohttp_session, url, 'DC96 .S25 2022', 'browse by call number'
+    )
 
 async def _check_vufind_browse_by_series_page(node: str, aiohttp_session: ClientSession) -> str:
     url = f'http://vufind{node}/Alphabrowse/Home?source=series&from=Concise+H'
-    return await _check_vufind_search_base(aiohttp_session, url, '>Concise Hornbook Series</a>', 'browse by series')
+    return await _check_vufind_search_base(
+        aiohttp_session, url, '>Concise Hornbook Series</a>', 'browse by series'
+    )
 
 async def _node_vufind_status(aiohttp_session: ClientSession) -> str:
     node = os.getenv('NODE')
@@ -200,6 +230,13 @@ async def _node_vufind_status(aiohttp_session: ClientSession) -> str:
     return 'OK'
 
 def get_vufind_status(statuses: list[dict]) -> str:
+    '''
+    Get the current status for VuFind on all nodes
+    Args:
+        statuses (list): Raw status data
+    Returns:
+        (str): Message with the current VuFind status
+    '''
     stack_name = os.getenv('STACK_NAME')
     one_vufind = re.fullmatch(r'devel-.*|review-.*', stack_name)
     missing_vufind_count = 0
@@ -216,6 +253,11 @@ def get_vufind_status(statuses: list[dict]) -> str:
 # Available memory and disk space
 
 async def node_available_memory() -> str:
+    '''
+    Get the memory available on the current node
+    Returns:
+        (str): Amount of memory available, or the error retrieving it
+    '''
     try:
         return await async_exec("/bin/sh", "-c", "free | grep Mem | awk '{print $7/$2 * 100.0}'")
     except ExecException as ex:
@@ -224,20 +266,35 @@ async def node_available_memory() -> str:
         return "Timeout when getting available memory"
 
 async def node_available_disk_space() -> str:
+    '''
+    Get the disk space available on the current node
+    Returns:
+        (str): Amount of disk space available, or the error retrieving it
+    '''
     try:
-        return await async_exec("/bin/sh", "-c", "df / | grep overlay | awk '{print $4/$2 * 100.0}'")
+        return await async_exec(
+            "/bin/sh", "-c", "df / | grep overlay | awk '{print $4/$2 * 100.0}'"
+        )
     except ExecException as ex:
         return f"Error getting available disk space: {ex}"
     except asyncio.TimeoutError:
         return "Timeout when getting available disk space"
 
 def get_memory_status(statuses: list[dict]) -> str:
+    '''
+    Get the memory available on each node
+    Args:
+        statuses (list): Status data
+    Returns:
+        (str): Message with information on the memory
+    '''
     for node in range(1, 4):
         available_memory = statuses[node-1]['available_memory']
         try:
             float(available_memory)
         except ValueError:
-            return f'Returned value for available memory is not a number on node {node}: {available_memory}'
+            return f'Returned value for available memory is not a number on node {node}: ' \
+            f'{available_memory}'
     lowest = 100
     lowest_node = 0
     for node in range(1, 4):
@@ -251,12 +308,20 @@ def get_memory_status(statuses: list[dict]) -> str:
     return f"OK - lowest available memory: {lowest}%"
 
 def get_disk_space_status(statuses: list[dict]) -> str:
+    '''
+    Get the disk space available on each node
+    Args:
+        statuses (list): Status data
+    Returns:
+        (str): Message with information on the disk usage
+    '''
     for node in range(1, 4):
         available_disk_space = statuses[node-1]['available_disk_space']
         try:
             float(available_disk_space)
         except ValueError:
-            return f'Returned value for available disk space is not a number on node {node}: {available_disk_space}'
+            return f'Returned value for available disk space is not a number on node {node}:' \
+            f'{available_disk_space}'
     lowest = 100
     lowest_node = 0
     for node in range(1, 4):
@@ -273,11 +338,23 @@ def get_disk_space_status(statuses: list[dict]) -> str:
 # Harvests
 
 def _harvest_delta(name: str) -> timedelta:
+    '''
+    Get the expected delay between harvest updates
+    Args:
+        name (str): Name of the harvest
+    Return:
+        (timedelta): Amount of time between harvests
+    '''
     if name == 'authority':
         return timedelta(days=7)
     return timedelta(days=1)
 
 def _node_cron_exit_codes() -> dict[str, str]:
+    '''
+    Get the exit code for the cron jobs on the node
+    Returns:
+        (dict): A dict with each cron job and their exit code
+    '''
     paths = {
         'folio': '/mnt/logs/harvests/folio_exit_code',
         'hlm': '/mnt/logs/harvests/hlm_exit_code',
@@ -306,6 +383,14 @@ def _node_cron_exit_codes() -> dict[str, str]:
     return exit_codes
 
 def get_cron_status(name: str, statuses: list[dict]) -> str:
+    '''
+    Get the status of a given cron
+    Args:
+        name (str): Name of the cron
+        statuses (list): Status data
+    Returns:
+        (str): Current status of that cron job
+    '''
     nb_executed = 0
     node_where_executed = 0
     exit_code = ''
@@ -334,6 +419,11 @@ def get_cron_status(name: str, statuses: list[dict]) -> str:
 # Getting all the node statuses at once
 
 def get_node_status() -> dict:
+    '''
+    Get the status for the current node
+    Returns:
+        (dict): Data with the service status on the current node
+    '''
     async def async_inner():
         async with get_aiohttp_session() as aiohttp_session:
             commands = [
@@ -355,6 +445,11 @@ def get_node_status() -> dict:
     return status
 
 def get_node_statuses() -> list[dict] | str:
+    '''
+    Get the status of each monitoting node
+    Returns:
+        (list|str): The status from each node or the error message
+    '''
     urls = []
     for node in range(1, 4):
         urls.append(f'http://monitoring{node}/monitoring/node/status')

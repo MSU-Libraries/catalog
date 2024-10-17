@@ -1,11 +1,14 @@
+'''Home Page'''
 import os
 import asyncio
 import flask
 
-import status
-
+import status # pylint: disable=import-error
 
 def homepage() -> str:
+    '''
+    Gets the contents for the home page and renders the template
+    '''
     stack_name = os.getenv('STACK_NAME')
     is_prod = stack_name == 'catalog-prod'
     is_dev = stack_name.startswith('devel-')
@@ -41,4 +44,10 @@ def homepage() -> str:
             'color': color,
             'status': s_text,
         }
-    return flask.render_template('index.html', services=services, is_prod=is_prod, is_dev=is_dev, stack_name=stack_name)
+    return flask.render_template(
+        'index.html',
+        services=services,
+        is_prod=is_prod,
+        is_dev=is_dev,
+        stack_name=stack_name
+    )
