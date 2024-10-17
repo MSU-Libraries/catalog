@@ -4,7 +4,7 @@ ENV PYTHONUNBUFFERED=1
 
 RUN \
     apk update && \
-    apk add mariadb-client mariadb-dev mariadb-connector-c gcc musl-dev tzdata && \
+    apk add mariadb-client mariadb-dev mariadb-connector-c gcc musl-dev tzdata vim && \
     ln -fs /usr/share/zoneinfo/America/Detroit /etc/localtime
 
 ENV TZ=America/Detroit

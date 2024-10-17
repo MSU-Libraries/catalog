@@ -1,3 +1,4 @@
+import os
 import asyncio
 import flask
 
@@ -5,9 +6,14 @@ import status
 
 
 def homepage() -> str:
+    stack_name = os.getenv('STACK_NAME')
+    is_prod = stack_name == 'catalog-prod'
+    is_dev = stack_name.startswith('devel-')
     statuses = status.get_node_statuses()
+
     if isinstance(statuses, str):
         return statuses
+
     status_list = {}
     status_list['memory'] = status.get_memory_status(statuses)
     status_list['disk_space'] = status.get_disk_space_status(statuses)
@@ -21,9 +27,10 @@ def homepage() -> str:
     status_list['alphabrowse'] = status.get_cron_status('alphabrowse', statuses)
     status_list['searches_cleanup'] = status.get_cron_status('searches', statuses)
     status_list['sessions_cleanup'] = status.get_cron_status('sessions', statuses)
-    status_list['solr_backup'] = status.get_cron_status('solr', statuses)
-    status_list['db_backup'] = status.get_cron_status('db', statuses)
-    status_list['alpha_backup'] = status.get_cron_status('alpha', statuses)
+    if is_prod or is_dev:
+        status_list['solr_backup'] = status.get_cron_status('solr', statuses)
+        status_list['db_backup'] = status.get_cron_status('db', statuses)
+        status_list['alpha_backup'] = status.get_cron_status('alpha', statuses)
     services = {}
     for s_name, s_text in status_list.items():
         if s_text.startswith('OK'):
@@ -34,4 +41,4 @@ def homepage() -> str:
             'color': color,
             'status': s_text,
         }
-    return flask.render_template('index.html', services=services)
+    return flask.render_template('index.html', services=services, is_prod=is_prod, is_dev=is_dev, stack_name=stack_name)
