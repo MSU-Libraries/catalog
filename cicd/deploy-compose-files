@@ -171,13 +171,13 @@ apply_prod_changes() {
         HTTPS_MIDDLEWARES+=("ip-campus")
         ## Only catalog-beta
         if [ "${STACK_NAME}" == "catalog-beta" ]; then
-            # Set cron/build placement contraint
+            # Set cron/build placement constraint
             ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_2}\"]" docker-compose.catalog.yml;
             ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_2}\"]" docker-compose.build.yml;
         fi;
         ## Only catalog-preview
         if [ "${STACK_NAME}" == "catalog-preview" ]; then
-            # Set cron/build placement contraint
+            # Set cron/build placement constraint
             ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_3}\"]" docker-compose.catalog.yml;
             ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_3}\"]" docker-compose.build.yml;
         fi;
