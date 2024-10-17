@@ -97,20 +97,21 @@ Validate Vufind Build:
       metrics: metrics.txt
 
 Pylint Monitoring:
-  stage: test
-  image: python:3.10-alpine
+  stage: Optional Steps
+  image: $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA
   allow_failure: true
   tags:
     - msul-shared
   retry: 1
   timeout: 15m
   interruptible: true
+  needs:
+    - Build Monitoring Image
   rules:
     - if: '$CI_COMMIT_TAG'
       when: never
     - if: '$CI_PIPELINE_SOURCE != "schedule"'
   script:
-    - pip install -r monitoring/requirements.txt
     - pylint --fail-under=10.00 monitoring/app/
 
 # Commenting this out since the https://docs.gitlab.com/ee/user/application_security/container_scanning/#vulnerability-allowlisting
