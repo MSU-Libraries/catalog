@@ -67,35 +67,6 @@ Shellcheck:
     reports:
       metrics: metrics.txt
 
-Validate Vufind Build:
-  stage: test
-  variables:
-    LATEST: $CI_REGISTRY_IMAGE/vufind:latest
-  tags:
-    - msul-shared
-  retry: 1
-  timeout: 15m
-  interruptible: true
-  rules:
-    - if: '$CI_COMMIT_TAG'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE != "schedule"'
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - apk add --no-cache bash
-  script:
-    - bash ./cicd/validate-vufind-build
-  coverage: '/^\s*Lines:\s*\d+.\d+\%/'
-  artifacts:
-    when: always
-    expire_in: 30 days
-    reports:
-      junit: reports/report.xml
-      coverage_report:
-        coverage_format: cobertura
-        path: reports/coverage.xml
-      metrics: metrics.txt
-
 VuFind Tests:
   stage: Optional Steps
   image: $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA
@@ -112,7 +83,17 @@ VuFind Tests:
       when: never
     - if: '$CI_PIPELINE_SOURCE != "schedule"'
   script:
-    - bash ./cicd/validate-vufind-build-v2
+    - bash ./cicd/validate-vufind-build
+  coverage: '/^\s*Lines:\s*\d+.\d+\%/'
+  artifacts:
+    when: always
+    expire_in: 30 days
+    reports:
+      junit: reports/report.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: reports/coverage.xml
+      metrics: metrics.txt
 
 Pylint Monitoring:
   stage: Optional Steps
