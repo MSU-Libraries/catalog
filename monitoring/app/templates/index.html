@@ -19,9 +19,11 @@
         <li>Alphabetical browse update: <span class="text-{{services['alphabrowse']['color']}}">{{services['alphabrowse']['status']}}</span></li>
         <li>Searches cleanup: <span class="text-{{services['searches_cleanup']['color']}}">{{services['searches_cleanup']['status']}}</span></li>
         <li>Sessions cleanup: <span class="text-{{services['sessions_cleanup']['color']}}">{{services['sessions_cleanup']['status']}}</span></li>
-        <li>Solr backup: <span class="text-{{services['solr_backup']['color']}}">{{services['solr_backup']['status']}}</span></li>
-        <li>DB backup: <span class="text-{{services['db_backup']['color']}}">{{services['db_backup']['status']}}</span></li>
-        <li>Alphabrowse backup: <span class="text-{{services['alpha_backup']['color']}}">{{services['alpha_backup']['status']}}</span></li>
+        {% if is_prod or is_dev %}
+            <li>Solr backup: <span class="text-{{services['solr_backup']['color']}}">{{services['solr_backup']['status']}}</span></li>
+            <li>DB backup: <span class="text-{{services['db_backup']['color']}}">{{services['db_backup']['status']}}</span></li>
+            <li>Alphabrowse backup: <span class="text-{{services['alpha_backup']['color']}}">{{services['alpha_backup']['status']}}</span></li>
+        {% endif %}
     </ul>
     <h2>Graphs</h2>
     <ul>
@@ -57,9 +59,11 @@
         <li><a href="/monitoring/logs/alphabrowse">Alphabetical Browse update</a> (<a href="https://msu-libraries.github.io/catalog/solr/#running-the-alphabetical-indexing-manually">docs</a>)</li>
         <li><a href="/monitoring/logs/vufind/searches_cleanup">Searches cleanup</a></li>
         <li><a href="/monitoring/logs/vufind/sessions_cleanup">Sessions cleanup</a></li>
-        <li><a href="/monitoring/logs/backups/solr">Solr backup</a> (<a href="https://msu-libraries.github.io/catalog/backup-and-restore/">docs</a>)</li>
-        <li><a href="/monitoring/logs/backups/db">DB backup</a> (<a href="https://msu-libraries.github.io/catalog/backup-and-restore/">docs</a>)</li>
-        <li><a href="/monitoring/logs/backups/alpha">Alphabrowse backup</a> (<a href="https://msu-libraries.github.io/catalog/backup-and-restore/">docs</a>)</li>
+        {% if is_prod or is_dev %}
+            <li><a href="/monitoring/logs/backups/solr">Solr backup</a> (<a href="https://msu-libraries.github.io/catalog/backup-and-restore/">docs</a>)</li>
+            <li><a href="/monitoring/logs/backups/db">DB backup</a> (<a href="https://msu-libraries.github.io/catalog/backup-and-restore/">docs</a>)</li>
+            <li><a href="/monitoring/logs/backups/alpha">Alphabrowse backup</a> (<a href="https://msu-libraries.github.io/catalog/backup-and-restore/">docs</a>)</li>
+        {% endif %}
     </ul>
     <h2>Other admin apps</h2>
     <ul>

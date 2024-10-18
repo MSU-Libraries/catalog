@@ -14,3 +14,4 @@ vufind/themes/msul/css/less/
 .php_cs_cache
 .phpstan_cache
 reports/
+__pycache__

@@ -128,6 +128,8 @@ apply_devel_changes() {
     # Reduce the catalog service replicas to 1
     ./yq -i ".services.catalog.deploy.replicas = 1" docker-compose.catalog.yml
 
+    # Mount monitoring files in container for easier editting
+    ./yq -i ".services.monitoring.volumes += \"/mnt/shared/local/${STACK_NAME}/repo/monitoring/:/app/\"" docker-compose.monitoring.yml;
 }
 
 apply_prod_changes() {
