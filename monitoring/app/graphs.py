@@ -148,4 +148,7 @@ def graph(variable: str, period: str) -> str:
         node_data['x'] = j['pt_x']
         node_data['y'] = j['pt_y']
         data.append(node_data)
-    return flask.render_template('graph.html', variable=variable, period=period, data=data)
+    return flask.render_template(
+        'graph.html',
+        variable=variable, period=period, data=data, stack_name=os.getenv('STACK_NAME')
+    )

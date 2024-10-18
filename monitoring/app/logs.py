@@ -131,5 +131,6 @@ def logs_vufind(service: str) -> list:
     except asyncio.exceptions.TimeoutError:
         return f'Timeout when reading the {service} log'
     return flask.render_template(
-        'logs.html', service=service, log1=logs[0], log2=logs[1], log3=logs[2]
+        'logs.html',
+        service=service, log1=logs[0], log2=logs[1], log3=logs[2], stack_name=os.getenv('STACK_NAME')
     )
