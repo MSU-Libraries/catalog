@@ -96,6 +96,24 @@ Validate Vufind Build:
         path: reports/coverage.xml
       metrics: metrics.txt
 
+VuFind Tests:
+  stage: Optional Steps
+  image: $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA
+  allow_failure: true
+  tags:
+    - msul-shared
+  retry: 1
+  timeout: 15m
+  interruptible: true
+  needs:
+    - Build Vufind Image
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
+  script:
+    - bash ./cicd/validate-vufind-build-v2
+
 Pylint Monitoring:
   stage: Optional Steps
   image: $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA
