@@ -73,7 +73,6 @@ RUN \
     echo ' <copyField source="title_fullStr" dest="title_browse"/>' >> /solr_confs/biblio/conf/schema.xml && \
     echo ' <copyField source="title_alt" dest="title_browse"/>' >> /solr_confs/biblio/conf/schema.xml && \
     echo ' <copyField source="title_auth" dest="title_browse"/>' >> /solr_confs/biblio/conf/schema.xml && \
-    echo '</schema>' >> /solr_confs/biblio/conf/schema.xml && \
     echo ' <field name="title_browse_sort" type="string" indexed="true" stored="true" multiValued="true"/>' >> /solr_confs/biblio/conf/schema.xml && \
     echo ' <copyField source="title_sort" dest="title_browse_sort"/>' >> /solr_confs/biblio/conf/schema.xml && \
     echo ' <copyField source="title_alt_sort" dest="title_browse_sort"/>' >> /solr_confs/biblio/conf/schema.xml && \
