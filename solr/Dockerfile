@@ -64,7 +64,6 @@ RUN \
     sed -i 's/topic,author,title,lcc,dewey,hierarchy/topic,author,title,lcc,dewey,hierarchy,series/' /solr_confs/biblio/conf/solrconfig.xml && \
     # Update the field used for alpha browse PC-686, PC-110
     sed -i 's/title_fullStr/title_browse/' /solr_confs/biblio/conf/solrconfig.xml && \
-    sed -i 's/      <str name="normalizer">org.vufind.util.TitleNormalizer<\/str>//' /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i '$ d' /solr_confs/biblio/conf/schema.xml && \
     echo ' <!-- CopyFields for Title Browse -->' >> /solr_confs/biblio/conf/schema.xml && \
     echo ' <field name="title_browse" type="string" indexed="true" stored="true" multiValued="true"/>' >> /solr_confs/biblio/conf/schema.xml && \
