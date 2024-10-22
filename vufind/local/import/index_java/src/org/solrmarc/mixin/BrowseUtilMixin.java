@@ -1,16 +1,12 @@
 package org.solrmarc.mixin;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.marc4j.marc.Record;
 
-import org.solrmarc.index.extractor.formatter.FieldFormatter;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.index.SolrIndexerMixin;
-import org.solrmarc.tools.DataUtil;
 
 
 public class BrowseUtilMixin extends SolrIndexerMixin {
@@ -44,9 +40,35 @@ public class BrowseUtilMixin extends SolrIndexerMixin {
      * Return a list with the title, auth title and alt titles, in order, filtered with titleSortLower.
      */
     public List<String> getTitleBrowseSort(final Record record) {
-        EnumSet<FieldFormatter.eCleanVal> cleanValue = DataUtil.getCleanValForParam("titleSortLower");
-        return getTitleBrowse(record).stream()
-            .map(s -> DataUtil.cleanByVal(s, cleanValue))
-            .collect(Collectors.toList());
+        // The indicator is not used with something like:
+        // DataUtil.cleanByVal(s, DataUtil.getCleanValForParam("titleSortLower"))
+        // So we need to create a custom indexer for each field (it gets cached).
+        // getFieldListCollector(record, tagStr, mapStr, collector) does that and is public.
+        List<String> result = new ArrayList<String>();
+        String title = getFirstValueForSpec(record, TITLE_SPEC + ",titleSortLower");
+        if (title != null) {
+            result.add(title);
+        }
+        String auth = getFirstValueForSpec(record, AUTH_SPEC + ",titleSortLower");
+        if (auth != null) {
+            result.add(auth);
+        }
+        List<String> alt = getValuesForSpec(record, ALT_SPEC + ",titleSortLower");
+        if (alt != null) {
+            result.add(alt);
+        }
+        return result;
+    }
+
+    private static String getFirstValueForSpec(final Record record, String spec) {
+        List<String> result = getValuesForSpec(record, spec + ",first");
+        return result.isEmpty() ? null : result.iterator().next();
+    }
+
+    private static List<String> getValuesForSpec(final Record record, String spec) {
+        SolrIndexer indexer = SolrIndexer.instance();
+        List<String> result = new ArrayList<String>();
+        indexer.getFieldListCollector(record, spec, null, result);
+        return result;
     }
 }
