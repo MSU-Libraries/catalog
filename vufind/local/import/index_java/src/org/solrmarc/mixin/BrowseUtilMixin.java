@@ -55,7 +55,7 @@ public class BrowseUtilMixin extends SolrIndexerMixin {
         }
         List<String> alt = getValuesForSpec(record, ALT_SPEC + ",titleSortLower");
         if (alt != null) {
-            result.add(alt);
+            result.addAll(alt);
         }
         return result;
     }
