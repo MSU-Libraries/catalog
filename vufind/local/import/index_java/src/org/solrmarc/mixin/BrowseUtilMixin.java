@@ -14,6 +14,7 @@ public class BrowseUtilMixin extends SolrIndexerMixin {
     private static final String TITLE_SPEC = "245abkp";
     private static final String AUTH_SPEC = "245ab";
     private static final String ALT_SPEC = "100t:130adfgklnpst:240a:246abnp:505t:700t:710t:711t:730adfgklnpst:740a:LNK245anbp";
+    private static final int MAX_ALT = 15;
 
     /**
      * Return a list with the title, auth title and alt titles, in order.
@@ -29,8 +30,11 @@ public class BrowseUtilMixin extends SolrIndexerMixin {
         if (auth != null) {
             result.add(auth);
         }
-        List<String> alt = indexer.getFieldListAsList(record, ALT_SPEC);
+        List<String> alt = indexer.getFieldListAsList(record, ALT_SPEC + ",notunique");
         if (!alt.isEmpty()) {
+            if (alt.size() > MAX_ALT) {
+                alt = alt.subList(0, MAX_ALT);
+            }
             result.addAll(alt);
         }
         return result;
@@ -53,8 +57,11 @@ public class BrowseUtilMixin extends SolrIndexerMixin {
         if (auth != null) {
             result.add(auth);
         }
-        List<String> alt = getValuesForSpec(record, ALT_SPEC + ",titleSortLower");
-        if (alt != null) {
+        List<String> alt = getValuesForSpec(record, ALT_SPEC + ",titleSortLower,notunique");
+        if (!alt.isEmpty()) {
+            if (alt.size() > MAX_ALT) {
+                alt = alt.subList(0, MAX_ALT);
+            }
             result.addAll(alt);
         }
         return result;
