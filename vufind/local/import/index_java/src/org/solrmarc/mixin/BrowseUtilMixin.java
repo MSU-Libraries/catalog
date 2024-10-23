@@ -2,6 +2,7 @@ package org.solrmarc.mixin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.marc4j.marc.Record;
 
@@ -20,24 +21,9 @@ public class BrowseUtilMixin extends SolrIndexerMixin {
      * Return a list with the title, auth title and alt titles, in order.
      */
     public List<String> getTitleBrowse(final Record record) {
-        List<String> result = new ArrayList<String>();
-        SolrIndexer indexer = SolrIndexer.instance();
-        String title = indexer.getFirstFieldVal(record, TITLE_SPEC);
-        if (title != null) {
-            result.add(title);
-        }
-        String auth = indexer.getFirstFieldVal(record, AUTH_SPEC);
-        if (auth != null) {
-            result.add(auth);
-        }
-        List<String> alt = indexer.getFieldListAsList(record, ALT_SPEC + ",notunique");
-        if (!alt.isEmpty()) {
-            if (alt.size() > MAX_ALT) {
-                alt = alt.subList(0, MAX_ALT);
-            }
-            result.addAll(alt);
-        }
-        return result;
+        return getTitleBrowseNotUnique(record).stream()
+            .distinct()
+            .collect(Collectors.toList());
     }
 
     /**
@@ -46,6 +32,7 @@ public class BrowseUtilMixin extends SolrIndexerMixin {
     public List<String> getTitleBrowseSort(final Record record) {
         // The indicator is not used with something like:
         // DataUtil.cleanByVal(s, DataUtil.getCleanValForParam("titleSortLower"))
+        // or with getTitleBrowseNotUnique().
         // So we need to create a custom indexer for each field (it gets cached).
         // getFieldListCollector(record, tagStr, mapStr, collector) does that and is public.
         List<String> result = new ArrayList<String>();
@@ -63,6 +50,53 @@ public class BrowseUtilMixin extends SolrIndexerMixin {
                 alt = alt.subList(0, MAX_ALT);
             }
             result.addAll(alt);
+        }
+        // Remove from the results the filtered titles that are related to duplicates in the unfiltered list
+        // (duplicates might be different in filtered results, but the number of records must be the same).
+        List<String> titleBrowseNotUniqe = getTitleBrowseNotUnique(record);
+        return removeFromIndices(result, indicesOfDuplicates(titleBrowseNotUniqe));
+    }
+
+    private List<String> getTitleBrowseNotUnique(final Record record) {
+        List<String> result = new ArrayList<String>();
+        SolrIndexer indexer = SolrIndexer.instance();
+        String title = indexer.getFirstFieldVal(record, TITLE_SPEC + ",cleanEnd");
+        if (title != null) {
+            result.add(title);
+        }
+        String auth = indexer.getFirstFieldVal(record, AUTH_SPEC + ",cleanEnd");
+        if (auth != null) {
+            result.add(auth);
+        }
+        List<String> alt = indexer.getFieldListAsList(record, ALT_SPEC + ",cleanEnd,notunique");
+        if (!alt.isEmpty()) {
+            if (alt.size() > MAX_ALT) {
+                alt = alt.subList(0, MAX_ALT);
+            }
+            result.addAll(alt);
+        }
+        return result;
+    }
+
+    private static List<Integer> indicesOfDuplicates(List l) {
+        List<Integer> indices = new ArrayList<Integer>();
+        if (l.size() < 2) {
+            return indices;
+        }
+        for (int i=1; i<l.size(); i++) {
+            if (l.subList(0, i).contains(l.get(i))) {
+                indices.add(i);
+            }
+        }
+        return indices;
+    }
+
+    private static List<String> removeFromIndices(List<String> l, List<Integer> indices) {
+        List<String> result = new ArrayList<String>();
+        for (int i=0; i<l.size(); i++) {
+            if (!indices.contains(i)) {
+                result.add(l.get(i));
+            }
         }
         return result;
     }
