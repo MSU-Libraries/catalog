@@ -65,17 +65,17 @@ RUN \
     # Update the field used for alpha browse PC-686, PC-110
     sed -i 's/title_fullStr/title_browse/' /solr_confs/biblio/conf/solrconfig.xml && \
     # Add exactish field type to the schema
-    NEWTYPES='  <fieldType name="exactish" class="solr.TextField">
-  <analyzer>
-   <tokenizer class="solr.KeywordTokenizerFactory"/>
-   <filter class="solr.LowerCaseFilterFactory"/>
-  </analyzer> 
-</fieldType>'
+    NEWTYPES='  <fieldType name="exactish" class="solr.TextField">\n' && \
+    NEWTYPES+='    <analyzer>\n' && \
+    NEWTYPES+='      <tokenizer class="solr.KeywordTokenizerFactory"\/>\n' && \
+    NEWTYPES+='      <filter class="solr.LowerCaseFilterFactory"\/>\n' && \
+    NEWTYPES+='    <\/analyzer>\n' && \
+    NEWTYPES+='  <\/fieldType>\n' && \
     sed -i "s/<\/types>/${NEWTYPES}<\/types>/" /solr_confs/biblio/conf/schema.xml && \
     # Add title_exactish, title_browse and title_browse_sort fields
-    NEWFIELDS='  <field name="title_exactish" type="exactish" indexed="true" stored="true" multiValued="false"\/>\n'
-    NEWFIELDS='  <field name="title_browse" type="string" indexed="true" stored="true" multiValued="true"\/>\n'
-    NEWFIELDS+='  <field name="title_browse_sort" type="string" indexed="true" stored="true" multiValued="true"\/>\n'
+    NEWFIELDS='  <field name="title_exactish" type="exactish" indexed="true" stored="true" multiValued="false"\/>\n' && \
+    NEWFIELDS+='  <field name="title_browse" type="string" indexed="true" stored="true" multiValued="true"\/>\n' && \
+    NEWFIELDS+='  <field name="title_browse_sort" type="string" indexed="true" stored="true" multiValued="true"\/>\n' && \
     sed -i "s/<\/fields>/${NEWFIELDS}<\/fields>/" /solr_confs/biblio/conf/schema.xml && \
     # Now rename biblio to biblio1 and duplicate it to biblio2, then update the datadir path
     # since we have two separate collections, one to build in and one for live searching
