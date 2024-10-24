@@ -12,6 +12,7 @@ import org.solrmarc.index.SolrIndexerMixin;
 
 public class BrowseUtilMixin extends SolrIndexerMixin {
 
+    // Make sure these specs match the ones in marc_local.properties
     private static final String TITLE_SPEC = "245abkp";
     private static final String AUTH_SPEC = "245ab";
     private static final String ALT_SPEC = "100t:130adfgklnpst:240a:246abnp:505t:700t:710t:711t:730adfgklnpst:740a:LNK245anbp";
