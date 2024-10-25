@@ -77,6 +77,9 @@ RUN \
     NEWFIELDS+='   <field name="title_browse" type="string" indexed="true" stored="true" multiValued="true"\/>\n' && \
     NEWFIELDS+='   <field name="title_browse_sort" type="string" indexed="true" stored="true" multiValued="true"\/>\n' && \
     sed -i "s/<\/fields>/${NEWFIELDS} <\/fields>/" /solr_confs/biblio/conf/schema.xml && \
+    # Copy title to title_exactish
+    NEWCOPYFIELDS=' <copyField source="title" dest="title_exactish"\/>\n' && \
+    sed -i "s/<\/schema>/${NEWCOPYFIELDS}<\/schema>/" /solr_confs/biblio/conf/schema.xml && \
     # Now rename biblio to biblio1 and duplicate it to biblio2, then update the datadir path
     # since we have two separate collections, one to build in and one for live searching
     mv /solr_confs/biblio /solr_confs/biblio1 && \
