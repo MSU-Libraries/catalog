@@ -67,8 +67,8 @@ RUN \
     # Update the field used for alpha browse PC-686, PC-110
     sed -i 's/title_fullStr/title_browse/' /solr_confs/biblio/conf/solrconfig.xml && \
     # Apply customizations to the Solr schema
-    xsltproc --stringparam modFile "/tmp/build/config-mod/biblio/schema.xml" \
-        /tmp/build/config-mod/schema.xslt /solr_confs/biblio/conf/schema.xml \
+    xsltproc --stringparam modFile "/tmp/build/configs-mod/biblio/schema.xml" \
+        /tmp/build/configs-mod/schema.xslt /solr_confs/biblio/conf/schema.xml \
         | sponge /solr_confs/biblio/conf/schema.xml && \
     # Now rename biblio to biblio1 and duplicate it to biblio2, then update the datadir path
     # since we have two separate collections, one to build in and one for live searching
