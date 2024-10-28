@@ -6,18 +6,19 @@
 ?>
 <nav class="record-nav" aria-label="<?=$this->transEscAttr('ajaxview_label_tools'); ?>">
   <ul class="action-toolbar">
-    <?php if (method_exists($this->driver, 'getLocation') && !empty($this->driver->getLocation()) && !str_contains(strtolower($this->driver->getLocation()), 'remote storage')): ?>
+    <?php /** MSU START */
+      if (method_exists($this->driver, 'getLocation') && !empty($this->driver->getLocation()) && !str_contains(strtolower($this->driver->getLocation()), 'remote storage')): ?>
       <li>
         <a class="map-record toolbar-btn" data-lightbox href="<?= $this->record($this->driver)->getLink('mapit', null) ?>" rel="nofollow" target="_blank" aria-hidden="true"> <!--msul added aria-hidden="true"-->
           <?=$this->icon('format-map') ?>
           <?=$this->transEsc('Map this')?>
         </a>
       </li>
-      
-    <?php endif; ?>
+
+    <?php endif; /** MSU END */ ?>
 
     <?php if (count($this->driver->getCitationFormats()) > 0): ?>
-      <li>
+      <li><?php /** MSU */ ?>
         <a class="cite-record toolbar-btn" data-lightbox href="<?=$this->escapeHtmlAttr($this->recordLinker()->getActionUrl($this->driver, 'Cite'))?>" rel="nofollow">
           <?=$this->icon('cite') ?>
           <?=$this->transEsc('Cite this')?>
@@ -26,7 +27,7 @@
     <?php endif; ?>
 
     <?php if ($this->accountCapabilities()->getSmsSetting() !== 'disabled'): ?>
-      <li>
+      <li><?php /** MSU */ ?>
         <a class="sms-record toolbar-btn" data-lightbox href="<?=$this->escapeHtmlAttr($this->recordLinker()->getActionUrl($this->driver, 'SMS'))?>" rel="nofollow">
           <?=$this->icon('send-sms') ?>
           <?=$this->transEsc('Text this')?>
@@ -34,7 +35,7 @@
       </li>
     <?php endif; ?>
 
-    <li>
+    <li><?php /** MSU */ ?>
       <a class="mail-record toolbar-btn" data-lightbox href="<?=$this->escapeHtmlAttr($this->recordLinker()->getActionUrl($this->driver, 'Email'))?>" rel="nofollow">
         <?=$this->icon('send-email') ?>
         <?=$this->transEsc('Email this')?>
@@ -50,15 +51,15 @@
 
     <?php $exportFormats = $this->export()->getFormatsForRecord($this->driver); ?>
     <?php if (count($exportFormats) > 0): ?>
-      <li class="dropdown">
+      <li class="dropdown"><?php /** MSU */ ?>
         <a class="export-toggle toolbar-btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" href="<?=$this->escapeHtmlAttr($this->recordLinker()->getActionUrl($this->driver, 'Export', [], '', ['excludeSearchId' => true]))?>" rel="nofollow" aria-expanded="false" aria-controls="export-options">
-          <?=$this->icon('fa-arrow-right', 'fa-arrow-right') ?>
-          <?=$this->transEsc('Export record') ?>
+          <?=$this->icon('fa-arrow-right', 'fa-arrow-right') /** MSU */ ?>
+          <?=$this->transEsc('Export record') /** MSU */ ?>
         </a>
         <ul class="dropdown-menu" id="export-options" role="menu">
           <?php foreach ($exportFormats as $exportFormat): ?>
-            <li>
-              <a <?php if ($this->export()->needsRedirect($exportFormat)): ?>target="<?=$this->escapeHtmlAttr($exportFormat)?>Main" <?php endif; ?>href="<?=$this->escapeHtmlAttr($this->recordLinker()->getActionUrl($this->driver, 'Export', [], '', ['excludeSearchId' => true]))?>?style=<?=$this->escapeHtmlAttr($exportFormat)?>" rel="nofollow" role="menuitem">
+            <li><?php /** MSU */ ?>
+              <a class="dropdown-item" <?php if ($this->export()->needsRedirect($exportFormat)): ?>target="<?=$this->escapeHtmlAttr($exportFormat)?>Main" <?php endif; ?>href="<?=$this->escapeHtmlAttr($this->recordLinker()->getActionUrl($this->driver, 'Export', [], '', ['excludeSearchId' => true]))?>?style=<?=$this->escapeHtmlAttr($exportFormat)?>" rel="nofollow" role="menuitem">
                 <?=$this->transEsc('export_to', ['%%target%%' => $this->translate($this->export()->getLabelForFormat($exportFormat))])?>
               </a>
             </li>
@@ -68,7 +69,7 @@
     <?php endif; ?>
 
     <?php if ($this->userlist()->getMode() !== 'disabled'): ?>
-      <li>
+      <li><?php /** MSU */ ?>
         <?php if ($this->permission()->allowDisplay('feature.Favorites')): ?>
           <a class="save-record toolbar-btn" data-lightbox href="<?=$this->escapeHtmlAttr($this->recordLinker()->getActionUrl($this->driver, 'Save'))?>" rel="nofollow">
             <?=$this->icon('user-favorites') ?>
@@ -80,7 +81,7 @@
       </li>
     <?php endif; ?>
     <?php if (!empty($addThis)): ?>
-      <li>
+      <li><?php /** MSU */ ?>
         <a class="addThis addthis_button" href="https://www.addthis.com/bookmark.php?v=250&amp;pub=<?=urlencode($addThis)?>">
           <?=$this->icon('addthis-bookmark') ?>
           <?=$this->transEsc('Bookmark')?>
@@ -94,7 +95,7 @@
       </li>
     <?php endif; ?>
 
-    <li>
+    <li><?php /** MSU */ ?>
       <a class="permalink-record toolbar-btn" data-lightbox href="<?=$this->escapeHtmlAttr($this->recordLinker()->getActionUrl($this->driver, 'Permalink'))?>" rel="nofollow">
         <?=$this->icon('external-link') ?>
         <?=$this->transEsc('permanent_link')?>
