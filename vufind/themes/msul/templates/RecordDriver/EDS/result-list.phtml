@@ -36,8 +36,10 @@
                     <?=$item['Data']?> </a>
                   </h2>
                 <?php else:?>
+                  <?php /** MSU Code removed */ ?>
                     <b><?=$this->transEsc($item['Label'])?>:</b>
                     <?=$this->driver->linkUrls($item['Data'])?>
+                  <?php /** MSU Code removed */ ?>
                 <?php endif;?>
               </div>
             <?php endif;
@@ -47,8 +49,8 @@
             <p>
               <?=$this->transEsc('This result is not displayed to guests')?>
               <br>
-              <a class="login" href="<?=$this->url('myresearch-userlogin')?>" data-lightbox ref="nofollow">
-                <span class="icon icon--font fa fa-sign-in icon-link__icon" role="img" aria-hidden="true"></span>
+              <a class="login" href="<?=$this->url('myresearch-userlogin')?>" data-lightbox rel="nofollow"><?php /** MSU */ ?>
+                <span class="icon icon--font fa fa-sign-in icon-link__icon" role="img" aria-hidden="true"></span><?php /** MSU */ ?>
                 <strong><?=$this->transEsc('Login for full access')?></strong>
               </a>
             </p>
@@ -66,25 +68,32 @@
               $name = $customLink['Text'] ?? '';
             ?>
             <span>
-              <?php if ($icon): ?><img src="<?=$this->escapeHtmlAttr($icon)?>" />
-              <?php else: ?><?=$this->icon('external-link', 'icon-link__icon') ?><?php endif; ?>
+              <?php if ($icon): /** MSU START */ ?>
+                <img alt="" src="<?=$this->escapeHtmlAttr($icon)?>" />
+              <?php else: ?>
+                <?=$this->icon('external-link', 'icon-link__icon') ?>
+              <?php endif; /** MSU END */ ?>
               <a href="<?=$this->escapeHtmlAttr($url)?>" target="_blank" title="<?=$this->escapeHtmlAttr($mot)?>" class="custom-link">
-                <?=$this->escapeHtml($name)?>
+                <?=$this->escapeHtml($name) /** MSU */ ?>
               </a>
             </span>
           <?php endforeach; ?>
         <?php endif; ?>
+      <?php /** MSU Code removed */ ?>
       </div>
+
       <?=$this->record($this->driver)->renderTemplate(
                 'result-list/full-text-links.phtml',
-                ['recordLinker' => $recordLinker]
+                ['recordLinker' => $recordLinker, 'newWindow' => true]
             );
       ?>
+
       <?php /* Links from DOI linker */ ?>
       <?php $doi = $this->doi($this->driver, 'results'); ?>
       <?php if ($doi->isActive()): ?>
         <div><?=$doi->renderTemplate()?></div>
       <?php endif; ?>
+      <?php /** MSU START */ ?>
       <?php $libkeyData = $this->record($this->driver)->getLibKeyData($this->driver->getCleanDOI()); ?>
       <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['pdf'],
                                              'label' => 'Download PDF',
@@ -95,9 +104,10 @@
       <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['issue'],
                                              'label' => 'View Full Issue',
                                              'openAccess' => $libkeyData['openAccess']]); ?>
+      <?php /** MSU END */ ?>
     </div>
     <div class="result-links hidden-print">
-      <?php /* Display qrcode if appropriate: */ ?>
+      <?php /* Display qrcode if appropriate: */ /** MSU START */ ?>
       <?php if ($QRCode = $this->record($this->driver)->getQRCode('results')): ?>
         <?php
           // Add JS Variables for QrCode
@@ -111,7 +121,7 @@
             </script>
           </div><br>
         </span>
-      <?php endif; ?>
+      <?php endif; /** MSU END */ ?>
 
       <?php if ($this->cart()->isActiveInSearch() && $this->params->getOptions()->supportsCart() && $this->cart()->isActive()): ?>
         <?=$this->render('record/cart-buttons.phtml', ['id' => $this->driver->getUniqueId(), 'source' => $this->driver->getSourceIdentifier()]); ?><br>
@@ -119,7 +129,7 @@
 
       <?php if ($this->userlist()->getMode() !== 'disabled'): ?>
         <?php /* Add to favorites */ ?>
-          <?= $this->icon('fa-star', 'fa-star') ?> <a href="<?=$this->escapeHtmlAttr($recordLinker->getActionUrl($this->driver, 'Save'))?>" class="save-record" data-lightbox id="<?=$this->driver->getUniqueId() ?>" title="<?=$this->transEscAttr('Add to favorites')?>"><?=$this->transEsc('Add to favorites')?></a><br>
+          <?= $this->icon('fa-star', 'fa-star') /** MSU */ ?> <a href="<?=$this->escapeHtmlAttr($recordLinker->getActionUrl($this->driver, 'Save'))?>" class="save-record" data-lightbox id="<?=$this->driver->getUniqueId() ?>" title="<?=$this->transEscAttr('Add to favorites')?>"><?=$this->transEsc('Add to favorites')?></a><br>
 
         <?php /* Saved lists */ ?>
         <div class="savedLists alert alert-info hidden">
@@ -133,7 +143,7 @@
         <?php foreach ($trees as $hierarchyID => $hierarchyTitle): ?>
           <div class="hierarchyTreeLink">
             <input type="hidden" value="<?=$this->escapeHtmlAttr($hierarchyID)?>" class="hiddenHierarchyId">
-            <?= $this->icon('fa-sitemap', 'fa-sitemap') ?>
+            <?= $this->icon('fa-sitemap', 'fa-sitemap') /** MSU */ ?>
             <a class="hierarchyTreeLinkText" data-lightbox href="<?=$this->escapeHtmlAttr($recordLinker->getTabUrl($this->driver, 'HierarchyTree', ['hierarchy' => $hierarchyID]))?>#tabnav" title="<?=$this->transEscAttr('hierarchy_tree')?>">
               <?=$this->transEsc('hierarchy_view_context')?><?php if (count($trees) > 1): ?>: <?=$this->escapeHtml($hierarchyTitle)?><?php endif; ?>
             </a>
