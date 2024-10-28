@@ -2,7 +2,7 @@
 
 # Cron job - Authority records harvest
 
-export CRON_COMMAND="/usr/bin/flock -n /tmp/authority-harvest.lock /usr/local/bin/pc-import-authority --verbose --harvest --import"
+export CRON_COMMAND="/usr/bin/flock -n -E 1000 /tmp/authority-harvest.lock /usr/local/bin/pc-import-authority --verbose --harvest --import"
 export LATEST_PATH=/mnt/logs/harvests/authority_latest.log
 export LOG_PATH=/mnt/logs/harvests/authority.log
 export EXIT_CODE_PATH=/mnt/logs/harvests/authority_exit_code
