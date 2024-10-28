@@ -38,6 +38,7 @@ RUN cp /tmp/build/cron.d/* /etc/cron.d/ && \
 RUN \
     cd /tmp/build/ && \
     cp startup.sh startup-cron.sh healthcheck.sh clusterhealth.sh cron-alphabrowse.sh alpha-browse.sh lock-state.sh / && \
+    cd - && \
     mkdir -p /solr_confs/import/lib && \
     wget https://github.com/vufind-org/vufind/archive/refs/tags/v${VUFIND_VERSION}.tar.gz && \
     tar -xf v${VUFIND_VERSION}.tar.gz  && \
@@ -78,7 +79,8 @@ RUN \
     # Use /mnt/logs/solr for the Solr logs
     rm -rf /opt/bitnami/solr/logs && \
     ln -s /mnt/logs/solr /opt/bitnami/solr/logs && \
-    cp /tmp/build/solr-zk-shell.sh /usr/local/bin/solr-zk-shell
+    cp /tmp/build/solr-zk-shell.sh /usr/local/bin/solr-zk-shell && \
+    rm -r /tmp/build/
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
     CMD /healthcheck.sh
