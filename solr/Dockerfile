@@ -47,7 +47,7 @@ RUN \
     rm v${VUFIND_VERSION}.tar.gz && \
     cp /vufind-${VUFIND_VERSION}/import/*.jar /solr_confs/import/ && \
     rm -rf /vufind-${VUFIND_VERSION} && \
-    cp index-alphabetic-browse.sh /solr_confs/ && \
+    cp /tmp/build/index-alphabetic-browse.sh /solr_confs/ && \
     chmod -R go-w /solr_confs /*.sh && \
     chmod ugo+x /*.sh /solr_confs/*.sh && \
     # Change solr_confs ownership so that a biblio9 copy can be created (conditionally) in startup.sh
