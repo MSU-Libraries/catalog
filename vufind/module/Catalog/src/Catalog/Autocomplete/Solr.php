@@ -89,7 +89,7 @@ class Solr extends \VuFind\Autocomplete\Solr
             $searchResults = $this->searchObject->getResults();
 
             // Build the recommendation list
-            $results = $this->getSuggestionsFromSearch($searchResults, $query);
+            $results = $this->getSuggestionsFromSearch2($searchResults, $query);
         } catch (\Exception $e) {
             // Ignore errors -- just return empty results if we must.
         }
@@ -105,7 +105,7 @@ class Solr extends \VuFind\Autocomplete\Solr
      *
      * @return array
      */
-    protected function getSuggestionsFromSearch($searchResults, $query)
+    protected function getSuggestionsFromSearch2($searchResults, $query)
     {
         $exactMatches = [];
         $otherMatches = [];

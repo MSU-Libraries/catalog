@@ -61,7 +61,7 @@ return [
       ],
       'autocomplete' => [
         'factories' => [
-          Catalog\Autocomplete\Solr::class => SolrFactory::class,
+          Catalog\Autocomplete\Solr::class => VuFind\Autocomplete\SolrFactory::class,
         ],
         'aliases' => [
           'solr' => Catalog\Autocomplete\Solr::class,
