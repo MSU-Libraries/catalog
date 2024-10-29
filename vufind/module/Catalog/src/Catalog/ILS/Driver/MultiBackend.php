@@ -3,7 +3,7 @@
 /**
  * Multiple Backend Driver.
  *
- * PHP version 7
+ * PHP version 8
  *
  * Copyright (C) The National Library of Finland 2012-2021.
  *
@@ -28,12 +28,11 @@
  * @link     https://vufind.org/wiki/development:plugins:ils_drivers Wiki
  */
 
-namespace Catalog\ILS\Driver;
+namespace VuFind\ILS\Driver;
 
 use VuFind\Exception\ILS as ILSException;
 use VuFind\ILS\Driver\PluginManager;
 
-use function array_key_exists;
 use function call_user_func_array;
 use function func_get_args;
 use function in_array;
@@ -50,12 +49,12 @@ use function strlen;
  * user id prefix (e.g. source.12345).
  *
  * @category VuFind
- * @package  ILS_Drivers
- * @author   Nathan Collins <colli372@msu.edu>
+ * @package  ILSdrivers
+ * @author   Ere Maijala <ere.maijala@helsinki.fi>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:ils_drivers Wiki
  */
-class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
+class MultiBackend extends AbstractMultiDriver
 {
     use \VuFind\Log\LoggerAwareTrait {
         logError as error;
@@ -67,13 +66,6 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
     public const HOLD_ID_FIELDS = ['id', 'item_id', 'cat_username'];
 
     /**
-     * The array of configured driver names.
-     *
-     * @var string[]
-     */
-    protected $drivers = [];
-
-    /**
      * The default driver to use
      *
      * @var string
@@ -81,46 +73,11 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
     protected $defaultDriver;
 
     /**
-     * The path to the driver configurations relative to the config path
-     *
-     * @var string
-     */
-    protected $driversConfigPath;
-
-    /**
-     * The array of cached drivers
-     *
-     * @var object[]
-     */
-    protected $driverCache = [];
-
-    /**
-     * The array of driver configuration options.
-     *
-     * @var string[]
-     */
-    protected $config = [];
-
-    /**
-     * Configuration loader
-     *
-     * @var \VuFind\Config\PluginManager
-     */
-    protected $configLoader;
-
-    /**
      * ILS authenticator
      *
      * @var \VuFind\Auth\ILSAuthenticator
      */
     protected $ilsAuth;
-
-    /**
-     * ILS driver manager
-     *
-     * @var PluginManager
-     */
-    protected $driverManager;
 
     /**
      * An array of methods that should determine source from a specific parameter
@@ -152,7 +109,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
         'getCourses',
         'getDepartments',
         'getFunds',
-        'getInstanceByBibId',
+        'getInstanceByBibId', /** MSU */
         'getInstructors',
         'getNewItems',
         'getOfflineMode',
@@ -173,21 +130,8 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
         \VuFind\Auth\ILSAuthenticator $ilsAuth,
         PluginManager $dm
     ) {
-        $this->configLoader = $configLoader;
+        parent::__construct($configLoader, $dm);
         $this->ilsAuth = $ilsAuth;
-        $this->driverManager = $dm;
-    }
-
-    /**
-     * Set the driver configuration.
-     *
-     * @param Config $config The configuration to be set
-     *
-     * @return void
-     */
-    public function setConfig($config)
-    {
-        $this->config = $config;
     }
 
     /**
@@ -201,13 +145,8 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
      */
     public function init()
     {
-        if (empty($this->config)) {
-            throw new ILSException('Configuration needs to be set.');
-        }
-        $this->drivers = $this->config['Drivers'];
+        parent::init();
         $this->defaultDriver = $this->config['General']['default_driver'] ?? null;
-        $this->driversConfigPath
-            = $this->config['General']['drivers_config_path'] ?? null;
     }
 
     /**
@@ -229,7 +168,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
             $status = $driver->getStatus($this->getLocalId($id));
             return $this->addIdPrefixes($status, $source);
         }
-        // Return an empy array if driver is not available; id can point to an ILS
+        // Return an empty array if driver is not available; id can point to an ILS
         // that's not currently configured.
         return [];
     }
@@ -332,7 +271,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
             );
             return $this->addIdPrefixes($holdings, $source);
         }
-        // Return an empy array if driver is not available; id can point to an ILS
+        // Return an empty array if driver is not available; id can point to an ILS
         // that's not currently configured.
         return [];
     }
@@ -354,7 +293,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
         if ($driver = $this->getDriver($source)) {
             return $driver->getPurchaseHistory($this->getLocalId($id));
         }
-        // Return an empy array if driver is not available; id can point to an ILS
+        // Return an empty array if driver is not available; id can point to an ILS
         // that's not currently configured.
         return [];
     }
@@ -474,16 +413,15 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
      */
     public function findReserves($course, $inst, $dept)
     {
-        // Get all the reserves from the default driver
         if ($driver = $this->getDriver($this->defaultDriver)) {
-            $reserves = $driver->findReserves($course, $inst, $dept);
-        } else {
-            throw new ILSException('No suitable backend driver found');
+            // MSU - Get all the reserves from the default driver
+            return $driver->findReserves($course, $inst, $dept);
         }
-        return $reserves;
+        throw new ILSException('No suitable backend driver found');
     }
 
     /**
+     * MSU Function
      * Find and instance record by the bib ID
      *
      * @param string $bibId Sierra bib number
@@ -518,7 +456,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
                 $source
             );
         }
-        // Return an empy array if driver is not available; cat_username can point
+        // Return an empty array if driver is not available; cat_username can point
         // to an ILS that's not currently configured.
         return [];
     }
@@ -578,7 +516,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
      *
      * @param string $id     The Bib ID
      * @param array  $data   An Array of item data
-     * @param patron $patron An array of patron data
+     * @param array  $patron An array of patron data
      *
      * @return mixed An array of data on the request including
      * whether or not it is valid and a status message. Alternatively a boolean
@@ -610,7 +548,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
      *
      * @param string $id     The Bib ID
      * @param array  $data   An Array of item data
-     * @param patron $patron An array of patron data
+     * @param array  $patron An array of patron data
      *
      * @return mixed An array of data on the request including
      * whether or not it is valid and a status message. Alternatively a boolean
@@ -644,10 +582,10 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
      * @param array $patron      Patron information returned by the patronLogin
      * method.
      * @param array $holdDetails Optional array, only passed in when getting a list
-     * in the context of placing or editing a hold.  When placing a hold, it contains
-     * most of the same values passed to placeHold, minus the patron data.  When
+     * in the context of placing or editing a hold. When placing a hold, it contains
+     * most of the same values passed to placeHold, minus the patron data. When
      * editing a hold it contains all the hold information returned by getMyHolds.
-     * May be used to limit the pickup options or may be ignored.  The driver must
+     * May be used to limit the pickup options or may be ignored. The driver must
      * not add new options to the return array based on this data or other areas of
      * VuFind may behave incorrectly.
      *
@@ -656,7 +594,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
      */
     public function getPickUpLocations($patron = false, $holdDetails = null)
     {
-        // If MultiBackend without MultiILS auth, cat_username source will be empty
+        // MSU - If MultiBackend without MultiILS auth, cat_username source will be empty
         $source = $this->getSource($patron['cat_username']) ?:
             $this->getSource($holdDetails['id'] ?? $holdDetails['item_id'] ?? '');
         if ($driver = $this->getDriver($source)) {
@@ -688,7 +626,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
      * method.
      * @param array $holdDetails Optional array, only passed in when getting a list
      * in the context of placing a hold; contains most of the same values passed to
-     * placeHold, minus the patron data.  May be used to limit the pickup options
+     * placeHold, minus the patron data. May be used to limit the pickup options
      * or may be ignored.
      *
      * @return string A location ID
@@ -720,7 +658,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
      * method.
      * @param array $holdDetails Optional array, only passed in when getting a list
      * in the context of placing a hold; contains most of the same values passed to
-     * placeHold, minus the patron data.  May be used to limit the request group
+     * placeHold, minus the patron data. May be used to limit the request group
      * options or may be ignored.
      *
      * @return array  An array of associative arrays with requestGroupId and
@@ -759,7 +697,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
      * method.
      * @param array $holdDetails Optional array, only passed in when getting a list
      * in the context of placing a hold; contains most of the same values passed to
-     * placeHold, minus the patron data.  May be used to limit the request group
+     * placeHold, minus the patron data. May be used to limit the request group
      * options or may be ignored.
      *
      * @return string A location ID
@@ -801,7 +739,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
      */
     public function placeHold($holdDetails)
     {
-        // If MultiBackend without MultiILS auth, cat_username source will be empty
+        // MSU - If MultiBackend without MultiILS auth, cat_username source will be empty
         $source = $this->getSource($holdDetails['patron']['cat_username']) ?:
             $this->getSource($holdDetails['id'] ?? $holdDetails['item_id'] ?? '');
         if ($driver = $this->getDriver($source)) {
@@ -839,7 +777,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
             $this->stripIdPrefixes(
                 $hold,
                 $source,
-                self::HOLD_ID_FIELDS,
+                self::HOLD_ID_FIELDS
             ),
             $this->stripIdPrefixes($patron, $source),
         ];
@@ -885,7 +823,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
      *
      * @param string $id     The Bib ID
      * @param array  $data   An Array of item data
-     * @param patron $patron An array of patron data
+     * @param array  $patron An array of patron data
      *
      * @return mixed An array of data on the request including
      * whether or not it is valid and a status message. Alternatively a boolean
@@ -1111,7 +1049,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
 
     /**
      * Helper method to determine whether or not a certain method can be
-     * called on this driver.  Required method for any smart drivers.
+     * called on this driver. Required method for any smart drivers.
      *
      * @param string $method The name of the called method.
      * @param array  $params Array of passed parameters.
@@ -1119,7 +1057,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
      * @return bool True if the method can be called with the given parameters,
      * false otherwise.
      */
-    public function supportsMethod($method, $params)
+    public function supportsMethod(string $method, array $params)
     {
         if ($method == 'getLoginDrivers' || $method == 'getDefaultLoginDriver') {
             return true;
@@ -1250,7 +1188,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
      *
      * @param string $source The source name of the driver to get.
      *
-     * @return mixed  On success a driver object, otherwise null.
+     * @return mixed On success a driver object, otherwise null.
      */
     protected function getDriver($source)
     {
@@ -1261,69 +1199,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
                 $source = $this->defaultDriver;
             }
         }
-
-        // Check for a cached driver
-        if (!array_key_exists($source, $this->driverCache)) {
-            // Create the driver
-            $this->driverCache[$source] = $this->createDriver($source);
-            if (null === $this->driverCache[$source]) {
-                $this->debug("Could not initialize driver for source '$source'");
-                return null;
-            }
-        }
-        return $this->driverCache[$source];
-    }
-
-    /**
-     * Create a driver for the given source.
-     *
-     * @param string $source Source id for the driver.
-     *
-     * @return mixed On success a driver object, otherwise null.
-     */
-    protected function createDriver($source)
-    {
-        if (!isset($this->drivers[$source])) {
-            return null;
-        }
-        $driver = $this->drivers[$source];
-        $config = $this->getDriverConfig($source);
-        if (!$config) {
-            $this->error("No configuration found for source '$source'");
-            return null;
-        }
-        $driverInst = clone $this->driverManager->get($driver);
-        $driverInst->setConfig($config);
-        $driverInst->init();
-        return $driverInst;
-    }
-
-    /**
-     * Get configuration for the ILS driver.  We will load an .ini file named
-     * after the driver class and number if it exists;
-     * otherwise we will return an empty array.
-     *
-     * @param string $source The source id to use for determining the
-     * configuration file
-     *
-     * @return array   The configuration of the driver
-     */
-    protected function getDriverConfig($source)
-    {
-        // Determine config file name based on class name:
-        try {
-            $path = empty($this->driversConfigPath)
-                ? $source
-                : $this->driversConfigPath . '/' . $source;
-
-            $config = $this->configLoader->get($path);
-        } catch (\Laminas\Config\Exception\RuntimeException $e) {
-            // Configuration loading failed; probably means file does not
-            // exist -- just return an empty array in that case:
-            $this->error("Could not load config for $source");
-            return [];
-        }
-        return $config->toArray();
+        return parent::getDriver($source);
     }
 
     /**
@@ -1347,6 +1223,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
         }
 
         foreach ($data as $key => $value) {
+            /** MSU Code removed */
             if (is_array($value)) {
                 $data[$key] = $this->addIdPrefixes(
                     $value,
@@ -1390,6 +1267,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
         $array = is_array($data) ? $data : [$data];
 
         foreach ($array as $key => $value) {
+            /** MSU Code removed */
             if (is_array($value)) {
                 if (in_array($key, $ignoreFields)) {
                     continue;
@@ -1411,26 +1289,6 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
             }
         }
         return is_array($data) ? $array : $array[0];
-    }
-
-    /**
-     * Check whether the given driver supports the given method
-     *
-     * @param object $driver ILS Driver
-     * @param string $method Method name
-     * @param array  $params Array of passed parameters
-     *
-     * @return bool
-     */
-    protected function driverSupportsMethod($driver, $method, $params = null)
-    {
-        if (is_callable([$driver, $method])) {
-            if (method_exists($driver, 'supportsMethod')) {
-                return $driver->supportsMethod($method, $params ?: []);
-            }
-            return true;
-        }
-        return false;
     }
 
     /**
