@@ -18,7 +18,7 @@ return [
   'controllers' => [
     'factories' => [
       Catalog\Controller\RecordController::class => VuFind\Controller\AbstractBaseWithConfigFactory::class,
-      Catalog\Controller\MyResearchController::class => VuFind\Controller\AbstractBaseFactory::class,
+      Catalog\Controller\MyResearchController::class => VuFind\Controller\MyResearchControllerFactory::class,
       // TODO PC-895 To remove after PR - START
       Catalog\Controller\SearchController::class => VuFind\Controller\AbstractBaseFactory::class,
       Catalog\Controller\EdsController::class => VuFind\Controller\AbstractBaseFactory::class,
