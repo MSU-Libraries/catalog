@@ -16,11 +16,10 @@
   if ($this->facet['operator'] == 'AND') {
     $classList[] = 'facetAND';
   }
-
   $displayText = '-';
-  if (!empty($this->facet['displayText'])) {
+  if ('' !== (string)($this->facet['displayText'] ?? '')) {
     $displayText = $this->escapeHtml($this->facet['displayText']);
-  } elseif (!empty($this->facet['value'])) {
+  } elseif ('' !== (string)($this->facet['value'] ?? '')) {
     $displayText = $this->escapeHtml($this->facet['value']);
   }
   $displayText = '<span class="facet-value' . ($hasCheckbox ? ' icon-link__label' : '') . '">' . $displayText . '</span>';
@@ -44,7 +43,7 @@
 
 <?php if ($this->exclude && !$this->facet['isApplied']): ?>
     <?php $excludeURL = $this->urlBase . $this->url->addFacet($this->group, $this->facet['value'], 'NOT'); ?>
-    <a href="<?=$excludeURL ?>" data-lightbox-ignore class="exclude" rel="nofollow">
+    <a href="<?=$excludeURL ?>" data-lightbox-ignore class="exclude" rel="nofollow"><?php /** MSU */ ?>
       <?=$this->icon('facet-exclude') ?>
       <span class="sr-only"><?=$this->transEsc('exclude_facet') ?></span>
     </a>
@@ -53,7 +52,8 @@
 
 <?php // Render the element: ?>
 <?php if ($hasSubLinks): ?>
-  <div class="<?=implode(' ', $classList) ?>">
+  <span class="<?=implode(' ', $classList) ?>">
+    <?php /** MSU START */ ?>
     <a class="text<?=$hasCheckbox ? ' icon-link' : ''?>"
        href="<?=$toggleUrl ?>"
        data-lightbox-ignore
@@ -64,11 +64,13 @@
         <?php endif;?>
        rel="nofollow"
     >
-        <?=$displayText ?>
+    <?php /** MSU END */ ?>
+      <?=$displayText ?>
     </a>
     <?=$badgeExclude?>
-  </div>
+  </span>
 <?php else: ?>
+  <?php /** MSU START */ ?>
   <a href="<?=$toggleUrl ?>"
      class="<?=implode(' ', $classList) ?><?=$hasCheckbox ? ' icon-link' : ''?>"
      data-title="<?=$this->escapeHtmlAttr($this->facet['displayText']) ?>"
@@ -79,6 +81,7 @@
      data-lightbox-ignore
      rel="nofollow"
   >
+  <?php /** MSU END */ ?>
     <span class="text">
       <?=$displayText ?>
     </span>

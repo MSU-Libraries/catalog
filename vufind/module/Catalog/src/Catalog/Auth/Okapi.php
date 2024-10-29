@@ -36,7 +36,7 @@ use function is_object;
 
 /**
  * Folio Okapi authentication module.
- * This is independant from the ILS/Folio authentication method, so that it can
+ * This is independent from the ILS/Folio authentication method, so that it can
  * use okapi_login=true while still using okapi_login=false for other login options.
  * It takes the folio.ini config and only changes okapi_login.
  * WARNING: note the lowercase folio.ini, we use a custom name because of MultiBackend.
@@ -155,15 +155,15 @@ class Okapi extends \VuFind\Auth\AbstractBase
         }
 
         // Check to see if we already have an account for this user:
-        $userTable = $this->getUserTable();
         if (!empty($info['id'])) {
-            $user = $userTable->getByCatalogId($info['id']);
+            $userService = $this->getUserService();
+            $user = $userService->getUserByCatId($info['id']);
             if (empty($user)) {
-                $user = $userTable->getByUsername($info[$usernameField]);
+                $user = $this->getOrCreateUserByUsername($info[$usernameField]);
                 $user->saveCatalogId($info['id']);
             }
         } else {
-            $user = $userTable->getByUsername($info[$usernameField]);
+            $user = $this->getOrCreateUserByUsername($info[$usernameField]);
         }
 
         // No need to store the ILS password in VuFind's main password field:

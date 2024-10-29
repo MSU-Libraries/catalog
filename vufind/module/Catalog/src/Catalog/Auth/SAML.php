@@ -30,6 +30,7 @@
 namespace Catalog\Auth;
 
 use Laminas\Http\PhpEnvironment\Request;
+use VuFind\Auth\ILSAuthenticator;
 use VuFind\Exception\Auth as AuthException;
 
 use function count;
@@ -90,6 +91,7 @@ class SAML extends \VuFind\Auth\AbstractBase
      *                                                             object
      */
     public function __construct(
+        protected ILSAuthenticator $ilsAuthenticator,
         \Laminas\Session\ManagerInterface $sessionManager,
         \Laminas\Http\PhpEnvironment\Request $request
     ) {
@@ -174,7 +176,7 @@ class SAML extends \VuFind\Auth\AbstractBase
         }
 
         // If we made it this far, we should log in the user!
-        $user = $this->getUserTable()->getByUsername($username);
+        $user = $this->getOrCreateUserByUsername($username);
 
         // Variable to hold catalog password (handled separately from other
         // attributes since we need to use saveCredentials method to store it):
@@ -208,9 +210,10 @@ class SAML extends \VuFind\Auth\AbstractBase
         // (unlikely) scenario that a password can actually change from non-blank
         // to blank, additional work may need to be done here.
         if (!empty($user->cat_username)) {
-            $user->saveCredentials(
+            $this->ilsAuthenticator->saveUserCatalogCredentials(
+                $user,
                 $user->cat_username,
-                empty($catPassword) ? $user->getCatPassword() : $catPassword
+                empty($catPassword) ? $this->ilsAuthenticator->getCatPasswordForUser($user) : $catPassword
             );
         }
 

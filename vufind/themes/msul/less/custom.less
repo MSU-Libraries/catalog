@@ -828,6 +828,15 @@ form.searchForm, .record-tabs, .navbar-form {
 }
 
 .bulkActionButtons {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  .selection-controls-bar {
+    order: 10;
+  }
+  .action-toolbar {
+    order: 20;
+  }
   .bulk-checkbox input {
     height:1.25rem;
     width:1.25rem;
@@ -1150,6 +1159,7 @@ label {
 
  .pagination {
     margin:0 0 1rem 0;
+    justify-content: inherit;
   }
 
 .pagination>li>a, .pagination>li>span {
@@ -1187,6 +1197,7 @@ label {
 }
 
 .view-buttons {
+  clear: both; // MSU
   margin-top:.5rem;
   margin-bottom:1.5rem;
 }
