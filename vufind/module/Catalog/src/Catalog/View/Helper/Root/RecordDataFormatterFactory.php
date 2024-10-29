@@ -284,7 +284,6 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
      */
     protected function getAuthorFunction()
     {
-        // MSUL override PC-936 to add 'link' to the author output
         return function ($data, $options) {
             // Lookup array of singular/plural labels (note that Other is always
             // plural right now due to lack of translation strings).
@@ -299,8 +298,6 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
                 'corporate' => 'creator',
                 'secondary' => 'contributor',
             ];
-            // Lookup array of sort orders.
-            $order = ['primary' => 1, 'corporate' => 2, 'secondary' => 3];
 
             // Sort the data:
             $final = [];
@@ -309,7 +306,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
                     'label' => $labels[$type][count($values) == 1 ? 0 : 1],
                     'values' => [$type => $values],
                     'options' => [
-                        'pos' => $options['pos'] + $order[$type],
+                        'pos' => $options['pos'] + $this->authorOrder[$type],
                         'renderType' => 'RecordDriverTemplate',
                         'template' => 'data-authors.phtml',
                         'context' => [
@@ -317,7 +314,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
                             'schemaLabel' => $schemaLabels[$type],
                             'requiredDataFields' => [
                                 ['name' => 'role', 'prefix' => 'CreatorRoles::'],
-                                ['name' => 'link', 'prefix' => ''],
+                                ['name' => 'link', 'prefix' => ''], // MSUL - PC-936 add 'link' to the author output
                             ],
                         ],
                     ],

@@ -15,7 +15,9 @@
 namespace Catalog\View\Helper\Root;
 
 use Catalog\Utils\RegexLookup as Regex;
+use Laminas\Config\Config;
 use VuFind\Config\YamlReader;
+use VuFind\Tags\TagsService;
 
 use function array_key_exists;
 use function in_array;
@@ -69,15 +71,20 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
      */
     private $libkeyAccessToken;
 
+
     /**
-     * Initialize the record driver
+     * Constructor
      *
-     * @param string                 $config         Name of the config to load
-     * @param \Laminas\Config\Config $browzineConfig config object for the BrowZine.ini file
+     * @param TagsService            $tagsService    Tags service
+     * @param Config                 $config         Configuration from config.ini
+     * @param \Laminas\Config\Config $browzineConfig config object for the BrowZine.ini file // MSU
      */
-    public function __construct($config = null, $browzineConfig = null)
-    {
-        parent::__construct($config);
+    public function __construct(
+        protected TagsService $tagsService,
+        protected ?Config $config = null,
+        $browzineConfig = null // MSU
+    ) {
+        parent::__construct($tagsService, $config);
         $yamlReader = new YamlReader();
         $this->accessLinksConfig = $yamlReader->get('accesslinks.yaml');
         if (array_key_exists('labels', $this->accessLinksConfig)) {
