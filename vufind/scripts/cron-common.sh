@@ -10,7 +10,7 @@ LATEST_PATH_WITH_TS="${LATEST_PATH}.${TIMESTAMP}"
 $CRON_COMMAND > "${LATEST_PATH_WITH_TS}" 2>&1
 EXIT_CODE=$?
 
-if [[ $EXIT_CODE -eq 1000 ]]; then
+if [[ $EXIT_CODE -eq 255 ]]; then
     echo "Could not obtain file lock." > "${LATEST_PATH_WITH_TS}"
 fi
 
