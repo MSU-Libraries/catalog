@@ -89,14 +89,15 @@ class Folio extends \VuFind\ILS\Driver\Folio
      * Support method for getHolding() -- given a few key details, format an item
      * for inclusion in the return value.
      *
-     * @param string $bibId          Current bibliographic ID
-     * @param array  $holdingDetails Holding details produced by
-     * getHoldingDetailsForItem()
-     * @param object $item           FOLIO item record (decoded from JSON)
-     * @param int    $number         The current item number (position within
-     * current holdings record)
-     * @param string $dueDateValue   The due date to display to the user
-     * @param string $tempLoanType   The temporary loan type for the item
+     * @param string $bibId            Current bibliographic ID
+     * @param array  $holdingDetails   Holding details produced by
+     *                                 getHoldingDetailsForItem()
+     * @param object $item             FOLIO item record (decoded from JSON)
+     * @param int    $number           The current item number (position within
+     *                                 current holdings record)
+     * @param string $dueDateValue     The due date to display to the user
+     * @param array  $boundWithRecords Any bib records this holding is bound with
+     * @param string $tempLoanType     The temporary loan type for the item
      *
      * @return array
      */
@@ -106,15 +107,17 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $item,
         $number,
         string $dueDateValue,
+        $boundWithRecords,
         string $tempLoanType = null
     ): array {
         $itemNotes = array_filter(
             array_map([$this, 'formatNote'], $item->notes ?? [])
         );
-        $locationId = $item->effectiveLocationId;
+        $locationId = $item->effectiveLocation->id;
         $locationData = $this->getLocationData($locationId);
         $locationName = $locationData['name'];
         $locationCode = $locationData['code'];
+        $locationIsActive = $locationData['isActive'];
         // concatenate enumeration fields if present
         $enum = implode(
             ' ',
@@ -126,7 +129,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 ]
             )
         );
-        $enum = str_ends_with($holdingDetails['holdingCallNumber'], $enum) ? '' : $enum;
+        $enum = str_ends_with($holdingDetails['holdingCallNumber'], $enum) ? '' : $enum; // MSU
         $callNumberData = $this->chooseCallNumber(
             $holdingDetails['holdingCallNumberPrefix'],
             $holdingDetails['holdingCallNumber'],
@@ -136,6 +139,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 ?? $item->itemLevelCallNumber ?? ''
         );
 
+        // MSU START
         // PC-835: Items with loan type "Non Circulating" should show as "Lib Use Only" after they're checked in
         if (
             $item->permanentLoanTypeId == 'adac93ac-951f-4f42-ab32-79f4faeabb50' &&
@@ -144,6 +148,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         ) {
             $item->status->name = 'Restricted';
         }
+        // MSU END
 
         return $callNumberData + [
             'id' => $bibId,
@@ -159,15 +164,17 @@ class Folio extends \VuFind\ILS\Driver\Folio
             'holdings_notes' => $holdingDetails['hasHoldingNotes']
                 ? $holdingDetails['holdingNotes'] : null,
             'item_notes' => !empty(implode($itemNotes)) ? $itemNotes : null,
-            'issues' => $holdingDetails['holdingsStatements'],
+            'issues' => $holdingDetails['holdingsStatements'], // MSU
             'supplements' => $holdingDetails['holdingsSupplements'],
             'indexes' => $holdingDetails['holdingsIndexes'],
             'location' => $locationName,
             'location_code' => $locationCode,
+            'folio_location_is_active' => $locationIsActive,
             'reserve' => 'TODO',
             'addLink' => true,
-            'electronic_access' => $item->electronicAccess,
-            'temporary_loan_type' => $tempLoanType,
+            'bound_with_records' => $boundWithRecords,
+            'electronic_access' => $item->electronicAccess, // MSU
+            'temporary_loan_type' => $tempLoanType, // MSU
         ];
     }
 
@@ -204,8 +211,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 $query
             ) as $holding
         ) {
-            $rawQuery = '(holdingsRecordId=="' . $holding->id
-                . '" NOT discoverySuppress==true)';
+            $rawQuery = '(holdingsRecordId=="' . $holding->id . '")';
             if (!empty($folioItemSort)) {
                 $rawQuery .= ' sortby ' . $folioItemSort;
             }
@@ -213,16 +219,20 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $holdingDetails = $this->getHoldingDetailsForItem($holding);
             $nextBatch = [];
             $sortNeeded = false;
-
+            $number = 0;
             foreach (
                 $this->getPagedResults(
                     'items',
-                    '/item-storage/items',
+                    '/inventory/items-by-holdings-id',
                     $query
                 ) as $item
             ) {
-                $number = $item->copyNumber ?? null;
+                if ($item->discoverySuppress ?? false) {
+                    continue;
+                }
+                $number = $item->copyNumber ?? null; // MSU
                 $dueDateValue = '';
+                $boundWithRecords = null;
                 if (
                     $item->status->name == 'Checked out'
                     && $showDueDate
@@ -231,7 +241,10 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $dueDateValue = $this->getDueDate($item->id, $showTime);
                     $dueDateItemCount++;
                 }
-                // PC-930: Add Loan Type to results
+                if ($item->isBoundWith ?? false) {
+                    $boundWithRecords = $this->getBoundWithRecords($item);
+                }
+                // MSU - PC-930: Add Loan Type to results
                 $tempLoanType = $this->getLoanType($item->temporaryLoanTypeId ?? null);
 
                 $nextItem = $this->formatHoldingItem(
@@ -240,8 +253,9 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $item,
                     $number,
                     $dueDateValue,
-                    $tempLoanType
+                    $tempLoanType ?? $boundWithRecords ?? [] // MSU
                 );
+                /** MSU Start */
                 // PC-872: Filter out LoM holdings
                 if (
                     !empty($nextItem['location']) && (
@@ -251,6 +265,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 ) {
                     continue;
                 }
+                // MSU End
                 if (!empty($vufindItemSort) && !empty($nextItem[$vufindItemSort])) {
                     $sortNeeded = true;
                 }
@@ -262,6 +277,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     ? $this->sortHoldings($nextBatch, $vufindItemSort) : $nextBatch
             );
 
+            /** MSU Start */
             // Add any bound items associated with the holding
             $item_ids = array_column($items, 'item_id');
             foreach ($this->getBoundwithHoldings($holding, $bibId) as $bound_item) {
@@ -269,8 +285,9 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     array_push($items, $bound_item);
                 }
             }
+            // MSU End
         }
-
+        /** MSU Start */
         // Sort by location, enumchron (volume) and copy number
         uasort($items, function ($item1, $item2) {
             return $item2['location'] <=> $item1['location'] ?: // reverse sort
@@ -278,8 +295,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
                    $item1['number'] <=> $item2['number'] ?:
                    $item1['id'] <=> $item2['id'];
         });
+        // MSU End
 
-        return $items;
+        return [
+            'total' => count($items),
+            'holdings' => $items,
+            'electronic_holdings' => [],
+        ];
     }
 
     /**

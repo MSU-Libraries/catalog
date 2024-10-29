@@ -1,9 +1,9 @@
 <?php
-  $this->layout()->showSearchBacklink = true;
+  $this->layout()->showSearchBacklink = true; // MSU
   $this->metadata()->generateMetatags($this->driver);
-  $this->headScript()->appendFile('get_license_agreement.js');
+  $this->headScript()->appendFile('get_license_agreement.js'); // MSU
 ?>
-<div class="media" vocab="http://schema.org/" resource="#record" typeof="<?=$this->driver->getSchemaOrgFormats()?> Product">
+<div class="media"<?=$this->schemaOrg()->getAttributes(['vocab' => 'http://schema.org/', 'resource' => '#record', 'typeof' => $this->driver->getSchemaOrgFormats() . ' Product'])?>>
   <?php
     $QRCode = $this->record($this->driver)->getQRCode('core');
     # MSUL customization - PC-1017 Remove link from cover image on record page
@@ -45,7 +45,7 @@
   <?php endif; ?>
   <div class="media-body">
 
-    <h1 property="name"><?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '')?></h1>
+    <h1<?=$this->schemaOrg()->getAttributes(['property' => 'name'])?>><?=$this->escapeHtml($this->driver->getShortTitle() . ' ' . $this->driver->getSubtitle() . ' ' . $this->driver->getTitleSection())?></h1>
     <?php //MSUL customization to add hidden fields used in support of PC-606 ?>
     <input type='hidden' id='title_short' value='<?= $this->escapeHtml($this->driver->getRawData()['title_short'] ?? '')?>'/>
     <input type='hidden' id='id' value='<?= $this->escapeHtml($this->driver->getRawData()['id'] ?? '')?>'/>
@@ -56,7 +56,7 @@
     <?php endif; ?>
 
     <?php foreach ($this->driver->tryMethod('getFullTitlesAltScript', [], []) as $altTitle): ?>
-      <div class="title-alt mb-3">
+      <div class="title-alt mb-3"><?php /** MSU */ ?>
         <?=$this->escapeHtml($altTitle)?>
       </div>
     <?php endforeach; ?>
@@ -70,6 +70,7 @@
       <?=$this->record($this->driver)->renderTemplate('versions-link.phtml')?>
     <?php endif; ?>
 
+    <?php /** MSU START */ ?>
     <?php $summary = $this->driver->getSummary();
       if (isset($summary)):
         for ($i = 0; $i < count($summary); $i++):
@@ -81,6 +82,7 @@
       endif;
     ?>
     <?php if ($summary): ?>
+    <?php /** MSU END */ ?>
       <p><?=$this->truncate($summary, 300)?></p>
 
       <?php if (strlen($summary) > 300): ?>

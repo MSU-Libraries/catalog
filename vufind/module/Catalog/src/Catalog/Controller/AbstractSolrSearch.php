@@ -47,93 +47,6 @@ use function in_array;
  */
 class AbstractSolrSearch extends \Catalog\Controller\AbstractSearch
 {
-    use RecordVersionsSearchTrait;
-
-    /**
-     * Handle an advanced search
-     *
-     * @return mixed
-     */
-    public function advancedAction()
-    {
-        // Standard setup from base class:
-        $view = parent::advancedAction();
-
-        // Set up facet information:
-        $facets = $this->serviceLocator
-            ->get(\VuFind\Search\FacetCache\PluginManager::class)
-            ->get($this->searchClassId)
-            ->getList('Advanced');
-        $view->hierarchicalFacets
-            = $this->getHierarchicalFacets($view->options->getFacetsIni());
-        $view->hierarchicalFacetsSortOptions
-            = $this->getAdvancedHierarchicalFacetsSortOptions(
-                $view->options->getFacetsIni()
-            );
-        $view->facetList = $this->processAdvancedFacets(
-            $facets,
-            $view->saved,
-            $view->hierarchicalFacets,
-            $view->hierarchicalFacetsSortOptions
-        );
-        $specialFacets = $this->parseSpecialFacetsSetting(
-            $view->options->getSpecialAdvancedFacets()
-        );
-        if (isset($specialFacets['illustrated'])) {
-            $view->illustratedLimit
-                = $this->getIllustrationSettings($view->saved);
-        }
-        if (isset($specialFacets['checkboxes'])) {
-            $view->checkboxFacets = $this->processAdvancedCheckboxes(
-                $specialFacets['checkboxes'],
-                $view->saved
-            );
-        }
-        $view->ranges = $this->getAllRangeSettings($specialFacets, $view->saved);
-
-        return $view;
-    }
-
-    /**
-     * Get the possible legal values for the illustration limit radio buttons.
-     *
-     * @param object $savedSearch Saved search object (false if none)
-     *
-     * @return array              Legal options, with selected value flagged.
-     */
-    protected function getIllustrationSettings($savedSearch = false)
-    {
-        $illYes = [
-            'text' => 'Has Illustrations', 'value' => 1, 'selected' => false,
-        ];
-        $illNo = [
-            'text' => 'Not Illustrated', 'value' => 0, 'selected' => false,
-        ];
-        $illAny = [
-            'text' => 'No Preference', 'value' => -1, 'selected' => false,
-        ];
-
-        // Find the selected value by analyzing facets -- if we find match, remove
-        // the offending facet to avoid inappropriate items appearing in the
-        // "applied filters" sidebar!
-        if (
-            $savedSearch
-            && $savedSearch->getParams()->hasFilter('illustrated:Illustrated')
-        ) {
-            $illYes['selected'] = true;
-            $savedSearch->getParams()->removeFilter('illustrated:Illustrated');
-        } elseif (
-            $savedSearch
-            && $savedSearch->getParams()->hasFilter('illustrated:"Not Illustrated"')
-        ) {
-            $illNo['selected'] = true;
-            $savedSearch->getParams()->removeFilter('illustrated:"Not Illustrated"');
-        } else {
-            $illAny['selected'] = true;
-        }
-        return [$illYes, $illNo, $illAny];
-    }
-
     /**
      * Process the facets to be used as limits on the Advanced Search screen.
      *
@@ -152,18 +65,22 @@ class AbstractSolrSearch extends \Catalog\Controller\AbstractSearch
         $hierarchicalFacets = [],
         $hierarchicalFacetsSortOptions = []
     ) {
-        // Process the facets
         $facetHelper = null;
-        if (!empty($hierarchicalFacets)) {
-            $facetHelper = $this->serviceLocator
-                ->get(\VuFind\Search\Solr\HierarchicalFacetHelper::class);
-        }
+        $options = null;
         foreach ($facetList as $facet => &$list) {
             // Hierarchical facets: format display texts and sort facets
             // to a flat array according to the hierarchy
             if (in_array($facet, $hierarchicalFacets)) {
+                // Process the facets
+                if (!$facetHelper) {
+                    $facetHelper = $this->serviceLocator
+                        ->get(\VuFind\Search\Solr\HierarchicalFacetHelper::class);
+                    $options = $this->getOptionsForClass();
+                }
+
                 $tmpList = $list['list'];
 
+                // MSU START
                 $sort = $hierarchicalFacetsSortOptions[$facet]
                     ?? $hierarchicalFacetsSortOptions['*'] ?? 'top';
 
@@ -172,6 +89,7 @@ class AbstractSolrSearch extends \Catalog\Controller\AbstractSearch
                     $facet,
                     $tmpList
                 );
+                // MSU End
                 $list['list'] = $facetHelper->flattenFacetHierarchy($tmpList);
             }
 
@@ -197,43 +115,5 @@ class AbstractSolrSearch extends \Catalog\Controller\AbstractSearch
             }
         }
         return $facetList;
-    }
-
-    /**
-     * Get an array of hierarchical facets
-     *
-     * @param string $config Name of facet configuration file to load.
-     *
-     * @return array Facets
-     */
-    protected function getHierarchicalFacets($config)
-    {
-        $facetConfig = $this->getConfig($config);
-        return isset($facetConfig->SpecialFacets->hierarchical)
-            ? $facetConfig->SpecialFacets->hierarchical->toArray()
-            : [];
-    }
-
-    /**
-     * Get an array of hierarchical facet sort options for Advanced search
-     *
-     * @param string $config Name of facet configuration file to load.
-     *
-     * @return array
-     */
-    protected function getAdvancedHierarchicalFacetsSortOptions($config)
-    {
-        $facetConfig = $this->getConfig($config);
-        $baseConfig
-            = isset($facetConfig->SpecialFacets->hierarchicalFacetSortOptions)
-            ? $facetConfig->SpecialFacets->hierarchicalFacetSortOptions->toArray()
-            : [];
-        $advancedConfig
-            = isset($facetConfig->Advanced_Settings->hierarchicalFacetSortOptions)
-            ? $facetConfig->Advanced_Settings->hierarchicalFacetSortOptions
-                ->toArray()
-            : [];
-
-        return array_merge($baseConfig, $advancedConfig);
     }
 }

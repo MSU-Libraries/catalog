@@ -1,16 +1,23 @@
 <?xml version="1.0"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="./bootstrap.php" backupGlobals="false" convertDeprecationsToExceptions="false" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
-  <coverage includeUncoveredFiles="true">
-    <include>
-      <directory suffix=".php">../../Catalog</directory>
-    </include>
-  </coverage>
+<phpunit
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  bootstrap="./bootstrap.php"
+  backupGlobals="false"
+  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+  displayDetailsOnTestsThatTriggerWarnings="true"
+  displayDetailsOnTestsThatTriggerDeprecations="true"
+  cacheDirectory=".phpunit.cache">
   <testsuites>
     <testsuite name="AllUnitTests">
-      <directory>../../Catalog/tests/unit-tests/src</directory>
+      <directory>../../Catalog/tests/unit-tests/src</directory><!-- MSU -->
     </testsuite>
     <testsuite name="AllIntegrationTests">
-      <directory>../../Catalog/tests/integration-tests/src</directory>
+      <directory>../../Catalog/tests/integration-tests/src</directory><!-- MSU -->
     </testsuite>
   </testsuites>
+  <source>
+    <include>
+      <directory suffix=".php">../../Catalog</directory><!-- MSU -->
+    </include>
+  </source>
 </phpunit>
