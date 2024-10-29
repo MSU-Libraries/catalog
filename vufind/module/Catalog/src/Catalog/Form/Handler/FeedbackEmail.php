@@ -30,6 +30,7 @@
 namespace Catalog\Form\Handler;
 
 use Laminas\Mail\Address;
+use VuFind\Db\Entity\UserEntityInterface;
 use VuFind\Exception\Mail as MailException;
 
 /**
@@ -48,16 +49,17 @@ class FeedbackEmail extends \VuFind\Form\Handler\Email
      *
      * @param \VuFind\Form\Form                     $form   Submitted form
      * @param \Laminas\Mvc\Controller\Plugin\Params $params Request params
-     * @param ?\VuFind\Db\Row\User                  $user   Authenticated user
+     * @param ?UserEntityInterface                  $user   Authenticated user
      *
      * @return bool
      */
     public function handle(
         \VuFind\Form\Form $form,
         \Laminas\Mvc\Controller\Plugin\Params $params,
-        ?\VuFind\Db\Row\User $user = null
+        ?UserEntityInterface $user = null
     ): bool {
-        $fields = $form->mapRequestParamsToFieldValues($params->fromPost());
+        $postParams = $params->fromPost();
+        $fields = $form->mapRequestParamsToFieldValues($postParams);
         // MSUL Start
         // Add in user id if logged in
         $fields[] = [
@@ -66,7 +68,7 @@ class FeedbackEmail extends \VuFind\Form\Handler\Email
             'value' => $user->id ?? 'none',
         ];
         // MSUL End
-        $emailMessage = $this->viewRenderer->partial(
+        $emailMessage = $this->viewRenderer->render(
             'Email/form.phtml',
             compact('fields')
         );
@@ -75,14 +77,11 @@ class FeedbackEmail extends \VuFind\Form\Handler\Email
 
         $replyToName = $params->fromPost(
             'name',
-            $user ? trim($user->firstname . ' ' . $user->lastname) : null
+            $user ? trim($user->getFirstname() . ' ' . $user->getLastname()) : null
         );
-        $replyToEmail = $params->fromPost(
-            'email',
-            $user ? $user->email : null
-        );
-        $recipients = $form->getRecipient($params->fromPost());
-        $emailSubject = $form->getEmailSubject($params->fromPost());
+        $replyToEmail = $params->fromPost('email', $user?->getEmail());
+        $recipients = $form->getRecipient($postParams);
+        $emailSubject = $form->getEmailSubject($postParams);
 
         // MSUL Start
 
@@ -179,16 +178,16 @@ class FeedbackEmail extends \VuFind\Form\Handler\Email
         $replyToEmail,
         $emailSubject,
         $emailMessage,
-        $ccEmail = null,
+        $ccEmail = null, // MSU
     ): bool {
         try {
-            $ccAddr = $ccEmail ? new Address($ccEmail) : null;
+            $ccAddr = $ccEmail ? new Address($ccEmail) : null; // MSU
             $this->mailer->send(
                 new Address($recipientEmail, $recipientName),
                 new Address($senderEmail, $senderName),
                 $emailSubject,
                 $emailMessage,
-                $ccAddr,
+                $ccAddr, // MSU
                 !empty($replyToEmail)
                     ? new Address($replyToEmail, $replyToName) : null
             );
