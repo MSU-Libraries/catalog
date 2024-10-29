@@ -2,8 +2,8 @@
 
 /**
  * TODO
- *  THIS IS AN EXACT COPY OF THE CORE-VUFIND FILE FOR EXTENSION PURPOSES
- *  COULD BE REMOVED WHEN PR ARE ACCEPTED (PC-895 + PC-698)
+ *  THIS IS AN EXACT COPY OF CORE-VUFIND; NEEDED FOR EXTENSION PURPOSES
+ *  TO EDIT WHEN PR ARE ACCEPTED (PC-895 + PC-698)
  * AbstractSearch with Solr-specific features added.
  *
  * PHP version 8
@@ -32,6 +32,7 @@
 
 namespace Catalog\Controller;
 
+use Laminas\View\Model\ViewModel;
 use VuFind\Controller\Feature\RecordVersionsSearchTrait;
 
 use function in_array;
@@ -50,6 +51,34 @@ class AbstractSolrSearch extends \Catalog\Controller\AbstractSearch
     use RecordVersionsSearchTrait;
 
     /**
+     * Set up facet details in the view (for use in advanced search and similar).
+     *
+     * @param ViewModel $view View model to update
+     * @param string    $list Name of facet list to retrieve
+     *
+     * @return void
+     */
+    protected function addFacetDetailsToView(ViewModel $view, $list = 'Advanced'): void
+    {
+        $facets = $this->serviceLocator
+            ->get(\VuFind\Search\FacetCache\PluginManager::class)
+            ->get($this->searchClassId)
+            ->getList($list);
+        $view->hierarchicalFacets
+            = $this->getHierarchicalFacets($view->options->getFacetsIni());
+        $view->hierarchicalFacetsSortOptions
+            = $this->getAdvancedHierarchicalFacetsSortOptions(
+                $view->options->getFacetsIni()
+            );
+        $view->facetList = $this->processAdvancedFacets(
+            $facets,
+            $view->saved ?? false,
+            $view->hierarchicalFacets,
+            $view->hierarchicalFacetsSortOptions
+        );
+    }
+
+    /**
      * Handle an advanced search
      *
      * @return mixed
@@ -60,22 +89,7 @@ class AbstractSolrSearch extends \Catalog\Controller\AbstractSearch
         $view = parent::advancedAction();
 
         // Set up facet information:
-        $facets = $this->serviceLocator
-            ->get(\VuFind\Search\FacetCache\PluginManager::class)
-            ->get($this->searchClassId)
-            ->getList('Advanced');
-        $view->hierarchicalFacets
-            = $this->getHierarchicalFacets($view->options->getFacetsIni());
-        $view->hierarchicalFacetsSortOptions
-            = $this->getAdvancedHierarchicalFacetsSortOptions(
-                $view->options->getFacetsIni()
-            );
-        $view->facetList = $this->processAdvancedFacets(
-            $facets,
-            $view->saved,
-            $view->hierarchicalFacets,
-            $view->hierarchicalFacetsSortOptions
-        );
+        $this->addFacetDetailsToView($view);
         $specialFacets = $this->parseSpecialFacetsSetting(
             $view->options->getSpecialAdvancedFacets()
         );
@@ -152,26 +166,27 @@ class AbstractSolrSearch extends \Catalog\Controller\AbstractSearch
         $hierarchicalFacets = [],
         $hierarchicalFacetsSortOptions = []
     ) {
-        // Process the facets
         $facetHelper = null;
-        if (!empty($hierarchicalFacets)) {
-            $facetHelper = $this->serviceLocator
-                ->get(\VuFind\Search\Solr\HierarchicalFacetHelper::class);
-        }
+        $options = null;
         foreach ($facetList as $facet => &$list) {
             // Hierarchical facets: format display texts and sort facets
             // to a flat array according to the hierarchy
             if (in_array($facet, $hierarchicalFacets)) {
+                // Process the facets
+                if (!$facetHelper) {
+                    $facetHelper = $this->serviceLocator
+                        ->get(\VuFind\Search\Solr\HierarchicalFacetHelper::class);
+                    $options = $this->getOptionsForClass();
+                }
+
                 $tmpList = $list['list'];
-
-                $sort = $hierarchicalFacetsSortOptions[$facet]
-                    ?? $hierarchicalFacetsSortOptions['*'] ?? 'top';
-
-                $facetHelper->sortFacetList($tmpList, $sort);
-                $tmpList = $facetHelper->buildFacetArray(
-                    $facet,
-                    $tmpList
-                );
+                if ($options->getFilterHierarchicalFacetsInAdvanced()) {
+                    $tmpList = $facetHelper->filterFacets(
+                        $facet,
+                        $tmpList,
+                        $options
+                    );
+                }
                 $list['list'] = $facetHelper->flattenFacetHierarchy($tmpList);
             }
 

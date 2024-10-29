@@ -1,6 +1,8 @@
+// MSU Start
 .sidebar h2 {
   margin-top:0;
 }
+// MSU End
 
 .facet-group {
   display: block;
@@ -25,6 +27,9 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  .facet__list__item .facet {
+    display: flex;
+  }
 }
 
 .facet,
@@ -59,24 +64,31 @@
     flex-shrink: 0;
     text-align: center;
     padding-left: 0.5rem;
+
+    body.rtl & {
+      padding-left: 0;
+      padding-right: 0.5rem;
+    }
   }
 }
+// MSU Start
 .facet-group:not(:first-child) {
   border-top:1px solid @medgray;
 }
 .facet-group a, .facet a {
   text-decoration:none;
 }
+// MSU End
 .facet-group .facet,
 .facet-load-indicator,
 .facet-load-failed {
-  border-bottom: none !important;
+  border-bottom: none !important; // MSU
 }
 .facet-group .title {
   display: flex;
   width: 100%;
   padding-right: 8px;
-  border: 0;
+  border: 0; // MSU
   font-weight: bold;
   text-align: inherit;
 }
@@ -102,7 +114,6 @@
   color: #fff;
   background-color: #000;
 }
-
 .facet .text {
   overflow: hidden;
 }
@@ -124,13 +135,15 @@
 .top-facet-inner {
   display: inline-block;
   padding: .25rem;
-  border: 0;
+  border: 0; // MSU
 }
 
+// MSU Code removed
 .checkbox-filter {
   display: flex;
   width: 100%;
   font-weight: bold;
+  // MSU Code removed
 }
 .facet-group > .checkbox,
 .sidebar .facet.checkbox {
@@ -143,7 +156,7 @@
   background-color: @list-group-active-bg;
   color: #fff;
 
-  a { color: #fff; text-decoration:none !important; }
+  a { color: #fff; text-decoration:none !important; } // MSU
 }
 .facet.active .badge {
   background-color: #fff;
@@ -204,90 +217,14 @@ h3.facet-title {
   .author-list { flex: 0 1 100%; }
 }
 
+// MSU START
 .facet-tree {
-  padding-left: 0;
-
-  ul {
-    padding: 0;
-    width: 100%;
-  }
-
   li {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    // Ensure that there is enough room for a button focus outline:
-    padding-left: .2rem;
-
-    .facet-tree__toggle-expanded {
-      flex: 1 1;
-      border: 0;
-      background: none;
-      max-width: 1.5em;
-
-      &:hover {
-        background-color: @list-group-hover-bg;
-      }
-
-      &[aria-expanded=false] {
-        .facet-tree__collapse {
-          display: none;
-        }
-        & ~ ul {
-          display: none;
-        }
-      }
-      &[aria-expanded=true] .facet-tree__expand {
-        display: none;
-      }
-    }
-
-    .facet-tree__item-container {
-      // Leave space for the open/close icon (see above):
-      width: calc(100% - 1.5em);
-
-      .text {
-        // Leave space for the badge:
-        width: calc(100% - 1.5em);
-      }
-
-      &--exclude .text {
-        // Leave space for the badge and exclude link:
-        width: calc(100% - 3.0em);
-      }
-
-      .facet-value {
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        display: inline;
-      }
-    }
-
-    // Child items:
-    ul {
-      padding-left: 1rem;
-      flex: 1;
-      .facet {
-        // Smaller padding to make the list a bit more condensed:
-        padding-top: 0.3rem;
-        padding-bottom: 0.3rem;
-      }
-    }
+    border: none !important;
   }
 
   .facet {
-    border: 0;
-    padding-left: .1rem;
-  }
-
-  // Top level bottom border:
-  & > ul > li, .more-less-btn-wrapper {
-    border-bottom: 1px solid @list-group-border;
-  }
-  // Make the first child level start a bit higher to counter the padding of top
-  // level items:
-  & > ul > li > ul {
-    margin-top: -0.2rem;
+    display: flex;
   }
 }
+// MSU END

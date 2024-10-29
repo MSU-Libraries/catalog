@@ -15,7 +15,11 @@
 namespace Catalog\View\Helper\Root;
 
 use Catalog\Utils\RegexLookup as Regex;
+use Laminas\Config\Config;
 use VuFind\Config\YamlReader;
+use VuFind\ILS\Logic\AvailabilityStatus;
+use VuFind\ILS\Logic\AvailabilityStatusInterface;
+use VuFind\Tags\TagsService;
 
 use function array_key_exists;
 use function in_array;
@@ -69,15 +73,20 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
      */
     private $libkeyAccessToken;
 
+
     /**
-     * Initialize the record driver
+     * Constructor
      *
-     * @param string                 $config         Name of the config to load
-     * @param \Laminas\Config\Config $browzineConfig config object for the BrowZine.ini file
+     * @param TagsService            $tagsService    Tags service
+     * @param Config                 $config         Configuration from config.ini
+     * @param \Laminas\Config\Config $browzineConfig config object for the BrowZine.ini file // MSU
      */
-    public function __construct($config = null, $browzineConfig = null)
-    {
-        parent::__construct($config);
+    public function __construct(
+        protected TagsService $tagsService,
+        protected ?Config $config = null,
+        $browzineConfig = null // MSU
+    ) {
+        parent::__construct($tagsService, $config);
         $yamlReader = new YamlReader();
         $this->accessLinksConfig = $yamlReader->get('accesslinks.yaml');
         if (array_key_exists('labels', $this->accessLinksConfig)) {
@@ -197,7 +206,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
      *
      * @return string
      */
-    public function getStatus($holding, $translate = true)
+    public function getStatus(&$holding, $translate = true)
     {
         // NOTE: Make sure this logic matches with getStatus in the GetThisLoader
 
@@ -205,13 +214,11 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             $transEsc = $this->getView()->plugin('transEsc');
         }
 
-        $status = $holding['status'] ?? 'Unknown';
-        $reserve = $holding['reserve'] ?? 'N';
-        $loc = $holding['location'] ?? '';
-
-        if (Regex::SPEC_COLL($loc)) {
+        $status = $holding['availability']->getStatusDescription() ?? 'Unknown';
+        if (Regex::SPEC_COLL($holding['location'] ?? '')) {
             $statusFirstPart = 'Unavailable';
             $statusSecondPart = '';
+            $availability = false;
         } elseif (
             in_array($status, [
                 'Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
@@ -221,30 +228,47 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
         ) {
             $statusFirstPart = 'Unavailable';
             $statusSecondPart = $status;
+            $availability = false;
         } elseif (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged'])) {
             $statusFirstPart = 'Checked Out';
             $statusSecondPart = $status;
+            $availability = false;
+        } elseif ($status === 'Checked out') {
+            $statusFirstPart = 'Checked Out';
+            $statusSecondPart = '';
+            $availability = false;
+        } elseif ($status === 'Available') {
+            $statusFirstPart = 'Available';
+            $statusSecondPart = '';
+            $availability = true;
         } elseif ($status == 'Restricted') {
             $statusFirstPart = 'Library Use Only';
             $statusSecondPart = '';
+            $availability = AvailabilityStatusInterface::STATUS_UNCERTAIN;
         } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
             $statusFirstPart = 'Unknown status';
             $statusSecondPart = $status;
-        } elseif ($reserve === 'Y') {
+            $availability = AvailabilityStatusInterface::STATUS_UNKNOWN;
+        } elseif (isset($holding['reserve']) && $holding['reserve'] === 'Y') {
             $statusFirstPart = 'On Reserve';
             $statusSecondPart = '';
+            $availability = true;
+        } else {
+            $statusFirstPart = 'Unknown status';
+            $availability = AvailabilityStatusInterface::STATUS_UNKNOWN;
         }
 
-        if (isset($statusFirstPart, $statusSecondPart)) {
-            $statusFirstPart = isset($transEsc) ? $transEsc($statusFirstPart) : $statusFirstPart;
-            $statusSecondPart = isset($transEsc) ? $transEsc($statusSecondPart) : $statusSecondPart;
-            if (!empty($statusSecondPart)) {
-                $statusSecondPart = ' (' . $statusSecondPart . ')';
-            }
-            $status = $statusFirstPart . $statusSecondPart;
+        $status = isset($transEsc) ? $transEsc($statusFirstPart) : $statusFirstPart;
+        if (!empty($statusSecondPart)) {
+            $status .= ' (' . (isset($transEsc) ? $transEsc($statusSecondPart) : $statusSecondPart) . ')';
         }
+        $status .= $this->getStatusSuffix($holding, $translate);
+        $holding['availability'] = new AvailabilityStatus(
+            $availability,
+            $status
+        );
 
-        return $status . $this->getStatusSuffix($holding, $translate);
+        return $status;
     }
 
     /**
@@ -267,7 +291,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
         }
         if ($holding['duedate'] ?? false) {
             $due = isset($transEsc) ? $transEsc('Due') : 'Due';
-            $suffix = $suffix . ' - ' . $due . ':' . $holding['duedate'];
+            $suffix = $suffix . ' - ' . $due . ': ' . $holding['duedate'];
         }
         if ($holding['temporary_loan_type'] ?? false) {
             $suffix = $suffix . ' (' . $holding['temporary_loan_type'] . ')';

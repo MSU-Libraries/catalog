@@ -16,6 +16,7 @@ namespace Catalog\View\Helper\Root;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerInterface;
+use VuFind\Tags\TagsService;
 
 /**
  * Factory class for the Record implementing the FactoryInterface
@@ -45,9 +46,9 @@ class RecordFactory implements FactoryInterface
         if (!empty($options)) {
             throw new \Exception('Unexpected options sent to factory.');
         }
-        $config = $container->get(\VuFind\Config\PluginManager::class)
-            ->get('config');
+        $config = $container->get(\VuFind\Config\PluginManager::class)->get('config');
 
+        // MSU Start
         // Get the BrowZine config
         try {
             $browzineConfig = $container->get(\VuFind\Config\PluginManager::class)
@@ -58,10 +59,11 @@ class RecordFactory implements FactoryInterface
                 'Could not parse BrowZine.ini: ' . $e->getMessage()
             );
         }
+        // MSU End
 
-        $helper = new $requestedName($config, $browzineConfig ?? []);
+        $helper = new $requestedName($container->get(TagsService::class), $config, $browzineConfig ?? []); // MSU
         $helper->setCoverRouter($container->get(\VuFind\Cover\Router::class));
-
+        $helper->setSearchMemory($container->get(\VuFind\Search\Memory::class));
         return $helper;
     }
 }

@@ -37,18 +37,17 @@ use VuFind\Search\Factory\UrlQueryHelperFactory;
 
 use function array_slice;
 use function count;
-use function is_object;
 
 /**
  * Redirects the user to the appropriate default VuFind action.
  *
  * @category VuFind
  * @package  Controller
- * @author   Robby ROUDON <roudonro@msu.edu>
+ * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org Main Site
  */
-class SearchController extends \Catalog\Controller\AbstractSolrSearch
+class SearchController extends AbstractSolrSearch
 {
     /**
      * Show facet list for Solr-driven collections.
@@ -70,8 +69,10 @@ class SearchController extends \Catalog\Controller\AbstractSolrSearch
     {
         // Get the user's referer, with the home page as a fallback; we'll
         // redirect here after the work is done.
-        $from = $this->getRequest()->getServer()->get('HTTP_REFERER')
-            ?? $this->url()->fromRoute('home');
+        $from = $this->getRequest()->getServer()->get('HTTP_REFERER') ?? null;
+        if (empty($from) || !$this->isLocalUrl($from)) {
+            $from = $this->url()->fromRoute('home');
+        }
 
         // Get parameters:
         $searchClassId = $this->params()
@@ -130,20 +131,16 @@ class SearchController extends \Catalog\Controller\AbstractSolrSearch
         $mailer->setMaxRecipients($view->maxRecipients);
         // Set up Captcha
         $view->useCaptcha = $this->captcha()->active('email');
-        $view->url = $this->params()->fromPost(
-            'url',
-            $this->params()->fromQuery(
-                'url',
-                $this->getRequest()->getServer()->get('HTTP_REFERER')
-            )
-        );
+        $view->url = $this->params()->fromPost('url')
+            ?? $this->params()->fromQuery('url')
+            ?? $this->getRequest()->getServer()->get('HTTP_REFERER');
+        if (!$this->isLocalUrl($view->url)) {
+            throw new \Exception('Unexpected value passed to emailAction: ' . $view->url);
+        }
 
         // Force login if necessary:
         $config = $this->getConfig();
-        if (
-            (!isset($config->Mail->require_login) || $config->Mail->require_login)
-            && !$this->getUser()
-        ) {
+        if (($config->Mail->require_login ?? true) && !$this->getUser()) {
             return $this->forceLogin(null, ['emailurl' => $view->url]);
         }
 
@@ -160,7 +157,7 @@ class SearchController extends \Catalog\Controller\AbstractSolrSearch
         }
 
         // Process form submission:
-        if ($this->formWasSubmitted('submit', $view->useCaptcha)) {
+        if ($this->formWasSubmitted(useCaptcha: $view->useCaptcha)) {
             // Attempt to send the email and show an appropriate flash message:
             try {
                 // If we got this far, we're ready to send the email:
@@ -200,7 +197,7 @@ class SearchController extends \Catalog\Controller\AbstractSolrSearch
                 ? $this->redirect()->toRoute('search-history')
                 : $this->forceLogin();
         }
-        $userId = is_object($user) ? $user->id : null;
+        $userId = $user?->getId();
 
         $searchHistoryHelper = $this->serviceLocator
             ->get(\VuFind\Search\History::class);
@@ -221,7 +218,7 @@ class SearchController extends \Catalog\Controller\AbstractSolrSearch
             unset($viewData['schedule']);
         } else {
             $viewData['scheduleOptions'] = $scheduleOptions;
-            $viewData['alertemail'] = is_object($user) ? $user->email : null;
+            $viewData['alertemail'] = $user?->getEmail();
         }
         return $this->createViewModel($viewData);
     }
@@ -238,12 +235,20 @@ class SearchController extends \Catalog\Controller\AbstractSolrSearch
             return $this->forwardTo('Search', 'NewItemResults');
         }
 
-        return $this->createViewModel(
+        $view = $this->createViewModel(
             [
+                'defaultSort' => $this->newItems()->getDefaultSort(),
                 'fundList' => $this->newItems()->getFundList(),
                 'ranges' => $this->newItems()->getRanges(),
             ]
         );
+        if ($this->newItems()->includeFacets()) {
+            $view->options = $this->serviceLocator
+                ->get(\VuFind\Search\Options\PluginManager::class)
+                ->get($this->searchClassId);
+            $this->addFacetDetailsToView($view, 'NewItems');
+        }
+        return $view;
     }
 
     /**
