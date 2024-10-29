@@ -25,12 +25,12 @@
  *
  * @category VuFind
  * @package  Controller
- * @author   Robby ROUDON <roudonro@msu.edu>
+ * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org Main Site
  */
 
-namespace Catalog\Controller;
+namespace VuFind\Controller;
 
 use Laminas\ServiceManager\ServiceLocatorInterface;
 use VuFind\Solr\Utils as SolrUtils;
@@ -42,11 +42,11 @@ use function in_array;
  *
  * @category VuFind
  * @package  Controller
- * @author   Robby ROUDON <roudonro@msu.edu>
+ * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org Main Site
  */
-class EdsController extends \Catalog\Controller\AbstractSearch
+class EdsController extends AbstractSearch
 {
     /**
      * Constructor
@@ -200,7 +200,7 @@ class EdsController extends \Catalog\Controller\AbstractSearch
     }
 
     /**
-     * Process the publicationd date range limiter widget
+     * Process the publication date range limiter widget
      *
      * @param object $searchObject Saved search object (false if none)
      *
