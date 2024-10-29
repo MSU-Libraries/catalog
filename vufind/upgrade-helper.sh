@@ -160,7 +160,7 @@ compare_diffs(){
 
     while read -r file; do
         SUMMARY+=("${file} May have had it's core file updated this release")
-    done < <(git -C ../vufind diff --name-only "${ARGS[CURRENT_RELEASE]}" "${ARGS[RELEASE]}" | xargs -n1 basename | xargs -n1 find . -name)
+    done < <(git -C "${ARGS[REPO_PATH]}" diff --name-only "${ARGS[CURRENT_RELEASE]}" "${ARGS[RELEASE]}" | xargs -n1 basename | xargs -n1 find . -name)
 }
 
 compare_local() {
