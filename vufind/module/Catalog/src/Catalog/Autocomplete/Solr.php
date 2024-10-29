@@ -53,8 +53,12 @@ class Solr extends \VuFind\Autocomplete\Solr
      */
     protected function mungeQuery($query)
     {
-        // Modify the query so it makes a nice, truncated autocomplete query:
-        if (!preg_match('/^[\s\p{P}]$/', substr($query, -1))) {
+        // Modify the query so it uses a wildcard at the end if the last character is alphanumeric:
+        if (preg_match('/[\p{L}\p{N}_]$/u', $query)) {
+            // When the query ends with a word with a hyphen or date range,
+            // replace it with a space before adding a wildcard
+            // (Solr does not tokenize a word with a hyphen if it ends with a wildcard)
+            $query = preg_replace('/([\p{L}\p{N}_])-([\p{L}\p{N}_]+)$/u', '$1 $2', $query);
             $query .= '*';
         }
         return $query;
