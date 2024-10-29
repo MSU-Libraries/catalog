@@ -59,6 +59,14 @@ return [
           'okapi' => Catalog\Auth\Okapi::class,
         ],
       ],
+      'autocomplete' => [
+        'factories' => [
+          Catalog\Autocomplete\Solr::class => SolrFactory::class,
+        ],
+        'aliases' => [
+          'solr' => Catalog\Autocomplete\Solr::class,
+        ],
+      ],
       'command' => [
         'factories' => [
           Catalog\Command\Util\IndexReservesCommand::class => VuFindConsole\Command\Util\AbstractSolrAndIlsCommandFactory::class,
