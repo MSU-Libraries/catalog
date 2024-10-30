@@ -29,6 +29,7 @@
 
 namespace Catalog\Autocomplete;
 
+use function array_slice;
 use function is_object;
 
 /**
