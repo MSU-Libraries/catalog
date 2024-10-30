@@ -281,6 +281,7 @@ Coordinate:
 JournalTitle:
   DismaxFields:
     - title_short^500
+    - title_exactish^450
     - title_full_unstemmed^450
     - title_full^400
     - title^300
@@ -303,6 +304,7 @@ JournalTitle:
 NewspaperTitle:
   DismaxFields:
     - title_short^500
+    - title_exactish^450
     - title_full_unstemmed^450
     - title_full^400
     - title^300
@@ -322,6 +324,7 @@ NewspaperTitle:
 Title:
   DismaxFields:
     - title_short^500
+    - title_exactish^450
     - title_full_unstemmed^450
     - title_full^400
     - title^300
@@ -350,6 +353,7 @@ Genre:
 AllFields:
   DismaxFields:
     - title_short^750
+    - title_exactish^600
     - title_full_unstemmed^600
     - title_full^400
     - title^500
@@ -375,8 +379,8 @@ AllFields:
   ExactSettings:
     DismaxFields:
       - title_exactish^1000
-      - title_full_unstemmed^600
-      - topic_unstemmed^550
+      - title_full_unstemmed^500
+      - topic_unstemmed^400
       - allfields_unstemmed^10
       - fulltext_unstemmed^10
       - isbn
