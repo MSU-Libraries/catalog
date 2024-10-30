@@ -1,7 +1,11 @@
 package org.solrmarc.mixin;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.marc4j.marc.DataField;
@@ -11,27 +15,50 @@ import org.marc4j.marc.VariableField;
 import org.solrmarc.index.SolrIndexerMixin;
 
 public class CallNumberUtilMixin extends SolrIndexerMixin {
+    private static final Pattern lccPattern = Pattern.compile("^[A-HJ-NP-VZ][A-Z]{0,2}\s*\d[^:]*$");
+    private static final Pattern firstCutterPattern = Pattern.compile("^([A-HJ-NP-VZ][A-Z]{0,2}\s?\.[A-Z0-9]+)");
 
     /**
-     * We want this, but it doesn't work with Solrmarc (it returns fields in document order):
-     * callnumber-label = custom, getCallNumberLabel("952e:050a,first")
-     * Instead this method is called like this:
-     * callnumber-label = custom, getMSUCallNumberLabel
+     * Return a list of call number substrings, using all values from 952e and 50a.
+     * - one with 2 letters
+     * - one up until the dot
+     * - one including the first cutter
      */
-    public String getMSUCallNumberLabel(final Record record) {
+    public List<String> getMSUCallNumberLabels(final Record record) {
         List<String> callNumbers = getValuesMatching(record, "952", "e");
-        if (callNumbers.isEmpty()) {
-            callNumbers = getValuesMatching(record, "050", "a");
+        callNumbers.addAll(getValuesMatching(record, "050", "a"));
+        HashSet<String> result = new LinkedHashSet<String>();
+        for (String cn : callNumbers) {
+            cnUp = cn.toUpperCase();
+            if (cnUp.length() < 2) {
+                result.add(cnUp);
+                continue;
+            }
+            boolean isLcc = lccPattern.matcher(cnUp).matches() && (cnUp.length() <= 10 || cnUp.contains("."));
+            if (isLcc && cnUp.length() >= 2) {
+                result.add(cnUp.substring(0, 2));
+            }
+            if (cnUp.length() == 2) {
+                continue;
+            }
+            int dotPos = cnUp.indexOf(".");
+            if (dotPos < 0) {
+                result.add(cnUp);
+                continue;
+            }
+            if (dotPos == 0) {
+                continue;
+            }
+            result.add(cnUp.substring(0, dotPos));
+            if (!isLcc) {
+                continue;
+            }
+            Matcher matcher = firstCutterPattern.matcher(cnUp);
+            if (matcher.find()) {
+                result.add(matcher.group(1));
+            }
         }
-        if (callNumbers.isEmpty()) {
-            return null;
-        }
-        String res = callNumbers.get(0);
-        int dotPos = res.indexOf(".");
-        if (dotPos > 0) {
-            res = res.substring(0, dotPos);
-        }
-        return res.toUpperCase();
+        return new ArrayList<String>(result);
     }
 
     private List<String> getValuesMatching(Record record, String fieldCode, String subfieldCodes) {
