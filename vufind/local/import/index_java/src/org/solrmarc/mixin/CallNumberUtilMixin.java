@@ -15,8 +15,8 @@ import org.marc4j.marc.VariableField;
 import org.solrmarc.index.SolrIndexerMixin;
 
 public class CallNumberUtilMixin extends SolrIndexerMixin {
-    private static final Pattern lccPattern = Pattern.compile("^[A-HJ-NP-VZ][A-Z]{0,2}\s*\d[^:]*$");
-    private static final Pattern firstCutterPattern = Pattern.compile("^([A-HJ-NP-VZ][A-Z]{0,2}\s?\.[A-Z0-9]+)");
+    private static final Pattern lccPattern = Pattern.compile("^[A-HJ-NP-VZ][A-Z]{0,2}\\s*\\d[^:]*$");
+    private static final Pattern firstCutterPattern = Pattern.compile("^([A-HJ-NP-VZ][A-Z]{0,2}\\s?\\.[A-Z0-9]+)");
 
     /**
      * Return a list of call number substrings, using all values from 952e and 50a.
@@ -29,7 +29,7 @@ public class CallNumberUtilMixin extends SolrIndexerMixin {
         callNumbers.addAll(getValuesMatching(record, "050", "a"));
         HashSet<String> result = new LinkedHashSet<String>();
         for (String cn : callNumbers) {
-            cnUp = cn.toUpperCase();
+            String cnUp = cn.toUpperCase();
             if (cnUp.length() < 2) {
                 result.add(cnUp);
                 continue;
