@@ -87,8 +87,7 @@
       <div class="clearfix">
         <h1 class="pull-left flip"><?=$this->transEsc($this->headerLookup)?></h1>
       </div>
-      <div aria-atomic="true" aria-live="polite"> <!-- msul - added aria labels for a11y -->
-      <div class="adv-group-msul bg-color-lightgray"> <!-- msul--added div & classes for appearance -->
+      <div class="adv-group-msul bg-color-lightgray" aria-atomic="true" aria-live="polite"> <!-- added div, classes and aria labels msul-->
       <a role="button" class="icon-link hidden adv-group-terms" id="groupPlaceHolder" href="#"> <!--added class adv-group-terms for layout-->
         <?=$this->icon('ui-add', 'icon-link__icon') ?>
         <span class="icon-link__label"><?= $this->transEsc('add_search_group') ?></span>
@@ -176,7 +175,6 @@
         </div>
       <?php endif; ?>
     </div>
-  </div>
 
     <div class="<?=$this->layoutClass('sidebar')?>">
       <?php if ($hasDefaultsApplied): ?>
