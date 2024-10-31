@@ -18,7 +18,7 @@ Removing elements:
      - <copyField source="title_full" dest="title_fullStr" deleteElement="true"/>
 
 Replacing elements:
-    Not yet implemented as we have no use case yet.
+    Simply add the elements in the modFile, matching elements in the original schema will not be copied.
 -->
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:output method="xml" indent="yes"/>
@@ -39,44 +39,35 @@ Replacing elements:
             <!-- Preserve attributes of the root element -->
             <xsl:apply-templates select="@*"/>
 
-            <!-- Merge `types` from both files, excluding deleteElement matches -->
+            <!-- Apply templates only for elements in the original schema -->
+            <!-- Copy elements from the modFile unless they have @deleteElement='true' -->
             <types>
                 <xsl:apply-templates select="types/*"/>
-                <xsl:apply-templates select="$modSchema/types/*[not(@deleteElement='true')]"/>
+                <xsl:copy-of select="$modSchema/types/*[not(@deleteElement='true')]"/>
             </types>
-            <!-- Merge `fields` from both files, excluding deleteElement matches -->
             <fields>
                 <xsl:apply-templates select="fields/*"/>
-                <xsl:apply-templates select="$modSchema/fields/*[not(@deleteElement='true')]"/>
+                <xsl:copy-of select="$modSchema/fields/*[not(@deleteElement='true')]"/>
             </fields>
-            <!-- Include any other elements from both files -->
             <xsl:apply-templates select="*[not(self::types or self::fields)]"/>
-            <xsl:apply-templates select="$modSchema/*[not(self::types or self::fields)]"/>
+            <xsl:copy-of select="$modSchema/*[not(self::types or self::fields or @deleteElement='true')]"/>
         </schema>
     </xsl:template>
 
-    <!-- Exclude from output fieldTypes which have deleteElement="true" for a given name -->
+    <!-- From the original schema, exclude elements which match an element in the schema modification file -->
     <xsl:template match="fieldType">
-        <xsl:if test="not($modSchema/types/*[@name=current()/@name and @deleteElement='true'])">
-            <xsl:copy>
-                <xsl:apply-templates select="@*|node()"/> <!-- @ node to onclude child elements -->
-            </xsl:copy>
+        <xsl:if test="not($modSchema/types/*[@name=current()/@name])">
+            <xsl:copy-of select="."/>
         </xsl:if>
     </xsl:template>
-    <!-- Exclude from output fields which have deleteElement="true" for a given name -->
     <xsl:template match="field">
-        <xsl:if test="not($modSchema/fields/*[@name=current()/@name and @deleteElement='true'])">
-            <xsl:copy>
-                <xsl:apply-templates select="@*"/>
-            </xsl:copy>
+        <xsl:if test="not($modSchema/fields/*[@name=current()/@name])">
+            <xsl:copy-of select="."/>
         </xsl:if>
     </xsl:template>
-    <!-- Exclude from output copyFields which have deleteElement="true" for a given source/dest -->
     <xsl:template match="copyField">
-        <xsl:if test="not($modSchema/copyField[@source=current()/@source and @dest=current()/@dest and @deleteElement='true'])">
-            <xsl:copy>
-                <xsl:apply-templates select="@*"/>
-            </xsl:copy>
+        <xsl:if test="not($modSchema/copyField[@source=current()/@source and @dest=current()/@dest])">
+            <xsl:copy-of select="."/>
         </xsl:if>
     </xsl:template>
 </xsl:stylesheet>
