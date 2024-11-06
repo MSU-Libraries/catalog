@@ -200,7 +200,7 @@ if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
 fi
 
 # Unset environment variables that are no longer necessary before starting Apache
-unset DEPLOY_KEY_FILE VUFIND_CORE_INSTALLATION
+unset DEPLOY_KEY_FILE
 
 # Start Apache
 tail -f /var/log/vufind/vufind.log & apachectl -DFOREGROUND
