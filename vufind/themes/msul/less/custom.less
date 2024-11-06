@@ -76,11 +76,13 @@ a.sr-only:focus {
   background-color:#ffffff !important;
 }
 
-*:focus, .form-control:focus, .active-filters .filters .filter-value:focus {
-  outline-color: transparent !important; // shows on Windows high contrast, box shadow doesn't
-  outline-width: 2px !important;
-  outline-style: solid !important;
-  box-shadow: 0px 0px 2px 2px rgba(0, 122, 255, .7), 0 0 2px 2px rgba(255, 255, 255, .9);
+*, .form-control, .active-filters .filters .filter-value, .slider-container .slider-handle {
+  &:focus {
+    outline-color: transparent !important; // shows on Windows high contrast, box shadow doesn't
+    outline-width: 2px !important;
+    outline-style: solid !important;
+    box-shadow: 0px 0px 2px 2px rgba(0, 122, 255, .7), 0 0 2px 2px rgba(255, 255, 255, .9);
+  }
 }
 
 .navbar, nav-tabs li, .home-askalib, .msul-prefooter, .msu-footer .col-lg-3  {
@@ -88,9 +90,20 @@ a.sr-only:focus {
   border-radius:0.5rem;
   }
 }
+.btn-default:focus {
+  color:initial;
+  background-color:initial;
+  border-color:revert;
+}
+#preFooterSocial a {
+  line-height:1em;
+  &:focus {
+    border-radius:1.5rem;
+  }
+}
 
 .facet-group {
-  button, .facet, .slider-container .slider-handle {
+  button, .facet {
   &:focus {
   outline-color: transparent !important; // shows on Windows high contrast, box shadow doesn't
   outline-width: 2px !important;
@@ -325,7 +338,7 @@ header {
     max-width:240px;
     margin-bottom:1rem;
   }
-  ul {
+  ul li {
     list-style:none;
     line-height:2.5em;
   }
@@ -1601,6 +1614,17 @@ body.template-dir-myresearch.template-name-profile {
 .adv-group-match {
   max-width:80%;
   float:left;
+}
+.adv-term-remove {
+  width:1em !important;
+  height:1em;
+  line-height:1em;
+  margin-top:0.4rem;
+  margin-left:0.5rem;
+  &:focus {
+    border-radius:1.5rem;
+    box-shadow: 0px 0px 2px 2px rgba(0, 122, 255, 1)
+  }
 }
 .add_search_link {
   margin-top:0 !important;
