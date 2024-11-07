@@ -48,8 +48,8 @@ RUN \
     cp /vufind-${VUFIND_VERSION}/import/*.jar /solr_confs/import/ && \
     rm -rf /vufind-${VUFIND_VERSION} && \
     # Overriding browse-handler.jar and browse-indexing.jar won't be needed when we use a version of VuFind with the new TitleNormalizer
-    cp browse-handler.jar /solr_confs/jars/ && \
-    cp browse-indexing.jar /solr_confs/import/ && \
+    cp /tmp/build/browse-handler.jar /solr_confs/jars/ && \
+    cp /tmp/build/browse-indexing.jar /solr_confs/import/ && \
     cp /tmp/build/index-alphabetic-browse.sh /solr_confs/ && \
     chmod -R go-w /solr_confs /*.sh && \
     chmod ugo+x /*.sh /solr_confs/*.sh && \
