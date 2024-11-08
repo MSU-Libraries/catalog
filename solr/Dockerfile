@@ -11,7 +11,7 @@ RUN \
 # Install additional packages, including zk-shell
     apt update && \
     apt install -y wget vim-nox htop rsyslog cron moreutils gettext-base jq \
-                   python3 python3-distutils python3-pip pipx && \
+                   xsltproc python3 python3-distutils python3-pip pipx && \
     pipx install zk-shell && \
     pipx ensurepath && \
     apt remove -y python3-pip && \
@@ -25,16 +25,20 @@ RUN \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
 
+COPY ./ /tmp/build/
+
 # Setup cron and logging for cron
-COPY cron.d/ /etc/cron.d/
-RUN chmod -R g-w,o-w /etc/cron.d/ && \
+RUN cp /tmp/build/cron.d/* /etc/cron.d/ && \
+    chmod -R g-w,o-w /etc/cron.d/ && \
     sed -i "/imklog/d" /etc/rsyslog.conf && \
     sed -i "/PrivDrop/d" /etc/rsyslog.conf && \
     echo "*.*;auth,authpriv.none /proc/1/fd/1" >> /etc/rsyslog.d/50-default.conf
 
 # Get solr configs and prepare for alphabetical browsing
-COPY startup.sh startup-cron.sh healthcheck.sh clusterhealth.sh cron-alphabrowse.sh alpha-browse.sh lock-state.sh /
 RUN \
+    cd /tmp/build/ && \
+    cp startup.sh startup-cron.sh healthcheck.sh clusterhealth.sh cron-alphabrowse.sh alpha-browse.sh lock-state.sh / && \
+    cd - && \
     mkdir -p /solr_confs/import/lib && \
     wget https://github.com/vufind-org/vufind/archive/refs/tags/v${VUFIND_VERSION}.tar.gz && \
     tar -xf v${VUFIND_VERSION}.tar.gz  && \
@@ -42,10 +46,11 @@ RUN \
     cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /vufind-${VUFIND_VERSION}/import/lib/reload4j-*.jar /solr_confs/import/lib/ && \
     rm v${VUFIND_VERSION}.tar.gz && \
     cp /vufind-${VUFIND_VERSION}/import/*.jar /solr_confs/import/ && \
-    rm -rf /vufind-${VUFIND_VERSION}
-COPY index-alphabetic-browse.sh /solr_confs/
-COPY series_browse.txt /tmp/
-RUN \
+    rm -rf /vufind-${VUFIND_VERSION} && \
+    # Overriding browse-handler.jar and browse-indexing.jar won't be needed when we use a version of VuFind with the new TitleNormalizer
+    cp /tmp/build/browse-handler.jar /solr_confs/jars/ && \
+    cp /tmp/build/browse-indexing.jar /solr_confs/import/ && \
+    cp /tmp/build/index-alphabetic-browse.sh /solr_confs/ && \
     chmod -R go-w /solr_confs /*.sh && \
     chmod ugo+x /*.sh /solr_confs/*.sh && \
     # Change solr_confs ownership so that a biblio9 copy can be created (conditionally) in startup.sh
@@ -60,18 +65,14 @@ RUN \
         /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i 's/<lib dir="\.\.\/jars"/<lib dir="\/solr_confs\/jars"/' /solr_confs/biblio/conf/solrconfig.xml && \
     # Add series browse request handler PC-110
-    sed -i '/hierarchy<\/str>/ r /tmp/series_browse.txt' /solr_confs/biblio/conf/solrconfig.xml && \
+    sed -i '/hierarchy<\/str>/ r /tmp/build/series_browse.txt' /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i 's/topic,author,title,lcc,dewey,hierarchy/topic,author,title,lcc,dewey,hierarchy,series/' /solr_confs/biblio/conf/solrconfig.xml && \
     # Update the field used for alpha browse PC-686, PC-110
     sed -i 's/title_fullStr/title_browse/' /solr_confs/biblio/conf/solrconfig.xml && \
-    sed -i 's/      <str name="normalizer">org.vufind.util.TitleNormalizer<\/str>//' /solr_confs/biblio/conf/solrconfig.xml && \
-    sed -i '$ d' /solr_confs/biblio/conf/schema.xml && \
-    echo ' <!-- CopyFields for Title Browse -->' >> /solr_confs/biblio/conf/schema.xml && \
-    echo ' <field name="title_browse" type="string" indexed="true" stored="true" multiValued="true"/>' >> /solr_confs/biblio/conf/schema.xml && \
-    echo ' <copyField source="title_fullStr" dest="title_browse"/>' >> /solr_confs/biblio/conf/schema.xml && \
-    echo ' <copyField source="title_alt" dest="title_browse"/>' >> /solr_confs/biblio/conf/schema.xml && \
-    echo ' <copyField source="title_auth" dest="title_browse"/>' >> /solr_confs/biblio/conf/schema.xml && \
-    echo '</schema>' >> /solr_confs/biblio/conf/schema.xml && \
+    # Apply customizations to the Solr schema
+    xsltproc --stringparam modFile "/tmp/build/configs-mod/biblio/schema.xml" \
+        /tmp/build/configs-mod/schema.xslt /solr_confs/biblio/conf/schema.xml \
+        | sponge /solr_confs/biblio/conf/schema.xml && \
     # Now rename biblio to biblio1 and duplicate it to biblio2, then update the datadir path
     # since we have two separate collections, one to build in and one for live searching
     mv /solr_confs/biblio /solr_confs/biblio1 && \
@@ -80,9 +81,9 @@ RUN \
     sed -i "s/\\bbiblio1\\b/biblio2/" /solr_confs/biblio2/conf/solrconfig.xml && \
     # Use /mnt/logs/solr for the Solr logs
     rm -rf /opt/bitnami/solr/logs && \
-    ln -s /mnt/logs/solr /opt/bitnami/solr/logs
-
-COPY solr-zk-shell.sh /usr/local/bin/solr-zk-shell
+    ln -s /mnt/logs/solr /opt/bitnami/solr/logs && \
+    cp /tmp/build/solr-zk-shell.sh /usr/local/bin/solr-zk-shell && \
+    rm -r /tmp/build/
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \
     CMD /healthcheck.sh

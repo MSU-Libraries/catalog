@@ -59,8 +59,10 @@ removesecrets() {
     SECRET_IDS=($(run_on_node 1 "docker secret ls --filter name=\"${STACK_NAME}-\" --format \"{{.ID}}\""))
     # shellcheck disable=SC2207
     SECRETS=($(run_on_node 1 "docker secret ls --filter name=\"${STACK_NAME}-\" --format \"{{.ID}}: {{.Name}}\""))
-    echo "Secrets to delete : ${SECRETS[*]}"
-    run_on_node 1 "docker secret rm ${SECRET_IDS[*]}"
+    if [ ${#SECRETS[@]} -gt 0 ]; then
+        echo "Secrets to delete : ${SECRETS[*]}"
+        run_on_node 1 "docker secret rm ${SECRET_IDS[*]}"
+    fi
 }
 
 main() {

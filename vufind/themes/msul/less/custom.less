@@ -70,13 +70,58 @@
   background-color:#ffffff;
 }
 
-
 //Focus indicators
-a.record-cover-link:focus {
-  outline-offset: 0.25rem;
+
+a.sr-only:focus {
+  background-color:#ffffff !important;
 }
-.dropdown-toggle:focus {
-    outline: dotted 1px #000;
+
+*, .form-control, .active-filters .filters .filter-value, .slider-container .slider-handle {
+  &:focus {
+    outline-color: transparent !important; // shows on Windows high contrast, box shadow doesn't
+    outline-width: 2px !important;
+    outline-style: solid !important;
+    box-shadow: 0px 0px 2px 2px rgba(0, 122, 255, .7), 0 0 2px 2px rgba(255, 255, 255, .9);
+  }
+}
+
+.navbar, nav-tabs li, .home-askalib, .msul-prefooter, .msu-footer .col-lg-3  {
+  a:focus {
+  border-radius:0.5rem;
+  }
+}
+.btn-default:focus {
+  color:initial;
+  background-color:initial;
+  border-color:revert;
+}
+#preFooterSocial a {
+  line-height:1em;
+  &:focus {
+    border-radius:1.5rem;
+  }
+}
+
+.facet-group {
+  button, .facet {
+  &:focus {
+  outline-color: transparent !important; // shows on Windows high contrast, box shadow doesn't
+  outline-width: 2px !important;
+  outline-style: solid !important;
+  box-shadow: 0px 0px 2px 2px rgba(0, 122, 255, .7) inset, 0 0 2px 2px rgba(255, 255, 255, .9) inset;
+    }
+  }
+}
+.facet-group .active, .slider-container .slider-handle {
+  &:focus {
+  background: @darkparakeetgreen;
+  }
+}
+.active-filters .filters a.filter-value {
+  &:focus {
+  background: #a94442;
+  border-radius:0.3rem;
+  }
 }
 
 //container width
@@ -184,9 +229,6 @@ header {
       color:#fff;
       text-decoration:none;
     }
-    a:focus {
-      outline:1px dotted #fff;
-    }
     .fa {
       font-size:2rem;
       color:#fff;
@@ -195,6 +237,9 @@ header {
   }
   .navbar-msubrand {
     margin-bottom:1rem;
+    a {
+      display:inline-block; //for focus indicator
+    }
   }
   .navbar-msul {
     font-size:2rem;
@@ -234,16 +279,23 @@ header {
     color:#fff;
   }
   a:hover, a:active, a:focus {
-    color:@msugreen;
+    color:#fff;
     & .fa {
-      color:@msugreen;
+      color:#fff;
     }
   }
   .nav > li > a {
-    &:hover,
+    padding-top:0.2rem;
+    padding-bottom:0.2rem;
+    margin-top:1rem;
+    &:hover {
+      color: #fff;
+      background-color: initial;
+      outline-color:transparent;
+    }
     &:focus {
-      color: @msugreen;
-      background-color: @nav-link-hover-bg;
+      color: #fff;
+      background-color: initial;
     }
   }
 }
@@ -262,7 +314,7 @@ header {
     color: @msugreen;
     text-decoration: none;
   }
-  a:hover, a:active, a:focus {
+  a:hover, a:active {
     color: @gray-darker;
     text-decoration: underline;
   }
@@ -286,20 +338,20 @@ header {
     max-width:240px;
     margin-bottom:1rem;
   }
-  ul {
+  ul li {
     list-style:none;
     line-height:2.5em;
   }
+  
   a, a:visited {
     color:#fff;
     text-decoration:none;
+    display:inline-block;
   }
   a:hover, a:active {
     color:#fff;
     text-decoration:underline;
-  }
-  a:focus {
-    outline: 1px dashed #fff;
+    display:inline-block;
   }
   .msul-address-icon, .msul-address, .a-address, .a-phone-icon, .msul-phone-icon, .msul-phone {
     display: inline-flex;
@@ -341,8 +393,13 @@ footer {
     }
   }
   .msu-footer {
-    .col-lg-3 img {
+    .col-lg-3 {
+      a:focus {
+        display:inline-block;
+      }
+      img {
       margin-bottom:0;
+      }
     }
     .col-lg-9 ul {
       display:block;
@@ -387,12 +444,6 @@ footer {
     }
   }
 }
-
-// footer .msu-footer :focus:not(input):not(.cta) {
-//   outline:#151a22;
-//   outline-style:dashed;
-//   outline-width:1px
-// }
 
 @media only screen and (max-width:991.98px) {
   footer .msu-footer .col-lg-3 img {
@@ -503,6 +554,9 @@ input[type="checkbox"] {
         right:4rem;
         margin-top:0.5rem;
       }
+      .search-tips-icon {
+        display:none;
+      }
   @media only screen and (max-width : 767px) {
     label, input, select, button {
       width:100%;
@@ -527,9 +581,9 @@ input[type="checkbox"] {
     input, select {
       width:100% !important;
     }
-    a.help-link {
-      display:none;
-    }
+//    a.help-link {
+//      display:none;
+//    }
 
 
   }
@@ -544,29 +598,30 @@ input[type="checkbox"] {
     .searchForm_lookfor {
       width: 100%;
       max-width: initial;
+      border-radius:0.5rem 0 0 0.5rem;
     }
     .search-tips-icon {
+      display:block;
       position: absolute;
       background-color:#fff;
       border:0;
-      padding:.3rem .3rem 0 .3rem;
-      top:2px;
-      right:10px;
-      height:2em;
-      width:2em;
+      top:0.5rem;
+      right:0.5rem;
+      height:1.5em;
+      width:1.5em;
     }
     .search-tips-mobile {
       display:none;
     }
     #searchForm-reset {
-      right: 45px;
+      right: 2.7rem;
     }
     button[type=submit].btn-primary {
       position: relative;
       z-index: 2;
       border-radius: 0 0.5rem 0.5rem 0;
-      margin-left: -1rem;
-      vertical-align: top;
+      margin-left: -0.4rem;
+ //     vertical-align: top;
     }
   }
     @media only screen and (min-width : 1236px) {
@@ -601,6 +656,9 @@ input[type="checkbox"] {
       }
     }
     @media only screen and (min-width : 992px) {
+      .searchForm_lookfor {
+        border-radius:0.5rem;
+      }
       button[type=submit].btn-primary {
         border-radius: 2rem;
         margin-left:0;
@@ -608,9 +666,13 @@ input[type="checkbox"] {
 
     }
     @media only screen and (min-width : 1236px) {
+      .searchForm_lookfor {
+        border-radius:0.5rem 0 0 0.5rem;
+      }
       button[type=submit].btn-primary {
         border-radius: 0 0.5rem 0.5rem 0;
-        margin-left: -1rem;
+        margin-left: -0.4rem;
+        margin-top: -0.1rem;
       }
 
     }
@@ -685,7 +747,7 @@ input[type="checkbox"] {
 
 .home-facet.home-askalib::after {
       position:absolute; width:0; height:0; overflow:hidden; z-index:-1; /* hide images */
-      content:url("/themes/msul/images/Icons_AskALib_Default.svg") url("/themes/msul/images/Icons_AskALib_Hover.svg"); /* load images */
+      content:url("/themes/msul/images/Icons_Ask_Us_World_Default.png") url("/themes/msul/images/Icons_Ask_Us_World_Hover_dark.png"); /* load images */
       }
   .home-facet.home-askalib {
       padding-top:3rem;
@@ -710,16 +772,18 @@ input[type="checkbox"] {
       }
 
       .ask-icon {
-        content:url("/themes/msul/images/Icons_AskALib_Default.svg");
+        content:url("/themes/msul/images/Icons_Ask_Us_World_Default.png");
         height:8rem;
+        margin-bottom:0.5rem;
       }
       &:hover .ask-icon {
-        content:url("/themes/msul/images/Icons_AskALib_Hover.svg");
+        content:url("/themes/msul/images/Icons_Ask_Us_World_Hover_dark.png");
         height:8rem;
       }
 
       .need-help, .askalibrarian {
         font-size:1.3rem;
+        font-weight:600;
       }
     }
   }
@@ -766,9 +830,6 @@ form.searchForm, .record-tabs, .navbar-form {
         padding-left:0.5rem;
         margin-left:0.5rem;
         }
-    }
-    a:focus {
-      outline: 1px dashed @eggplant;
     }
     a:hover {
       border-bottom: 0.4rem solid #ACB3C9;
@@ -942,8 +1003,7 @@ table tr {
     color:@darkparakeetgreen !important;
     border: 2px solid @darkparakeetgreen !important;
   }
-  &:active,
-  &:focus {
+  &:active {
     text-decoration:none;
     color:@parakeetgreen;
     border: 2px solid @parakeetgreen;
@@ -955,13 +1015,13 @@ table tr {
   }
 }
 
-/* Diable links (such as the request button */
+/* Disable links (such as the request button */
 .disabled {
   color: @darkgray;
   border-color: @darkgray;
   background-color: @lightgray;
   cursor: not-allowed;
-  &:focus, &:hover {
+  &:hover {
     color: @darkgray;
     border-color: @darkgray;
     background-color: @lightgray;
@@ -1125,8 +1185,10 @@ table tr {
   }
 }
 
+
 .active-filters a {
   text-decoration:none;
+  border-radius:0.3rem;
 }
 
 // filter remove button
@@ -1413,7 +1475,7 @@ body.template-dir-myresearch.template-name-profile {
   }
 
   > ul > li {
-    > a, > a:hover, > a:focus {
+    > a, > a:hover {
       color: @gray-darker;
       position: relative;
       // Increase z-index to place a tag in front of the :after triangle
@@ -1514,32 +1576,40 @@ body.template-dir-myresearch.template-name-profile {
       border-color:@darkparakeetgreen;
       color:#fff;
   }
-    &:active,
-    &:focus {
+    &:active {
       background-color:@msugreen !important;
       border-color:@msugreen !important;
+      color:#fff;
+  }
+    &:focus {
+      background-color:@parakeetgreen !important;
+      border-color:@parakeetgreen;
       color:#fff;
   }
 }
 
 //Filter button on Articles and More when 4+ selected
 
-.search-filter-dropdown .btn-primary {
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  color: #fff;
-  background: @parakeetgreen;
-  vertical-align: baseline;
-  &:hover {
+.search-filter-dropdown {
+  .btn-primary {
+    border-radius: 4px;
+    padding: 2px 8px;
+    color: #fff;
+    background: @parakeetgreen;
+    vertical-align: baseline;
+    &:hover {
       background-color:@darkparakeetgreen;
       border-color:@darkparakeetgreen;
       color:#fff;
-  }
-    &:active,
-    &:focus {
+    }
+    &:active {
       background-color:@msugreen !important;
       border-color:@msugreen !important;
       color:#fff !important;
+    }
+  }
+  ul {
+    padding:0.5rem;
   }
 }
 
@@ -1555,6 +1625,17 @@ body.template-dir-myresearch.template-name-profile {
 .adv-group-match {
   max-width:80%;
   float:left;
+}
+.adv-term-remove {
+  width:1em !important;
+  height:1em;
+  line-height:1em;
+  margin-top:0.4rem;
+  margin-left:0.5rem;
+  &:focus {
+    border-radius:1.5rem;
+    box-shadow: 0px 0px 2px 2px rgba(0, 122, 255, 1)
+  }
 }
 .add_search_link {
   margin-top:0 !important;
@@ -1771,11 +1852,7 @@ mark {
     &:hover {
       background-color: @gray;
     }
-  }  button {
-    &:focus {
-      outline:0.25rem solid #ffffff;
-    }
-  }
+  }  
 }
 
 //Similar items carousel focus same as hover for A11Y
@@ -1804,6 +1881,14 @@ mark {
   }
   .fa-info {
     padding-right: 0.5rem;
+  }
+}
+
+
+.pager li {
+  background-color:transparent;
+  a {
+    border-radius:0.5rem;
   }
 }
 

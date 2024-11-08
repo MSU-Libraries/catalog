@@ -128,6 +128,8 @@ apply_devel_changes() {
     # Reduce the catalog service replicas to 1
     ./yq -i ".services.catalog.deploy.replicas = 1" docker-compose.catalog.yml
 
+    # Mount monitoring files in container for easier editting
+    ./yq -i ".services.monitoring.volumes += \"/mnt/shared/local/${STACK_NAME}/repo/monitoring/:/app/\"" docker-compose.monitoring.yml;
 }
 
 apply_prod_changes() {
@@ -171,13 +173,13 @@ apply_prod_changes() {
         HTTPS_MIDDLEWARES+=("ip-campus")
         ## Only catalog-beta
         if [ "${STACK_NAME}" == "catalog-beta" ]; then
-            # Set cron/build placement contraint
+            # Set cron/build placement constraint
             ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_2}\"]" docker-compose.catalog.yml;
             ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_2}\"]" docker-compose.build.yml;
         fi;
         ## Only catalog-preview
         if [ "${STACK_NAME}" == "catalog-preview" ]; then
-            # Set cron/build placement contraint
+            # Set cron/build placement constraint
             ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_3}\"]" docker-compose.catalog.yml;
             ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_3}\"]" docker-compose.build.yml;
         fi;
@@ -314,7 +316,7 @@ main() {
     fi
 
     # Save CI variables
-    env | grep -f <(grep -ohE '\$[A-Z_]+|\$\{[A-Z_]+\}' ./*.yml | tr -d '{}$' | sort -u) | sed -E -e 's/([A-Z_]+=)(.*)/export \1"\2"/' >.env
+    env | grep -f <(grep -ohE '\$[A-Z_]+|\$\{[A-Z_]+[}:]' ./*.yml | tr -d '{}$:' | sort -u) | sed -E -e 's/([A-Z_]+=)(.*)/export \1"\2"/' >.env
     chmod o-r .env
 
     # Remove blank lines as a workaround for issue caused by: https://github.com/mikefarah/yq/issues/1191

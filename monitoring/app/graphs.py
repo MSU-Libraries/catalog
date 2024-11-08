@@ -1,3 +1,4 @@
+'''Graph generator'''
 from datetime import datetime, timedelta
 import os
 import asyncio
@@ -6,13 +7,14 @@ import flask
 import mariadb as db
 import aiohttp
 
-import util
+import util # pylint: disable=import-error
 
 
 KNOWN_VARIABLES = [
     'available_memory', 'available_disk_space', 'apache_requests', 'response_time',
-    'solr_solr_cpu', 'solr_solr_mem', 'solr_cron_cpu', 'solr_cron_mem', 'solr_zk_cpu', 'solr_zk_mem',
-    'catalog_catalog_cpu', 'catalog_catalog_mem', 'mariadb_galera_cpu', 'mariadb_galera_mem'
+    'solr_solr_cpu', 'solr_solr_mem', 'solr_cron_cpu', 'solr_cron_mem', 'solr_zk_cpu',
+    'solr_zk_mem', 'catalog_catalog_cpu', 'catalog_catalog_mem', 'mariadb_galera_cpu',
+    'mariadb_galera_mem'
 ]
 
 
@@ -71,6 +73,14 @@ def _sql_query(variable: str, period_start: datetime, period_end: datetime, grou
         f'WHERE time > "{sql_start}" AND time < "{sql_end}" AND node = {node} GROUP BY {sql_group};'
 
 def node_graph_data(variable: str, period: str) -> dict[str, list] | str:
+    '''
+    Get the graph data for the nodes
+    Args:
+        variable (str): Type of graph data
+        period (str): Period of time to limit for
+    Returns:
+        (dict|str): Graph data or error message
+    '''
     if variable not in KNOWN_VARIABLES:
         return 'Error: unknown variable'
     if period not in ['hour', 'day', 'week', 'month', 'year']:
@@ -80,38 +90,39 @@ def node_graph_data(variable: str, period: str) -> dict[str, list] | str:
     group = _group_by_times(period_start, period_end)
     conn = None
     try:
-        with open(os.getenv('MARIADB_MONITORING_PASSWORD_FILE'), 'r', encoding='UTF-8') as f:
-            password = f.read().strip()
-            f.close()
-        conn = db.connect(user='monitoring', password=password, host='galera', database="monitoring")
-        del password
-        cur = conn.cursor()
-        cur.execute(_sql_query(variable, period_start, period_end, group))
-        pt_x = []
-        pt_y = []
-        for row in cur:
-            if group == 'MONTH':
-                x = datetime(row[0], row[1], 1).strftime('%Y-%m')
-            elif group == 'DAY':
-                x = datetime(row[0], row[1], row[2]).strftime('%Y-%m-%d')
-            elif group == 'HOUR':
-                x = datetime(row[0], row[1], row[2], row[3]).strftime('%Y-%m-%d %H')
-            else:
-                x = datetime(row[0], row[1], row[2], row[3], row[4]).strftime('%Y-%m-%d %H:%M:%S')
-            if row[-1] is not None:
-                pt_x.append(x)
-                pt_y.append(row[-1])
+        with util.DBConnection() as conn:
+            cur = conn.cursor()
+            cur.execute(_sql_query(variable, period_start, period_end, group))
+            pt_x = []
+            pt_y = []
+            for row in cur:
+                if group == 'MONTH':
+                    x = datetime(row[0], row[1], 1).strftime('%Y-%m')
+                elif group == 'DAY':
+                    x = datetime(row[0], row[1], row[2]).strftime('%Y-%m-%d')
+                elif group == 'HOUR':
+                    x = datetime(row[0], row[1], row[2], row[3]).strftime('%Y-%m-%d %H')
+                else:
+                    x = datetime(
+                        row[0], row[1], row[2], row[3], row[4]
+                        ).strftime('%Y-%m-%d %H:%M:%S')
+                if row[-1] is not None:
+                    pt_x.append(x)
+                    pt_y.append(row[-1])
     except db.Error as err:
-        if conn is not None:
-            conn.close()
         return f"Database error: {err}"
-    conn.close()
     return {
         'pt_x': pt_x,
         'pt_y': pt_y,
     }
 
 def graph(variable: str, period: str) -> str:
+    '''
+    Get and render the graph for the given period
+    Args:
+        variable (str): Type of graph to get
+        period (str): Period of time to get the graph data for
+    '''
     if variable not in KNOWN_VARIABLES:
         return 'Error: unknown variable'
     if period not in ['hour', 'day', 'week', 'month', 'year']:
@@ -137,4 +148,7 @@ def graph(variable: str, period: str) -> str:
         node_data['x'] = j['pt_x']
         node_data['y'] = j['pt_y']
         data.append(node_data)
-    return flask.render_template('graph.html', variable=variable, period=period, data=data)
+    return flask.render_template(
+        'graph.html',
+        variable=variable, period=period, data=data, stack_name=os.getenv('STACK_NAME')
+    )

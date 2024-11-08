@@ -1,3 +1,4 @@
+'''Log reader'''
 import pathlib
 import asyncio
 import gzip
@@ -9,7 +10,7 @@ import tempfile
 import flask
 import aiohttp
 
-import util
+import util # pylint: disable=import-error
 
 
 MAX_FULL_FILE = 10*1024*1024 # Max file size to return the full contents; arbitrary 10 MB
@@ -18,7 +19,8 @@ TIMEOUT = 10
 
 
 def _read_beginning_and_end(path: str) -> str:
-    command = f'head -c {BEGIN_END_BYTES} {path}; echo -e "\n\n[...]\n"; tail -c {BEGIN_END_BYTES} {path}'
+    command = f'head -c {BEGIN_END_BYTES} {path}; echo -e "\n\n[...]\n";' \
+        f'tail -c {BEGIN_END_BYTES} {path}'
     try:
         process = subprocess.run(["/bin/sh", "-c", command],
             capture_output=True, text=True, timeout=TIMEOUT, check=True)
@@ -31,7 +33,8 @@ def _read_beginning_and_end(path: str) -> str:
 
 def _add_uncompressed_file_to_log(path: str, full_log: str) -> str:
     if path.stat().st_size > MAX_FULL_FILE:
-        log_text = 'Detected a large file. Showing beginning and end...\n' + _read_beginning_and_end(path)
+        log_text = 'Detected a large file. Showing beginning and end...\n' \
+            f'{_read_beginning_and_end(path)}'
     else:
         log_text = path.read_text(encoding="utf8", errors="ignore")
 
@@ -56,6 +59,13 @@ def _add_file_to_log(path: str, full_log: str) -> str:
 
 
 def node_logs(service: str) -> str:
+    '''
+    Gets the file path to the log for a particular service
+    Args:
+        service (str): Service to get the path for
+    Returns:
+        (str): Path to the log
+    '''
     paths = {
         'vufind':                  '/mnt/logs/vufind/vufind.log',
         'apache/error':            '/mnt/logs/apache/error.log',
@@ -103,7 +113,14 @@ def node_logs(service: str) -> str:
     return full_log
 
 
-def logs_vufind(service: str) -> str:
+def logs_vufind(service: str) -> list:
+    '''
+    Get ths logs for a service
+    Args:
+        service (str): Name of the service to get the logs for
+    Returns:
+        (list): Logs from all of the nodes
+    '''
     urls = []
     for node in range(1, 4):
         urls.append(f'http://monitoring{node}/monitoring/node/logs/{service}')
@@ -113,4 +130,8 @@ def logs_vufind(service: str) -> str:
         return f'Error reading the {service} log: {err}'
     except asyncio.exceptions.TimeoutError:
         return f'Timeout when reading the {service} log'
-    return flask.render_template('logs.html', service=service, log1=logs[0], log2=logs[1], log3=logs[2])
+    return flask.render_template(
+        'logs.html',
+        service=service, log1=logs[0], log2=logs[1],
+        log3=logs[2], stack_name=os.getenv('STACK_NAME')
+    )

@@ -165,26 +165,27 @@ does is sleep! It is recommended to run these commands in a `screen`.
     If you run a deploy pipeline while this is running, you will not want to run
     the manual job that deploys the updates to the build container (since not all the
     import scripts are configured to resume where they left off yet).  
-    ```bash
-    # On Host
-    screen
-    docker exec -it catalog-prod-catalog_build.12345 bash
-    
-    # Inside container
-    rm local/harvest/folio/processed/*
-    cp /mnt/shared/oai/${STACK_NAME}/harvest_folio/processed/* local/harvest/folio/
-    /usr/local/bin/pc-import-folio --verbose --reset-solr --collection biblio-build --batch-import | tee /mnt/shared/logs/folio_import_${STACK_NAME}_$(date -I).log
-    [Ctrl-a d]
-    
-    # On Host
-    screen
-    docker exec -it catalog-prod-catalog_build.12345 bash
-    
-    # Inside container
-    cp /mnt/shared/hlm/${STACK_NAME}/current/* local/harvest/hlm/
-    /usr/local/bin/pc-import-hlm --import --verbose | tee /mnt/shared/logs/hlm_import_${STACK_NAME}_$(date -I).log
-    [Ctrl-a d]
-    ```
+
+```bash
+# On Host
+screen
+docker exec -it $(docker ps -q -f name=catalog-prod-catalog_build) bash
+
+# Inside container
+rm local/harvest/folio/processed/*
+cp /mnt/shared/oai/${STACK_NAME}/harvest_folio/processed/* local/harvest/folio/
+/usr/local/bin/pc-import-folio --verbose --reset-solr --collection biblio-build --batch-import | tee /mnt/shared/logs/folio_import_${STACK_NAME}_$(date -I).log
+[Ctrl-a d]
+
+# On Host
+screen
+docker exec -it $(docker ps -q -f name=catalog-prod-catalog_build) bash
+
+# Inside container
+cp /mnt/shared/hlm/${STACK_NAME}/current/* local/harvest/hlm/
+/usr/local/bin/pc-import-hlm --import --verbose | tee /mnt/shared/logs/hlm_import_${STACK_NAME}_$(date -I).log
+[Ctrl-a d]
+```
 
 * Verify the counts are what you expect on the `biblio-build` collection using the following command
     ```bash

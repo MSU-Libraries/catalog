@@ -154,7 +154,7 @@ resources such as Solr and the Traefik dashboard
 * `SESSION_BOT_SALT`: Secure random string used in creating persisting session ids for bots (when bot_agent values are set)
 * `SIMPLESAMLPHP_ADMIN_PW_FILE`: Filepath containing the password to the admin interface of SimpleSAMLphp
 * `SIMPLESAMLPHP_SALT`: Random salt for SimpleSAMLphp
-* `VUFIND_CORE_INSTALLATION`: Default `0`, set to `1` in the pipelines to install core-vufind without MSUL Catalog module
+* `VUFIND_CORE_INSTALLATION`: Set to `1` in the pipelines to install core-vufind without MSUL Catalog module. Set to `0` otherwise.
 
 ## Scheduled Pipelines
 For the Ansible image to build overnight, saving time on regular daily builds, we can set up a scheduled pipeline to
