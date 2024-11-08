@@ -342,7 +342,7 @@ header {
     list-style:none;
     line-height:2.5em;
   }
-  
+
   a, a:visited {
     color:#fff;
     text-decoration:none;
@@ -546,7 +546,7 @@ input[type="checkbox"] {
         right: 3px;
         top:0.37em;
         line-height:1em;
-        width:1.5em;
+        width:1.5em !important;
         height:1.5em;
     }
       .search-tips-mobile {
@@ -599,6 +599,9 @@ input[type="checkbox"] {
       width: 100%;
       max-width: initial;
       border-radius:0.5rem 0 0 0.5rem;
+    }
+    .searchForm-query #searchForm_controls {
+      width: 4.5rem;
     }
     .search-tips-icon {
       display:block;
@@ -848,7 +851,7 @@ form.searchForm, .record-tabs, .navbar-form {
 //align advanced searchbox left
 .mainbody.right .searchbox .navbar-form {
   padding-left:0;
-  
+
 }
 
 
@@ -1759,7 +1762,7 @@ fieldset.solr-facets {
 
 //add group numbers on catalog advanced search
 .template-dir-search.template-name-advanced {
-  counter-reset: adv-group-num; 
+  counter-reset: adv-group-num;
     .msul-adv-group-num::before {
         counter-increment: adv-group-num;
         content: "Group " counter(adv-group-num) " ";
@@ -1852,7 +1855,7 @@ mark {
     &:hover {
       background-color: @gray;
     }
-  }  
+  }
 }
 
 //Similar items carousel focus same as hover for A11Y
