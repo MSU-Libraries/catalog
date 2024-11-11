@@ -20,7 +20,7 @@ def read_results():
 
 def connect():
     headers = { 'Content-type': 'application/json' }
-    conn = http.client.HTTPConnection('localhost')
+    conn = http.client.HTTPConnection('localhost:8983')
     return conn, headers
 
 
