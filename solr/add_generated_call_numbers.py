@@ -33,7 +33,7 @@ def chunks(lst, n):
 def send_batch_to_solr(conn, headers, batch):
     update_objects = []
     for doc in batch:
-        obj = {"id": doc['id'], 'callnumber-label': {"add": doc['cn']}}
+        obj = {"id": doc['id'], 'callnumber-label': {"add-distinct": doc['cn']}}
         update_objects.append(obj)
     query = json.dumps(update_objects, ensure_ascii=False)
     path = '/solr/biblio/update?commit=true'
