@@ -4,7 +4,7 @@ import http.client
 import json
 import time
 
-BATCH_SIZE = 1024
+BATCH_SIZE = 65536
 
 
 class StatusException(Exception):
@@ -33,13 +33,16 @@ def chunks(lst, n):
 def send_batch_to_solr(conn, headers, batch):
     update_objects = []
     for doc in batch:
-        obj = {"id": doc['id'], 'callnumber-label': {"add-distinct": doc['cn']}}
+        obj = {"id": doc['id'], "callnumber-label": {"add-distinct": doc['cn']}}
         update_objects.append(obj)
     query = json.dumps(update_objects, ensure_ascii=False)
     path = '/solr/biblio/update?commit=true'
     conn.request('POST', path, body=query, headers=headers)
     resp = conn.getresponse()
     if resp.status != 200:
+        print(f"\nUnexpected status: {resp.status} {resp.reason}\n")
+        print("Response:\n")
+        print(resp.read())
         raise StatusException(f"Unexpected status: {resp.status} {resp.reason}")
     resp.read()
 
