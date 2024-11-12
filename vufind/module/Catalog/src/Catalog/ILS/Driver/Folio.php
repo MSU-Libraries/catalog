@@ -142,8 +142,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         // MSU START
         // PC-835: Items with loan type "Non Circulating" should show as "Lib Use Only" after they're checked in
         if (
-            $item->permanentLoanType->id ?? $item->permanentLoanTypeId ?? ''
-                == 'adac93ac-951f-4f42-ab32-79f4faeabb50' &&
+            ($item->permanentLoanType->id ?? '') == 'adac93ac-951f-4f42-ab32-79f4faeabb50' &&
             $item->status->name == 'Available' &&
             !Regex::ONLINE($locationName)
         ) {
@@ -254,7 +253,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $item,
                     $number,
                     $dueDateValue,
-                    $tempLoanType ?? $boundWithRecords ?? [] // MSU
+                    $boundWithRecords ?? [],
+                    $tempLoanType // MSU
                 );
                 // MSU Start
                 // PC-872: Filter out LoM holdings
@@ -277,16 +277,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 $sortNeeded
                     ? $this->sortHoldings($nextBatch, $vufindItemSort) : $nextBatch
             );
-
-            // MSU Start
-            // Add any bound items associated with the holding
-            $item_ids = array_column($items, 'item_id');
-            foreach ($this->getBoundwithHoldings($holding, $bibId) as $bound_item) {
-                if (!in_array($bound_item['item_id'], $item_ids)) {
-                    array_push($items, $bound_item);
-                }
-            }
-            // MSU End
         }
         // MSU Start
         // Sort by location, enumchron (volume) and copy number
@@ -303,60 +293,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
             'holdings' => $items,
             'electronic_holdings' => [],
         ];
-    }
-
-    /**
-     * Get the bound-with items associated with the instance ID
-     *
-     * @param object $bound_holding Holding data to use to populate the item with
-     * @param string $bibId         Bib-level id
-     *
-     * @return array An array of associative holding arrays
-     */
-    public function getBoundwithHoldings($bound_holding, $bibId)
-    {
-        $showDueDate = $this->config['Availability']['showDueDate'] ?? true;
-        $showTime = $this->config['Availability']['showTime'] ?? false;
-        $maxNumDueDateItems = $this->config['Availability']['maxNumberItems'] ?? 5;
-        $dueDateItemCount = 0;
-
-        $items = [];
-
-        $query = [
-            'query' => 'holdingsRecordId=="' . $bound_holding->id . '"',
-        ];
-        $holdingDetails = $this->getHoldingDetailsForItem($bound_holding);
-        foreach (
-            $this->getPagedResults(
-                'boundWithParts',
-                '/inventory-storage/bound-with-parts',
-                $query
-            ) as $bound
-        ) {
-            $response = $this->makeRequest(
-                'GET',
-                '/item-storage/items/' . $bound->itemId
-            );
-            $bound_item = json_decode($response->getBody());
-            $number = $bound_item->copyNumber ?? null;
-            $dueDateValue = '';
-            if (
-                $bound_item->status->name == 'Checked out'
-                && $showDueDate
-                && $dueDateItemCount < $maxNumDueDateItems
-            ) {
-                $dueDateValue = $this->getDueDate($bound_item->id, $showTime);
-                $dueDateItemCount++;
-            }
-            $items[] = $this->formatHoldingItem(
-                $bibId,
-                $holdingDetails,
-                $bound_item,
-                $number,
-                $dueDateValue
-            );
-        }
-        return $items;
     }
 
     /**

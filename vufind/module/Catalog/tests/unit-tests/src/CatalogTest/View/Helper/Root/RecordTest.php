@@ -16,9 +16,12 @@ namespace CatalogTest\View\Helper\Root;
 
 use Catalog\View\Helper\Root\Record;
 use Laminas\Config\Config;
+use Laminas\View\Helper\ServerUrl;
+use Laminas\View\Helper\Url;
 use Laminas\View\Resolver\ResolverInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use VuFind\Cover\Loader;
+use VuFind\ILS\Logic\AvailabilityStatus;
 use VuFind\RecordDriver\AbstractBase as RecordDriver;
 use VuFind\Tags\TagsService;
 use VuFind\View\Helper\Root\Context;
@@ -136,7 +139,8 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusWithNoHolding()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('Unavailable (Unknown)', $record->getStatus(null, false));
+        $holding = null;
+        $this->assertEquals('Unavailable (Unknown)', $record->getStatus($holding, false));
     }
 
     /**
@@ -147,7 +151,8 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusWithMissingKey()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('Unavailable (Unknown)', $record->getStatus([], false));
+        $holding = [];
+        $this->assertEquals('Unavailable (Unknown)', $record->getStatus($holding, false));
     }
 
     /**
@@ -158,7 +163,8 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusAvailable()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('Available', $record->getStatus(['status' => 'Available'], false));
+        $holding = ['availability' => new AvailabilityStatus(0, 'Available')];
+        $this->assertEquals('Available', $record->getStatus($holding, false));
     }
 
     /**
@@ -169,7 +175,8 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusUnavailable()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('Unavailable (In process)', $record->getStatus(['status' => 'In process'], false));
+        $holding = ['availability' => new AvailabilityStatus(0, 'In process')];
+        $this->assertEquals('Unavailable (In process)', $record->getStatus($holding, false));
     }
 
     /**
@@ -180,7 +187,8 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusRestricted()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('Library Use Only', $record->getStatus(['status' => 'Restricted'], false));
+        $holding = ['availability' => new AvailabilityStatus(0, 'Restricted')];
+        $this->assertEquals('Library Use Only', $record->getStatus($holding, false));
     }
 
     /**
@@ -191,22 +199,14 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusCheckedOut()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals(
-            'Checked Out (Awaiting pickup)',
-            $record->getStatus(['status' => 'Awaiting pickup'], false)
-        );
-        $this->assertEquals(
-            'Checked Out (Awaiting delivery)',
-            $record->getStatus(['status' => 'Awaiting delivery'], false)
-        );
-        $this->assertEquals(
-            'Checked Out (In transit)',
-            $record->getStatus(['status' => 'In transit'], false)
-        );
-        $this->assertEquals(
-            'Checked Out (Paged)',
-            $record->getStatus(['status' => 'Paged'], false)
-        );
+        $holding = ['availability' => new AvailabilityStatus(0, 'Awaiting pickup')];
+        $this->assertEquals('Checked Out (Awaiting pickup)', $record->getStatus($holding, false));
+        $holding = ['availability' => new AvailabilityStatus(0, 'Awaiting delivery')];
+        $this->assertEquals('Checked Out (Awaiting delivery)', $record->getStatus($holding, false));
+        $holding = ['availability' => new AvailabilityStatus(0, 'In transit')];
+        $this->assertEquals('Checked Out (In transit)', $record->getStatus($holding, false));
+        $holding = ['availability' => new AvailabilityStatus(0, 'Paged')];
+        $this->assertEquals('Checked Out (Paged)', $record->getStatus($holding, false));
     }
 
     /**
@@ -217,7 +217,11 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusReserve()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('On Reserve', $record->getStatus(['status' => 'Available', 'reserve' => 'Y'], false));
+        $holding = [
+            'availability' => new AvailabilityStatus(0, 'Available'),
+            'reserve' => 'Y',
+        ];
+        $this->assertEquals('On Reserve', $record->getStatus($holding, false));
     }
 
     /**
@@ -228,7 +232,8 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusUnknown()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('Unknown status (test)', $record->getStatus(['status' => 'test'], false));
+        $holding = ['availability' => new AvailabilityStatus(0, 'test')];
+        $this->assertEquals('Unknown status (test)', $record->getStatus($holding, false));
     }
 
     /**
@@ -239,10 +244,11 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusReturnDate()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals(
-            'Checked Out (Paged) - 1/1/2000',
-            $record->getStatus(['status' => 'Paged', 'returnDate' => '1/1/2000'], false)
-        );
+        $holding = [
+            'availability' => new AvailabilityStatus(0, 'Paged'),
+            'returnDate' => '1/1/2000',
+        ];
+        $this->assertEquals('Checked Out (Paged) - 1/1/2000', $record->getStatus($holding, false));
     }
 
     /**
@@ -253,10 +259,11 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusDueDate()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals(
-            'Checked Out (Paged) - Due:1/1/2000',
-            $record->getStatus(['status' => 'Paged', 'duedate' => '1/1/2000'], false)
-        );
+        $holding = [
+            'availability' => new AvailabilityStatus(0, 'Paged'),
+            'duedate' => '1/1/2000',
+        ];
+        $this->assertEquals('Checked Out (Paged) - Due: 1/1/2000', $record->getStatus($holding, false));
     }
 
     /**
@@ -267,10 +274,11 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusLoanType()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals(
-            'Checked Out (Paged) (LoanType)',
-            $record->getStatus(['status' => 'Paged', 'temporary_loan_type' => 'LoanType'], false)
-        );
+        $holding = [
+            'availability' => new AvailabilityStatus(0, 'Paged'),
+            'temporary_loan_type' => 'LoanType',
+        ];
+        $this->assertEquals('Checked Out (Paged) (LoanType)', $record->getStatus($holding, false));
     }
 
     /**

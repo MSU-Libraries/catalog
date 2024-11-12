@@ -84,11 +84,12 @@ class SAML extends \VuFind\Auth\AbstractBase
     /**
      * Constructor
      *
-     * @param \Laminas\Session\ManagerInterface    $sessionManager Session
-     *                                                             manager
-     * @param \Laminas\Http\PhpEnvironment\Request $request        Http
-     *                                                             request
-     *                                                             object
+     * @param \VuFind\Auth\ILSAuthenticator        $ilsAuthenticator Not used
+     * @param \Laminas\Session\ManagerInterface    $sessionManager   Session
+     *                                                               manager
+     * @param \Laminas\Http\PhpEnvironment\Request $request          Http
+     *                                                               request
+     *                                                               object
      */
     public function __construct(
         protected ILSAuthenticator $ilsAuthenticator,

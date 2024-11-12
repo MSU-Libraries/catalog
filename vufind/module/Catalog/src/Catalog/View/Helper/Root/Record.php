@@ -73,7 +73,6 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
      */
     private $libkeyAccessToken;
 
-
     /**
      * Constructor
      *
@@ -128,7 +127,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
                 $found &= preg_match($mat['desc'], $link['desc']);
             }
             if (isset($mat['url'])) {
-                $found &= preg_match($mat['url'], $link['url'] ?? null);
+                $found &= preg_match($mat['url'], $link['url'] ?? '');
             }
             if ($found) {
                 $label = $mat['label'];
@@ -214,10 +213,10 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             $transEsc = $this->getView()->plugin('transEsc');
         }
 
-        $status = $holding['availability']->getStatusDescription() ?? 'Unknown';
+        $status = isset($holding['availability']) ? $holding['availability']->getStatusDescription() : 'Unknown';
+        $statusSecondPart = '';
         if (Regex::SPEC_COLL($holding['location'] ?? '')) {
             $statusFirstPart = 'Unavailable';
-            $statusSecondPart = '';
             $availability = false;
         } elseif (
             in_array($status, [
@@ -235,15 +234,9 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             $availability = false;
         } elseif ($status === 'Checked out') {
             $statusFirstPart = 'Checked Out';
-            $statusSecondPart = '';
             $availability = false;
-        } elseif ($status === 'Available') {
-            $statusFirstPart = 'Available';
-            $statusSecondPart = '';
-            $availability = true;
-        } elseif ($status == 'Restricted') {
+        } elseif ($status === 'Restricted') {
             $statusFirstPart = 'Library Use Only';
-            $statusSecondPart = '';
             $availability = AvailabilityStatusInterface::STATUS_UNCERTAIN;
         } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
             $statusFirstPart = 'Unknown status';
@@ -251,7 +244,9 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             $availability = AvailabilityStatusInterface::STATUS_UNKNOWN;
         } elseif (isset($holding['reserve']) && $holding['reserve'] === 'Y') {
             $statusFirstPart = 'On Reserve';
-            $statusSecondPart = '';
+            $availability = true;
+        } elseif ($status === 'Available') {
+            $statusFirstPart = 'Available';
             $availability = true;
         } else {
             $statusFirstPart = 'Unknown status';
@@ -291,10 +286,10 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
         }
         if ($holding['duedate'] ?? false) {
             $due = isset($transEsc) ? $transEsc('Due') : 'Due';
-            $suffix = $suffix . ' - ' . $due . ': ' . $holding['duedate'];
+            $suffix .= ' - ' . $due . ': ' . $holding['duedate'];
         }
         if ($holding['temporary_loan_type'] ?? false) {
-            $suffix = $suffix . ' (' . $holding['temporary_loan_type'] . ')';
+            $suffix .= ' (' . $holding['temporary_loan_type'] . ')';
         }
         return $suffix;
     }

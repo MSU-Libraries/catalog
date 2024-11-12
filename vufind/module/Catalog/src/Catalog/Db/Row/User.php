@@ -42,4 +42,3 @@ class User extends \VuFind\Db\Row\User
         return $this->cat_pass_enc ?? null;
     }
 }
-

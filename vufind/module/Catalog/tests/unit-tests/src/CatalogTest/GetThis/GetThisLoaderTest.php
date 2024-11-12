@@ -297,7 +297,7 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusCheckedOutDueDate()
     {
         $this->assertEquals(
-            'Checked Out (In transit) - Due:12/12/2000',
+            'Checked Out (In transit) - Due: 12/12/2000',
             $this->callMethod($this->getHandler(), 'getStatus', ['012'])
         );
     }

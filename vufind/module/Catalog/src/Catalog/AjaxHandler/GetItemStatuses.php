@@ -16,8 +16,8 @@ namespace Catalog\AjaxHandler;
 
 use Laminas\Mvc\Controller\Plugin\Params;
 use VuFind\Exception\ILS as ILSException;
-
 use VuFind\ILS\Logic\AvailabilityStatusInterface;
+
 use function count;
 use function is_array;
 
@@ -58,8 +58,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
                 $results[] = [
                     [
                         'id' => $id,
-                        // MSUL: Alternate message on failure
-                        'error' => 'Holding data is currently unavailable.',
+                        'error' => 'Holding data is currently unavailable.',// MSUL: Alternate message on failure
                     ],
                 ];
             }
