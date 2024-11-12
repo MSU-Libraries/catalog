@@ -12,7 +12,7 @@
         <field name="title_exactish" type="exactish" indexed="true" stored="true" multiValued="false"/>
         <field name="title_browse" type="string" indexed="true" stored="true" multiValued="true"/>
         <field name="title_browse_sort" type="string" indexed="true" stored="true" multiValued="true"/>
-        <!--<field name="title_fullStr" deleteElement="true"/>-->
+        <field name="title_fullStr" deleteElement="true"/>
         <field name="callnumber-label" type="string" indexed="true" stored="true" multiValued="true"/>
     </fields>
     <copyField source="title" dest="title_exactish"/>
