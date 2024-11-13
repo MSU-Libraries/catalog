@@ -45,7 +45,7 @@
   <?php endif; ?>
   <div class="media-body">
 
-    <h1<?=$this->schemaOrg()->getAttributes(['property' => 'name'])?>><?=$this->escapeHtml($this->driver->getShortTitle() . ' ' . $this->driver->getSubtitle() . ' ' . $this->driver->getTitleSection())?></h1>
+    <h1<?=$this->schemaOrg()->getAttributes(['property' => 'name'])?>><?=$this->escapeHtml($this->driver->getShortTitle() . ' : ' . $this->driver->getSubtitle() . ' ' . $this->driver->getTitleSection())?></h1><?php /** MSU add a colon */?>
     <?php //MSUL customization to add hidden fields used in support of PC-606 ?>
     <input type='hidden' id='title_short' value='<?= $this->escapeHtml($this->driver->getRawData()['title_short'] ?? '')?>'/>
     <input type='hidden' id='id' value='<?= $this->escapeHtml($this->driver->getRawData()['id'] ?? '')?>'/>
