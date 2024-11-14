@@ -1,7 +1,7 @@
 <?php
     // Set up convenience variables:
     $account = $this->auth()->getManager();
-    $user = $account->isLoggedIn();
+    $user = $account->getUserObject();
     $openUrl = $this->openUrl($this->driver, 'holdings');
     $openUrlActive = $openUrl->isActive();
     $doi = $this->doi($this->driver, 'holdings');
@@ -25,7 +25,7 @@
     $this->headTitle($this->translate('Holdings') . ': ' . $this->driver->getBreadcrumb());
 ?>
 
-<?=$this->context($this)->renderInContext('librarycards/selectcard.phtml', ['user' => $this->auth()->isLoggedIn()]); ?>
+<?=$this->context($this)->renderInContext('librarycards/selectcard.phtml', compact('user')); ?>
 
 <?php if (!empty($holdings['blocks'])):?>
   <div id="account-block-msg" class="alert alert-danger">
@@ -39,11 +39,18 @@
   <?php if ($account->loginEnabled() && $offlineMode != 'ils-offline'): ?>
     <?php if (!$user): ?>
       <div class="alert alert-info">
-        <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getTabUrl($this->driver, 'Holdings', ['login' => 'true', 'catalogLogin' => 'true']))?>" data-lightbox><?=$this->transEsc('hold_login')?></a>
+        <a id="hold-login" href="<?=$this->serverUrl($this->url('myresearch-completelogin'))?>" data-lightbox><?=$this->transEsc('hold_login')?></a>
       </div>
-    <?php elseif (!$user->cat_username): ?>
+    <?php elseif (!$user->getCatUsername()): ?>
       <div class="alert alert-info">
-        <?=$this->translate('hold_profile_html', ['%%url%%' => $this->escapeHtmlAttr($this->recordLinker()->getTabUrl($this->driver, 'Holdings', ['catalogLogin' => 'true']))])?>
+        <?php
+          // Add a data-lightbox attribute to the link in the translation; we do this here to keep
+          // the HTML in the language files as simple/generic/future-proof as possible.
+          $catalogLoginUrl = $this->recordLinker()
+            ->getTabUrl($this->driver, 'Holdings', ['catalogLogin' => 'true']);
+          $tokens = ['%%url%%' => $this->escapeHtmlAttr($catalogLoginUrl)];
+          echo str_replace('<a ', '<a data-lightbox ', $this->translate('hold_profile_html', $tokens));
+        ?>
       </div>
     <?php endif; ?>
   <?php endif; ?>
@@ -58,12 +65,12 @@
 <?php if (!empty($urls) || $openUrlActive || $doiActive): ?>
   <h2><?=$this->transEsc('Internet')?></h2>
   <?php if (!empty($urls)): ?>
+    <?php foreach ($urls as $current): ?>
     <?php
-        foreach ($urls as $current):
-          $current['url'] ??= null;
-          $current['desc'] ??= '';
+          $current['url'] ??= null; /** MSU */
+          $current['desc'] ??= ''; /** MSU */
     ?>
-        <a href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url']))?>"><?=$this->escapeHtml($current['desc'])?></a><br>
+      <a href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url']))?>"><?=$this->escapeHtml($current['desc'])?></a><br>
     <?php endforeach; ?>
   <?php endif; ?>
   <?php if ($openUrlActive): ?><?=$openUrl->renderTemplate()?><?php endif; ?>
@@ -91,10 +98,10 @@
 <?php
   $truncateSettings = [
     'rows' => $this->config()->getHoldingsItemLimit(),
-    'btn-class' => 'btn-primary',
+    'btn-class' => 'btn-primary', /** MSU */
   ];
 ?>
-<table class="truncate-field" data-truncate="<?=$this->htmlSafeJsonEncode($truncateSettings)?>">
+<table class="table table-striped truncate-field holdings-table" data-truncate="<?=$this->htmlSafeJsonEncode($truncateSettings)?>">
   <caption class="sr-only"><?=$this->transEsc('holdings_details_from', ['%%location%%' => $this->transEsc($holding['location'])]) ?></caption>
   <?php $callNos = $this->tab->getUniqueCallNumbers($holding['items'], true); ?>
   <?php if (!empty($callNos)): ?>
@@ -107,7 +114,7 @@
         <?php else: ?>
           <?=$this->escapeHtml($callNo['display'])?>
         <?php endif; ?>
-        <?= $this->locationNotices(array_column($holding['items'], null, 'callnumber')[$callNo['callnumber']]) ?>
+        <?= $this->locationNotices(array_column($holding['items'], null, 'callnumber')[$callNo['callnumber']]) /** MSU */ ?>
         <br>
       <?php endforeach; ?>
     </td>
@@ -129,12 +136,12 @@
         try {
             echo $this->context($this)->renderInContext(
                 'RecordTab/holdingsils/' . $this->tab->getTemplate() . '.phtml',
-                ['holding' => $row, 'record' => $this->record($this->driver)]
+                ['holding' => $row, 'callNos' => $callNos, 'record' => $this->record($this->driver)] /** MSU */
             );
         } catch (Exception $e) {
             echo $this->context($this)->renderInContext(
                 'RecordTab/holdingsils/standard.phtml',
-                ['holding' => $row, 'record' => $this->record($this->driver)]
+                ['holding' => $row, 'callNos' => $callNos, 'record' => $this->record($this->driver)] /** MSU */
             );
         }
     ?>
@@ -157,13 +164,13 @@
 <?php $history = $this->driver->getRealTimeHistory(); ?>
 <?php if (is_array($history) && !empty($history)): ?>
   <h2><?=$this->transEsc('Most Recent Received Issues')?></h2>
-  <table>
+  <table><?php /** MSU */ ?>
     <?php foreach ($history as $row): ?>
       <tr><td><?=$this->escapeHtml($row['issue'])?></td></tr>
     <?php endforeach; ?>
   </table>
 <?php endif; ?>
-<?php # PC-927 Add additional notes fields ?>
+<?php /** MSU START */ # PC-927 Add additional notes fields ?>
 <?php if (!empty($restrictions = $this->driver->getAccessRestrictions())): ?>
   <h2><?=$this->transEsc('Access Restrictions')?></h2>
   <?php foreach ($restrictions as $restriction): ?>
@@ -187,4 +194,4 @@
   <?php foreach ($frequencies as $frequency): ?>
     <span><?= is_array($frequency) && array_key_exists('note', $frequency) ? $frequency['note'] : $frequency ?></span>
   <?php endforeach; ?>
-<?php endif; ?>
+<?php endif;  /** MSU END */?>

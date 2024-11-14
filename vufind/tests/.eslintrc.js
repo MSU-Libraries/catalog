@@ -3,7 +3,10 @@ module.exports = {
     "ecmaVersion": 8
   },
   plugins: ["no-jquery"],
-  ignorePatterns: ["themes/**/vendor/**"],
+  ignorePatterns: [
+    "themes/**/vendor/**",
+    "themes/**/node_modules/**"
+  ],
   extends: ["eslint:recommended", "plugin:no-jquery/deprecated"],
   env: {
     "browser": true,

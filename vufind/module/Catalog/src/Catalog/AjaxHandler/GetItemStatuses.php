@@ -16,6 +16,7 @@ namespace Catalog\AjaxHandler;
 
 use Laminas\Mvc\Controller\Plugin\Params;
 use VuFind\Exception\ILS as ILSException;
+use VuFind\ILS\Logic\AvailabilityStatusInterface;
 
 use function count;
 use function is_array;
@@ -57,8 +58,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
                 $results[] = [
                     [
                         'id' => $id,
-                        // MSUL: Alternate message on failure
-                        'error' => 'Holding data is currently unavailable.',
+                        'error' => 'Holding data is currently unavailable.',// MSUL: Alternate message on failure
                     ],
                 ];
             }
@@ -76,15 +76,6 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
         // need special handling.
         $missingIds = array_flip($ids);
 
-        // Load messages for response:
-        $messages = [
-            'available' => $this->renderer->render('ajax/status-available.phtml'),
-            'unavailable' =>
-                $this->renderer->render('ajax/status-unavailable.phtml'),
-            'uncertain' => $this->renderer->render('ajax/status-uncertain.phtml'),
-            'unknown' => $this->renderer->render('ajax/status-unknown.phtml'),
-        ];
-
         // Load callnumber and location settings:
         $callnumberSetting = $this->config->Item_Status->multiple_call_nos ?? 'msg';
         $locationSetting = $this->config->Item_Status->multiple_locations ?? 'msg';
@@ -100,18 +91,22 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
             if (count($record)) {
                 // Check for errors
                 if (!empty($record[0]['error'])) {
+                    $unknownStatus = $this->availabilityStatusManager->createAvailabilityStatus(
+                        AvailabilityStatusInterface::STATUS_UNKNOWN
+                    );
                     $current = $this
-                        ->getItemStatusError($record, $messages['unknown']);
+                        ->getItemStatusError(
+                            $record,
+                            $this->getAvailabilityMessage($unknownStatus)
+                        );
                 } elseif ($locationSetting === 'group') {
                     $current = $this->getItemStatusGroup(
                         $record,
-                        $messages,
                         $callnumberSetting
                     );
                 } else {
                     $current = $this->getItemStatus(
                         $record,
-                        $messages,
                         $locationSetting,
                         $callnumberSetting
                     );
@@ -121,7 +116,8 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
                 if ($showFullStatus && empty($record[0]['error'])) {
                     $current['full_status'] = $this->renderFullStatus(
                         $record,
-                        compact('searchId')
+                        $current,
+                        compact('searchId', 'current'),
                     );
                 }
                 $current['record_number'] = array_search($current['id'], $ids);
@@ -134,10 +130,11 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
 
         // If any IDs were missing, send back appropriate dummy data
         foreach ($missingIds as $missingId => $recordNumber) {
+            $availabilityStatus = $this->availabilityStatusManager->createAvailabilityStatus(false);
             $statuses[] = [
                 'id'                   => $missingId,
                 'availability'         => 'false',
-                'availability_message' => $messages['unavailable'],
+                'availability_message' => $this->getAvailabilityMessage($availabilityStatus),
                 'location'             => $this->translate('Unknown'),
                 'locationList'         => false,
                 'reserve'              => 'false',

@@ -1,4 +1,5 @@
 <?php
+/** MSU Start */
 $checkboxFilters = $this->checkboxFilters;
 $filterList = $this->filterList;
 $filterCount = $this->searchbox()->getFilterCount($this->checkboxFilters, $this->filterList);
@@ -14,6 +15,7 @@ if ($filterCount == 1) {
 }
 
 if (!$skip) {
+/** MSU End */
       if (!isset($this->params)) {
         // No current search, use last search in memory
         $params = $this->searchMemory()->getLastSearchParams($this->searchClassId);
@@ -109,7 +111,7 @@ if (!$skip) {
                   ? $urlQuery->removeFacet($value['field'], $value['value'], $value['operator'])
                   : $this->searchMemory()->getEditLink($this->searchClassId, 'removeFacet', $value);
               ?>
-            <a class="filter-value filters-<?=$operatorClass?>" href="<?=$removeLink?>">
+            <a class="<?=$dropdown ? 'dropdown-item ' : ''?>filter-value filters-<?=$operatorClass?>" href="<?=$removeLink?>">
               <span class="sr-only">
                 <?=$this->translate('Remove filter') ?>
               </span>
@@ -143,7 +145,7 @@ if (!$skip) {
       <?php // Normal view ?>
       <div class="active-filters hidden-xs">
         <span class="sr-only"><?=$this->transEscAttr('page_reload_on_deselect_hint') ?></span>
-        <?php if ($resetLink && $options->getRetainFilterSetting()): ?>
+        <?php if ($resetLink && $options->shouldDisplayResetFilters()): ?>
           <a class="reset-filters-btn" href="<?=$resetLink?>"><?=$this->transEsc('Remove Filters')?></a>
         <?php elseif ($advancedSearch): ?>
           <p class="adv_search_filters"><?=$this->transEsc('adv_search_filters')?>:</p>
@@ -158,8 +160,8 @@ if (!$skip) {
       <div class="active-filters visible-xs">
         <span class="sr-only"><?=$this->transEscAttr('page_reload_on_deselect_hint') ?></span>
         <div class="filters-toggle-bar">
-          <?php if ($resetLink && $options->getRetainFilterSetting()): ?>
-            <a class="reset-filters-btn" href="<?=$resetLink?>"><?=$this->transEsc('Remove Filters')?></a>
+          <?php if ($resetLink && $options->shouldDisplayResetFilters()): ?>
+            <a class="reset-filters-btn" href="<?=$resetLink?>"><?=$this->transEsc('Remove Filters') /** MSU */ ?></a>
           <?php endif; ?>
           <div class="filters-toggle collapsed" data-toggle="collapse" data-target="#active-filters-mobile">
             <?=$this->transEsc('show_filters_html', ['%%count%%' => $filterCount])?>
@@ -173,4 +175,4 @@ if (!$skip) {
       </div>
     <?php endif; ?>
     <?php
-}
+} /** MSU */

@@ -1,4 +1,4 @@
-/* https://github.com/vufind-org/autocomplete.js (v2.1.7) (2023-06-21) */
+/* https://github.com/vufind-org/autocomplete.js (v2.1.10) (2024-06-06) */
 function Autocomplete(_settings) {
   const _DEFAULTS = {
     delay: 250,
@@ -28,6 +28,8 @@ function Autocomplete(_settings) {
       timeout = setTimeout(function () {
         func.apply(context, args);
       }, delay);
+
+      return timeout;
     };
   }
 
@@ -36,6 +38,9 @@ function Autocomplete(_settings) {
   }
 
   function _align(input) {
+    if (input === false) {
+      return;
+    }
     const inputBox = input.getBoundingClientRect();
     list.style.minWidth = inputBox.width + "px";
     list.style.top = inputBox.bottom + window.scrollY + "px";
@@ -62,17 +67,19 @@ function Autocomplete(_settings) {
     list.classList.add("open");
   }
 
-  function _hide(e) {
-    if (
-      typeof e !== "undefined" &&
-      !!e.relatedTarget &&
-      e.relatedTarget.hasAttribute("href")
-    ) {
-      return;
-    }
+  let lastCB = null;
+  let debounceTimeout;
+  function _hide() {
     list.classList.remove("open");
+    list.innerHTML = "";
+
+    clearTimeout(debounceTimeout);
     _currentIndex = -1;
+    if (lastInput) {
+      lastInput.setAttribute('aria-expanded', 'false');
+    }
     lastInput = false;
+    lastCB = null;
   }
 
   function _selectItem(item, input) {
@@ -80,9 +87,7 @@ function Autocomplete(_settings) {
       return;
     }
     // Broadcast
-    var event = document.createEvent("CustomEvent");
-    // CustomEvent: name, canBubble, cancelable, detail
-    event.initCustomEvent("ac-select", true, true, item);
+    var event = new CustomEvent("ac-select", { bubbles: true, cancelable: true, detail: item });
     input.dispatchEvent(event);
     // Copy value
     if (typeof item === "string" || typeof item === "number") {
@@ -168,24 +173,35 @@ function Autocomplete(_settings) {
     _currentIndex = -1;
   }
 
-  let lastCB;
   function _search(handler, input) {
     if (input.value.length < settings.minInputLength) {
       _hide();
       return;
     }
 
+    let loadingEl = _renderItem({ _header: settings.loadingString }, input);
+    list.innerHTML = loadingEl.outerHTML;
+
     let thisCB = new Date().getTime();
     lastCB = thisCB;
 
     handler(input.value, function callback(items) {
-      if (thisCB !== lastCB || items === false || items.length === 0) {
+      const outdatedHandler = thisCB !== lastCB;
+      if (outdatedHandler) {
+        // We should just ignore outdated handler callbacks; newer code will do
+        // the right thing, and taking action based on an old request will only
+        // cause problems.
+        return;
+      }
+      if (!items || items.length === 0) {
         _hide();
         return;
       }
       _searchCallback(items, input);
       _show(input);
       _align(input);
+      // Set aria-expanded here so that the load indicator isn't marked expanded
+      input.setAttribute('aria-expanded', 'true');
     });
   }
 
@@ -252,6 +268,7 @@ function Autocomplete(_settings) {
     if (!input) {
       return false;
     }
+
     if (typeof handler === "undefined") {
       throw new Error(
         "Autocomplete needs handler to return items based on a query: function(query, callback) {}"
@@ -268,12 +285,12 @@ function Autocomplete(_settings) {
         document.body.appendChild(list);
         window.addEventListener(
           "resize",
-          function acresize() {
-            if (lastInput === false) {
-              return;
-            }
-            _align(lastInput);
-          },
+          () => _align(lastInput),
+          false
+        );
+        window.addEventListener(
+          "scroll",
+          () => _align(lastInput),
           false
         );
       }
@@ -284,15 +301,25 @@ function Autocomplete(_settings) {
     list.setAttribute("aria-live", "assertive"); // msul added autocomplete suggestions screen reader
     input.setAttribute("role", "combobox");
     input.setAttribute("aria-autocomplete", "both");
+    input.setAttribute('aria-expanded', 'false');
     input.setAttribute("aria-controls", list.getAttribute("id"));
     input.setAttribute("enterkeyhint", "search"); // phone keyboard hint
     input.setAttribute("autocapitalize", "off");  // disable browser tinkering
     input.setAttribute("autocomplete", "off");    // ^
-    input.setAttribute("autocorrect", "off");     // ^
     input.setAttribute("spellcheck", "false");    // ^
+    if (typeof input.autocorrect !== 'undefined') {
+      input.setAttribute("autocorrect", "off");     // ^ only with Safari
+    }
 
     // Activation / De-activation
-    input.addEventListener("focus", (_) => _search(handler, input), false);
+    if (input.getAttribute("autofocus") !== null) {
+      // ignore the first autofocus
+      input.addEventListener("focus", () => {
+        input.addEventListener("focus", () => _search(handler, input));
+      }, { once: true });
+    } else {
+      input.addEventListener("focus", () => _search(handler, input));
+    }
     input.addEventListener("blur", _hide, false);
 
     // Input typing
@@ -300,8 +327,6 @@ function Autocomplete(_settings) {
     input.addEventListener(
       "input",
       (event) => {
-        let loadingEl = _renderItem({ _header: settings.loadingString }, input);
-        list.innerHTML = loadingEl.outerHTML;
         _show(input);
         _align(input);
 
@@ -311,7 +336,7 @@ function Autocomplete(_settings) {
         ) {
           _search(handler, input);
         } else {
-          debounceSearch(handler, input);
+          debounceTimeout = debounceSearch(handler, input);
         }
       },
       false
@@ -323,6 +348,11 @@ function Autocomplete(_settings) {
       (event) => _keydown(handler, input, event),
       false
     );
+
+    input.ac = {
+      show: _show,
+      hide: _hide,
+    }
 
     return input;
   };
