@@ -43,17 +43,16 @@ class MyResearchController extends \VuFind\Controller\MyResearchController
             || $this->params()->fromQuery('auth_method')
         ) {
             try {
-                if (!$this->getAuthManager()->isLoggedIn()) {
+                if (!$this->getAuthManager()->getIdentity()) {
                     $this->getAuthManager()->login($this->getRequest());
                     // Return early to avoid unnecessary processing if we are being
-                    // called from login lightbox and don't have a followup action.
+                    // called from login lightbox and don't have a followup action or
+                    // followup is set to referrer.
                     if (
                         $this->params()->fromPost('processLogin')
                         && $this->inLightbox()
                         // (MSULib) No longer checking for lack of followup url, as we always set it
                     ) {
-                        // (MSULib) But we should clear the followup url if we're in a lightbox to
-                        //          prevent a double-up on the redirect
                         $this->clearFollowupUrl();
                         return $this->getRefreshResponse();
                     }
@@ -64,7 +63,14 @@ class MyResearchController extends \VuFind\Controller\MyResearchController
         }
 
         // Not logged in?  Force user to log in:
-        if (!$this->getAuthManager()->isLoggedIn()) {
+        if (!$this->getAuthManager()->getIdentity()) {
+            if (
+                $this->followup()->retrieve('lightboxParent')
+                && $url = $this->getAndClearFollowupUrl(true)
+            ) {
+                return $this->redirect()->toUrl($url);
+            }
+
             // Allow bypassing of post-login redirect
             if ($this->params()->fromQuery('redirect', true)) {
                 $this->setFollowupUrlToReferer();
@@ -73,14 +79,8 @@ class MyResearchController extends \VuFind\Controller\MyResearchController
         }
         // Logged in?  Forward user to followup action
         // or default action (if no followup provided):
-        if ($url = $this->getFollowupUrl()) {
-            $this->clearFollowupUrl();
-            // If a user clicks on the "Your Account" link, we want to be sure
-            // they get to their account rather than being redirected to an old
-            // followup URL. We'll use a redirect=0 GET flag to indicate this:
-            if ($this->params()->fromQuery('redirect', true)) {
-                return $this->redirect()->toUrl($url);
-            }
+        if ($url = $this->getAndClearFollowupUrl(true)) {
+            return $this->redirect()->toUrl($url);
         }
 
         $config = $this->getConfig();
@@ -104,14 +104,14 @@ class MyResearchController extends \VuFind\Controller\MyResearchController
     public function userloginAction()
     {
         // Don't log in if already logged in!
-        if ($this->getAuthManager()->isLoggedIn()) {
+        if ($this->getAuthManager()->getIdentity()) {
             return $this->inLightbox()  // different behavior for lightbox context
                 ? $this->getRefreshResponse()
                 : $this->redirect()->toRoute('home');
         }
         $this->clearFollowupUrl();
-        // Set followup only if we're not in lightbox since it has the short-circuit
-        // for reloading current page:
+        // Set followup with the isReferrer flag so that the post-login process
+        // can decide whether to use it:
         // (MSULib) Always set follow up URL, as we might end up linking to external SAML
         $this->setFollowupUrlToReferer();
         if ($si = $this->getSessionInitiator()) {

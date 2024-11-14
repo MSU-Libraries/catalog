@@ -18,7 +18,7 @@ return [
   'controllers' => [
     'factories' => [
       Catalog\Controller\RecordController::class => VuFind\Controller\AbstractBaseWithConfigFactory::class,
-      Catalog\Controller\MyResearchController::class => VuFind\Controller\AbstractBaseFactory::class,
+      Catalog\Controller\MyResearchController::class => VuFind\Controller\MyResearchControllerFactory::class,
       // TODO PC-895 To remove after PR - START
       Catalog\Controller\SearchController::class => VuFind\Controller\AbstractBaseFactory::class,
       Catalog\Controller\EdsController::class => VuFind\Controller\AbstractBaseFactory::class,
@@ -126,6 +126,14 @@ return [
         'factories' => [
           'EDS' => Catalog\Search\Factory\EdsBackendFactory::class,
         ],
+      ],
+      'db_row' => [ // TODO Remove after upgrade to 10.1.1 - Fix login bug
+          'factories' => [
+              Catalog\Db\Row\User::class => VuFind\Db\Row\UserFactory::class,
+          ],
+          'aliases' => [
+              VuFind\Db\Row\User::class => Catalog\Db\Row\User::class,
+          ],
       ],
     ],
   ],

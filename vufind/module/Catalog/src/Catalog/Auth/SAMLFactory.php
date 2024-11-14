@@ -33,6 +33,7 @@ use Laminas\ServiceManager\Exception\ServiceNotCreatedException;
 use Laminas\ServiceManager\Exception\ServiceNotFoundException;
 use Psr\Container\ContainerExceptionInterface as ContainerException;
 use Psr\Container\ContainerInterface;
+use VuFind\Auth\ILSAuthenticator;
 
 /**
  * Factory for Shibboleth authentication module.
@@ -69,6 +70,7 @@ class SAMLFactory implements \Laminas\ServiceManager\Factory\FactoryInterface
         }
         $request = $container->get('Request');
         return new $requestedName(
+            $container->get(ILSAuthenticator::class),
             $container->get(\Laminas\Session\SessionManager::class),
             $request
         );
