@@ -282,6 +282,19 @@ Alternatively, you can also modify the cron entry (or add a temporary additional
 container for the `cron-reserves.sh` command to run at an earlier time. The benefit of this would be it would
 save logs to `/mnt/logs/vufind/reserves_latest.log` and track them in the Monitoring site.
 
+### Adding generated call numbers
+This should be done after each full import (FOLIO + HLM) when data was reset, in the `solr_solr` container:
+```
+python3 ./add_generated_call_numbers.py
+```
+Partial call numbers are added to `callnumber-label` for records that didn't have any when the
+`call_numbers.json` file was generated.
+It is possible an error occurs if a record has been deleted since the `call_numbers.json` file was generated.
+In this case the file should be edited to remove the offending entry.
+
+Note that the call numbers in `/mnt/shared/call-numbers/call_numbers.json` are meant for beta/preview/prod.
+There is another file at `/mnt/shared/call-numbers/test_call_numbers.json` that can be used for testing in dev.
+
 ## Ignoring certain HLM files
 If your EBSCO FTP server is set up in a way where it contains all of the sets ever generated for you, then
 you'll likely want a way to have the `pc-import-hlm` script ignore the past sets assuming you get new full

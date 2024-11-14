@@ -39,6 +39,7 @@ services:
       - bitnami:/bitnami
       - /mnt/shared/backups/${STACK_NAME}/solr_dropbox:/mnt/solr_backups
       - logs:/mnt/logs
+      - /mnt/shared/call-numbers:/mnt/shared/call-numbers:r
     hostname: solr{{slice .Node.Hostname 8 9}}
     networks:
       - internal
