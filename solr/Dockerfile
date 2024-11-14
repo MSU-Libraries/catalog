@@ -37,7 +37,7 @@ RUN cp /tmp/build/cron.d/* /etc/cron.d/ && \
 # Get solr configs and prepare for alphabetical browsing
 RUN \
     cd /tmp/build/ && \
-    cp startup.sh startup-cron.sh healthcheck.sh clusterhealth.sh cron-alphabrowse.sh alpha-browse.sh lock-state.sh / && \
+    cp startup.sh startup-cron.sh healthcheck.sh clusterhealth.sh cron-alphabrowse.sh alpha-browse.sh lock-state.sh add_generated_call_numbers.py / && \
     cd - && \
     mkdir -p /solr_confs/import/lib && \
     wget https://github.com/vufind-org/vufind/archive/refs/tags/v${VUFIND_VERSION}.tar.gz && \

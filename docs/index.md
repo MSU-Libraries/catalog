@@ -27,3 +27,4 @@ suggestions you have!
 ## Developing
 * [Writing & Running Tests](testing.md)
 * [Using Core VuFind Only](core-vufind.md)
+* [Alphabrowse Internals](alphabrowse.md)
