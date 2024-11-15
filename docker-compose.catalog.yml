@@ -63,6 +63,7 @@ services:
         # HTTPS Configuration
         - "traefik.http.routers.${STACK_NAME}-https-router.tls=true"
         - "traefik.http.routers.${STACK_NAME}-https-router.entrypoints=msul-https-ent"
+        - "traefik.http.routers.${STACK_NAME}-https-router.middlewares=emergency-brakes"
         - "traefik.http.routers.${STACK_NAME}-https-router.service=${STACK_NAME}-https-app"
         - "traefik.http.services.${STACK_NAME}-https-app.loadbalancer.server.port=80"
 
