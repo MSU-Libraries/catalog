@@ -14,7 +14,7 @@ else
 
 fi
 
-fileroot=$(echo "${infile}" | sed 's/\.....\?$//')
+fileroot=${infile%.*}
 outfile="${fileroot}_extract.txt"
 
 
@@ -124,7 +124,7 @@ echo -e "${awkscript}" > tmp_checkmarc
 chmod 700 tmp_checkmarc
 
 
-awk -v RS=$'\x1d' -v ORS="\n" -v FS=$'\x1e' -v SFS=$'\x1f' -v OFS="\t" -v MARCTAG=${marctag} -v OUTFILE="${outfile}" -v IDTAG="${idtag}" -b -f tmp_checkmarc "${infile}"
+awk -v RS=$'\x1d' -v ORS="\n" -v FS=$'\x1e' -v SFS=$'\x1f' -v OFS="\t" -v MARCTAG="${marctag}" -v OUTFILE="${outfile}" -v IDTAG="${idtag}" -b -f tmp_checkmarc "${infile}"
 echo
 echo
 

@@ -420,14 +420,13 @@ update_processed_delete_files() {
     fi
     IDS=""
     for MFILE in "${ARGS[VUFIND_HARVEST_DIR]}"/*.marc; do
-        FILEROOT=$(echo "${MFILE}" | sed 's/\.....\?$//')
-        OUTFILE="${FILEROOT}_extract.txt"
-        if ! marcextract "${MFILE}" 001; then
+        OUTFILE="${MFILE%.*}_extract.txt"
+        if ! marcextract.sh "${MFILE}" 001; then
             verbose "ERROR with marcextract for ${MFILE}"
             rm -f "${OUTFILE}"
-            return
+            exit 1
         fi
-        IDS="${IDS} $(cut -f1 "${OUTFILE}" | sed -e 's/^/hlm./')"
+        IDS="${IDS}$(cut -f1 "${OUTFILE}" | sed -e 's/^/hlm./')"
         rm -f "${OUTFILE}"
     done
     IDS=$(echo "$IDS" | sort)
