@@ -418,7 +418,19 @@ update_processed_delete_files() {
         verbose "No delete file in processed directory, skipping."
         return
     fi
-    IDS=$(LANG=C grep -oUaP "(?<=\x1e)ebs[0-9]+e(?=\x1e)" "${ARGS[VUFIND_HARVEST_DIR]}"/*.marc | sed -e 's/^/hlm./' | sort)
+    IDS=""
+    for MFILE in "${ARGS[VUFIND_HARVEST_DIR]}"/*.marc; do
+        FILEROOT=$(echo "${MFILE}" | sed 's/\.....\?$//')
+        OUTFILE="${FILEROOT}_extract.txt"
+        if ! marcextract "${MFILE}" 001; then
+            verbose "ERROR with marcextract for ${MFILE}"
+            rm -f "${OUTFILE}"
+            return
+        fi
+        IDS="${IDS} $(cut -f1 "${OUTFILE}" | sed -e 's/^/hlm./')"
+        rm -f "${OUTFILE}"
+    done
+    IDS=$(echo "$IDS" | sort)
     for DFILE in "${DELETE_FILES[@]}"; do
         if comm -2 -3 <(sort "$DFILE") <(echo "$IDS") >"${DFILE}_2"; then
             mv "${DFILE}_2" "$DFILE"
