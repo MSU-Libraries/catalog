@@ -426,10 +426,15 @@ update_processed_delete_files() {
             rm -f "${OUTFILE}"
             exit 1
         fi
-        IDS="${IDS}$(cut -f1 "${OUTFILE}" | sed -e 's/^/hlm./')"
+        IDS2="$(cut -f1 "${OUTFILE}" | sed -e 's/^/hlm./')"
+        if [[ "${IDS}" == "" ]]; then
+            IDS="${IDS2}"
+        else
+            IDS="${IDS}\n${IDS2}"
+        fi
         rm -f "${OUTFILE}"
     done
-    IDS=$(echo "$IDS" | sort)
+    IDS=$(echo -e "$IDS" | sort -u)
     for DFILE in "${DELETE_FILES[@]}"; do
         if comm -2 -3 <(sort "$DFILE") <(echo "$IDS") >"${DFILE}_2"; then
             mv "${DFILE}_2" "$DFILE"
