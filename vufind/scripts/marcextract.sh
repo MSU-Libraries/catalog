@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -e
+
+# Script based on marcextract from https://github.com/banerjek/marc-utils
+
 if [[ -z $1 || -z $2 ]];then
 	echo "Usage: marcextract [filename] [marcfield] [idtag]"
 	echo "Subfield delimiter in MARC is hex 1F"
@@ -122,12 +126,16 @@ END {
 
 ENDOFAWK
 
-echo -e "${awkscript}" > tmp_checkmarc
-chmod 700 tmp_checkmarc
+CHECKMARK_TEMP=$(mktemp -d)
+cleanup() {
+    rm -rf "$CHECKMARK_TEMP"
+}
+trap cleanup EXIT INT TERM
+
+echo -e "${awkscript}" > "${CHECKMARK_TEMP}/checkmarc"
+chmod 700 "${CHECKMARK_TEMP}/checkmarc"
 
 
 awk -v RS=$'\x1d' -v ORS="\n" -v FS=$'\x1e' -v SFS=$'\x1f' -v OFS="\t" -v MARCTAG="${marctag}" -v OUTFILE="${outfile}" -v IDTAG="${idtag}" -b -f tmp_checkmarc "${infile}"
 echo
 echo
-
-rm -f tmp_checkmarc
