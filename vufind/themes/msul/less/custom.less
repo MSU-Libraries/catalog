@@ -196,6 +196,11 @@ body, button, select, input {
       width: 35%;
     }
   }
+    @media only screen and (min-width : 1260px) {
+   .searchForm-query {
+      width: 50%;
+    }
+  }
 }
 
 header {
@@ -541,8 +546,9 @@ input[type="checkbox"] {
 }
 
 //searchbox responsive styling
-.searchbox {
+.searchbox .searchForm {
       #searchForm-reset {
+        position:absolute;
         right: 3px;
         top:0.37em;
         line-height:1em;
@@ -595,10 +601,11 @@ input[type="checkbox"] {
   }
 
   @media only screen and (min-width : 992px) {
-    .searchForm_lookfor {
+    .searchForm-query .searchForm_lookfor {
       width: 100%;
       max-width: initial;
       border-radius:0.5rem 0 0 0.5rem;
+      padding-right:5rem !important;
     }
     .searchForm-query #searchForm_controls {
       width: 4.5rem;
@@ -1573,7 +1580,7 @@ body.template-dir-myresearch.template-name-profile {
 // Button btn-primary
 
 .btn-primary {
-  line-height:1.375;
+  line-height:1.4;
     &:hover {
       background-color:@darkparakeetgreen;
       border-color:@darkparakeetgreen;
