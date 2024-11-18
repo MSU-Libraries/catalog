@@ -141,8 +141,10 @@ return [
     'factories' => [
       Catalog\Form\Form::class => VuFind\Form\FormFactory::class,
       Catalog\Session\SessionManager::class => Catalog\Session\ManagerFactory::class,
+      Catalog\ILS\Logic\Holds::class => VuFind\ILS\Logic\LogicFactory::class, // TODO - To remove after 10.1 - There is a fix for it - https://github.com/vufind-org/vufind/pull/4013
     ],
     'aliases' => [
+      VuFind\ILS\Logic\Holds::class => Catalog\ILS\Logic\Holds::class, // TODO - To remove after 10.1 - There is a fix for it - https://github.com/vufind-org/vufind/pull/4013
       VuFind\Form\Form::class => Catalog\Form\Form::class,
       Laminas\Session\SessionManager::class => Catalog\Session\SessionManager::class,
       VuFind\Session\ManagerFactory::class => Catalog\Session\ManagerFactory::class,
