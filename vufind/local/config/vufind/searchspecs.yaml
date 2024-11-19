@@ -255,8 +255,9 @@ Bibnum:
 
 ISN:
   DismaxFields:
-    - isbn
-    - issn
+    - isbn^10
+    - issn^10
+    - invalid_isbn
   DismaxHandler: edismax
 
 Subject:
@@ -369,12 +370,13 @@ AllFields:
     - genre^300
     - allfields_unstemmed^10
     - fulltext_unstemmed^10
+    - isbn^10
+    - issn^10
     - allfields
     - fulltext
     - description
-    - isbn
-    - issn
     - long_lat_display
+    - invalid_isbn
   DismaxHandler: edismax
   ExactSettings:
     DismaxFields:
@@ -383,8 +385,9 @@ AllFields:
       - topic_unstemmed^400
       - allfields_unstemmed^10
       - fulltext_unstemmed^10
-      - isbn
-      - issn
+      - isbn^10
+      - issn^10
+      - invalid_isbn
 
 # These are advanced searches that never use Dismax:
 id:
