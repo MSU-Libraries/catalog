@@ -110,9 +110,7 @@ class SessionManager extends \Laminas\Session\SessionManager
      */
     private function setBotId($botName)
     {
-        $botHash = base64_encode(
-            hash('sha224', $botName . $_SERVER['REMOTE_ADDR'] . $this->botSalt(), true)
-        );
+        $botHash = substr(hash('sha224', $botName . $_SERVER['REMOTE_ADDR'] . $this->botSalt()), 0, 30);
         // Bot Forced Session prefix (btfs) can be used to identify these sessions
         $botId = 'btfs' . preg_replace('/[\W]/', '', $botHash);
 
