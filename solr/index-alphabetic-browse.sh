@@ -97,27 +97,27 @@ function build_browse
     if [ "$skip_authority" = "1" ]; then
         # shellcheck disable=SC2086
         # extra_jvm_opts may have several options (not currently used), in which case we want it to expand
-        if ! output=$($JAVA ${extra_jvm_opts} -Dfile.encoding="UTF-8" -Dfield.preferred=heading -Dfield.insteadof=use_for -cp "$CLASSPATH" PrintBrowseHeadings "$bib_index" "$field" "${browse}.tmp" 2>&1); then
+        if ! output=$($JAVA ${extra_jvm_opts} -Dfile.encoding="UTF-8" -Dfield.preferred=heading -Dfield.insteadof=use_for -cp "$CLASSPATH" org.vufind.solr.indexing.PrintBrowseHeadings "$bib_index" "$field" "${browse}.tmp" 2>&1); then
             echo "ERROR: Failed to create browse headings for ${browse}. ${output}."
             exit 1
         fi
     else
         # shellcheck disable=SC2086
         # extra_jvm_opts may have several options (not currently used), in which case we want it to expand
-        if ! output=$($JAVA ${extra_jvm_opts} -Dfile.encoding="UTF-8" -Dfield.preferred=heading -Dfield.insteadof=use_for -cp "$CLASSPATH" PrintBrowseHeadings "$bib_index" "$field" "$auth_index" "${browse}.tmp" 2>&1); then
+        if ! output=$($JAVA ${extra_jvm_opts} -Dfile.encoding="UTF-8" -Dfield.preferred=heading -Dfield.insteadof=use_for -cp "$CLASSPATH" org.vufind.solr.indexing.PrintBrowseHeadings "$bib_index" "$field" "$auth_index" "${browse}.tmp" 2>&1); then
             echo "ERROR: Failed to create browse headings for ${browse}. ${output}."
             exit 1
         fi
     fi
 
     verbose "  Sort the browse headings"
-    if ! output=$(sort -T /var/tmp -u -t$'\1' -k1 "${browse}.tmp" -o "sorted-${browse}.tmp" 2>&1); then
+    if ! output=$(sort -T /var/tmp --buffer-size=1G -u -t$'\1' -k1 "${browse}.tmp" -o "sorted-${browse}.tmp" 2>&1); then
         echo "ERROR: Failed to sort ${browse}. ${output}."
         exit 1
     fi
 
     verbose "  Build the SQLite database"
-    if ! output=$($JAVA -Dfile.encoding="UTF-8" -cp "$CLASSPATH" CreateBrowseSQLite "sorted-${browse}.tmp" "${browse}_browse.db" 2>&1); then
+    if ! output=$($JAVA -Dfile.encoding="UTF-8" -cp "$CLASSPATH" org.vufind.solr.indexing.CreateBrowseSQLite "sorted-${browse}.tmp" "${browse}_browse.db" 2>&1); then
         echo "ERROR: Failed to build the SQLite database for ${browse}. ${output}."
         exit 1
     fi
