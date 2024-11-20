@@ -177,14 +177,15 @@ RUN \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
+    install -d -o 1000 -g 1000 ${VUFIND_CACHE_DIR}/cli && \
     # Set permissions on local, theme, and Catalog
     chown -R 1000:1000 ${VUFIND_LOCAL_DIR} && \
     chown -R 33:1000 ${VUFIND_HOME}/themes/msul && \
     chown -R 1000:1000 ${VUFIND_HOME}/module/Catalog && \
-    rsync -aip --chmod=D2775,F664 ${VUFIND_CACHE_DIR}/ ${VUFIND_CACHE_DIR}/ && \
-    rsync -aip --chmod=D2775,F664 ${VUFIND_LOCAL_DIR}/ ${VUFIND_LOCAL_DIR}/ && \
-    rsync -aip --chmod=D2775,F664 ${VUFIND_HOME}/themes/msul/ ${VUFIND_HOME}/themes/msul/ && \
-    rsync -aip --chmod=D2775,F664 ${VUFIND_HOME}/module/Catalog/ ${VUFIND_HOME}/module/Catalog/ && \
+    rsync -rp --chmod=D2775,F664 ${VUFIND_CACHE_DIR}/ ${VUFIND_CACHE_DIR}/ && \
+    rsync -rp --chmod=D2775,F664 ${VUFIND_LOCAL_DIR}/ ${VUFIND_LOCAL_DIR}/ && \
+    rsync -rp --chmod=D2775,F664 ${VUFIND_HOME}/themes/msul/ ${VUFIND_HOME}/themes/msul/ && \
+    rsync -rp --chmod=D2775,F664 ${VUFIND_HOME}/module/Catalog/ ${VUFIND_HOME}/module/Catalog/ && \
     # Set permissions on Robots.txt
     chown 1000:1000 ${VUFIND_HOME}/public/robots.txt && \
     chmod 664 ${VUFIND_HOME}/public/robots.txt && \
@@ -198,9 +199,6 @@ RUN \
     # Install grunt
     npm install -g grunt-cli && \
     grunt less
-
-# Debugging; temporary files overriding core libraries
-COPY debug/ /usr/local/vufind/
 
 EXPOSE 80
 
