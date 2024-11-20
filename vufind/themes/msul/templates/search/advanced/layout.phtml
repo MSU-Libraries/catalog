@@ -162,7 +162,7 @@
       </div>
 
       <div class="adv-submit">
-        <input class="clear-btn btn btn-default" type="button" value="<?= $this->transEscAttr('Clear')?>">
+        <button class="clear-btn btn btn-default" type="button"><span id="msulClearall" class="sr-only"></span> <?= $this->transEscAttr('Clear')?></button>
         <button type="submit" class="btn btn-primary"><?=$this->icon('search') ?> <?=$this->transEsc('Search')?></button>
       </div>
       <?php if (isset($this->extraAdvancedControls)): ?>
@@ -170,7 +170,7 @@
           <?=$this->extraAdvancedControls ?>
         </div>
         <div class="adv-submit">
-          <input class="clear-btn btn btn-default" type="button" value="<?= $this->transEscAttr('Clear')?>">
+          <button class="clear-btn btn btn-default" type="button"><span id="msulClearall" class="sr-only"></span> <?= $this->transEscAttr('Clear')?></button>
           <button type="submit" class="btn btn-primary"><?=$this->icon('search') ?> <?=$this->transEsc('Search')?></button>
         </div>
       <?php endif; ?>
