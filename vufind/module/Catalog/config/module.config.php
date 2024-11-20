@@ -75,6 +75,14 @@ return [
           'util/index_reserves' => Catalog\Command\Util\IndexReservesCommand::class,
         ],
       ],
+      'content_covers' => [
+        'factories' => [
+          Catalog\Content\Covers\BrowZine::class => VuFind\Content\Covers\BrowZineFactory::class,
+        ],
+        'aliases' => [
+          'browzine' => Catalog\Content\Covers\BrowZine::class,
+        ],
+      ],
       'form_handler' => [
         'factories' => [
           Catalog\Form\Handler\FeedbackEmail::class => VuFind\Form\Handler\EmailFactory::class,
