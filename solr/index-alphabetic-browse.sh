@@ -111,7 +111,7 @@ function build_browse
     fi
 
     verbose "  Sort the browse headings"
-    if ! output=$(sort -T /var/tmp --buffer-size=1G -u -t$'\1' -k1 "${browse}.tmp" -o "sorted-${browse}.tmp" 2>&1); then
+    if ! output=$(sort -T /var/tmp -u -t$'\1' -k1 "${browse}.tmp" -o "sorted-${browse}.tmp" 2>&1); then
         echo "ERROR: Failed to sort ${browse}. ${output}."
         exit 1
     fi
