@@ -177,7 +177,7 @@ RUN \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
-    chown -R 1000:1000 ${VUFIND_CACHE_DIR}/cli && \
+    install -d -o 1000 -g 1000 ${VUFIND_CACHE_DIR}/cli && \
     # Set permissions on local, theme, and Catalog
     chown -R 1000:1000 ${VUFIND_LOCAL_DIR} && \
     chown -R 33:1000 ${VUFIND_HOME}/themes/msul && \
