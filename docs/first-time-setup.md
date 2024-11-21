@@ -85,6 +85,8 @@ following permissions within FOLIO. They need to be created as a permission set 
 with a `POST` request to `/perms/permissions`.
 
 * `inventory.instances.item.get`
+* `inventory.items.collection.get`
+* `inventory.items.item.get`
 * `inventory-storage.bound-with-parts.collection.get`
 * `inventory-storage.holdings.collection.get`
 * `inventory-storage.holdings.item.get`

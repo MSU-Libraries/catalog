@@ -62,7 +62,7 @@ Shellcheck:
   before_script:
     - apk add shellcheck || apt install shellcheck
   script:
-    - shellcheck $(find . -name "*.sh" -o -name "pc-*")
+    - shellcheck $(find . -name '.git' -prune -o \( -name "*.sh" -o -name "pc-*" \) -print)
   artifacts:
     reports:
       metrics: metrics.txt
