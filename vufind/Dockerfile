@@ -197,8 +197,7 @@ RUN \
     chmod -R 664 /tests && \
     mv /tests/* ${VUFIND_HOME}/tests/ && \
     # Install grunt
-    npm install -g grunt-cli && \
-    grunt less
+    npm install -g grunt-cli
 
 EXPOSE 80
 
