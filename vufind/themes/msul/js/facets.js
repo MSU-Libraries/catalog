@@ -214,10 +214,18 @@ VuFind.register('sideFacets', function SideFacets() {
     window.location.assign(getHrefWithNewParams());
   }
 
+  function applyFiltersAnimation() {
+    document.getElementById('applyMultiFacetsSelection').classList.add('transform');
+    setTimeout(function fn() {
+      document.getElementById('applyMultiFacetsSelection').classList.remove('transform');
+    }, 2000);
+  }
+
   function dateSelectorInit() {
     dateSelectorId = $('div.facet form .date-fields').parent().attr('id');
     if (dateSelectorId !== undefined) {
       $('form#' + dateSelectorId + ' input[type="submit"]').remove();
+      $('form#' + dateSelectorId + ' input').on('change', applyFiltersAnimation);
     }
   }
 
@@ -285,6 +293,7 @@ VuFind.register('sideFacets', function SideFacets() {
       // We don't concat if there is only one empty element
       globalRemovedParams = globalRemovedParams.concat(removedParams);
     }
+    applyFiltersAnimation();
   }
 
   function facetLinkClicked(e) {
