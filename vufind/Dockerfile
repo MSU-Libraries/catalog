@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ENV TZ=America/Detroit \
     DEBIAN_FRONTEND=noninteractive \
@@ -197,7 +197,7 @@ RUN \
     chmod -R 664 /tests && \
     mv /tests/* ${VUFIND_HOME}/tests/ && \
     # Install grunt
-    npm install -g grunt-cli node.os @types/node && \
+    npm install -g grunt-cli && \
     grunt less
 
 EXPOSE 80
