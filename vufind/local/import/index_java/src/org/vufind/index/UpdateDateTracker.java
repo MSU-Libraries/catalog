@@ -29,9 +29,9 @@ import org.apache.log4j.Logger;
  */
 public class UpdateDateTracker
 {
-    private static Logger logger = Logger.getLogger();
+    private static Logger logger = Logger.getLogger(UpdateDateTracker.class);
 
-    private static final int BATCH_SIZE = 10;
+    private static final int BATCH_SIZE = 100;
     private int insertBatchCount = 0;
     private int updateBatchCount = 0;
 
@@ -68,12 +68,12 @@ public class UpdateDateTracker
         return trackerCache.get();
     }
 
-    private void possiblyExecuteBatch(boolean update, PreparedStatement statement, boolean force)
+    private void possiblyExecuteBatch(boolean update, PreparedStatement statement, boolean force) throws SQLException
     {
         int count = update ? updateBatchCount : insertBatchCount;
         if (count == BATCH_SIZE || (count > 0 && force)) {
             int[] numUpdates = statement.executeBatch();
-            for (n : numUpdates) {
+            for (int n : numUpdates) {
                 if (n != 1) {
                     logger.error("Wrong number of updates for executeBatch: " + n);
                 }
@@ -173,11 +173,15 @@ public class UpdateDateTracker
             "SET first_indexed = ?, last_indexed = ?, last_record_change = ?, deleted = ? " +
             "WHERE core = ? AND id = ?;");
         Thread shutdownHook = new Thread(() -> {
-            possiblyExecuteBatch(false, insertSql, true);
-            possiblyExecuteBatch(true, updateSql, true);
-            insertSql.close();
-            selectSql.close();
-            updateSql.close();
+            try {
+                possiblyExecuteBatch(false, insertSql, true);
+                possiblyExecuteBatch(true, updateSql, true);
+                insertSql.close();
+                selectSql.close();
+                updateSql.close();
+            } catch (SQLException ex) {
+                logger.error("SQLException in shutdown hook: " + ex.getMessage());
+            }
         });
         Runtime.getRuntime().addShutdownHook(shutdownHook);
     }
