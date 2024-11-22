@@ -32,7 +32,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
         # Set up the repository for group editing
         git config --system --add safe.directory \*
         git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo config core.sharedRepository group
-        chgrp -R msuldevs "${SHARED_STORAGE}/${STACK_NAME}"/repo
+        chgrp -R ubuntu "${SHARED_STORAGE}/${STACK_NAME}"/repo
         chmod -R g+rw "${SHARED_STORAGE}/${STACK_NAME}"/repo
         chmod g-w "${SHARED_STORAGE}/${STACK_NAME}"/repo/.git/objects/pack/*
         find "${SHARED_STORAGE}/${STACK_NAME}" -type d -exec chmod g+s {} \;
@@ -95,9 +95,9 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
 
     # Make sure permissions haven't gotten changed on the share along the way
     # (This can happen no matter what on devel container startup)
-    chown msuldevs:msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/*
+    chown msuldevs:ubuntu -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/*
     chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/msul/
-    chown msuldevs:msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/local-confs/*
+    chown msuldevs:ubuntu -R "${SHARED_STORAGE}/${STACK_NAME}"/local-confs/*
     rsync -aip --chmod=D2775,F664 --exclude "*.sh" --exclude "cicd" --exclude "*scripts*" "${SHARED_STORAGE}/${STACK_NAME}"/ "${SHARED_STORAGE}/${STACK_NAME}"/
 
     if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
