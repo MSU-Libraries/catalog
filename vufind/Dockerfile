@@ -184,8 +184,8 @@ RUN \
     chown -R 1000:1000 ${VUFIND_HOME}/module/Catalog && \
     rsync -rp --chmod=D2775,F664 ${VUFIND_CACHE_DIR}/ ${VUFIND_CACHE_DIR}/ && \
     rsync -rp --chmod=D2775,F664 ${VUFIND_LOCAL_DIR}/ ${VUFIND_LOCAL_DIR}/ && \
-    (rsync -rp --chmod=D2775,F664 ${VUFIND_HOME}/themes/msul/ ${VUFIND_HOME}/themes/msul/ || true) && \
-    (rsync -rp --chmod=D2775,F664 ${VUFIND_HOME}/module/Catalog/ ${VUFIND_HOME}/module/Catalog/ || true) && \
+    rsync -rp --chmod=D2775,F664 ${VUFIND_HOME}/themes/msul/ ${VUFIND_HOME}/themes/msul/ && \
+    rsync -rp --chmod=D2775,F664 ${VUFIND_HOME}/module/Catalog/ ${VUFIND_HOME}/module/Catalog/ && \
     # Set permissions on Robots.txt
     chown 1000:1000 ${VUFIND_HOME}/public/robots.txt && \
     chmod 664 ${VUFIND_HOME}/public/robots.txt && \
@@ -198,7 +198,7 @@ RUN \
     mv /tests/* ${VUFIND_HOME}/tests/ && \
     # Install grunt
     npm install -g grunt-cli && \
-    grunt less
+    grunt less --force
 
 EXPOSE 80
 
