@@ -37,7 +37,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
         chmod g-w "${SHARED_STORAGE}/${STACK_NAME}"/repo/.git/objects/pack/*
         find "${SHARED_STORAGE}/${STACK_NAME}" -type d -exec chmod g+s {} \;
         chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/
-        chown msuldevs -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/module/
+        chown 1000 -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/module/
     fi
     git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch
     # Setting up "local" sync dir
@@ -95,9 +95,9 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
 
     # Make sure permissions haven't gotten changed on the share along the way
     # (This can happen no matter what on devel container startup)
-    chown msuldevs:ubuntu -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/*
+    chown 1000:1000 -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/*
     chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/msul/
-    chown msuldevs:ubuntu -R "${SHARED_STORAGE}/${STACK_NAME}"/local-confs/*
+    chown 1000:1000 -R "${SHARED_STORAGE}/${STACK_NAME}"/local-confs/*
     rsync -aip --chmod=D2775,F664 --exclude "*.sh" --exclude "cicd" --exclude "*scripts*" "${SHARED_STORAGE}/${STACK_NAME}"/ "${SHARED_STORAGE}/${STACK_NAME}"/
 
     if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then

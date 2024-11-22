@@ -88,10 +88,6 @@ RUN \
     rm -rf /tmp/solr && \
     # Fix world writable vendor dirs (TODO find out why these happen in the first place)
     find /usr/local/vufind/vendor -type d -perm -o+w -exec chmod o-w \; && \
-    # Create user for grunt
-    useradd msuldevs -u 1000 -g 1000 && \
-    mkdir /home/msuldevs && \
-    chown 1000:1000 /home/msuldevs && \
     # Enable bash completion for all users
     echo ". /usr/share/bash-completion/bash_completion" >> /etc/bash.bashrc
 
