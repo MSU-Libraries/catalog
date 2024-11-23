@@ -56,7 +56,10 @@ public class UpdateDateTracker
             protected UpdateDateTracker initialValue()
             {
                 try {
-                    return new UpdateDateTracker(DatabaseManager.instance().getConnection());
+                    DatabaseManager dbm = DatabaseManager.instance();
+                    UpdateDateTracker udt = new UpdateDateTracker(dbm.getConnection());
+                    dbm.setUpdateDateTracker(udt);
+                    return udt;
                 } catch (SQLException e) {
                     throw new RuntimeException(e.getMessage());
                 }
@@ -71,14 +74,14 @@ public class UpdateDateTracker
     private void possiblyExecuteBatch(boolean update, PreparedStatement statement, boolean force) throws SQLException
     {
         int count = update ? updateBatchCount : insertBatchCount;
-        if (count == BATCH_SIZE || (count > 0 && force)) {
-            int[] numUpdates = statement.executeBatch();
-            for (int n : numUpdates) {
-                if (n != 1) {
-                    logger.error("Wrong number of updates for executeBatch: " + n);
-                }
+        if (count >= BATCH_SIZE || (count > 0 && force)) {
+            try {
+                statement.executeBatch();
+                db.commit();
+            } catch (SQLException ex) {
+                logger.error("SQLException in possiblyExecuteBatch(): " + ex.getMessage());
+                throw ex;
             }
-            db.commit();
             if (update) {
                 updateBatchCount = 0;
             } else {
@@ -172,18 +175,18 @@ public class UpdateDateTracker
         updateSql = db.prepareStatement("UPDATE change_tracker " +
             "SET first_indexed = ?, last_indexed = ?, last_record_change = ?, deleted = ? " +
             "WHERE core = ? AND id = ?;");
-        Thread shutdownHook = new Thread(() -> {
-            try {
-                possiblyExecuteBatch(false, insertSql, true);
-                possiblyExecuteBatch(true, updateSql, true);
-                insertSql.close();
-                selectSql.close();
-                updateSql.close();
-            } catch (SQLException ex) {
-                logger.error("SQLException in shutdown hook: " + ex.getMessage());
-            }
-        });
-        Runtime.getRuntime().addShutdownHook(shutdownHook);
+    }
+
+    void shutdown() {
+        try {
+            possiblyExecuteBatch(false, insertSql, true);
+            possiblyExecuteBatch(true, updateSql, true);
+            insertSql.close();
+            selectSql.close();
+            updateSql.close();
+        } catch (SQLException ex) {
+            logger.error("SQLException in shutdown hook: " + ex.getMessage());
+        }
     }
 
     /* Get the first indexed date (IMPORTANT: index() must be called before this method)

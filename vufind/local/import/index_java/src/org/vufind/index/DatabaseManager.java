@@ -36,6 +36,8 @@ public class DatabaseManager
     // Shutdown flag:
     private boolean shuttingDown = false;
 
+    private UpdateDateTracker udt;
+
     private static ThreadLocal<DatabaseManager> managerCache =
         new ThreadLocal<DatabaseManager>()
         {
@@ -80,11 +82,19 @@ public class DatabaseManager
             String classname = "invalid";
             String prefix = "invalid";
             String extraParams = "";
-            if (dsn.substring(0, 8).equals("mysql://")) {
-                classname = "com.mysql.jdbc.Driver";
-                prefix = "mysql";
+            if (dsn.startsWith("mysql://") || dsn.startsWith("mariadb://")) {
+                if (dsn.startsWith("mysql://")) {
+                    classname = "com.mysql.jdbc.Driver";
+                    prefix = "mysql";
+                } else {
+                    classname = "org.mariadb.jdbc.Driver";
+                    prefix = "mariadb";
+                }
                 String useSsl = ConfigManager.instance().getBooleanConfigSetting("config.ini", "Database", "use_ssl", false) ? "true" : "false";
-                extraParams = "?useSSL=" + useSsl + "&rewriteBatchedStatements=true";
+                extraParams = "?useSSL=" + useSsl;
+                if (dsn.startsWith("mysql://")) {
+                    extraParams += "&rewriteBatchedStatements=true";
+                }
                 if (useSsl != "false") {
                     String verifyCert = ConfigManager.instance().getBooleanConfigSetting("config.ini", "Database", "verify_server_certificate", false) ? "true" : "false";
                     extraParams += "&verifyServerCertificate=" + verifyCert;
@@ -118,6 +128,10 @@ public class DatabaseManager
         Runtime.getRuntime().addShutdownHook(new DatabaseManagerShutdownThread(this));
     }
 
+    void setUpdateDateTracker(UpdateDateTracker udt) {
+        this.udt = udt;
+    }
+
     private void disconnectFromDatabase()
     {
         if (vufindDatabase != null) {
@@ -132,6 +146,10 @@ public class DatabaseManager
 
     public void shutdown()
     {
+        if (udt != null) {
+            // We can't use UpdateDateTracker.instance() in shutdown, so we have to use a previously-saved reference
+            udt.shutdown();
+        }
         disconnectFromDatabase();
         shuttingDown = true;
     }
