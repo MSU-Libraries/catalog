@@ -158,7 +158,6 @@ return [
       VuFind\Form\Form::class => Catalog\Form\Form::class,
       Laminas\Session\SessionManager::class => Catalog\Session\SessionManager::class,
       VuFind\Session\ManagerFactory::class => Catalog\Session\ManagerFactory::class,
-      VuFind\DbAdapterFactory::class => Catalog\Db\AdapterFactory::class,
     ],
   ],
 ];
