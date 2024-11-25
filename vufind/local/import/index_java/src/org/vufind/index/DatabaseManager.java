@@ -90,10 +90,14 @@ public class DatabaseManager
                     classname = "org.mariadb.jdbc.Driver";
                     prefix = "mariadb";
                 }
+                // NOTE: useSSL is deprecated for both mysql and mariadb
+                // sslMode is supported since mysql Connector/J 8.0.13 and mariadb Connector/J 3.0.0
                 String useSsl = ConfigManager.instance().getBooleanConfigSetting("config.ini", "Database", "use_ssl", false) ? "true" : "false";
                 extraParams = "?useSSL=" + useSsl;
                 if (dsn.startsWith("mysql://")) {
                     extraParams += "&rewriteBatchedStatements=true";
+                    // NOTE: rewriteBatchedStatements was removed from mariadb Connector/J in version 3.0.0.
+                    // It was replaced by useBulkStmts, which defaults to true.
                 }
                 if (useSsl != "false") {
                     String verifyCert = ConfigManager.instance().getBooleanConfigSetting("config.ini", "Database", "verify_server_certificate", false) ? "true" : "false";
