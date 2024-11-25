@@ -150,6 +150,8 @@ return [
       Catalog\Form\Form::class => VuFind\Form\FormFactory::class,
       Catalog\Session\SessionManager::class => Catalog\Session\ManagerFactory::class,
       Catalog\ILS\Logic\Holds::class => VuFind\ILS\Logic\LogicFactory::class, // TODO - To remove after 10.1 - There is a fix for it - https://github.com/vufind-org/vufind/pull/4013
+      Catalog\Db\AdapterFactory::class => VuFind\Service\ServiceWithConfigIniFactory::class,
+      Laminas\Db\Adapter\Adapter::class => Catalog\Db\AdapterFactory::class,
     ],
     'aliases' => [
       VuFind\ILS\Logic\Holds::class => Catalog\ILS\Logic\Holds::class, // TODO - To remove after 10.1 - There is a fix for it - https://github.com/vufind-org/vufind/pull/4013
