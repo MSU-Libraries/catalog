@@ -94,13 +94,13 @@ RUN \
 # TEMP(PART3):
 # - Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/100
 # - Patch and replace solrmarc due to delete logic hardcode to MARC 001 as id instead of .properties defined id
-RUN \
-    rm /usr/local/vufind/import/lib/marc4j*.jar && \
-    mv /tmp/marc4j/build/marc4j*.jar /usr/local/vufind/import/lib/ && \
-    rm -r /tmp/marc4j/ && \
-    rm /usr/local/vufind/import/solrmarc_core_3.5.jar && \
-    mv /tmp/solrmarc/dist/solrmarc_core_*.jar /usr/local/vufind/import/solrmarc_core_3.5.jar && \
-    rm -r /tmp/solrmarc/
+RUN #\
+#    rm /usr/local/vufind/import/lib/marc4j*.jar && \
+#    mv /tmp/marc4j/build/marc4j*.jar /usr/local/vufind/import/lib/ && \
+#    rm -r /tmp/marc4j/ && \
+#    rm /usr/local/vufind/import/solrmarc_core_3.5.jar && \
+#    mv /tmp/solrmarc/dist/solrmarc_core_*.jar /usr/local/vufind/import/solrmarc_core_3.5.jar && \
+#    rm -r /tmp/solrmarc/
 # END TEMP(PART3)
 
 # User configs for root
