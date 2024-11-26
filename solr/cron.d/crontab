@@ -24,4 +24,4 @@
 # Trigger Alphabetical browse update
 STACK_NAME=${STACK_NAME}
 NODE=${NODE}
-15 1	* * *	root    /cron-alphabrowse.sh
+15 ${ALPHA_CRON_HOURS}	* * *	root    /cron-alphabrowse.sh

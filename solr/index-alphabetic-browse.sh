@@ -10,6 +10,8 @@ else
   JAVA="java"
 fi
 
+# Limit max heap for all java commands
+JAVA="$JAVA -Xmx2g"
 
 ##################################################
 # Set VUFIND_HOME
