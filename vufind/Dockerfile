@@ -26,17 +26,17 @@ RUN \
     # TEMP(PART2):
     # - Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/100
     # - Patch and replace solrmarc due to delete logic hardcode to MARC 001 as id instead of .properties defined id
-    apt-get install -y ant && \
-    git clone --depth 1 --branch 2.9.4 https://github.com/marc4j/marc4j.git /tmp/marc4j && \
-    cd /tmp/marc4j/ && \
-    git apply /tmp/patches/marc4j_fieldMatches_LNK.patch && \
-    ant jar && \
-    git clone --depth 1 --branch 3.5 https://github.com/solrmarc/solrmarc.git /tmp/solrmarc && \
-    cd /tmp/solrmarc/ && \
-    git apply /tmp/patches/solrmarc_delete_on_docid.patch && \
-    ant package && \
-    rm -r /tmp/patches && \
-    apt-get purge -y ant && \
+#    apt-get install -y ant && \
+#    git clone --depth 1 --branch 2.9.4 https://github.com/marc4j/marc4j.git /tmp/marc4j && \
+#    cd /tmp/marc4j/ && \
+#    git apply /tmp/patches/marc4j_fieldMatches_LNK.patch && \
+#    ant jar && \
+#    git clone --depth 1 --branch 3.5 https://github.com/solrmarc/solrmarc.git /tmp/solrmarc && \
+#    cd /tmp/solrmarc/ && \
+#    git apply /tmp/patches/solrmarc_delete_on_docid.patch && \
+#    ant package && \
+#    rm -r /tmp/patches && \
+#    apt-get purge -y ant && \
     # END TEMP(PART2)
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
