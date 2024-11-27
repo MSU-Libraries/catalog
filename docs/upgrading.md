@@ -23,6 +23,8 @@ to update the `VUFIND_VERSION` variable to be the new release you are updating t
 * Create a new branch with these changes named either `review-`* or `devel-`* to trigger a pipeline with
 a new environment.
 
+* Make sure the `--data` parameters contains the right field in `solr_cache_warmup` in `pc-import-folio`
+
 * Once the pipeline completes successfully, verify that the site loads and works correctly.
 
 * In order to test that a database migration will work correctly, take a fresh database dump of an
@@ -63,6 +65,10 @@ https://catalog.lib.msu.edu/Record/folio.in00000280877
 button status.
 
 * Check the login
+
+* Check holdings status (Available, Checked out, ...)
+
+* Check import scripts
 
 ## Solr
 If it is just the Solr version that is being upgraded, then updates to the Docker image will handle
