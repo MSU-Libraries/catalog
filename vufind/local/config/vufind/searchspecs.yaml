@@ -98,6 +98,8 @@
 # - SearchTypeIn      At least one of the search types must be in the given list
 # - AllSearchTypesIn  All of the search types must be in the given list
 # - SearchTypeNotIn   None of the search types must be in the given list
+# - SortIn            Sort order (exactly as it's sent to Solr) must be in the given list
+# - SortNotIn         Sort order (exactly as it's sent to Solr) must not be in the given list
 #
 # Example: Boost more recent material if any of the search fields is of type
 # "AllFields" or "Title" unless there's a search type specific boost:
@@ -112,6 +114,8 @@
 #       - NoDismaxParams:
 #         - bf
 #         - bq
+#       - SortIn:
+#         - score desc,id asc
 #
 #
 # Example: Boost material in English if any of the search fields is of type
@@ -251,8 +255,9 @@ Bibnum:
 
 ISN:
   DismaxFields:
-    - isbn
-    - issn
+    - isbn^10
+    - issn^10
+    - invalid_isbn
   DismaxHandler: edismax
 
 Subject:
@@ -293,10 +298,12 @@ JournalTitle:
   DismaxHandler: edismax
 #  FilterQuery: "format:Journal OR format:Article"
   FilterQuery: "format:Journal"
-#  ExactSettings:
-#    DismaxFields:
-#      - title_full_unstemmed^450
+  ExactSettings:
+    DismaxFields:
+      - title_exactish^500
+      - title_full_unstemmed^100
 #    FilterQuery: "format:Journal OR format:Article"
+    FilterQuery: "format:Journal"
 
 NewspaperTitle:
   DismaxFields:
@@ -311,6 +318,11 @@ NewspaperTitle:
     - series2
   DismaxHandler: edismax
   FilterQuery: "format:Newspaper"
+  ExactSettings:
+    DismaxFields:
+      - title_exactish^500
+      - title_full_unstemmed^100
+    FilterQuery: "format:Newspaper"
 
 Title:
   DismaxFields:
@@ -324,9 +336,10 @@ Title:
     - series^100
     - series2
   DismaxHandler: edismax
-#  ExactSettings:
-#    DismaxFields:
-#      - title_full_unstemmed^450
+  ExactSettings:
+    DismaxFields:
+      - title_exactish^500
+      - title_full_unstemmed^100
 
 Series:
   DismaxFields:
@@ -357,21 +370,24 @@ AllFields:
     - genre^300
     - allfields_unstemmed^10
     - fulltext_unstemmed^10
+    - isbn^10
+    - issn^10
     - allfields
     - fulltext
     - description
-    - isbn
-    - issn
     - long_lat_display
+    - invalid_isbn
   DismaxHandler: edismax
-#  ExactSettings:
-#    DismaxFields:
-#      - title_full_unstemmed^600
-#      - topic_unstemmed^550
-#      - allfields_unstemmed^10
-#      - fulltext_unstemmed^10
-#      - isbn
-#      - issn
+  ExactSettings:
+    DismaxFields:
+      - title_exactish^1000
+      - title_full_unstemmed^500
+      - topic_unstemmed^400
+      - allfields_unstemmed^10
+      - fulltext_unstemmed^10
+      - isbn^10
+      - issn^10
+      - invalid_isbn
 
 # These are advanced searches that never use Dismax:
 id:

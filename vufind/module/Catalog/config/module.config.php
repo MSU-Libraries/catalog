@@ -18,7 +18,7 @@ return [
   'controllers' => [
     'factories' => [
       Catalog\Controller\RecordController::class => VuFind\Controller\AbstractBaseWithConfigFactory::class,
-      Catalog\Controller\MyResearchController::class => VuFind\Controller\AbstractBaseFactory::class,
+      Catalog\Controller\MyResearchController::class => VuFind\Controller\MyResearchControllerFactory::class,
       // TODO PC-895 To remove after PR - START
       Catalog\Controller\SearchController::class => VuFind\Controller\AbstractBaseFactory::class,
       Catalog\Controller\EdsController::class => VuFind\Controller\AbstractBaseFactory::class,
@@ -59,12 +59,28 @@ return [
           'okapi' => Catalog\Auth\Okapi::class,
         ],
       ],
+      'autocomplete' => [
+        'factories' => [
+          Catalog\Autocomplete\Solr::class => VuFind\Autocomplete\SolrFactory::class,
+        ],
+        'aliases' => [
+          'solr' => Catalog\Autocomplete\Solr::class,
+        ],
+      ],
       'command' => [
         'factories' => [
           Catalog\Command\Util\IndexReservesCommand::class => VuFindConsole\Command\Util\AbstractSolrAndIlsCommandFactory::class,
         ],
         'aliases' => [
           'util/index_reserves' => Catalog\Command\Util\IndexReservesCommand::class,
+        ],
+      ],
+      'content_covers' => [
+        'factories' => [
+          Catalog\Content\Covers\BrowZine::class => VuFind\Content\Covers\BrowZineFactory::class,
+        ],
+        'aliases' => [
+          'browzine' => Catalog\Content\Covers\BrowZine::class,
         ],
       ],
       'form_handler' => [
@@ -119,14 +135,26 @@ return [
           'EDS' => Catalog\Search\Factory\EdsBackendFactory::class,
         ],
       ],
+      'db_row' => [ // TODO Remove after upgrade to 10.1.1 - Fix login bug
+          'factories' => [
+              Catalog\Db\Row\User::class => VuFind\Db\Row\UserFactory::class,
+          ],
+          'aliases' => [
+              VuFind\Db\Row\User::class => Catalog\Db\Row\User::class,
+          ],
+      ],
     ],
   ],
   'service_manager' => [
     'factories' => [
       Catalog\Form\Form::class => VuFind\Form\FormFactory::class,
       Catalog\Session\SessionManager::class => Catalog\Session\ManagerFactory::class,
+      Catalog\ILS\Logic\Holds::class => VuFind\ILS\Logic\LogicFactory::class, // TODO - To remove after 10.1 - There is a fix for it - https://github.com/vufind-org/vufind/pull/4013
+      Catalog\Db\AdapterFactory::class => VuFind\Service\ServiceWithConfigIniFactory::class,
+      Laminas\Db\Adapter\Adapter::class => Catalog\Db\AdapterFactory::class,
     ],
     'aliases' => [
+      VuFind\ILS\Logic\Holds::class => Catalog\ILS\Logic\Holds::class, // TODO - To remove after 10.1 - There is a fix for it - https://github.com/vufind-org/vufind/pull/4013
       VuFind\Form\Form::class => Catalog\Form\Form::class,
       Laminas\Session\SessionManager::class => Catalog\Session\SessionManager::class,
       VuFind\Session\ManagerFactory::class => Catalog\Session\ManagerFactory::class,

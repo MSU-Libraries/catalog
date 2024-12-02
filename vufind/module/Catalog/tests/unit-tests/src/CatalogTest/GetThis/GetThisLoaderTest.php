@@ -15,6 +15,7 @@
 namespace CatalogTest\GetThis;
 
 use Catalog\GetThis\GetThisLoader;
+use VuFind\ILS\Logic\AvailabilityStatus;
 use VuFind\RecordDriver\AbstractBase as RecordDriver;
 
 /**
@@ -297,7 +298,7 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusCheckedOutDueDate()
     {
         $this->assertEquals(
-            'Checked Out (In transit) - Due:12/12/2000',
+            'Checked Out (In transit) - Due: 12/12/2000',
             $this->callMethod($this->getHandler(), 'getStatus', ['012'])
         );
     }
@@ -324,37 +325,37 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
         return [
             [
                 'item_id' => '123',
-                'status' => 'Available',
+                'availability' => new AvailabilityStatus(true, 'Available'),
                 'reserve' => 'N',
                 'temporary_loan_type' => 'test',
             ],
             [
                 'item_id' => '456',
-                'status' => 'Missing',
+                'availability' => new AvailabilityStatus(false, 'Missing'),
                 'location' => 'Main Library',
                 'location_code' => 'ML',
             ],
             [
                 'item_id' => '789',
-                'status' => 'In transit',
+                'availability' => new AvailabilityStatus(false, 'In transit'),
                 'returnDate' => '1/1/2000',
             ],
             [
                 'item_id' => '321',
-                'status' => 'Restricted',
+                'availability' => new AvailabilityStatus(false, 'Restricted'),
             ],
             [
                 'item_id' => '654',
-                'status' => 'Available',
+                'availability' => new AvailabilityStatus(false, 'Available'),
                 'reserve' => 'Y',
             ],
             [
                 'item_id' => '999',
-                'status' => 'test',
+                'availability' => new AvailabilityStatus(false, 'test'),
             ],
             [
                 'item_id' => '012',
-                'status' => 'In transit',
+                'availability' => new AvailabilityStatus(false, 'In transit'),
                 'duedate' => '12/12/2000',
             ],
         ];

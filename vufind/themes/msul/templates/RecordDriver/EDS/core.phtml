@@ -1,21 +1,22 @@
+<?php /** This one I'm not sure */ ?>
 <?php $this->headLink()->appendStylesheet('EDS.css'); ?>
 <?php
-    $this->layout()->showSearchBacklink = true;
+    $this->layout()->showSearchBacklink = true; // MSU
     $items = $this->driver->getItems('core');
     $dbLabel = $this->driver->getDbLabel();
     $customLinks = $this->driver->getCustomLinks();
     $accessLevel = $this->driver->getAccessLevel();
-    $user = $this->auth()->isLoggedIn();
-    $isCommunityBorrower = $user != null ? $this->auth()->isCommunityBorrower() : false;
-    $isOnCampus = $this->auth()->isOnCampus();
+    $user = $this->auth()->isLoggedIn(); // MSU
+    $isCommunityBorrower = $user != null ? $this->auth()->isCommunityBorrower() : false; // MSU
+    $isOnCampus = $this->auth()->isOnCampus(); // MSU
     $restrictedView = empty($accessLevel) ? false : true;
     $coverDetails = $this->record($this->driver)->getCoverDetails('core', 'medium');
     $cover = $coverDetails['html'];
-    $libkeyData = $this->record($this->driver)->getLibKeyData($this->driver->getCleanDOI());
+    $libkeyData = $this->record($this->driver)->getLibKeyData($this->driver->getCleanDOI()); // MSU
 ?>
-<div class="media" vocab="http://schema.org/" resource="#record" typeof="<?=$this->driver->getSchemaOrgFormats()?> Product"> <!--changed order of .media-body and .media-left for a11y PC-502-->
+<div class="media"<?=$this->schemaOrg()->getAttributes(['vocab' => 'http://schema.org/', 'resource' => '#record', 'typeof' => $this->driver->getSchemaOrgFormats() . ' Product'])?>>
   <div class="media-body info-col">
-    <h1 property="name"><?=$this->driver->getTitle()?></h1>
+    <h1<?=$this->schemaOrg()->getAttributes(['property' => 'name'])?>><?=$this->driver->getTitle()?></h1>
 
     <?php if ($this->driver->getExtraDetail('cached_record') && !$this->translationEmpty('cached_record_warning')): ?>
       <div class="alert alert-warning">
@@ -55,7 +56,7 @@
           $name = $customLink['Text'] ?? '';
         ?>
         <div>
-          <?php if ($icon): ?><img src="<?=$this->escapeHtmlAttr($icon)?>" />
+          <?php if ($icon): ?><img alt="" src="<?=$this->escapeHtmlAttr($icon)?>" />
           <?php else: ?><?=$this->icon('external-link', 'icon-link__icon') ?><?php endif; ?>
           <a href="<?=$this->escapeHtmlAttr($url)?>" target="_blank" title="<?=$this->escapeHtmlAttr($mot)?>" class="custom-link">
             <?=$this->escapeHtml($name)?>
@@ -70,55 +71,62 @@
     <?php endif; ?>
     </div>
   </div>
-    <div class="media-left medium img-col">
+  <div class="media-left medium img-col">
     <?php if ($cover): ?>
       <?=$cover?>
     <?php endif; ?>
 
-    <?php
-      $pLink = $this->driver->getPLink();
-      $ftLink = $this->driver->getLinkedFullTextLink();
-      $pdfLink = $this->driver->getPdfLink();
-      $epubLink = $this->driver->getEpubLink();
-    ?>
     <?php if (($isCommunityBorrower && $isOnCampus) || ($user && !$isCommunityBorrower)): ?>
       <div class="external-links">
-        <?php if($pLink): ?>
+        <?php $pLink = $this->driver->getPLink();
+        if ($pLink): ?>
           <span>
-            <?=$this->icon('external-link', 'icon-link__icon') ?>
+            <?=$this->icon('external-link', 'icon-link__icon') /** MSU */ ?>
             <a href="<?=$this->escapeHtmlAttr($pLink)?>">
               <?=$this->transEsc('View in EDS')?>
             </a>
-          </span><br>
+          </span><br><?php /** MSU */ ?>
         <?php endif; ?>
-        <?php if ($ftLink): ?>
-          <span>
-            <?=$this->icon('external-link', 'icon-link__icon') ?>
-            <a href="<?=$ftLink?>" class="fulltext">
-              <?=$this->transEsc('Linked Full Text')?>
-            </a>
-          </span><br>
-        <?php endif; ?>
-        <?php if ($pdfLink): ?>
-          <span>
-            <?=$this->icon('external-link', 'icon-link__icon') ?>
-            <a href="<?=$pdfLink?>" class="icon--eds pdf fulltext">
-              <?=$this->transEsc('PDF Full Text')?>
-            </a>
-          </span><br>
-        <?php endif; ?>
-        <?php if ($epubLink): ?>
-          <span>
-            <?=$this->icon('external-link', 'icon-link__icon') ?>
-            <a href="<?=$epubLink?>" class="icon--eds epub fulltext">
-              <?=$this->transEsc('ePub Full Text')?>
-            </a>
-          </span><br>
+        <?php if ($this->permission()->isAuthorized('access.EDSExtendedResults')): ?>
+          <?php if ($this->driver->hasHTMLFullTextAvailable()): ?>
+            <span>
+              <?=$this->icon('external-link', 'icon-link__icon') /** MSU */ ?>
+              <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getUrl($this->driver))?>#html" class="icon--eds html fulltext">
+                <?=$this->transEsc('HTML Full Text')?>
+              </a>
+            </span><br><?php /** MSU */ ?>
+          <?php endif; ?>
+          <?php if ($ftLink = $this->driver->getLinkedFullTextLink()): ?>
+            <span>
+              <?=$this->icon('external-link', 'icon-link__icon') /** MSU */ ?>
+              <a href="<?=$ftLink?>" class="fulltext">
+                <?=$this->transEsc('Linked Full Text')?>
+              </a>
+            </span><br><?php /** MSU */ ?>
+          <?php endif; ?>
+          <?php if ($pdfLink = $this->driver->getPdfLink()): ?>
+            <span>
+              <?=$this->icon('external-link', 'icon-link__icon') /** MSU */ ?>
+              <a href="<?=$pdfLink?>" class="icon--eds pdf fulltext">
+                <?=$this->transEsc('PDF Full Text')?>
+              </a>
+            </span><br><?php /** MSU */ ?>
+          <?php endif; ?>
+          <?php if ($epubLink = $this->driver->getEpubLink()): ?>
+            <span>
+              <?=$this->icon('external-link', 'icon-link__icon') /** MSU */ ?>
+              <a href="<?=$epubLink?>" class="icon--eds epub fulltext">
+                <?=$this->transEsc('ePub Full Text')?>
+              </a>
+            </span><br><?php /** MSU */ ?>
+          <?php endif; ?>
+        <?php else: ?>
+          <?=$this->render('RecordDriver/EDS/result-list/full-text-links.phtml', ['driver' => $this->driver, 'recordLinker' => $this->recordLinker()])?>
         <?php endif; ?>
       </div>
-    <?php elseif ($pLink || $ftLink || $pdfLink || $epubLink): ?>
+    <?php elseif ($pLink || $this->permission()->isAuthorized('access.EDSExtendedResults')): /** MSU START */ ?>
        <span>
-        <a class="login" href="<?=$this->url('myresearch-userlogin')?>" data-lightbox ref="nofollow">
+        <a class="login" href="<?=$this->url('myresearch-userlogin')?>" data-lightbox rel="nofollow">
           <span class="icon icon--font fa fa-sign-in icon-link__icon" role="img" aria-hidden="true"></span>
           <strong><?=$this->transEsc('Login for full access')?></strong>
         </a>
@@ -133,5 +141,6 @@
     <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['issue'],
                                            'label' => 'View Full Issue',
                                            'openAccess' => $libkeyData['openAccess']]); ?>
+    <?php /** MSU END */ ?>
   </div>
 </div>

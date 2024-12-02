@@ -23,6 +23,8 @@ to update the `VUFIND_VERSION` variable to be the new release you are updating t
 * Create a new branch with these changes named either `review-`* or `devel-`* to trigger a pipeline with
 a new environment.
 
+* Make sure the `--data` parameters contains the right field in `solr_cache_warmup` in `pc-import-folio`
+
 * Once the pipeline completes successfully, verify that the site loads and works correctly.
 
 * In order to test that a database migration will work correctly, take a fresh database dump of an
@@ -46,6 +48,27 @@ mv /usr/local/vufind/local/harvest/folio/processed/* /usr/local/vufind/local/har
 ./pc-import-folio -b
 ```
 
+### Verification
+This section includes some things that should be checked after doing a VuFind upgrade.
+
+* Inside the container, execute `run-tests` to make sure all tests and linting checks are passing.
+
+* Import course reserves (via the optional CI job) to make sure that searching and display continues to work.
+
+* Verify that the "bound with" relationships are still working as expected. Here are some sample records
+from our environment:
+https://catalog.lib.msu.edu/Record/folio.in00000717323
+https://catalog.lib.msu.edu/Record/folio.in00000336743
+https://catalog.lib.msu.edu/Record/folio.in00000280877
+
+* Verify that the status displayed on the record page and search results page matches what is in the "Get This"
+button status.
+
+* Check the login
+
+* Check holdings status (Available, Checked out, ...)
+
+* Check import scripts
 
 ## Solr
 If it is just the Solr version that is being upgraded, then updates to the Docker image will handle

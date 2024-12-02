@@ -327,6 +327,17 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * MSU extended
+     * Get the text of the part/section portion of the title.
+     *
+     * @return string
+     */
+    public function getTitleSection()
+    {
+        return $this->getFirstFieldValue('245', ['n', 'p', 'c']);
+    }
+
+    /**
      * Get the note fields
      *
      * @return array Note fields from Solr
@@ -1954,7 +1965,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getEdition()
     {
         // PC-1105
-        return $this->getFieldArray('250', ['a', 'b', '3']);
+        return $this->getFirstFieldValue('250', ['a', 'b', '3']);
     }
 
     /**

@@ -1,7 +1,10 @@
 <?php
+/** MSU - Except marked part, all code has been modified by MSU */
+/** MSU START */
 use Catalog\GetThis\GetThisLoader;
 
 $selected = '';
+/** @var Catalog\View\Helper\Root\Record $record */
 $record = $this->record($this->driver);
 foreach ($this->statusItems as $item) {
   if ($selected == '') {
@@ -18,22 +21,25 @@ if ($selected != '') {
   $callnumber = $selected['callnumber'];
   $callNumPrefix = !empty($selected['callnumber_prefix']) ? $selected['callnumber_prefix'] . ' ' : '';
 }
+/** MSU END */
 ?>
 <?php if ($selected != ''): ?>
   <div>
     <strong>Holdings:</strong>
     <span class="fullAvailability">
-      <?php if ($selected['use_unknown_message'] ?? false): ?>
-        <strong class="text-muted"><?=$this->transEsc('status_unknown_message')?></strong>
-      <?php elseif ($status == 'Library Use Only'): ?>
-        <strong class="text-warning"><?=$this->transEsc($status)?></strong>
-      <?php elseif ((int)$selected['availability'] === \VuFind\ILS\Logic\ItemStatus::STATUS_UNAVAILABLE): ?>
-        <strong class="text-danger"><?=$this->transEsc($status)?></strong>
-      <?php elseif ((int)$selected['availability'] === \VuFind\ILS\Logic\ItemStatus::STATUS_UNCERTAIN): ?>
-        <strong class="text-warning"><?=$this->transEsc($status)?></strong>
-      <?php else: ?>
-        <strong class="text-success"><?=$this->transEsc($status)?></strong>
-      <?php endif; ?>
+        <?php /** @var $availabilityStatus VuFind\ILS\Logic\AvailabilityStatus */ ?>
+        <?php $availabilityStatus = $selected['availability']; ?>
+        <?php /** NOT MSU START */ ?>
+          <?php
+            $statusClass = $this->availabilityStatus()->getClass($availabilityStatus);
+            if ($availabilityStatus->isAvailable() && $item['reserve'] === 'Y') {
+              $statusDescription = 'On Reserve';
+            } else {
+              $statusDescription = $availabilityStatus->getStatusDescription();
+            }
+            /** NOT MSU END */
+          ?>
+          <strong class="<?=$this->escapeHtmlAttr($statusClass)?>"><?=$this->transEsc($statusDescription)?></strong>
     </span>
     <?php if ($location != ''): ?>
       at

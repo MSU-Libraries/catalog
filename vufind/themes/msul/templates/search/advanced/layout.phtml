@@ -162,7 +162,7 @@
       </div>
 
       <div class="adv-submit">
-        <input class="clear-btn btn btn-default" type="button" value="<?= $this->transEscAttr('Clear')?>">
+        <button class="clear-btn btn btn-default" type="button"><span id="msulClearall" class="sr-only"></span> <?= $this->transEscAttr('Clear')?></button>
         <button type="submit" class="btn btn-primary"><?=$this->icon('search') ?> <?=$this->transEsc('Search')?></button>
       </div>
       <?php if (isset($this->extraAdvancedControls)): ?>
@@ -170,7 +170,7 @@
           <?=$this->extraAdvancedControls ?>
         </div>
         <div class="adv-submit">
-          <input class="clear-btn btn btn-default" type="button" value="<?= $this->transEscAttr('Clear')?>">
+          <button class="clear-btn btn btn-default" type="button"><span id="msulClearall" class="sr-only"></span> <?= $this->transEscAttr('Clear')?></button>
           <button type="submit" class="btn btn-primary"><?=$this->icon('search') ?> <?=$this->transEsc('Search')?></button>
         </div>
       <?php endif; ?>
@@ -220,11 +220,13 @@
       <?php if ($helpTopics): ?>
         <h2><?=$this->transEsc('Search Tips')?></h2>
         <?php // Data-title attribute is for analytics use.  Do not remove. ?>
-        <div class="facet-group" data-title="<?=$this->escapeHtmlAttr('Search Tips') ?>">
+        <ul class="facet-group" data-title="<?=$this->escapeHtmlAttr('Search Tips') ?>">
           <?php foreach ($helpTopics as $topic => $title): ?>
-            <a class="facet help-link" data-lightbox href="<?=$this->url('help-home', [], ['query' => ['topic' => $topic, '_' => time()]])?>"><?=$this->transEsc($title)?></a>
+            <li class="facet">
+              <a class="help-link" data-lightbox href="<?=$this->url('help-home', [], ['query' => ['topic' => $topic, '_' => time()]])?>"><?=$this->transEsc($title)?></a>
+            </li>
           <?php endforeach; ?>
-        </div>
+        </ul>
       <?php endif; ?>
     </div>
   </form>

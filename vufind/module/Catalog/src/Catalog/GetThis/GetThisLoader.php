@@ -148,41 +148,42 @@ class GetThisLoader
 
         $item_id = $this->getItemId($item_id);
         $item = $this->getItem($item_id);
-        $status = $item['status'] ?? 'Unknown';
-        $reserve = $item['reserve'] ?? 'N';
-        $loc = $item['location'] ?? '';
 
-        $statusSecondPart = $status;
-        if (Regex::SPEC_COLL($loc)) {
+        $status = isset($item['availability']) ? $item['availability']->getStatusDescription() : 'Unknown';
+        $statusSecondPart = '';
+        if (Regex::SPEC_COLL($item['location'] ?? '')) {
             $statusFirstPart = 'Unavailable';
-            $statusSecondPart = '';
         } elseif (
-            in_array($status, ['Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
-            'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
-            'Unknown', 'Withdrawn'])
+            in_array($status, [
+                'Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
+                'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
+                'Unknown', 'Withdrawn',
+            ])
         ) {
             $statusFirstPart = 'Unavailable';
             $statusSecondPart = $status;
         } elseif (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged'])) {
             $statusFirstPart = 'Checked Out';
             $statusSecondPart = $status;
-        } elseif ($status == 'Restricted') {
+        } elseif ($status === 'Checked out') {
+            $statusFirstPart = 'Checked Out';
+        } elseif ($status === 'Restricted') {
             $statusFirstPart = 'Library Use Only';
-            $statusSecondPart = '';
         } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
             $statusFirstPart = 'Unknown status';
             $statusSecondPart = $status;
-        } elseif ($reserve === 'Y') {
+        } elseif (isset($item['reserve']) && $item['reserve'] === 'Y') {
             $statusFirstPart = 'On Reserve';
-            $statusSecondPart = '';
+        } elseif ($status === 'Available') {
+            $statusFirstPart = 'Available';
+        } else {
+            $statusFirstPart = 'Unknown status';
         }
 
-        if (isset($statusFirstPart, $statusSecondPart)) {
-            if (!empty($statusSecondPart)) {
-                $statusSecondPart = ' (' . $statusSecondPart . ')';
-            }
-            $status = $statusFirstPart . $statusSecondPart;
+        if (!empty($statusSecondPart)) {
+            $statusSecondPart = ' (' . $statusSecondPart . ')';
         }
+        $status = $statusFirstPart . $statusSecondPart;
 
         return $status . $this->getStatusSuffix($item);
     }
@@ -201,10 +202,10 @@ class GetThisLoader
             $suffix = ' - ' . $item['returnDate'];
         }
         if ($item['duedate'] ?? false) {
-            $suffix = $suffix . ' - Due:' . $item['duedate'];
+            $suffix .= ' - Due: ' . $item['duedate'];
         }
         if ($item['temporary_loan_type'] ?? false) {
-            $suffix = $suffix . ' (' . $item['temporary_loan_type'] . ')';
+            $suffix .= ' (' . $item['temporary_loan_type'] . ')';
         }
         return $suffix;
     }

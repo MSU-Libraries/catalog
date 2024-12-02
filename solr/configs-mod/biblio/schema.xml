@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<schema name="VuFind Bibliographic Index" version="1.2">
+    <types>
+        <fieldType name="exactish" class="solr.TextField">
+            <analyzer>
+                <tokenizer class="solr.KeywordTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+        </fieldType>
+    </types>
+    <fields>
+        <field name="title_exactish" type="exactish" indexed="true" stored="true" multiValued="false"/>
+        <field name="title_browse" type="string" indexed="true" stored="true" multiValued="true"/>
+        <field name="title_browse_sort" type="string" indexed="true" stored="true" multiValued="true"/>
+        <field name="title_fullStr" deleteElement="true"/>
+        <field name="callnumber-label" type="string" indexed="true" stored="true" multiValued="true"/>
+        <field name="invalid_isbn" type="isn" indexed="true" stored="false" multiValued="true"/>
+    </fields>
+    <copyField source="title" dest="title_exactish"/>
+    <copyField source="title_full" dest="title_fullStr" deleteElement="true"/>
+</schema>

@@ -16,7 +16,16 @@ namespace CatalogTest\View\Helper\Root;
 
 use Catalog\View\Helper\Root\Record;
 use Laminas\Config\Config;
+use Laminas\View\Helper\ServerUrl;
+use Laminas\View\Helper\Url;
+use Laminas\View\Resolver\ResolverInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use VuFind\Cover\Loader;
+use VuFind\ILS\Logic\AvailabilityStatus;
+use VuFind\RecordDriver\AbstractBase as RecordDriver;
+use VuFind\Tags\TagsService;
+use VuFind\View\Helper\Root\Context;
+use VuFind\View\Helper\Root\SearchTabs;
 use VuFindTheme\ThemeInfo;
 
 use function is_array;
@@ -130,7 +139,8 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusWithNoHolding()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('Unavailable (Unknown)', $record->getStatus(null, false));
+        $holding = null;
+        $this->assertEquals('Unavailable (Unknown)', $record->getStatus($holding, false));
     }
 
     /**
@@ -141,7 +151,8 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusWithMissingKey()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('Unavailable (Unknown)', $record->getStatus([], false));
+        $holding = [];
+        $this->assertEquals('Unavailable (Unknown)', $record->getStatus($holding, false));
     }
 
     /**
@@ -152,7 +163,8 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusAvailable()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('Available', $record->getStatus(['status' => 'Available'], false));
+        $holding = ['availability' => new AvailabilityStatus(0, 'Available')];
+        $this->assertEquals('Available', $record->getStatus($holding, false));
     }
 
     /**
@@ -163,7 +175,8 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusUnavailable()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('Unavailable (In process)', $record->getStatus(['status' => 'In process'], false));
+        $holding = ['availability' => new AvailabilityStatus(0, 'In process')];
+        $this->assertEquals('Unavailable (In process)', $record->getStatus($holding, false));
     }
 
     /**
@@ -174,7 +187,8 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusRestricted()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('Library Use Only', $record->getStatus(['status' => 'Restricted'], false));
+        $holding = ['availability' => new AvailabilityStatus(0, 'Restricted')];
+        $this->assertEquals('Library Use Only', $record->getStatus($holding, false));
     }
 
     /**
@@ -185,22 +199,14 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusCheckedOut()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals(
-            'Checked Out (Awaiting pickup)',
-            $record->getStatus(['status' => 'Awaiting pickup'], false)
-        );
-        $this->assertEquals(
-            'Checked Out (Awaiting delivery)',
-            $record->getStatus(['status' => 'Awaiting delivery'], false)
-        );
-        $this->assertEquals(
-            'Checked Out (In transit)',
-            $record->getStatus(['status' => 'In transit'], false)
-        );
-        $this->assertEquals(
-            'Checked Out (Paged)',
-            $record->getStatus(['status' => 'Paged'], false)
-        );
+        $holding = ['availability' => new AvailabilityStatus(0, 'Awaiting pickup')];
+        $this->assertEquals('Checked Out (Awaiting pickup)', $record->getStatus($holding, false));
+        $holding = ['availability' => new AvailabilityStatus(0, 'Awaiting delivery')];
+        $this->assertEquals('Checked Out (Awaiting delivery)', $record->getStatus($holding, false));
+        $holding = ['availability' => new AvailabilityStatus(0, 'In transit')];
+        $this->assertEquals('Checked Out (In transit)', $record->getStatus($holding, false));
+        $holding = ['availability' => new AvailabilityStatus(0, 'Paged')];
+        $this->assertEquals('Checked Out (Paged)', $record->getStatus($holding, false));
     }
 
     /**
@@ -211,7 +217,11 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusReserve()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('On Reserve', $record->getStatus(['status' => 'Available', 'reserve' => 'Y'], false));
+        $holding = [
+            'availability' => new AvailabilityStatus(0, 'Available'),
+            'reserve' => 'Y',
+        ];
+        $this->assertEquals('On Reserve', $record->getStatus($holding, false));
     }
 
     /**
@@ -222,7 +232,8 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusUnknown()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals('Unknown status (test)', $record->getStatus(['status' => 'test'], false));
+        $holding = ['availability' => new AvailabilityStatus(0, 'test')];
+        $this->assertEquals('Unknown status (test)', $record->getStatus($holding, false));
     }
 
     /**
@@ -233,10 +244,11 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusReturnDate()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals(
-            'Checked Out (Paged) - 1/1/2000',
-            $record->getStatus(['status' => 'Paged', 'returnDate' => '1/1/2000'], false)
-        );
+        $holding = [
+            'availability' => new AvailabilityStatus(0, 'Paged'),
+            'returnDate' => '1/1/2000',
+        ];
+        $this->assertEquals('Checked Out (Paged) - 1/1/2000', $record->getStatus($holding, false));
     }
 
     /**
@@ -247,10 +259,11 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusDueDate()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals(
-            'Checked Out (Paged) - Due:1/1/2000',
-            $record->getStatus(['status' => 'Paged', 'duedate' => '1/1/2000'], false)
-        );
+        $holding = [
+            'availability' => new AvailabilityStatus(0, 'Paged'),
+            'duedate' => '1/1/2000',
+        ];
+        $this->assertEquals('Checked Out (Paged) - Due: 1/1/2000', $record->getStatus($holding, false));
     }
 
     /**
@@ -261,10 +274,11 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     public function testGetStatusLoanType()
     {
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
-        $this->assertEquals(
-            'Checked Out (Paged) (LoanType)',
-            $record->getStatus(['status' => 'Paged', 'temporary_loan_type' => 'LoanType'], false)
-        );
+        $holding = [
+            'availability' => new AvailabilityStatus(0, 'Paged'),
+            'temporary_loan_type' => 'LoanType',
+        ];
+        $this->assertEquals('Checked Out (Paged) (LoanType)', $record->getStatus($holding, false));
     }
 
     /**
@@ -376,27 +390,24 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     /**
      * Get a Record object ready for testing.
      *
-     * @param \VuFind\RecordDriver\AbstractBase $driver                   Record driver
-     * @param array|Config                      $config                   Configuration
-     * @param array|Config                      $browzineConfig           Configuration for BrowZine
-     * @param \VuFind\View\Helper\Root\Context  $context                  Context helper
-     * @param bool|string                       $url                      Should we add a URL helper?
-     * False if no, expected route if yes.
-     * @param bool                              $serverurl                Should we add a ServerURL
-     * helper?
-     * @param bool                              $setSearchTabExpectations Should we set default
-     * search tab expectations?
+     * @param RecordDriver $driver                   Record driver
+     * @param array|Config $config                   Configuration
+     * @param array|Config $browzineConfig           Configuration for BrowZine
+     * @param Context      $context                  Context helper
+     * @param bool|string  $url                      Should we add a URL helper? False if no, expected route if yes.
+     * @param bool         $serverurl                Should we add a ServerURL helper?
+     * @param bool         $setSearchTabExpectations Should we set default search tab expectations?
      *
      * @return Record
      */
     protected function getRecord(
-        $driver,
-        $config = [],
+        RecordDriver $driver,
+        array|Config $config = [],
         $browzineConfig = [],
-        $context = null,
-        $url = false,
-        $serverurl = false,
-        $setSearchTabExpectations = true
+        Context $context = null,
+        bool|string $url = false,
+        bool $serverurl = false,
+        bool $setSearchTabExpectations = true
     ) {
         if (null === $context) {
             $context = $this->getMockContext();
@@ -412,14 +423,81 @@ class RecordTest extends \PHPUnit\Framework\TestCase
         $container->set('searchTabs', $this->getMockSearchTabs($setSearchTabExpectations));
         $view->setHelperPluginManager($container);
         $view->expects($this->any())->method('resolver')
-            ->will($this->returnValue($this->getMockResolver()));
+            ->willReturn($this->getMockResolver());
         $config = is_array($config) ? new \Laminas\Config\Config($config) : $config;
         $browzineConfig = is_array($browzineConfig) ? new \Laminas\Config\Config($browzineConfig) : $browzineConfig;
-        $record = new Record($config, $browzineConfig);
+        $record = new Record($this->createMock(TagsService::class), $config, $browzineConfig);
         $record->setCoverRouter(new \VuFind\Cover\Router('http://foo/bar', $this->getCoverLoader()));
         $record->setView($view);
 
         return $record($driver);
+    }
+
+    /**
+     * Get a mock resolver object
+     *
+     * @return MockObject&ResolverInterface
+     */
+    protected function getMockResolver(): MockObject&ResolverInterface
+    {
+        return $this->createMock(ResolverInterface::class);
+    }
+
+    /**
+     * Get a mock context object
+     *
+     * @return MockObject&Context
+     */
+    protected function getMockContext(): MockObject&Context
+    {
+        $context = $this->createMock(\VuFind\View\Helper\Root\Context::class);
+        $context->expects($this->any())->method('__invoke')->willReturn($context);
+        return $context;
+    }
+
+    /**
+     * Get a mock URL helper
+     *
+     * @param string $expectedRoute Route expected by mock helper
+     *
+     * @return MockObject&Url
+     */
+    protected function getMockUrl($expectedRoute): MockObject&Url
+    {
+        $url = $this->createMock(Url::class);
+        $url->expects($this->once())->method('__invoke')
+            ->with($this->equalTo($expectedRoute))
+            ->willReturn('http://foo/bar');
+        return $url;
+    }
+
+    /**
+     * Get a mock server URL helper
+     *
+     * @return MockObject&ServerUrl
+     */
+    protected function getMockServerUrl(): MockObject&ServerUrl
+    {
+        $url = $this->createMock(ServerUrl::class);
+        $url->expects($this->once())->method('__invoke')->willReturn('http://server-foo/baz');
+        return $url;
+    }
+
+    /**
+     * Get a mock search tabs view helper
+     *
+     * @param bool $setDefaultExpectations Should we set up default expectations?
+     *
+     * @return MockObject&SearchTabs
+     */
+    protected function getMockSearchTabs($setDefaultExpectations = true)
+    {
+        $searchTabs = $this->getMockBuilder(SearchTabs::class)
+            ->disableOriginalConstructor()->getMock();
+        if ($setDefaultExpectations) {
+            $searchTabs->expects($this->any())->method('getCurrentHiddenFilterParams')->willReturn('');
+        }
+        return $searchTabs;
     }
 
     /**
@@ -429,53 +507,12 @@ class RecordTest extends \PHPUnit\Framework\TestCase
      *
      * @return array
      */
-    protected function loadRecordFixture($file)
+    protected function loadRecordFixture(string $file): object
     {
         $json = $this->getJsonFixture('misc/' . $file, 'Catalog');
         $record = new \VuFind\RecordDriver\SolrMarc();
         $record->setRawData($json['response']['docs'][0]);
         return $record;
-    }
-
-    /**
-     * Get a mock context object
-     *
-     * @return \VuFind\View\Helper\Root\Context
-     */
-    protected function getMockContext()
-    {
-        $context = $this->createMock(\VuFind\View\Helper\Root\Context::class);
-        $context->expects($this->any())->method('__invoke')
-            ->will($this->returnValue($context));
-        return $context;
-    }
-
-    /**
-     * Get a mock search tabs view helper
-     *
-     * @param bool $setDefaultExpectations Should we set up default expectations?
-     *
-     * @return \VuFind\View\Helper\Root\SearchTabs
-     */
-    protected function getMockSearchTabs($setDefaultExpectations = true)
-    {
-        $searchTabs = $this->getMockBuilder(\VuFind\View\Helper\Root\SearchTabs::class)
-            ->disableOriginalConstructor()->getMock();
-        if ($setDefaultExpectations) {
-            $searchTabs->expects($this->any())->method('getCurrentHiddenFilterParams')
-                ->will($this->returnValue(''));
-        }
-        return $searchTabs;
-    }
-
-    /**
-     * Get a mock resolver object
-     *
-     * @return \Laminas\View\Resolver\ResolverInterface
-     */
-    protected function getMockResolver()
-    {
-        return $this->createMock(\Laminas\View\Resolver\ResolverInterface::class);
     }
 
     /**
@@ -489,8 +526,13 @@ class RecordTest extends \PHPUnit\Framework\TestCase
      *
      * @return Loader
      */
-    protected function getCoverLoader($config = [], $manager = null, $theme = null, $httpService = null, $mock = false)
-    {
+    protected function getCoverLoader(
+        array $config = [],
+        \VuFind\Content\Covers\PluginManager $manager = null,
+        ThemeInfo $theme = null,
+        \VuFindHttp\HttpService $httpService = null,
+        array|bool $mock = false
+    ): Loader {
         $config = new Config($config);
         if (null === $manager) {
             $manager = $this->createMock(\VuFind\Content\Covers\PluginManager::class);
@@ -515,37 +557,8 @@ class RecordTest extends \PHPUnit\Framework\TestCase
      *
      * @return string
      */
-    protected function getThemeDir()
+    protected function getThemeDir(): string
     {
         return realpath('/usr/local/vufind/themes');
-    }
-
-    /**
-     * Get a mock URL helper
-     *
-     * @param string $expectedRoute Route expected by mock helper
-     *
-     * @return \Laminas\View\Helper\Url
-     */
-    protected function getMockUrl($expectedRoute)
-    {
-        $url = $this->createMock(\Laminas\View\Helper\Url::class);
-        $url->expects($this->once())->method('__invoke')
-            ->with($this->equalTo($expectedRoute))
-            ->will($this->returnValue('http://foo/bar'));
-        return $url;
-    }
-
-    /**
-     * Get a mock server URL helper
-     *
-     * @return \Laminas\View\Helper\ServerUrl
-     */
-    protected function getMockServerUrl()
-    {
-        $url = $this->createMock(\Laminas\View\Helper\ServerUrl::class);
-        $url->expects($this->once())->method('__invoke')
-            ->will($this->returnValue('http://server-foo/baz'));
-        return $url;
     }
 }

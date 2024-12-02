@@ -17,7 +17,7 @@ RUN \
     apt-get update && \
     apt-get install -y wget vim-nox lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
         gettext-base locales msmtp-mta rsync screen libxml-xpath-perl xmlstarlet php-xdebug \
-        nodejs npm git pigz libxml2-utils libmarc-xml-perl bash-completion \
+        nodejs npm git pigz libxml2-utils libmarc-xml-perl bash-completion gawk \
         # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
         mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php \
         php-curl php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml \
@@ -159,6 +159,9 @@ COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
 COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh backup.sh restore.sh /
 COPY msmtp/aliases msmtp/msmtprc /etc/
+# This could be removed once the mariadb connector is added to VuFind:
+RUN mv /usr/local/vufind/local/import/lib_local/mariadb-java-client-3.5.1.jar /usr/local/vufind/import/lib_local/ && \
+    sed -i "s/\\\\VuFind\\\\Db\\\\AdapterFactory/\\\\Catalog\\\\Db\\\\AdapterFactory/" /usr/local/vufind/module/VuFind/src/VuFindTest/Feature/LiveDatabaseTrait.php
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
@@ -177,14 +180,15 @@ RUN \
     # Prepare cache directory
     mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
+    install -d -o 1000 -g 1000 ${VUFIND_CACHE_DIR}/cli && \
     # Set permissions on local, theme, and Catalog
     chown -R 1000:1000 ${VUFIND_LOCAL_DIR} && \
     chown -R 33:1000 ${VUFIND_HOME}/themes/msul && \
     chown -R 1000:1000 ${VUFIND_HOME}/module/Catalog && \
-    rsync -aip --chmod=D2775,F664 ${VUFIND_CACHE_DIR}/ ${VUFIND_CACHE_DIR}/ && \
-    rsync -aip --chmod=D2775,F664 ${VUFIND_LOCAL_DIR}/ ${VUFIND_LOCAL_DIR}/ && \
-    rsync -aip --chmod=D2775,F664 ${VUFIND_HOME}/themes/msul/ ${VUFIND_HOME}/themes/msul/ && \
-    rsync -aip --chmod=D2775,F664 ${VUFIND_HOME}/module/Catalog/ ${VUFIND_HOME}/module/Catalog/ && \
+    rsync -rp --chmod=D2775,F664 ${VUFIND_CACHE_DIR}/ ${VUFIND_CACHE_DIR}/ && \
+    rsync -rp --chmod=D2775,F664 ${VUFIND_LOCAL_DIR}/ ${VUFIND_LOCAL_DIR}/ && \
+    rsync -rp --chmod=D2775,F664 ${VUFIND_HOME}/themes/msul/ ${VUFIND_HOME}/themes/msul/ && \
+    rsync -rp --chmod=D2775,F664 ${VUFIND_HOME}/module/Catalog/ ${VUFIND_HOME}/module/Catalog/ && \
     # Set permissions on Robots.txt
     chown 1000:1000 ${VUFIND_HOME}/public/robots.txt && \
     chmod 664 ${VUFIND_HOME}/public/robots.txt && \
@@ -198,9 +202,6 @@ RUN \
     # Install grunt
     npm install -g grunt-cli && \
     grunt less
-
-# Debugging; temporary files overriding core libraries
-COPY debug/ /usr/local/vufind/
 
 EXPOSE 80
 

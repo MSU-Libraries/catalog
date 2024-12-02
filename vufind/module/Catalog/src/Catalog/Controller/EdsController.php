@@ -46,7 +46,7 @@ use function in_array;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org Main Site
  */
-class EdsController extends \Catalog\Controller\AbstractSearch
+class EdsController extends AbstractSearch
 {
     /**
      * Constructor
@@ -200,7 +200,7 @@ class EdsController extends \Catalog\Controller\AbstractSearch
     }
 
     /**
-     * Process the publicationd date range limiter widget
+     * Process the publication date range limiter widget
      *
      * @param object $searchObject Saved search object (false if none)
      *
