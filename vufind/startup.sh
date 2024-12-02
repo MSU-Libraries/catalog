@@ -32,7 +32,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
         # Set up the repository for group editing
         git config --system --add safe.directory \*
         git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo config core.sharedRepository group
-        chgrp -R ubuntu "${SHARED_STORAGE}/${STACK_NAME}"/repo
+        chgrp -R 1000 "${SHARED_STORAGE}/${STACK_NAME}"/repo
         chmod -R g+rw "${SHARED_STORAGE}/${STACK_NAME}"/repo
         chmod g-w "${SHARED_STORAGE}/${STACK_NAME}"/repo/.git/objects/pack/*
         find "${SHARED_STORAGE}/${STACK_NAME}" -type d -exec chmod g+s {} \;

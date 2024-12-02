@@ -413,13 +413,18 @@ update_processed_delete_files() {
     verbose "Updating past delete files (in case some records were undeleted)..."
     shopt -s nullglob
     DELETE_FILES=("${ARGS[VUFIND_HARVEST_DIR]}"/processed/*.delete)
+    MARC_FILES=("${ARGS[VUFIND_HARVEST_DIR]}"/*.marc)
     shopt -u nullglob
     if [[ ${#DELETE_FILES[@]} -eq 0 ]]; then
         verbose "No delete file in processed directory, skipping."
         return
     fi
+    if [[ ${#MARC_FILES[@]} -eq 0 ]]; then
+        verbose "No marc file in harvest directory, skipping."
+        return
+    fi
     IDS=""
-    for MFILE in "${ARGS[VUFIND_HARVEST_DIR]}"/*.marc; do
+    for MFILE in "${MARC_FILES[@]}"; do
         OUTFILE="${MFILE%.*}_extract.txt"
         if ! marcextract.sh "${MFILE}" 001; then
             verbose "ERROR with marcextract for ${MFILE}"
