@@ -25,6 +25,7 @@ def _times_by_period(period: str) -> list[datetime]:
         'week': timedelta(days=7),
         'month': timedelta(days=30),
         'year': timedelta(days=365),
+        'decade': timedelta(days=3652),
     }
     delta = delta_by_period[period]
     period_start = datetime.now() - delta
@@ -83,7 +84,7 @@ def node_graph_data(variable: str, period: str) -> dict[str, list] | str:
     '''
     if variable not in KNOWN_VARIABLES:
         return 'Error: unknown variable'
-    if period not in ['hour', 'day', 'week', 'month', 'year']:
+    if period not in ['hour', 'day', 'week', 'month', 'year', 'decade']:
         return 'Error: unknown period'
     # someday this will support any given date/time for start and end
     (period_start, period_end) = _times_by_period(period)
