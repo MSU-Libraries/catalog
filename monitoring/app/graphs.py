@@ -126,7 +126,7 @@ def graph(variable: str, period: str) -> str:
     '''
     if variable not in KNOWN_VARIABLES:
         return 'Error: unknown variable'
-    if period not in ['hour', 'day', 'week', 'month', 'year']:
+    if period not in ['hour', 'day', 'week', 'month', 'year', 'decade']:
         return 'Error: unknown period'
     urls = []
     for node in range(1, 4):
