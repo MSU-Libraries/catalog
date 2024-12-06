@@ -100,7 +100,8 @@ class AbstractSearch extends \VuFind\Controller\AbstractSearch
         }
 
         $recordList = $results->getResults();
-        $queryParams = SearchOriginFactory::createObject($this->params()->fromQuery())->getSearchUrlParamsArray() ?? [];
+        $searchOrigin = SearchOriginFactory::createObject($this->params()->fromQuery());
+        $queryParams = isset($searchOrigin) ? $searchOrigin->getSearchUrlParamsArray() : [];
         return isset($recordList[$jumpto - 1])
             ? $this->getRedirectForRecord($recordList[$jumpto - 1], $queryParams) : false;
     }
@@ -123,8 +124,8 @@ class AbstractSearch extends \VuFind\Controller\AbstractSearch
             && $results->getResultTotal() == 1
             && $recordList = $results->getResults()
         ) {
-            $queryParams = SearchOriginFactory::createObject($this->params()->fromQuery())->getSearchUrlParamsArray()
-                ?? [];
+            $searchOrigin = SearchOriginFactory::createObject($this->params()->fromQuery());
+            $queryParams = isset($searchOrigin) ? $searchOrigin->getSearchUrlParamsArray() : [];
             $queryParams['sid'] = $results->getSearchId();
             return $this->getRedirectForRecord(reset($recordList), $queryParams);
         }
