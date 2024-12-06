@@ -24,7 +24,7 @@ fileroot=${infile%.*}
 outfile="${fileroot}_extract.txt"
 
 
-read -r -d '' awkscript << "ENDOFAWK"
+awkscript=$(cat << "ENDOFAWK"
 #!/usr/bin/awk -f 
 BEGIN { records_found = 0 
 
@@ -125,6 +125,7 @@ END {
 }
 
 ENDOFAWK
+)
 
 CHECKMARK_TEMP=$(mktemp -d)
 cleanup() {
