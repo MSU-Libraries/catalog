@@ -1965,7 +1965,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getEdition()
     {
         // PC-1105
-        return $this->getFieldArray('250', ['a', 'b', '3']);
+        return $this->getFirstFieldValue('250', ['a', 'b', '3']);
     }
 
     /**

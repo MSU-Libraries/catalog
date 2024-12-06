@@ -413,12 +413,33 @@ update_processed_delete_files() {
     verbose "Updating past delete files (in case some records were undeleted)..."
     shopt -s nullglob
     DELETE_FILES=("${ARGS[VUFIND_HARVEST_DIR]}"/processed/*.delete)
+    MARC_FILES=("${ARGS[VUFIND_HARVEST_DIR]}"/*.marc)
     shopt -u nullglob
     if [[ ${#DELETE_FILES[@]} -eq 0 ]]; then
         verbose "No delete file in processed directory, skipping."
         return
     fi
-    IDS=$(LANG=C grep -oUaP "(?<=\x1e)ebs[0-9]+e(?=\x1e)" "${ARGS[VUFIND_HARVEST_DIR]}"/*.marc | sed -e 's/^/hlm./' | sort)
+    if [[ ${#MARC_FILES[@]} -eq 0 ]]; then
+        verbose "No marc file in harvest directory, skipping."
+        return
+    fi
+    IDS=""
+    for MFILE in "${MARC_FILES[@]}"; do
+        OUTFILE="${MFILE%.*}_extract.txt"
+        if ! marcextract.sh "${MFILE}" 001; then
+            verbose "ERROR with marcextract for ${MFILE}"
+            rm -f "${OUTFILE}"
+            exit 1
+        fi
+        IDS2="$(cut -f1 "${OUTFILE}" | sed -e 's/^/hlm./')"
+        if [[ "${IDS}" == "" ]]; then
+            IDS="${IDS2}"
+        else
+            IDS="${IDS}\n${IDS2}"
+        fi
+        rm -f "${OUTFILE}"
+    done
+    IDS=$(echo -e "$IDS" | sort -u)
     for DFILE in "${DELETE_FILES[@]}"; do
         if comm -2 -3 <(sort "$DFILE") <(echo "$IDS") >"${DFILE}_2"; then
             mv "${DFILE}_2" "$DFILE"

@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ENV TZ=America/Detroit \
     DEBIAN_FRONTEND=noninteractive \
@@ -17,11 +17,15 @@ RUN \
     apt-get update && \
     apt-get install -y wget vim-nox lsof apache2 xml-twig-tools curl cron rsyslog jq htop moreutils \
         gettext-base locales msmtp-mta rsync screen libxml-xpath-perl xmlstarlet php-xdebug \
-        nodejs npm git pigz libxml2-utils libmarc-xml-perl bash-completion \
-        # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead)
-        mysql-client default-jre-headless apache2 libapache2-mod-php php-pear php \
+        nodejs npm git pigz libxml2-utils libmarc-xml-perl bash-completion gawk \
+        # VuFind dependencies; modified to not include php-dev, mysql-server, or Java JDK (using JRE instead) \
+        # We can switch back to default-jre-headless (openjdk-21-jre-headless) instead of openjdk-17-jre-headless \
+        # when we remove the patches for marc4j & solrmarc
+        mysql-client openjdk-17-jre-headless apache2 libapache2-mod-php php-pear php \
         php-curl php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml \
         libapache2-mod-security2 modsecurity-crs uuid-runtime && \
+    # We can remove the following line when switching back to default-jre-headless
+    cd /usr/lib/jvm && ln -s java-17-openjdk-amd64 default-java && \
     # TEMP(PART2):
     # - Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/100
     # - Patch and replace solrmarc due to delete logic hardcode to MARC 001 as id instead of .properties defined id
@@ -87,11 +91,6 @@ RUN \
     rm -rf /tmp/solr && \
     # Fix world writable vendor dirs (TODO find out why these happen in the first place)
     find /usr/local/vufind/vendor -type d -perm -o+w -exec chmod o-w \; && \
-    # Create user for grunt
-    groupadd -g 1000 msuldevs && \
-    useradd msuldevs -u 1000 -g 1000 && \
-    mkdir /home/msuldevs && \
-    chown 1000:1000 /home/msuldevs && \
     # Enable bash completion for all users
     echo ". /usr/share/bash-completion/bash_completion" >> /etc/bash.bashrc
 
@@ -159,6 +158,9 @@ COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
 COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh backup.sh restore.sh /
 COPY msmtp/aliases msmtp/msmtprc /etc/
+# This could be removed once the mariadb connector is added to VuFind:
+RUN mv /usr/local/vufind/local/import/lib_local/mariadb-java-client-3.5.1.jar /usr/local/vufind/import/lib_local/ && \
+    sed -i "s/\\\\VuFind\\\\Db\\\\AdapterFactory/\\\\Catalog\\\\Db\\\\AdapterFactory/" /usr/local/vufind/module/VuFind/src/VuFindTest/Feature/LiveDatabaseTrait.php
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/

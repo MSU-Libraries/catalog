@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from itertools import islice
 import http.client
 import json
 import time
@@ -12,22 +13,32 @@ class StatusException(Exception):
 
 
 def read_results():
-    print("Read results\n")
-    filename = "/mnt/shared/call-numbers/call_numbers.json"
+    print("Read results")
+    filename = "/mnt/shared/call-numbers/call_numbers.csv"
     with open(filename, 'r', encoding='utf-8') as f:
-        return json.load(f)
+        for line in f:
+            parts = line.split(',')
+            yield {"id": parts[0], "cn": parts[1]}
 
 
 def connect():
-    headers = { 'Content-type': 'application/json' }
+    headers = {"Content-type": "application/json"}
     conn = http.client.HTTPConnection('localhost:8983')
     return conn, headers
 
 
-def chunks(lst, n):
+def chunks(iterable, n):
     # could be replaced by itertools.batched with python 3.12
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
+    while chunk := list(islice(iterable, n)):
+        yield chunk
+
+
+def check_status(resp):
+    if resp.status != 200:
+        print(f"\nUnexpected status: {resp.status} {resp.reason}\n")
+        print("Response:\n")
+        print(resp.read())
+        raise StatusException(f"Unexpected status: {resp.status} {resp.reason}")
 
 
 def send_batch_to_solr(conn, headers, batch):
@@ -39,32 +50,39 @@ def send_batch_to_solr(conn, headers, batch):
     path = '/solr/biblio/update?commit=true'
     conn.request('POST', path, body=query, headers=headers)
     resp = conn.getresponse()
-    if resp.status != 200:
-        print(f"\nUnexpected status: {resp.status} {resp.reason}\n")
-        print("Response:\n")
-        print(resp.read())
-        raise StatusException(f"Unexpected status: {resp.status} {resp.reason}")
+    check_status(resp)
     resp.read()
 
 
-def send_by_batch(docs):
+def send_by_batch(docs, conn, headers):
     print("Send by batch")
-    conn, headers = connect()
-    try:
-        n = 0
-        for batch in chunks(docs, BATCH_SIZE):
-            n = n + 1
-            print(f"Batch number {n} / {int(len(docs)/BATCH_SIZE)+1}", end='\r')
-            send_batch_to_solr(conn, headers, batch)
-    finally:
-        conn.close()
+    n = 0
+    for batch in chunks(docs, BATCH_SIZE):
+        n = n + 1
+        print(f"Batch number {n}", end='\r')
+        send_batch_to_solr(conn, headers, batch)
     print("\n")
+
+
+def remove_deleted_records(conn, headers):
+    print("Remove deleted records")
+    path = '/solr/biblio/update?commit=true'
+    query = json.dumps({"delete": {"query": "!(institution:*)"}})
+    conn.request('POST', path, body=query, headers=headers)
+    resp = conn.getresponse()
+    check_status(resp)
+    resp.read()
 
 
 def main():
     start = time.perf_counter()
     docs = read_results()
-    send_by_batch(docs)
+    conn, headers = connect()
+    try:
+        send_by_batch(docs, conn, headers)
+        remove_deleted_records(conn, headers)
+    finally:
+        conn.close()
     end = time.perf_counter()
     print(f"\nDone. Execution time: {int(end - start)} s")
 

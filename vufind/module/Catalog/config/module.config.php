@@ -75,6 +75,14 @@ return [
           'util/index_reserves' => Catalog\Command\Util\IndexReservesCommand::class,
         ],
       ],
+      'content_covers' => [
+        'factories' => [
+          Catalog\Content\Covers\BrowZine::class => VuFind\Content\Covers\BrowZineFactory::class,
+        ],
+        'aliases' => [
+          'browzine' => Catalog\Content\Covers\BrowZine::class,
+        ],
+      ],
       'form_handler' => [
         'factories' => [
           Catalog\Form\Handler\FeedbackEmail::class => VuFind\Form\Handler\EmailFactory::class,
@@ -141,8 +149,12 @@ return [
     'factories' => [
       Catalog\Form\Form::class => VuFind\Form\FormFactory::class,
       Catalog\Session\SessionManager::class => Catalog\Session\ManagerFactory::class,
+      Catalog\ILS\Logic\Holds::class => VuFind\ILS\Logic\LogicFactory::class, // TODO - To remove after 10.1 - There is a fix for it - https://github.com/vufind-org/vufind/pull/4013
+      Catalog\Db\AdapterFactory::class => VuFind\Service\ServiceWithConfigIniFactory::class,
+      Laminas\Db\Adapter\Adapter::class => Catalog\Db\AdapterFactory::class,
     ],
     'aliases' => [
+      VuFind\ILS\Logic\Holds::class => Catalog\ILS\Logic\Holds::class, // TODO - To remove after 10.1 - There is a fix for it - https://github.com/vufind-org/vufind/pull/4013
       VuFind\Form\Form::class => Catalog\Form\Form::class,
       Laminas\Session\SessionManager::class => Catalog\Session\SessionManager::class,
       VuFind\Session\ManagerFactory::class => Catalog\Session\ManagerFactory::class,

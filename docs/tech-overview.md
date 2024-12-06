@@ -96,6 +96,7 @@ pipelines to provision and configure our application stack
 a read-only access key to the registry to pull from  
 * **MkDocs**: The static site generator used to generate this documentation  
 * **GitHub Pages**: The hosting service used for this documentation  
+* **[marc-utils](https://github.com/banerjek/marc-utils/tree/main)**  
 
 ## Docker Swarm Stacks and Services
 * **catalog**:  

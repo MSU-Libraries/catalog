@@ -196,6 +196,11 @@ body, button, select, input {
       width: 35%;
     }
   }
+    @media only screen and (min-width : 1260px) {
+   .searchForm-query {
+      width: 50%;
+    }
+  }
 }
 
 header {
@@ -541,8 +546,9 @@ input[type="checkbox"] {
 }
 
 //searchbox responsive styling
-.searchbox {
+.searchbox .searchForm {
       #searchForm-reset {
+        position:absolute;
         right: 3px;
         top:0.37em;
         line-height:1em;
@@ -595,10 +601,11 @@ input[type="checkbox"] {
   }
 
   @media only screen and (min-width : 992px) {
-    .searchForm_lookfor {
+    .searchForm-query .searchForm_lookfor {
       width: 100%;
       max-width: initial;
       border-radius:0.5rem 0 0 0.5rem;
+      padding-right:5rem !important;
     }
     .searchForm-query #searchForm_controls {
       width: 4.5rem;
@@ -696,7 +703,7 @@ input[type="checkbox"] {
   @media only screen and (min-width : 1445px) {
       .searchForm-query {
         width:100%;
-        max-width: 400px;
+        max-width: 500px;
     }
   }
 }
@@ -1105,6 +1112,14 @@ table tr {
   h3 {
     color: black;
   }
+
+
+@keyframes buttonAnimation {
+  from {box-shadow: 0;background-color:@parakeetgreen;}
+  to {box-shadow: 0 0 2px 2px rgba(255, 255, 255, 1), 0px 0px 5px 5px rgba(0, 122, 255, .9);
+  background-color:@darkparakeetgreen;}
+}
+
   #apply-filters {
     height: 3.5em;
     z-index: 500;
@@ -1112,6 +1127,16 @@ table tr {
     padding: 1em 1em 3.5em;
     border-bottom: 1px solid #C1C1C1;
     background: white;
+    .transform {
+      box-shadow: 0;
+      animation-name: buttonAnimation;
+      animation-duration: 2s;
+      -webkit-transition: all 2s ease;
+      -moz-transition: all 2s ease;
+      -o-transition: all 2s ease;
+      -ms-transition: all 2s ease;
+      transition: all 2s ease;
+    }
   }
   #apply-filters.fixed {
     top: 0;
@@ -1573,7 +1598,7 @@ body.template-dir-myresearch.template-name-profile {
 // Button btn-primary
 
 .btn-primary {
-  line-height:1.375;
+  line-height:1.4;
     &:hover {
       background-color:@darkparakeetgreen;
       border-color:@darkparakeetgreen;

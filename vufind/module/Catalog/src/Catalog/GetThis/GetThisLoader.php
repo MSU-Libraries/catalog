@@ -148,8 +148,8 @@ class GetThisLoader
 
         $item_id = $this->getItemId($item_id);
         $item = $this->getItem($item_id);
-        $status = $item['status'] ?? 'Unknown';
 
+        $status = isset($item['availability']) ? $item['availability']->getStatusDescription() : 'Unknown';
         $statusSecondPart = '';
         if (Regex::SPEC_COLL($item['location'] ?? '')) {
             $statusFirstPart = 'Unavailable';
