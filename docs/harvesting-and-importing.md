@@ -288,10 +288,10 @@ This should be done after each full import (FOLIO + HLM) when data was reset, in
 python3 ./add_generated_call_numbers.py
 ```
 Partial call numbers are added to `callnumber-label` for records that didn't have any when the
-`call_numbers.json` file was generated.
+`call_numbers.csv` file was generated.
 
-Note that the call numbers in `/mnt/shared/call-numbers/call_numbers.json` are meant for beta/preview/prod.
-There is another file at `/mnt/shared/call-numbers/test_call_numbers.json` that can be used for testing in dev.
+Note that the call numbers in `/mnt/shared/call-numbers/call_numbers.csv` are meant for beta/preview/prod.
+There is another file at `/mnt/shared/call-numbers/test_call_numbers.csv` that can be used for testing in dev.
 
 ## Ignoring certain HLM files
 If your EBSCO FTP server is set up in a way where it contains all of the sets ever generated for you, then
