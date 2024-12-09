@@ -4,79 +4,69 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.Set;
 
-import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
-import org.marc4j.marc.VariableField;
 
+import org.solrmarc.callnum.DeweyCallNumber;
+import org.solrmarc.callnum.LCCallNumber;
+import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.index.SolrIndexerMixin;
 
+
 public class CallNumberUtilMixin extends SolrIndexerMixin {
-    private static final Pattern lccPattern = Pattern.compile("^([A-HJ-NP-VZ][A-Z]{0,2})\\s*\\d[^:]*$");
-    private static final Pattern firstCutterPattern = Pattern.compile("^([A-HJ-NP-VZ][A-Z]{0,2}\\d+\\s?\\.[A-Z0-9]+)");
 
     /**
-     * Return a list of call number substrings, using all values from 952e and 50a.
-     * - one with 2 letters
-     * - one up until the dot
-     * - one including the first cutter
+     * Extract the call number labels from a record.
+     * fieldSpec might include 952e for FOLIO, in which case we do not know the type of call number
+     * (also sometimes call numbers are in the wrong MARC field for their type).
+     * If LCC: classLetters, classLetters + classDigits, classLetters + classDigits + classDecimal
+     * If Dewey: classDigits, classDigits + classDecimal
+     * Otherwise: everything up until the dot (or everything if there is no dot)
+     * @param record MARC record
+     * @param fieldSpec taglist for call number fields
+     * @return Call number labels
      */
-    public List<String> getMSUCallNumberLabels(final Record record) {
-        List<String> callNumbers = getValuesMatching(record, "952", "e");
-        callNumbers.addAll(getValuesMatching(record, "050", "a"));
+    public List<String> getMSUCallNumberLabels(final Record record, String fieldSpec) {
+        Set<String> values = SolrIndexer.instance().getFieldList(record, fieldSpec);
         HashSet<String> result = new LinkedHashSet<String>();
-        for (String cn : callNumbers) {
+        for (String cn: values) {
             String cnUp = cn.toUpperCase().trim();
-            if (cnUp.length() < 1) {
-                continue;
-            }
-            if (cnUp.length() < 2) {
-                result.add(cnUp);
-                continue;
-            }
-            Matcher lccMatcher = lccPattern.matcher(cnUp);
-            boolean isLcc = lccMatcher.matches() && (cnUp.length() <= 10 || cnUp.contains("."));
-            if (isLcc && cnUp.length() >= 2) {
-                result.add(lccMatcher.group(1));
-            }
-            if (cnUp.length() == 2) {
-                continue;
-            }
-            int dotPos = cnUp.indexOf(".");
-            if (dotPos < 0) {
-                result.add(cnUp.trim());
-                continue;
-            }
-            if (dotPos == 0) {
-                continue;
-            }
-            result.add(cnUp.substring(0, dotPos).trim());
-            if (!isLcc) {
-                continue;
-            }
-            Matcher firstCutterMatcher = firstCutterPattern.matcher(cnUp);
-            if (firstCutterMatcher.find()) {
-                result.add(firstCutterMatcher.group(1).replaceAll("\\s",""));
+            LCCallNumber lcc = new LCCallNumber(cnUp);
+            DeweyCallNumber dewey = new DeweyCallNumber(cnUp);
+            boolean other = cnUp.contains(":") || (cnUp.length() > 10 && !cnUp.contains("."));
+            boolean isLcc = lcc.isValid() && !other;
+            boolean isDewey = dewey.isValid() && !other;
+            if (isLcc) {
+                result.add(lcc.getClassLetters());
+                result.add(lcc.getClassLetters() + lcc.getClassDigits());
+                if (lcc.getClassDecimal() != null) {
+                    result.add(lcc.getClassLetters() + lcc.getClassDigits() + lcc.getClassDecimal());
+                }
+            } else if (isDewey) {
+                result.add(dewey.getClassDigits());
+                String classDecimal = dewey.getClassDecimal();
+                if (classDecimal != null) {
+                    for (int i=1; i<5; i++) {
+                        if (classDecimal.length() > i) {
+                            result.add(dewey.getClassDigits() + classDecimal.substring(0, i+1));
+                        }
+                    }
+                }
+            } else {
+                // NOTE: we could add other classifications like SuDoc here (and add related MARC fields to fieldSpec)
+                int dotPos = cnUp.indexOf(".");
+                if (dotPos < 0) {
+                    result.add(cnUp);
+                    continue;
+                }
+                if (dotPos == 0) {
+                    continue;
+                }
+                result.add(cnUp.substring(0, dotPos).trim());
             }
         }
         return new ArrayList<String>(result);
     }
 
-    private List<String> getValuesMatching(Record record, String fieldCode, String subfieldCodes) {
-        List<VariableField> fields = record.getVariableFields(fieldCode);
-        List<String> values = new ArrayList<String>();
-        for (VariableField vf : fields) {
-            if (!(vf instanceof DataField)) {
-                continue;
-            }
-            DataField df = (DataField)vf;
-            values.addAll(df.getSubfields(subfieldCodes).stream()
-                .map(f -> f.getData())
-                .collect(Collectors.toList()));
-        }
-        return(values);
-    }
 }
