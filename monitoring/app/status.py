@@ -17,7 +17,7 @@ async def _node_cluster_state_uuid() -> str:
         with open(os.getenv('MARIADB_VUFIND_PASSWORD_FILE'), 'r', encoding='UTF-8') as f:
             password = f.read().strip()
             f.close()
-        return await async_exec("mysql", "-h", "galera", "-u", "vufind",
+        return await async_exec("mariadb", "--skip_ssl", "-h", "galera", "-u", "vufind",
             f"-p{password}", "-ss", "-e",
             "SELECT variable_value from information_schema.global_status WHERE " \
             "variable_name='wsrep_cluster_state_uuid';")
@@ -44,7 +44,7 @@ async def get_galera_status(statuses: list[dict]) -> str:
         with open(os.getenv('MARIADB_VUFIND_PASSWORD_FILE'), 'r', encoding='UTF-8') as f:
             password = f.read().strip()
             f.close()
-        cluster_size = await async_exec("mysql", "-h", "galera", "-u", "vufind",
+        cluster_size = await async_exec("mariadb", "--skip_ssl", "-h", "galera", "-u", "vufind",
             f"-p{password}", "-ss", "-e",
             "SELECT variable_value from information_schema.global_status " \
             "WHERE variable_name='wsrep_cluster_size';")
