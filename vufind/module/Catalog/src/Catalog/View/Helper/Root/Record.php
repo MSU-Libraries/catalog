@@ -14,7 +14,6 @@
 
 namespace Catalog\View\Helper\Root;
 
-use Catalog\Utils\RegexLookup as Regex;
 use Laminas\Config\Config;
 use VuFind\Config\YamlReader;
 use VuFind\ILS\Logic\AvailabilityStatus;
@@ -215,10 +214,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
 
         $status = isset($holding['availability']) ? $holding['availability']->getStatusDescription() : 'Unknown';
         $statusSecondPart = '';
-        if (Regex::SPEC_COLL($holding['location'] ?? '')) {
-            $statusFirstPart = 'Unavailable';
-            $availability = false;
-        } elseif (
+        if (
             in_array($status, [
                 'Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
                 'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
