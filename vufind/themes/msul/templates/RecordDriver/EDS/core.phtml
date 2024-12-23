@@ -76,10 +76,10 @@
       <?=$cover?>
     <?php endif; ?>
 
+    <?php $pLink = $this->driver->getPLink(); ?>
     <?php if (($isCommunityBorrower && $isOnCampus) || ($user && !$isCommunityBorrower)): ?>
       <div class="external-links">
-        <?php $pLink = $this->driver->getPLink();
-        if ($pLink): ?>
+        <?php if ($pLink): ?>
           <span>
             <?=$this->icon('external-link', 'icon-link__icon') /** MSU */ ?>
             <a href="<?=$this->escapeHtmlAttr($pLink)?>">
