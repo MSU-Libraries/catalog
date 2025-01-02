@@ -9,14 +9,16 @@ $record = $this->record($this->driver);
 foreach ($this->statusItems as $item) {
   if ($selected == '') {
     $selected = $item;
-  } elseif ($selected['status'] != 'Available') {
-    if ($item['status'] == 'Available' || ($selected['status'] != 'Restricted' && $item['status'] == 'Restricted')) {
+    $selectedStatus = $record->getStatus($selected);
+  } elseif ($selectedStatus != 'Available') {
+    $itemStatus = $record->getStatus($item);
+    if ($itemStatus == 'Available' || ($selectedStatus != 'Library Use Only' && $itemStatus == 'Library Use Only')) {
       $selected = $item;
+      $selectedStatus = $record->getStatus($selected);
     }
   }
 }
 if ($selected != '') {
-  $status = $record->getStatus($selected);
   $location = $selected['location'];
   $callnumber = $selected['callnumber'];
   $callNumPrefix = !empty($selected['callnumber_prefix']) ? $selected['callnumber_prefix'] . ' ' : '';

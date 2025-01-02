@@ -32,6 +32,8 @@ services:
       STACK_NAME: "${STACK_NAME}"
       NODE: "{{slice .Node.Hostname 8 9}}"
       <<: *vufind_envs
+    secrets: # secrets are prefixed with stack name in deploy-compose
+      - HLM_FTP_PASSWORD
     deploy:
       mode: replicated
       replicas: 1

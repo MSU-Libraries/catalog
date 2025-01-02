@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from itertools import islice
 import http.client
 import json
 import time
@@ -13,9 +14,11 @@ class StatusException(Exception):
 
 def read_results():
     print("Read results")
-    filename = "/mnt/shared/call-numbers/call_numbers.json"
+    filename = "/mnt/shared/call-numbers/call_numbers.csv"
     with open(filename, 'r', encoding='utf-8') as f:
-        return json.load(f)
+        for line in f:
+            parts = line.split(',')
+            yield {"id": parts[0], "cn": parts[1]}
 
 
 def connect():
@@ -24,10 +27,10 @@ def connect():
     return conn, headers
 
 
-def chunks(lst, n):
+def chunks(iterable, n):
     # could be replaced by itertools.batched with python 3.12
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
+    while chunk := list(islice(iterable, n)):
+        yield chunk
 
 
 def check_status(resp):
@@ -56,7 +59,7 @@ def send_by_batch(docs, conn, headers):
     n = 0
     for batch in chunks(docs, BATCH_SIZE):
         n = n + 1
-        print(f"Batch number {n} / {int(len(docs)/BATCH_SIZE)+1}", end='\r')
+        print(f"Batch number {n}", end='\r')
         send_batch_to_solr(conn, headers, batch)
     print("\n")
 
