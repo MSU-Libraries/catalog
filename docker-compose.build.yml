@@ -56,3 +56,7 @@ volumes:
   logs:
     external: true
     name: "${STACK_NAME}_logs"
+
+secrets: # secrets are prefixed with stack name in deploy-compose
+  HLM_FTP_PASSWORD:
+    external: true
