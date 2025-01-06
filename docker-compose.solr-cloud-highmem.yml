@@ -7,9 +7,124 @@ x-solr-envs: &solr_envs
   SOLR_OPTS: "-Dsolr.allowPaths=/mnt/solr_backups"
   STACK_NAME: "${STACK_NAME}"
 
+x-solrproxy-deploy: &solrproxy_deploy
+  mode: replicated
+  replicas: 3
+  restart_policy:
+    window: 15s
+  update_config:
+    parallelism: 1
+    failure_action: rollback
+    delay: 10s
+    monitor: 10s
+  placement:
+    max_replicas_per_node: 1
+  labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.entrypoints=msul-http-ent"
+    - "traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.service=${STACK_NAME}-msul-proxysolr-app"
+    - "traefik.http.services.${STACK_NAME}-msul-proxysolr-app.loadbalancer.server.port=8080"
+    - "traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.middlewares=http-redirect"
+    - "traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.entrypoints=msul-https-ent"
+    - "traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.service=${STACK_NAME}-https-msul-proxysolr-app"
+    - "traefik.http.services.${STACK_NAME}-https-msul-proxysolr-app.loadbalancer.server.port=8080"
+    - "traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.middlewares=restrict-auth"
+    - "traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.tls=true"
+
 version: "3.8"
 services:
   solr:
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
+    volumes:
+      - bitnami:/bitnami
+      - /mnt/shared/backups/${STACK_NAME}/solr_dropbox:/mnt/solr_backups
+      - logs:/mnt/logs
+      - /mnt/shared/call-numbers:/mnt/shared/call-numbers:r
+    hostname: solr{{slice .Node.Hostname 8 9}}
+    networks:
+      - internal
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    init: true
     environment:
       SOLR_HOST: solr{{slice .Node.Hostname 8 9}}
       <<: *solr_envs
+    deploy:
+      mode: replicated
+      replicas: 3
+      resources:
+        limits:
+          memory: 1536M
+      restart_policy:
+        window: 15s
+      update_config:
+        parallelism: 1
+        failure_action: rollback
+        delay: 10s
+        monitor: 10s
+      placement:
+        max_replicas_per_node: 1
+
+  cron:
+    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
+    command: /startup-cron.sh
+    user: "0"
+    volumes:
+      - bitnami:/bitnami
+      - /mnt/shared:/mnt/shared:rw
+      - logs:/mnt/logs
+    networks:
+      - internal
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    healthcheck:
+      disable: true
+    environment:
+      NODE: "{{slice .Node.Hostname 8 9}}"
+      STACK_NAME: "${STACK_NAME}"
+    deploy:
+      mode: replicated
+      replicas: 3
+      restart_policy:
+        window: 15s
+      update_config:
+        parallelism: 1
+        failure_action: rollback
+        delay: 10s
+      placement:
+        max_replicas_per_node: 1
+
+  proxysolr:
+    image: bitnami/nginx
+    networks:
+      - public
+      - internal
+    volumes:
+      - /mnt/shared/local/${STACK_NAME}/deploy/proxysolr/proxysolr.conf:/opt/bitnami/nginx/conf/server_blocks/proxysolr.conf:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    deploy:
+      <<: *solrproxy_deploy
+
+networks:
+  internal:
+    name: ${STACK_NAME}-internal
+    external: true
+  public:
+    name: public
+    external: true
+
+volumes:
+  bitnami:
+  logs:
+    external: true
+    name: "${STACK_NAME}_logs"
