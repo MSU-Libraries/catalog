@@ -19,6 +19,7 @@ default_args() {
     ARGS[SHARED_DIR]=/mnt/authority
     ARGS[SOLR_URL]="http://solr:8983/solr"
     ARGS[RESET_SOLR]=0
+    ARGS[QUICK]=0
     ARGS[VERBOSE]=0
     ARGS[BYPASS_PREPROCESS]=0
     declare -g -a TAGS=( 100 110 111 130 150 151 155 )
@@ -93,6 +94,8 @@ run_help() {
     echo "      Default: Stored in the environment variable \$AUTH_FTP_PASSWORD"
     echo "  -r|--reset-solr"
     echo "      Clear out the authority Solr collection prior to importing."
+    echo "  -q|--quick"
+    echo "      Skip the countdown delays before each stage of the script."
     echo "  -v|--verbose"
     echo "      Show verbose output."
     echo ""
@@ -167,6 +170,9 @@ parse_args() {
             shift;;
         -B|--bypass-preprocess)
             ARGS[BYPASS_PREPROCESS]=1
+            shift;;
+        -q|--quick)
+            ARGS[QUICK]=1
             shift;;
         -v|--verbose)
             ARGS[VERBOSE]=1
@@ -261,6 +267,7 @@ verbose_inline() {
 #  $1 => (Optional) String message to display before countdown; default: "Proceeding in:"
 #  $2 => (Optional) Integer number of seconds to countdown from; default: 5
 countdown() {
+    if [[ "${ARGS[QUICK]}" -eq 1 ]]; then return; fi
     CD_CNT="${1:-5}"
     CD_MSG="${2:-Proceeding in:}"
     verbose_inline "${CD_MSG}"

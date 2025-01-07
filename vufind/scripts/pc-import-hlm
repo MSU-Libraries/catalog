@@ -18,6 +18,7 @@ default_args() {
     ARGS[FTP_PASSWORD]=$(cat "${HLM_FTP_PASSWORD_FILE}")
     ARGS[SHARED_DIR]=/mnt/hlm
     ARGS[DRY_RUN]=0
+    ARGS[QUICK]=0
     ARGS[VERBOSE]=0
     ARGS[IGNORE_FILE]=/mnt/shared/hlm/ignore_patterns.txt
     declare -a IGNORE_SUBSTR=()
@@ -88,6 +89,8 @@ run_help() {
     echo "  -P|--ftp-password FTP_PASSWORD"
     echo "      Password for connecting to the FTP server"
     echo "      Default: Stored in the filepath stocked in environment variable \$HLM_FTP_PASSWORD_FILE"
+    echo "  -q|--quick"
+    echo "      Skip the countdown delays before each stage of the script."
     echo "  -v|--verbose"
     echo "      Show verbose output."
     echo ""
@@ -176,6 +179,9 @@ parse_args() {
             ARGS[FTP_PASSWORD]="$2"
             shift 2
             ;;
+        -q|--quick)
+            ARGS[QUICK]=1
+            shift;;
         -v|--verbose)
             ARGS[VERBOSE]=1
             shift;;
@@ -270,6 +276,7 @@ verbose_inline() {
 #  $1 => (Optional) String message to display before countdown; default: "Proceeding in:"
 #  $2 => (Optional) Integer number of seconds to countdown from; default: 5
 countdown() {
+    if [[ "${ARGS[QUICK]}" -eq 1 ]]; then return; fi
     CD_CNT="${1:-5}"
     CD_MSG="${2:-Proceeding in:}"
     verbose_inline "${CD_MSG}"
