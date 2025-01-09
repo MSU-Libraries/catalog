@@ -346,6 +346,23 @@ is_zip_or_marc_file() {
   return 1
 }
 
+
+# Returns 0 when the file exists with the same size
+# Returns 1 when the file is missing or the file has a different size
+# than the version we have downloaded already
+is_missing_or_different_size() {
+    FILE="${1}"
+    if [ ! -f "${ARGS[SHARED_DIR]}/current/${FILE}" ]; then
+        return 1
+    fi
+    LOCAL_SIZE=$(stat -c %s "${ARGS[SHARED_DIR]}/current/$FILE")
+    REMOTE_SIZE=$(curl "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${FILE}" --netrc -sI | grep -i Content-Length | awk '{print $2}' | sed -e 's/[[:space:]]*$//')
+    if [ "$LOCAL_SIZE" -ne "$REMOTE_SIZE" ]; then
+        return 1
+    fi
+    return 0
+}
+
 # Perform an harvest of HLM Records
 harvest() {
     assert_vufind_harvest_dir_writable
@@ -375,7 +392,7 @@ harvest() {
     while IFS= read -r HLM_FILE
     do
         # If it is not an ignored pattern, not in the shared storage, and it is a MARC or zip file, then get it
-        if ! is_ignored "${HLM_FILE}" && [ ! -f "${ARGS[SHARED_DIR]}/current/${HLM_FILE}" ] && is_zip_or_marc_file "${HLM_FILE}"; then
+        if ! is_ignored "${HLM_FILE}" &&  ! is_missing_or_different_size "${HLM_FILE}" && is_zip_or_marc_file "${HLM_FILE}"; then
             verbose "Getting ${HLM_FILE}"
             if [ "${ARGS[DRY_RUN]}" -eq "0" ]; then
                 if ! wget "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${HLM_FILE}" > /dev/null 2>&1; then
