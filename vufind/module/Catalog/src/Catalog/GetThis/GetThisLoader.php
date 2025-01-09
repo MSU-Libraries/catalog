@@ -136,26 +136,23 @@ class GetThisLoader
     }
 
     /**
-     * Get the status for a holding item
+     * Get the general and specfic status for a holding item
      *
-     * @param string $item_id The holding item UUID. If null (default) will return status for first item
+     * @param array $item The holding item data, as retrieved from getItem()
      *
-     * @return string The status string
+     * @return array The item status as two parts (both string):
+     *               - General status ("Checked out", "Unavailable", etc)
+     *               - Specific status ("Awaiting pickup", "Declared lost", etc; default blank string)
      */
-    public function getStatus($item_id = null)
+    public function getStatusParts($item)
     {
-        // NOTE: Make sure this logic matches with getStatus in the Record view helper
-
-        $item_id = $this->getItemId($item_id);
-        $item = $this->getItem($item_id);
-
         $status = isset($item['availability']) ? $item['availability']->getStatusDescription() : 'Unknown';
         $statusSecondPart = '';
         if (
             in_array($status, [
                 'Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
-                'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
-                'Unknown', 'Withdrawn',
+                'In process (non-requestable)', 'Long missing', 'Lost and paid',
+                'Missing', 'On order', 'Order closed', 'Unknown', 'Withdrawn',
             ])
         ) {
             $statusFirstPart = 'Unavailable';
@@ -177,13 +174,25 @@ class GetThisLoader
         } else {
             $statusFirstPart = 'Unknown status';
         }
+        return [$statusFirstPart, $statusSecondPart];
+    }
 
-        if (!empty($statusSecondPart)) {
-            $statusSecondPart = ' (' . $statusSecondPart . ')';
-        }
-        $status = $statusFirstPart . $statusSecondPart;
+    /**
+     * Get the status for a holding item
+     *
+     * @param string $item_id The holding item UUID. If null (default) will return status for first item
+     *
+     * @return string The status string
+     */
+    public function getStatus($item_id = null)
+    {
+        // NOTE: Make sure this logic matches with getStatus in the Record view helper
 
-        return $status . $this->getStatusSuffix($item);
+        $item_id = $this->getItemId($item_id);
+        $item = $this->getItem($item_id);
+        list($partOne, $partTwo) = $this->getStatusParts($item);
+        $partTwo = empty($partTwo) ? "" : " ({$partTwo})";
+        return $partOne . $partTwo . $this->getStatusSuffix($item);
     }
 
     /**
@@ -425,7 +434,8 @@ class GetThisLoader
     public function isUnavailable($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
-        $stat = $this->getStatus($item_id);
+        $item = $this->getItem($item_id);
+        list($stat, $_) = $this->getStatusParts($item);
         return $stat == 'Unavailable';
     }
 
@@ -517,19 +527,35 @@ class GetThisLoader
     }
 
     /**
-     * Determine if the request scanning template should display
+     * Determine if the request scanning from MSU's collection template should display
      *
      * @param string $item_id Item ID to filter for
      *
      * @return bool  If the template should display
      */
-    public function showReqScan($item_id = null)
+    public function showReqScanMSU($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc_code = $this->getLocationCode($item_id);
 
         if (Regex::AVAILABLE($stat) && $loc_code != 'mnmst') {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Determine if the request scanning from other libraries template should display
+     *
+     * @param string $item_id Item ID to filter for
+     *
+     * @return bool  If the template should display
+     */
+    public function showReqScanOther($item_id = null)
+    {
+        $item_id = $this->getItemId($item_id);
+        if ($this->isUnavailable($item_id)) {
             return true;
         }
         return false;
