@@ -555,7 +555,9 @@ class GetThisLoader
     public function showReqScanOther($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
-        if ($this->isUnavailable($item_id)) {
+        $stat = $this->getStatus($item_id);
+        $loc_code = $this->getLocationCode($item_id);
+        if (!Regex::AVAILABLE($stat) && $loc_code != 'mnmst') {
             return true;
         }
         return false;
