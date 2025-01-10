@@ -50,6 +50,43 @@ use function is_string;
 class Folio extends \VuFind\ILS\Driver\Folio
 {
     /**
+     * Given an instance object or identifer, or a holding or item identifier,
+     * determine an appropriate value to use as VuFind's bibliographic ID.
+     *
+     * @param string $instanceOrInstanceId Instance object or ID (will be looked up
+     * using holding or item ID if not provided)
+     * @param string $holdingId            Holding-level id (optional)
+     * @param string $itemId               Item-level id (optional)
+     *
+     * @return string Appropriate bib id retrieved from FOLIO identifiers
+     */
+    protected function getBibId(
+        $instanceOrInstanceId = null,
+        $holdingId = null,
+        $itemId = null
+    ) {
+        $idType = $this->getBibIdType();
+
+        // Special case: if we're using instance IDs and we already have one,
+        // short-circuit the lookup process:
+        if ($idType === 'instance' && is_string($instanceOrInstanceId)) {
+            return $instanceOrInstanceId;
+        }
+
+        $instance = is_object($instanceOrInstanceId)
+            ? $instanceOrInstanceId
+            : $this->getInstanceById($instanceOrInstanceId, $holdingId, $itemId);
+
+        switch ($idType) {
+            case 'hrid':
+                return 'folio.' . $instance->hrid; // MSUL folio prefix (until multibackend fixed)
+            case 'instance':
+                return $instance->id;
+        }
+
+        throw new \Exception('Unsupported ID type: ' . $idType);
+    }
+    /**
      * Support method for getHolding() -- given a loan type ID return the string name for it
      *
      * @param string|null $loanTypeId Loan Type ID (ie: the value of permanentLoanTypeId)
@@ -372,7 +409,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                         $dueDateTimestamp
                     ),
                 'dueStatus' => $dueStatus,
-                'id' => 'folio.' . $this->getBibId($trans->item->instanceId),
+                'id' => $this->getBibId($trans->item->instanceId),
                 'item_id' => $trans->item->id,
                 'barcode' => $trans->item->barcode,
                 'renew' => $trans->renewalCount ?? 0,
@@ -415,9 +452,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $idProperty = $this->getBibIdType() === 'hrid'
                 ? 'instanceHrid' : 'instanceId';
             $bibId = $item->copiedItem->$idProperty ?? null;
-            if ($bibId !== null) {
-                $bibId = 'folio.' . $bibId;
-            }
 
             // Get the electronic access links from the item record if possible
             // electronicAccess will be an array with keys: uri, linkText, publicNote, relationshipId
@@ -682,8 +716,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 'type' => $hold->requestType,
                 'create' => $requestDate,
                 'expire' => $expireDate ?? '',
-                // MSU customization: id changed for multi-backend
-                'id' => 'folio.' . $request_id,
+                'id' => $request_id,
                 'item_id' => $hold->itemId,
                 'reqnum' => $hold->id,
                 // Title moved from item to instance in Lotus release:
