@@ -356,7 +356,7 @@ is_missing_or_different_size() {
         return 1
     fi
     LOCAL_SIZE=$(stat -c %s "${ARGS[SHARED_DIR]}/current/$FILE")
-    REMOTE_SIZE=$(curl "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${FILE}" --netrc -sI | grep -i Content-Length | awk '{print $2}' | sed -e 's/[[:space:]]*$//')
+    REMOTE_SIZE=$(curl "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${FILE// /%20}" --netrc -sI | grep -i Content-Length | awk '{print $2}' | sed -e 's/[[:space:]]*$//')
     if [ "$LOCAL_SIZE" -ne "$REMOTE_SIZE" ]; then
         return 1
     fi
