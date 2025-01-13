@@ -36,6 +36,7 @@ use VuFind\Exception\ILS as ILSException;
 
 use function count;
 use function in_array;
+use function is_object;
 use function is_string;
 
 /**
@@ -86,6 +87,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
 
         throw new \Exception('Unsupported ID type: ' . $idType);
     }
+
     /**
      * Support method for getHolding() -- given a loan type ID return the string name for it
      *
