@@ -804,8 +804,8 @@ class GetThisLoader
         $loc = $this->getLocation($item_id);
         $loc_code = $this->getLocationCode($item_id);
 
-        // Never show on Remote SPC items (PC-439), Makerspace equipment, or VVL
-        if (Regex::SPEC_COLL_REMOTE($loc) || $loc_code == 'mnmst' || Regex::VINCENT_VOICE($loc)) {
+        // Makerspace equipment, or VVL
+        if ($loc_code == 'mnmst' || Regex::VINCENT_VOICE($loc)) {
             return false;
         }
 
