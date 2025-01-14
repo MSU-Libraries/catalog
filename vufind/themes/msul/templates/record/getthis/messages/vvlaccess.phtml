@@ -1,0 +1,15 @@
+<?php
+$title = $this->driver->getTitle();
+$author = $this->driver->getPrimaryAuthor();
+$callnum = $this->getthis->getCallNumber();
+?>
+<div>
+    <p>
+        <b>Request Digital Access:</b>
+        You can request ditigal access to copyrighted material within the Vincent Voice Library
+        for short-term use. Material may not be copied, shared, or downloaded.
+        Please fill out
+        <a href='https://lib.msu.edu/vvl-request?&TI=<?= $this->escapeUrl($title) ?>&creator=<?= $this->escapeUrl($author) ?>&CN=<?= $this->escapeUrl($callnum) ?>' target='_blank'>this form</a>
+        and we will contact you when the material is available. (MSU Students, Staff and Faculty only)
+    </p>
+</div>
