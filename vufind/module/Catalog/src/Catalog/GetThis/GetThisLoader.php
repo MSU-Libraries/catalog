@@ -334,7 +334,7 @@ class GetThisLoader
      */
     public static function makerspaceLocation($item)
     {
-        return $item['location_code'] == 'mnmst';
+        return ($item['location_code'] ?? '') == 'mnmst';
     }
 
     /**
@@ -391,6 +391,20 @@ class GetThisLoader
     }
 
     /**
+     * Determine if the given item is media of audio/video form
+     *
+     * @param string $item_id Item ID to filter for
+     *
+     * @return bool  Whether the item is audio or video media item or not
+     */
+    public function isAudioVideoMedia($item_id = null)
+    {
+        $item_id = $this->getItemId($item_id);
+        $callNum = $this->getItem($item_id)['callnumber'] ?? '';
+        return Regex::AV_MEDIA($callNum);
+    }
+
+    /**
      * Determine if the given item is a media item or not
      *
      * @param string $item_id Item ID to filter for
@@ -400,14 +414,8 @@ class GetThisLoader
     public function isMedia($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
-        $callNum = strtolower($this->getItem($item_id)['callnumber'] ?? '');
-        return
-            preg_match('/fiche/', $callNum) ||
-            preg_match('/disc/', $callNum) ||
-            preg_match('/video/', $callNum) ||
-            preg_match('/cd/', $callNum) ||
-            preg_match('/dvd/', $callNum)
-        ;
+        $callNum = $this->getItem($item_id)['callnumber'] ?? '';
+        return Regex::MICROPRINT($callNum) || Regex::AV_MEDIA($callNum);
     }
 
     /**
@@ -537,9 +545,21 @@ class GetThisLoader
     {
         $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
+        $loc = $this->getLocation($item_id);
         $loc_code = $this->getLocationCode($item_id);
 
-        if (Regex::AVAILABLE($stat) && $loc_code != 'mnmst') {
+        if (
+            (
+                Regex::AVAILABLE($stat)
+                || Regex::SPEC_COLL($loc)
+                || Regex::SPEC_COLL_REMOTE($loc)
+                || Regex::MICROPRINT($callNum)
+                || Regex::MICROFORMS($loc)
+                || Regex::GOV($loc)
+            )
+            && $loc_code != 'mnmst'
+            && !$this->isAudioVideoMedia()
+        ) {
             return true;
         }
         return false;
@@ -556,8 +576,18 @@ class GetThisLoader
     {
         $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
+        $loc = $this->getLocation($item_id);
         $loc_code = $this->getLocationCode($item_id);
-        if (!Regex::AVAILABLE($stat) && $loc_code != 'mnmst') {
+        if (
+            !Regex::AVAILABLE($stat)
+            && $loc_code != 'mnmst'
+            && !$this->isAudioVideoMedia()
+            && !Regex::SPEC_COLL($loc)
+            && !Regex::SPEC_COLL_REMOTE($loc)
+            && !Regex::MICROPRINT($callNum)
+            && !Regex::MICROFORMS($loc)
+            && !Regex::GOV($loc)
+        ) {
             return true;
         }
         return false;
