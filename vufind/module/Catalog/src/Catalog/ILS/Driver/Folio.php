@@ -451,11 +451,12 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 $query
             ) as $item
         ) {
-            $idProperty = $this->getBibIdType() === 'hrid'
-                ? 'instanceHrid' : 'instanceId';
-            $bibId = $item->copiedItem->$idProperty ?? null;
+            // MSU customization to always use instanceId so that we can have getBibId lookup
+            // the correct prefix
+            $instanceId = $item->copiedItem->instanceId ?? null;
+            $bibId = $this->getBibId($instanceId);
 
-            // Get the electronic access links from the item record if possible
+            // MSU customization - Get the electronic access links from the item record if possible
             // electronicAccess will be an array with keys: uri, linkText, publicNote, relationshipId
             $itemId = $item->itemId ?? null;
             $electronicAccess = null;
@@ -996,4 +997,50 @@ class Folio extends \VuFind\ILS\Driver\Folio
         }
         return $response;
     }
+
+    /**
+     * Helper function to retrieve paged results from FOLIO API
+     *
+     * @param string $responseKey Key containing values to collect in response
+     * @param string $interface   FOLIO api interface to call
+     * @param array  $query       CQL query
+     * @param int    $limit       How many results to retrieve from FOLIO per call
+     *
+     * @return array
+     */
+    protected function getPagedResults($responseKey, $interface, $query = [], $limit = 1000)
+    {
+        $offset = 0;
+
+        // MSU -- Can remove once https://github.com/vufind-org/vufind/pull/4186 is
+        // in our code.
+        // If we're using the new authentication method and our token has expired
+        // Renew it now before we make the call
+        if (! $this->useLegacyAuthentication()) {
+            $this->renewTenantToken();
+        }
+
+        do {
+            $combinedQuery = array_merge($query, compact('offset', 'limit'));
+            $response = $this->makeRequest(
+                'GET',
+                $interface,
+                $combinedQuery
+            );
+            $json = json_decode($response->getBody());
+            if (!$response->isSuccess() || !$json) {
+                $msg = $json->errors[0]->message ?? json_last_error_msg();
+                throw new ILSException("Error: '$msg' fetching '$responseKey'");
+            }
+            $totalEstimate = $json->totalRecords ?? 0;
+            foreach ($json->$responseKey ?? [] as $item) {
+                yield $item ?? '';
+            }
+            $offset += $limit;
+
+            // Continue until the current offset is greater than the totalRecords value returned
+            // from the API (which could be an estimate if more than 1000 results are returned).
+        } while ($offset <= $totalEstimate);
+    }
+
 }
