@@ -550,7 +550,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 $lsplits = array_pad($lsplits, $max_size, '');
 
                 array_map(function ($fval, $lval) use (&$toc) {
-                    $toc[] = $fval . ($lval ? " = ${lval}" : '');
+                    $toc[] = $fval . ($lval ? " = {$lval}" : '');
                 }, $fsplits, $lsplits);
             }, $arr1, $arr2);
         }
