@@ -556,6 +556,7 @@ class GetThisLoader
                 || Regex::MICROPRINT($callNum)
                 || Regex::MICROFORMS($loc)
                 || Regex::GOV($loc)
+                || Regex::TURFGRASS($loc)
             )
             && $loc_code != 'mnmst'
             && !$this->isAudioVideoMedia()
@@ -589,6 +590,7 @@ class GetThisLoader
             && !Regex::MICROFORMS($loc)
             && !Regex::GOV($loc)
             && !Regex::VINCENT_VOICE($loc)
+            && !Regex::TURFGRASS($loc)
         ) {
             return true;
         }
