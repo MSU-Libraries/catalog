@@ -190,8 +190,8 @@ class GetThisLoader
 
         $item_id = $this->getItemId($item_id);
         $item = $this->getItem($item_id);
-        list($partOne, $partTwo) = $this->getStatusParts($item);
-        $partTwo = empty($partTwo) ? "" : " ({$partTwo})";
+        [$partOne, $partTwo] = $this->getStatusParts($item);
+        $partTwo = empty($partTwo) ? '' : " ({$partTwo})";
         return $partOne . $partTwo . $this->getStatusSuffix($item);
     }
 
@@ -443,7 +443,7 @@ class GetThisLoader
     {
         $item_id = $this->getItemId($item_id);
         $item = $this->getItem($item_id);
-        list($stat, $_) = $this->getStatusParts($item);
+        [$stat, $_] = $this->getStatusParts($item);
         return $stat == 'Unavailable';
     }
 
@@ -547,6 +547,7 @@ class GetThisLoader
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
         $loc_code = $this->getLocationCode($item_id);
+        $callNum = $this->getItem($item_id)['callnumber'] ?? '';
 
         if (
             (
@@ -556,6 +557,7 @@ class GetThisLoader
                 || Regex::MICROPRINT($callNum)
                 || Regex::MICROFORMS($loc)
                 || Regex::GOV($loc)
+                || Regex::TURFGRASS($loc)
             )
             && $loc_code != 'mnmst'
             && !$this->isAudioVideoMedia()
@@ -579,6 +581,8 @@ class GetThisLoader
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
         $loc_code = $this->getLocationCode($item_id);
+        $callNum = $this->getItem($item_id)['callnumber'] ?? '';
+
         if (
             !Regex::AVAILABLE($stat)
             && $loc_code != 'mnmst'
@@ -589,6 +593,7 @@ class GetThisLoader
             && !Regex::MICROFORMS($loc)
             && !Regex::GOV($loc)
             && !Regex::VINCENT_VOICE($loc)
+            && !Regex::TURFGRASS($loc)
         ) {
             return true;
         }

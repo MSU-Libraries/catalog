@@ -70,7 +70,7 @@
     'search' => 'Help with Search Operators',
   ];
 ?>
-
+<p class="mb-4"><a href="/">Catalog Home - Main Search</a></p>
 <?=$this->flashmessages()?>
 <div role="search">
   <form name="searchForm" id="advSearchForm" method="get" action="<?=$this->url($this->options->getSearchAction())?>">
@@ -85,7 +85,7 @@
         <input type="hidden" name="sort" value="<?=$this->escapeHtmlAttr($lastSort)?>">
       <?php endif; ?>
       <div class="clearfix">
-        <h1 class="pull-left flip"><?=$this->transEsc($this->headerLookup)?></h1>
+        <h1 class="pull-left flip mt-0"><?=$this->transEsc($this->headerLookup)?></h1>
       </div>
       <div class="adv-group-msul bg-color-lightgray" aria-atomic="true" aria-live="polite"> <!-- added div, classes and aria labels msul-->
       <a role="button" class="icon-link hidden adv-group-terms" id="groupPlaceHolder" href="#"> <!--added class adv-group-terms for layout-->
