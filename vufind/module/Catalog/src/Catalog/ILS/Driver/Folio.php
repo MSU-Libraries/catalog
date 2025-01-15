@@ -1042,5 +1042,4 @@ class Folio extends \VuFind\ILS\Driver\Folio
             // from the API (which could be an estimate if more than 1000 results are returned).
         } while ($offset <= $totalEstimate);
     }
-
 }
