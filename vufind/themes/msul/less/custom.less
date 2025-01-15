@@ -1730,6 +1730,7 @@ fieldset.solr-facets {
       height: 15.5em;
       overflow: auto;
       white-space: nowrap;
+      max-width:100%; //override core max-width 400px
 
       label {
         font-weight: inherit;
@@ -1769,7 +1770,17 @@ fieldset.solr-facets {
       justify-content: space-around;
       gap: 0.4rem;
     }
-
+    .solr-adv-facet {
+      flex: 1 1 98%;
+      width: 98%;
+    }
+  }
+  @media (min-width: 992px) {
+    .solr-adv-facet {
+      flex: 1 1 48%;
+      width: 48%;
+    }
+  }  @media (min-width: 1630px) {
     .solr-adv-facet {
       flex: 1 1 23%;
       width: 23%;
