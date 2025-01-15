@@ -72,9 +72,12 @@ if ($this->getthis->isHLM()) {
         echo $this->render('record/getthis/otherlib.phtml');
     }
 
-    # otherLib();
-    if ($this->getthis->showReqScan()) {
-        echo $this->render('record/getthis/reqscan.phtml');
+    if ($this->getthis->showReqScanMSU()) {
+        echo $this->render('record/getthis/reqscan_msu.phtml');
+    }
+
+    if ($this->getthis->showReqScanOther()) {
+        echo $this->render('record/getthis/reqscan_other.phtml');
     }
 
     # circForm(); // Hidden forms; always displayed, but not sure if needed to always be displayed

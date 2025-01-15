@@ -136,26 +136,23 @@ class GetThisLoader
     }
 
     /**
-     * Get the status for a holding item
+     * Get the general and specfic status for a holding item
      *
-     * @param string $item_id The holding item UUID. If null (default) will return status for first item
+     * @param array $item The holding item data, as retrieved from getItem()
      *
-     * @return string The status string
+     * @return array The item status as two parts (both string):
+     *               - General status ("Checked out", "Unavailable", etc)
+     *               - Specific status ("Awaiting pickup", "Declared lost", etc; default blank string)
      */
-    public function getStatus($item_id = null)
+    public function getStatusParts($item)
     {
-        // NOTE: Make sure this logic matches with getStatus in the Record view helper
-
-        $item_id = $this->getItemId($item_id);
-        $item = $this->getItem($item_id);
-
         $status = isset($item['availability']) ? $item['availability']->getStatusDescription() : 'Unknown';
         $statusSecondPart = '';
         if (
             in_array($status, [
                 'Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
-                'In process (non-requestable)', 'Long missing', 'Lost and paid', 'Missing', 'On order', 'Order closed',
-                'Unknown', 'Withdrawn',
+                'In process (non-requestable)', 'Long missing', 'Lost and paid',
+                'Missing', 'On order', 'Order closed', 'Unknown', 'Withdrawn',
             ])
         ) {
             $statusFirstPart = 'Unavailable';
@@ -177,13 +174,25 @@ class GetThisLoader
         } else {
             $statusFirstPart = 'Unknown status';
         }
+        return [$statusFirstPart, $statusSecondPart];
+    }
 
-        if (!empty($statusSecondPart)) {
-            $statusSecondPart = ' (' . $statusSecondPart . ')';
-        }
-        $status = $statusFirstPart . $statusSecondPart;
+    /**
+     * Get the status for a holding item
+     *
+     * @param string $item_id The holding item UUID. If null (default) will return status for first item
+     *
+     * @return string The status string
+     */
+    public function getStatus($item_id = null)
+    {
+        // NOTE: Make sure this logic matches with getStatus in the Record view helper
 
-        return $status . $this->getStatusSuffix($item);
+        $item_id = $this->getItemId($item_id);
+        $item = $this->getItem($item_id);
+        list($partOne, $partTwo) = $this->getStatusParts($item);
+        $partTwo = empty($partTwo) ? "" : " ({$partTwo})";
+        return $partOne . $partTwo . $this->getStatusSuffix($item);
     }
 
     /**
@@ -325,7 +334,7 @@ class GetThisLoader
      */
     public static function makerspaceLocation($item)
     {
-        return $item['location_code'] == 'mnmst';
+        return ($item['location_code'] ?? '') == 'mnmst';
     }
 
     /**
@@ -382,6 +391,20 @@ class GetThisLoader
     }
 
     /**
+     * Determine if the given item is media of audio/video form
+     *
+     * @param string $item_id Item ID to filter for
+     *
+     * @return bool  Whether the item is audio or video media item or not
+     */
+    public function isAudioVideoMedia($item_id = null)
+    {
+        $item_id = $this->getItemId($item_id);
+        $callNum = $this->getItem($item_id)['callnumber'] ?? '';
+        return Regex::AV_MEDIA($callNum);
+    }
+
+    /**
      * Determine if the given item is a media item or not
      *
      * @param string $item_id Item ID to filter for
@@ -391,14 +414,8 @@ class GetThisLoader
     public function isMedia($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
-        $callNum = strtolower($this->getItem($item_id)['callnumber'] ?? '');
-        return
-            preg_match('/fiche/', $callNum) ||
-            preg_match('/disc/', $callNum) ||
-            preg_match('/video/', $callNum) ||
-            preg_match('/cd/', $callNum) ||
-            preg_match('/dvd/', $callNum)
-        ;
+        $callNum = $this->getItem($item_id)['callnumber'] ?? '';
+        return Regex::MICROPRINT($callNum) || Regex::AV_MEDIA($callNum);
     }
 
     /**
@@ -425,7 +442,8 @@ class GetThisLoader
     public function isUnavailable($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
-        $stat = $this->getStatus($item_id);
+        $item = $this->getItem($item_id);
+        list($stat, $_) = $this->getStatusParts($item);
         return $stat == 'Unavailable';
     }
 
@@ -517,19 +535,59 @@ class GetThisLoader
     }
 
     /**
-     * Determine if the request scanning template should display
+     * Determine if the request scanning from MSU's collection template should display
      *
      * @param string $item_id Item ID to filter for
      *
      * @return bool  If the template should display
      */
-    public function showReqScan($item_id = null)
+    public function showReqScanMSU($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
+        $loc = $this->getLocation($item_id);
         $loc_code = $this->getLocationCode($item_id);
 
-        if (Regex::AVAILABLE($stat) && $loc_code != 'mnmst') {
+        if (
+            (
+                Regex::AVAILABLE($stat)
+                || Regex::SPEC_COLL($loc)
+                || Regex::SPEC_COLL_REMOTE($loc)
+                || Regex::MICROPRINT($callNum)
+                || Regex::MICROFORMS($loc)
+                || Regex::GOV($loc)
+            )
+            && $loc_code != 'mnmst'
+            && !$this->isAudioVideoMedia()
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Determine if the request scanning from other libraries template should display
+     *
+     * @param string $item_id Item ID to filter for
+     *
+     * @return bool  If the template should display
+     */
+    public function showReqScanOther($item_id = null)
+    {
+        $item_id = $this->getItemId($item_id);
+        $stat = $this->getStatus($item_id);
+        $loc = $this->getLocation($item_id);
+        $loc_code = $this->getLocationCode($item_id);
+        if (
+            !Regex::AVAILABLE($stat)
+            && $loc_code != 'mnmst'
+            && !$this->isAudioVideoMedia()
+            && !Regex::SPEC_COLL($loc)
+            && !Regex::SPEC_COLL_REMOTE($loc)
+            && !Regex::MICROPRINT($callNum)
+            && !Regex::MICROFORMS($loc)
+            && !Regex::GOV($loc)
+        ) {
             return true;
         }
         return false;

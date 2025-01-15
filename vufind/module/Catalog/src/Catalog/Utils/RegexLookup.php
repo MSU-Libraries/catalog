@@ -65,8 +65,10 @@ class RegexLookup
     public const IN_PROCESS            = ['/IN PROCESS/i'];
     public const LIB_USE_ONLY          = ['/LIB USE ONLY/i', '/LIBRARY USE ONLY/i'];
     public const ON_DISPLAY            = ['/ON DISPLAY/i'];
-    // Description
+    // Description / Call Number
     public const VINYL                 = ['/VINYL/i'];
+    public const MICROPRINT            = ['/MICROFILM/i', '/MICROFICHE/i', '/MICROPRINT/i'];
+    public const AV_MEDIA              = ['/DISC/i', '/VIDEO/i', '/CD/i', '/DVD/i', '/BLU-RAY/i', '/VINYL/i', '/AUDIOCASSETTE/i'];
     // Location
     public const MAIN                  = ['/^MSU MAIN/i'];
     public const AFRICANA              = ['/^MSU AFRICANA/i'];
