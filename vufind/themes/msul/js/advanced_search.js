@@ -179,7 +179,7 @@ function toggleExpansion(itemOrEvent) {
 }
 
 function openParentIfChildChecked() {
-  $('.leveledCheckboxes').each(function openParent() {
+  $('.leveledCheckboxes').each(function openParentFn() {
     let item = $(this).find('.leveledCheckbox').last();
     let openParent = false;
     let currentLevel = parseInt($(item).attr('data-level'));
@@ -273,11 +273,12 @@ function uncheckChildrenIfParentCheckedRoutine(item) {
 /**
  * Check the state of previous elements in the list and for parents, toggling to adapt the checkmark
  * @param itemToStartWith
- * @param indeterminate if we know at this point that the parent will be in indeterminate state
+ * @param initiallyIndeterminate if we know at this point that the parent will be in indeterminate state
  * @param runWholeList if we stop at a root parent or go through the entire list (when starting at the last element)
  */
-function checkAndUpdatePreviousLeveledCheckboxes(itemToStartWith, indeterminate = undefined, runWholeList = false) {
+function checkAndUpdatePreviousLeveledCheckboxes(itemToStartWith, initiallyIndeterminate = undefined, runWholeList = false) {
   let previousItemChecked, previousItemIndeterminate, previousItemCheckbox, currentLevel;
+  let indeterminate = initiallyIndeterminate;
   let itemChecked = $(itemToStartWith).find('input[type="checkbox"]').prop('checked');
   let previousItem = itemToStartWith;
   let previousLevel = parseInt($(previousItem).attr('data-level'));
