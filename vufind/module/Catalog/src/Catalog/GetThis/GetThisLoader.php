@@ -547,6 +547,7 @@ class GetThisLoader
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
         $loc_code = $this->getLocationCode($item_id);
+        $callNum = $this->getItem($item_id)['callnumber'] ?? '';
 
         if (
             (
@@ -580,6 +581,8 @@ class GetThisLoader
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
         $loc_code = $this->getLocationCode($item_id);
+        $callNum = $this->getItem($item_id)['callnumber'] ?? '';
+
         if (
             !Regex::AVAILABLE($stat)
             && $loc_code != 'mnmst'
