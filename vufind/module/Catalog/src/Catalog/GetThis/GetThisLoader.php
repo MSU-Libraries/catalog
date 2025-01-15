@@ -511,7 +511,7 @@ class GetThisLoader
             } elseif (Regex::TURFGRASS($loc)) {
                 $this->msgTemplate = 'turfgrass.phtml';
             } elseif (Regex::VINCENT_VOICE($loc)) {
-                $this->msgTemplate = 'pickup.phtml';
+                $this->msgTemplate = 'vvlaccess.phtml';
             }
         }
         return $this->msgTemplate !== null;
@@ -559,6 +559,7 @@ class GetThisLoader
             )
             && $loc_code != 'mnmst'
             && !$this->isAudioVideoMedia()
+            && !Regex::VINCENT_VOICE($loc)
         ) {
             return true;
         }
@@ -587,6 +588,7 @@ class GetThisLoader
             && !Regex::MICROPRINT($callNum)
             && !Regex::MICROFORMS($loc)
             && !Regex::GOV($loc)
+            && !Regex::VINCENT_VOICE($loc)
         ) {
             return true;
         }
@@ -802,8 +804,8 @@ class GetThisLoader
         $loc = $this->getLocation($item_id);
         $loc_code = $this->getLocationCode($item_id);
 
-        // Never show on Remote SPC items (PC-439) or Makerspace equipment
-        if (/*Regex::SPEC_COLL_REMOTE($loc) ||*/ $loc_code == 'mnmst') {
+        // Makerspace equipment, or VVL
+        if ($loc_code == 'mnmst' || Regex::VINCENT_VOICE($loc)) {
             return false;
         }
 
