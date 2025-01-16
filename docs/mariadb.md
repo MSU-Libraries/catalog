@@ -9,6 +9,29 @@ To quick-connect to the database within the container
 docker exec -it $(docker ps -q -f name=catalog-prod-mariadb_galera) connect
 ```
 
+## Re-deploying
+If you ever need to re-deploy the stack, you can use the
+[pc-deploy](helper-scripts.md#deploy-helper-pc-deploy) script.
+
+Make sure you run it as the deploy user so that the proper Docker
+container registry credentials are passed.
+
+    ```bash
+    sudo -Hu deploy pc-deploy catalog-prod mariadb
+    ```
+
+## Restarting
+If you need to restart the Galera cluster, the easiest method is to re-run the CI job that deploys the
+DB updates. But alternatively, you can retstart the containers one-by-one. Just wait for the restarted
+container to be "healthy" before restarting the next.
+
+```bash
+docker stop $(docker ps -q -f name=catalog-prod-mariadb_galera)
+# Wait for the new container to report healthy
+watch 'docker ps | grep catalog-prod-mariadb_galera'
+# Now repeat those two steps on the remaining nodes in the cluster
+```
+
 ## Troubleshooting
 
 In the event of the database getting de-clustered, where the nodes are un-able to bootstrap themselves, you
@@ -52,7 +75,7 @@ to change the `N` to you your node number, i.e. a value 1-3. Then also update th
 Now we're ready to bring back up the stack with just the single node in bootstrap mode.
 
 ```bash
-docker stack deploy --with-registry-auth -c <(source .env; envsubst <docker-compose.mariadb-cloud-force.yml) [STACK_NAME]-mariadb
+sudo -Hu deploy docker stack deploy --with-registry-auth -c <(source .env; envsubst <docker-compose.mariadb-cloud-force.yml) [STACK_NAME]-mariadb
 docker service logs -f
 ```
 
@@ -64,7 +87,7 @@ it can cleanly stop first and disable its bootstrap state before the other nodes
 ```bash
 docker stack rm [STACK_NAME]-mariadb
 # wait for the container to stop
-docker stack deploy --with-registry-auth -c <(source .env; envsubst <docker-compose.mariadb-cloud.yml) [STACK_NAME]-mariadb
+sudo -Hu deploy docker stack deploy --with-registry-auth -c <(source .env; envsubst <docker-compose.mariadb-cloud.yml) [STACK_NAME]-mariadb
 ```
 
 The stack should now come back up with all the nodes being healthy and joined to the cluster.
@@ -93,3 +116,9 @@ SHOW GLOBAL STATUS LIKE '%wsrep%'\G
 
 some key values are the `wsrep_cluster_size` (which should match the number of nodes you have) and the
 `wsrep_cluster_state_uuid` (which should be the same on all the nodes).
+
+Using the NCPA checks deployed via the catalog-infrastructure repository will also run many of these health checks.
+
+```bash
+/usr/local/ncpa/plugins/check_galera.sh catalog-prod
+```

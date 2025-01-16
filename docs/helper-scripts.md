@@ -12,17 +12,20 @@ Deploys stacks for a given environment and docker compose. This is useful becaus
 the step of sourcing the `.env` file for the environment directory used and calling
 `envsubstr` on the compose file before deploying the stack.
 
+Make sure you run it as the deploy user so that the proper Docker
+container registry credentials are passed.
+
 ```bash
 # Deploy the catalog stack for the catalog-prod environment
-pc-deploy catalog-prod catalog
+sudo -Hu deploy pc-deploy catalog-prod catalog
 
 # Do a dry-run of the traefik stack, which is a core-stack
-pc-deploy core-stacks traefik -n
+sudo -Hu deploy pc-deploy core-stacks traefik -n
 
 # Deploy the solr bootstrap compose file for the devel-test stack
-pc-deploy devel-test solr-bootstrap
+sudo -Hu deploy pc-deploy devel-test solr-bootstrap
 # or
-pc-deploy devel-test docker-compose.solr-bootstrap.yml
+sudo -Hu deploy pc-deploy devel-test docker-compose.solr-bootstrap.yml
 ```
 
 ## OAI File Locator ([pc-locate-oai](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-locate-oai?ref_type=heads))

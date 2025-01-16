@@ -43,7 +43,7 @@ significantly for other users.
    ```
 
 5. Deploying the change will block the bot on all your environments. You can also optionally
-   restart the `catalog_caalog` containers on the nodes if the CPU/memory usage didn't
+   restart the `catalog_catalog` containers on the nodes if the CPU/memory usage didn't
    drop.
    ```bash
    docker stop $(docker ps -q -f name=catalog-prod-catalog_catalog)

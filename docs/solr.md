@@ -10,6 +10,18 @@ simply use the `solr-zk-shell` command.
 docker exec -it $(docker ps -q -f name=catalog-prod-solr_solr) solr-zk-shell
 
 ```
+
+## Re-deploying
+If you ever need to re-deploy the stack, you can use the
+[pc-deploy](helper-scripts.md#deploy-helper-pc-deploy) script.
+
+Make sure you run it as the deploy user so that the proper Docker
+container registry credentials are passed.
+
+    ```bash
+    sudo -Hu deploy pc-deploy catalog-prod solr
+    ```
+
 ## Collection Structure
 Most of the collections do not have an alias associated with them. But, `biblio` is special!
 For that collection we are using Solr aliases because we want to be able to clear out the
@@ -96,6 +108,12 @@ and issues identified. It can be run by:
 
 ```bash
 docker exec $(docker ps -q -f name=${STACK_NAME}-solr_solr) /clusterhealth.sh
+```
+
+* Using the NCPA checks deployed via the catalog-infrastructure repository will also run many of these health checks.
+
+```bash
+/usr/local/ncpa/plugins/check_galera.sh catalog-prod
 ```
 
 * To view the Docker healthcheck logs from a particular container you can:
