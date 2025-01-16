@@ -95,3 +95,23 @@ pc-connect catalog-prod-solr_solr --zk
 pc-connect devel-test-catalog_catalog -n
 
 ```
+
+## Run full import ([pc-full-import](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-full-import?ref_type=heads))
+Helper to run a full import of data into an environment using the folio and hlm data in their `processed` or `current` directories.
+This should be run in a `screen` since it will likely run for a day and needs to be run with `sudo` on the host.
+
+```bash
+screen # run in a screen, this isn't required, but highly recommended
+
+# List all of the steps the script will run
+sudo pc-full-import catalog-prod --list
+
+# Run a full import with debug output saving to a file
+sudo pc-full-import catalog-prod --debug 2>&1 | tee catalog-prod-import_$(date -I).log
+
+# Run only a few steps from script bypassing user confirmation (if that step asks for it)
+sudo pc-full-import catalog-prod --first-step 3 --last-step 5 --debug --yes
+
+# Do a dry run of the full import to show what steps it would perform
+sudo pc-full-import catalog-prod --dry-run
+```
