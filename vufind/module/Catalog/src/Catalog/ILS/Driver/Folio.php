@@ -65,7 +65,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
     {
         // If the unexpected status is 401, and the token renews successfully, and we have not yet
         // retried, we should try again:
-        if ($response->getStatusCode() === 401 && !$this->checkTenantToken() && $attemptNumber < 2) {
+        if ($response->getStatusCode() === 401 && $attemptNumber < 2) {
             $this->debug('Retrying request after token expired...');
             return true;
         }
@@ -928,6 +928,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
      * expression, or boolean true to allow all codes.
      * @param string|array      $debugParams         Value to use in place of $params
      * in debug messages (useful for concealing sensitive data, etc.)
+     * @param int               $attemptNumber       Counter to keep track of attempts
+     * (starts at 1 for the first attempt)
      *
      * @return \Laminas\Http\Response
      * @throws ILSException
