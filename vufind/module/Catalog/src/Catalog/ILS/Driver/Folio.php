@@ -32,6 +32,7 @@ namespace Catalog\ILS\Driver;
 use ArrayIterator;
 use Catalog\Utils\RegexLookup as Regex;
 use Laminas\Http\Header\HeaderInterface;
+use Laminas\Http\Response; // MSU - Can remove after we upgrade to VF 10.1
 use VuFind\Exception\ILS as ILSException;
 
 use function count;
@@ -50,6 +51,27 @@ use function is_string;
  */
 class Folio extends \VuFind\ILS\Driver\Folio
 {
+    /**
+     *  -- CAN REMOVE ONCE WE UPGRADE TO VF 10.1
+     * Support method for makeRequest to process an unexpected status code. Can return true to trigger
+     * a retry of the API call or false to throw an exception.
+     *
+     * @param Response $response      HTTP response
+     * @param int      $attemptNumber Counter to keep track of attempts (starts at 1 for the first attempt)
+     *
+     * @return bool
+     */
+    protected function shouldRetryAfterUnexpectedStatusCode(Response $response, int $attemptNumber): bool
+    {
+        // If the unexpected status is 401, and the token renews successfully, and we have not yet
+        // retried, we should try again:
+        if ($response->getStatusCode() === 401 && $attemptNumber < 2) {
+            $this->debug('Retrying request after token expired...');
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Given an instance object or identifer, or a holding or item identifier,
      * determine an appropriate value to use as VuFind's bibliographic ID.
@@ -906,6 +928,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
      * expression, or boolean true to allow all codes.
      * @param string|array      $debugParams         Value to use in place of $params
      * in debug messages (useful for concealing sensitive data, etc.)
+     * @param int               $attemptNumber       Counter to keep track of attempts
+     * (starts at 1 for the first attempt)
      *
      * @return \Laminas\Http\Response
      * @throws ILSException
@@ -916,7 +940,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $params = [],
         $headers = [],
         $allowedFailureCodes = [],
-        $debugParams = null
+        $debugParams = null,
+        $attemptNumber = 1
     ) {
         $client = $this->httpService->createClient(
             $this->config['API']['base_url'] . $path,
@@ -970,77 +995,44 @@ class Folio extends \VuFind\ILS\Driver\Folio
             && !$this->failureCodeIsAllowed($code, $allowedFailureCodes)
         ) {
             $this->logError(
-                "Unexpected error response; code: $code, body: "
-                . $response->getBody()
+                "Unexpected error response (attempt #$attemptNumber"
+                . "); code: {$response->getStatusCode()}, body: {$response->getBody()}"
             );
-            throw new ILSException('Unexpected error code.');
+            if ($this->shouldRetryAfterUnexpectedStatusCode($response, $attemptNumber)) {
+                return $this->makeRequest(
+                    $method,
+                    $path,
+                    $params,
+                    $headers,
+                    $allowedFailureCodes,
+                    $debugParams,
+                    $attemptNumber + 1
+                );
+            } else {
+                throw new ILSException('Unexpected error code.');
+            }
         }
         if ($jsonLog = ($this->config['API']['json_log_file'] ?? false)) {
             if (APPLICATION_ENV !== 'development') {
-                throw new \Exception(
-                    'SECURITY: json_log_file enabled outside of development mode'
+                $this->logError(
+                    'SECURITY: json_log_file enabled outside of development mode; disabling feature.'
                 );
+            } else {
+                $body = $response->getBody();
+                $jsonBody = @json_decode($body);
+                $json = file_exists($jsonLog)
+                    ? json_decode(file_get_contents($jsonLog)) : [];
+                $json[] = [
+                    'expectedMethod' => $method,
+                    'expectedPath' => $path,
+                    'expectedParams' => $params,
+                    'body' => $jsonBody ? $jsonBody : $body,
+                    'bodyType' => $jsonBody ? 'json' : 'string',
+                    'status' => $code,
+                ];
+                file_put_contents($jsonLog, json_encode($json));
             }
-            $body = $response->getBody();
-            $jsonBody = @json_decode($body);
-            $json = file_exists($jsonLog)
-                ? json_decode(file_get_contents($jsonLog)) : [];
-            $json[] = [
-                'expectedMethod' => $method,
-                'expectedPath' => $path,
-                'expectedParams' => $params,
-                'body' => $jsonBody ? $jsonBody : $body,
-                'bodyType' => $jsonBody ? 'json' : 'string',
-                'code' => $code,
-            ];
-            file_put_contents($jsonLog, json_encode($json));
         }
         return $response;
     }
-
-    /**
-     * Helper function to retrieve paged results from FOLIO API
-     *
-     * @param string $responseKey Key containing values to collect in response
-     * @param string $interface   FOLIO api interface to call
-     * @param array  $query       CQL query
-     * @param int    $limit       How many results to retrieve from FOLIO per call
-     *
-     * @return array
-     */
-    protected function getPagedResults($responseKey, $interface, $query = [], $limit = 1000)
-    {
-        $offset = 0;
-
-        // MSU -- Can remove once https://github.com/vufind-org/vufind/pull/4186 is
-        // in our code.
-        // If we're using the new authentication method and our token has expired
-        // Renew it now before we make the call
-        if (! $this->useLegacyAuthentication()) {
-            $this->renewTenantToken();
-        }
-
-        do {
-            $combinedQuery = array_merge($query, compact('offset', 'limit'));
-            $response = $this->makeRequest(
-                'GET',
-                $interface,
-                $combinedQuery
-            );
-            $json = json_decode($response->getBody());
-            if (!$response->isSuccess() || !$json) {
-                $msg = $json->errors[0]->message ?? json_last_error_msg();
-                throw new ILSException("Error: '$msg' fetching '$responseKey'");
-            }
-            $totalEstimate = $json->totalRecords ?? 0;
-            foreach ($json->$responseKey ?? [] as $item) {
-                yield $item ?? '';
-            }
-            $offset += $limit;
-
-            // Continue until the current offset is greater than the totalRecords value returned
-            // from the API (which could be an estimate if more than 1000 results are returned).
-        } while ($offset <= $totalEstimate);
-    }
-
 }
