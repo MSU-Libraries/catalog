@@ -188,8 +188,8 @@ class GetThisLoader
 
         $item_id = $this->getItemId($item_id);
         $item = $this->getItem($item_id);
-        list($partOne, $partTwo) = $this->getStatusParts($item);
-        $partTwo = empty($partTwo) ? "" : " ({$partTwo})";
+        [$partOne, $partTwo] = $this->getStatusParts($item);
+        $partTwo = empty($partTwo) ? '' : " ({$partTwo})";
         return $partOne . $partTwo . $this->getStatusSuffix($item);
     }
 
@@ -441,7 +441,7 @@ class GetThisLoader
     {
         $item_id = $this->getItemId($item_id);
         $item = $this->getItem($item_id);
-        list($stat, $_) = $this->getStatusParts($item);
+        [$stat, $_] = $this->getStatusParts($item);
         return $stat == 'Unavailable';
     }
 
