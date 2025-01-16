@@ -781,7 +781,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getTermsOfUseNotes()
     {
-        return $this->getNotesMarcFields('540');
+        return $this->getNotesMarcFields('540', range('a', 'z'));
     }
 
     /**
