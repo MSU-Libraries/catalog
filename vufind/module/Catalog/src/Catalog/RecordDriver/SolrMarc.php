@@ -1399,7 +1399,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getCallNumbers()
     {
-        return array_unique($this->fields['callnumber-raw'] ?? []);
+        return array_unique($this->fields['callnumber-full_str_mv'] ?? []);
     }
 
     /**
