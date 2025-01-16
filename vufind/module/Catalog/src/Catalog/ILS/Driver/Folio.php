@@ -999,6 +999,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 . "); code: {$response->getStatusCode()}, body: {$response->getBody()}"
             );
             if ($this->shouldRetryAfterUnexpectedStatusCode($response, $attemptNumber)) {
+                $this->renewTenantToken(); // MSU Can likely remove after updating to 10.1
                 return $this->makeRequest(
                     $method,
                     $path,
