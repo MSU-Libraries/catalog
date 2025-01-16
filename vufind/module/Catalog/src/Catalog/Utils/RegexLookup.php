@@ -65,8 +65,16 @@ class RegexLookup
     public const IN_PROCESS            = ['/IN PROCESS/i'];
     public const LIB_USE_ONLY          = ['/LIB USE ONLY/i', '/LIBRARY USE ONLY/i'];
     public const ON_DISPLAY            = ['/ON DISPLAY/i'];
+    public const CHECKED               = ['/CHECKED/i'];
+    public const BILLED                = ['/BILLED/i'];
+    public const ON_SEARCH             = ['/ON SEARCH/i'];
+    public const LOST                  = ['/LOST/i'];
+    public const HOLD                  = ['/HOLD/i'];
+    // Format
+    public const SERIAL                = ['/SERIAL/i'];
     // Description / Call Number
     public const VINYL                 = ['/VINYL/i'];
+    // Call Number
     public const MICROPRINT            = ['/MICROFILM/i', '/MICROFICHE/i', '/MICROPRINT/i'];
     public const AV_MEDIA              = [
         '/DISC/i', '/VIDEO/i', '/CD/i', '/DVD/i', '/BLU-RAY/i', '/VINYL/i', '/AUDIOCASSETTE/i'
@@ -83,6 +91,7 @@ class RegexLookup
     public const CIRCULATING           = ['/CIRCULATING/i', '/FOLD/i'];
     public const DIGITAL_MEDIA         = ['/DIGITAL\/MEDIA\./i'];
     public const FACULTY_BOOK          = ['/FACULTY BOOK/i'];
+    public const FICHE                 = ['/FICHE/i'];
     public const GOV                   = ['/^MSU GOV/i'];
     public const GULL                  = ['/^MSU GULL/i'];
     public const KLINE_DMC             = ['/^MSU G\.M\.KLINE DIGITAL/i'];
