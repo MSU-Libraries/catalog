@@ -325,11 +325,12 @@ class GetThisLoader
     /**
      * Check if item is Makerspace equipment location code
      *
-     * @param array $item item record
+     * @param string $item_id Item ID to filter for
      *
      * @return bool
      */
-    public function isMakerspace($item_id = null) {
+    public function isMakerspace($item_id = null)
+    {
         $item_id = $this->getItemId($item_id);
         $loc_code = $this->getLocationCode($item_id);
         return $loc_code == 'mnmst';
