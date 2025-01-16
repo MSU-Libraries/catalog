@@ -12,8 +12,12 @@ Deploys stacks for a given environment and docker compose. This is useful becaus
 the step of sourcing the `.env` file for the environment directory used and calling
 `envsubstr` on the compose file before deploying the stack.
 
-Make sure you run it as the deploy user so that the proper Docker
-container registry credentials are passed.
+Make sure you run it as the `deploy` user so that the proper Docker
+container registry credentials are passed. While running as `root`
+would also work since the script will detect that and switch users,
+this documentation will list using the `deploy` user to help
+indicate that is the user with the proper credentials to the
+container registry.
 
 ```bash
 # Deploy the catalog stack for the catalog-prod environment

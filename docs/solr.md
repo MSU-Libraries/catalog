@@ -113,7 +113,7 @@ docker exec $(docker ps -q -f name=${STACK_NAME}-solr_solr) /clusterhealth.sh
 * Using the NCPA checks deployed via the catalog-infrastructure repository will also run many of these health checks.
 
 ```bash
-/usr/local/ncpa/plugins/check_galera.sh catalog-prod
+sudo /usr/local/ncpa/plugins/check_galera.sh catalog-prod
 ```
 
 * To view the Docker healthcheck logs from a particular container you can:

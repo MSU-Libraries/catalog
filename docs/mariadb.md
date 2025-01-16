@@ -30,6 +30,8 @@ docker stop $(docker ps -q -f name=catalog-prod-mariadb_galera)
 # Wait for the new container to report healthy
 watch 'docker ps | grep catalog-prod-mariadb_galera'
 # Now repeat those two steps on the remaining nodes in the cluster
+# Once complete, run a final check on the cluster
+sudo /usr/local/ncpa/plugins/check_galera.sh catalog-prod
 ```
 
 ## Troubleshooting
@@ -120,5 +122,5 @@ some key values are the `wsrep_cluster_size` (which should match the number of n
 Using the NCPA checks deployed via the catalog-infrastructure repository will also run many of these health checks.
 
 ```bash
-/usr/local/ncpa/plugins/check_galera.sh catalog-prod
+sudo /usr/local/ncpa/plugins/check_galera.sh catalog-prod
 ```
