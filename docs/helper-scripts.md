@@ -12,17 +12,24 @@ Deploys stacks for a given environment and docker compose. This is useful becaus
 the step of sourcing the `.env` file for the environment directory used and calling
 `envsubstr` on the compose file before deploying the stack.
 
+Make sure you run it as the `deploy` user so that the proper Docker
+container registry credentials are passed. While running as `root`
+would also work since the script will detect that and switch users,
+this documentation will list using the `deploy` user to help
+indicate that is the user with the proper credentials to the
+container registry.
+
 ```bash
 # Deploy the catalog stack for the catalog-prod environment
-pc-deploy catalog-prod catalog
+sudo -Hu deploy pc-deploy catalog-prod catalog
 
 # Do a dry-run of the traefik stack, which is a core-stack
-pc-deploy core-stacks traefik -n
+sudo -Hu deploy pc-deploy core-stacks traefik -n
 
 # Deploy the solr bootstrap compose file for the devel-test stack
-pc-deploy devel-test solr-bootstrap
+sudo -Hu deploy pc-deploy devel-test solr-bootstrap
 # or
-pc-deploy devel-test docker-compose.solr-bootstrap.yml
+sudo -Hu deploy pc-deploy devel-test docker-compose.solr-bootstrap.yml
 ```
 
 ## OAI File Locator ([pc-locate-oai](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-locate-oai?ref_type=heads))
@@ -87,4 +94,24 @@ pc-connect catalog-prod-solr_solr --zk
 # Dry-run to locate an instance
 pc-connect devel-test-catalog_catalog -n
 
+```
+
+## Run full import ([pc-full-import](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-full-import?ref_type=heads))
+Helper to run a full import of data into an environment using the folio and hlm data in their `processed` or `current` directories.
+This should be run in a `screen` since it will likely run for a day and needs to be run with `sudo` on the host.
+
+```bash
+screen # run in a screen, this isn't required, but highly recommended
+
+# List all of the steps the script will run
+sudo pc-full-import catalog-prod --list
+
+# Run a full import with debug output saving to a file
+sudo pc-full-import catalog-prod --debug 2>&1 | tee catalog-prod-import_$(date -I).log
+
+# Run only a few steps from script bypassing user confirmation (if that step asks for it)
+sudo pc-full-import catalog-prod --first-step 3 --last-step 5 --debug --yes
+
+# Do a dry run of the full import to show what steps it would perform
+sudo pc-full-import catalog-prod --dry-run
 ```
