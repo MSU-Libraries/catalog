@@ -125,14 +125,12 @@ class GetThisLoader
     public function getItem($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
-        $item = null;
-        foreach ($this->items as $hold_item) {
-            if ($item_id === null || $hold_item['item_id'] == $item_id) {
-                $item = $hold_item;
-                break;
+        foreach ($this->items as $item) {
+            if ($item_id === null || $item['item_id'] == $item_id) {
+                return $item;
             }
         }
-        return $item;
+        return null;
     }
 
     /**
@@ -325,16 +323,17 @@ class GetThisLoader
     }
 
     /**
-     * Return true if the Place Request button should not be displayed for the given item
-     * because the location code is mnmst.
+     * Check if item is Makerspace equipment location code
      *
-     * @param array $item item record
+     * @param string $item_id Item ID to filter for
      *
      * @return bool
      */
-    public static function makerspaceLocation($item)
+    public function isMakerspace($item_id = null)
     {
-        return ($item['location_code'] ?? '') == 'mnmst';
+        $item_id = $this->getItemId($item_id);
+        $loc_code = $this->getLocationCode($item_id);
+        return $loc_code == 'mnmst';
     }
 
     /**
@@ -361,13 +360,12 @@ class GetThisLoader
     public function isSerial($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
-        $is_serial = false;
         foreach ($this->record->getFormats() as $format) {
-            if (preg_match('/SERIAL/i', $format)) {
-                $is_serial = true;
+            if (Regex::SERIAL($format)) {
+                return true;
             }
         }
-        return $is_serial;
+        return false;
     }
 
     /**
@@ -382,11 +380,11 @@ class GetThisLoader
         $item_id = $this->getItemId($item_id);
         $status = $this->getStatus($item_id);
         return
-            preg_match('/CHECKED/i', $status) ||
-            preg_match('/BILLED/i', $status) ||
-            preg_match('/ON SEARCH/i', $status) ||
-            preg_match('/LOST/i', $status) ||
-            preg_match('/HOLD/i', $status)
+            Regex::CHECKED($status) ||
+            Regex::BILLED($status) ||
+            Regex::ON_SEARCH($status) ||
+            Regex::LOST($status) ||
+            Regex::HOLD($status)
         ;
     }
 
@@ -546,9 +544,7 @@ class GetThisLoader
         $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
-        $loc_code = $this->getLocationCode($item_id);
         $callNum = $this->getItem($item_id)['callnumber'] ?? '';
-
         if (
             (
                 Regex::AVAILABLE($stat)
@@ -559,8 +555,8 @@ class GetThisLoader
                 || Regex::GOV($loc)
                 || Regex::TURFGRASS($loc)
             )
-            && $loc_code != 'mnmst'
-            && !$this->isAudioVideoMedia()
+            && !$this->isMakerspace($item_id)
+            && !$this->isAudioVideoMedia($item_id)
             && !Regex::VINCENT_VOICE($loc)
         ) {
             return true;
@@ -580,13 +576,11 @@ class GetThisLoader
         $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
-        $loc_code = $this->getLocationCode($item_id);
         $callNum = $this->getItem($item_id)['callnumber'] ?? '';
-
         if (
             !Regex::AVAILABLE($stat)
-            && $loc_code != 'mnmst'
-            && !$this->isAudioVideoMedia()
+            && !$this->isMakerspace($item_id)
+            && !$this->isAudioVideoMedia($item_id)
             && !Regex::SPEC_COLL($loc)
             && !Regex::SPEC_COLL_REMOTE($loc)
             && !Regex::MICROPRINT($callNum)
@@ -689,38 +683,37 @@ class GetThisLoader
         $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
-        $loc_code = $this->getLocationCode($item_id);
         $desc = $this->getDescription();
+        $callNum = $this->getItem($item_id)['callnumber'] ?? '';
 
-        // Never show if the item is out, unavailable, on reserve, Remote SPC or mnmst (Makerspace equipment)
         if (
-            $this->isOut($item_id) || $this->isUnavailable($item_id) || Regex::RESERV($loc)
-            || Regex::SPEC_COLL_REMOTE($loc) || $loc_code == 'mnmst'
+            $this->isOut($item_id) ||
+            $this->isUnavailable($item_id) ||
+            Regex::RESERV($loc) ||
+            Regex::SPEC_COLL_REMOTE($loc) ||
+            Regex::FICHE($loc) ||
+            Regex::MICROFORMS($loc) ||
+            Regex::MICROPRINT($callNum) ||
+            $this->isMakerspace($item_id)
         ) {
             return false;
         }
 
         if (
-            (Regex::ART($loc) &&
-            !Regex::PERM($loc) &&
-            !$this->isLibUseOnly()) ||
-             (Regex::BUSINESS($loc) &&
-             !Regex::RESERV($loc)) ||
-             (Regex::MAP($loc) &&
-             Regex::CIRCULATING($loc) &&
-             Regex::AVAILABLE($stat)) ||
-             (Regex::MUSIC($loc) &&
-             !(Regex::REF($loc) ||
-             Regex::RESERV($loc))) ||
-             (Regex::REMOTE($loc) &&
-             !Regex::VINYL($desc) &&
-              !Regex::SPEC_COLL_REMOTE($loc) &&
-              !Regex::MICROFORMS($loc)) ||
-             (Regex::ROVI($loc)) ||
-             (Regex::THESES_REMOTE_MICRO($loc)) ||
-             (Regex::MAIN($loc) &&
-             Regex::AVAILABLE($stat)) ||
-             (Regex::AVAILABLE($stat))
+            (Regex::ART($loc) && !Regex::PERM($loc) && !$this->isLibUseOnly()) ||
+            (Regex::BUSINESS($loc) && !Regex::RESERV($loc)) ||
+            (Regex::MAP($loc) && Regex::CIRCULATING($loc) && Regex::AVAILABLE($stat)) ||
+            (Regex::MUSIC($loc) && !(Regex::REF($loc) || Regex::RESERV($loc))) ||
+            (
+                Regex::REMOTE($loc) &&
+                !Regex::VINYL($desc) &&
+                !Regex::SPEC_COLL_REMOTE($loc) &&
+                !Regex::MICROFORMS($loc)
+            ) ||
+            (Regex::ROVI($loc)) ||
+            (Regex::THESES_REMOTE_MICRO($loc)) ||
+            (Regex::MAIN($loc) && Regex::AVAILABLE($stat)) ||
+            (Regex::AVAILABLE($stat))
         ) {
             return true;
         }
@@ -739,35 +732,40 @@ class GetThisLoader
         $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
-        $loc_code = $this->getLocationCode($item_id);
         $desc = $this->getDescription();
+        $callNum = $this->getItem($item_id)['callnumber'] ?? '';
 
-        // Never show if the item is out, unavailable, on reserve, Remote SPC or mnmst (Makerspace equipment)
         if (
-            $this->isOut($item_id) || $this->isUnavailable($item_id) || Regex::RESERV($loc)
-            || Regex::SPEC_COLL_REMOTE($loc) || $loc_code == 'mnmst'
+            $this->isOut($item_id) ||
+            $this->isUnavailable($item_id) ||
+            Regex::RESERV($loc) ||
+            Regex::SPEC_COLL_REMOTE($loc) ||
+            Regex::FICHE($loc) ||
+            Regex::MICROFORMS($loc) ||
+            Regex::MICROPRINT($callNum) ||
+            $this->isMakerspace($item_id)
         ) {
             return false;
         }
 
         if (
             (Regex::ART($loc) && !Regex::PERM($loc) && !$this->isLibUseOnly()) ||
-             (Regex::BROWSING($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::BUSINESS($loc) && !Regex::RESERV($loc)) ||
-             (Regex::CAREER($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::CESAR_CHAVEZ($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::VIDEO_GAME($loc)) ||
-             (Regex::KLINE_DMC($loc) && !Regex::RESERV($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::FACULTY_BOOK($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::SCHAEFER($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::GOV($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::MAP($loc) && Regex::CIRCULATING($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::MUSIC($loc) && !(Regex::REF($loc) || Regex::RESERV($loc))) ||
-             (Regex::REMOTE($loc)) && !Regex::VINYL($desc) ||
-             (Regex::ROVI($loc)) ||
-             (Regex::TRAVEL($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::MAIN($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::AVAILABLE($stat))
+            (Regex::BROWSING($loc) && Regex::AVAILABLE($stat)) ||
+            (Regex::BUSINESS($loc) && !Regex::RESERV($loc)) ||
+            (Regex::CAREER($loc) && Regex::AVAILABLE($stat)) ||
+            (Regex::CESAR_CHAVEZ($loc) && Regex::AVAILABLE($stat)) ||
+            (Regex::VIDEO_GAME($loc)) ||
+            (Regex::KLINE_DMC($loc) && !Regex::RESERV($loc) && Regex::AVAILABLE($stat)) ||
+            (Regex::FACULTY_BOOK($loc) && Regex::AVAILABLE($stat)) ||
+            (Regex::SCHAEFER($loc) && Regex::AVAILABLE($stat)) ||
+            (Regex::GOV($loc) && Regex::AVAILABLE($stat)) ||
+            (Regex::MAP($loc) && Regex::CIRCULATING($loc) && Regex::AVAILABLE($stat)) ||
+            (Regex::MUSIC($loc) && !(Regex::REF($loc) || Regex::RESERV($loc))) ||
+            (Regex::REMOTE($loc) && !Regex::VINYL($desc)) ||
+            (Regex::ROVI($loc)) ||
+            (Regex::TRAVEL($loc) && Regex::AVAILABLE($stat)) ||
+            (Regex::MAIN($loc) && Regex::AVAILABLE($stat)) ||
+            (Regex::AVAILABLE($stat))
         ) {
             return true;
         }
@@ -807,17 +805,17 @@ class GetThisLoader
     {
         $item_id = $this->getItemId($item_id);
         $loc = $this->getLocation($item_id);
-        $loc_code = $this->getLocationCode($item_id);
 
-        // Makerspace equipment, or VVL
-        if ($loc_code == 'mnmst' || Regex::VINCENT_VOICE($loc)) {
+        if ($this->isMakerspace($item_id) || Regex::VINCENT_VOICE($loc)) {
             return false;
         }
 
         // only if the item is on reserve, non-circulating (lib use only), checked out or unavailable
         if (
-            Regex::RESERV($loc) || $this->isOut($item_id) || $this->isLibUseOnly($item_id)
-            || $this->isUnavailable($item_id)
+            Regex::RESERV($loc) ||
+            $this->isOut($item_id) ||
+            $this->isLibUseOnly($item_id) ||
+            $this->isUnavailable($item_id)
         ) {
             return true;
         }
@@ -835,18 +833,11 @@ class GetThisLoader
     public function showUahc($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
-        // only show if any of the items in the instance are held by UAHC
-        if ($item_id === null) {
-            $loc = $this->getLocation($item_id);
+        $items = $item_id ? [['item_id' => $item_id]] : $this->items;
+        foreach ($items as $item) {
+            $loc = $this->getLocation($item['item_id']);
             if (Regex::UNIV_ARCH($loc)) {
                 return true;
-            }
-        } else {
-            foreach ($this->items as $item) {
-                $loc = $this->getLocation($item['item_id']);
-                if (Regex::UNIV_ARCH($loc)) {
-                    return true;
-                }
             }
         }
         return false;
@@ -859,20 +850,19 @@ class GetThisLoader
      *
      * @return bool  If the template should display
      */
-    public function showMicrofiche($item_id = null)
+    public function showMicroforms($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
-        if ($item_id === null) {
-            $loc = $this->getLocation($item_id);
-            if (Regex::MICROFORMS($loc)) {
+        $items = $item_id ? [['item_id' => $item_id]] : $this->items;
+        foreach ($items as $item) {
+            $loc = $this->getLocation($item['item_id']);
+            $callNum = $this->getItem($item['item_id'])['callnumber'] ?? '';
+            if (
+                Regex::MICROFORMS($loc) ||
+                Regex::FICHE($loc) ||
+                Regex::MICROPRINT($callNum)
+            ) {
                 return true;
-            }
-        } else {
-            foreach ($this->items as $item) {
-                $loc = $this->getLocation($item['item_id']);
-                if (Regex::MICROFORMS($loc)) {
-                    return true;
-                }
             }
         }
         return false;
