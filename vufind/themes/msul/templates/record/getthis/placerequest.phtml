@@ -1,14 +1,18 @@
 <!-- Get-this: placerequest -->
 <?php
-use Catalog\GetThis\GetThisLoader;
 
 $item = $this->getthis->getItem();
 $check = $item['check'] ?? false;
 $link = $this->getthis->getLink();
 $notices = $this->Notices('RequestNotices.yaml');
 ?>
-<?php if ($item != null && !$this->getthis->isOnlineResource() && !GetThisLoader::makerspaceLocation($item) &&
-    $item['is_holdable'] && $link ?? false) { ?>
+<?php if (
+    $item != null &&
+    !$this->getthis->isOnlineResource() &&
+    !$this->getthis->isMakerspace() &&
+    $item['is_holdable'] &&
+    ($link ?? false)
+  ) { ?>
   <div>
     <p><b><a href='https://lib.msu.edu/circ/borrowing-at-msu' target='_blank'>On-Campus Pickup:</a></b>
       We will hold MSU materials for pickup at the campus

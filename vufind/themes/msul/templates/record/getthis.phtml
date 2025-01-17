@@ -19,7 +19,6 @@ if ($this->getthis->isHLM()) {
     // Always render biblio info
     echo $this->render('record/getthis/bibinfo.phtml');
 
-    # inProcess();
     if ($this->getthis->showInProcess()) {
         echo $this->render('record/getthis/inprocess.phtml');
     }
@@ -28,46 +27,38 @@ if ($this->getthis->isHLM()) {
         echo $this->render('record/getthis/uahc.phtml');
     }
 
-    if ($this->getthis->showMicrofiche()) {
-        echo $this->render('record/getthis/microfiche.phtml');
+    if ($this->getthis->showMicroforms()) {
+        echo $this->render('record/getthis/microforms.phtml');
     }
 
-    # servMsg(); // Accepts two arguments: a header string, some inline HTML to display under the header
     if ($this->getthis->showServMsg()) {
         echo $this->render('record/getthis/messages/' . $this->getthis->msgTemplate);
     }
 
-    # reqItem($rovi,"Pickup at Business Library",$BUS_PICKUP);
     if ($this->getthis->showReqItem()) {
         echo $this->render('record/getthis/reqitem.phtml');
     }
 
-    # getRovi($rovi);
     if ($this->getthis->showGetRovi()) {
         echo $this->render('record/getthis/getrovi.phtml');
     }
 
-    # remForm();
     if ($this->getthis->showRemForm()) {
         echo $this->render('record/getthis/remform.phtml');
     }
 
-    # facDel();
     if ($this->getthis->showFacDel()) {
         echo $this->render('record/getthis/facdel.phtml');
     }
 
-    # remotePat();
     if ($this->getthis->showRemotePat()) {
         echo $this->render('record/getthis/remotepat.phtml');
     }
 
-    # spAeon();
     if ($this->getthis->showSpcAeon()) {
         echo $this->render('record/getthis/spcaeon.phtml');
     }
 
-    # otherLib();
     if ($this->getthis->showOtherLib()) {
         echo $this->render('record/getthis/otherlib.phtml');
     }
@@ -80,6 +71,7 @@ if ($this->getthis->isHLM()) {
         echo $this->render('record/getthis/reqscan_other.phtml');
     }
 
-    # circForm(); // Hidden forms; always displayed, but not sure if needed to always be displayed
+    // from legacy circForm();
+    // Hidden forms; always displayed, but not sure if needed to always be displayed
     echo $this->render('record/getthis/circform.phtml');
 }
