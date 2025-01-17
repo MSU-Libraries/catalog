@@ -379,13 +379,13 @@ class GetThisLoader
     {
         $item_id = $this->getItemId($item_id);
         $status = $this->getStatus($item_id);
-        return (
+        return
             Regex::CHECKED($status) ||
             Regex::BILLED($status) ||
             Regex::ON_SEARCH($status) ||
             Regex::LOST($status) ||
             Regex::HOLD($status)
-        );
+        ;
     }
 
     /**
