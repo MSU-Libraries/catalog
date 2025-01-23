@@ -29,7 +29,6 @@ if (!empty($title)) {
     echo 'TI  - ' . "$title\r\n";
 }
 
-// MSU PC-946
 $shortTitle = $this->driver->getShortTitle();
 if (!empty($shortTitle)) {
     $shortTitle = rtrim(rtrim($shortTitle, ' /'), ' :');
@@ -118,13 +117,13 @@ if (is_array($genres)) {
     }
 }
 
-$topics = $this->driver->tryMethod('getTopics');
+$topics = $this->driver->tryMethod('getAllSubjectHeadingsFlattened');
 if (is_array($topics)) {
     foreach ($topics as $topic) {
         echo 'KW  - ' . "$topic\r\n";
     }
 } else {
-    // For EDS
+    // MSU -- For EDS
     $topics = $this->driver->tryMethod('getItemsSubjects');
     if (is_string($topics)) {
         $topics = strip_tags($topics);
@@ -165,7 +164,6 @@ if (is_array($notes)) {
     }
 }
 
-// MSU PC-946
 echo 'L4  - ' . $this->serverUrl($this->recordLinker()->getUrl($this->driver)) . "\r\n";
 
 foreach ($this->record($this->driver)->getUrlList() as $url) {
@@ -178,17 +176,23 @@ if ($doi = $this->driver->tryMethod('getCleanDOI')) {
     echo "DO  - $doi\r\n";
 }
 
-// MSU START PC-750, PC-946
-$abstract = $this->driver->tryMethod('getAbstractAndSummaryNotes');
+$summary = $this->driver->tryMethod('getSummaryNotes');
+if (is_array($summary)) {
+    foreach ($summary as $note) {
+        echo 'AB  - ' . "$note\r\n";
+    }
+}
+
+$abstract = $this->driver->tryMethod('getAbstractNotes');
 if (is_array($abstract)) {
     foreach ($abstract as $note) {
         echo 'AB  - ' . "$note\r\n";
     }
-} else {
-    $abstract = $this->driver->tryMethod('getItemsAbstract');
-    if (is_string($abstract)) {
-        echo 'AB  - ' . "$abstract\r\n";
-    }
+
+// MSU -- Add EDS
+$abstract = $this->driver->tryMethod('getItemsAbstract');
+if (is_string($abstract)) {
+    echo 'AB  - ' . "$abstract\r\n";
 }
 
 $notes = $this->driver->tryMethod('getLocationOfArchivalMaterialsNotes');
@@ -198,10 +202,10 @@ if (is_array($notes)) {
     }
 }
 
-$results = $this->driver->tryMethod('getCallNumbers');
-if (is_array($results)) {
-    foreach ($results as $result) {
-        echo 'CN  - ' . "$result\r\n";
+$call_numbers = $this->driver->tryMethod('getCallNumbers');
+if (is_array($call_numbers)) {
+    foreach ($call_numbers as $call_number) {
+        echo 'CN  - ' . "$call_number\r\n";
     }
 }
 
@@ -211,7 +215,6 @@ if (is_array($results)) {
         echo 'J2  - ' . "$result\r\n";
     }
 }
-// MSU END
 
 // End of Record:
 echo "ER  -\r\n\r\n";

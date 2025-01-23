@@ -29,7 +29,7 @@
         <ul>
           <li><a href="https://lib.msu.edu/callnumbers" target="_blank">Call Number Locations<?= $this->icon('fa-external-link', 'fa-external-link') ?></a></li>
           <li><a href="https://lib.msu.edu/contact/askalib/" target="_blank">Ask a Librarian<?= $this->icon('fa-external-link', 'fa-external-link') ?></a></li>
-          <li><a href="<?=$this->url('help-home')?>?topic=z3950" data-lightbox><?=$this->transEsc('Z39.50 Access')?></a></li>
+          <li><a href="<?=$this->url('help', ['topic' => 'z3950')?>" data-lightbox><?=$this->transEsc('Z39.50 Access')?></a></li>
 <!--         <li><a href="<?=$this->url('content-page', ['page' => 'faq']) ?>"><?=$this->transEsc('FAQs')?></a></li> -->
           <?php if ($this->cookieConsent()->isEnabled()): ?>
             <li><a href="#" data-cc="show-preferencesModal" aria-haspopup="dialog"><?=$this->transEsc('Cookie Settings')?></a></li>

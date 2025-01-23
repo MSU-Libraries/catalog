@@ -32,7 +32,6 @@ namespace Catalog\ILS\Driver;
 use ArrayIterator;
 use Catalog\Utils\RegexLookup as Regex;
 use Laminas\Http\Header\HeaderInterface;
-use Laminas\Http\Response; // MSU - Can remove after we upgrade to VF 10.1
 use VuFind\Exception\ILS as ILSException;
 
 use function count;
@@ -51,27 +50,6 @@ use function is_string;
  */
 class Folio extends \VuFind\ILS\Driver\Folio
 {
-    /**
-     *  -- CAN REMOVE ONCE WE UPGRADE TO VF 10.1
-     * Support method for makeRequest to process an unexpected status code. Can return true to trigger
-     * a retry of the API call or false to throw an exception.
-     *
-     * @param Response $response      HTTP response
-     * @param int      $attemptNumber Counter to keep track of attempts (starts at 1 for the first attempt)
-     *
-     * @return bool
-     */
-    protected function shouldRetryAfterUnexpectedStatusCode(Response $response, int $attemptNumber): bool
-    {
-        // If the unexpected status is 401, and the token renews successfully, and we have not yet
-        // retried, we should try again:
-        if ($response->getStatusCode() === 401 && $attemptNumber < 2) {
-            $this->debug('Retrying request after token expired...');
-            return true;
-        }
-        return false;
-    }
-
     /**
      * Given an instance object or identifer, or a holding or item identifier,
      * determine an appropriate value to use as VuFind's bibliographic ID.
@@ -150,15 +128,16 @@ class Folio extends \VuFind\ILS\Driver\Folio
      * Support method for getHolding() -- given a few key details, format an item
      * for inclusion in the return value.
      *
-     * @param string $bibId            Current bibliographic ID
-     * @param array  $holdingDetails   Holding details produced by
+     * @param string     $bibId            Current bibliographic ID
+     * @param array      $holdingDetails   Holding details produced by
      *                                 getHoldingDetailsForItem()
-     * @param object $item             FOLIO item record (decoded from JSON)
-     * @param int    $number           The current item number (position within
+     * @param object     $item             FOLIO item record (decoded from JSON)
+     * @param int        $number           The current item number (position within
      *                                 current holdings record)
-     * @param string $dueDateValue     The due date to display to the user
-     * @param array  $boundWithRecords Any bib records this holding is bound with
-     * @param string $tempLoanType     The temporary loan type for the item
+     * @param string     $dueDateValue     The due date to display to the user
+     * @param array      $boundWithRecords Any bib records this holding is bound with
+     * @param string     $tempLoanType     The temporary loan type for the item
+     * @param ?\stdClass $currentLoan      Any current loan on this item
      *
      * @return array
      */
@@ -169,16 +148,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $number,
         string $dueDateValue,
         $boundWithRecords,
-        string $tempLoanType = null
+        string $tempLoanType = null,
+        $currentLoan
     ): array {
         $itemNotes = array_filter(
             array_map([$this, 'formatNote'], $item->notes ?? [])
         );
         $locationId = $item->effectiveLocation->id;
-        $locationData = $this->getLocationData($locationId);
-        $locationName = $locationData['name'];
-        $locationCode = $locationData['code'];
-        $locationIsActive = $locationData['isActive'];
         // concatenate enumeration fields if present
         $enum = implode(
             ' ',
@@ -191,6 +167,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             )
         );
         $enum = str_ends_with($holdingDetails['holdingCallNumber'], $enum) ? '' : $enum; // MSU
+        $locAndHoldings = $this->getItemFieldsFromNonItemData($locationId, $holdingDetails, $currentLoan);
         $callNumberData = $this->chooseCallNumber(
             $holdingDetails['holdingCallNumberPrefix'],
             $holdingDetails['holdingCallNumber'],
@@ -211,7 +188,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         }
         // MSU END
 
-        return $callNumberData + [
+        return $callNumberData + $locAndHoldings + [
             'id' => $bibId,
             'item_id' => $item->id,
             'holdings_id' => $holdingDetails['id'],
@@ -221,19 +198,11 @@ class Folio extends \VuFind\ILS\Driver\Folio
             'status' => $item->status->name,
             'duedate' => $dueDateValue,
             'availability' => $item->status->name == 'Available',
-            'is_holdable' => $this->isHoldable($locationName),
-            'holdings_notes' => $holdingDetails['hasHoldingNotes']
-                ? $holdingDetails['holdingNotes'] : null,
             'item_notes' => !empty(implode($itemNotes)) ? $itemNotes : null,
-            'issues' => $holdingDetails['holdingsStatements'], // MSU
-            'supplements' => $holdingDetails['holdingsSupplements'],
-            'indexes' => $holdingDetails['holdingsIndexes'],
-            'location' => $locationName,
-            'location_code' => $locationCode,
-            'folio_location_is_active' => $locationIsActive,
             'reserve' => 'TODO',
-            'addLink' => true,
+            'addLink' => 'check',
             'bound_with_records' => $boundWithRecords,
+            'issues' => $holdingDetails['holdingsStatements'], // MSU
             'electronic_access' => $item->electronicAccess, // MSU
             'temporary_loan_type' => $tempLoanType, // MSU
         ];
@@ -255,6 +224,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $showDueDate = $this->config['Availability']['showDueDate'] ?? true;
         $showTime = $this->config['Availability']['showTime'] ?? false;
         $maxNumDueDateItems = $this->config['Availability']['maxNumberItems'] ?? 5;
+        $showHoldingsNoItems = $this->config['Holdings']['show_holdings_no_items'] ?? false;
         $dueDateItemCount = 0;
 
         $instance = $this->getInstanceByBibId($bibId);
@@ -292,6 +262,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     continue;
                 }
                 $number = $item->copyNumber ?? null; // MSU
+                $currentLoan = null;
                 $dueDateValue = '';
                 $boundWithRecords = null;
                 if (
@@ -299,7 +270,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     && $showDueDate
                     && $dueDateItemCount < $maxNumDueDateItems
                 ) {
-                    $dueDateValue = $this->getDueDate($item->id, $showTime);
+                    $currentLoan = $this->getCurrentLoan($item->id);
+                    $dueDateValue = $currentLoan ? $this->getDueDate($currentLoan, $showTime) : '';
                     $dueDateItemCount++;
                 }
                 if ($item->isBoundWith ?? false) {
@@ -315,7 +287,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $number,
                     $dueDateValue,
                     $boundWithRecords ?? [],
-                    $tempLoanType // MSU
+                    $tempLoanType, // MSU
+                    $currentLoan
                 );
                 // MSU Start
                 // PC-872: Filter out LoM holdings
@@ -332,6 +305,25 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $sortNeeded = true;
                 }
                 $nextBatch[] = $nextItem;
+            }
+
+            // If there are no item records on this holding, we're going to create a fake one,
+            // fill it with data from the FOLIO holdings record, and make it not appear in
+            // the full record display using a non-visible AvailabilityStatus.
+            if ($number == 0 && $showHoldingsNoItems) {
+                $locAndHoldings = $this->getItemFieldsFromNonItemData($holding->effectiveLocationId, $holdingDetails);
+                $invisibleAvailabilityStatus = new AvailabilityStatus(
+                    true,
+                    'HoldingStatus::holding_no_items_availability_message'
+                );
+                $invisibleAvailabilityStatus->setVisibilityInHoldings(false);
+                $nextBatch[] = $locAndHoldings + [
+                    'id' => $bibId,
+                    'callnumber' => $holdingDetails['holdingCallNumber'],
+                    'callnumber_prefix' => $holdingDetails['holdingCallNumberPrefix'],
+                    'reserve' => 'N',
+                    'availability' => $invisibleAvailabilityStatus,
+                ];
             }
             $items = array_merge(
                 $items,
@@ -396,21 +388,23 @@ class Folio extends \VuFind\ILS\Driver\Folio
      *                         was checked out (optional – introduced in release 2.4)
      *
      * @param array $patron Patron login information from $this->patronLogin
+     * @param array $params Additional parameters (limit, page, sort)
      *
-     * @return array Transactions associative arrays
+     * @return array Transaction data as described above
      */
-    public function getMyTransactions($patron)
+    public function getMyTransactions($patron, $params = [])
     {
-        // MSUL -- overridden to add sortBy and add fields to response
-        $query = ['query' => 'userId==' . $patron['id'] . ' and status.name==Open sortBy dueDate/sort.ascending'];
+        // MSUL -- overridden to add fields to response
+        $limit = $params['limit'] ?? 1000;
+        $offset = isset($params['page']) ? ($params['page'] - 1) * $limit : 0;
+
+        $query = 'userId==' . $patron['id'] . ' and status.name==Open';
+        if (isset($params['sort'])) {
+            $query .= ' sortby ' . $this->escapeCql($params['sort']);
+        }
+        $resultPage = $this->getResultPage('/circulation/loans', compact('query'), $offset, $limit);
         $transactions = [];
-        foreach (
-            $this->getPagedResults(
-                'loans',
-                '/circulation/loans',
-                $query
-            ) as $trans
-        ) {
+        foreach ($resultPage->loans ?? [] as $trans) {
             $dueStatus = false;
             $date = $this->getDateTimeFromString($trans->dueDate);
             $dueDateTimestamp = $date->getTimestamp();
@@ -439,12 +433,19 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 'renew' => $trans->renewalCount ?? 0,
                 'renewable' => true,
                 'title' => $trans->item->title,
-                'borrowingLocation' => $trans->item->location->name,
-                'volume' => $trans->item->volume ?? null,
-                'callNumber' => $trans->item->callNumber,
+                'borrowingLocation' => $trans->item->location->name, // MSU
+                'volume' => $trans->item->volume ?? null, // MSU
+                'callNumber' => $trans->item->callNumber, // MSU
             ];
         }
-        return $transactions;
+        // If we have a full page or have applied an offset, we need to look up the total count of transactions:
+        $count = count($transactions);
+        if ($offset > 0 || $count >= $limit) {
+            // We could use the count in the result page, but that may be an estimate;
+            // safer to do a separate lookup to be sure we have the right number!
+            $count = $this->getResultCount('/circulation/loans', compact('query'));
+        }
+        return ['count' => $count, 'records' => $transactions];
     }
 
     /**
@@ -461,9 +462,16 @@ class Folio extends \VuFind\ILS\Driver\Folio
     public function findReserves($course, $inst, $dept)
     {
         $retVal = [];
-        $query = [
-            'query' => 'copiedItem.instanceDiscoverySuppress==false',
-        ];
+        $query = [];
+        $legalCourses = $this->getCourses();
+
+        $includeSuppressed = $this->config['CourseReserves']['includeSuppressed'] ?? false;
+
+        if (!$includeSuppressed) {
+            $query = [
+                'query' => 'copiedItem.instanceDiscoverySuppress==false',
+            ];
+        }
 
         // Results can be paginated, so let's loop until we've gotten everything:
         foreach (
@@ -501,6 +509,11 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $item->courseListingId ?? null
                 );
                 foreach ($courseData as $courseId => $departmentId) {
+                    // If the present course ID is not in the legal course list, it is likely
+                    // expired data and should be skipped.
+                    if (!isset($legalCourses[$courseId])) {
+                        continue;
+                    }
                     foreach ($instructorIds as $instructorId) {
                         $retVal[] = [
                             'BIB_ID' => $bibId,
@@ -555,10 +568,10 @@ class Folio extends \VuFind\ILS\Driver\Folio
      *
      * @param array $patron   Patron information returned by $this->patronLogin
      * @param array $holdInfo Optional array, only passed in when getting a list
-     * in the context of placing or editing a hold.  When placing a hold, it contains
-     * most of the same values passed to placeHold, minus the patron data.  When
+     * in the context of placing or editing a hold. When placing a hold, it contains
+     * most of the same values passed to placeHold, minus the patron data. When
      * editing a hold it contains all the hold information returned by getMyHolds.
-     * May be used to limit the pickup options or may be ignored.  The driver must
+     * May be used to limit the pickup options or may be ignored. The driver must
      * not add new options to the return array based on this data or other areas of
      * VuFind may behave incorrectly.
      *
@@ -569,6 +582,51 @@ class Folio extends \VuFind\ILS\Driver\Folio
      */
     public function getPickupLocations($patron, $holdInfo = null)
     {
+        if ('Delivery' == ($holdInfo['requestGroupId'] ?? null)) {
+            $addressTypes = $this->getAddressTypes();
+            $limitDeliveryAddressTypes = $this->config['Holds']['limitDeliveryAddressTypes'] ?? [];
+            $deliveryPickupLocations = [];
+            foreach ($patron['addressTypeIds'] as $addressTypeId) {
+                $addressType = $addressTypes[$addressTypeId];
+                if (empty($limitDeliveryAddressTypes) || in_array($addressType, $limitDeliveryAddressTypes)) {
+                    $deliveryPickupLocations[] = [
+                        'locationID' => $addressTypeId,
+                        'locationDisplay' => $addressType,
+                    ];
+                }
+            }
+            return $deliveryPickupLocations;
+        }
+
+        $limitedServicePoints = null;
+        if (
+            str_contains($this->config['Holds']['limitPickupLocations'] ?? '', 'itemEffectiveLocation')
+            // If there's no item ID, it must be a title-level hold,
+            // so limiting by itemEffectiveLocation does not apply
+            && $holdInfo['item_id'] ?? false
+        ) {
+            $item = $this->getItemById($holdInfo['item_id']);
+            $itemLocationId = $item->effectiveLocationId;
+            $limitedServicePoints = $this->getLocationData($itemLocationId)['servicePointIds'];
+        }
+
+        // If we have $holdInfo, we can limit ourselves to pickup locations that are valid in context. Because the
+        // allowed service point list doesn't include discovery display names, we can't use it directly; we just
+        // have to obtain a list of IDs to use as a filter below.
+        $legalServicePoints = null;
+        if ($holdInfo) {
+            $allowed = $this->getAllowedServicePoints($this->getInstanceByBibId($holdInfo['id'])->id, $patron['id']);
+            if ($allowed !== null) {
+                $legalServicePoints = [];
+                $preferredRequestType = $this->getPreferredRequestType($holdInfo);
+                foreach ($this->getRequestTypeList($preferredRequestType) as $requestType) {
+                    foreach ($allowed[$requestType] ?? [] as $servicePoint) {
+                        $legalServicePoints[] = $servicePoint['id'];
+                    }
+                }
+            }
+        }
+
         $query = ['query' => 'pickupLocation=true'];
         $locations = [];
         foreach (
@@ -578,14 +636,24 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 $query
             ) as $servicepoint
         ) {
-            if ($this->isPickupable($servicepoint->discoveryDisplayName)) {
-                $locations[] = [
-                    'locationID' => $servicepoint->id,
-                    'locationDisplay' => $servicepoint->discoveryDisplayName,
-                ];
+            // MSU -- prevent specific locations by config
+            if (!$this->isPickupable($servicepoint->discoveryDisplayName)) {
+                continue;
             }
+            if ($legalServicePoints !== null && !in_array($servicePoint->id, $legalServicePoints)) {
+                continue;
+            }
+            if ($limitedServicePoints && !in_array($servicePoint->id, $limitedServicePoints)) {
+                continue;
+            }
+
+            $locations[] = [
+                'locationID' => $servicePoint->id,
+                'locationDisplay' => $servicePoint->discoveryDisplayName,
+            ];
         }
-        // PC-864 Sort the locations, if configured to do so
+
+        // MSU START PC-864 Sort the locations, if configured to do so
         // sortby is a list of location names in the order we should be sorting them in
         $sortby = (array)($this->config['Holds']['sortPickupLocations'] ?? []);
         $finalLocations = [];
@@ -604,6 +672,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 $finalLocations[] = $loc;
             }
         }
+        // MSU END
 
         return $finalLocations;
     }
@@ -725,28 +794,32 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $hold->holdShelfExpirationDate
                 )
                 : null;
-            $available = in_array(
-                $hold->status,
-                $this->config['Holds']['available']
-                ?? $this->defaultAvailabilityStatuses
-            );
+            // MSU START
             $servicePoint = isset($hold->pickupServicePointId)
                 ? $this->getPickupLocation($hold->pickupServicePointId) : null;
             $location = isset($servicePoint) && count($servicePoint) == 1
                 ? $servicePoint[0]['locationDisplay'] : '';
-            $request_id = $this->getBibId(null, null, $hold->itemId);
             $updateDetails = (!$available || $allowCancelingAvailableRequests)
                 ? (string)$request_id : '';
+            // MSU END
             $currentHold = [
                 'type' => $hold->requestType,
                 'create' => $requestDate,
                 'expire' => $expireDate ?? '',
-                'id' => $request_id,
-                'item_id' => $hold->itemId,
+                'id' => $this->getBibId(
+                    $hold->instanceId,
+                    $hold->holdingsRecordId ?? null,
+                    $hold->itemId ?? null
+                ),
+                'item_id' => $hold->itemId ?? null,
                 'reqnum' => $hold->id,
                 // Title moved from item to instance in Lotus release:
                 'title' => $hold->instance->title ?? $hold->item->title ?? '',
-                'available' => $available,
+                'available' => in_array(
+                    $hold->status,
+                    $this->config['Holds']['available']
+                    ?? $this->defaultAvailabilityStatuses
+                ),
                 'in_transit' => in_array(
                     $hold->status,
                     $this->config['Holds']['in_transit']
@@ -999,7 +1072,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 . "); code: {$response->getStatusCode()}, body: {$response->getBody()}"
             );
             if ($this->shouldRetryAfterUnexpectedStatusCode($response, $attemptNumber)) {
-                $this->renewTenantToken(); // MSU Can likely remove after updating to 10.1
                 return $this->makeRequest(
                     $method,
                     $path,
@@ -1035,50 +1107,5 @@ class Folio extends \VuFind\ILS\Driver\Folio
             }
         }
         return $response;
-    }
-
-    /**
-     * Helper function to retrieve paged results from FOLIO API
-     *
-     * @param string $responseKey Key containing values to collect in response
-     * @param string $interface   FOLIO api interface to call
-     * @param array  $query       CQL query
-     * @param int    $limit       How many results to retrieve from FOLIO per call
-     *
-     * @return array
-     */
-    protected function getPagedResults($responseKey, $interface, $query = [], $limit = 1000)
-    {
-        $offset = 0;
-
-        // MSU -- Can remove once https://github.com/vufind-org/vufind/pull/4186 is
-        // in our code.
-        // If we're using the new authentication method and our token has expired
-        // Renew it now before we make the call
-        if (! $this->useLegacyAuthentication()) {
-            $this->renewTenantToken();
-        }
-
-        do {
-            $combinedQuery = array_merge($query, compact('offset', 'limit'));
-            $response = $this->makeRequest(
-                'GET',
-                $interface,
-                $combinedQuery
-            );
-            $json = json_decode($response->getBody());
-            if (!$response->isSuccess() || !$json) {
-                $msg = $json->errors[0]->message ?? json_last_error_msg();
-                throw new ILSException("Error: '$msg' fetching '$responseKey'");
-            }
-            $totalEstimate = $json->totalRecords ?? 0;
-            foreach ($json->$responseKey ?? [] as $item) {
-                yield $item ?? '';
-            }
-            $offset += $limit;
-
-            // Continue until the current offset is greater than the totalRecords value returned
-            // from the API (which could be an estimate if more than 1000 results are returned).
-        } while ($offset <= $totalEstimate);
     }
 }
