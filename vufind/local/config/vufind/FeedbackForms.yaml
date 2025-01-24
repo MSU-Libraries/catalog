@@ -194,7 +194,11 @@ forms:
         settings:
         help:
           post: feedback_comment_help
-        # help: message_help
+      - name: problem_language
+        type: checkbox
+        required: false
+        options:
+          - "My feedback relates to problematic language within the catalog."
 
   # Example for an acquisition request form
 

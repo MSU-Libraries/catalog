@@ -84,13 +84,13 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test makerspaceLocation
+     * Test isMakerspace
      *
      * @return null
      */
-    public function testMakerspaceLocation()
+    public function testIsMakerspace()
     {
-        $this->assertTrue($this->getHandler()->makerspaceLocation(['location_code' => 'mnmst']));
+        $this->assertFalse($this->getHandler()->isMakerspace());
     }
 
     /**

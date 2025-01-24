@@ -8,6 +8,17 @@ been written to make certain tasks easier.
 theme or language file changes.
 * `run-tests`: Run the unit tests and code quality tests as they would be run within the CI/CD.
 
+## Re-deploying
+If you ever need to re-deploy the stack, you can use the
+[pc-deploy](helper-scripts.md#deploy-helper-pc-deploy) script.
+
+Make sure you run it as the deploy user so that the proper Docker
+container registry credentials are passed.
+
+    ```bash
+    sudo -Hu deploy pc-deploy catalog-prod catalog
+    ```
+
 ## Troubleshooting
 [VuFind's troubleshooting page](https://vufind.org/wiki/development:troubleshooting)
 is a good reference for debugging options, but we'll highlight a few

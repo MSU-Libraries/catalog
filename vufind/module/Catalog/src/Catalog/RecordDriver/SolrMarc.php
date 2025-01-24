@@ -550,7 +550,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 $lsplits = array_pad($lsplits, $max_size, '');
 
                 array_map(function ($fval, $lval) use (&$toc) {
-                    $toc[] = $fval . ($lval ? " = ${lval}" : '');
+                    $toc[] = $fval . ($lval ? " = {$lval}" : '');
                 }, $fsplits, $lsplits);
             }, $arr1, $arr2);
         }
@@ -781,7 +781,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getTermsOfUseNotes()
     {
-        return $this->getNotesMarcFields('540');
+        return $this->getNotesMarcFields('540', range('a', 'z'));
     }
 
     /**
@@ -1399,7 +1399,11 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getCallNumbers()
     {
-        return array_unique($this->fields['callnumber-raw'] ?? []);
+        return array_unique(
+            $this->fields['callnumber-full_str_mv']
+            ? array_map('trim', $this->fields['callnumber-full_str_mv'])
+            : []
+        );
     }
 
     /**
