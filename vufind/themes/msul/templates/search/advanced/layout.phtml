@@ -1,6 +1,6 @@
 <?php
-  // Set page title.
-  $this->headTitle($this->translate('Advanced Search'));
+  // Set page title. MSU -- customize title
+  $this->headTitle($this->translate($this->headerLookup));
 
   // Disable top search box -- this page has a special layout.
   $this->layout()->searchbox = false;
@@ -85,7 +85,7 @@
         <input type="hidden" name="sort" value="<?=$this->escapeHtmlAttr($lastSort)?>">
       <?php endif; ?>
       <div class="clearfix">
-        <h1 class="pull-left flip mt-0"><?=$this->transEsc('Advanced Search')?></h1>
+        <h1 class="pull-left flip mt-0"><?=$this->transEsc($this->headerLookup)?></h1><!-- MSU customize title -->
       </div>
       <div class="adv-group-msul bg-color-lightgray" aria-atomic="true" aria-live="polite"> <!-- added div, classes and aria labels msul-->
       <a role="button" class="icon-link hidden adv-group-terms" id="groupPlaceHolder" href="#"> <!--added class adv-group-terms for layout-->

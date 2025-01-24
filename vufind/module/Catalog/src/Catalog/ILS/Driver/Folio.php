@@ -33,6 +33,7 @@ use ArrayIterator;
 use Catalog\Utils\RegexLookup as Regex;
 use Laminas\Http\Header\HeaderInterface;
 use VuFind\Exception\ILS as ILSException;
+use VuFind\ILS\Logic\AvailabilityStatus;
 
 use function count;
 use function in_array;
@@ -136,8 +137,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
      *                                 current holdings record)
      * @param string     $dueDateValue     The due date to display to the user
      * @param array      $boundWithRecords Any bib records this holding is bound with
-     * @param string     $tempLoanType     The temporary loan type for the item
      * @param ?\stdClass $currentLoan      Any current loan on this item
+     * @param string     $tempLoanType     The temporary loan type for the item
      *
      * @return array
      */
@@ -148,8 +149,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $number,
         string $dueDateValue,
         $boundWithRecords,
-        string $tempLoanType = null,
-        $currentLoan
+        $currentLoan,
+        string $tempLoanType = null
     ): array {
         $itemNotes = array_filter(
             array_map([$this, 'formatNote'], $item->notes ?? [])
@@ -182,7 +183,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         if (
             ($item->permanentLoanType->id ?? '') == 'adac93ac-951f-4f42-ab32-79f4faeabb50' &&
             $item->status->name == 'Available' &&
-            !Regex::ONLINE($locationName)
+            !Regex::ONLINE($this->getLocationData($locationId)['name'])
         ) {
             $item->status->name = 'Restricted';
         }
@@ -287,8 +288,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $number,
                     $dueDateValue,
                     $boundWithRecords ?? [],
-                    $tempLoanType, // MSU
-                    $currentLoan
+                    $currentLoan,
+                    $tempLoanType // MSU
                 );
                 // MSU Start
                 // PC-872: Filter out LoM holdings
@@ -634,10 +635,10 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 'servicepoints',
                 '/service-points',
                 $query
-            ) as $servicepoint
+            ) as $servicePoint
         ) {
             // MSU -- prevent specific locations by config
-            if (!$this->isPickupable($servicepoint->discoveryDisplayName)) {
+            if (!$this->isPickupable($servicePoint->discoveryDisplayName)) {
                 continue;
             }
             if ($legalServicePoints !== null && !in_array($servicePoint->id, $legalServicePoints)) {
@@ -795,6 +796,16 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 )
                 : null;
             // MSU START
+            $request_id = $this->getBibId(
+                $hold->instanceId,
+                $hold->holdingsRecordId ?? null,
+                $hold->itemId ?? null
+            );
+            $available = in_array(
+                $hold->status,
+                $this->config['Holds']['available']
+                ?? $this->defaultAvailabilityStatuses
+            );
             $servicePoint = isset($hold->pickupServicePointId)
                 ? $this->getPickupLocation($hold->pickupServicePointId) : null;
             $location = isset($servicePoint) && count($servicePoint) == 1
@@ -806,20 +817,12 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 'type' => $hold->requestType,
                 'create' => $requestDate,
                 'expire' => $expireDate ?? '',
-                'id' => $this->getBibId(
-                    $hold->instanceId,
-                    $hold->holdingsRecordId ?? null,
-                    $hold->itemId ?? null
-                ),
+                'id' => $request_id, // MSU -- use variable since it's used in updateDetails
                 'item_id' => $hold->itemId ?? null,
                 'reqnum' => $hold->id,
                 // Title moved from item to instance in Lotus release:
                 'title' => $hold->instance->title ?? $hold->item->title ?? '',
-                'available' => in_array(
-                    $hold->status,
-                    $this->config['Holds']['available']
-                    ?? $this->defaultAvailabilityStatuses
-                ),
+                'available' => $available, // MSU -- use variable since it's used in updateDetails
                 'in_transit' => in_array(
                     $hold->status,
                     $this->config['Holds']['in_transit']
@@ -1056,6 +1059,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 $client->setParameterPost($params);
             }
         }
+        $startTime = microtime(true);
         try {
             $response = $client->send();
         } catch (\Exception $e) {
@@ -1063,6 +1067,12 @@ class Folio extends \VuFind\ILS\Driver\Folio
             throw new ILSException('Error during send operation.');
         }
         $code = $response->getStatusCode();
+        $code = $response->getStatusCode();
+        $endTime = microtime(true);
+        $responseTime = $endTime - $startTime;
+        $this->debug(
+            'Request Response Time --- ' . $responseTime . ' seconds. ' . $path . ' [' . $code . ']'
+        );
         if (
             !$response->isSuccess()
             && !$this->failureCodeIsAllowed($code, $allowedFailureCodes)

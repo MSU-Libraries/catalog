@@ -122,15 +122,6 @@ if (is_array($topics)) {
     foreach ($topics as $topic) {
         echo 'KW  - ' . "$topic\r\n";
     }
-} else {
-    // MSU -- For EDS
-    $topics = $this->driver->tryMethod('getItemsSubjects');
-    if (is_string($topics)) {
-        $topics = strip_tags($topics);
-        foreach (explode(', ', $topics) as $topic) {
-            echo 'KW  - ' . "$topic\r\n";
-        }
-    }
 }
 
 $start_page = $this->driver->tryMethod('getContainerStartPage');
@@ -188,7 +179,7 @@ if (is_array($abstract)) {
     foreach ($abstract as $note) {
         echo 'AB  - ' . "$note\r\n";
     }
-
+}
 // MSU -- Add EDS
 $abstract = $this->driver->tryMethod('getItemsAbstract');
 if (is_string($abstract)) {

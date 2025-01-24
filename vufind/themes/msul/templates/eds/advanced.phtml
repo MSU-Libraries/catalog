@@ -46,5 +46,6 @@
   $this->formOverride = ob_get_contents();
   ob_end_clean();
 
+  $this->headerLookup = 'Advanced Search EDS'; // MSU customize page header
   echo $this->render('search/advanced/layout.phtml');
 ?>

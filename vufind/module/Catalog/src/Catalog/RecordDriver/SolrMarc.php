@@ -152,53 +152,17 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
-     * Takes a Marc field that notes are stored in (ex: 950) and a list of
-     * sub fields (ex: ['a','b']) optionally as well as what indicator
-     * number and value to filter for
-     * and concatonates the subfields together and returns the fields back
-     * as an array
-     * (ex: ['subA subB subC', 'field2SubA field2SubB'])
-     *
-     * @param string $field    Marc field to search within
-     * @param array  $subfield Sub-fields to return or empty for all
-     * @param string $indNum   The Marc indicator to filter for
-     * @param string $indValue The indicator value to check for
-     * @param string $unique   Deduplicate and return only unique values
-     *
-     * @return array The values within the subfields under the field
-     */
-    public function getMarcFieldWithInd(
-        string $field,
-        ?array $subfield = null,
-        string $indNum = '',
-        string $indValue = '',
-        bool $unique = true
-    ) {
-        $vals = [];
-        $marc = $this->getMarcReader();
-        $marc_fields = $marc->getFields($field, $subfield);
-        foreach ($marc_fields as $marc_data) {
-            $field_vals = [];
-            if (trim(($marc_data['i' . $indNum] ?? '')) == $indValue) {
-                $subfields = $marc_data['subfields'];
-                foreach ($subfields as $subfield) {
-                    $field_vals[] = $subfield['data'];
-                }
-            }
-            if (!empty($field_vals)) {
-                $vals[] = implode(' ', $field_vals);
-            }
-        }
-        return $unique ? array_unique($vals) : $vals;
-    }
-
-    /**
      * Similar functionality to getMarcFieldWithInd, but also retrieves any linkage from a $6
      *
      * @param string $field    Marc field to search within
      * @param array  $subfield Sub-fields to return or empty for all
-     * @param string $indNum   The Marc indicator to filter for
-     * @param string $indValue The indicator value to check for
+     * @param array  $indData  Array of filter arrays, each in the format indicator number =>
+     * array of allowed indicator values. If any one of the filter arrays fully matches the indicator
+     * values in the field, data will be returned. If no filter arrays are defined, data will always
+     * be returned regardless of indicators.
+     * ex: [['1' => ['1', '2']], ['2' => ['']]] would filter fields ind1 = 1 or 2 or ind2 = blank
+     * ex: [['1' => ['1'], '2' => ['7']]] would filter fields with ind1 = 1 and ind2 = 7
+     * ex: [] would apply no filtering based on indicators
      *
      * @return array An array pair with:
      *                0: array with the values within the subfields under the field
@@ -207,8 +171,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getMarcFieldWithIndAndLinked(
         string $field,
         ?array $subfield = null,
-        string $indNum = '',
-        string $indValue = ''
+        array $indData = []
     ) {
         $linkVals = null;
         $marc = $this->getMarcReader();
@@ -245,7 +208,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             }
         }
         return [
-            $this->getMarcFieldWithInd($field, $subfield, $indNum, $indValue, false),
+            $this->getMarcFieldWithInd($field, $subfield, $indData),
             $linkVals,
         ];
     }
@@ -344,10 +307,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getNotes()
     {
-        return array_merge(
-            $this->getMarcFieldWithInd('561', ['a', 'u', '3'], '1', ''),
-            $this->getMarcFieldWithInd('561', ['a', 'u', '3'], '1', '1')
-        );
+        return $this->getMarcFieldWithInd('561', ['a', 'u', '3'], [[1 => ['', '1']]]);
     }
 
     /**
@@ -407,12 +367,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getSummaryNotes()
     {
-        return array_merge(
-            $this->getMarcFieldWithInd('520', null, '1', ''),
-            $this->getMarcFieldWithInd('520', null, '1', '0'),
-            $this->getMarcFieldWithInd('520', null, '1', '2'),
-            $this->getMarcFieldWithInd('520', null, '1', '8'),
-        );
+        return $this->getMarcFieldWithInd('520', null, [[1 => ['', '0', '2', '8']]]);
     }
 
     /**
@@ -422,7 +377,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getReviewNotes()
     {
-        return $this->getMarcFieldWithInd('520', null, '1', '1');
+        return $this->getMarcFieldWithInd('520', null, [[1 => ['1']]]);
     }
 
     /**
@@ -432,7 +387,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getAbstractNotes()
     {
-        return $this->getMarcFieldWithInd('520', null, '1', '3');
+        return $this->getMarcFieldWithInd('520', null, [[1 => ['3']]]);
     }
 
     /**
@@ -442,13 +397,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getAbstractAndSummaryNotes()
     {
-        return array_merge(
-            $this->getMarcFieldWithInd('520', null, '1', ''),
-            $this->getMarcFieldWithInd('520', null, '1', '0'),
-            $this->getMarcFieldWithInd('520', null, '1', '2'),
-            $this->getMarcFieldWithInd('520', null, '1', '3'),
-            $this->getMarcFieldWithInd('520', null, '1', '8'),
-        );
+        return $this->getMarcFieldWithInd('520', null, [[1 => ['', '0', '2', '3', '8']]]);
     }
 
     /**
@@ -458,7 +407,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getContentAdviceNotes()
     {
-        return $this->getMarcFieldWithInd('520', null, '1', '4');
+        return $this->getMarcFieldWithInd('520', null, [[1 => ['4']]]);
     }
 
     /**
@@ -468,10 +417,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getTargetAudienceNotes()
     {
-        return array_merge(
-            $this->getMarcFieldWithInd('521', null, '1', ''),
-            $this->getMarcFieldWithInd('521', null, '1', '8'),
-        );
+        return $this->getMarcFieldWithInd('521', null, [[1 => ['', '8']]]);
     }
 
     /**
@@ -481,7 +427,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getGradeLevelNotes()
     {
-        return $this->getMarcFieldWithInd('521', null, '1', '0');
+        return $this->getMarcFieldWithInd('521', null, [[1 => ['0']]]);
     }
 
     /**
@@ -491,7 +437,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getInterestAgeLevelNotes()
     {
-        return $this->getMarcFieldWithInd('521', null, '1', '1');
+        return $this->getMarcFieldWithInd('521', null, [[1 => ['1']]]);
     }
 
     /**
@@ -501,7 +447,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getInterestGradeLevelNotes()
     {
-        return $this->getMarcFieldWithInd('521', null, '1', '2');
+        return $this->getMarcFieldWithInd('521', null, [[1 => ['2']]]);
     }
 
     /**
@@ -511,7 +457,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getSpecialAudienceNotes()
     {
-        return $this->getMarcFieldWithInd('521', null, '1', '3');
+        return $this->getMarcFieldWithInd('521', null, [[1 => ['3']]]);
     }
 
     /**
@@ -521,7 +467,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getInterestLevelNotes()
     {
-        return $this->getMarcFieldWithInd('521', null, '1', '4');
+        return $this->getMarcFieldWithInd('521', null, [[1 => ['4']]]);
     }
 
     /**
@@ -566,11 +512,11 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         $toc = [];
         // Assumption: only one of indicator "1=0" or "1=8" will exist on any given record
-        $marc505_0 = $this->getMarcFieldWithIndAndLinked('505', ['a','g','r','t','u'], '1', '0');
+        $marc505_0 = $this->getMarcFieldWithIndAndLinked('505', ['a','g','r','t','u'], [[1 => ['0']]]);
         $fields = $marc505_0[0];
         $linked = $marc505_0[1] ?? array_pad($marc505_0[1] ?? [], count($marc505_0[0]), '');
         if (empty($fields)) {
-            $marc505_8 = $this->getMarcFieldWithIndAndLinked('505', ['a','g','r','t','u'], '1', '8');
+            $marc505_8 = $this->getMarcFieldWithIndAndLinked('505', ['a','g','r','t','u'], [[1 => ['8']]]);
             $fields = $marc505_8[0];
             $linked = $marc505_8[1] ?? array_pad($marc505_8[1] ?? [], count($marc505_8[0]), '');
         }
@@ -587,7 +533,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getIncompleteContentsNotes()
     {
         $toc = [];
-        $marc505 = $this->getMarcFieldWithIndAndLinked('505', ['a','g','r','t','u'], '1', '1');
+        $marc505 = $this->getMarcFieldWithIndAndLinked('505', ['a','g','r','t','u'], [[1 => ['1']]]);
         $fields = $marc505[0];
         $linked = $marc505[1] ?? array_pad($marc505[1] ?? [], count($marc505[0]), '');
 
@@ -603,7 +549,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getPartialContentsNotes()
     {
         $toc = [];
-        $marc505 = $this->getMarcFieldWithIndAndLinked('505', ['a','g','r','t','u'], '1', '2');
+        $marc505 = $this->getMarcFieldWithIndAndLinked('505', ['a','g','r','t','u'], [[1 => ['2']]]);
         $fields = $marc505[0];
         $linked = $marc505[1] ?? array_pad($marc505[1] ?? [], count($marc505[0]), '');
 
@@ -618,7 +564,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getIndexedByNotes()
     {
-        return $this->getMarcFieldWithInd('510', null, '1', '0');
+        return $this->getMarcFieldWithInd('510', null, [[1 => ['0']]]);
     }
 
     /**
@@ -628,7 +574,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getIndexedByEntiretyNotes()
     {
-        return $this->getMarcFieldWithInd('510', null, '1', '1');
+        return $this->getMarcFieldWithInd('510', null, [[1 => ['1']]]);
     }
 
     /**
@@ -638,7 +584,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getIndexedBySelectivelyNotes()
     {
-        return $this->getMarcFieldWithInd('510', null, '1', '2');
+        return $this->getMarcFieldWithInd('510', null, [[1 => ['2']]]);
     }
 
     /**
@@ -648,10 +594,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getIndexedReferenceNotes()
     {
-        return array_merge(
-            $this->getMarcFieldWithInd('510', null, '1', '3'),
-            $this->getMarcFieldWithInd('510', null, '1', '4')
-        );
+        return $this->getMarcFieldWithInd('510', null, [[1 => ['3', '4']]]);
     }
 
     /**
@@ -661,7 +604,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getParticipantNotes()
     {
-        return $this->getMarcFieldWithInd('511', null, '1', '0');
+        return $this->getMarcFieldWithInd('511', null, [[1 => ['0']]]);
     }
 
     /**
@@ -671,7 +614,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getCastNotes()
     {
-        return $this->getMarcFieldWithInd('511', null, '1', '1');
+        return $this->getMarcFieldWithInd('511', null, [[1 => ['1']]]);
     }
 
     /**
@@ -711,7 +654,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getA11yNotes()
     {
-        return $this->getMarcFieldWithInd('532', null, '1', '8');
+        return $this->getMarcFieldWithInd('532', null, [[1 => ['8']]]);
     }
 
     /**
@@ -721,7 +664,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getA11yTechnicalDetailsNotes()
     {
-        return $this->getMarcFieldWithInd('532', null, '1', '0');
+        return $this->getMarcFieldWithInd('532', null, [[1 => ['0']]]);
     }
 
     /**
@@ -731,7 +674,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getA11yFeaturesNotes()
     {
-        return $this->getMarcFieldWithInd('532', null, '1', '1');
+        return $this->getMarcFieldWithInd('532', null, [[1 => ['1']]]);
     }
 
     /**
@@ -741,7 +684,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getA11yDeficienciesNotes()
     {
-        return $this->getMarcFieldWithInd('532', null, '1', '2');
+        return $this->getMarcFieldWithInd('532', null, [[1 => ['2']]]);
     }
 
     /**
@@ -791,10 +734,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getSourceOfAcquisitionNotes()
     {
-        return array_merge(
-            $this->getMarcFieldWithInd('541', null, '1', ''),
-            $this->getMarcFieldWithInd('541', null, '1', '1')
-        );
+        return $this->getMarcFieldWithInd('541', null, [[1 => ['', '1']]]);
     }
 
     /**
@@ -804,10 +744,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getCopyrightInformationNotes()
     {
-        return array_merge(
-            $this->getMarcFieldWithInd('542', null, '1', ''),
-            $this->getMarcFieldWithInd('542', null, '1', '1')
-        );
+        return $this->getMarcFieldWithInd('542', null, [[1 => ['', '1']]]);
     }
 
     /**
@@ -817,10 +754,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getLocationOfArchivalMaterialsNotes()
     {
-        return array_merge(
-            $this->getMarcFieldWithInd('544', null, '1', ''),
-            $this->getMarcFieldWithInd('544', null, '1', '0')
-        );
+        return $this->getMarcFieldWithInd('544', null, [[1 => ['', '0']]]);
     }
 
     /**
@@ -830,7 +764,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getLocationOfRelatedMaterialsNotes()
     {
-        return $this->getMarcFieldWithInd('544', null, '1', '1');
+        return $this->getMarcFieldWithInd('544', null, [[1 => ['1']]]);
     }
 
     /**
@@ -840,10 +774,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getBiographicalSketchNotes()
     {
-        return array_merge(
-            $this->getMarcFieldWithInd('545', null, '1', ''),
-            $this->getMarcFieldWithInd('545', null, '1', '0')
-        );
+        return $this->getMarcFieldWithInd('545', null, [[1 => ['', '0']]]);
     }
 
     /**
@@ -853,7 +784,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getAdministrativeHistoryNotes()
     {
-        return $this->getMarcFieldWithInd('545', null, '1', '1');
+        return $this->getMarcFieldWithInd('545', null, [[1 => ['1']]]);
     }
 
     /**
@@ -903,7 +834,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getHoldersOfOriginalNotes()
     {
-        return $this->getMarcFieldWithInd('535', null, '1', '1');
+        return $this->getMarcFieldWithInd('535', null, [[1 => ['1']]]);
     }
 
     /**
@@ -913,7 +844,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getHoldersOfDuplicateNotes()
     {
-        return $this->getMarcFieldWithInd('535', null, '1', '2');
+        return $this->getMarcFieldWithInd('535', null, [[1 => ['2']]]);
     }
 
     /**
@@ -933,10 +864,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getCumulativeIndexesNotes()
     {
-        return array_merge(
-            $this->getMarcFieldWithInd('555', null, '1', ''),
-            $this->getMarcFieldWithInd('555', null, '1', '8')
-        );
+        return $this->getMarcFieldWithInd('555', null, [[1 => ['', '8']]]);
     }
 
     /**
@@ -946,7 +874,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getFindingAidNotes()
     {
-        return $this->getMarcFieldWithInd('555', null, '1', '0');
+        return $this->getMarcFieldWithInd('555', null, [[1 => ['0']]]);
     }
 
     /**
@@ -1006,10 +934,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getActionNotes()
     {
-        return array_merge(
-            $this->getMarcFieldWithInd('583', null, '1', ''),
-            $this->getMarcFieldWithInd('583', null, '1', '1')
-        );
+        return $this->getMarcFieldWithInd('583', null, [[1 => ['', '1']]]);
     }
 
     /**
@@ -1039,10 +964,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getSourceOfDescriptionNotes()
     {
-        return array_merge(
-            $this->getMarcFieldWithInd('588', null, '1', ''),
-            $this->getMarcFieldWithInd('588', null, '1', '0')
-        );
+        return $this->getMarcFieldWithInd('588', null, [[1 => ['', '0']]]);
     }
 
     /**
@@ -1052,7 +974,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getLatestIssueConsultedNotes()
     {
-        return $this->getMarcFieldWithInd('588', null, '1', '1');
+        return $this->getMarcFieldWithInd('588', null, [[1 => ['1']]]);
     }
 
     /**
@@ -1197,6 +1119,30 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * MSU -- customize to pull out 'subject' from getAllSubjectHeadings
+     * Get the subject headings as a flat array of strings.
+     *
+     * @return array Subject headings
+     */
+    public function getAllSubjectHeadingsFlattened()
+    {
+        $topics = [];
+        $subjects = $this->getAllSubjectHeadings();
+        if (is_array($subjects)) {
+            foreach ($subjects as $subj) {
+                $headings = array_map(
+                    function ($item) {
+                        return $item['subject'];
+                    },
+                    $subj
+                );
+                $topics[] = implode(' -- ', $headings);
+            }
+        }
+        return $topics;
+    }
+
+    /**
      * Get the uniform title
      *
      * @return array Content from Solr
@@ -1229,7 +1175,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         // PC-1105
         $subfields = range('a', 'z');
         $subfields[] = '3';
-        return $this->getMarcFieldWithInd('711', $subfields, '2', '2');
+        return $this->getMarcFieldWithInd('711', $subfields, [[2 => ['2']]]);
     }
 
     /**
@@ -1240,7 +1186,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getDistributed()
     {
         // PC-1105
-        return $this->getMarcFieldWithInd('264', ['a', 'b', 'c', '3'], '2', '2');
+        return $this->getMarcFieldWithInd('264', ['a', 'b', 'c', '3'], [[2 => ['2']]]);
     }
 
     /**
@@ -1251,7 +1197,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getManufactured()
     {
         // PC-1105
-        return $this->getMarcFieldWithInd('264', ['a', 'b', 'c', '3'], '2', '3');
+        return $this->getMarcFieldWithInd('264', ['a', 'b', 'c', '3'], [[2 => ['3']]]);
     }
 
     /**
@@ -1262,7 +1208,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getCopyrightDate()
     {
         // PC-1105
-        return $this->getMarcFieldWithInd('264', ['a', 'b', 'c', '3'], '2', '4');
+        return $this->getMarcFieldWithInd('264', ['a', 'b', 'c', '3'], [[2 => ['4']]]);
     }
 
     /**
@@ -2000,7 +1946,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getProduced()
     {
         // PC-1105
-        return $this->getMarcFieldWithInd('264', ['a', 'b', '3'], '2', '0');
+        return $this->getMarcFieldWithInd('264', ['a', 'b', '3'], [[2 => ['0']]]);
     }
 
     /**
