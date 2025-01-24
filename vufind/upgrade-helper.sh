@@ -170,7 +170,7 @@ compare_diffs(){
     verbose "Looking for changes in customized files from ${ARGS[CURRENT_RELEASE]} -> ${ARGS[TARGET_RELEASE]}"
 
     SUMMARY+=("-----------------------------------------------------------------------------------------")
-    for f in $(git -C "${ARGS[CORE_VF_PATH]}" diff tags/${ARGS[CURRENT_RELEASE]} tags/${ARGS[TARGET_RELEASE]} --name-only); do
+    for f in $(git -C "${ARGS[CORE_VF_PATH]}" diff tags/"${ARGS[CURRENT_RELEASE]}" tags/"${ARGS[TARGET_RELEASE]}" --name-only); do
         skip=0
         for substring in "${IGNORE_PATHS[@]}"; do
             if [[ "$f" == *"$substring"* ]]; then
