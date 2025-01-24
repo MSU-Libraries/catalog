@@ -75,9 +75,9 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
       ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootprint3" /usr/local/vufind/themes/bootprint3
       ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/sandal" /usr/local/vufind/themes/sandal
       ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/sandal5" /usr/local/vufind/themes/sandal5
-      ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootstrap5" /usr/local/vufind/themes/bootstrap5
     fi
     ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootstrap3" /usr/local/vufind/themes/bootstrap3
+    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootstrap5" /usr/local/vufind/themes/bootstrap5
     ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/root" /usr/local/vufind/themes/root
     ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFind" /usr/local/vufind/module/VuFind
     ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindAdmin" /usr/local/vufind/module/VuFindAdmin
