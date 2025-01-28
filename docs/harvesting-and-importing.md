@@ -98,7 +98,7 @@ of them.
 
 ## Full Data Imports
 There is now a helper script to run *all* of the below steps in the proper order. See the full documentation for
-the [pc-full-import](helper-scripts.md#run-a-full-import-pc-full-import) and the below for a simple example.
+the [pc-full-import](helper-scripts.md#run-full-import-pc-full-import) and the below for a simple example.
 
 ```bash
 screen
