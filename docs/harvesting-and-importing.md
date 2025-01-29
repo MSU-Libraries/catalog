@@ -97,19 +97,23 @@ of them.
 (`/mnt/logs/harvests/`).
 
 ## Full Data Imports
-There is now a helper script to run *all* of the below steps in the proper order. See the full documentation for
-the [pc-full-import](helper-scripts.md#run-full-import-pc-full-import) and the below for a simple example.
-
-```bash
-screen
-sudo pc-full-import catalog-prod --debug 2>&1 | tee catalog-prod-import_$(date -I).log
-```
-
-Should you choose to do the steps manually, this section will describe the process needed to run a full re-import of the data since
-that is frequently required to update the Solr index with new field updates. If other tasks are required (such as full
-harvests or incremental) refer to the `--help` flags on the appropriate script.
 
 ### `biblio` Index
+!!! tip "Helper script for full import"
+
+    There is now a helper script to run *all* of the below steps in the proper order to do a full re-import
+    of data in the `biblio` index. See the full documentation for
+    the [pc-full-import](helper-scripts.md#run-full-import-pc-full-import) and the below for a simple example.
+    
+    ```bash
+    sudo screen
+    pc-full-import catalog-prod --debug 2>&1 | tee /mnt/shared/logs/catalog-prod-import_$(date -I).log
+    ```
+    
+    Should you choose to do the steps manually, this section will describe the process needed to run a full re-import of the data since
+    that is frequently required to update the Solr index with new field updates. If other tasks are required (such as full
+    harvests or incremental) refer to the `--help` flags on the appropriate script.
+
 Full imports for the `biblio` collection can be done  
 - directly in the `cron` container for prod/beta/preview,  
 - in the `catalog` container for dev environments,  

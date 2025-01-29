@@ -23,8 +23,10 @@ suggestions you have!
 * [Load Testing](load-testing.md)
 * [Helper Scripts](helper-scripts.md)
 * [Bots](bots.md)
+* [Job Schedules](job-schedules.md)
 
 ## Developing
 * [Writing & Running Tests](testing.md)
 * [Using Core VuFind Only](core-vufind.md)
 * [Alphabrowse Internals](alphabrowse.md)
+* [Documentation](documentation.md)
