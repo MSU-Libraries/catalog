@@ -172,11 +172,11 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
         foreach ($links as $idx => $link) {
             if (strcasecmp($link['desc'] ?? '', 'cover image') === 0) {
                 unset($links[$idx]);
-                break;
+                continue;
             }
             if (str_contains($link['url'] ?? '', 'bookplate')) {
                 unset($links[$idx]);
-                break;
+                continue;
             }
         }
         return $this->deduplicateLinks(
