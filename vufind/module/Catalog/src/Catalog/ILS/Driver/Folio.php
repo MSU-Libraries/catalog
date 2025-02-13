@@ -32,6 +32,8 @@ namespace Catalog\ILS\Driver;
 use ArrayIterator;
 use Catalog\Utils\RegexLookup as Regex;
 use Laminas\Http\Header\HeaderInterface;
+use Laminas\Http\Response; // MSU - Can remove after we upgrade to VF 10.1
+use VuFind\Config\Feature\SecretTrait; // MSU  - Can remove after we upgrade to VF 10.1.2
 use VuFind\Exception\ILS as ILSException;
 use VuFind\ILS\Logic\AvailabilityStatus;
 
@@ -51,6 +53,16 @@ use function is_string;
  */
 class Folio extends \VuFind\ILS\Driver\Folio
 {
+    use SecretTrait; // CAN REMOVE AFTER WE UPDATE TO VF 10.1.2
+
+    /**
+     * Authentication token expiration time
+     * CAN REMOVE AFTER WE UPDATE TO VF 10.1.2
+     *
+     * @var string
+     */
+    protected $tokenExpiration = null;
+
     /**
      * Given an instance object or identifer, or a holding or item identifier,
      * determine an appropriate value to use as VuFind's bibliographic ID.
@@ -1117,5 +1129,289 @@ class Folio extends \VuFind\ILS\Driver\Folio
             }
         }
         return $response;
+    }
+
+    /**
+     * MSUL -- CAN REMOVE AFTER WE UPGRADE TO VF 10.1.2
+     * Get a total count of records from a FOLIO endpoint.
+     *
+     * @param string $interface FOLIO api interface to call
+     * @param array  $query     Extra GET parameters (e.g. ['query' => 'your cql here'])
+     *
+     * @return int
+     */
+    protected function getResultCount(string $interface, array $query = []): int
+    {
+        $combinedQuery = array_merge($query, ['limit' => 0]);
+        $response = $this->makeRequest(
+            'GET',
+            $interface,
+            $combinedQuery
+        );
+        $json = json_decode($response->getBody());
+        return $json->totalRecords ?? 0;
+    }
+
+    /**
+     * MSUL -- CAN REMOVE AFTER WE UPGRADE TO VF 10.1.2
+     * Helper function to retrieve a single page of results from FOLIO API
+     *
+     * @param string $interface FOLIO api interface to call
+     * @param array  $query     Extra GET parameters (e.g. ['query' => 'your cql here'])
+     * @param int    $offset    Starting record index
+     * @param int    $limit     Max number of records to retrieve
+     *
+     * @return array
+     */
+    protected function getResultPage($interface, $query = [], $offset = 0, $limit = 1000)
+    {
+        $combinedQuery = array_merge($query, compact('offset', 'limit'));
+        $response = $this->makeRequest(
+            'GET',
+            $interface,
+            $combinedQuery
+        );
+        $json = json_decode($response->getBody());
+        if (!$response->isSuccess() || !$json) {
+            $msg = $json->errors[0]->message ?? json_last_error_msg();
+            throw new ILSException("Error: '$msg' fetching from '$interface'");
+        }
+        return $json;
+    }
+
+    /**
+     * MSUL -- CAN REMOVE AFTER WE UPGRADE TO VF 10.1.2
+     * Helper function to retrieve paged results from FOLIO API
+     *
+     * @param string $responseKey Key containing values to collect in response
+     * @param string $interface   FOLIO api interface to call
+     * @param array  $query       Extra GET parameters (e.g. ['query' => 'your cql here'])
+     * @param int    $limit       How many results to retrieve from FOLIO per call
+     *
+     * @return array
+     */
+    protected function getPagedResults($responseKey, $interface, $query = [], $limit = 1000)
+    {
+        $offset = 0;
+
+        do {
+            $json = $this->getResultPage($interface, $query, $offset, $limit);
+            $totalEstimate = $json->totalRecords ?? 0;
+            foreach ($json->$responseKey ?? [] as $item) {
+                yield $item ?? '';
+            }
+            $offset += $limit;
+
+            // Continue until the current offset is greater than the totalRecords value returned
+            // from the API (which could be an estimate if more than 1000 results are returned).
+        } while ($offset <= $totalEstimate);
+    }
+
+    /**
+     * MSUL -- CAN REMOVE AFTER WE UPGRADE TO VF 10.1.2
+     * Login and receive a new token
+     *
+     * @return void
+     */
+    protected function renewTenantToken()
+    {
+        // If not using legacy authentication, see if the token has expired before trying to renew it
+        if (!$this->useLegacyAuthentication() && !$this->checkTenantTokenExpired()) {
+            $currentTime = gmdate('D, d-M-Y H:i:s T', strtotime('now'));
+            $this->debug(
+                'No need to renew token; not yet expired. ' . $currentTime . ' < ' . $this->tokenExpiration .
+                'Username: ' . $this->config['API']['username'] . ' Token: ' . substr($this->token, 0, 30) . '...'
+            );
+            return;
+        }
+        $startTime = microtime(true);
+        $this->token = null;
+        $response = $this->performOkapiUsernamePasswordAuthentication(
+            $this->config['API']['username'],
+            $this->getSecretFromConfig($this->config['API'], 'password')
+        );
+        $this->setTokenValuesFromResponse($response);
+        $endTime = microtime(true);
+        $responseTime = $endTime - $startTime;
+        $this->debug(
+            'Token renewed in ' . $responseTime . ' seconds. Username: ' . $this->config['API']['username'] .
+            ' Token: ' . substr($this->token, 0, 30) . '...'
+        );
+    }
+
+    /**
+     * MSUL -- CAN REMOVE AFTER UPGRADING TO VF 10.1.2
+     * Check if our token is still valid. Return true if the token was already valid, false if it had to be renewed.
+     *
+     * Method taken from Stripes JS (loginServices.js:validateUser)
+     *
+     * @return bool
+     */
+    protected function checkTenantToken()
+    {
+        if ($this->useLegacyAuthentication()) {
+            $response = $this->makeRequest('GET', '/users', [], [], [401, 403]);
+            if ($response->getStatusCode() < 400) {
+                return true;
+            }
+            // Clear token data to ensure that checkTenantTokenExpired triggers a renewal:
+            $this->token = $this->tokenExpiration = null;
+        }
+        if ($this->checkTenantTokenExpired()) {
+            $this->token = $this->tokenExpiration = null;
+            $this->renewTenantToken();
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * MSUL -- CAN REMOVE AFTER UPGRADING TO VF 10.1.2
+     * Check if our token has expired. Return true if it has expired, false if it has not.
+     *
+     * @return bool
+     */
+    protected function checkTenantTokenExpired()
+    {
+        return
+            $this->token == null
+            || $this->tokenExpiration == null
+            || strtotime('now') >= strtotime($this->tokenExpiration);
+    }
+
+    /**
+     * MSUL -- CAN REMOVE AFTER UPGRADING TO VF 10.1.2
+     * Should we use a global cache for FOLIO API tokens?
+     *
+     * @return bool
+     */
+    protected function useGlobalTokenCache(): bool
+    {
+        // If we're configured to store user-specific tokens, we can't use the global
+        // token cache.
+        $useUserToken = $this->config['User']['use_user_token'] ?? false;
+        $this->debug("---");
+        $this->debug($this->config['API']['global_token_cache'] ?? true);
+        $this->debug("---");
+        return !$useUserToken && ($this->config['API']['global_token_cache'] ?? true);
+    }
+
+    /**
+     * MSUL -- CAN REMOVE AFTER UPGRADING TO VF 10.1.2
+     * Initialize the driver.
+     *
+     * Check or renew our auth token
+     *
+     * @return void
+     */
+    public function init()
+    {
+        $factory = $this->sessionFactory;
+        $this->sessionCache = $factory($this->tenant);
+        $cacheType = 'session';
+        if ($this->useGlobalTokenCache()) {
+            $globalTokenData = (array)($this->getCachedData('token') ?? []);
+            if (count($globalTokenData) === 2) {
+                $cacheType = 'global';
+                [$this->sessionCache->folio_token, $this->sessionCache->folio_token_expiration] = $globalTokenData;
+            }
+        }
+        if ($this->sessionCache->folio_token ?? false) {
+            $this->token = $this->sessionCache->folio_token;
+            $this->tokenExpiration = $this->sessionCache->folio_token_expiration ?? null;
+            $this->debug(
+                'Token taken from ' . $cacheType . ' cache: ' . substr($this->token, 0, 30) . '...'
+            );
+        }
+        if ($this->token == null) {
+            $this->renewTenantToken();
+        } else {
+            $this->checkTenantToken();
+        }
+    }
+
+    /**
+     * MSUL -- CAN REMOVE AFTER UPGRADING TO VF 10.1.2
+     * Given a response from performOkapiUsernamePasswordAuthentication(),
+     * extract the requested cookie.
+     *
+     * @param Response $response   Response from performOkapiUsernamePasswordAuthentication().
+     * @param string   $cookieName Name of the cookie to get from the response.
+     *
+     * @return \Laminas\Http\Header\SetCookie
+     */
+    protected function getCookieByName(Response $response, string $cookieName): \Laminas\Http\Header\SetCookie
+    {
+        $folioUrl = $this->config['API']['base_url'];
+        $cookies = new \Laminas\Http\Cookies();
+        $cookies->addCookiesFromResponse($response, $folioUrl);
+        $results = $cookies->getAllCookies();
+        foreach ($results as $cookie) {
+            if ($cookie->getName() == $cookieName) {
+                return $cookie;
+            }
+        }
+        throw new \Exception('Could not find ' . $cookieName . ' cookie in response');
+    }
+
+    /**
+     * MSUL -- CAN REMOVE AFTER UPGRADING TO VF 10.1.2
+     * Given a response from performOkapiUsernamePasswordAuthentication(),
+     * extract and save authentication data we want to preserve.
+     *
+     * @param Response $response Response from performOkapiUsernamePasswordAuthentication().
+     *
+     * @return null
+     */
+    protected function setTokenValuesFromResponse(Response $response)
+    {
+        // If using legacy authentication, there is no option to renew tokens,
+        // so assume the token is expired as of now
+        if ($this->useLegacyAuthentication()) {
+            $this->token = $response->getHeaders()->get('X-Okapi-Token')->getFieldValue();
+            $this->tokenExpiration = gmdate('D, d-M-Y H:i:s T', strtotime('now'));
+            $tokenCacheLifetime = 600; // cache old-fashioned tokens for 10 minutes
+        } elseif ($cookie = $this->getCookieByName($response, 'folioAccessToken')) {
+            $this->token = $cookie->getValue();
+            $this->tokenExpiration = $cookie->getExpires();
+            // cache RTR tokens using their known lifetime:
+            $tokenCacheLifetime = strtotime($this->tokenExpiration) - strtotime('now');
+        }
+        if ($this->token != null && $this->tokenExpiration != null) {
+            $this->sessionCache->folio_token = $this->token;
+            $this->sessionCache->folio_token_expiration = $this->tokenExpiration;
+            if ($this->useGlobalTokenCache()) {
+                $this->putCachedData('token', [$this->token, $this->tokenExpiration], $tokenCacheLifetime);
+            }
+        } else {
+            throw new \Exception('Could not find token data in response');
+        }
+    }
+
+    /**
+     * MSUL -- CAN REMOVE AFTER UPGRADING TO VF 10.1.2
+     * Support method for patronLogin(): authenticate the patron with an Okapi
+     * login attempt. Returns a CQL query for retrieving more information about
+     * the authenticated user.
+     *
+     * @param string $username The patron username
+     * @param string $password The patron password
+     *
+     * @return string
+     */
+    protected function patronLoginWithOkapi($username, $password)
+    {
+        $response = $this->performOkapiUsernamePasswordAuthentication($username, $password);
+        $debugMsg = 'User logged in. User: ' . $username . '.';
+        // We've authenticated the user with Okapi, but we only have their
+        // username; set up a query to retrieve full info below.
+        $query = 'username == ' . $username;
+        // Replace admin with user as tenant if configured to do so:
+        if ($this->config['User']['use_user_token'] ?? false) {
+            $this->setTokenValuesFromResponse($response);
+            $debugMsg .= ' Token: ' . substr($this->token, 0, 30) . '...';
+        }
+        $this->debug($debugMsg);
+        return $query;
     }
 }
