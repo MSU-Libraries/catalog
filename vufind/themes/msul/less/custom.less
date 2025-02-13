@@ -29,6 +29,9 @@
 .ml-neg-pt5 {
   margin-left:-0.5rem;
 }
+.mt-0 {
+  margin-top:0 !important;
+}
 .fw-light {
   font-weight:300 !important;
 }
@@ -225,7 +228,7 @@ header {
     border-radius: 0;
     margin-left: 0;
     margin-right: 0;
-    margin-bottom: 3rem;
+    margin-bottom: 1rem;
   }
 
 
@@ -306,8 +309,8 @@ header {
 }
 
 .custom-notices {
-  margin-top: -3rem;
-  margin-bottom: 2rem;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
   background-color: @alert-warning-bg;
   color: @eggplant;
   padding: 0.3rem 1rem 0.3rem 1rem;
@@ -887,6 +890,10 @@ form.searchForm, .record-tabs, .navbar-form {
         border-top:1px solid @medgray;
         padding-top:1rem;
       }
+      .copy-number > span {
+        display: inline-block;
+        margin-top: calc(0.3rem + 1px);
+      }
     }
   }
 }
@@ -1125,7 +1132,7 @@ table tr {
     z-index: 500;
     position: sticky;
     padding: 1em 1em 3.5em;
-    border-bottom: 1px solid #C1C1C1;
+    border-bottom: 1px solid @medgray;
     background: white;
     .transform {
       box-shadow: 0;
@@ -1145,7 +1152,13 @@ table tr {
 
 @media only screen and (min-width : 768px) {
   .sidebar.left {
-    border-right: 1px solid #C1C1C1;
+    border-right: 1px solid @medgray;
+  }
+  .template-name-advanced .sidebar.left {
+    border-right:0 !important;
+      .facet-group {
+        border-top:0 !important;
+      }
   }
   .record .mainbody.right {
     float:left;
@@ -1727,6 +1740,7 @@ fieldset.solr-facets {
       height: 15.5em;
       overflow: auto;
       white-space: nowrap;
+      max-width:100%; //override core max-width 400px
 
       label {
         font-weight: inherit;
@@ -1766,7 +1780,17 @@ fieldset.solr-facets {
       justify-content: space-around;
       gap: 0.4rem;
     }
-
+    .solr-adv-facet {
+      flex: 1 1 98%;
+      width: 98%;
+    }
+  }
+  @media (min-width: 992px) {
+    .solr-adv-facet {
+      flex: 1 1 48%;
+      width: 48%;
+    }
+  }  @media (min-width: 1630px) {
     .solr-adv-facet {
       flex: 1 1 23%;
       width: 23%;

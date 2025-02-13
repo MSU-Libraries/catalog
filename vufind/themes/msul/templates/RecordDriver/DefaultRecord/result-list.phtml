@@ -36,13 +36,12 @@
           <?php /** MSU END */ ?>
           <?=$this->record($this->driver)->getTitleHtml()?>
         </a>
+      </h2><!-- msul moved authors out of h2 into div below -->
         <?php foreach ($this->driver->tryMethod('getFullTitlesAltScript', [], []) as $altTitle): /** MSU */ ?>
           <div class="title-alt">
             <?=$this->escapeHtml($altTitle)?>
           </div>
         <?php endforeach; ?>
-
-      </h2><!-- msul moved authors out of h2 into div below -->
       <div>
         <?php if (!$this->driver->isCollection()): ?>
           <?php $summAuthors = $this->driver->getPrimaryAuthorsWithHighlighting(); ?>

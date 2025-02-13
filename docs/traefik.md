@@ -1,5 +1,16 @@
 # Traefik
 
+## Re-deploying
+If you ever need to re-deploy the stack, you can use the
+[pc-deploy](helper-scripts.md#deploy-helper-pc-deploy) script.
+
+Make sure you run it as the deploy user so that the proper Docker
+container registry credentials are passed.
+
+    ```bash
+    sudo -Hu deploy pc-deploy core-stacks traefik
+    ```
+
 ## Troubleshooting
 
 * Your first line of defense when debugging issues with Traefik is

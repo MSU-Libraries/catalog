@@ -8,7 +8,12 @@ theme:
     - navigation.expand
     - navigation.instant
 
+extra_javascript:
+  - https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js
+  - javascripts/tablesort.js
+
 markdown_extensions:
+- tables
 - footnotes
 - admonition
 - pymdownx.highlight:
@@ -42,7 +47,9 @@ nav:
     - Load Testing: load-testing.md
     - Helper Scripts: helper-scripts.md
     - Bots: bots.md
+    - Job Schedules: job-schedules.md
 - Developing:
     - Writing &amp; Running Tests: testing.md
     - Using Core VuFind Only: core-vufind.md
     - Alphabrowse Internals: alphabrowse.md
+    - Documentation: documentation.md

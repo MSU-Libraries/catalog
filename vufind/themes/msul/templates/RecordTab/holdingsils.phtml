@@ -115,7 +115,6 @@
           <?=$this->escapeHtml($callNo['display'])?>
         <?php endif; ?>
         <?= $this->locationNotices(array_column($holding['items'], null, 'callnumber')[$callNo['callnumber']]) /** MSU */ ?>
-        <br>
       <?php endforeach; ?>
     </td>
   </tr>
