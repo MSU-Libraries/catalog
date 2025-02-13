@@ -30,10 +30,10 @@
 namespace Catalog\ILS\Driver;
 
 use ArrayIterator;
+use Catalog\Config\Feature\SecretTrait; // MSU  - Can remove after we upgrade to VF 10.1.2
 use Catalog\Utils\RegexLookup as Regex;
 use Laminas\Http\Header\HeaderInterface;
 use Laminas\Http\Response; // MSU - Can remove after we upgrade to VF 10.1
-use Catalog\Config\Feature\SecretTrait; // MSU  - Can remove after we upgrade to VF 10.1.2
 use VuFind\Exception\ILS as ILSException;
 use VuFind\ILS\Logic\AvailabilityStatus;
 
