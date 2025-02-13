@@ -33,7 +33,7 @@ use ArrayIterator;
 use Catalog\Utils\RegexLookup as Regex;
 use Laminas\Http\Header\HeaderInterface;
 use Laminas\Http\Response; // MSU - Can remove after we upgrade to VF 10.1
-use VuFind\Config\Feature\SecretTrait; // MSU  - Can remove after we upgrade to VF 10.1.2
+use Catalog\Config\Feature\SecretTrait; // MSU  - Can remove after we upgrade to VF 10.1.2
 use VuFind\Exception\ILS as ILSException;
 
 use function count;
@@ -1207,9 +1207,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
         // If we're configured to store user-specific tokens, we can't use the global
         // token cache.
         $useUserToken = $this->config['User']['use_user_token'] ?? false;
-        $this->debug("---");
-        $this->debug($this->config['API']['global_token_cache'] ?? true);
-        $this->debug("---");
         return !$useUserToken && ($this->config['API']['global_token_cache'] ?? true);
     }
 
