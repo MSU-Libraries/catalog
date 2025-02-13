@@ -12,7 +12,8 @@ access to by EBSCO. The records contain the HLM dataset that is missing from FOL
 Used to harvest and import MARC data from Backstage into the `authority` collection in Solr from the FTP location
 provided by Backstage.  
 * [cron-reserves.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/cron-reserves.sh):
-Used to update or refresh the `reserves` index in Solr with data from FOLIO's API, replacing it entirely each run.  
+* [pc-full-import](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-full-import?ref_type=heads):
+Wrapper script for the `pc-import-folio` and `pc-import-hlm` scripts to perform a full import of data.  
 
 ## HLM Data
 One of our sources is HLM (Holdings Link Management) which is files from EBSCO's FTP server with electronic
@@ -96,11 +97,23 @@ of them.
 (`/mnt/logs/harvests/`).
 
 ## Full Data Imports
-This section will describe the process needed to run a full re-import of the data since 
-that is frequently required to update the Solr index with new field updates. If other tasks are required (such as full
-harvests or incremental) refer to the `--help` flags on the appropriate script.
 
 ### `biblio` Index
+!!! tip "Helper script for full import"
+
+    There is now a helper script to run *all* of the below steps in the proper order to do a full re-import
+    of data in the `biblio` index. See the full documentation for
+    the [pc-full-import](helper-scripts.md#run-full-import-pc-full-import) and the below for a simple example.
+    
+    ```bash
+    sudo screen
+    pc-full-import catalog-prod --debug 2>&1 | tee /mnt/shared/logs/catalog-prod-import_$(date -I).log
+    ```
+    
+    Should you choose to do the steps manually, this section will describe the process needed to run a full re-import of the data since
+    that is frequently required to update the Solr index with new field updates. If other tasks are required (such as full
+    harvests or incremental) refer to the `--help` flags on the appropriate script.
+
 Full imports for the `biblio` collection can be done  
 - directly in the `cron` container for prod/beta/preview,  
 - in the `catalog` container for dev environments,  
