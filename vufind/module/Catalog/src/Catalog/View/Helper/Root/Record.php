@@ -249,6 +249,9 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
         } elseif ($status === 'Restricted') {
             $statusFirstPart = 'Library Use Only';
             $availability = AvailabilityStatusInterface::STATUS_UNCERTAIN;
+        } elseif ($status === 'Unavailable') {
+            $statusFirstPart = 'Unavailable';
+            $availability = false;
         } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
             $statusFirstPart = 'Unknown status';
             $statusSecondPart = $status;
