@@ -64,6 +64,14 @@ class Folio extends \VuFind\ILS\Driver\Folio
     protected $tokenExpiration = null;
 
     /**
+     * Authentication token expiration time
+     * CAN REMOVE AFTER WE UPDATE TO VF 10.1.2
+     *
+     * @var string
+     */
+    protected $tokenExpiration = null;
+
+    /**
      * Given an instance object or identifer, or a holding or item identifier,
      * determine an appropriate value to use as VuFind's bibliographic ID.
      *
