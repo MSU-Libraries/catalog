@@ -17,16 +17,25 @@ foreach ($this->statusItems as $item) {
       $selectedStatus = $record->getStatus($selected);
     }
   }
+  $itemHasAdditionalHoldingsFields = false;
+  foreach ($this->holdingsTextFieldNames as $holdingsTextField) {
+    if (!empty($item[$holdingsTextField])) {
+      $itemHasAdditionalHoldingsFields = true;
+      break;
+    }
 }
 if ($selected != '') {
   $location = $selected['location'];
   $callnumber = $selected['callnumber'];
   $callNumPrefix = !empty($selected['callnumber_prefix']) ? $selected['callnumber_prefix'] . ' ' : '';
+
+}
+
 }
 /** MSU END */
 ?>
 <?php if ($selected != ''): ?>
-  <div>
+  <div<?=$itemHasAdditionalHoldingsFields ? $this->htmlAttributes(['class' => 'itemWithAdditionalHoldingFields']) : ''?>>
     <strong>Holdings:</strong>
     <span class="fullAvailability">
         <?php /** @var $availabilityStatus VuFind\ILS\Logic\AvailabilityStatus */ ?>
@@ -39,9 +48,10 @@ if ($selected != '') {
             } else {
               $statusDescription = $availabilityStatus->getStatusDescription();
             }
+            $statusDescriptionTokens = $availabilityStatus->getStatusDescriptionTokens();
             /** NOT MSU END */
           ?>
-          <strong class="<?=$this->escapeHtmlAttr($statusClass)?>"><?=$this->transEsc($statusDescription)?></strong>
+          <strong class="<?=$this->escapeHtmlAttr($statusClass)?>"><?=$this->transEsc($statusDescription, $statusDescriptionTokens)?></strong>
     </span>
     <?php if ($location != ''): ?>
       at
@@ -74,6 +84,15 @@ if ($selected != '') {
   <?php if (!empty($selected)): ?>
     <?= $this->locationNotices($selected) ?>
   <?php endif; ?>
+  <?php foreach ($this->holdingsTextFieldNames as $holdingsTextField): ?>
+    <?php if (!empty($item[$holdingsTextField])): ?>
+      <div>
+        <span class="statusItemsHoldingsTextFields">
+          <strong><?= $this->transEsc(ucfirst($holdingsTextField)) ?>: </strong><span><?= $this->escapeHtml(implode('; ', ((array)$item[$holdingsTextField]))); ?></span>
+        </span>
+      </div>
+    <?php endif; ?>
+  <?php endforeach; ?>
 <?php else: ?>
   <span class="fullAvailability"><strong class="text-danger">Unavailable</strong></span>
 <?php endif; ?>

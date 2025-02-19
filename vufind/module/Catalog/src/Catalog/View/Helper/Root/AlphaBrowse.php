@@ -3,6 +3,7 @@
 /**
  * TODO
  *  COULD BE REMOVED WHEN PR IS ACCEPTED (PC-895)
+ *  https://github.com/vufind-org/vufind/pull/3826
  * AbstractSearch with Solr-specific features added.
  *
  * PHP version 8

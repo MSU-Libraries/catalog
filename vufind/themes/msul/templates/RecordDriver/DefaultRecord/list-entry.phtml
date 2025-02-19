@@ -1,8 +1,6 @@
 <?php
   // Set up some convenience variables:
   $id = $this->driver->getUniqueId();
-  $safeId = str_replace(',', '-', $id); # remove comma in EDS IDs # MSU
-  $safeId = str_replace('.', '_', $safeId); # remove periods in MultiBackend IDs # MSU
   $source = $this->driver->getSourceIdentifier();
   if (isset($this->list) && is_object($this->list)) {
     $list_id = $this->list->getId();
@@ -17,7 +15,7 @@
   $thumbnail = false;
   $thumbnailAlignment = $this->record($this->driver)->getThumbnailAlignment('list');
 ?>
-<li id="li-<?= $safeId ?>" class="result<?php if ($this->driver->supportsAjaxStatus()): ?> ajaxItem<?php endif ?>"><?php /** MSU */ ?>
+<li class="result<?php if ($this->driver->supportsAjaxStatus()): ?> ajaxItem<?php endif ?>">
   <?php if ($cover):
     ob_start(); ?>
     <div class="media-<?=$thumbnailAlignment ?> <?=$this->escapeHtmlAttr($coverDetails['size'])?>">
@@ -218,7 +216,8 @@
           $deleteUrl = null === $list_id
               ? $this->url('myresearch-favorites')
               : $this->url('userList', ['id' => $list_id]);
-          $deleteUrlGet = $deleteUrl . '?delete=' . urlencode($safeId) . '&amp;source=' . urlencode($source); // MSU
+          $deleteUrlGet = $deleteUrl . '?delete=' . urlencode($id) . '&amp;source=' . urlencode($source);
+          $md5Id = md5($id);
         ?>
         <?=
           $this->component(
@@ -228,7 +227,7 @@
                   'buttonLink' => $deleteUrlGet,
                   'buttonIcon' => 'user-list-remove',
                   'buttonLabel' => 'Delete',
-                  'confirmId' => 'confirm_delete_item_' . urlencode(preg_replace('[\W]', '-', $safeId)),
+                  'confirmId' => 'confirm_delete_item_' . $md5Id,
               ]
           )
         ?>
@@ -240,25 +239,22 @@
     <?php endif; ?>
   </div>
   <?php
-    $escId = $this->escapeJs($safeId); // MSU
+    $escId = $this->escapeJs($id);
     $escSource = $this->escapeJs($source);
-    /** MSU START */
     $script = <<<JS
-        $(document).ready(function() {
-          $('#confirm_delete_item_${escId}').click(function() {
-              $.post('${deleteUrl}', {
-                  'delete':'${escId}'.replace(/_/g,'.').replace(/-/g,','),
-                  'source':'${escSource}',
-                  'confirm':true
-                },
-                function(){
-                  location.reload()
-                }
-              );
-          });
+        $('#confirm_delete_item_{$md5Id}').click(function(e) {
+            e.preventDefault();
+            $.post('{$deleteUrl}', {
+                        'delete':'{$escId}',
+                        'source':'{$escSource}',
+                        'confirm':true
+                    },
+                    function() {
+                        location.reload()
+                    }
+                );
         });
         JS;
-    /** MSU START */
   ?>
   <?=$this->inlineScript(\Laminas\View\Helper\HeadScript::SCRIPT, $script, 'SET');?>
 </li>

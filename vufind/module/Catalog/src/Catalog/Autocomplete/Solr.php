@@ -48,11 +48,12 @@ class Solr extends \VuFind\Autocomplete\Solr
     /**
      * Process the user query to make it suitable for a Solr query.
      *
-     * @param string $query Incoming user query
+     * @param string $query   Incoming user query
+     * @param array  $options Array of extra parameters
      *
-     * @return string       Processed query
+     * @return string        Processed query
      */
-    protected function mungeQuery($query)
+    protected function mungeQuery(string $query, array $options = []): string
     {
         // Modify the query so it uses a wildcard at the end if the last character is alphanumeric:
         if (preg_match('/[\p{L}\p{N}_]$/u', $query)) {

@@ -30,10 +30,11 @@ use Catalog\GetThis\GetThisLoader; /** MSU */
       <?php
         $statusClass = $this->availabilityStatus()->getClass($availabilityStatus);
         $statusDescription = $getthis->getStatus($item_id); /** MSU */
+        $statusDescriptionTokens = $availabilityStatus->getStatusDescriptionTokens();
         $schemaAvailabilityUri = $availabilityStatus->getSchemaAvailabilityUri();
       ?>
       <span class="<?=$this->escapeHtmlAttr($statusClass)?>">
-        <?=$this->transEsc($statusDescription)?>
+        <?=$this->transEsc($statusDescription, $statusDescriptionTokens)?>
         <?php if ($schemaAvailabilityUri): ?>
           <?=$this->schemaOrg()->getLink($schemaAvailabilityUri, 'availability')?>
         <?php endif; ?>
@@ -59,7 +60,7 @@ use Catalog\GetThis\GetThisLoader; /** MSU */
           </a>
         <?php endif; ?>
       <?php else: ?>
-        <?php /* Begin Unavailable Items (Requests) */ /** MSU */ ?>
+        <?php /* Begin Unavailable Items (Recalls) */ /** MSU */ ?>
           <?php /** MSU Code removed */ ?>
           <?php if (($holding['requests_placed'] ?? 0) > 0): ?>
             <span><?=$this->transEsc('Requests')?>: <?=$this->escapeHtml($holding['requests_placed'])?></span>

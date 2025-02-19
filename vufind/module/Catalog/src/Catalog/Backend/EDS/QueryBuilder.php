@@ -4,7 +4,7 @@
  * Overrides for the Articles & More search tab searching
  * the EDS API
  *
- * PHP version 7
+ * PHP version 8
  *
  * @category VuFind
  * @package  Backend_EDS
