@@ -1,5 +1,15 @@
-<?php $alt = $this->link ? trim($this->driver->tryMethod('getTitle') ?? '') : ''; ?>
-<?php if ($this->link && !empty($alt)): ?><a tabindex="-1" aria-hidden="true" href="<?=$this->escapeHtmlAttr($this->link)?>" class="record-cover-link"><?php endif; ?> <!--PC-504: added tabindex & aria hidden-->
+<?php
+  // Determine link attributes; use legacy $this->link property as a fallback for backward compatibility.
+  $linkAttributes = $this->linkAttributes ?? ($this->link ? ['href' => $this->link] : []);
+  if ($linkAttributes && !isset($linkAttributes['class'])) {
+    $linkAttributes['class'] = 'record-cover-link';
+  }
+?>
+<?php if ($linkAttributes): ?>
+  <a<?=$this->htmlAttributes($linkAttributes)?>>
+<?php else: ?>
+  <div aria-hidden="true" tabindex"-1"><!-- MSU Add tabindex -1->
+<?php endif; ?>
 <?php /* Display thumbnail if appropriate: */ ?>
 <?php if ($cover): ?>
   <img src="<?=$this->escapeHtmlAttr($cover); ?>" <?php if ($linkPreview): ?>data-linkpreview="true" <?php endif; ?>class="recordcover" role="presentation" alt=""> <!--PC-504: made empty alt tag, add role="presentation"-->
@@ -13,4 +23,4 @@
     </div>
   </div>
 <?php endif; ?>
-<?php if ($this->link && !empty($alt)): ?></a><?php endif; ?>
+<?php if ($linkAttributes): ?></a><?php else: ?></div><?php endif; ?>

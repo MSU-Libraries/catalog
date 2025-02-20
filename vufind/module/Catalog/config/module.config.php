@@ -19,22 +19,10 @@ return [
     'factories' => [
       Catalog\Controller\RecordController::class => VuFind\Controller\AbstractBaseWithConfigFactory::class,
       Catalog\Controller\MyResearchController::class => VuFind\Controller\MyResearchControllerFactory::class,
-      // TODO PC-895 To remove after PR - START
-      Catalog\Controller\SearchController::class => VuFind\Controller\AbstractBaseFactory::class,
-      Catalog\Controller\EdsController::class => VuFind\Controller\AbstractBaseFactory::class,
-      Catalog\Controller\AlphabrowseController::class => VuFind\Controller\AbstractBaseFactory::class,
-      // TODO PC-895 To remove after PR - END
     ],
     'aliases' => [
       VuFind\Controller\RecordController::class => Catalog\Controller\RecordController::class,
       VuFind\Controller\MyResearchController::class => Catalog\Controller\MyResearchController::class,
-      // TODO PC-895 To remove after PR - START
-      VuFind\Controller\SearchController::class => Catalog\Controller\SearchController::class,
-      VuFind\Controller\EdsController::class => Catalog\Controller\EdsController::class,
-      'EDS' => Catalog\Controller\EdsController::class,
-      'eds' => Catalog\Controller\EdsController::class,
-      VuFind\Controller\AlphabrowseController::class => Catalog\Controller\AlphabrowseController::class,
-      // TODO PC-895 To remove after PR - END
     ],
   ],
   'vufind' => [
@@ -120,13 +108,13 @@ return [
         'factories' => [
             Catalog\RecordTab\Description::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
             Catalog\RecordTab\HoldingsILS::class => VuFind\RecordTab\HoldingsILSFactory::class,
-            Catalog\RecordTab\HoldingsWorldCat::class => VuFind\RecordTab\HoldingsWorldCatFactory::class,
+            Catalog\RecordTab\HoldingsWorldCat2::class => VuFind\RecordTab\HoldingsWorldCat2Factory::class,
             Catalog\RecordTab\TOC::class => VuFind\RecordTab\TOCFactory::class,
         ],
         'aliases' => [
             VuFind\RecordTab\Description::class => Catalog\RecordTab\Description::class,
             VuFind\RecordTab\HoldingsILS::class => Catalog\RecordTab\HoldingsILS::class,
-            VuFind\RecordTab\HoldingsWorldCat::class => Catalog\RecordTab\HoldingsWorldCat::class,
+            VuFind\RecordTab\HoldingsWorldCat2::class => Catalog\RecordTab\HoldingsWorldCat2::class,
             VuFind\RecordTab\TOC::class => Catalog\RecordTab\TOC::class,
         ],
       ],
@@ -135,26 +123,16 @@ return [
           'EDS' => Catalog\Search\Factory\EdsBackendFactory::class,
         ],
       ],
-      'db_row' => [ // TODO Remove after upgrade to 10.1.1 - Fix login bug
-          'factories' => [
-              Catalog\Db\Row\User::class => VuFind\Db\Row\UserFactory::class,
-          ],
-          'aliases' => [
-              VuFind\Db\Row\User::class => Catalog\Db\Row\User::class,
-          ],
-      ],
     ],
   ],
   'service_manager' => [
     'factories' => [
       Catalog\Form\Form::class => VuFind\Form\FormFactory::class,
       Catalog\Session\SessionManager::class => Catalog\Session\ManagerFactory::class,
-      Catalog\ILS\Logic\Holds::class => VuFind\ILS\Logic\LogicFactory::class, // TODO - To remove after 10.1 - There is a fix for it - https://github.com/vufind-org/vufind/pull/4013
       Catalog\Db\AdapterFactory::class => VuFind\Service\ServiceWithConfigIniFactory::class,
       Laminas\Db\Adapter\Adapter::class => Catalog\Db\AdapterFactory::class,
     ],
     'aliases' => [
-      VuFind\ILS\Logic\Holds::class => Catalog\ILS\Logic\Holds::class, // TODO - To remove after 10.1 - There is a fix for it - https://github.com/vufind-org/vufind/pull/4013
       VuFind\Form\Form::class => Catalog\Form\Form::class,
       Laminas\Session\SessionManager::class => Catalog\Session\SessionManager::class,
       VuFind\Session\ManagerFactory::class => Catalog\Session\ManagerFactory::class,
