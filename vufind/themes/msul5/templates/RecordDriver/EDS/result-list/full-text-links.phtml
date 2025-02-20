@@ -1,0 +1,56 @@
+<?php
+  /** MSU START */
+  $user = $this->auth()->isLoggedIn();
+  $isCommunityBorrower = $user != null ? $this->auth()->isCommunityBorrower() : false;
+  $isOnCampus = $this->auth()->isOnCampus();
+
+  $pLink = $this->driver->getPLink();
+  $ftLink = $this->driver->getLinkedFullTextLink();
+  $pdfLink = $this->driver->getPdfLink();
+  $epubLink = $this->driver->getEpubLink();
+  /** MSU END */
+?>
+<?php $target = ($newWindow ?? false) ? ' target="_blank"' : ''; ?>
+
+<?php if (($isCommunityBorrower && $isOnCampus) || ($user && !$isCommunityBorrower)): /** MSU */ ?>
+  <?php if ($this->driver->hasHTMLFullTextAvailable()): ?>
+    <span>
+      <?=$this->icon('external-link', 'icon-link__icon') /** MSU */ ?>
+      <a href="<?=$this->escapeHtmlAttr($recordLinker->getUrl($this->driver)) ?>#html" class="custom-link icon--eds html fulltext _record_link"<?=$target?>><?php /** MSU */ ?>
+        <?=$this->transEsc('HTML Full Text')?>
+      </a>
+    </span>
+  <?php endif; ?>
+
+  <?php if ($this->driver->hasLinkedFullTextAvailable()): ?>
+    <span>
+      <?=$this->icon('external-link', 'icon-link__icon') /** MSU */ ?>
+      <a href="<?=$this->escapeHtmlAttr($recordLinker->getTabUrl($this->driver, 'LinkedText')) ?>" class="custom-link fulltext"<?=$target?>><?php /** MSU */ ?>
+        <?=$this->transEsc('Linked Full Text')?>
+      </a>
+    </span>
+  <?php endif; ?>
+
+  <?php if ($this->driver->hasPdfAvailable()): ?>
+    <span>
+      <?=$this->icon('external-link', 'icon-link__icon') /** MSU */ ?>
+      <a href="<?=$this->escapeHtmlAttr($recordLinker->getTabUrl($this->driver, 'PDF')) ?>" class="custom-link icon--eds pdf fulltext"<?=$target?>><?php /** MSU */ ?>
+        <?=$this->transEsc('PDF Full Text')?>
+      </a>
+    </span>
+  <?php endif; ?>
+
+  <?php if ($this->driver->hasEpubAvailable()): ?>
+    <span>
+      <?=$this->icon('external-link', 'icon-link__icon') /** MSU */ ?>
+      <a href="<?=$this->escapeHtmlAttr($recordLinker->getTabUrl($this->driver, 'Epub')) ?>" class="custom-link icon--eds epub fulltext"<?=$target?>><?php /** MSU */ ?>
+        <?=$this->transEsc('ePub Full Text')?>
+      </a>
+    </span>
+  <?php endif; ?>
+<?php elseif (($pLink || $ftLink || $pdfLink || $epubLink) && !empty($item)): /** MSU START */ ?>
+  <a class="login" href="<?=$this->url('myresearch-userlogin')?>" data-lightbox rel="nofollow">
+    <span class="icon icon--font fa fa-sign-in icon-link__icon" role="img" aria-hidden="true"></span>
+    <strong><?=$this->transEsc('Login for full access')?></strong>
+  </a>
+<?php endif; /** MSU END */ ?>

@@ -1,0 +1,178 @@
+<?php /** This one I'm not sure */ ?>
+<?php $this->headLink()->appendStylesheet('EDS.css'); ?>
+<?php
+    $this->layout()->showSearchBacklink = true; // MSU
+    $items = $this->driver->getItems('core');
+    $dbLabel = $this->driver->getDbLabel();
+    $customLinks = $this->driver->getCustomLinks();
+    $accessLevel = $this->driver->getAccessLevel();
+    $user = $this->auth()->isLoggedIn(); // MSU
+    $isCommunityBorrower = $user != null ? $this->auth()->isCommunityBorrower() : false; // MSU
+    $isOnCampus = $this->auth()->isOnCampus(); // MSU
+    $restrictedView = empty($accessLevel) ? false : true;
+    $coverDetails = $this->record($this->driver)->getCoverDetails('core', 'medium');
+    $cover = $coverDetails['html'];
+    $libkeyData = $this->record($this->driver)->getLibKeyData($this->driver->getCleanDOI()); // MSU
+    $edsConfig = $this->config()->get('EDS');
+    $authorDisplay = strtolower($edsConfig->AuthorDisplay->DetailPageFormat ?? 'Long');
+?>
+<div class="media"<?=$this->schemaOrg()->getAttributes(['vocab' => 'http://schema.org/', 'resource' => '#record', 'typeof' => $this->schemaOrg()->getRecordTypes($this->driver)])?>>
+  <div class="media-body info-col">
+    <h1<?=$this->schemaOrg()->getAttributes(['property' => 'name'])?>><?=$this->driver->getTitle()?></h1>
+    <!-- MSU removed code -->
+
+    <?php if ($this->driver->getExtraDetail('cached_record') && !$this->translationEmpty('cached_record_warning')): ?>
+      <div class="alert alert-warning">
+        <?=$this->transEsc('cached_record_warning')?>
+      </div>
+    <?php endif; ?>
+
+    <table class="table table-striped">
+      <caption class="sr-only"><?=$this->transEsc('Bibliographic Details')?></caption>
+      <?php foreach ($items as $key => $item): ?>
+        <?php if (!empty($item['Data'])): ?>
+          <?php if ('Au' == $item['Group'] && $authorDisplay == 'short'): ?>
+            <tr>
+              <th><?=empty($item['Label']) ? '' : $this->transEsc($item['Label']) . ':'?></th>
+              <?php
+                $authors = $driver->getPrimaryAuthorsWithHighlighting();
+                $authorCount = count($authors);
+                $authorNameLimit = $edsConfig->AuthorDisplay->ShortAuthorLimit ?? 3;
+              ?>
+              <?php if ($authorCount > 1): ?>
+                <td class="record__biblio-value">
+                <?php foreach ($authors as $i => $author): ?>
+                  <span class="author"><a href="<?=$this->record($driver)->getLink('author', $this->highlight($author, null, true, false))?>"><?=$this->highlight($author)?></a></span><?php
+                    if ($authorCount == ($i + 1)) {
+                      break;
+                    } elseif (($i + 1) >= $authorNameLimit) {
+                      echo ' ' . $this->transEsc('more_authors_abbrev');
+                      break;
+                    }
+                  ?><?php endforeach; ?>
+                </td>
+              <?php else: ?>
+                <?=$this->driver->linkUrls($item['Data'])?>
+              <?php endif; ?>
+            </tr>
+          <?php elseif ('AuInfo' == $item['Group'] && $authorDisplay == 'short'): ?>
+            <?php /* Do nothing: skip AuInfo data in short author mode... */ ?>
+          <?php else: ?>
+            <tr>
+              <th><?=empty($item['Label']) ? '' : $this->transEsc($item['Label']) . ':'?></th>
+              <td class="record__biblio-value"><?=$this->driver->linkUrls($item['Data'])?></td>
+            </tr>
+          <?php endif; ?>
+        <?php endif; ?>
+      <?php endforeach; ?>
+
+      <?php if ($dbLabel): ?>
+        <tr>
+          <th><?=$this->transEsc('Database')?>:</th>
+          <td><?=$this->escapeHtml($dbLabel)?></td>
+        </tr>
+      <?php endif; ?>
+    <!-- MSU removed code -->
+    </table>
+
+    <div class="resultItemLine4 custom-links">
+
+    <?php $customLinks = array_merge($this->driver->getFTCustomLinks(), $this->driver->getCustomLinks());
+    if (!empty($customLinks)): ?>
+      <?php foreach ($customLinks as $customLink): ?>
+        <?php
+          $url = $customLink['Url'] ?? '';
+          $mot = $customLink['MouseOverText'] ?? '';
+          $icon = $customLink['Icon'] ?? '';
+          $name = $customLink['Text'] ?? '';
+        ?>
+        <div>
+          <!-- MSU -->
+          <?php if ($icon): ?><img alt="" src="<?=$this->escapeHtmlAttr($icon)?>" />
+          <?php else: ?><?=$this->icon('external-link', 'icon-link__icon') ?><?php endif; ?>
+          <a href="<?=$this->escapeHtmlAttr($url)?>" target="_blank" title="<?=$this->escapeHtmlAttr($mot)?>" class="custom-link">
+            <?=$this->escapeHtml($name)?>
+          </a>
+        </div>
+      <?php endforeach; ?>
+    <?php endif; ?>
+
+    <?php $doi = $this->doi($this->driver, 'record'); ?>
+    <?php if ($doi->isActive()): ?>
+      <div><?=$doi->renderTemplate()?></div>
+    <?php endif; ?>
+    </div>
+  </div>
+  <div class="media-left medium img-col">
+    <?php if ($cover): ?>
+      <?=$cover?>
+    <?php endif; ?>
+
+    <?php $pLink = $this->driver->getPLink(); ?>
+    <?php if (($isCommunityBorrower && $isOnCampus) || ($user && !$isCommunityBorrower)): ?>
+      <div class="external-links">
+        <?php if ($pLink): ?>
+          <span>
+            <?=$this->icon('external-link', 'icon-link__icon') /** MSU */ ?>
+            <a href="<?=$this->escapeHtmlAttr($pLink)?>">
+              <?=$this->transEsc('View in EDS')?>
+            </a>
+          </span><br><?php /** MSU */ ?>
+        <?php endif; ?>
+        <?php if ($this->permission()->isAuthorized('access.EDSExtendedResults')): ?>
+          <?php if ($this->driver->hasHTMLFullTextAvailable()): ?>
+            <span>
+              <?=$this->icon('external-link', 'icon-link__icon') /** MSU */ ?>
+              <a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getUrl($this->driver))?>#html" class="icon--eds html fulltext">
+                <?=$this->transEsc('HTML Full Text')?>
+              </a>
+            </span><br><?php /** MSU */ ?>
+          <?php endif; ?>
+          <?php if ($ftLink = $this->driver->getLinkedFullTextLink()): ?>
+            <span>
+              <?=$this->icon('external-link', 'icon-link__icon') /** MSU */ ?>
+              <a href="<?=$ftLink?>" class="fulltext">
+                <?=$this->transEsc('Linked Full Text')?>
+              </a>
+            </span><br><?php /** MSU */ ?>
+          <?php endif; ?>
+          <?php if ($pdfLink = $this->driver->getPdfLink()): ?>
+            <span>
+              <?=$this->icon('external-link', 'icon-link__icon') /** MSU */ ?>
+              <a href="<?=$pdfLink?>" class="icon--eds pdf fulltext">
+                <?=$this->transEsc('PDF Full Text')?>
+              </a>
+            </span><br><?php /** MSU */ ?>
+          <?php endif; ?>
+          <?php if ($epubLink = $this->driver->getEpubLink()): ?>
+            <span>
+              <?=$this->icon('external-link', 'icon-link__icon') /** MSU */ ?>
+              <a href="<?=$epubLink?>" class="icon--eds epub fulltext">
+                <?=$this->transEsc('ePub Full Text')?>
+              </a>
+            </span><br><?php /** MSU */ ?>
+          <?php endif; ?>
+        <?php else: ?>
+          <?=$this->render('RecordDriver/EDS/result-list/full-text-links.phtml', ['driver' => $this->driver, 'recordLinker' => $this->recordLinker()])?>
+        <?php endif; ?>
+      </div>
+    <?php elseif ($pLink || $this->permission()->isAuthorized('access.EDSExtendedResults')): /** MSU START */ ?>
+       <span>
+        <a class="login" href="<?=$this->url('myresearch-userlogin')?>" data-lightbox rel="nofollow">
+          <span class="icon icon--font fa fa-sign-in icon-link__icon" role="img" aria-hidden="true"></span>
+          <strong><?=$this->transEsc('Login for full access')?></strong>
+        </a>
+       </span><br>
+    <?php endif; ?>
+    <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['pdf'],
+                                           'label' => 'Download PDF',
+                                           'openAccess' => $libkeyData['openAccess']]); ?>
+    <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['article'],
+                                           'label' => 'View Article',
+                                           'openAccess' => $libkeyData['openAccess']]); ?>
+    <?=$this->render('RecordDriver/EDS/libkey-link.phtml', ['link' => $libkeyData['issue'],
+                                           'label' => 'View Full Issue',
+                                           'openAccess' => $libkeyData['openAccess']]); ?>
+    <?php /** MSU END */ ?>
+  </div>
+</div>

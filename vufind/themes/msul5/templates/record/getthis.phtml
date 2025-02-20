@@ -1,0 +1,77 @@
+<?php
+# Usually this is displayed in a modal, but if it is not (coming back from login), we don't want the search box and
+# we want a link back to search results if possible.
+$this->layout()->searchbox = false;
+$this->layout()->showSearchBacklink = true;
+// If HLM, just render HoldingsILS template
+$rec_id = $this->driver->getUniqueId();
+if ($this->getthis->isHLM()) {
+    echo $this->render('RecordTab/holdingsils.phtml');
+} else {
+    // Show the item dropdown if there are multiple items available
+    if (count($this->getthis->items) > 1) {
+        echo $this->render('record/getthis/itemopts.phtml');
+    }
+
+    // LEGACY LOGIC
+    // ORDER OF SUB-TEMPLATES COPIED FROM LEGACY CODE
+
+    // Always render biblio info
+    echo $this->render('record/getthis/bibinfo.phtml');
+
+    if ($this->getthis->showInProcess()) {
+        echo $this->render('record/getthis/inprocess.phtml');
+    }
+
+    if ($this->getthis->showUahc()) {
+        echo $this->render('record/getthis/uahc.phtml');
+    }
+
+    if ($this->getthis->showMicroforms()) {
+        echo $this->render('record/getthis/microforms.phtml');
+    }
+
+    if ($this->getthis->showServMsg()) {
+        echo $this->render('record/getthis/messages/' . $this->getthis->msgTemplate);
+    }
+
+    if ($this->getthis->showReqItem()) {
+        echo $this->render('record/getthis/reqitem.phtml');
+    }
+
+    if ($this->getthis->showGetRovi()) {
+        echo $this->render('record/getthis/getrovi.phtml');
+    }
+
+    if ($this->getthis->showRemForm()) {
+        echo $this->render('record/getthis/remform.phtml');
+    }
+
+    if ($this->getthis->showFacDel()) {
+        echo $this->render('record/getthis/facdel.phtml');
+    }
+
+    if ($this->getthis->showRemotePat()) {
+        echo $this->render('record/getthis/remotepat.phtml');
+    }
+
+    if ($this->getthis->showSpcAeon()) {
+        echo $this->render('record/getthis/spcaeon.phtml');
+    }
+
+    if ($this->getthis->showOtherLib()) {
+        echo $this->render('record/getthis/otherlib.phtml');
+    }
+
+    if ($this->getthis->showReqScanMSU()) {
+        echo $this->render('record/getthis/reqscan_msu.phtml');
+    }
+
+    if ($this->getthis->showReqScanOther()) {
+        echo $this->render('record/getthis/reqscan_other.phtml');
+    }
+
+    // from legacy circForm();
+    // Hidden forms; always displayed, but not sure if needed to always be displayed
+    echo $this->render('record/getthis/circform.phtml');
+}

@@ -1,0 +1,7 @@
+<?php
+$searchRoute = $this->searchOptions($this->driver->getSourceIdentifier())->getSearchAction();
+echo $this->url(
+    $searchRoute,
+    [],
+    ['query' => ['lookfor' => "\"{$this->lookfor}\"", 'type' => 'Title' ]]
+);

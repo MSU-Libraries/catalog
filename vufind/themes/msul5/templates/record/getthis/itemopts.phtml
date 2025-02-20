@@ -1,0 +1,46 @@
+<!-- Get-this: Itemopts -->
+<?php
+$sel_item = $this->getthis->getItem();
+$items = $this->getthis->items;
+
+function getDisplay($view, $item)
+{
+    $item['item_id'] ??= null;
+    return $view->getthis->getLocation($item['item_id']) . ': ' . $view->getthis->getCallNumber($item['item_id']);
+}
+?>
+
+<b>Items:</b>
+<nav role="navigation" class="get-this-dropdown">
+    <ul>
+        <li><a href="#" aria-expanded="false"><?= getDisplay($this, $sel_item) ?></a>
+        <div tabindex="-1">
+            <ul class="dropdown">
+                <?php
+                $sel_item['item_id'] ??= -1;
+                foreach ($items as $item) {
+                    $item['item_id'] ??= null;
+                    $item_class = $sel_item['item_id'] == $item['item_id'] ? 'current' : '';
+                    ?><li>
+                        <a href="<?= $this->url(
+                        'record-getthis',
+                        [
+                                'id' => $this->driver->getUniqueId(),
+                                'action' => 'GetThis',
+                            ],
+                        [
+                                'query' => [
+                                    'item_id' => $item['item_id'],
+                                ],
+                            ]
+                    ) ?>" class="<?= $this->escapeUrl($item_class) ?>" rel="nofollow">
+                            <?= getDisplay($this, $item) ?>
+                        </a>
+                    </li>
+                <?php } ?>
+            </ul>
+        </div>
+        </li>
+    </ul>
+</nav>
+<br>

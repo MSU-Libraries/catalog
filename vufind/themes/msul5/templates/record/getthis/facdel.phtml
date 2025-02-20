@@ -1,0 +1,28 @@
+<!-- Getthis: facdel -->
+<?php
+$item = $this->getthis->getItem();
+$title = $this->driver->getTitle();
+$callnum = $this->getthis->getCallNumber();
+$author = $this->driver->getPrimaryAuthor();
+$loc = $this->getthis->getLocation();
+$isbn = $this->driver->getCleanISBN();
+$pubname = $this->driver->getPublisher();
+if (is_array($pubname)): $pubname = implode(', ', $pubname); endif;
+?>
+<div>
+    <p>
+        <b>
+            <a href="https://lib.msu.edu/ils/facstaffdelivery" target="_blank">
+            Faculty/Staff Office Delivery</a>:
+        </b>
+        We deliver MSU materials to your on-campus office,
+        free of charge, typically within 3-5 business days. (MSU Staff and Faculty only)
+        <ul>
+            <li>
+                <a href="https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:facdel%20request&LO=EYM%2CGZM%2CMUN&rft.title=<?= $this->escapeUrl($title) ?>&rft.au=<?= $this->escapeUrl($author) ?>&rft.pub=<?= $this->escapeUrl($pubname) ?>&rft.isbn=<?= $this->escapeUrl($isbn) ?>&loc=<?= $this->escapeUrl($loc) ?>&callno=<?= $this->escapeUrl($callnum) ?>&CAT=1" target="_blank">
+                    Request Delivery to My Office
+                </a>
+            </li>
+        </ul>
+    </p>
+</div>

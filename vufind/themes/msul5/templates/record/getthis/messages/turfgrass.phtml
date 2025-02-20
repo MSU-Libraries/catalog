@@ -1,0 +1,26 @@
+<?php
+$item = $this->getthis->getItem();
+$loc = $this->getthis->getLocation();
+$title = $this->driver->getTitle();
+$author = $this->driver->getPrimaryAuthor();
+$bibnum = $this->driver->getSierraBN();
+$callnum = $this->getthis->getCallNumber();
+?>
+<div>
+    <p>
+        <b>Turfgrass Information Center:</b>
+        All material must be requested for viewing in the Special Collections Reading Room,
+        by appointment only.
+    </p>
+    <p>
+        Please note: You must make an appointment to view this item. Item requests without
+        corresponding Reading Room appointments will be cancelled.
+    </p>
+    <ul>
+        <li>
+        Please <a href="https://tic.msu.edu/contact">contact TIC</a> to request the item
+        <!--<a href='https://codeprod.lib.msu.edu/forms/reqform.php?TITLE=<?= $this->escapeUrl($title) ?>&CALL=<?= $this->escapeUrl($callnum) ?>&AUTHOR=<?= $this->escapeUrl($author) ?>&LOC=<?= $this->escapeUrl($loc) ?>&BIBNUM=<?= $this->escapeUrl($bibnum) ?>' target='_blank'>Request the item</a>
+        --></li>
+        <li><a href='https://bookings.lib.msu.edu/reserve/spc' target='_blank'>Make an appointment</a></li>
+    </ul>
+</div>

@@ -1,0 +1,40 @@
+<?php
+$item = $this->getthis->getItem();
+$title = $this->driver->getTitle();
+$author = $this->driver->getPrimaryAuthor();
+$bibnum = $this->driver->getSierraBN();
+$barcode = $item['barcode'];
+$callnum = $this->getthis->getCallNumber();
+$notices = $this->Notices('RequestNotices.yaml');
+?>
+<div>
+    <p>
+        <b>
+            <?php // PC-745 Disabled requests during configured periods of time ?>
+            <?php if ($notices->hasNotices()): ?>
+                Request Digital Lending:
+            <?php else: ?>
+                <a href='https://lib.msu.edu/cdl?&TI=<?= $this->escapeUrl($title) ?>&CN=<?= $this->escapeUrl($callnum) ?>&AU=<?= $this->escapeUrl($author) ?>&BARCODE=<?= $this->escapeUrl($barcode) ?>&BIBNUM=<?= $this->escapeUrl($bibnum) ?>' target='_blank'>
+                    Request Digital Lending:
+                </a>
+            <?php endif; ?>
+        </b>
+        This item is available for short-term use and may not be copied, printed or downloaded.
+        After the form is submitted, within about 15 minutes, you will receive an email with access
+        to the PDF. Please note that this service is only available
+        <a href='https://lib.msu.edu/hours/' target='_blank'>when the Main Library is open</a>
+        (MSU Students, Staff and Faculty only).
+        <ul>
+            <li>
+                <?php // PC-745 Disabled requests during configured periods of time ?>
+                <?php if ($notices->hasNotices()): ?>
+                    Request via Digital Lending (UNAVAILABLE)
+                <?php else: ?>
+                    <a href='https://lib.msu.edu/cdl?&TI=<?= $this->escapeUrl($title) ?>&CN=<?= $this->escapeUrl($callnum) ?>&AU=<?= $this->escapeUrl($author) ?>&BARCODE=<?= $this->escapeUrl($barcode) ?>&BIBNUM=<?= $this->escapeUrl($bibnum) ?>' target='_blank'>
+                        Request via Digital Lending
+                    </a>
+                <?php endif; ?>
+            </li>
+        </ul>
+    </p>
+</div>

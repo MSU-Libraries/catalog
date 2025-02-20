@@ -1,0 +1,18 @@
+<?php
+$item = $this->getthis->getItem();
+$loc = $this->getthis->getLocation();
+$callnum = $this->getthis->getCallNumber();
+?>
+<div>
+    <p>
+        <b>Request this Item:</b>
+        You may check out the material from the
+        <a href='http://locate.lib.msu.edu/map.cgi?LOC=<?= $this->escapeUrl($loc) ?>&CALL=<?= $this->escapeUrl($this->escapeUrl($callnum)) ?>' target='_blank'>
+            appropriate Service Desk
+        </a> using call number <?= $this->escapeHtml($callnum) ?>,
+        during the Desk&#39;s open hours.
+        <?php if ($this->getthis->isLibUseOnly()) {
+            ?>However, this material cannot leave the building.<?php
+        } ?>
+    </p>
+</div>

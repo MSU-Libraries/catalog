@@ -1,0 +1,9 @@
+<?php foreach ($data as $field): ?>
+    <div class="genre-line" property="keywords">
+        <?php $genre = trim($field); ?>
+        <a title="<?=$this->escapeHtmlAttr($genre)?>"
+            href="<?=$this->record($this->driver)->getLink('genre', $genre)?>" rel="nofollow">
+                <?=trim($this->escapeHtml($genre))?>
+        </a>
+    </div>
+<?php endforeach; ?>

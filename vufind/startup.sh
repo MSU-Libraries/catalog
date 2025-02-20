@@ -62,6 +62,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     rm -rf /usr/local/vufind/local
     ln -sf "${SHARED_STORAGE}/${STACK_NAME}/local-confs" /usr/local/vufind/local
     ln -sf "${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/themes/msul" /usr/local/vufind/themes
+    ln -sf "${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/themes/msul5" /usr/local/vufind/themes
     if [[ ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
       ln -sf "${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog" /usr/local/vufind/module
     fi
@@ -195,8 +196,7 @@ fi
 # Run grunt if a devel/review site
 if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
     echo "Starting grunt to auto-compile theme changes..."
-    # TODO vufind10 use scss
-    grunt watch:less&
+    grunt watch:scss&
 fi
 
 # Unset environment variables that are no longer necessary before starting Apache

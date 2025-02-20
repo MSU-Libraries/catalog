@@ -1,0 +1,12 @@
+<?php
+$item = $this->getthis->getItem();
+$callnum = $this->getthis->getCallNumber();
+?>
+<div>
+    <p>
+        <b>Self Service:</b>
+        You may check out the material from the
+        <a href='https://www.law.msu.edu/library/hours.html' target='_blank'>Law Library Service Desk</a>
+        using call number <?= $this->escapeHtml($callnum) ?> during the Desk open hours.
+    </p>
+</div>

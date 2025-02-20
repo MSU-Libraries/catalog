@@ -1,0 +1,51 @@
+<!-- Getthis: spcaeon -->
+<?php
+
+use Catalog\Utils\RegexLookup as Regex;
+
+$item = $this->getthis->getItem();
+$loc = $this->getthis->getLocation();
+$title = $this->driver->getTitle();
+$author = $this->driver->getPrimaryAuthor();
+$bibnum = $this->driver->getSierraBN();
+$edition = $this->driver->getEdition();
+$pubname = $this->driver->getPublisher();
+$callnum = $this->getthis->getCallNumber();
+$barcode = $item['barcode'];
+if (is_array($pubname)): $pubname = implode(', ', $pubname); endif;
+
+$title = substr($title, 0, 255);
+$pubname = substr($pubname, 0, 255);
+?>
+<div>
+    <?php
+    $msg = '';
+    if (Regex::SPEC_COLL_REMOTE($loc)) {
+        $msg = 'Material will be retrieved for viewing in the Special Collections Reading Room. Please allow up to 3 days for delivery, or you may schedule a later date and time for viewing.';
+    } elseif (Regex::READING_ROOM($loc)) {
+        $msg = '';
+    } else {
+        $msg = 'Material will be retrieved for viewing in the Special Collections Reading Room.';
+    }
+
+    if (Regex::READING_ROOM($loc)) { ?>
+        <p>
+            <b>Special Collections:</b>
+            <?= $msg ?>
+            This material may only be viewed on a dedicated computer in the
+            <a href='https://lib.msu.edu/murray-hong-spc/visiting' target="_blank">
+            Special Collections Reading Room</a>. Please visit anytime Special Collections is
+            open and a staff member will be happy to assist you.
+        </p>
+    <?php } else { ?>
+        <p>
+            <b>Special Collections:</b>
+            <?= $msg ?>
+            <ul>
+                <li>
+                    <a href="https://spcrequest.lib.msu.edu/Logon/?Action=10&Form=20&value=GenericRequestMonograph&DocumentType=book&ItemTitle=<?= $this->escapeUrl($title) ?>&ItemEdition=<?= $this->escapeUrl($edition) ?>&ItemAuthor=<?= $this->escapeUrl($author) ?>&ItemPublisher=<?= $this->escapeUrl($pubname) ?>&Location=<?= $this->escapeUrl($loc) ?>&CallNumber=<?= $this->escapeUrl($callnum) ?>&ItemNumber=<?= $this->escapeUrl($bibnum) ?>&ItemVolume=<?= $this->escapeUrl($barcode) ?>" target="_blank">Request Item</a>
+                </li>
+            </ul>
+        </p>
+    <?php } ?>
+</div>

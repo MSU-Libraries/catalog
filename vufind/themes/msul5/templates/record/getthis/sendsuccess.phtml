@@ -1,0 +1,13 @@
+<?php
+$title_full = $this->driver->getRawData()['title_full'];
+?>
+<div>
+    <b>Retrieval Request Sent</b>
+    <p><i>Title:</i> <?= $this->escapeHtml($title_full) ?><br></p>
+    <p>
+        <b>Your request had been received.</b> An email confirmation will
+        be sent shortly.
+        Once the material is ready, you will be contacted with
+        further instructions.
+    </p>
+</div>

@@ -1,0 +1,53 @@
+<!-- Getthis: Otherlib -->
+<?php
+
+use Catalog\Utils\RegexLookup as Regex;
+
+$item = $this->getthis->getItem();
+$loc = $this->getthis->getLocation();
+$status = $this->getthis->getStatus();
+$title = $this->driver->getTitle();
+$pubname = $this->driver->getPublisher();
+$author = $this->driver->getPrimaryAuthor();
+$isbn = $this->driver->getCleanISBN();
+$callnum = $this->getthis->getCallNumber();
+if (is_array($pubname)): $pubname = implode(', ', $pubname); endif;
+?>
+<div>
+    <?php
+      # If law library use only material, display law patron form first
+      if (Regex::SCHAEFER($loc) && $this->getthis->isOut()) { ?>
+          <p><b>Law Library Inter-library Loan:</b> Law Library patrons can request this material through
+              <a href="http://www.law.msu.edu/library/ill.php" target="_blank">the Inter-library Loan Request Form</a>
+          </p>
+     <?php
+      } ?>
+    <p><b><a href='https://lib.msu.edu/ils/' target="_blank">Inter-library Loan</a>:</b> Request materials through the Inter-library Loan Request Form.
+        Typically available for pickup in 3-14 business days (MSU Students, Staff and Faculty only)</p>
+    <ul>
+        <?php
+        echo "<li><a href='https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:" .
+            $this->escapeUrl($status) . ':' . $this->escapeUrl($item == null ? '' : $item['barcode']) .
+            '&rft.genre=book&LO=EYM%2CGZM%2CMUN&rft.title=' .
+            $this->escapeUrl($title) . '&rft.au=' . $this->escapeUrl($author) . '&rft.pub=' . $this->escapeUrl($pubname) .
+            '&rft.isbn=' . $this->escapeUrl($isbn) . '&loc=' .
+            $this->escapeUrl($loc) . '&callno=' . $this->escapeUrl($callnum) .
+            "&CAT=1' target='_blank'>Request Copy via ILLiad</a></li>";
+        ?>
+    </ul>
+    <?php
+    if (Regex::ROVI($loc) && $this->getthis->isMedia()) { ?>
+    <p><b>Scans:</b> If you only need an article/chapter from this title, it can be typically delivered electronically in
+        2-3 business days (MSU Students, Staff and Faculty only)</p>
+    <ul>
+        <?php
+        echo "<li><a href='https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:" .
+            $this->escapeUrl($status) . ':' . $this->escapeUrl($item['barcode']) .
+            '&rft.genre=article&LO=EYM%2CGZM%2CMUN&rft.title=' .
+            $this->escapeUrl($title) . '&rft.au=' . $this->escapeUrl($author) . '&rft.pub=' . $this->escapeUrl($pubname) .
+            '&rft.isbn=' . $this->escapeUrl($isbn) . '&loc=' . $this->escapeUrl($loc) . '&callno=' .
+            $this->escapeUrl($callnum) .
+            "&CAT=1' target='_blank'>Request a SCAN of Copy</a></li>";
+    } ?>
+    </ul>
+</div>
