@@ -1125,6 +1125,11 @@ class MultiBackend extends AbstractMultiDriver
             return substr($id, 0, $pos);
         }
 
+        // When no prefix found in id, use the default source
+        if (!$pos && $this->defaultDriver) {
+            return $this->defaultDriver;
+        }
+
         return '';
     }
 

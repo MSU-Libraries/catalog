@@ -139,7 +139,7 @@ main() {
     echo "   change (you can inspect the changes yourself or just always assume to be safe), you"
     echo "   will need to re-index / re-import your data into Solr in order to get the updated index."
     echo "3. Reference https://msu-libraries.github.io/catalog/upgrading/ for further"
-    echo "   documentation on how to perform an upgrade."
+    echo "   documentation on how to perform an upgrade and steps to perform after this script."
     echo ""
 }
 

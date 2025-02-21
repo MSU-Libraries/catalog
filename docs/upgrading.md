@@ -70,6 +70,10 @@ button status.
 
 * Check import scripts
 
+* Check placing and canceling a request
+
+* Confirm there are no errors/warnings we should address in the VuFind or Apache logs
+
 ## Solr
 If it is just the Solr version that is being upgraded, then updates to the Docker image will handle
 the update. But if the schema or solr config are being updated you'll likely need to follow these
