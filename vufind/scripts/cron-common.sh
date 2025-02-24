@@ -5,6 +5,10 @@
 # (all the vufind cron scripts are assumed to be on the PATH)
 # NOTE: solr/cron-alphabrowse.sh duplicates this code
 
+# Clear out previous exit code while we run. This helps to
+# reduce additional Nagios alerts for long running cronjobs.
+true > "$EXIT_CODE_PATH"
+
 TIMESTAMP=$( date +%Y%m%d%H%M%S )
 LATEST_PATH_WITH_TS="${LATEST_PATH}.${TIMESTAMP}"
 $CRON_COMMAND > "${LATEST_PATH_WITH_TS}" 2>&1
