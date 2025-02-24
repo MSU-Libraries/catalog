@@ -832,7 +832,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      *
      * @return array Note fields from Solr
      */
-    public function getHoldersOfOriginalNotes()
+    public function getHolderOfOriginalNotes()
     {
         return $this->getMarcFieldWithInd('535', null, [[1 => ['1']]]);
     }
@@ -842,7 +842,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      *
      * @return array Note fields from Solr
      */
-    public function getHoldersOfDuplicateNotes()
+    public function getHolderOfDuplicateNotes()
     {
         return $this->getMarcFieldWithInd('535', null, [[1 => ['2']]]);
     }
@@ -1339,14 +1339,14 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
-     * Return an array of call numbers from the Solr field "callnumber-raw".
+     * Return an array of call numbers from the Solr field "callnumber-full_str_mv".
      *
      * @return array the call numbers
      */
     public function getCallNumbers()
     {
         return array_unique(
-            in_array('callnumber-full_str_mv', $this->fields)
+            isset($this->fields['callnumber-full_str_mv'])
             ? array_map('trim', $this->fields['callnumber-full_str_mv'])
             : []
         );

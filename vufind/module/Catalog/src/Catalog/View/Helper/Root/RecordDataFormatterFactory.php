@@ -29,8 +29,6 @@
 
 namespace Catalog\View\Helper\Root;
 
-use VuFind\View\Helper\Root\RecordDataFormatter\SpecBuilder;
-
 use function count;
 
 /**
