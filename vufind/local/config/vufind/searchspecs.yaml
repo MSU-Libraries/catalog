@@ -257,7 +257,7 @@ ISN:
   DismaxFields:
     - isbn^10
     - issn^10
-    - invalid_isbn
+    - invalid_isn
   DismaxHandler: edismax
 
 Subject:
@@ -376,7 +376,7 @@ AllFields:
     - fulltext
     - description
     - long_lat_display
-    - invalid_isbn
+    - invalid_isn
   DismaxHandler: edismax
   ExactSettings:
     DismaxFields:
@@ -387,7 +387,7 @@ AllFields:
       - fulltext_unstemmed^10
       - isbn^10
       - issn^10
-      - invalid_isbn
+      - invalid_isn
 
 # These are advanced searches that never use Dismax:
 id:
