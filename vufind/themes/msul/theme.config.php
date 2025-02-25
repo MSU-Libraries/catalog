@@ -17,7 +17,7 @@ return [
         'factories' => [
             VuFind\View\Helper\Root\RecordDataFormatter::class => Catalog\View\Helper\Root\RecordDataFormatterFactory::class,
             Catalog\View\Helper\Root\Record::class => Catalog\View\Helper\Root\RecordFactory::class,
-            Catalog\View\Helper\Root\Auth::class => VuFind\View\Helper\Root\AuthFactory::class,
+            Catalog\View\Helper\Root\Auth::class => Catalog\View\Helper\Root\AuthFactory::class,
             Catalog\View\Helper\Root\PrintArrayHtml::class => Laminas\ServiceManager\Factory\InvokableFactory::class,
             Catalog\View\Helper\Root\Notices::class => Catalog\View\Helper\Root\NoticesFactory::class,
             Catalog\View\Helper\Root\LocationNotices::class => Catalog\View\Helper\Root\LocationNoticesFactory::class,

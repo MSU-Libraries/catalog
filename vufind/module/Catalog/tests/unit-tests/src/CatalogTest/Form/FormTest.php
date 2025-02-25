@@ -78,7 +78,7 @@ class FormTest extends \PHPUnit\Framework\TestCase
             'feedback_response',
             $form->getSubmitResponse()
         );
-        $this->assertEquals([[], 'Email/form.phtml'], $form->formatEmailMessage([]));
+        $this->assertEquals([[], 'Email/form.phtml'], $form->mapRequestParamsToFieldValues([]));
         $this->assertEquals(
             'Laminas\InputFilter\InputFilter',
             get_class($form->getInputFilter())
