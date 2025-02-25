@@ -374,13 +374,13 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
         // $driver = $this->createMock(\VuFind\RecordDriver\AbstractBase::class);
         $driver = $this->createMock(\Catalog\RecordDriver\SolrDefault::class);
         $driver->expects($this->any())->method('getUniqueId')
-            ->will($this->returnValue($id));
+            ->willReturn($id);
         $driver->expects($this->any())->method('getSourceIdentifier')
-            ->will($this->returnValue($source));
+            ->willReturn($source);
         $driver->expects($this->any())->method('getSummary')
-            ->will($this->returnValue([$source]));
+            ->willReturn([$source]);
         $driver->expects($this->any())->method('getFormats')
-            ->will($this->returnValue(['Serial', 'Book']));
+            ->willReturn(['Serial', 'Book']);
         return $driver;
     }
 }
