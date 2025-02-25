@@ -87,6 +87,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindLocalTemplate" /usr/local/vufind/module/VuFindLocalTemplate
     ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindSearch" /usr/local/vufind/module/VuFindSearch
     ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindTheme" /usr/local/vufind/module/VuFindTheme
+    ln -f -s "${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/local/config/vufind/RecordDataFormatter.ini" /usr/local/vufind/local/config/vufind/RecordDataFormatter.ini
 
     if [[ ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
       # Add a link in core-repo so that unit tests work
@@ -123,7 +124,6 @@ chown www-data:www-data /mnt/logs/vufind/vufind.log /var/log/simplesamlphp/simpl
 ln -f -s /mnt/shared/config/BannerNotices.yaml /usr/local/vufind/local/config/vufind/BannerNotices.yaml
 ln -f -s /mnt/shared/config/LocationNotices.yaml /usr/local/vufind/local/config/vufind/LocationNotices.yaml
 ln -f -s /mnt/shared/config/RequestNotices.yaml /usr/local/vufind/local/config/vufind/RequestNotices.yaml
-ln -f -s "${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/local/config/vufind/RecordDataFormatter.ini" /usr/local/vufind/local/config/vufind/RecordDataFormatter.ini
 
 if [[ "${STACK_NAME}" != devel-* || ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
   # Update the phing commands to use our module instead of VuFind for tests
