@@ -1373,6 +1373,52 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get ISBN data with type of ISBN ('valid', 'canceled/invalid')
+     *
+     * @return array An array of arrays, subarrays containing 'isn' and 'type'
+     */
+    public function getISBNsWithType()
+    {
+        $isns = [];
+        $marc = $this->getMarcReader();
+        $marcArr020 = $marc->getFields('020', ['a', 'z']);
+        foreach ($marcArr020 as $marc020) {
+            foreach ($marc020['subfields'] as $subfield) {
+                if ($subfield['code'] == 'a') {
+                    $isns[] = ['isn' => $subfield['data'], 'type' => 'valid'];
+                } elseif ($subfield['code'] == 'z') {
+                    $isns[] = ['isn' => $subfield['data'], 'type' => 'canceled/invalid'];
+                }
+            }
+        }
+        return $isns;
+    }
+
+    /**
+     * Get ISSN data with type of ISSN ('valid', 'incorrect', or 'canceled')
+     *
+     * @return array An array of arrays, subarrays containing 'isn' and 'type'
+     */
+    public function getISSNsWithType()
+    {
+        $isns = [];
+        $marc = $this->getMarcReader();
+        $marcArr022 = $marc->getFields('022', ['a', 'y', 'z']);
+        foreach ($marcArr022 as $marc022) {
+            foreach ($marc022['subfields'] as $subfield) {
+                if ($subfield['code'] == 'a') {
+                    $isns[] = ['isn' => $subfield['data'], 'type' => 'valid'];
+                } elseif ($subfield['code'] == 'y') {
+                    $isns[] = ['isn' => $subfield['data'], 'type' => 'incorrect'];
+                } elseif ($subfield['code'] == 'z') {
+                    $isns[] = ['isn' => $subfield['data'], 'type' => 'canceled'];
+                }
+            }
+        }
+        return $isns;
+    }
+
+    /**
      * Get the translated from languaes
      *
      * @return array Content from Solr
