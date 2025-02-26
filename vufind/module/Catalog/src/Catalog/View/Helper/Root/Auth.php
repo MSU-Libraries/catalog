@@ -16,7 +16,7 @@ namespace Catalog\View\Helper\Root;
 
 use Laminas\Config\Config;
 use Laminas\Config\Reader\Ini as IniReader;
-use VuFind\Config\Locator as Locator;
+use VuFind\Config\PathResolver;
 
 use function array_key_exists;
 use function count;
@@ -32,6 +32,23 @@ use function count;
  */
 class Auth extends \VuFind\View\Helper\Root\Auth
 {
+    /**
+     * Constructor
+     *
+     * @param \VuFind\Auth\Manager          $manager          Authentication manager
+     * @param \VuFind\Auth\ILSAuthenticator $ilsAuthenticator ILS Authenticator
+     * @param ?PathResolver                 $pathResolver     Config file path resolver
+     */
+    public function __construct(
+        \VuFind\Auth\Manager $manager,
+        \VuFind\Auth\ILSAuthenticator $ilsAuthenticator,
+        protected ?PathResolver $pathResolver = null
+    )
+    {
+        parent::__construct($manager, $ilsAuthenticator);
+    }
+
+
     /**
      * Determines if the given patron is a community borrower based
      * on the username field from their patron data.
@@ -66,7 +83,7 @@ class Auth extends \VuFind\View\Helper\Root\Auth
         $ranges = [];
         $ip = ip2long($_SERVER['REMOTE_ADDR']);
 
-        $fullpath = Locator::getConfigPath('permissions.ini', 'config/vufind');
+        $fullpath = $this->pathResolver->getConfigPath('permissions.ini', 'config/vufind');
         $config = new Config((new IniReader())->fromFile($fullpath, true));
 
         if (

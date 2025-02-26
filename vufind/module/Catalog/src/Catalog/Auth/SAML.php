@@ -31,6 +31,7 @@ namespace Catalog\Auth;
 
 use Laminas\Http\PhpEnvironment\Request;
 use VuFind\Auth\ILSAuthenticator;
+use VuFind\Db\Service\UserCardServiceInterface;
 use VuFind\Exception\Auth as AuthException;
 
 use function count;
@@ -188,7 +189,7 @@ class SAML extends \VuFind\Auth\AbstractBase
             if (isset($config[$attribute])) {
                 $value = $this->getAttribute($config[$attribute]);
                 if ($attribute == 'email') {
-                    $user->updateEmail($value);
+                    $this->getUserService()->updateUserEmail($user, $value);
                 } elseif (
                     $attribute == 'cat_username' && isset($config['prefix'])
                     && !empty($value)
@@ -301,7 +302,8 @@ class SAML extends \VuFind\Auth\AbstractBase
             $username = $config['prefix'] . '.' . $username;
         }
         $password = $config['cat_password'] ?? null;
-        $connectingUser->saveLibraryCard(
+        $this->getDbService(UserCardServiceInterface::class)->persistLibraryCardData(
+            $connectingUser,
             null,
             $config['prefix'],
             $username,
