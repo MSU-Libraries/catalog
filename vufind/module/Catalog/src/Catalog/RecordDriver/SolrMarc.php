@@ -1372,7 +1372,6 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         return $this->getMarcField('255', ['a', 'b', 'c', 'd']);
     }
 
-
     /**
      * Get ISBN data with type of ISBN ('valid', 'canceled/invalid')
      *
@@ -1387,8 +1386,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             foreach ($marc020['subfields'] as $subfield) {
                 if ($subfield['code'] == 'a') {
                     $isns[] = ['isn' => $subfield['data'], 'type' => 'valid'];
-                }
-                elseif ($subfield['code'] == 'z') {
+                } elseif ($subfield['code'] == 'z') {
                     $isns[] = ['isn' => $subfield['data'], 'type' => 'canceled/invalid'];
                 }
             }
@@ -1410,11 +1408,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             foreach ($marc022['subfields'] as $subfield) {
                 if ($subfield['code'] == 'a') {
                     $isns[] = ['isn' => $subfield['data'], 'type' => 'valid'];
-                }
-                elseif ($subfield['code'] == 'y') {
+                } elseif ($subfield['code'] == 'y') {
                     $isns[] = ['isn' => $subfield['data'], 'type' => 'incorrect'];
-                }
-                elseif ($subfield['code'] == 'z') {
+                } elseif ($subfield['code'] == 'z') {
                     $isns[] = ['isn' => $subfield['data'], 'type' => 'canceled'];
                 }
             }
