@@ -216,5 +216,15 @@
             <subfield code="u">https://vufind.org/vufind/</subfield>
             <subfield code="y">VuFind Home Page</subfield>
         </datafield>
+        <datafield tag="880" ind1=" " ind2=" ">
+            <subfield code="6">520-00/r</subfield>
+            <subfield code="a">Linked Summary.</subfield>
+            <subfield code="b">Expanded.</subfield>
+        </datafield>
+        <datafield tag="880" ind1=" " ind2=" ">
+            <subfield code="6">520-00/r</subfield>
+            <subfield code="a">Linked Summary2.</subfield>
+            <subfield code="b">Expanded.</subfield>
+        </datafield>
     </record>
 </collection>
