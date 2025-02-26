@@ -43,8 +43,7 @@ class Auth extends \VuFind\View\Helper\Root\Auth
         \VuFind\Auth\Manager $manager,
         \VuFind\Auth\ILSAuthenticator $ilsAuthenticator,
         protected ?PathResolver $pathResolver = null
-    )
-    {
+    ) {
         parent::__construct($manager, $ilsAuthenticator);
     }
 
