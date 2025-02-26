@@ -1,0 +1,12 @@
+<?php foreach ($data as $field): ?>
+    <?php $isn = trim($field['isn'] ?? ''); ?>
+    <?php $type = trim($field['type'] ?? 'valid'); ?>
+    <?php if ($type == 'valid'): ?>
+      <div class="isn-line">
+        <?= $this->escapeHtml($isn) ?>
+    <?php else: ?>
+      <div class="isn-line isn-invalid">
+        <?= $this->escapeHtml($isn) ?> (<?= $this->escapeHtml(ucwords($type)) ?>)
+    <?php endif; ?>
+    </div>
+<?php endforeach; ?>

@@ -176,6 +176,26 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
+     * Get ISBN data with type of ISBN ('valid', 'canceled/invalid')
+     *
+     * @return array An array of arrays, subarrays containing 'isn' and 'type'
+     */
+    public function getISBNsWithType()
+    {
+        return [];
+    }
+
+    /**
+     * Get ISSN data with type of ISSN ('valid', 'incorrect', or 'canceled')
+     *
+     * @return array An array of arrays, subarrays containing 'isn' and 'type'
+     */
+    public function getISSNsWithType()
+    {
+        return [];
+    }
+
+    /**
      * Get summary
      *
      * @return array
