@@ -48,9 +48,12 @@ function searchboxAction() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('searchForm')?.addEventListener('submit', function (event) {
-        if (searchboxAction()) {
-            event.preventDefault();
-        }
-    });
+    let searchForm = document.getElementById('searchForm');
+    if (searchForm != null) {
+        searchForm.addEventListener('submit', function (event) {
+            if (searchboxAction()) {
+                event.preventDefault();
+            }
+        });
+    }
 });
