@@ -69,9 +69,10 @@ class Okapi extends \VuFind\Auth\AbstractBase
     /**
      * Constructor
      *
-     * @param \VuFind\ILS\Connection           $connection    ILS connection to set
-     * @param \VuFind\ILS\Driver\PluginManager $driverManager Driver plugin manager
-     * @param \VuFind\Config\PluginManager     $configReader  Configuration loader
+     * @param \VuFind\ILS\Connection           $connection       ILS connection to set
+     * @param \VuFind\ILS\Driver\PluginManager $driverManager    Driver plugin manager
+     * @param \VuFind\Config\PluginManager     $configReader     Configuration loader
+     * @param ILSAuthenticator                 $ilsAuthenticator ilsAuthenticator
      */
     public function __construct(
         \VuFind\ILS\Connection $connection,
