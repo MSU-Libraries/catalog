@@ -30,6 +30,9 @@ use function is_array;
  */
 class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 {
+    public const LINKSUBF = '6'; // subfield code that has field link information
+    public const UNLINKPOS = '00'; // occurance position in the linked subfield that represents unlinked 880s
+
     /**
      * Fields that may contain subject headings, and their descriptions
      *
@@ -47,45 +50,6 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 //        '655' => 'genre/form', // MSU commented
         '656' => 'occupation',
     ];
-
-    /**
-     * Takes a Marc field (ex: 950) and a list of sub fields (ex: ['a','b'])
-     * and returns the values inside those fields in an array
-     * (ex: ['val 1', 'val 2'])
-     *
-     * @param string $field    Marc field to search within
-     * @param array  $subfield Sub-fields to return or empty for all
-     *
-     * @return array the values within the subfields under the field
-     */
-    public function getMarcField(string $field, ?array $subfield = null)
-    {
-        $vals = [];
-        $marc = $this->getMarcReader();
-        $marc_fields = $marc->getFields($field, $subfield);
-        foreach ($marc_fields as $marc_data) {
-            $subfields = $marc_data['subfields'];
-            foreach ($subfields as $subfield) {
-                $vals[] = $subfield['data'];
-            }
-        }
-        return $vals;
-    }
-
-    /**
-     * Takes a Marc field (ex: 950) and a list of sub fields (ex: ['a','b'])
-     * and returns the unique values inside those fields in an array
-     * (ex: ['val 1', 'val 2'])
-     *
-     * @param string $field    Marc field to search within
-     * @param array  $subfield Sub-fields to return or empty for all
-     *
-     * @return array The unique values within the subfields under the field
-     */
-    public function getMarcFieldUnique(string $field, ?array $subfield = null)
-    {
-        return array_unique($this->getMarcField($field, $subfield));
-    }
 
     /**
      * Takes a Marc field that notes are stored in (ex: 950) and a list of
@@ -148,116 +112,186 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 ];
             }
         }
+        // Get unmatched 880 fields
+        $linkedFields = $marc->getLinkedFields('880', $field, $codes);
+        foreach ($linkedFields as $linkedField) {
+            // Anytime there is a link with an occurrence of '00' it means it is unlinked
+            if ($linkedField['link']['occurrence'] != self::UNLINKPOS) {
+                continue;
+            }
+            $fieldVals = [];
+            $exclude = false;
+            foreach ($linkedField['subfields'] as $subfield) {
+                // exclude field from display if value of subfield 5 is not MiEM
+                if ($subfield['code'] == '5' && $subfield['data'] != 'MiEM' && $subfield['data'] != 'MiEMMF') {
+                    $exclude = true;
+                    break;
+                }
+                // exclude subfield 5 from display
+                if ($subfield['code'] === '5') {
+                    continue;
+                }
+                if ($subfield['code'] != '6') {
+                    $fieldVals[] = $subfield['data'];
+                }
+            }
+            $newVal = implode(' ', $fieldVals);
+            if (!empty($fieldVals) && !in_array($newVal, $vals) && !$exclude) {
+                $vals[] = $newVal;
+            }
+        }
         return $vals;
     }
 
     /**
-     * Similar functionality to getMarcFieldWithInd, but also retrieves any linkage from a $6
-     *
-     * @param string $field    Marc field to search within
-     * @param array  $subfield Sub-fields to return or empty for all
-     * @param array  $indData  Array of filter arrays, each in the format indicator number =>
-     * array of allowed indicator values. If any one of the filter arrays fully matches the indicator
-     * values in the field, data will be returned. If no filter arrays are defined, data will always
-     * be returned regardless of indicators.
-     * ex: [['1' => ['1', '2']], ['2' => ['']]] would filter fields ind1 = 1 or 2 or ind2 = blank
-     * ex: [['1' => ['1'], '2' => ['7']]] would filter fields with ind1 = 1 and ind2 = 7
-     * ex: [] would apply no filtering based on indicators
-     *
-     * @return array An array pair with:
-     *                0: array with the values within the subfields under the field
-     *                1: array with the values from a $6 linkage if exists, null otherwise
-     */
-    public function getMarcFieldWithIndAndLinked(
-        string $field,
-        ?array $subfield = null,
-        array $indData = []
-    ) {
-        $linkVals = null;
-        $marc = $this->getMarcReader();
-        $marc_fields = $marc->getFields($field, array_merge($subfield ?? [], ['6']));
-        foreach ($marc_fields as $marc_data) {
-            $subfields = $marc_data['subfields'];
-            $subf6 = array_filter($subfields, function ($subf) {
-                return array_key_exists('code', $subf) && $subf['code'] == '6';
-            });
-            $linked = null;
-            if ($subf6) {
-                $subf6Parts = explode('-', $subf6[0]['data']);
-                if (count($subf6Parts) > 1 && $subf6Parts[0] == '880') {
-                    $index = $subf6Parts[1];
-                    $linked = $marc->getLinkedField('880', $field, $index, $subfield);
-                }
-            }
-
-            foreach ($subfields as $subf) {
-                if ($subf['code'] === '6') {
-                    continue;
-                }
-                if (isset($linked['subfields'])) {
-                    foreach ($linked['subfields'] as $lsf) {
-                        if ($lsf['code'] === '6' || !in_array($lsf['code'], $subfield)) {
-                            continue;
-                        }
-                        if ($linkVals === null) {
-                            $linkVals = [];
-                        }
-                        $linkVals[] = $lsf['data'];
-                    }
-                }
-            }
-        }
-        return [
-            $this->getMarcFieldWithInd($field, $subfield, $indData),
-            $linkVals,
-        ];
-    }
-
-    /**
-     * Added in PC-1105
-     * Takes a Marc field that notes are stored in (ex: 950) and a list of
+     * Takes a Marc field (ex: 950) and a list of
      * sub fields (ex: ['a','b']) optionally as well as what indicator
-     * numbers and values to exclude, then concatenates the subfields
+     * numbers and values to filter for and concatenates the subfields
      * together and returns the fields back as an array
      * (ex: ['subA subB subC', 'field2SubA field2SubB'])
      *
-     * @param string $field    Marc field to search within
-     * @param array  $subfield Sub-fields to return or empty for all
-     * @param array  $indData  Array containing the indicator number as the key
-     *                         and the value as an array of strings for the
-     *                         allowed indicator values
-     *                         ex: [['1' => '1', '2', '2' => '']]
-     *                         would filter ind1 = 1 or 2 and ind2 = blank
+     * @param string $field           Marc field to search within
+     * @param ?array $subfieldFilters Sub-fields to return or empty for all
+     * @param array  $indData         Array of filter arrays, each in the format indicator number =>
+     *                                array of allowed indicator values. If any one of the filter
+     *                                arrays fully matches the indicator values in the field, data
+     *                                will be returned. If no filter arrays are defined, data will
+     *                                always be returned regardless of indicators. ex: [['1' =>
+     *                                ['1', '2']], ['2' => ['']]] would filter fields ind1 = 1 or 2
+     *                                or ind2 = blank ex: [['1' => ['1'], '2' => ['7']]] would
+     *                                filter fields with ind1 = 1 and ind2 = 7 ex: [] would apply no
+     *                                filtering based on indicators
+     * @param bool   $inclLinked      Include 880 linked fields in the results. Default: true
      *
-     * @return array The values within the subfields under the field
+     * @return array An array containing containing either a string with subfield values or
+     *               an associative array with the keys:
+     *                'note': array with the values within the subfields under the field
+     *                'link': array with the values from a $6 linkage if exists, null otherwise
+     *               if linked data in the 880 field exists for that field.
+     *               Example: ['subA subB', ['note' => '2Suba', 'link' => 'link2Suba']]
      */
-    public function getMarcFieldWithoutInd(
+    public function getMarcFieldWithInd(
         string $field,
-        ?array $subfield = null,
-        array $indData = []
+        ?array $subfieldFilters = null,
+        array $indData = [],
+        bool $inclLinked = true
     ) {
         $vals = [];
+        $linkVals = [];
+        // Pull $6 to link with 880 field
+        if ($inclLinked) {
+            // Only add $6 if it is not empty, otherwise we will be filtering to ONLY $6
+            if (!empty($subfieldFilters)) {
+                $subfieldFilters = array_merge($subfieldFilters, [self::LINKSUBF]);
+            }
+        }
         $marc = $this->getMarcReader();
-        $marc_fields = $marc->getFields($field, $subfield);
-        foreach ($marc_fields as $marc_data) {
-            $field_vals = [];
-            // Check if that field has either indicator (MARC only has up to 2 indicators)
-            foreach (range(1, 2) as $indNum) {
-                if (
-                    array_key_exists($indNum, $indData) &&
-                    !in_array(trim(($marc_data['i' . $indNum] ?? '')), $indData[$indNum])
-                ) {
-                    $subfields = $marc_data['subfields'];
-                    foreach ($subfields as $subfield) {
-                        $field_vals[] = $subfield['data'];
+        $marcFields = $marc->getFields($field, $subfieldFilters);
+        foreach ($marcFields as $marcData) {
+            $fieldVals = [];
+            // Match sure if matches the indicator filters
+            if ($this->checkIndicatorFilters($marcData, $indData)) {
+                $subfields = $marcData['subfields'];
+                // If we want to include linked fields, try to find a match based on $6
+                if ($inclLinked) {
+                    $linkVals = $this->getLinkedSubfieldData($field, $subfieldFilters, $marcData);
+                }
+                foreach ($subfields as $subfield) {
+                    if ($subfield['code'] != self::LINKSUBF) {
+                        $fieldVals[] = $subfield['data'];
                     }
                 }
             }
-            if (!empty($field_vals)) {
-                $vals[] = implode(' ', $field_vals);
+            $newVal = implode(' ', $fieldVals);
+            $newLinkedVal = implode(' ', $linkVals);
+            if (!empty($fieldVals) && !in_array($newVal, $vals)) {
+                if (!empty($linkVals)) {
+                    $vals[] = ['note' => $newVal, 'link' => $newLinkedVal];
+                } else {
+                    $vals[] = $newVal;
+                }
             }
         }
-        return array_unique($vals);
+        // Now add the linked fields that were not found in $marcData
+        if ($inclLinked) {
+            $vals = array_merge(
+                $vals,
+                $this->getUnmatchedLinkedSubfieldData($field, $subfieldFilters, $indData)
+            );
+        }
+
+        return $vals;
+    }
+
+    /**
+     * Utility function for getMarcFieldWithInd to get all linked subfield data
+     * for the given field, subfield filter, and indicator filter that do not
+     * have a link occurance.
+     *
+     * @param string $field           Marc field to find links for
+     * @param array  $subfieldFilters All subfields to get the data for
+     * @param array  $indData         See getMarcFieldWithInd for full definition
+     *
+     * @return array array with the values from the linked fields
+     * (ex: ['subA subB subC', 'field2SubA field2SubB'])
+     */
+    protected function getUnmatchedLinkedSubfieldData($field, $subfieldFilters, $indData = [])
+    {
+        $vals = [];
+        $marc = $this->getMarcReader();
+        $linkedFields = $marc->getLinkedFields('880', $field, $subfieldFilters);
+        foreach ($linkedFields as $linkedField) {
+            // Anytime there is a link with an occurrence of '00' it means it is unlinked
+            if ($linkedField['link']['occurrence'] != self::UNLINKPOS) {
+                continue;
+            }
+            $fieldVals = [];
+            if ($this->checkIndicatorFilters($linkedField, $indData)) {
+                foreach ($linkedField['subfields'] as $subfield) {
+                    if ($subfield['code'] != self::LINKSUBF) {
+                        $fieldVals[] = $subfield['data'];
+                    }
+                }
+            }
+            $newVal = implode(' ', $fieldVals);
+            if (!empty($fieldVals) && !in_array($newVal, $vals)) {
+                $vals[] = $newVal;
+            }
+        }
+        return $vals;
+    }
+
+    /**
+     * Utility function for getMarcFieldWithInd to get all linked subfields
+     * for the given field, subfield filter, and marc record
+     *
+     * @param string $field           Marc field to find links for
+     * @param array  $subfieldFilters All subfields to get the data for
+     * @param array  $marcField       The Marc field to find the linked 880 for, if it exists
+     *
+     * @return array with the values from the linked field
+     */
+    protected function getLinkedSubfieldData($field, $subfieldFilters, $marcField)
+    {
+        $linkedVals = [];
+        $marc = $this->getMarcReader();
+        $subf6 = array_filter($marcField['subfields'], function ($subf) {
+            return array_key_exists('code', $subf) && $subf['code'] == self::LINKSUBF;
+        });
+        if ($subf6) {
+            $subf6Parts = explode('-', $subf6[0]['data']);
+            if (count($subf6Parts) > 1 && $subf6Parts[0] == '880') {
+                $index = $subf6Parts[1];
+                $linked = $marc->getLinkedField('880', $field, $index, $subfieldFilters);
+                foreach ($linked['subfields'] as $lsf) {
+                    if (!in_array($lsf['code'], $subfieldFilters) && $lsf['code'] != self::LINKSUBF) {
+                        continue;
+                    }
+                    $linkVals[] = $lsf['data'];
+                }
+            }
+        }
+        return $linkedVals;
     }
 
     /**
@@ -311,7 +345,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
-     * Get the binding note fields
+     * $subfieldFiltersthe binding note fields
      *
      * @return array Note fields from Solr
      */
@@ -512,11 +546,11 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         $toc = [];
         // Assumption: only one of indicator "1=0" or "1=8" will exist on any given record
-        $marc505_0 = $this->getMarcFieldWithIndAndLinked('505', ['a','g','r','t','u'], [[1 => ['0']]]);
+        $marc505_0 = $this->getMarcFieldWithInd('505', ['a','g','r','t','u'], [[1 => ['0']]]);
         $fields = $marc505_0[0];
         $linked = $marc505_0[1] ?? array_pad($marc505_0[1] ?? [], count($marc505_0[0]), '');
         if (empty($fields)) {
-            $marc505_8 = $this->getMarcFieldWithIndAndLinked('505', ['a','g','r','t','u'], [[1 => ['8']]]);
+            $marc505_8 = $this->getMarcFieldWithInd('505', ['a','g','r','t','u'], [[1 => ['8']]]);
             $fields = $marc505_8[0];
             $linked = $marc505_8[1] ?? array_pad($marc505_8[1] ?? [], count($marc505_8[0]), '');
         }
@@ -533,7 +567,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getIncompleteContentsNotes()
     {
         $toc = [];
-        $marc505 = $this->getMarcFieldWithIndAndLinked('505', ['a','g','r','t','u'], [[1 => ['1']]]);
+        $marc505 = $this->getMarcFieldWithInd('505', ['a','g','r','t','u'], [[1 => ['1']]]);
         $fields = $marc505[0];
         $linked = $marc505[1] ?? array_pad($marc505[1] ?? [], count($marc505[0]), '');
 
@@ -549,7 +583,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getPartialContentsNotes()
     {
         $toc = [];
-        $marc505 = $this->getMarcFieldWithIndAndLinked('505', ['a','g','r','t','u'], [[1 => ['2']]]);
+        $marc505 = $this->getMarcFieldWithInd('505', ['a','g','r','t','u'], [[1 => ['2']]]);
         $fields = $marc505[0];
         $linked = $marc505[1] ?? array_pad($marc505[1] ?? [], count($marc505[0]), '');
 
@@ -1259,6 +1293,11 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             $tmpVal['value'] = implode(' ', $tmpVal['value']);
             $vals[] = $tmpVal;
         }
+        // Add in unlinked 880 fields
+        foreach ($this->getUnmatchedLinkedSubfieldData($field, $codes) as $unlinkedField) {
+            $vals[] = ['name' => $unlinkedField];
+        }
+
         return $vals;
     }
 
@@ -1359,7 +1398,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getBarcode()
     {
-        return $this->getMarcField('952', ['m']);
+        return $this->getMarcFieldWithInd('952', ['m']);
     }
 
     /**
@@ -1369,7 +1408,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getCartographicData()
     {
-        return $this->getMarcField('255', ['a', 'b', 'c', 'd']);
+        return $this->getMarcFieldWithInd('255', ['a', 'b', 'c', 'd']);
     }
 
     /**
@@ -1484,7 +1523,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getPlatform()
     {
-        return $this->getMarcFieldUnique('753', ['a']);
+        return $this->getMarcFieldWithInd('753', ['a', 'b', 'c']);
     }
 
     /**
@@ -1494,7 +1533,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getGeneralNotes()
     {
-        return array_merge($this->getMarcField('500', ['a', '3']), $this->getMarcField('501', ['a']));
+        return array_merge($this->getMarcFieldWithInd('500', ['a', '3']), $this->getMarcFieldWithInd('501', ['a']));
     }
 
     /**
@@ -1749,7 +1788,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             $this->getFieldArray('110', ['a', 'b']),
             $this->getFieldArray('111', range('a', 'z')),
             $this->getFieldArray('710', ['a', 'b']),
-            $this->getMarcFieldWithoutInd('711', ['a', 'b'], ['2' => ['2']])
+            $this->getMarcFieldWithInd('711', ['a', 'b'], ['1' => ['', '0', '1', '2'], '2' => ['']])
         );
     }
 
@@ -1772,6 +1811,8 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      * Get an array of all series names containing the record. Array entries may
      * be either the name string, or an associative array with 'name' and 'number'
      * keys.
+     * TODO -- only returns 880 fields that are linked to a transliterated field
+     * and should be refactored to return series that are only in 880.
      *
      * @return array
      */
@@ -1805,6 +1846,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         if (empty($matches)) {
             $marc = $this->getMarcReader();
             $marc_fields = $marc->getFields('490', ['a', 'n', 'p', 'v', '6']);
+            // TODO add in unlinked 880s
             foreach ($marc_fields as $marc_data) {
                 $field_vals = [];
                 $field_num = '';
@@ -1876,6 +1918,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                     }
 
                     // Check for a linked value
+                    // TODO add in unlinked 880s
                     $linkedField = $this->getSubfieldArray($currentField, ['6']);
                     if (isset($linkedField[0])) {
                         $explodedSubfield = explode('-', $linkedField[0]);

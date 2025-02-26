@@ -101,7 +101,12 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetSummaryNotes()
     {
-        $this->assertEquals(['Summary. Expanded.'], $this->getDriver()->getSummaryNotes());
+        $this->assertEquals(
+            ['Summary. Expanded.',
+            'Linked Summary. Expanded.',
+            'Linked Summary2. Expanded.'],
+            $this->getDriver()->getSummaryNotes()
+        );
     }
 
     /**
