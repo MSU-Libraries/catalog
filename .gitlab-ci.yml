@@ -29,6 +29,8 @@ Set Stack Name:
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH ||  $CI_COMMIT_BRANCH == "catalog-preview" || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $PROD == "false"'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $PROD == "true"'
       when: manual
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
     - when: manual
   before_script:
     - apk add --no-cache bash
