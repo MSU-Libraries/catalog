@@ -47,7 +47,6 @@ class Auth extends \VuFind\View\Helper\Root\Auth
         parent::__construct($manager, $ilsAuthenticator);
     }
 
-
     /**
      * Determines if the given patron is a community borrower based
      * on the username field from their patron data.
