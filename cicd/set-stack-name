@@ -41,6 +41,8 @@ main() {
         STACK_NAME="${CI_COMMIT_BRANCH}"
         SITE_HOSTNAME="${STACK_NAME}.aws.lib.msu.edu"
         MAIL_HOST="mail-${STACK_NAME}"
+    else
+        STACK_NAME="${CI_COMMIT_BRANCH}"
     fi
 
     {
