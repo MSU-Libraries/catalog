@@ -24,8 +24,7 @@ $this->jsConfigs()->add(
     'item-status:load-observable-only',
     $this->config()->get('config')->Item_Status->load_observable_only ?? true
 );
-if ($this->searchbox()->combinedHandlersActive())
-{
+if ($this->searchbox()->combinedHandlersActive()) {
     $search_url_map = [];
     foreach ($this->config()->get('searchbox')->CombinedHandlers->get('target') as $searchClassId) {
         $route = $this->searchOptions($searchClassId)->getSearchAction();
