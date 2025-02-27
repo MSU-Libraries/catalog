@@ -33,13 +33,12 @@ significantly for other users.
 
 4. Now that we know what to block, update the
    [badbots compose file](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/core-stacks/files/docker-compose.badbots.yml)
-   with the new `ClientIP` or `User-Agent` in *both* rules in that file. If you know the name
+   with the new `ClientIP` or `User-Agent` in that file. If you know the name
    of the bot (also shown in the `whois` output) then add a comment block in the file for reference.
    ```yaml
    # >> [BOT] [CIDR-RANGE]
    # >> [BOT] User-Agent [BOT1]
-   - "traefik.http.routers.badbot-http-router.rule=ClientIP(`[CIDR-RANGE]`) || ClientIP(`[ANOTHER-CIDR]`) || HeadersRegexp(`User-Agent`, `(?i)([BOT1]|[BOT2])`)"
-   - "traefik.http.routers.badbot-https-router.rule=ClientIP(`43.128.0.0/10`) || ClientIP(`[ANOTHER-CIDR]`) || HeadersRegexp(`User-Agent`, `(?i)([BOT1]|[BOT2])`)"
+   - "traefik.http.routers.badbot-https-router.rule=ClientIP(`[CIDR-RANGE]`) || ClientIP(`[ANOTHER-CIDR]`) || HeadersRegexp(`User-Agent`, `(?i)([BOT1]|[BOT2])`)"
    ```
 
 5. Deploying the change will block the bot on all your environments. You can also optionally
