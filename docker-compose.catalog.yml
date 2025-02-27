@@ -55,12 +55,6 @@ services:
         monitor: 10s
       labels:
         - "traefik.enable=true"
-        # HTTP Configuration
-        - "traefik.http.routers.${STACK_NAME}-http-router.entrypoints=msul-http-ent"
-        - "traefik.http.routers.${STACK_NAME}-http-router.middlewares=http-redirect"
-        - "traefik.http.routers.${STACK_NAME}-http-router.service=${STACK_NAME}-http-app"
-        - "traefik.http.services.${STACK_NAME}-http-app.loadbalancer.server.port=80"
-        # HTTPS Configuration
         - "traefik.http.routers.${STACK_NAME}-https-router.tls=true"
         - "traefik.http.routers.${STACK_NAME}-https-router.entrypoints=msul-https-ent"
         - "traefik.http.routers.${STACK_NAME}-https-router.service=${STACK_NAME}-https-app"
@@ -87,12 +81,6 @@ services:
         monitor: 10s
       labels:
         - "traefik.enable=true"
-        # HTTP Configuration
-        - "traefik.http.routers.${STACK_NAME}-http-links.entrypoints=msul-http-ent"
-        - "traefik.http.routers.${STACK_NAME}-http-links.middlewares=http-redirect"
-        - "traefik.http.routers.${STACK_NAME}-http-links.service=${STACK_NAME}-http-links-app"
-        - "traefik.http.services.${STACK_NAME}-http-links-app.loadbalancer.server.port=80"
-        # HTTPS Configuration
         - "traefik.http.routers.${STACK_NAME}-https-links.tls=true"
         - "traefik.http.routers.${STACK_NAME}-https-links.entrypoints=msul-https-ent"
         - "traefik.http.routers.${STACK_NAME}-https-links.service=${STACK_NAME}-https-links-app"
@@ -190,12 +178,6 @@ services:
         window: 15s
       labels:
         - "traefik.enable=true"
-        # HTTP Configuration
-        - "traefik.http.routers.${STACK_NAME}-http-mail.entrypoints=msul-http-ent"
-        - "traefik.http.routers.${STACK_NAME}-http-mail.service=${STACK_NAME}-http-mail-app"
-        - "traefik.http.services.${STACK_NAME}-http-mail-app.loadbalancer.server.port=80"
-        - "traefik.http.routers.${STACK_NAME}-http-mail.middlewares=http-redirect"
-        # HTTPS Configuration
         - "traefik.http.routers.${STACK_NAME}-https-mail.entrypoints=msul-https-ent"
         - "traefik.http.routers.${STACK_NAME}-https-mail.service=${STACK_NAME}-https-mail-app"
         - "traefik.http.services.${STACK_NAME}-https-mail-app.loadbalancer.server.port=80"

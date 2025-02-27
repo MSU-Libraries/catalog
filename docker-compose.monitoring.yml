@@ -64,10 +64,6 @@ services:
         monitor: 10s
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.${STACK_NAME}-msul-proxymonitoring-router.entrypoints=msul-http-ent"
-        - "traefik.http.routers.${STACK_NAME}-msul-proxymonitoring-router.service=${STACK_NAME}-msul-proxymonitoring-app"
-        - "traefik.http.services.${STACK_NAME}-msul-proxymonitoring-app.loadbalancer.server.port=8080"
-        - "traefik.http.routers.${STACK_NAME}-msul-proxymonitoring-router.middlewares=http-redirect"
         - "traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.entrypoints=msul-https-ent"
         - "traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.service=${STACK_NAME}-https-msul-proxymonitoring-app"
         - "traefik.http.services.${STACK_NAME}-https-msul-proxymonitoring-app.loadbalancer.server.port=8080"

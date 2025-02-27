@@ -21,10 +21,6 @@ x-solrproxy-deploy: &solrproxy_deploy
     max_replicas_per_node: 1
   labels:
     - "traefik.enable=true"
-    - "traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.entrypoints=msul-http-ent"
-    - "traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.service=${STACK_NAME}-msul-proxysolr-app"
-    - "traefik.http.services.${STACK_NAME}-msul-proxysolr-app.loadbalancer.server.port=8080"
-    - "traefik.http.routers.${STACK_NAME}-msul-proxysolr-router.middlewares=http-redirect"
     - "traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.entrypoints=msul-https-ent"
     - "traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.service=${STACK_NAME}-https-msul-proxysolr-app"
     - "traefik.http.services.${STACK_NAME}-https-msul-proxysolr-app.loadbalancer.server.port=8080"
