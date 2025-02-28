@@ -98,11 +98,13 @@ with a `POST` request to `/perms/permissions`.
 * `inventory-storage.loan-types.collection.get` (For MSUL customization to display loan type)
 * `inventory-storage.service-points.collection.get`
 * `circulation.loans.collection.get`
+* `circulation.requests.allowed-service-points.get`
 * `circulation.requests.item.post`
 * `circulation.requests.item.get`
 * `circulation.requests.item.put`
 * `circulation.renew-by-id.post`
 * `circulation-storage.requests.collection.get`
+* `circulation-storage.request-preferences.collection.get`
 * `users.collection.get`
 * `accounts.collection.get`
 * `course-reserves-storage.courselistings.collection.get`
@@ -111,6 +113,7 @@ with a `POST` request to `/perms/permissions`.
 * `course-reserves-storage.courses.collection.get`
 * `course-reserves-storage.departments.collection.get`
 * `course-reserves-storage.reserves.collection.get`
+* `course-reserves-storage.terms.collection.get`
 * `oai-pmh.records.collection.get`
 * `kb-ebsco.packages.collection.get` (For MSUL customization to add license agreement information to record pages)
 * `proxiesfor.collection.get`

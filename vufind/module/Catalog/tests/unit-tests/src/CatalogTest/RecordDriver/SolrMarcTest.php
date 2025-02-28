@@ -73,13 +73,40 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Test the getISBNsWithType function
+     *
+     * @return void
+     */
+    public function testGetISBNsWithType()
+    {
+        $this->assertEquals(
+            [
+                [
+                    'isn' => '978-3-16-148410-0',
+                    'type' => 'valid',
+                ],
+                [
+                    'isn' => '978-3-16-148410-1',
+                    'type' => 'canceled/invalid',
+                ],
+            ],
+            $this->getDriver()->getISBNsWithType()
+        );
+    }
+
+    /**
      * Test that summary notes are retrieved from Solr
      *
      * @return void
      */
     public function testGetSummaryNotes()
     {
-        $this->assertEquals(['Summary. Expanded.'], $this->getDriver()->getSummaryNotes());
+        $this->assertEquals(
+            ['Summary. Expanded.',
+            'Linked Summary. Expanded.',
+            'Linked Summary2. Expanded.'],
+            $this->getDriver()->getSummaryNotes()
+        );
     }
 
     /**

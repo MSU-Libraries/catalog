@@ -87,6 +87,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindLocalTemplate" /usr/local/vufind/module/VuFindLocalTemplate
     ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindSearch" /usr/local/vufind/module/VuFindSearch
     ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindTheme" /usr/local/vufind/module/VuFindTheme
+    ln -f -s "${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/local/config/vufind/RecordDataFormatter.ini" /usr/local/vufind/local/config/vufind/RecordDataFormatter.ini
 
     if [[ ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
       # Add a link in core-repo so that unit tests work

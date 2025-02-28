@@ -30,13 +30,14 @@
 namespace Catalog\Auth;
 
 use Laminas\Http\PhpEnvironment\Request;
+use VuFind\Auth\ILSAuthenticator;
 use VuFind\Exception\Auth as AuthException;
 
 use function is_object;
 
 /**
  * Folio Okapi authentication module.
- * This is independent from the ILS/Folio authentication method, so that it can
+ * This is independent of the ILS/Folio authentication method, so that it can
  * use okapi_login=true while still using okapi_login=false for other login options.
  * It takes the folio.ini config and only changes okapi_login.
  * WARNING: note the lowercase folio.ini, we use a custom name because of MultiBackend.
@@ -61,21 +62,23 @@ class Okapi extends \VuFind\Auth\AbstractBase
     /**
      * Catalog connection
      *
-     * @var \Catalog\Auth\Okapi
+     * @var Okapi
      */
     protected $catalog;
 
     /**
      * Constructor
      *
-     * @param \VuFind\ILS\Connection           $connection    ILS connection to set
-     * @param \VuFind\ILS\Driver\PluginManager $driverManager Driver plugin manager
-     * @param \VuFind\Config\PluginManager     $configReader  Configuration loader
+     * @param \VuFind\ILS\Connection           $connection       ILS connection to set
+     * @param \VuFind\ILS\Driver\PluginManager $driverManager    Driver plugin manager
+     * @param \VuFind\Config\PluginManager     $configReader     Configuration loader
+     * @param ILSAuthenticator                 $ilsAuthenticator ilsAuthenticator
      */
     public function __construct(
         \VuFind\ILS\Connection $connection,
         \VuFind\ILS\Driver\PluginManager $driverManager,
-        \VuFind\Config\PluginManager $configReader
+        \VuFind\Config\PluginManager $configReader,
+        protected ILSAuthenticator $ilsAuthenticator,
     ) {
         $this->catalog = $connection;
         $this->driver = clone $driverManager->get('Folio');
@@ -156,11 +159,11 @@ class Okapi extends \VuFind\Auth\AbstractBase
 
         // Check to see if we already have an account for this user:
         if (!empty($info['id'])) {
-            $userService = $this->getUserService();
-            $user = $userService->getUserByCatId($info['id']);
+            $user = $this->getUserService()->getUserByCatId($info['id']);
             if (empty($user)) {
                 $user = $this->getOrCreateUserByUsername($info[$usernameField]);
-                $user->saveCatalogId($info['id']);
+                $user->setCatId($info['id']);
+                $this->getUserService()->persistEntity($user);
             }
         } else {
             $user = $this->getOrCreateUserByUsername($info[$usernameField]);
@@ -174,10 +177,11 @@ class Okapi extends \VuFind\Auth\AbstractBase
         foreach ($fields as $field) {
             $user->$field = $info[$field] ?? ' ';
         }
-        $user->updateEmail($info['email'] ?? '');
+        $this->getUserService()->updateUserEmail($user, $info['email'] ?? '');
 
         // Update the user in the database, then return it to the caller:
-        $user->saveCredentials(
+        $this->ilsAuthenticator->saveUserCatalogCredentials(
+            $user,
             $info['cat_username'] ?? ' ',
             $info['cat_password'] ?? ' '
         );

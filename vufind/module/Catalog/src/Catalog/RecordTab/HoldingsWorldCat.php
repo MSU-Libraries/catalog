@@ -33,7 +33,7 @@ use VuFind\I18n\Translator\TranslatorAwareInterface;
 use VuFind\I18n\Translator\TranslatorAwareTrait;
 
 /**
- * Holdings (WorldCat) tab
+ * Holdings (WorldCat2) tab
  *
  * @category VuFind
  * @package  RecordTabs
@@ -41,7 +41,7 @@ use VuFind\I18n\Translator\TranslatorAwareTrait;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:record_tabs Wiki
  */
-class HoldingsWorldCat extends \VuFind\RecordTab\HoldingsWorldCat implements TranslatorAwareInterface
+class HoldingsWorldCat2 extends \VuFind\RecordTab\HoldingsWorldCat2 implements TranslatorAwareInterface
 {
     use TranslatorAwareTrait;
 

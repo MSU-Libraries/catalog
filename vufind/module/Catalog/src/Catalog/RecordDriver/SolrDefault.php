@@ -1,9 +1,26 @@
 <?php
 
 /**
- * Default values for the record
+ * Default model for Solr records -- used when a more specific model based on
+ * the record_format field cannot be found.
  *
- * PHP version 7
+ * PHP version 8
+ *
+ * Copyright (C) Villanova University 2010, 2022.
+ * Copyright (C) The National Library of Finland 2019.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * @category VuFind
  * @package  Record_Drivers
@@ -15,8 +32,10 @@
 namespace Catalog\RecordDriver;
 
 /**
- * Populates data about the record. Used when no more specific record
- * driver is found.
+ * Default model for Solr records -- used when a more specific model based on
+ * the record_format field cannot be found.
+ *
+ * This should be used as the base class for all Solr-based record models.
  *
  * @category VuFind
  * @package  Record_Drivers
@@ -152,6 +171,26 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
      * @return array
      */
     public function getCartographicData()
+    {
+        return [];
+    }
+
+    /**
+     * Get ISBN data with type of ISBN ('valid', 'canceled/invalid')
+     *
+     * @return array An array of arrays, subarrays containing 'isn' and 'type'
+     */
+    public function getISBNsWithType()
+    {
+        return [];
+    }
+
+    /**
+     * Get ISSN data with type of ISSN ('valid', 'incorrect', or 'canceled')
+     *
+     * @return array An array of arrays, subarrays containing 'isn' and 'type'
+     */
+    public function getISSNsWithType()
     {
         return [];
     }

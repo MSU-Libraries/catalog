@@ -8,7 +8,7 @@ stages:
   - Release
 
 variables:
-  VUFIND_VERSION: "10.0.1"
+  VUFIND_VERSION: "10.1.1"
   SIMPLESAMLPHP_VERSION: "2.1.1"
   COMPOSE_PATH: /home/deploy/$STACK_NAME
   SSH_USER: "deploy"
@@ -29,6 +29,11 @@ Set Stack Name:
     - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH ||  $CI_COMMIT_BRANCH == "catalog-preview" || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $PROD == "false"'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $PROD == "true"'
       when: manual
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: manual
   before_script:
     - apk add --no-cache bash
   script:

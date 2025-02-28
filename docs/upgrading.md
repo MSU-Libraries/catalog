@@ -13,7 +13,7 @@ to the release tag that your environment is currently on.
 script to determine what config files in the local directory need to be updated with changes made to
 core files and apply them manually to [the catalog repository](https://github.com/MSU-Libraries/catalog)
 in the `/vufind/local` directory. An example of running the command might be:
-`./upgrade-helper.sh -r v8.1 -p /tmp/vufind/`.
+`~/catalog/vufind/upgrade-helper.sh --target-release v10.1.1 --current-release v10.0.1 --core-vf-path ~/vufind --msul-vf-path ~/catalog/vufind -v`.
 
 * Update the [CI/CD Config](https://github.com/MSU-Libraries/catalog/blob/main/.gitlab-ci.yml)
 to update the `VUFIND_VERSION` variable to be the new release you are updating to.
@@ -69,6 +69,10 @@ button status.
 * Check holdings status (Available, Checked out, ...)
 
 * Check import scripts
+
+* Check placing and canceling a request
+
+* Confirm there are no errors/warnings we should address in the VuFind or Apache logs
 
 ## Solr
 If it is just the Solr version that is being upgraded, then updates to the Docker image will handle

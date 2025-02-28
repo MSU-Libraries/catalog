@@ -162,6 +162,8 @@ class GetThisLoader
             $statusFirstPart = 'Checked Out';
         } elseif ($status === 'Restricted') {
             $statusFirstPart = 'Library Use Only';
+        } elseif ($status === 'Unavailable') {
+            $statusFirstPart = 'Unavailable';
         } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
             $statusFirstPart = 'Unknown status';
             $statusSecondPart = $status;

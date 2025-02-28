@@ -10,13 +10,14 @@ return [
         ['file' => 'get-this-dropdown.js', 'priority' => 450],
         ['file' => 'check_item_statuses.js', 'priority' => 450],
         ['file' => 'get_license_agreement.js', 'priority' => 450],
+        ['file' => 'combined-handler.js', 'priority' => 450],
     ],
     'favicon' => 'msul-favicon.ico',
     'helpers' => [
         'factories' => [
             VuFind\View\Helper\Root\RecordDataFormatter::class => Catalog\View\Helper\Root\RecordDataFormatterFactory::class,
             Catalog\View\Helper\Root\Record::class => Catalog\View\Helper\Root\RecordFactory::class,
-            Catalog\View\Helper\Root\Auth::class => VuFind\View\Helper\Root\AuthFactory::class,
+            Catalog\View\Helper\Root\Auth::class => Catalog\View\Helper\Root\AuthFactory::class,
             Catalog\View\Helper\Root\PrintArrayHtml::class => Laminas\ServiceManager\Factory\InvokableFactory::class,
             Catalog\View\Helper\Root\Notices::class => Catalog\View\Helper\Root\NoticesFactory::class,
             Catalog\View\Helper\Root\LocationNotices::class => Catalog\View\Helper\Root\LocationNoticesFactory::class,

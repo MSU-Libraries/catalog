@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Factory for Okapi authentication module.
+ * Auth helper factory.
  *
- * PHP version 7
+ * PHP version 8
  *
- * Copyright (C) Villanova University 2022.
+ * Copyright (C) Villanova University 2018.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2,
@@ -21,33 +21,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * @category VuFind
- * @package  Authentication
- * @author   Damien Guillaume <damieng@msu.edu>
+ * @package  View_Helpers
+ * @author   Robby ROUDON <roudonro@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development Wiki
  */
 
-namespace Catalog\Auth;
+namespace Catalog\View\Helper\Root;
 
 use Laminas\ServiceManager\Exception\ServiceNotCreatedException;
 use Laminas\ServiceManager\Exception\ServiceNotFoundException;
 use Psr\Container\ContainerExceptionInterface as ContainerException;
 use Psr\Container\ContainerInterface;
-use VuFind\Auth\ILSAuthenticator;
-use VuFind\Config\PluginManager as ConfigPluginManager;
-use VuFind\ILS\Connection;
-use VuFind\ILS\Driver\PluginManager as ILSDriverPluginManager;
 
 /**
- * Factory for Okapi authentication module.
+ * Auth helper factory.
  *
  * @category VuFind
- * @package  Authentication
- * @author   Damien Guillaume <damieng@msu.edu>
+ * @package  View_Helpers
+ * @author   Robby ROUDON <roudonro@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development Wiki
  */
-class OkapiFactory implements \Laminas\ServiceManager\Factory\FactoryInterface
+class AuthFactory extends \VuFind\View\Helper\Root\AuthFactory
 {
     /**
      * Create an object
@@ -72,10 +68,9 @@ class OkapiFactory implements \Laminas\ServiceManager\Factory\FactoryInterface
             throw new \Exception('Unexpected options sent to factory.');
         }
         return new $requestedName(
-            $container->get(Connection::class),
-            $container->get(ILSDriverPluginManager::class),
-            $container->get(ConfigPluginManager::class),
-            $container->get(ILSAuthenticator::class),
+            $container->get(\VuFind\Auth\Manager::class),
+            $container->get(\VuFind\Auth\ILSAuthenticator::class),
+            $container->get(\VuFind\Config\PathResolver::class) // MSU
         );
     }
 }
