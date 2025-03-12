@@ -14,6 +14,7 @@
         <field name="title_browse_sort" type="string" indexed="true" stored="true" multiValued="true"/>
         <field name="title_fullStr" deleteElement="true"/>
         <field name="callnumber-label" type="string" indexed="true" stored="true" multiValued="true"/>
+        <field name="ismn" type="isn" indexed="true" stored="true" multiValued="true"/>
         <field name="invalid_isn" type="isn" indexed="true" stored="false" multiValued="true"/>
     </fields>
     <copyField source="title" dest="title_exactish"/>
