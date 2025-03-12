@@ -284,10 +284,10 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 $index = $subf6Parts[1];
                 $linked = $marc->getLinkedField('880', $field, $index, $subfieldFilters);
                 foreach ($linked['subfields'] as $lsf) {
-                    if (!in_array($lsf['code'], $subfieldFilters) && $lsf['code'] != self::LINKSUBF) {
+                    if (!in_array($lsf['code'], $subfieldFilters) || $lsf['code'] == self::LINKSUBF) {
                         continue;
                     }
-                    $linkVals[] = $lsf['data'];
+                    $linkedVals[] = $lsf['data'];
                 }
             }
         }
@@ -521,10 +521,15 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         // TODO we could have the delimiter and join string passed as customizable arguments
         $toc = [];
+
+        // If not already arrays, cast to arrays
+        $arr1 = is_array($arr1) ? $arr1 : [$arr1];
+        $arr2 = is_array($arr2) ? $arr2 : [$arr2];
+
         if (!empty($arr1)) {
             array_map(function ($fdata, $ldata) use (&$toc) {
-                $fsplits = preg_split('/[.\s]--/', $fdata);
-                $lsplits = preg_split('/[.\s]--/', $ldata);
+                $fsplits = empty($fdata) ? [] : preg_split('/[.\s]--/', $fdata);
+                $lsplits = empty($ldata) ? [] : preg_split('/[.\s]--/', $ldata);
                 $max_size = max(count($fsplits), count($lsplits));
                 $fsplits = array_pad($fsplits, $max_size, '');
                 $lsplits = array_pad($lsplits, $max_size, '');
@@ -538,6 +543,40 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Parse the results from getMarcFieldWithInd and split it into two
+     * separate arrays. Takes the same parameters as getMarcFieldWithInd.
+     *
+     * @param string $field           MARC field
+     * @param array  $subfieldFilters Array of subfield codes to get from the MARC field
+     * @param array  $indFilters      Indicator filters. See full docs in getMarcFieldWithInd
+     *
+     * @return array  [array of field values, array of linked field values]
+     */
+    private function getContents($field, $subfieldFilters, $indFilters)
+    {
+        $fields = [];
+        $linked = [];
+
+        // $marcRecords = ['subA', ['note' => 'subA', 'link' => 'linkA']]
+        $marcRecords = $this->getMarcFieldWithInd($field, $subfieldFilters, $indFilters);
+
+        foreach ($marcRecords as $record) {
+            if (is_array($record)) {
+                $fields[] = $record['note'];
+                if (array_key_exists('link', $record)) {
+                    $linked[] = $record['link'];
+                } else {
+                    $linked[] = '';
+                }
+            } else {
+                $fields[] = $record;
+                $linked[] = '';
+            }
+        }
+        return [$fields, $linked];
+    }
+
+    /**
      * Get the Contents notes
      *
      * @return array Note fields from Solr
@@ -546,15 +585,10 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         $toc = [];
         // Assumption: only one of indicator "1=0" or "1=8" will exist on any given record
-        $marc505_0 = $this->getMarcFieldWithInd('505', ['a','g','r','t','u'], [[1 => ['0']]]);
-        $fields = $marc505_0[0];
-        $linked = $marc505_0[1] ?? array_pad($marc505_0[1] ?? [], count($marc505_0[0]), '');
+        [$fields, $linked] = $this->getContents('505', ['a','g','r','t','u'], [[1 => ['0']]]);
         if (empty($fields)) {
-            $marc505_8 = $this->getMarcFieldWithInd('505', ['a','g','r','t','u'], [[1 => ['8']]]);
-            $fields = $marc505_8[0];
-            $linked = $marc505_8[1] ?? array_pad($marc505_8[1] ?? [], count($marc505_8[0]), '');
+            [$fields, $linked] = $this->getContents('505', ['a','g','r','t','u'], [[1 => ['8']]]);
         }
-
         $toc = $this->splitAndMergeArrayValues($fields, $linked);
         return array_unique($toc);
     }
@@ -567,10 +601,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getIncompleteContentsNotes()
     {
         $toc = [];
-        $marc505 = $this->getMarcFieldWithInd('505', ['a','g','r','t','u'], [[1 => ['1']]]);
-        $fields = $marc505[0];
-        $linked = $marc505[1] ?? array_pad($marc505[1] ?? [], count($marc505[0]), '');
-
+        [$fields, $linked] = $this->getContents('505', ['a','g','r','t','u'], [[1 => ['1']]]);
         $toc = $this->splitAndMergeArrayValues($fields, $linked);
         return array_unique($toc);
     }
@@ -583,10 +614,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getPartialContentsNotes()
     {
         $toc = [];
-        $marc505 = $this->getMarcFieldWithInd('505', ['a','g','r','t','u'], [[1 => ['2']]]);
-        $fields = $marc505[0];
-        $linked = $marc505[1] ?? array_pad($marc505[1] ?? [], count($marc505[0]), '');
-
+        [$fields, $linked] = $this->getContents('505', ['a','g','r','t','u'], [[1 => ['2']]]);
         $toc = $this->splitAndMergeArrayValues($fields, $linked);
         return array_unique($toc);
     }
