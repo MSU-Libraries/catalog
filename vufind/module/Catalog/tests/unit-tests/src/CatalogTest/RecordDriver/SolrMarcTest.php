@@ -257,4 +257,51 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
         $this->assertArrayHasKey('link', $this->getDriver('linkedtitle.xml')->getUniformTitle()[0]);
         $this->assertEquals(36, strlen($this->getDriver('linkedtitle.xml')->getUniformTitle()[0]['link']));
     }
+
+    /**
+     * Test getContentsNotes
+     *
+     * @return void
+     */
+    public function testgetContentsNotes()
+    {
+        $this->assertEquals(
+            [
+                'General Note.',
+                'Note. = Linked Contents.',
+            ],
+            $this->getDriver()->getContentsNotes()
+        );
+    }
+
+    /**
+     * Test getIncompleteContentsNotes
+     *
+     * @return void
+     */
+    public function testgetIncompleteContentsNotes()
+    {
+        $this->assertEquals(
+            [
+                'Incomplete Note. = Linked Incomplete Contents.',
+            ],
+            $this->getDriver()->getIncompleteContentsNotes()
+        );
+    }
+
+    /**
+     * Test getPartialContentsNotes
+     *
+     * @return void
+     */
+    public function testgetPartialContentsNotes()
+    {
+        $this->assertEquals(
+            [
+                'Partial Note. = Linked Partial Contents.',
+                'Partial Note 2. = Linked Partial Contents 2.',
+            ],
+            $this->getDriver()->getPartialContentsNotes()
+        );
+    }
 }
