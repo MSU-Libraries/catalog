@@ -1458,6 +1458,31 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get ISMN data with type of ISMN ('valid', 'canceled/invalid')
+     *
+     * @return array An array of arrays, subarrays containing 'isn' and 'type'
+     */
+    public function getISMNsWithType()
+    {
+        $isns = [];
+        $marc = $this->getMarcReader();
+        $marcArr024 = $marc->getFields('024', ['a', 'z']);
+        foreach ($marcArr024 as $marc024) {
+            if (($marc024['i1'] ?? '') != '2') {
+                continue;
+            }
+            foreach ($marc024['subfields'] as $subfield) {
+                if ($subfield['code'] == 'a') {
+                    $isns[] = ['isn' => $subfield['data'], 'type' => 'valid'];
+                } elseif ($subfield['code'] == 'z') {
+                    $isns[] = ['isn' => $subfield['data'], 'type' => 'canceled/invalid'];
+                }
+            }
+        }
+        return $isns;
+    }
+
+    /**
      * Get the translated from languaes
      *
      * @return array Content from Solr
