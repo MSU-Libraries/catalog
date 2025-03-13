@@ -109,7 +109,7 @@ public class MaterialTypeMixin extends SolrIndexerMixin {
                     carrierTypes.contains("audio disc")
                 )
             )
-            result.add("1/At the Libraries/Physical Non-Musical Audio (audiobook/)");
+            result.add("1/At the Libraries/Physical Non-Musical Audio (audiobook)/");
 
         if (contentTypes.contains("spoken word") &&
                 mediaTypes.contains("computer") &&
