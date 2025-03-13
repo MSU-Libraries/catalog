@@ -7,6 +7,15 @@
                 <filter class="solr.LowerCaseFilterFactory"/>
             </analyzer>
         </fieldType>
+        <!-- ISN type updated to support legacy ISMN format which allows a 'M' prefix char -->
+        <fieldType name="isn" class="solr.TextField" positionIncrementGap="100">
+            <analyzer>
+                <tokenizer class="solr.PatternTokenizerFactory" pattern="^(\S*)\s*.*$" group="1"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.PatternReplaceFilterFactory" pattern="[^0-9xm]" replacement="" replace="all"/>
+                <filter class="solr.LengthFilterFactory" min="4" max="100"/>
+            </analyzer>
+        </fieldType>
     </types>
     <fields>
         <field name="title_exactish" type="exactish" indexed="true" stored="true" multiValued="false"/>
