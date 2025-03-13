@@ -196,6 +196,16 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
+     * Get ISMN data with type of ISMN ('valid', 'canceled/invalid')
+     *
+     * @return array An array of arrays, subarrays containing 'isn' and 'type'
+     */
+    public function getISMNsWithType()
+    {
+        return [];
+    }
+
+    /**
      * Get summary
      *
      * @return array
