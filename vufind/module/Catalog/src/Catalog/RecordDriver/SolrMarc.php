@@ -2147,4 +2147,115 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         // If we got this far, no snippet was found:
         return false;
     }
+
+    /**
+     * MSUL PC-1307
+     * Get an array of publication detail lines combining information from
+     * getPublicationDates(), getPublishers() and getPlacesOfPublication().
+     *
+     * @return array
+     */
+    public function getPublicationDetails()
+    {
+        // Each of these return an array like this: [[0 => 'val', 1 => 'link'], [0 => 'val2']]
+        $places = $this->getPlacesOfPublicationWithLinks();
+        $names = $this->getPublishersWithLinks();
+        $dates = $this->getHumanReadablePublicationDatesWithLinks();
+
+        $i = 0;
+        $retval = [];
+        while (isset($places[$i]) || isset($names[$i]) || isset($dates[$i])) {
+            // Build objects to represent each set of data; these will
+            // transform seamlessly into strings in the view layer.
+            $retval[] = new Response\PublicationDetails(
+                $places[$i][0] ?? '',
+                $names[$i][0] ?? '',
+                $dates[$i][0] ?? '',
+                $places[$i][1] ?? '',
+                $names[$i][1] ?? '',
+                $dates[$i][1] ?? '',
+            );
+            $i++;
+        }
+
+        return $retval;
+    }
+
+    /**
+     * MSUL PC-1307
+     * Get the item's places of publication, based off of getPlacesOfPublication
+     *
+     * @return array
+     */
+    public function getPlacesOfPublicationWithLinks()
+    {
+        return $this->getPublicationInfoWithLinks('a');
+    }
+
+    /**
+     * MSUL PC-1307
+     * Get the item's publisher, based off of getPublishers
+     *
+     * @return array
+     */
+    public function getPublishersWithLinks()
+    {
+        return $this->getPublicationInfoWithLinks('b');
+    }
+
+    /**
+     * MSUL PC-1307
+     * Get the item's publication dates, based off of getHumanReadablePublicationDates
+     *
+     * @return array
+     */
+    public function getHumanReadablePublicationDatesWithLinks()
+    {
+        return $this->getPublicationInfoWithLinks('c');
+    }
+
+    /**
+     * MSUL PC-1307
+     * Get the item's publication information, based off of getPublicationInfo
+     *
+     * @param string $subfield The subfield to retrieve ('a' = location, 'c' = date)
+     *
+     * @return array
+     */
+    protected function getPublicationInfoWithLinks($subfield = 'a')
+    {
+        $pubResults = $results = [];
+
+        // First check old-style 260 field:
+        $fields = $this->getMarcFieldWithInd('260', [$subfield]);
+        foreach ($fields as $currentField) {
+            if (is_array($currentField)) {
+                $results[] = [$currentField['note'], $currentField['link']];
+            } else {
+                $results[] = [$currentField];
+            }
+        }
+
+        // Now track down relevant RDA-style 264 fields; we only care about
+        // copyright and publication places (and ignore copyright places if
+        // publication places are present). This behavior is designed to be
+        // consistent with default SolrMarc handling of names/dates.
+
+        // Returns: [['note' => 'val', 'link' => 'link val'], 'val2']
+        $fields = $this->getMarcFieldWithInd('264', [$subfield], [[2 => ['1']]]);
+        foreach ($fields as $currentField) {
+            if (is_array($currentField)) {
+                $pubResults[] = [$currentField['note'], $currentField['link']];
+            } else {
+                $pubResults[] = [$currentField];
+            }
+        }
+
+        // Replace or merge with 260 field data depending on config
+        $replace260 = $this->mainConfig->Record->replaceMarc260 ?? false;
+        if (count($pubResults) > 0) {
+            return $replace260 ? $pubResults : array_merge($results, $pubResults);
+        }
+        return $results;
+    }
 }
