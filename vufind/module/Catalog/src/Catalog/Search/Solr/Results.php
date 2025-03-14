@@ -68,7 +68,6 @@ class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\Logger
         }
 
         try {
-            $this->logError('=== In MSUL performSearch ===');
             $command = new SearchCommand(
                 $this->backendId,
                 $query,
@@ -79,7 +78,7 @@ class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\Logger
 
             $collection = $searchService->invoke($command)->getResult();
         } catch (\VuFindSearch\Backend\Exception\BackendException $e) {
-            $this->logError('=== In MSUL BackendException === ');
+            $this->logWarning('Caught ' . get_class($e) . ' Message: ' . $e->getMessage());
             // If the query caused a parser error, see if we can clean it up:
             if (
                 $e->hasTag(ErrorListener::TAG_PARSER_ERROR)
@@ -87,7 +86,7 @@ class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\Logger
             ) {
                 // We need to get a fresh set of $params, since the previous one was
                 // manipulated by the previous search() call.
-                $this->logError('=== In MSUL Retrying parse error query... ===');
+                $this->logWarning('Retrying parser error query');
                 $params = $this->getParams()->getBackendParameters();
                 $command = new SearchCommand(
                     $this->backendId,
@@ -98,7 +97,8 @@ class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\Logger
                 );
                 $collection = $searchService->invoke($command)->getResult();
             } else {
-                $this->logError('=== In MSUL retrying original query... ===');
+                $this->logWarning('=== Retrying original query in 2 seconds... ===');
+                sleep(2); // Give Solr time to recover
                 $params = $this->getParams()->getBackendParameters();
                 $command = new SearchCommand(
                     $this->backendId,
