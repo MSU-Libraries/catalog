@@ -86,11 +86,12 @@ class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\Logger
             $this->logError('=== In MSUL BackendException === ');
             // If the query caused a parser error, see if we can clean it up:
             if (
-                $newQuery = $this->fixBadQuery($query)
+                $e->hasTag(ErrorListener::TAG_PARSER_ERROR)
+                && $newQuery = $this->fixBadQuery($query)
             ) {
                 // We need to get a fresh set of $params, since the previous one was
                 // manipulated by the previous search() call.
-                $this->logError('=== In MSUL Retrying query... ===');
+                $this->logError('=== In MSUL Retrying parse error query... ===');
                 $params = $this->getParams()->getBackendParameters();
                 $command = new SearchCommand(
                     $this->backendId,
@@ -101,7 +102,16 @@ class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\Logger
                 );
                 $collection = $searchService->invoke($command)->getResult();
             } else {
-                throw $e;
+                $this->logError('=== In MSUL retrying original query... ===');
+                $params = $this->getParams()->getBackendParameters();
+                $command = new SearchCommand(
+                    $this->backendId,
+                    $query,
+                    $offset,
+                    $limit,
+                    $params
+                );
+                $collection = $searchService->invoke($command)->getResult();
             }
         }
 
