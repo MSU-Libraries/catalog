@@ -43,11 +43,11 @@ public class MaterialTypeMixin extends SolrIndexerMixin {
         );
         Set<String> physicalMaterialFormats = Set.of(
             "PhysicalIntegratingResource", "ProjectedMedium", "Slide", "Transparency",
-            "MusicalScore", "SensorImage", "PostCard", "Poster", "PhysicalObject",
+            "SensorImage", "PostCard", "Poster", "PhysicalObject",
             "FlashCard", "Chart", "Drawing", "Print", "Painting", "Photo", "Photonegative", "Collage"
         );
         Set<String> electronicMaterialFormats = Set.of(
-            "DataSet", "PhysicalIntegratingResource", "MusicalScore", "SensorImage",
+            "DataSet", "PhysicalIntegratingResource", "SensorImage",
             "PostCard", "Poster", "Font", "FlashCard", "Chart", "Drawing", "Print",
             "Painting", "Photo", "Photonegative", "Collage"
         );
@@ -60,14 +60,14 @@ public class MaterialTypeMixin extends SolrIndexerMixin {
                     mediaTypes.contains("unmediated") &&
                     carrierTypes.contains("volume"))
             )
-            result.add("1/At the Libraries/Print Book/");
+            result.add("1/At the Libraries/Books/");
 
         if (formats.contains("eBook") ||
                 (formats.contains("Atlas") && formats.contains("Electronic")) ||
                 (formats.contains("Book") && formats.contains("Electronic")) ||
                 (formats.contains("BookComponentPart") && formats.contains("Electronic"))
             )
-            result.add("1/Available Online/Electronic Book/");
+            result.add("1/Available Online/eBooks/");
 
         // disjoint returns true if there are no elements in common
         if (!Collections.disjoint(formats, physicalVideoFormats) ||
@@ -76,7 +76,7 @@ public class MaterialTypeMixin extends SolrIndexerMixin {
                     (carrierTypes.contains("videodisc") || carrierTypes.contains("computer disc"))
                 )
             )
-            result.add("1/At the Libraries/Physical Video (DVD, Blu-ray, etc.)/");
+            result.add("1/At the Libraries/Video (DVD, Blu-ray, etc.)/");
 
         // PC-413 Identify streaming video from electronic link text
         if (formats.contains("VideoOnline") ||
@@ -88,39 +88,39 @@ public class MaterialTypeMixin extends SolrIndexerMixin {
                     )
                 )
             )
-            result.add("1/Available Online/Streaming Video/");
+            result.add("1/Available Online/Video/");
 
-        if (formats.contains("MusicRecording") ||
+        if ((!formats.contains("Electronic") && (formats.contains("MusicRecording") || formats.contains("SoundRecording"))) ||
                 (contentTypes.contains("performed music") &&
                     mediaTypes.contains("audio") &&
                     carrierTypes.contains("audio disc")
-                )
-            )
-            result.add("1/At the Libraries/Physical Music (CD, etc.)/");
-
-        if (contentTypes.contains("performed music") &&
-                mediaTypes.contains("computer") &&
-                carrierTypes.contains("online resource"))
-            result.add("1/Available Online/Streaming Music/");
-
-        if (formats.contains("SoundRecording") ||
+                ) ||
                 (contentTypes.contains("spoken word") &&
                     mediaTypes.contains("audio") &&
                     carrierTypes.contains("audio disc")
+                ) ||
+                formats.contains("CD")
+            )
+            result.add("1/At the Libraries/Music & Audio (CD, etc.)/");
+
+
+        if ((formats.contains("Electronic") && (formats.contains("MusicRecording") || formats.contains("SoundRecording"))) ||
+                (contentTypes.contains("performed music") &&
+                    mediaTypes.contains("computer") &&
+                    carrierTypes.contains("online resource")
+                ) ||
+                (contentTypes.contains("spoken word") &&
+                    mediaTypes.contains("computer") &&
+                    carrierTypes.contains("online resource")
                 )
             )
-            result.add("1/At the Libraries/Physical Non-Musical Audio (audiobook)/");
-
-        if (contentTypes.contains("spoken word") &&
-                mediaTypes.contains("computer") &&
-                carrierTypes.contains("online resource"))
-            result.add("1/Available Online/Streaming Non-Musical Audio/");
+            result.add("1/Available Online/Music & Audio/");
 
         if (!Collections.disjoint(formats, physicalMapFormats) && !formats.contains("Electronic"))
-            result.add("1/At the Libraries/Physical Map/");
+            result.add("1/At the Libraries/Maps/");
 
         if (!Collections.disjoint(formats, electronicMapFormats) && formats.contains("Electronic"))
-            result.add("1/Available Online/Electronic Map/");
+            result.add("1/Available Online/Maps/");
 
         if (formats.contains("Microfilm"))
             result.add("1/At the Libraries/Microfilm/");
@@ -128,29 +128,35 @@ public class MaterialTypeMixin extends SolrIndexerMixin {
         if (!Collections.disjoint(formats, physicalComputerMediaFormats) ||
                 (formats.contains("DataSet") && !formats.contains("Electronic"))
             )
-            result.add("1/At the Libraries/Physical Computer Media (CDROM, etc.)/");
+            result.add("1/At the Libraries/Computer Media (CDROM, etc.)/");
 
         if (!Collections.disjoint(formats, journalFormats) &&
                 formats.contains("Electronic")
             )
-            result.add("1/Available Online/Electronic Journals and Newspapers/");
+            result.add("1/Available Online/Journals and Newspapers/");
 
         if (!Collections.disjoint(formats, journalFormats) &&
                 !formats.contains("Electronic")
             )
-            result.add("1/At the Libraries/Print Journals and Newspapers/");
+            result.add("1/At the Libraries/Journals and Newspapers/");
+
+        if (formats.contains("MusicalScore") && !formats.contains("Electronic"))
+            result.add("1/At the Libraries/Musical Scores/");
+
+        if (formats.contains("MusicalScore") && formats.contains("Electronic"))
+            result.add("1/Available Online/Musical Scores/");
 
         if (!Collections.disjoint(formats, physicalMaterialFormats) &&
                 !formats.contains("Electronic")
             )
-            result.add("1/At the Libraries/Physical Materials (Other)/");
+            result.add("1/At the Libraries/Other Materials/");
 
         if ((!Collections.disjoint(formats, electronicMaterialFormats) &&
                 formats.contains("Electronic")) ||
                 formats.contains("Website") ||
                 formats.contains("OnlineIntegratingResource")
             )
-            result.add("1/Available Online/Electronic Materials (Other)/");
+            result.add("1/Available Online/Other Materials/");
 
         // Add in the appropriate top level hierarchy for the nested facet to work
         if (result.stream().anyMatch(s -> s.toLowerCase().contains("/at the libraries/")))
