@@ -68,7 +68,6 @@ class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\Logger
         }
 
         try {
-            $this->logError('=== In MSUL performSearch ===');
             $command = new SearchCommand(
                 $this->backendId,
                 $query,
@@ -80,6 +79,7 @@ class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\Logger
             $collection = $searchService->invoke($command)->getResult();
         } catch (\VuFindSearch\Backend\Exception\BackendException $e) {
             $this->logError('=== In MSUL BackendException === ');
+            $this->logError('EXC MSG: ' . $e->getMessage());
             // If the query caused a parser error, see if we can clean it up:
             if (
                 $e->hasTag(ErrorListener::TAG_PARSER_ERROR)
@@ -98,7 +98,9 @@ class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\Logger
                 );
                 $collection = $searchService->invoke($command)->getResult();
             } else {
-                $this->logError('=== In MSUL retrying original query... ===');
+                $this->logError('=== In MSUL retrying original query in 2 seconds... ===');
+                sleep(2); // Give Solr time to recover
+                $this->logError('=== In MSUL retrying original query NOW! ===');
                 $params = $this->getParams()->getBackendParameters();
                 $command = new SearchCommand(
                     $this->backendId,
