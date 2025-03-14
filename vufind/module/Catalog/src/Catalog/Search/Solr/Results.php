@@ -31,10 +31,6 @@ namespace Catalog\Search\Solr;
 
 use VuFind\Search\Solr\AbstractErrorListener as ErrorListener;
 use VuFindSearch\Command\SearchCommand;
-use VuFindSearch\Query\AbstractQuery;
-use VuFindSearch\Query\QueryGroup;
-
-use function count;
 
 /**
  * Solr Search Parameters
@@ -72,7 +68,7 @@ class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\Logger
         }
 
         try {
-            $this->logError('=== In MSUL perofrmSearch ===');
+            $this->logError('=== In MSUL performSearch ===');
             $command = new SearchCommand(
                 $this->backendId,
                 $query,

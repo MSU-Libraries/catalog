@@ -131,7 +131,7 @@ return [
           VuFind\Search\Solr\Results::class => Catalog\Search\Solr\Results::class,
           'solr' => Catalog\Search\Solr\Results::class,
         ],
-      ]
+      ],
     ],
   ],
   'service_manager' => [
