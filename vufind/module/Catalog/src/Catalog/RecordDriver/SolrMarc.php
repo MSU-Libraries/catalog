@@ -284,10 +284,10 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 $index = $subf6Parts[1];
                 $linked = $marc->getLinkedField('880', $field, $index, $subfieldFilters);
                 foreach ($linked['subfields'] as $lsf) {
-                    if (!in_array($lsf['code'], $subfieldFilters) && $lsf['code'] != self::LINKSUBF) {
+                    if (!in_array($lsf['code'], $subfieldFilters) || $lsf['code'] == self::LINKSUBF) {
                         continue;
                     }
-                    $linkVals[] = $lsf['data'];
+                    $linkedVals[] = $lsf['data'];
                 }
             }
         }
@@ -521,10 +521,15 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         // TODO we could have the delimiter and join string passed as customizable arguments
         $toc = [];
+
+        // If not already arrays, cast to arrays
+        $arr1 = is_array($arr1) ? $arr1 : [$arr1];
+        $arr2 = is_array($arr2) ? $arr2 : [$arr2];
+
         if (!empty($arr1)) {
             array_map(function ($fdata, $ldata) use (&$toc) {
-                $fsplits = preg_split('/[.\s]--/', $fdata);
-                $lsplits = preg_split('/[.\s]--/', $ldata);
+                $fsplits = empty($fdata) ? [] : preg_split('/[.\s]--/', $fdata);
+                $lsplits = empty($ldata) ? [] : preg_split('/[.\s]--/', $ldata);
                 $max_size = max(count($fsplits), count($lsplits));
                 $fsplits = array_pad($fsplits, $max_size, '');
                 $lsplits = array_pad($lsplits, $max_size, '');
@@ -538,6 +543,40 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Parse the results from getMarcFieldWithInd and split it into two
+     * separate arrays. Takes the same parameters as getMarcFieldWithInd.
+     *
+     * @param string $field           MARC field
+     * @param array  $subfieldFilters Array of subfield codes to get from the MARC field
+     * @param array  $indFilters      Indicator filters. See full docs in getMarcFieldWithInd
+     *
+     * @return array  [array of field values, array of linked field values]
+     */
+    private function getContents($field, $subfieldFilters, $indFilters)
+    {
+        $fields = [];
+        $linked = [];
+
+        // $marcRecords = ['subA', ['note' => 'subA', 'link' => 'linkA']]
+        $marcRecords = $this->getMarcFieldWithInd($field, $subfieldFilters, $indFilters);
+
+        foreach ($marcRecords as $record) {
+            if (is_array($record)) {
+                $fields[] = $record['note'];
+                if (array_key_exists('link', $record)) {
+                    $linked[] = $record['link'];
+                } else {
+                    $linked[] = '';
+                }
+            } else {
+                $fields[] = $record;
+                $linked[] = '';
+            }
+        }
+        return [$fields, $linked];
+    }
+
+    /**
      * Get the Contents notes
      *
      * @return array Note fields from Solr
@@ -546,15 +585,10 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         $toc = [];
         // Assumption: only one of indicator "1=0" or "1=8" will exist on any given record
-        $marc505_0 = $this->getMarcFieldWithInd('505', ['a','g','r','t','u'], [[1 => ['0']]]);
-        $fields = $marc505_0[0];
-        $linked = $marc505_0[1] ?? array_pad($marc505_0[1] ?? [], count($marc505_0[0]), '');
+        [$fields, $linked] = $this->getContents('505', ['a','g','r','t','u'], [[1 => ['0']]]);
         if (empty($fields)) {
-            $marc505_8 = $this->getMarcFieldWithInd('505', ['a','g','r','t','u'], [[1 => ['8']]]);
-            $fields = $marc505_8[0];
-            $linked = $marc505_8[1] ?? array_pad($marc505_8[1] ?? [], count($marc505_8[0]), '');
+            [$fields, $linked] = $this->getContents('505', ['a','g','r','t','u'], [[1 => ['8']]]);
         }
-
         $toc = $this->splitAndMergeArrayValues($fields, $linked);
         return array_unique($toc);
     }
@@ -567,10 +601,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getIncompleteContentsNotes()
     {
         $toc = [];
-        $marc505 = $this->getMarcFieldWithInd('505', ['a','g','r','t','u'], [[1 => ['1']]]);
-        $fields = $marc505[0];
-        $linked = $marc505[1] ?? array_pad($marc505[1] ?? [], count($marc505[0]), '');
-
+        [$fields, $linked] = $this->getContents('505', ['a','g','r','t','u'], [[1 => ['1']]]);
         $toc = $this->splitAndMergeArrayValues($fields, $linked);
         return array_unique($toc);
     }
@@ -583,10 +614,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getPartialContentsNotes()
     {
         $toc = [];
-        $marc505 = $this->getMarcFieldWithInd('505', ['a','g','r','t','u'], [[1 => ['2']]]);
-        $fields = $marc505[0];
-        $linked = $marc505[1] ?? array_pad($marc505[1] ?? [], count($marc505[0]), '');
-
+        [$fields, $linked] = $this->getContents('505', ['a','g','r','t','u'], [[1 => ['2']]]);
         $toc = $this->splitAndMergeArrayValues($fields, $linked);
         return array_unique($toc);
     }
@@ -1458,6 +1486,31 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get ISMN data with type of ISMN ('valid', 'canceled/invalid')
+     *
+     * @return array An array of arrays, subarrays containing 'isn' and 'type'
+     */
+    public function getISMNsWithType()
+    {
+        $isns = [];
+        $marc = $this->getMarcReader();
+        $marcArr024 = $marc->getFields('024', ['a', 'z']);
+        foreach ($marcArr024 as $marc024) {
+            if (($marc024['i1'] ?? '') != '2') {
+                continue;
+            }
+            foreach ($marc024['subfields'] as $subfield) {
+                if ($subfield['code'] == 'a') {
+                    $isns[] = ['isn' => $subfield['data'], 'type' => 'valid'];
+                } elseif ($subfield['code'] == 'z') {
+                    $isns[] = ['isn' => $subfield['data'], 'type' => 'canceled/invalid'];
+                }
+            }
+        }
+        return $isns;
+    }
+
+    /**
      * Get the translated from languaes
      *
      * @return array Content from Solr
@@ -2093,5 +2146,116 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 
         // If we got this far, no snippet was found:
         return false;
+    }
+
+    /**
+     * MSUL PC-1307
+     * Get an array of publication detail lines combining information from
+     * getPublicationDates(), getPublishers() and getPlacesOfPublication().
+     *
+     * @return array
+     */
+    public function getPublicationDetails()
+    {
+        // Each of these return an array like this: [[0 => 'val', 1 => 'link'], [0 => 'val2']]
+        $places = $this->getPlacesOfPublicationWithLinks();
+        $names = $this->getPublishersWithLinks();
+        $dates = $this->getHumanReadablePublicationDatesWithLinks();
+
+        $i = 0;
+        $retval = [];
+        while (isset($places[$i]) || isset($names[$i]) || isset($dates[$i])) {
+            // Build objects to represent each set of data; these will
+            // transform seamlessly into strings in the view layer.
+            $retval[] = new Response\PublicationDetails(
+                $places[$i][0] ?? '',
+                $names[$i][0] ?? '',
+                $dates[$i][0] ?? '',
+                $places[$i][1] ?? '',
+                $names[$i][1] ?? '',
+                $dates[$i][1] ?? '',
+            );
+            $i++;
+        }
+
+        return $retval;
+    }
+
+    /**
+     * MSUL PC-1307
+     * Get the item's places of publication, based off of getPlacesOfPublication
+     *
+     * @return array
+     */
+    public function getPlacesOfPublicationWithLinks()
+    {
+        return $this->getPublicationInfoWithLinks('a');
+    }
+
+    /**
+     * MSUL PC-1307
+     * Get the item's publisher, based off of getPublishers
+     *
+     * @return array
+     */
+    public function getPublishersWithLinks()
+    {
+        return $this->getPublicationInfoWithLinks('b');
+    }
+
+    /**
+     * MSUL PC-1307
+     * Get the item's publication dates, based off of getHumanReadablePublicationDates
+     *
+     * @return array
+     */
+    public function getHumanReadablePublicationDatesWithLinks()
+    {
+        return $this->getPublicationInfoWithLinks('c');
+    }
+
+    /**
+     * MSUL PC-1307
+     * Get the item's publication information, based off of getPublicationInfo
+     *
+     * @param string $subfield The subfield to retrieve ('a' = location, 'c' = date)
+     *
+     * @return array
+     */
+    protected function getPublicationInfoWithLinks($subfield = 'a')
+    {
+        $pubResults = $results = [];
+
+        // First check old-style 260 field:
+        $fields = $this->getMarcFieldWithInd('260', [$subfield]);
+        foreach ($fields as $currentField) {
+            if (is_array($currentField)) {
+                $results[] = [$currentField['note'], $currentField['link']];
+            } else {
+                $results[] = [$currentField];
+            }
+        }
+
+        // Now track down relevant RDA-style 264 fields; we only care about
+        // copyright and publication places (and ignore copyright places if
+        // publication places are present). This behavior is designed to be
+        // consistent with default SolrMarc handling of names/dates.
+
+        // Returns: [['note' => 'val', 'link' => 'link val'], 'val2']
+        $fields = $this->getMarcFieldWithInd('264', [$subfield], [[2 => ['1']]]);
+        foreach ($fields as $currentField) {
+            if (is_array($currentField)) {
+                $pubResults[] = [$currentField['note'], $currentField['link']];
+            } else {
+                $pubResults[] = [$currentField];
+            }
+        }
+
+        // Replace or merge with 260 field data depending on config
+        $replace260 = $this->mainConfig->Record->replaceMarc260 ?? false;
+        if (count($pubResults) > 0) {
+            return $replace260 ? $pubResults : array_merge($results, $pubResults);
+        }
+        return $results;
     }
 }
