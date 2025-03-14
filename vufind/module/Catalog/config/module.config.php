@@ -123,6 +123,15 @@ return [
           'EDS' => Catalog\Search\Factory\EdsBackendFactory::class,
         ],
       ],
+      'search_results' => [
+        'factories' => [
+          Catalog\Search\Solr\Results::class => VuFind\Search\Solr\ResultsFactory::class,
+        ],
+        'aliases' => [
+          VuFind\Search\Solr\Results::class => Catalog\Search\Solr\Results::class,
+          'solr' => Catalog\Search\Solr\Results::class,
+        ],
+      ],
     ],
   ],
   'service_manager' => [

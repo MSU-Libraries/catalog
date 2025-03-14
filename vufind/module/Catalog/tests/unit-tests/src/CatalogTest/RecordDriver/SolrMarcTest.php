@@ -45,7 +45,7 @@ use function strlen;
  */
 class SolrMarcTest extends \PHPUnit\Framework\TestCase
 {
-    use \VuFindTest\Feature\FixtureTrait;
+    use \Catalog\Feature\FixtureTrait;
     use \VuFindTest\Feature\ReflectionTrait;
 
     /**
@@ -59,10 +59,10 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      */
     protected function getDriver(
         $marcFixture = 'marctraits.xml',
-        $solrFixture = 'testbug2.json',
+        $solrFixture = 'record.json',
         Config $mainConfig = null
     ) {
-        $fixture = $this->getJsonFixture('misc/' . $solrFixture);
+        $fixture = $this->getJsonFixture('misc/' . $solrFixture, $module = 'Catalog');
         $record = new SolrMarc($mainConfig);
         $marc = [];
         if (!empty($marcFixture)) {
@@ -256,5 +256,102 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $this->getDriver('linkedtitle.xml')->getUniformTitle());
         $this->assertArrayHasKey('link', $this->getDriver('linkedtitle.xml')->getUniformTitle()[0]);
         $this->assertEquals(36, strlen($this->getDriver('linkedtitle.xml')->getUniformTitle()[0]['link']));
+    }
+
+    /**
+     * Test getContentsNotes
+     *
+     * @return void
+     */
+    public function testgetContentsNotes()
+    {
+        $this->assertEquals(
+            [
+                'General Note.',
+                'Note. = Linked Contents.',
+            ],
+            $this->getDriver()->getContentsNotes()
+        );
+    }
+
+    /**
+     * Test getIncompleteContentsNotes
+     *
+     * @return void
+     */
+    public function testgetIncompleteContentsNotes()
+    {
+        $this->assertEquals(
+            [
+                'Incomplete Note. = Linked Incomplete Contents.',
+            ],
+            $this->getDriver()->getIncompleteContentsNotes()
+        );
+    }
+
+    /**
+     * Test getPartialContentsNotes
+     *
+     * @return void
+     */
+    public function testgetPartialContentsNotes()
+    {
+        $this->assertEquals(
+            [
+                'Partial Note. = Linked Partial Contents.',
+                'Partial Note 2. = Linked Partial Contents 2.',
+            ],
+            $this->getDriver()->getPartialContentsNotes()
+        );
+    }
+
+    /**
+     * Test getPartialContentsNotes
+     *
+     * @return void
+     */
+    public function testgetPublicationDetails()
+    {
+        $this->assertEquals(
+            [
+                // 260
+                new \Catalog\RecordDriver\Response\PublicationDetails(
+                    '260 Location :',
+                    '260 Publisher',
+                    '2600',
+                    '',
+                    '',
+                    '',
+                ),
+                // 264 with 880
+                new \Catalog\RecordDriver\Response\PublicationDetails(
+                    'Location :',
+                    'The Publishers,',
+                    '',
+                    'Linked Location :',
+                    'Linked Publishers,',
+                    'Linked 2020',
+                ),
+                // 264 with no 880
+                new \Catalog\RecordDriver\Response\PublicationDetails(
+                    'Location 2:',
+                    '',
+                    '2020',
+                    '',
+                    '',
+                    '',
+                ),
+                // 880 with no corresponding 264
+                new \Catalog\RecordDriver\Response\PublicationDetails(
+                    'Only Linked Location',
+                    'Only Linked Publisher',
+                    '',
+                    '',
+                    '',
+                    '',
+                ),
+            ],
+            $this->getDriver()->getPublicationDetails()
+        );
     }
 }

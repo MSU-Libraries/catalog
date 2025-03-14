@@ -1,0 +1,34 @@
+<?php foreach ($data as $field): ?>
+  <span<?=$this->schemaOrg()->getAttributes(['property' => 'publisher', 'typeof' => 'Organization'])?>>
+  <?php $pubPlace = $field->getPlace(); ?>
+  <?php if (!empty($pubPlace)): ?>
+    <span<?=$this->schemaOrg()->getAttributes(['property' => 'location'])?>><?=$this->escapeHtml($pubPlace)?></span>
+  <?php endif; ?>
+  <?php $pubName = $field->getName(); ?>
+  <?php if (!empty($pubName)): ?>
+    <a<?=$this->schemaOrg()->getAttributes(['property' => 'name'])?> href="<?=$this->record($this->driver)->getLink('publisher', $pubName)?>"><?=$this->escapeHtml($pubName)?></a>
+  <?php endif; ?>
+  </span>
+  <?php $pubDate = $field->getDate(); ?>
+  <?php if (!empty($pubDate)): ?>
+    <span<?=$this->schemaOrg()->getAttributes(['property' => 'datePublished'])?>><?=$this->escapeHtml($pubDate)?></span>
+  <?php endif; ?>
+  <!-- MSU Customization PC-1307 -->
+  <?php $pubPlaceLinked = $field->getPlaceLinked(); ?>
+  <?php $pubNameLinked = $field->getNameLinked(); ?>
+  <?php $pubDateLinked = $field->getDateLinked(); ?>
+  <?php if (!empty($pubPlaceLinked) || !empty($pubNameLinked) || !empty($pubDateLinked)): ?>
+    <span> = </span>
+  <?php endif; ?>
+  <?php if (!empty($pubPlaceLinked)): ?>
+    <span<?=$this->schemaOrg()->getAttributes(['property' => 'location'])?>><?=$this->escapeHtml($pubPlaceLinked)?></span>
+  <?php endif; ?>
+  <?php if (!empty($pubNameLinked)): ?>
+    <span<?=$this->schemaOrg()->getAttributes(['property' => 'name'])?>><?=$this->escapeHtml($pubNameLinked)?></span>
+  <?php endif; ?>
+  </span>
+  <?php if (!empty($pubDateLinked)): ?>
+    <span<?=$this->schemaOrg()->getAttributes(['property' => 'datePublished'])?>><?=$this->escapeHtml($pubDateLinked)?></span>
+  <?php endif; ?>
+  <br>
+<?php endforeach; ?>
