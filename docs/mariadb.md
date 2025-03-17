@@ -22,7 +22,7 @@ container registry credentials are passed.
 
 ## Restarting
 If you need to restart the Galera cluster, the easiest method is to re-run the CI job that deploys the
-DB updates. But alternatively, you can retstart the containers one-by-one. Just wait for the restarted
+DB updates. But alternatively, you can restart the containers one-by-one. Just wait for the restarted
 container to be "healthy" before restarting the next.
 
 ```bash
@@ -36,7 +36,7 @@ sudo /usr/local/ncpa/plugins/check_galera.sh catalog-prod
 
 ## Troubleshooting
 
-In the event of the database getting de-clustered, where the nodes are un-able to bootstrap themselves, you
+In the event of the database getting de-clustered, where the nodes are unable to bootstrap themselves, you
 will need to manually determine which node should be started up first and be the one with the most up-to-date
 source of data.
 
