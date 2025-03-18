@@ -66,7 +66,7 @@ RUN \
     sed -i 's/<lib dir="\.\.\/jars"/<lib dir="\/solr_confs\/jars"/' /solr_confs/biblio/conf/solrconfig.xml && \
     # Add series browse request handler PC-110
     sed -i '/hierarchy<\/str>/ r /tmp/build/series_browse.txt' /solr_confs/biblio/conf/solrconfig.xml && \
-    sed -i 's/topic,author,title,lcc,dewey,hierarchy/topic,author,title,lcc,dewey,hierarchy,series/' /solr_confs/biblio/conf/solrconfig.xml && \
+    sed -i 's/topic,author,title,lcc,dewey,hierarchy/topic,author,title,lcc,hierarchy,series/' /solr_confs/biblio/conf/solrconfig.xml && \
     # Update the field used for alpha browse PC-686, PC-110
     sed -i 's/title_fullStr/title_browse/' /solr_confs/biblio/conf/solrconfig.xml && \
     # Apply customizations to the Solr schema
