@@ -81,7 +81,7 @@ class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\Logger
             $collection = $searchService->invoke($command)->getResult();
         } catch (\VuFindSearch\Backend\Exception\BackendException $e) {
             // MSU customization PC-1187 log a warning for the caught exception
-            $this->logWarning('Caught ' . get_class($e) . ' Message: ' . $e->getMessage());
+            $this->logWarning('Caught ' . $e::class . ' Message: ' . $e->getMessage());
             $params = $this->getParams()->getBackendParameters();
             // If the query caused a parser error, see if we can clean it up:
             if (
