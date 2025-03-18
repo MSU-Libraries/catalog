@@ -149,5 +149,5 @@ build_browse "title" "title_browse" 0 "-Dbibleech=StoredFieldLeech -Dsortfield=t
 build_browse "topic" "topic_browse"
 build_browse "author" "author_browse"
 build_browse "lcc" "callnumber-raw" 1 "-Dbrowse.normalizer=org.vufind.util.LCCallNormalizer"
-build_browse "dewey" "dewey-raw" 1 "-Dbrowse.normalizer=org.vufind.util.DeweyCallNormalizer"
+# MSU commented build_browse "dewey" "dewey-raw" 1 "-Dbrowse.normalizer=org.vufind.util.DeweyCallNormalizer"
 build_browse "series" "series_browse_str_mv"
