@@ -22,7 +22,7 @@ touch /mnt/logs/vufind/vufind.log
 ln -s "/mnt/shared/backups/${STACK_NAME}/" /mnt/backups
 
 # Set custom cron minute offsets for OAI harvesting
-FOLIO_CRON_MINS="0,30"  # catalog-prod
+FOLIO_CRON_MINS="0,15,30,45"  # catalog-prod
 HARV_CRON_MINS="30"
 RESRV_CRON_MINS="10"
 if [[ "${STACK_NAME}" == "catalog-beta" ]]; then
