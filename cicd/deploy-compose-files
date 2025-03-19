@@ -118,6 +118,9 @@ apply_devel_changes() {
 
     # Mount monitoring files in container for easier editting
     ./yq -i ".services.monitoring.volumes += \"/mnt/shared/local/${STACK_NAME}/repo/monitoring/:/app/\"" docker-compose.monitoring.yml;
+
+    # Mount host live/ dir for /usr/local/vufind/
+    ./yq -i ".services.catalog.volumes += \"/mnt/shared/local/${STACK_NAME}/live/:/usr/local/vufind/\"" docker-compose.catalog.yml;
 }
 
 apply_prod_changes() {
