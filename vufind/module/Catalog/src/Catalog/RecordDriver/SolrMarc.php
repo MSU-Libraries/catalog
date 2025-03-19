@@ -1098,7 +1098,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 $sfvals[$subfield['code']] = $subfield['data'];
             }
             if (str_contains($sfvals['u'], 'bookplate')) {
-                $bookplates[] = ['note' => $sfvals['y'], 'url' => $sfvals['u']];
+                $bookplates[] = ['note' => trim($sfvals['y']), 'url' => $sfvals['u']];
             }
         }
 
@@ -1114,14 +1114,15 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             // if so, use the bookplate values instead
             $bookplateMatch = false;
             foreach ($bookplates as $bookplate) {
-                if (strcasecmp($bookplate['note'] ?? '', $sfvals['a']) === 0) {
+                if (strcasecmp($bookplate['note'] ?? '', trim($sfvals['a'])) === 0) {
                     $notes[] = ['note' => $sfvals['a'], 'url' => $bookplate['url']];
                     $bookplateMatch = true;
                     break;
                 }
             }
+            var_export($bookplateMatch);
             if (!$bookplateMatch) {
-                $notes[] = ['note' => $sfvals['a']];
+                $notes[] = ['note' => trim($sfvals['a'])];
             }
         }
         return $notes;
