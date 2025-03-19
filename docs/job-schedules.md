@@ -22,8 +22,8 @@ basis.
 | prod                | VuFind Cron      | Course Reserves Import     | Every hour @ :10                       |
 | beta                | VuFind Cron      | Course Reserves Import     | Every hour @ :20                       |
 | preview             | VuFind Cron      | Course Reserves Import     | Every hour @ :50                       |
-| all                 | VuFind Cron      | Clear old VuFind searches  | 12:00am every day                      |
-| all                 | VuFind Cron      | Clear old VuFind sessions  | 12:15am, 6:15am, 6:15pm every day      |
+| all                 | VuFind Cron      | Clear old VuFind searches  | 12:00AM every day                      |
+| all                 | VuFind Cron      | Clear old VuFind sessions  | 12:15AM, 6:15AM, 6:15PM every day      |
 | prod, beta, preview | VuFind Cron      | Clear VuFind cache         | At container start                     |
 | devel-\*, review-\* | VuFind CacheCron | Clear VuFind cache         | At container start and every 5 minutes |
 

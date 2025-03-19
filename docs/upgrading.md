@@ -30,7 +30,7 @@ a new environment.
 * In order to test that a database migration will work correctly, take a fresh database dump of an
 environment at the older version and load it into the new release environment. Now connect to the `catalog`
 container and modify the `config.ini` file to set the `autoConfigure` value to `true` temporarily.
-This will enable the [URL]/Upgrade/Home url to be accessible to run the database migration manually.
+This will enable the [URL]/Upgrade/Home URL to be accessible to run the database migration manually.
 It will likely prompt for the database credentials, which can be found in the
 [docker-compose.mariadb-cloud.yml](https://github.com/MSU-Libraries/catalog/blob/main/docker-compose.mariadb-cloud.yml)
 file within the environment variables. **Remember to disable the `autoConfigure` once complete**.
@@ -39,7 +39,7 @@ Then ensure that everything still works post-upgrade and that data is preserved.
 * Once thorough testing is complete, take a backup of the database on `main`, merge the branch into `main`,
 then repeat the database migration steps once the pipeline completes.
 
-* It is recommended to do a reindex of Solr to apply the latest schema changes, if the helper script
+* It is recommended to do a re-index of Solr to apply the latest schema changes, if the helper script
 detected any. In order to do this, you will need to run the
 [pc-import-folio script](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-folio)
 copying back the last full harvest and doing only an import:
