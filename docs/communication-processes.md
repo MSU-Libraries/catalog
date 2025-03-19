@@ -16,9 +16,10 @@ This document contains who to contact and when in various circumstances.
 
 ### Communication Method
 
-| Who to Contact | When to Contact |
-|----------------|-----------------|
-| LIB.DL.CDAWG@msu.edu | 1 week prior to the upgrade |
+| Who to Contact          | When to Contact                      |
+|-------------------------|--------------------------------------|
+| LIB.DL.CDAWG@msu.edu    | Within the week prior to the upgrade |
+| LIB.DL.libstaff@msu.edu | Within the week prior to the upgrade |
 
 ## Major VuFind Version Upgrades
 
@@ -38,10 +39,12 @@ This document contains who to contact and when in various circumstances.
 <!-- markdownlint-disable-next-line MD024 Duplicate headers -->
 ### Communication Method
 
-| Who to Contact | When to Contact |
-|----------------|-----------------|
-| LIB.DL.CDAWG@msu.edu | 1 month prior to the upgrade |
+| Who to Contact           | When to Contact                         |
+|--------------------------|-----------------------------------------|
+| LIB.DL.CDAWG@msu.edu     | 1 month prior to the upgrade            |
 | Library Staff Newsletter | Newsletter edition prior to the upgrade |
+| LIB.DL.CDAWG@msu.edu     | Within the week prior to the upgrade    |
+| LIB.DL.libstaff@msu.edu  | Within the week prior to the upgrade    |
 
 ## VuFind Outages
 
@@ -53,16 +56,17 @@ This document contains who to contact and when in various circumstances.
 <!-- markdownlint-disable-next-line MD024 Duplicate headers -->
 ### What Information to Include in Communication
 
-* An estimate of when the service to the site will be restored
+* A general estimate of when service will be restored subject
+  to change and future updates
 * Any information on the cause of the outage, if known
 
 <!-- markdownlint-disable-next-line MD024 Duplicate headers -->
 ### Communication Method
 
-| Who to Contact | When to Contact |
-|----------------|-----------------|
+| Who to Contact          | When to Contact                                   |
+|-------------------------|---------------------------------------------------|
 | LIB.DL.libstaff@msu.edu | When the outage has lasted longer than 15 minutes |
-| LIB.DL.libstaff@msu.edu | When service is restored |
+| LIB.DL.libstaff@msu.edu | When service is restored                          |
 
 ## Minor Feature Updates
 
@@ -82,8 +86,8 @@ This document contains who to contact and when in various circumstances.
 <!-- markdownlint-disable-next-line MD024 Duplicate headers -->
 ### Communication Method
 
-| Who to Contact | When to Contact |
-|----------------|-----------------|
+| Who to Contact       | When to Contact      |
+|----------------------|----------------------|
 | LIB.DL.CDAWG@msu.edu | PubCat sprint review |
 
 ## Major Feature Updates
@@ -103,7 +107,7 @@ This document contains who to contact and when in various circumstances.
 <!-- markdownlint-disable-next-line MD024 Duplicate headers -->
 ### Communication Method
 
-| Who to Contact | When to Contact |
-|----------------|-----------------|
-| LIB.DL.CDAWG@msu.edu| PubCat sprint review |
-| Library Staff Newsletter | Newsletter edition after the change is on the preview site |
+| Who to Contact           | When to Contact                                    |
+|--------------------------|----------------------------------------------------|
+| LIB.DL.CDAWG@msu.edu     | PubCat sprint review                               |
+| Library Staff Newsletter | Newsletter edition after it is on the preview site |
