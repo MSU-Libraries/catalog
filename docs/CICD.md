@@ -20,27 +20,27 @@ the `main` branch.
 
 ## Environment based on branch name
 
-* branch: `main`,  
-  stack prefix: `catalog-beta` (`catalog-beta-catalog`, `catalog-beta-solr`, `catalog-beta-mariadb`, etc.),  
-  url: https://catalog-beta.lib.msu.edu (local DNS C-Record to catalog.aws.lib.msu.edu)  
-  stack prefix: `catalog-prod` (`catalog-prod-catalog`, `catalog-prod-solr`, `catalog-prod-mariadb`, etc.),  
-  url: https://catalog.lib.msu.edu (local DNS C-Record to catalog.aws.lib.msu.edu)
+* **branch:** `main`,  
+  **stack prefix:** `catalog-beta` (`catalog-beta-catalog`, `catalog-beta-solr`, `catalog-beta-mariadb`, etc.),  
+  **URL:** https://catalog-beta.lib.msu.edu (local DNS C-Record to catalog.aws.lib.msu.edu)  
+  **stack prefix:** `catalog-prod` (`catalog-prod-catalog`, `catalog-prod-solr`, `catalog-prod-mariadb`, etc.),  
+  **URL:** https://catalog.lib.msu.edu (local DNS C-Record to catalog.aws.lib.msu.edu)
 
-* branch: `catalog-preview`,  
-  stack prefix: `catalog-preview (`catalog-preview-catalog`, `catalog-preview-solr`, `catalog-preview-mariadb`, etc.),  
-  url: https://catalog-preview.lib.msu.edu (local DNS C-Record to catalog.aws.lib.msu.edu)
+* **branch:** `catalog-preview`,  
+  **stack prefix:** `catalog-preview` (`catalog-preview-catalog`, `catalog-preview-solr`, `catalog-preview-mariadb`, etc.),  
+  **URL:** https://catalog-preview.lib.msu.edu (local DNS C-Record to catalog.aws.lib.msu.edu)
 
-* branch: `review-some-feature`,  
-  stack prefix: `review-some-feature` (`review-some-feature-catalog`, `review-some-feature-solr`, `review-some-feature-mariadb`, etc.),  
-  url: https://review-some-feature.aws.lib.msu.edu
+* **branch:** `review-some-feature`,  
+  **stack prefix:** `review-some-feature` (`review-some-feature-catalog`, `review-some-feature-solr`, `review-some-feature-mariadb`, etc.),  
+  **URL:** https://review-some-feature.aws.lib.msu.edu
 
-* branch: `devel-some-feature`,  
-  stack prefix: `devel-some-feature` (`devel-some-feature-catalog`, `devel-some-feature-solr`, `devel-some-feature-mariadb`, etc.),  
-  url: https://devel-some-feature.aws.lib.msu.edu 
+* **branch:** `devel-some-feature`,  
+  **stack prefix:** `devel-some-feature` (`devel-some-feature-catalog`, `devel-some-feature-solr`, `devel-some-feature-mariadb`, etc.),  
+  **URL:** https://devel-some-feature.aws.lib.msu.edu
 
-* branch: `nothing-special`  
-  stack prefix: None, no environment created  
-  url: None, no environment created  
+* **branch:** `nothing-special`  
+  **stack prefix:** None, no environment created  
+  **URL:** None, no environment created
 
 !!! note
 
@@ -73,7 +73,7 @@ when you are done with it
 * Will set the `STACK_NAME` variable that is used throughout the pipeline, which is essentially
 the branch name unless the branch does not start with `devel-`, `review-` or is `main`
 * Will make updates to the docker compose files and copy them to the AWS servers. The updates include
-changing the image tag from `:latest` to the current commit sha and modifying services based on
+changing the image tag from `:latest` to the current commit SHA and modifying services based on
 the `STACK_NAME`
 * Will call the playbook that creates a DNS record for devel and review environments if necessary
 * Deploy both the traefik (which handles routing of public traffic to the different environments
@@ -82,22 +82,22 @@ within the individual environment
 * Will bootstrap the `solr` and `mariadb` stacks if they have not already been (i.e. this is the first time
 running this job for this branch)
 * Deploys the `catalog`, `solr`, `swarm-cleanup`, and `mariadb` stacks. If this is a devel or review environment, it will
-import a single marc file into the VuFind instance as test data
+import a single MARC file into the VuFind instance as test data
 * Runs VuFind version upgrades, if applicable
 * If on a the `main` branch, it will run functional testing with the tests in the `Catalog` module
 * If it is a `devel-` or `review-` branch, it will populate the environment with sample data
 * Evaluate the health of the services on all nodes
 
-### Cleanup
+### Clean-up
 **branches**: `devel-`* and `review-`*
 
 * Removes the stacks, their volumes, and runs the playbook to remove the DNS record created for the environment
 
-### Release 
+### Release
 **branches**: `main`
 
 * Creates a release tag for the current commit
-* Pushes the latest changes to Github and publishes the Github Pages once the Github Action
+* Pushes the latest changes to GitHub and publishes the GitHub Pages once the GitHub Action
 job should have completed that compiles the docs
 
 ## Variables
@@ -112,7 +112,7 @@ And the *scope* value is the branch name you want to match it to followed by a w
 For example: `devel-mytest*`.
 
 * `AUTH_FTP_PASSWORD`: Password for `AUTH_FTP_USER`
-* `AUTH_FTP_USER`: Username for the authority marc file FTP server
+* `AUTH_FTP_USER`: Username for the authority MARC file FTP server
 * `AWS_KEY`: The AWS access key to use when provisioning the DNS CNAME records
 * `AWS_SECRET`: The AWS secret for the `AWS_KEY` uses when provisioning the DNS CNAME records
 * `BASICAUTH_FOR_RESOURCES`: Bcrypt password hash[^1] for basic authentication to internal
@@ -122,37 +122,37 @@ resources such as Solr and the Traefik dashboard
 * `DEPLOY_HOST_1`: Server FQDN for the for first node in the cluster to deploy to
 * `DEPLOY_HOST_2`: Server FQDN for the for second node in the cluster to deploy to
 * `DEPLOY_HOST_3`: Server FQDN for the for thirds node in the cluster to deploy to
-* `DEPLOY_KEY_FILE`: Filepath containing GitLab read-only deploy key base64 encoded
-* `DEPLOY_PRIVATE_KEY`: The `base64` encoded private ssh key to the deploy server
+* `DEPLOY_KEY_FILE`: File path containing GitLab read-only deploy key base64 encoded
+* `DEPLOY_PRIVATE_KEY`: The `base64` encoded private SSH key to the deploy server
 * `EDS_ORG`: Organization ID for the EDS API
 * `EDS_PASS`: Password for the `EDS_USER` username
 * `EDS_PROFILE`: Profile name for EDS
 * `EDS_USER`: Username for the EDS API
-* `EMAIL`: Email address set in VuFind's configs 
+* `EMAIL`: Email address set in VuFind's configs
 * `FEEDBACK_EMAIL`: Email address for sending feedback form submissions to (internal and external)
 * `FEEDBACK_PUBLIC_EMAIL`: Email address for sending external feedback form submissions to
 * `FOLIO_CANCEL_ID`: The FOLIO cancellation ID to use when canceling an order. VuFind uses
 `75187e8d-e25a-47a7-89ad-23ba612338de` by default
 * `FOLIO_PASS`: Password for the `FOLIO_USER` application user used by VuFind
 * `FOLIO_REC_ID`: Record ID in FOLIO to search for to verify the tenant is available
-* `FOLIO_TENANT`: Tenant ID 
-* `FOLIO_URL`: Okapi URL for FOLIO used by VuFind 
-* `FOLIO_USER`: Application user used by VuFind for ILS calls 
-* `HLM_FTP_PASSWORD_FILE`: Filepath containing the password for `HLM_FTP_USER`
+* `FOLIO_TENANT`: Tenant ID
+* `FOLIO_URL`: Okapi URL for FOLIO used by VuFind
+* `FOLIO_USER`: Application user used by VuFind for ILS calls
+* `HLM_FTP_PASSWORD_FILE`: File path containing the password for `HLM_FTP_USER`
 * `HLM_FTP_USER`: Username for the EBSCO FTP server
-* `GITHUB_USER_TOKEN`: Token used to publish releases to GitHub repository 
+* `GITHUB_USER_TOKEN`: Token used to publish releases to GitHub repository
 * `MATOMO_SEARCHBACKEND_DIMENSION`: ID for the custom dimension in Matomo to track the search backend used for the request
 * `MATOMO_SITE_ID`: Matomo site identifier for the website you want the analytics sent to
 * `MATOMO_URL`: Matomo URL to send the analytics to
-* `OAI_URL`: URL for making OAI calls to FOLIO when harvesting (can include API Token) 
+* `OAI_URL`: URL for making OAI calls to FOLIO when harvesting (can include API Token)
 * `RECAPTCHA_SECRET_KEY`: Secret key for reCaptcha form validation
 * `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation
 * `REGISTRY_ACCESS_TOKEN`: Read-only registry access token used by deploy user
 * `ROUND_ROBIN_DNS`: The DNS A-record entry that is a round-robin to all nodes in the cluster
 * `RO_CICD_TOKEN`: Read-only access token to this repository used to query the API during the CI
-* `RW_CICD_TOKEN`: Read-Write access token to this repository used to create release tags 
+* `RW_CICD_TOKEN`: Read-Write access token to this repository used to create release tags
 * `SESSION_BOT_SALT`: Secure random string used in creating persisting session ids for bots (when bot_agent values are set)
-* `SIMPLESAMLPHP_ADMIN_PW_FILE`: Filepath containing the password to the admin interface of SimpleSAMLphp
+* `SIMPLESAMLPHP_ADMIN_PW_FILE`: File path containing the password to the admin interface of SimpleSAMLphp
 * `SIMPLESAMLPHP_SALT`: Random salt for SimpleSAMLphp
 * `VUFIND_CORE_INSTALLATION`: Set to `1` in the pipelines to install core-vufind without MSUL Catalog module. Set to `0` otherwise.
 
@@ -161,12 +161,6 @@ For the Ansible image to build overnight, saving time on regular daily builds, w
 run off-hours in GitLab. This is done in the [Schedules](https://gitlab.msu.edu/msu-libraries/devops/catalog/-/pipeline_schedules)
 tab in the CI/CD page of GitLab. You should configure it for the `main` branch and set it to run at whatever time is convenient
 for your team.
-
-## Deploy Freezes
-If you want to prevent deployments to the production environment during certain times, you
-can make use of GitLab's [Deploy Freeze](https://gitlab.msu.edu/help/ci/environments/deployment_safety.md#prevent-deployments-during-deploy-freeze-windows)
-feature. Simply enter a timeframe using cron-style syntax in the "Deploy Freeze" section
-of the CI/CD Settings of the repository.
 
 [^1]
     There are many ways to generate this password hash, such as online generators or command

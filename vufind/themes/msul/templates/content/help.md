@@ -67,9 +67,9 @@ The advanced search interface provides a similar, though not identical, set of f
 The search results page includes a few options to save and send results.
 
 * **Save Search**: Requires login. Saved searches will appear on your user account page.
-* **Email Search**: No login required. Send the url of your search to any email address.
+* **Email Search**: No login required. Send the URL of your search to any email address.
 * **RSS Feed**: TODO
-* **With Selected: Email**: No login required. In addition to emailing a search url, as above, you can also select some or all records on a page and send them to an email address of your choosing.
+* **With Selected: Email**: No login required. In addition to emailing a search URL, as above, you can also select some or all records on a page and send them to an email address of your choosing.
 * **With Selected: Export**: No login required. All built-in VuFind export options are currently turned on: RefWorks, EndNote, EndNoteWeb, MARC, MARCXML, RDF, BibTeX, and RIS. 
 * **With Selected: Print**: Print out selected sections of the search results page. To print all results, the same result can be obtained by using the File-->Print option from the browser menu.
 * **With Selected: Save**: Requires login. Save selected records to a list of your creation.

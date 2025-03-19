@@ -20,7 +20,7 @@ One of our sources is HLM (Holdings Link Management) which is files from EBSCO's
 resources our library has access to which are not in FOLIO. To automate the retrieval and import of these
 files we have a wrapper script, `pc-import-hlm`.
 
-Since occassionally EBSCO sends us full sets of data, we want to be able to exclude all previous sets from them,
+Since occasionally EBSCO sends us full sets of data, we want to be able to exclude all previous sets from them,
 so to do this we have an ignore files `/mnt/shared/oai/ignore_patterns.txt` with will check to see if the file
 name contains any of those substrings and ignore them if they match.
 
@@ -159,7 +159,7 @@ This means we will on occasion need to swap them. This occasion being when we re
 such as when we're adding new data fields or doing a VuFind version upgrade (...which typically
 add new data fields).
 
-* Start the manual task "Deploy VuFind Build Env" in gitlab. It will update the `catalog_build` container.
+* Start the manual task "Deploy VuFind Build Env" in GitLab. It will update the `catalog_build` container.
 This is not done automatically so that other updates to the main branch can be deployed while a full import is running.
 
 * Identify what collection each alias is pointing to currently
