@@ -1715,6 +1715,18 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         // and does NOT have ind2 = 6
         foreach ($allFields as $result) {
             if (isset($result['tag']) && in_array($result['tag'], $subjectFieldsKeys) && $result['i2'] != '6') {
+                // MSU:  Skip if $2 == fast (PC-1216)
+                $skip = false;
+                foreach ($result['subfields'] as $sf) {
+                    if ($sf['code'] == '2' && $sf['data'] == 'fast') {
+                        $skip = true;
+                        break;
+                    }
+                }
+                if ($skip) {
+                    continue;
+                }
+
                 $fieldType = $this->subjectFields[$result['tag']];
 
                 // Start an array for holding the chunks of the current heading:
