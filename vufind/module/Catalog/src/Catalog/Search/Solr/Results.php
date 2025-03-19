@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * MSUL customization PC-1187 have it retry the query
+ *
  * Solr aspect of the Search Multi-class (Results)
  *
  * PHP version 8
@@ -22,7 +24,7 @@
  *
  * @category VuFind
  * @package  Search_Solr
- * @author   Demian Katz <demian.katz@villanova.edu>
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org Main Page
  */
@@ -37,13 +39,13 @@ use VuFindSearch\Command\SearchCommand;
  *
  * @category VuFind
  * @package  Search_Solr
- * @author   Demian Katz <demian.katz@villanova.edu>
- * @author   David Maus <maus@hab.de>
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org Main Page
  */
 class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\LoggerAwareInterface
 {
+    // MSU customization to add in logging
     use \VuFind\Log\LoggerAwareTrait;
 
     /**
@@ -78,7 +80,9 @@ class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\Logger
 
             $collection = $searchService->invoke($command)->getResult();
         } catch (\VuFindSearch\Backend\Exception\BackendException $e) {
-            $this->logWarning('Caught ' . get_class($e) . ' Message: ' . $e->getMessage());
+            // MSU customization PC-1187 log a warning for the caught exception
+            $this->logWarning('Caught ' . $e::class . ' Message: ' . $e->getMessage());
+            $params = $this->getParams()->getBackendParameters();
             // If the query caused a parser error, see if we can clean it up:
             if (
                 $e->hasTag(ErrorListener::TAG_PARSER_ERROR)
@@ -87,7 +91,6 @@ class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\Logger
                 // We need to get a fresh set of $params, since the previous one was
                 // manipulated by the previous search() call.
                 $this->logWarning('Retrying parser error query');
-                $params = $this->getParams()->getBackendParameters();
                 $command = new SearchCommand(
                     $this->backendId,
                     $newQuery,
@@ -95,11 +98,10 @@ class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\Logger
                     $limit,
                     $params
                 );
-                $collection = $searchService->invoke($command)->getResult();
             } else {
-                $this->logWarning('=== Retrying original query in 2 seconds... ===');
+                // MSUL customization PC-1187 have it retry the query
+                $this->logWarning('Retrying original query in 2 seconds...');
                 sleep(2); // Give Solr time to recover
-                $params = $this->getParams()->getBackendParameters();
                 $command = new SearchCommand(
                     $this->backendId,
                     $query,
@@ -107,8 +109,8 @@ class Results extends \VuFind\Search\Solr\Results implements \Laminas\Log\Logger
                     $limit,
                     $params
                 );
-                $collection = $searchService->invoke($command)->getResult();
             }
+            $collection = $searchService->invoke($command)->getResult();
         }
 
         $this->extraSearchBackendDetails = $command->getExtraRequestDetails();

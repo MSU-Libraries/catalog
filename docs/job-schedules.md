@@ -10,7 +10,7 @@ basis.
 | prod                | Solr Cron        | Alphabrowse Rebuild        | 1:15am every day (build on node `1`)   | 
 | beta                | Solr Cron        | Alphabrowse Rebuild        | 2:15am every day (build on node `2`)   |
 | preview             | Solr Cron        | Alphabrowse Rebuild        | 3:15am every day (build on node `3`)   |
-| prod                | VuFind Cron      | FOLIO harvest & Import     | 3am - 11pm @ :00 and :30               |
+| prod                | VuFind Cron      | FOLIO harvest & Import     | 3am - 11pm @ :00, :15, :30, and :45    |
 | beta                | VuFind Cron      | FOLIO harvest & Import     | 3am - 11pm @ :15                       |
 | preview             | VuFind Cron      | FOLIO harvest & Import     | 3am - 11pm @ :45                       |
 | prod                | VuFind Cron      | HLM harvest & Import       | 2:30am every day                       |
