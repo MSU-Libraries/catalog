@@ -24,6 +24,7 @@ fi
 
 declare LOCAL_DIR="/mnt/shared/local/${STACK_NAME}"
 declare LIVE_DIR="${LOCAL_DIR}/live"
+# shellcheck disable=SC2155
 declare TIMESTAMP=$( date +%Y%m%d%H%M%S )
 
 # TODO refactor to link all EXCEPT for those listed here (config.ini and folio.ini)
@@ -33,39 +34,26 @@ make_archive() {
     if [[ -d $LIVE_DIR ]]; then
         declare local_archive="$LOCAL_DIR/.archive/${TIMESTAMP}/"
         mkdir -p "${local_archive}/live/"
-        rsync -a "${LIVE_DIR}/" "${local_archive}/live/"
+        pc-rsync -a -s "${LIVE_DIR}/" -d "${local_archive}/live/"
     fi
 }
 
 add_bind_mount() {
     declare SOURCE_DIR="$1"
     declare MOUNT_DIR="$2"
-
-    # Add mount definition to fstab
-    run_on_all_nodes "echo \"${SOURCE_DIR}  ${MOUNT_DIR}  none  bind  0  0\" | sudo tee /etc/fstab"
-
-    # Ensure mount dir exists and mount the bind
-    run_on_all_nodes "mkdir -p ${MOUNT_DIR@Q}"
-    run_on_all_nodes "mount ${MOUNT_DIR@Q}"
+    run_on_all_nodes "pc-fstab -s \"${SOURCE_DIR}\" -m \"${MOUNT_DIR}\""
 }
 
 remove_bind_mount() {
     declare MOUNT_DIR="$1"
-
-    # Backup fstab file
-    run_on_all_nodes "cp /etc/fstab \"/tmp/fstab.${TIMESTAMP}\""
-
-    run_on_all_nodes "mountpoint -q \"$MOUNT_DIR\" && sudo umount \"$MOUNT_DIR\""
-
-    # Remove existing mount definition if exists
-    run_on_all_node "sudo sed -i \"\\|${MOUNT_DIR}|d\" /etc/fstab"
+    run_on_all_nodes "pc-fstab --rm -m \"${MOUNT_DIR}\""
 }
 
 add_config_symlinks() {
     declare conf
     for conf in "${LINK_CONFIGS[@]}"; do
-        ln -sf "${LOCAL_DIR}/repo/vufind/local/config/vufind/${conf}" \
-            "${LOCAL_DIR}/live/local/config/vufind/${conf}"
+        pc-symlink -vv -f -t "${LOCAL_DIR}/repo/vufind/local/config/vufind/${conf}" \
+            -s "${LOCAL_DIR}/live/local/config/vufind/${conf}"
     done
 }
 
