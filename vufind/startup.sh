@@ -3,7 +3,6 @@
 echo "Startup script..."
 
 SHARED_STORAGE="/mnt/shared/local"
-TIMESTAMP=$( date +%Y%m%d%H%M%S )
 
 if [[ "${STACK_NAME}" != catalog-prod ]]; then
     echo "Replacing robots.txt file with disallow contents"
