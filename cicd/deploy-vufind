@@ -34,25 +34,25 @@ make_archive() {
     if [[ -d $LIVE_DIR ]]; then
         declare local_archive="$LOCAL_DIR/.archive/${TIMESTAMP}/"
         mkdir -p "${local_archive}/live/"
-        pc-rsync -a -s "${LIVE_DIR}/" -d "${local_archive}/live/"
+        pc-rsync "${STACK_NAME}" -a -s "${LIVE_DIR}/" -d "${local_archive}/live/"
     fi
 }
 
 add_bind_mount() {
     declare SOURCE_DIR="$1"
     declare MOUNT_DIR="$2"
-    run_on_all_nodes "pc-fstab -s \"${SOURCE_DIR}\" -m \"${MOUNT_DIR}\""
+    run_on_all_nodes "pc-fstab $STACK_NAME -s \"${SOURCE_DIR}\" -m \"${MOUNT_DIR}\""
 }
 
 remove_bind_mount() {
     declare MOUNT_DIR="$1"
-    run_on_all_nodes "pc-fstab --rm -m \"${MOUNT_DIR}\""
+    run_on_all_nodes "pc-fstab $STACK_NAME --rm -m \"${MOUNT_DIR}\""
 }
 
 add_config_symlinks() {
     declare conf
     for conf in "${LINK_CONFIGS[@]}"; do
-        pc-symlink -vv -f -t "${LOCAL_DIR}/repo/vufind/local/config/vufind/${conf}" \
+        pc-symlink "$STACK_NAME" -vv -f -t "${LOCAL_DIR}/repo/vufind/local/config/vufind/${conf}" \
             -s "${LOCAL_DIR}/live/local/config/vufind/${conf}"
     done
 }

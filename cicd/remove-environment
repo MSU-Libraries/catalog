@@ -67,7 +67,7 @@ removesecrets() {
 
 remove_bind_mount() {
     declare MOUNT_DIR="$1"
-    run_on_all_nodes "pc-fstab --rm -m \"${MOUNT_DIR}\""
+    run_on_all_nodes "pc-fstab $STACK_NAME --rm -m \"${MOUNT_DIR}\""
 }
 
 main() {
