@@ -26,6 +26,7 @@ declare LOCAL_DIR="/mnt/shared/local/${STACK_NAME}"
 declare LIVE_DIR="${LOCAL_DIR}/live"
 # shellcheck disable=SC2155
 declare TIMESTAMP=$( date +%Y%m%d%H%M%S )
+declare SSH_USER=deploy
 
 # TODO refactor to link all EXCEPT for those listed here (config.ini and folio.ini)
 declare -a LINK_CONFIGS=("RecordDataFormatter.ini")
@@ -70,7 +71,7 @@ main() {
         remove_bind_mount "$LIVE_DIR/themes/msul"
 
         # Sleeping for 2 hours; if setup is cancelled somehow, the container will eventually terminate
-        docker run --rm --name "temp-$STACK_NAME" "$CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" sleep 7200
+        docker run -d --rm --name "temp-$STACK_NAME" "$CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" sleep 7200
         docker cp -q "temp-$STACK_NAME":/usr/local/vufind/ "$LIVE_DIR"
         docker rm "temp-$STACK_NAME"
 
