@@ -33,11 +33,8 @@ declare SSH_USER=deploy
 declare -a LINK_CONFIGS=("RecordDataFormatter.ini")
 
 make_archive() {
-    if [[ -d $LIVE_DIR ]]; then
-        declare local_archive="$LOCAL_DIR/.archive/${TIMESTAMP}/"
-        run_on_node "1" "mkdir -p \"${local_archive}/live/\""
-        run_on_node "1" "pc-rsync \"${STACK_NAME}\" -a -s \"${LIVE_DIR}/\" -d \"${local_archive}/live/\""
-    fi
+    declare local_archive="$LOCAL_DIR/.archive/${TIMESTAMP}/"
+    run_on_node "1" "pc-rsync \"${STACK_NAME}\" -a -s \"${LIVE_DIR}/\" -d \"${local_archive}/live/\""
 }
 
 add_bind_mount() {
@@ -67,7 +64,6 @@ main() {
     if [[ $STACK_NAME == devel-* ]]; then
         # Generate an archive of existing content (if it exists)
         make_archive
-        run_on_node "1" "mkdir -p \"$LIVE_DIR\""
 
         remove_bind_mount "$LIVE_DIR/module/Catalog"
         remove_bind_mount "$LIVE_DIR/themes/msul"
