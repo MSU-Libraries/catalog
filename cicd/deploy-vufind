@@ -26,6 +26,7 @@ declare LOCAL_DIR="/mnt/shared/local/${STACK_NAME}"
 declare LIVE_DIR="${LOCAL_DIR}/live"
 # shellcheck disable=SC2155
 declare TIMESTAMP=$( date +%Y%m%d%H%M%S )
+# shellcheck disable=SC2034
 declare SSH_USER=deploy
 
 # TODO refactor to link all EXCEPT for those listed here (config.ini and folio.ini)
@@ -34,8 +35,8 @@ declare -a LINK_CONFIGS=("RecordDataFormatter.ini")
 make_archive() {
     if [[ -d $LIVE_DIR ]]; then
         declare local_archive="$LOCAL_DIR/.archive/${TIMESTAMP}/"
-        mkdir -p "${local_archive}/live/"
-        pc-rsync "${STACK_NAME}" -a -s "${LIVE_DIR}/" -d "${local_archive}/live/"
+        run_on_node "1" "mkdir -p \"${local_archive}/live/\""
+        run_on_node "1" "pc-rsync \"${STACK_NAME}\" -a -s \"${LIVE_DIR}/\" -d \"${local_archive}/live/\""
     fi
 }
 
@@ -53,8 +54,9 @@ remove_bind_mount() {
 add_config_symlinks() {
     declare conf
     for conf in "${LINK_CONFIGS[@]}"; do
-        pc-symlink "$STACK_NAME" -vv -f -t "${LOCAL_DIR}/repo/vufind/local/config/vufind/${conf}" \
-            -s "${LOCAL_DIR}/live/local/config/vufind/${conf}"
+        run_on_node "1" "pc-symlink \"$STACK_NAME\" -vv -f \
+            -t \"${LOCAL_DIR}/repo/vufind/local/config/vufind/${conf}\" \
+            -s \"${LOCAL_DIR}/live/local/config/vufind/${conf}\""
     done
 }
 
@@ -65,15 +67,15 @@ main() {
     if [[ $STACK_NAME == devel-* ]]; then
         # Generate an archive of existing content (if it exists)
         make_archive
-        mkdir -p "$LIVE_DIR"
+        run_on_node "1" "mkdir -p \"$LIVE_DIR\""
 
         remove_bind_mount "$LIVE_DIR/module/Catalog"
         remove_bind_mount "$LIVE_DIR/themes/msul"
 
         # Sleeping for 2 hours; if setup is cancelled somehow, the container will eventually terminate
-        docker run -d --rm --name "temp-$STACK_NAME" "$CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}" sleep 7200
-        docker cp -q "temp-$STACK_NAME":/usr/local/vufind/ "$LIVE_DIR"
-        docker rm "temp-$STACK_NAME"
+        run_on_node "1" "docker run -d --rm --name \"temp-$STACK_NAME\" \"$CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}\" sleep 7200"
+        run_on_node "1" "docker cp -q \"temp-$STACK_NAME\":/usr/local/vufind/ \"$LIVE_DIR\""
+        run_on_node "1" "docker rm \"temp-$STACK_NAME\""
 
         add_bind_mount "${LOCAL_DIR}/repo/vufind/module/Catalog" "${LIVE_DIR}/module/Catalog"
         add_bind_mount "${LOCAL_DIR}/repo/vufind/themes/msul" "${LIVE_DIR}/themes/msul"
