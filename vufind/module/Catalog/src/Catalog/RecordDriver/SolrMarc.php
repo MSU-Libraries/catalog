@@ -1120,7 +1120,6 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                     break;
                 }
             }
-            var_export($bookplateMatch);
             if (!$bookplateMatch) {
                 $notes[] = ['note' => trim($sfvals['a'])];
             }
