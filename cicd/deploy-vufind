@@ -69,11 +69,11 @@ main() {
         remove_bind_mount "$LIVE_DIR/themes/msul"
 
         # Sleeping for 2 hours; if setup is cancelled somehow, the container will eventually terminate
-        TEMP_CTR_ID=$( run_on_node "1" "docker run -d --rm --name \"temp-${STACK_NAME}-$TIMESTAMP\" \"$CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}\" sleep 7200" )
+        TEMP_CTR_ID=$( run_on_node "1" "docker run -d --rm -v \"$LIVE_DIR\":/media/live --name \"temp-${STACK_NAME}-$TIMESTAMP\" \"$CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}\" sleep 7200" )
         sleep 2
         run_on_node "1" "pc-install $STACK_NAME -v -o 1000 -g 1000 -m g+ws -d -t \"$LIVE_DIR\""
-        run_on_node "1" "docker cp -q \"$TEMP_CTR_ID\":/usr/local/vufind/ \"$LIVE_DIR\""
-        run_on_node "1" "docker rm \"$TEMP_CTR_ID\""
+        run_on_node "1" "docker exec \"$TEMP_CTR_ID\" rsync -a /usr/local/vufind/ /media/live/"
+        run_on_node "1" "docker rm -f \"$TEMP_CTR_ID\""
 
         add_bind_mount "${LOCAL_DIR}/repo/vufind/module/Catalog" "${LIVE_DIR}/module/Catalog"
         add_bind_mount "${LOCAL_DIR}/repo/vufind/themes/msul" "${LIVE_DIR}/themes/msul"
