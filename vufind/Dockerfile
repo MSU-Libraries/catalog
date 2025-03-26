@@ -91,6 +91,10 @@ RUN \
     rm -rf /tmp/solr && \
     # Fix world writable vendor dirs (TODO find out why these happen in the first place)
     find /usr/local/vufind/vendor -type d -perm -o+w -exec chmod o-w \; && \
+    # File ownership of node directory
+    mkdir -p /usr/local/vufind/node_modules && \
+    touch /usr/local/vufind/package-lock.json && \
+    chown -R 1000:1000 /usr/local/vufind/node_modules /usr/local/vufind/package-lock.json && \
     # Enable bash completion for all users
     echo ". /usr/share/bash-completion/bash_completion" >> /etc/bash.bashrc
 
