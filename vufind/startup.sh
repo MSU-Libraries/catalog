@@ -48,7 +48,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     fi
 
     # Enable detailed error reporting for devel
-    sed -i -E 's/^(file\s+= /var/log/vufind/vufind.log:).*$/\1alert-5,error-5,notice-5,debug-1/' /usr/local/vufind/local/config/vufind/config.ini
+    sed -i -E 's#^(file\s+= /var/log/vufind/vufind.log:).*$#\1alert-5,error-5,notice-5,debug-1#' /usr/local/vufind/local/config/vufind/config.ini
 
     # Make sure permissions haven't gotten changed on the share along the way
     # (This can happen no matter what on devel container startup)
