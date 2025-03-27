@@ -36,6 +36,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
         chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/
         chown 1000 -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/module/
     fi
+    git config --system --add safe.directory "${SHARED_STORAGE}/${STACK_NAME}"/repo
     git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch
 
     # Set up the symlink to be able to access code from host machine
