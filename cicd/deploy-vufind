@@ -32,10 +32,19 @@ declare SSH_USER=deploy
 # TODO refactor to link all EXCEPT for those listed here (config.ini and folio.ini)
 declare -a LINK_CONFIGS=("RecordDataFormatter.ini")
 
+most_recent_archive() {
+    find "${LOCAL_DIR}/.archive/" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | tail -n1
+}
+
 make_archive() {
-    declare local_archive="$LOCAL_DIR/.archive/${TIMESTAMP}"
-    # TODO use --link-dest from most recent archive? would speed up subsequent archive creation
-    run_on_node "1" "pc-rsync \"${STACK_NAME}\" -a -s \"${LIVE_DIR}/\" -d \"${local_archive}/live/\""
+    declare last_archive
+    last_archive=$( most_recent_archive )
+    declare -a extra_args
+    if [[ -n $last_archive ]]; then
+        extra_args+=("--link-dest" "${last_archive@Q}")
+    fi
+
+    run_on_node "1" "pc-rsync \"${STACK_NAME}\" ${extra_args[*]} -a -s \"${LIVE_DIR}/\" -d \"$LOCAL_DIR/.archive/${TIMESTAMP}/live/\""
 }
 
 add_bind_mount() {
