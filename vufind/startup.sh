@@ -26,8 +26,6 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     if [ ! -d "${SHARED_STORAGE}/${STACK_NAME}/repo/.git" ]; then
         # Clone repository
         git clone -b "${STACK_NAME}" git@gitlab.msu.edu:msu-libraries/devops/catalog.git "${SHARED_STORAGE}/${STACK_NAME}/repo"
-        # Set up the repository for group editing
-        git config --system --add safe.directory \*
         git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo config core.sharedRepository group
         chgrp -R 1000 "${SHARED_STORAGE}/${STACK_NAME}"/repo
         chmod -R g+rw "${SHARED_STORAGE}/${STACK_NAME}"/repo
@@ -36,7 +34,8 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
         chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/
         chown 1000 -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/module/
     fi
-    git config --system --add safe.directory "${SHARED_STORAGE}/${STACK_NAME}"/repo
+    # Set up the repository for group editing
+    git config --system --add safe.directory \*
     git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch
 
     # Set up the symlink to be able to access code from host machine
@@ -55,7 +54,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     # (This can happen no matter what on devel container startup)
     chown 1000:1000 -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/
     chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/msul/
-    rsync -aip --chmod=D2775,F664 --exclude "*.sh" --exclude "cicd" --exclude "*scripts*" "${SHARED_STORAGE}/${STACK_NAME}"/ "${SHARED_STORAGE}/${STACK_NAME}"/
+    rsync -ap --chmod=D2775,F664 --exclude "*.sh" --exclude "cicd" --exclude "*scripts*" "${SHARED_STORAGE}/${STACK_NAME}"/ "${SHARED_STORAGE}/${STACK_NAME}"/
 fi
 
 # Save the logs in the logs docker volume
