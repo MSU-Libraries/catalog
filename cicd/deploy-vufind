@@ -34,6 +34,7 @@ declare -a LINK_CONFIGS=("RecordDataFormatter.ini")
 
 make_archive() {
     declare local_archive="$LOCAL_DIR/.archive/${TIMESTAMP}"
+    # TODO use --link-dest from most recent archive? would speed up subsequent archive creation
     run_on_node "1" "pc-rsync \"${STACK_NAME}\" -a -s \"${LIVE_DIR}/\" -d \"${local_archive}/live/\""
 }
 
@@ -69,7 +70,7 @@ main() {
         remove_bind_mount "$LIVE_DIR/themes/msul"
 
         # Sleeping for 2 hours; if setup is cancelled somehow, the container will eventually terminate
-        TEMP_CTR_ID=$( run_on_node "1" "docker run -d --rm -v \"$LIVE_DIR\":/media/live --name \"temp-${STACK_NAME}-$TIMESTAMP\" \"$CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}\" sleep 7200" )
+        TEMP_CTR_ID=$( run_on_node "1" "docker run -d --rm -env-file <( sed -e 's/^export //' -e 's/^\\(.*\\)=\"\\(.*\\)\"$/\1=\2/' ${COMPOSE_PATH}/.env ) -v \"$LIVE_DIR\":/media/live --name \"temp-${STACK_NAME}-$TIMESTAMP\" \"$CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}\" sleep 7200" )
         sleep 2
         run_on_node "1" "pc-install $STACK_NAME -v -o 1000 -g 1000 -m g+ws -d -t \"$LIVE_DIR\""
         run_on_node "1" "docker exec \"$TEMP_CTR_ID\" rsync -a /usr/local/vufind/ /media/live/"

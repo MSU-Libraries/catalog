@@ -3,10 +3,7 @@
 echo "Entrypoint script..."
 
 # Replace environment variables in template ini files
-env > /tmp/env-PRE
-cp local/config/vufind/config.ini /tmp/vufind-config-PRE.ini
 envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.ini
-cp local/config/vufind/config.ini /tmp/vufind-config-POST.ini
 envsubst < local/config/vufind/contentsecuritypolicy.ini | sponge local/config/vufind/contentsecuritypolicy.ini
 envsubst < local/config/vufind/folio.ini | sponge local/config/vufind/folio.ini
 envsubst < local/config/vufind/FeedbackForms.yaml | sponge local/config/vufind/FeedbackForms.yaml
