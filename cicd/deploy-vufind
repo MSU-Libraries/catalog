@@ -37,7 +37,7 @@ make_archive() {
     recent_archive=$( run_on_node "1" "find '${LOCAL_DIR}/.archive/' -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | sort | tail -n1" )
     declare -a extra_args
     if [[ -n $recent_archive ]]; then
-        extra_args+=("--link-dest" "$LOCAL_DIR/.archive/${TIMESTAMP}/live/${recent_archive}")
+        extra_args+=("--link-dest" "$LOCAL_DIR/.archive/${recent_archive}/live/")
     fi
 
     run_on_node "1" "pc-rsync \"${STACK_NAME}\" ${extra_args[*]} -a -s \"${LIVE_DIR}/\" -d \"$LOCAL_DIR/.archive/${TIMESTAMP}/live/\""
