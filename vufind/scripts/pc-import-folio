@@ -542,7 +542,7 @@ batch_import() {
 
     verbose "Processing delete records from harvest."
     # No countdown here to avoid slowing down the Solr cache warmup after the commit that happened in the previous step
-    if ! /usr/local/vufind/harvest/batch-delete.sh folio; then
+    if ! /usr/local/vufind/harvest/batch-delete.sh folio -vv --id-prefix=folio; then
         echo "ERROR: Batch delete script failed."
         exit 1
     fi
