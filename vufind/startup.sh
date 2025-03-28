@@ -196,6 +196,17 @@ if ! [[ "${ALIASES}" =~ .*"biblio".* ]]; then
     fi
 fi
 
+echo "Running Solr query with healthcheck ID to confirm Solr readiness"
+OUTPUT=$(curl --max-time 5 -o /dev/null -s "http://solr:8983/solr/biblio/select?fl=%2A&wt=json&json.nl=arrarr&q=id%3A%22folio.${FOLIO_REC_ID}%22")
+EXIT_STATUS=$?
+while [[ "$EXIT_STATUS" -eq 28 ]]; do # exit code 28 is curl timeout
+    echo "Solr not ready yet (timed out). Waiting..."
+    sleep 5
+    OUTPUT=$(curl --max-time 5 -o /dev/null -s "http://solr:8983/solr/biblio/select?fl=%2A&wt=json&json.nl=arrarr&q=id%3A%22folio.${FOLIO_REC_ID}%22")
+    EXIT_STATUS=$?
+done
+echo "Solr ready!"
+
 # Run grunt if a devel/review site
 if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
     echo "Starting grunt to auto-compile theme changes..."
