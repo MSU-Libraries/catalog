@@ -51,7 +51,7 @@ services:
       update_config:
         parallelism: 1
         failure_action: rollback
-        delay: 10s
+        delay: 5s
         monitor: 10s
       labels:
         - "traefik.enable=true"

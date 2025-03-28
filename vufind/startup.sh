@@ -144,6 +144,7 @@ while [[ "$SOLR_CLUSTER_SIZE" -lt 1 ]]; do
     sleep 5
     SOLR_CLUSTER_SIZE=$(curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.live_nodes | length")
 done
+echo "Solr nodes online."
 
 # Sleep before creating collections so all
 # nodes don't try at the same time
