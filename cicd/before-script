@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 run_help() {
     echo ""
@@ -21,6 +21,30 @@ if [ -n "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; t
     run_help
     exit 0
 fi
+
+check() {
+    SERVICE=$1;
+    HEALTHY=0;
+    for HOST in {1..3}; do
+        ATTEMPTS=0;
+        NODE_HOSTNAME=$(node_hostname "${HOST}")
+        while [[ "${ATTEMPTS}" -le 60 ]]; do
+            echo "$(date +'%m-%d-%Y %T %z') -- (${NODE_HOSTNAME}): Checking ${SERVICE} health...";
+            if run_on_node "${HOST}" "/usr/local/ncpa/plugins/check_${SERVICE}.sh ${STACK_NAME}"; then
+                echo "$(date +'%m-%d-%Y %T %z') -- (${NODE_HOSTNAME}): ${SERVICE} is healthy!";
+                HEALTHY=1;
+                break;
+            fi
+            echo "$(date +'%m-%d-%Y %T %z') -- (${NODE_HOSTNAME}): ${SERVICE} not healthy yet. Waiting...";
+            sleep 15;
+            ATTEMPTS=$((ATTEMPTS+1));
+        done
+        if [[ "${HEALTHY}" -ne 1 ]]; then
+            echo "$(date +'%m-%d-%Y %T %z') -- (${NODE_HOSTNAME}): ${SERVICE} not healthy after max attempts. Failing job!";
+            exit 1;
+        fi;
+    done
+}
 
 get_pc_common() {
     git clone "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure.git" /tmp/catalog-infrastructure/
@@ -74,7 +98,7 @@ before_script() {
     # Get the number of attempts for this job
     apk add jq curl || apt install -y jq curl;
     ATTEMPTS=$(curl -s --header "PRIVATE-TOKEN: ${RO_CICD_TOKEN}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${CI_PIPELINE_ID}/jobs?include_retried=true" | jq "[.[] | select(.name == \"${CI_JOB_NAME}\")] | length");
-    echo "$(echo "${CI_JOB_NAME}" | sed 's/ /_/g')_JobAttempts" "${ATTEMPTS}" >> metrics.txt;
+    echo "${CI_JOB_NAME// /_}_JobAttempts ${ATTEMPTS}" >> metrics.txt;
 
     # Determine job start time; used to calculate runtime metrics
     START=$(date +%s);

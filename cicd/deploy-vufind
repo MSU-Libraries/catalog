@@ -23,6 +23,10 @@ if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
 fi
 
 main() {
+    # Wait for Solr to be healthy
+    check solr
+    check zk
+
     # Pull images now to save time with stack deploy
     run_on_all_nodes "docker pull $CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}"
 
