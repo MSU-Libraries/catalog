@@ -37,6 +37,7 @@ use VuFind\Exception\ILS as ILSException;
 use VuFind\ILS\Connection;
 use VuFind\Session\Settings as SessionSettings;
 use VuFindSearch\Backend\EDS\Backend;
+use VuFindSearch\ParamBag;
 use VuFindSearch\Query\Query as Query;
 
 use function in_array;
@@ -174,7 +175,15 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
 
         $this->debug('Calling EPF function to get publishers for ' . $title);
         try {
-            $resp = $this->epf->search(new Query($title), 0, 3);
+            $query = new Query($title);
+            $params = new ParamBag();
+
+            // The documentation says that 'view' is optional,
+            // but omitting it causes an error.
+            // https://connect.ebsco.com/s/article/Publication-Finder-API-Reference-Guide-Search
+            $params->set('view', 'brief');
+
+            $resp = $this->epf->search($query, 0, 3, $params);
 
             // Parse the publisher data to get the names
             if (!isset($resp->getRecords()[0])) {

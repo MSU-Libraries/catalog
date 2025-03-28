@@ -976,19 +976,25 @@ class Folio extends \VuFind\ILS\Driver\Folio
         ];
         $response = $this->makeRequest('GET', '/erm/sas/publicLookup', $query);
         $licenses = json_decode($response->getBody());
-        $customProperties = $licenses->records[0]?->linkedLicenses[0]?->remoteId_object?->customProperties;
+        // Get the license agreement data for the record if there was one found
+        if (count($licenses->records) == 0) {
+            $this->debug('Unable to get records from licenses');
+            return [];
+        } else {
+            $customProperties = $licenses->records[0]?->linkedLicenses[0]?->remoteId_object?->customProperties;
 
-        $licenseAgreement = [];
-        if (isset($customProperties->vendoraccessibilityinfo[0]->value)) {
-            $licenseAgreement['vendoraccessibilityinfo'] = $customProperties->vendoraccessibilityinfo[0]->value;
+            $licenseAgreement = [];
+            if (isset($customProperties->vendoraccessibilityinfo[0]->value)) {
+                $licenseAgreement['vendoraccessibilityinfo'] = $customProperties->vendoraccessibilityinfo[0]->value;
+            }
+            if (isset($customProperties->authorizedusers[0]->value->label)) {
+                $licenseAgreement['authorizedusers'] = $customProperties->authorizedusers[0]->value->label;
+            }
+            if (isset($customProperties->ConcurrentUsers[0]->value)) {
+                $licenseAgreement['ConcurrentUsers'] = $customProperties->ConcurrentUsers[0]->value;
+            }
+            return $licenseAgreement;
         }
-        if (isset($customProperties->authorizedusers[0]->value->label)) {
-            $licenseAgreement['authorizedusers'] = $customProperties->authorizedusers[0]->value->label;
-        }
-        if (isset($customProperties->ConcurrentUsers[0]->value)) {
-            $licenseAgreement['ConcurrentUsers'] = $customProperties->ConcurrentUsers[0]->value;
-        }
-        return $licenseAgreement;
     }
 
     /**

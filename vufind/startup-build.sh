@@ -23,7 +23,11 @@ sed -i 's/type\s*=\s*Database/type=File/' /usr/local/vufind/local/config/vufind/
 
 # Update this container to index to the biblio-build collection alias
 if ! OUTPUT=$(sed -i "s/\\bbiblio\\b/biblio-build/" /usr/local/vufind/local/import/import.properties); then
-    echo "Failed to change the indexing collection from biblio to biblio-build. Exiting container. ${OUTPUT}"
+    echo "Failed to change the indexing collection from biblio to biblio-build in the import.properties. Exiting container. ${OUTPUT}"
+    exit 1
+fi
+if ! OUTPUT=$(sed -i "s/\\bbiblio\\b/biblio-build/" /usr/local/vufind/local/config/vufind/config.ini); then
+    echo "Failed to change the indexing collection from biblio to biblio-buildi in the confin.ini. Exiting container. ${OUTPUT}"
     exit 1
 fi
 

@@ -1995,7 +1995,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                                 $index,
                                 range('a', 'z')
                             );
-                            $currentArray['linked'] = implode(' ', $this->getSubfieldArray($linked, range('a', 'z')));
+                            $currentArray['linked'] = empty($linked) ?
+                                '' :
+                                implode(' ', $this->getSubfieldArray($linked, range('a', 'z')));
                         }
                     }
 
