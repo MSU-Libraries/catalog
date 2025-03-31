@@ -283,11 +283,13 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             if (count($subf6Parts) > 1 && $subf6Parts[0] == '880') {
                 $index = $subf6Parts[1];
                 $linked = $marc->getLinkedField('880', $field, $index, $subfieldFilters);
-                foreach ($linked['subfields'] as $lsf) {
-                    if (!in_array($lsf['code'], $subfieldFilters) || $lsf['code'] == self::LINKSUBF) {
-                        continue;
+                if ($linked && array_key_exists('subfields', $linked) && is_array($linked)) {
+                    foreach ($linked['subfields'] as $lsf) {
+                        if (!in_array($lsf['code'], $subfieldFilters) || $lsf['code'] == self::LINKSUBF) {
+                            continue;
+                        }
+                        $linkedVals[] = $lsf['data'];
                     }
-                    $linkedVals[] = $lsf['data'];
                 }
             }
         }
