@@ -14,28 +14,14 @@ fi
 # Populating the shared storage if empty
 if [[ "${STACK_NAME}" == devel-* ]]; then
     echo "Setting up links for module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
-    mkdir -p "${SHARED_STORAGE}/${STACK_NAME}/repo"
-    chmod g+ws "${SHARED_STORAGE}/${STACK_NAME}/repo"
     # Set up deploy key
     install -d -m 700 ~/.ssh/
     base64 -d "$DEPLOY_KEY_FILE" > ~/.ssh/id_ed25519
     ( umask 022; touch ~/.ssh/known_hosts )
     chmod 600 ~/.ssh/id_ed25519
     ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
-    # Set up the "repo" dir
-    if [ ! -d "${SHARED_STORAGE}/${STACK_NAME}/repo/.git" ]; then
-        # Clone repository
-        git clone -b "${STACK_NAME}" git@gitlab.msu.edu:msu-libraries/devops/catalog.git "${SHARED_STORAGE}/${STACK_NAME}/repo"
-        git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo config core.sharedRepository group
-        chgrp -R 1000 "${SHARED_STORAGE}/${STACK_NAME}"/repo
-        chmod -R g+rw "${SHARED_STORAGE}/${STACK_NAME}"/repo
-        chmod g-w "${SHARED_STORAGE}/${STACK_NAME}"/repo/.git/objects/pack/*
-        find "${SHARED_STORAGE}/${STACK_NAME}" -type d -exec chmod g+s {} \;
-        chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/
-        chown 1000 -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/module/
-    fi
-    # Set up the repository for group editing
     git config --system --add safe.directory \*
+    # Update the repo (repo is initially cloned during first CI run for branch)
     git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch
 
     # Set up the symlink to be able to access code from host machine
