@@ -40,7 +40,6 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     # (This can happen no matter what on devel container startup)
     chown 1000:1000 -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/
     chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/msul/
-    rsync -ap --chmod=D2775,F664 --exclude "*.sh" --exclude "cicd" --exclude "*scripts*" "${SHARED_STORAGE}/${STACK_NAME}"/ "${SHARED_STORAGE}/${STACK_NAME}"/
 fi
 
 # Save the logs in the logs docker volume
@@ -58,11 +57,6 @@ chown www-data:www-data /mnt/logs/vufind/vufind.log /var/log/simplesamlphp/simpl
 ln -f -s /mnt/shared/config/BannerNotices.yaml /usr/local/vufind/local/config/vufind/BannerNotices.yaml
 ln -f -s /mnt/shared/config/LocationNotices.yaml /usr/local/vufind/local/config/vufind/LocationNotices.yaml
 ln -f -s /mnt/shared/config/RequestNotices.yaml /usr/local/vufind/local/config/vufind/RequestNotices.yaml
-
-if [[ "${STACK_NAME}" != devel-* || ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
-  # Update the phing commands to use our module instead of VuFind for tests
-  sed -i 's#VuFind/tests#Catalog\/tests#' /usr/local/vufind/build.xml
-fi
 
 # Prepare cache cli dir (volume only exists after start)
 clear-vufind-cache
