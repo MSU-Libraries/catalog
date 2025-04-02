@@ -27,8 +27,6 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     # Set up the symlink to be able to access code from host machine
     if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
         rm -r /usr/local/vufind/module/Catalog /usr/local/vufind/themes/msul
-        # Commenting the setEnv directive
-        sed -i -r 's/^\s+SetEnv VUFIND_LOCAL_MODULES Catalog/#&/' /usr/local/vufind/local/httpd-vufind.conf
         # Changing theme in config
         sed -i -r 's/^(theme\s+= )msul/\1bootstrap3/' /usr/local/vufind/local/config/vufind/config.ini
     fi
