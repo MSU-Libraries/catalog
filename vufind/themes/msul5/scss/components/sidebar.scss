@@ -1,3 +1,5 @@
+@use 'variables' as v;
+
 // MSU Start
 .sidebar h2 {
   margin-top:0;
@@ -20,10 +22,10 @@
   .collapsing,
   &.full-facet-list .facet {
     position: relative;
-    border-left: 1px solid $list-group-border;
-    border-right: 1px solid $list-group-border;
+    border-left: 1px solid v.$list-group-border;
+    border-right: 1px solid v.$list-group-border;
   }
-  &.full-facet-list :first-child .facet { border-top: 1px solid $list-group-border; }
+  &.full-facet-list :first-child .facet { border-top: 1px solid v.$list-group-border; }
 }
 
 .facet__list {
@@ -76,7 +78,7 @@
 }
 // MSU Start
 .facet-group:not(:first-child) {
-  border-top:1px solid $medgray;
+  border-top:1px solid v.$medgray;
 }
 .facet-group a, .facet a {
   text-decoration:none;
@@ -127,7 +129,7 @@
       border: 2px dotted transparent;
     }
     .exclude.selected {
-      border: 2px dotted $list-group-active-bg;
+      border: 2px dotted v.$list-group-active-bg;
     }
     .exclude {
       .icon {
@@ -173,26 +175,27 @@
 
 .active-filters .facet,
 .facet-group .active {
-  background-color: $list-group-active-bg;
+  background-color: v.$list-group-active-bg;
   color: #fff;
 
   a { color: #fff; text-decoration:none !important; } // MSU
 }
 .facet.active .badge {
   background-color: #fff;
-  color: $brand-primary;
+  color: v.$brand-primary;
 }
 
 .narrow-toggle { text-align: center; }
 
 .sidebar .format {
-  @extend .label;
-  @extend .label-info;
+  // TODO convert to sass
+  //@extend .label;
+  //@extend .label-info;
 }
 .top-row .applied {
   font-weight: bold;
   &:hover {
-    color: $state-danger-text;
+    color: v.$state-danger-text;
     .fa.fa-check:before {
       content: "\f00d";
     }
@@ -201,8 +204,8 @@
 
 .full-facets {
   margin: 1rem 0;
-  border-top: 1px solid $list-group-border;
-  border-bottom: 1px solid $list-group-border;
+  border-top: 1px solid v.$list-group-border;
+  border-bottom: 1px solid v.$list-group-border;
 }
 .full-facet-list .active .fa.fa-times {
   float: right;
@@ -212,7 +215,7 @@
 body.rtl .full-facet-list .active .fa.fa-times { float: left; }
 .full-facet-controls .form-group {
   margin: 0;
-  padding: $padding-base-vertical 0;
+  padding: v.$padding-base-vertical 0;
 }
 
 .truncate-done {
@@ -237,7 +240,7 @@ body.rtl .full-facet-list .active .fa.fa-times { float: left; }
   .date-to   { padding-left:  .25rem; }
 }
 h3.facet-title {
-  font-size: $font-size-base;
+  font-size: v.$font-size-base;
   margin: 0;
 }
 @media (min-width: 768px) {
@@ -281,7 +284,7 @@ h3.facet-title {
   top: 0;
   padding: 1em;
   z-index: 40;
-  border-bottom: 1px solid $list-group-border;
+  border-bottom: 1px solid v.$list-group-border;
   box-shadow: 0 5px 5px -4px #000;
 }
 .multi-facet-selection-active {

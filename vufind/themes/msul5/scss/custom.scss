@@ -1,76 +1,21 @@
 /* This is for the Metropolis font */
-@import url("https://msu-p-001.sitecorecontenthub.cloud/api/public/content/1a1d46b45afb40eda6ebf4ed44077295");
+// TODO -- this is not an SCSS style
+//@use url("https://msu-p-001.sitecorecontenthub.cloud/api/public/content/1a1d46b45afb40eda6ebf4ed44077295");
 
-@import "bootstrap"; /* Include bootstrap theme's less base */
-@import "vendor/bootstrap/variables";
-@import "components/variables";
-@import "components/sidebar";
+@use "bootstrap"; /* Include bootstrap theme's scss base */
+@use "variables" as v;
+@use "components/sidebar";
 
-//Utility Classes from Bootstrap 5
+//Utility Classes
 
-.mb-1 {
-  margin-bottom:0.25rem !important;
-}
-.mb-2 {
-  margin-bottom:0.5rem !important;
-}
-.mb-3 {
-  margin-bottom:1rem !important;
-}
-.mb-4 {
-  margin-bottom:1.5rem !important;
-}
-.mb-5 {
-  margin-bottom:3rem !important;
-}
-.mr-1 {
-  margin-right:0.25rem !important;
-}
-.ml-neg-pt5 {
-  margin-left:-0.5rem;
-}
-.mt-0 {
-  margin-top:0 !important;
-}
-.fw-light {
-  font-weight:300 !important;
-}
-.fw-normal {
-  font-weight:400 !important;
-}
-.fw-medium {
-  font-weight:500 !important;
-}
-.fw-semibold {
-  font-weight:600 !important;
-}
-.fw-bold {
-  font-weight:700 !important;
-}
-.fw-bolder {
-  font-weight:bolder !important;
-}
-.visually-hidden {
-  position:absolute !important;
-  overflow:hidden;
-  clip:rect(1px,1px,1px,1px);
-  width:1px;
-  height:1px;
-  word-wrap:normal;
-}
-.h2-style {
-  font-size: 23px;
-  font-weight: normal;
-}
-.text-decoration-none {
-  text-decoration:none;
-}
-
-.bg-color-lightgray {
-  background-color:$lightgray;
-}
 .bg-color-white {
   background-color:#ffffff;
+}
+
+// link color
+
+a {
+  color:$darkparakeetgreen;
 }
 
 //Focus indicators
@@ -117,7 +62,7 @@ a.sr-only:focus {
 }
 .facet-group .active, .slider-container .slider-handle {
   &:focus {
-  background: $darkparakeetgreen;
+  background: v.$darkparakeetgreen;
   }
 }
 .active-filters .filters a.filter-value {
@@ -144,7 +89,7 @@ body, button, select, input {
 .template-dir-search.template-name-home header, .template-dir-eds.template-name-home header, .template-dir-combined.template-name-home header {
   display:flex;
   flex-direction:column;
-  background-color:$msugreen;
+  background-color:v.$msugreen;
   background-image:
   linear-gradient(
     rgba(24, 69, 59, 0.8),
@@ -208,7 +153,7 @@ body, button, select, input {
 
 header {
   .banner.container {
-    background-color:$msugreen;
+    background-color:v.$msugreen;
     background-image:
     linear-gradient(
       rgba(24, 69, 59, 0.8),
@@ -311,19 +256,19 @@ header {
 .custom-notices {
   margin-top: -1rem;
   margin-bottom: 1rem;
-  background-color: $alert-warning-bg;
-  color: $eggplant;
+  background-color: v.$alert-warning-bg;
+  color: v.$eggplant;
   padding: 0.3rem 1rem 0.3rem 1rem;
 
   p {
     margin: 0.4rem 0 0.5rem 0;
   }
   a, i {
-    color: $msugreen;
+    color: v.$msugreen;
     text-decoration: none;
   }
   a:hover, a:active {
-    color: $gray-darker;
+    color: v.$gray-darker;
     text-decoration: underline;
   }
 }
@@ -339,7 +284,7 @@ header {
   padding-top:2rem;
   padding-bottom:2rem;
   padding-left:2rem;
-  background-color: $parakeetgreen;
+  background-color: v.$parakeetgreen;
   color:#fff;
   font-weight:600;
   img.msul_logo {
@@ -499,16 +444,16 @@ footer .msu-footer ul:first-child li {
 /* --- Main Content --- */
 
 h2 a {
-  color: $eggplant;
+  color: v.$eggplant;
   text-decoration:none;
   &:hover {
-    color:$eggplant;
+    color:v.$eggplant;
   }
 }
 
 // checkbox color
 input[type="checkbox"] {
-  accent-color: $darkparakeetgreen
+  accent-color: v.$darkparakeetgreen
 }
 
 //hide back to catalog link
@@ -721,7 +666,7 @@ input[type="checkbox"] {
     padding-left:5%;
 
     &.home-reserves {
-      border-left:1px solid $medgray;
+      border-left:1px solid #c1c1c1; //fix - create variable
     }
   }
   form.searchForm {
@@ -773,20 +718,22 @@ input[type="checkbox"] {
 
     .home-facet-container {
       margin:0 auto;
-      background-color:$parakeetgreen;
+      background-color:v.$parakeetgreen;
       -webkit-border-radius: 0.5rem;
       -moz-border-radius: 0.5rem;
       border-radius: 0.5rem;
       &:hover {
-        background-color:$darkparakeetgreen;
+        background-color:v.$darkparakeetgreen;
       }
       &:active {
-        background-color:$msugreen;
+        background-color:v.$msugreen;
       }
 
       .ask-icon {
         content:url("/themes/msul/images/Icons_Ask_Us_World_Default.png");
         height:8rem;
+        margin-left:auto;
+        margin-right:auto;
         margin-bottom:0.5rem;
       }
       &:hover .ask-icon {
@@ -830,16 +777,19 @@ form.searchForm, .record-tabs, .navbar-form {
       outline:0;
       background:none;
       text-decoration:none;
-      color: $eggplant !important;
+      color: v.$eggplant !important;
       padding:0;
       margin:0 0.7rem;
+    }
+    a.nav-link.active {
+      background:none;
     }
     li:first-child a {
       margin-left:0;
     }
     .navtab-digrepo {
       @media only screen and (min-width : 998px) {
-        border-left:0.2rem solid $eggplant;
+        border-left:0.2rem solid v.$eggplant;
         padding-left:0.5rem;
         margin-left:0.5rem;
         }
@@ -851,7 +801,7 @@ form.searchForm, .record-tabs, .navbar-form {
       border-top:0;
     }
     .active a {
-      border-bottom: 0.4rem solid $eggplant;
+      border-bottom: 0.4rem solid v.$eggplant;
       border-right: 0.4rem solid transparent;
       border-left:0;
       border-top:0;
@@ -867,13 +817,13 @@ form.searchForm, .record-tabs, .navbar-form {
 
 .record-tabs {
   ul.nav-tabs {
-    border-bottom: 1px solid $medgray;
+    border-bottom: 1px solid v.$medgray;
 
     margin-top:3rem;
     margin-bottom:2rem;
 
     li.record-tab {
-      border-right:1px solid $eggplant;
+      border-right:1px solid v.$eggplant;
       margin-bottom:1rem;
       height:2rem;
     }
@@ -887,7 +837,7 @@ form.searchForm, .record-tabs, .navbar-form {
         margin-top:0;
       }
       h3:not(:first-child) {
-        border-top:1px solid $medgray;
+        border-top:1px solid v.$medgray;
         padding-top:1rem;
       }
       .copy-number > span {
@@ -901,7 +851,7 @@ form.searchForm, .record-tabs, .navbar-form {
 .record-nav {
   .action-toolbar li a {
     background-color:revert;
-    color:$darkparakeetgreen;
+    color:v.$darkparakeetgreen;
   }
 }
 
@@ -922,7 +872,7 @@ form.searchForm, .record-tabs, .navbar-form {
   }
   .action-toolbar li button {
     background-color:transparent;
-    color:$darkparakeetgreen;
+    color:v.$darkparakeetgreen;
   }
 }
 
@@ -1005,8 +955,8 @@ table tr {
 .placehold {
   display:inline-block;
   text-decoration: none !important;
-  color:$parakeetgreen;
-  border: 2px solid $parakeetgreen;
+  color:v.$parakeetgreen;
+  border: 2px solid v.$parakeetgreen;
   -webkit-border-radius: 7rem;
   -moz-border-radius: 7rem;
   border-radius: 7rem;
@@ -1017,15 +967,15 @@ table tr {
   -webkit-transition:-webkit-box-shadow .3s linear;
   &:hover {
     text-decoration:none;
-    color:$darkparakeetgreen !important;
-    border: 2px solid $darkparakeetgreen !important;
+    color:v.$darkparakeetgreen !important;
+    border: 2px solid v.$darkparakeetgreen !important;
   }
   &:active {
     text-decoration:none;
-    color:$parakeetgreen;
-    border: 2px solid $parakeetgreen;
-    box-shadow: inset 0 1rem 1rem $lightgray, 0 0 0.5rem $parakeetgreen;
-    -webkit-box-shadow: inset 0 1rem 1rem $lightgray, 0 0 0.5rem $parakeetgreen;
+    color:v.$parakeetgreen;
+    border: 2px solid v.$parakeetgreen;
+    box-shadow: inset 0 1rem 1rem v.$lightgray, 0 0 0.5rem v.$parakeetgreen;
+    -webkit-box-shadow: inset 0 1rem 1rem v.$lightgray, 0 0 0.5rem v.$parakeetgreen;
   }
   i {
     display:none;
@@ -1034,14 +984,14 @@ table tr {
 
 /* Disable links (such as the request button */
 .disabled {
-  color: $darkgray;
-  border-color: $darkgray;
-  background-color: $lightgray;
+  color: v.$darkgray;
+  border-color: v.$darkgray;
+  background-color: v.$lightgray;
   cursor: not-allowed;
   &:hover {
-    color: $darkgray;
-    border-color: $darkgray;
-    background-color: $lightgray;
+    color: v.$darkgray;
+    border-color: v.$darkgray;
+    background-color: v.$lightgray;
     cursor: not-allowed;
   }
 }
@@ -1066,7 +1016,7 @@ table tr {
     margin-bottom:0.2rem;
   }
   h2 a {
-    color: $msugreen;
+    color: v.$msugreen;
     &:hover {
       color: black;
     }
@@ -1075,7 +1025,7 @@ table tr {
 }
 
 .tag-record {
-  border: 2px solid $parakeetgreen;
+  border: 2px solid v.$parakeetgreen;
   -webkit-border-radius: 7rem;
   -moz-border-radius: 7rem;
   border-radius: 7rem;
@@ -1084,9 +1034,9 @@ table tr {
   text-decoration:none;
 
   &:hover {
-    border: 2px solid $parakeetgreen;
+    border: 2px solid v.$parakeetgreen;
     text-decoration:none;
-    color:$darkparakeetgreen;
+    color:v.$darkparakeetgreen;
   }
 }
 
@@ -1094,7 +1044,7 @@ table tr {
   ul.list-group li.list-group-item {
     border-top:0;
     border-right:0;
-    border-bottom:1px solid $medgray !important;
+    border-bottom:1px solid v.$medgray !important;
     border-left:0;
     margin-bottom:0;
     border-bottom-right-radius:0;
@@ -1122,9 +1072,9 @@ table tr {
 
 
 @keyframes buttonAnimation {
-  from {box-shadow: 0;background-color:$parakeetgreen;}
+  from {box-shadow: 0;background-color:v.$parakeetgreen;}
   to {box-shadow: 0 0 2px 2px rgba(255, 255, 255, 1), 0px 0px 5px 5px rgba(0, 122, 255, .9);
-  background-color:$darkparakeetgreen;}
+  background-color:v.$darkparakeetgreen;}
 }
 
   #apply-filters {
@@ -1132,7 +1082,7 @@ table tr {
     z-index: 500;
     position: sticky;
     padding: 1em 1em 3.5em;
-    border-bottom: 1px solid $medgray;
+    border-bottom: 1px solid v.$medgray;
     background: white;
     .transform {
       box-shadow: 0;
@@ -1152,7 +1102,7 @@ table tr {
 
 @media only screen and (min-width : 768px) {
   .sidebar.left {
-    border-right: 1px solid $medgray;
+    border-right: 1px solid v.$medgray;
   }
   .template-name-advanced .sidebar.left {
     border-right:0 !important;
@@ -1170,7 +1120,7 @@ table tr {
     padding-left:1rem;
     padding-right:0;
     border-right:0;
-    border-left:1px solid $medgray;
+    border-left:1px solid v.$medgray;
   }
 }
 
@@ -1201,7 +1151,7 @@ table tr {
           padding:0.5rem;
           text-decoration: none;
           color:#18453b;
-          background-color: $lightsage;
+          background-color: v.$lightsage;
           -webkit-border-radius: 0.5rem;
           -moz-border-radius: 0.5rem;
           border-radius: 0.5rem;
@@ -1212,7 +1162,7 @@ table tr {
           padding:0.5rem;
           text-decoration: none;
           color:#ffffff;
-          background-color: $parakeetgreen;
+          background-color: v.$parakeetgreen;
           -webkit-border-radius: 0.5rem;
           -moz-border-radius: 0.5rem;
           border-radius: 0.5rem;
@@ -1237,18 +1187,18 @@ table tr {
   color: #fff;
 }
 .active-filters .search-filter-remove:hover {
-  color: $medgray;
+  color: v.$medgray;
 }
 
 label {
-  color: $msugreen;
+  color: v.$msugreen;
 }
 
 .search-term {
-  background-color:$lightgray;
+  background-color:v.$lightgray;
   padding:0.5rem 1rem;
   border-radius:0.5rem;
-  color:$gray-darker;
+  color:v.$gray-darker;
   font-size:18px;
   margin-bottom:1rem;
   margin-top:1rem;
@@ -1311,7 +1261,7 @@ label {
 .table, .tab-content table {
   width: auto;
   max-width: 100%;
-  margin-bottom: $line-height-computed;
+  margin-bottom: v.$line-height-computed;
   // Cells
   > thead,
   > tbody,
@@ -1330,10 +1280,10 @@ label {
       }
 
       > td {
-        padding: $table-cell-padding;
-        line-height: $line-height-base;
+        padding: v.$table-cell-padding;
+        line-height: v.$line-height-base;
         width:auto;
-        border-top: 0 solid $table-border-color;
+        border-top: 0 solid v.$table-border-color;
         overflow-wrap: anywhere;
 
         @media only screen and (max-width : 992px) {
@@ -1367,6 +1317,18 @@ body.template-dir-myresearch.template-name-profile {
     }
 }
 
+//styling h1's to appear as h2's on account page
+.template-dir-myresearch.template-name-mylist, 
+.template-dir-myresearch.template-name-checkedout,
+.template-dir-holds.template-name-list,
+.template-dir-myresearch.template-name-fines,
+.template-dir-myresearch.template-name-editlist {
+  h1 {
+    font-size:23px;
+    font-weight:normal;
+  }
+}
+
 // Zebra-striping
 //
 // Default zebra-stripe styles (alternating gray and transparent backgrounds)
@@ -1381,7 +1343,7 @@ body.template-dir-myresearch.template-name-profile {
 
 .alphabrowse tbody tr {
   &:hover {
-    background-color:$lightgray;
+    background-color:v.$lightgray;
   }
   &.title {
     min-width:10rem;
@@ -1422,7 +1384,7 @@ body.template-dir-myresearch.template-name-profile {
 
 //monospace font for staff view
 .tab-content .details-tab {
-  font-family: $font-family-monospace;
+  font-family: v.$font-family-monospace;
   font-size: 1.1rem;
   letter-spacing: 0;
 }
@@ -1461,13 +1423,13 @@ body.template-dir-myresearch.template-name-profile {
   }
 
   > ul, div {
-    border: 0.15rem solid $medgray;
+    border: 0.15rem solid v.$medgray;
     border-radius: 0.2rem;
   }
 
   ul {
     width: 100%;
-    background: $lightgray;
+    background: v.$lightgray;
     list-style: none;
     margin: 0;
     padding-left: 0;
@@ -1499,7 +1461,7 @@ body.template-dir-myresearch.template-name-profile {
     }
 
     a {
-      color: $violet;
+      color: v.$violet;
 
       &.current {
         font-weight: bold;
@@ -1510,14 +1472,14 @@ body.template-dir-myresearch.template-name-profile {
       width: 100%;
 
       &:hover {
-        background-color: $medgray;
+        background-color: v.$medgray;
       }
     }
   }
 
   > ul > li {
     > a, > a:hover {
-      color: $gray-darker;
+      color: v.$gray-darker;
       position: relative;
       // Increase z-index to place a tag in front of the :after triangle
       z-index: 10;
@@ -1540,7 +1502,7 @@ body.template-dir-myresearch.template-name-profile {
   &[disabled],
   fieldset[disabled] & {
     &:hover {
-      background-color: $gray-darker;
+      background-color: v.$gray-darker;
       color: white;
    }
   }
@@ -1613,18 +1575,18 @@ body.template-dir-myresearch.template-name-profile {
 .btn-primary {
   line-height:1.4;
     &:hover {
-      background-color:$darkparakeetgreen;
-      border-color:$darkparakeetgreen;
+      background-color:v.$darkparakeetgreen;
+      border-color:v.$darkparakeetgreen;
       color:#fff;
   }
     &:active {
-      background-color:$msugreen !important;
-      border-color:$msugreen !important;
+      background-color:v.$msugreen !important;
+      border-color:v.$msugreen !important;
       color:#fff;
   }
     &:focus {
-      background-color:$parakeetgreen !important;
-      border-color:$parakeetgreen;
+      background-color:v.$parakeetgreen !important;
+      border-color:v.$parakeetgreen;
       color:#fff;
   }
 }
@@ -1636,16 +1598,16 @@ body.template-dir-myresearch.template-name-profile {
     border-radius: 4px;
     padding: 2px 8px;
     color: #fff;
-    background: $parakeetgreen;
+    background: v.$parakeetgreen;
     vertical-align: baseline;
     &:hover {
-      background-color:$darkparakeetgreen;
-      border-color:$darkparakeetgreen;
+      background-color:v.$darkparakeetgreen;
+      border-color:v.$darkparakeetgreen;
       color:#fff;
     }
     &:active {
-      background-color:$msugreen !important;
-      border-color:$msugreen !important;
+      background-color:v.$msugreen !important;
+      border-color:v.$msugreen !important;
       color:#fff !important;
     }
   }
@@ -1681,6 +1643,9 @@ body.template-dir-myresearch.template-name-profile {
 .add_search_link {
   margin-top:0 !important;
   padding-top:0;
+}
+#groupJoin {
+  margin-left:-0.5rem;
 }
 
 @media (min-width: 768px) {
@@ -1721,12 +1686,14 @@ fieldset.solr-facets {
 
 //outer gray box around groups
 .adv-group-msul {
-  @include clearfix();
+  // TODO investigate
+  //@include clearfix();
   position: relative;
   margin-bottom: .5rem;
   padding: 1rem;
-  border-radius: $border-radius-base;
+  border-radius: v.$border-radius-base;
   margin-bottom:1rem;
+  background-color:v.$lightgray;
 }
 
 // catalog advanced search
@@ -1849,7 +1816,7 @@ mark {
 }
 .authmethod0 {
   h3 {
-  color:$gray-base;
+  color:v.$gray-base;
   }
 }
 .authmethod1 {
@@ -1878,7 +1845,7 @@ mark {
     }
   }
   .card-body {
-    border:2px dashed $medgray;
+    border:2px dashed v.$medgray;
     border-radius:1rem;
     padding:2rem;
   }
@@ -1886,8 +1853,8 @@ mark {
 .template-name-login #loginOptions .icon-link { //disable header login link on login page
   pointer-events: none;
   cursor: default;
-  color: $msugreen;
-  background-color: $nav-link-hover-bg;
+  color: v.$msugreen;
+  background-color: v.$nav-link-hover-bg;
 }
 
 //Modal content
@@ -1902,7 +1869,7 @@ mark {
   }
   .close {
     &:hover {
-      background-color: $gray;
+      background-color: v.$gray;
     }
   }
 }
@@ -1947,7 +1914,7 @@ mark {
 @media only screen and (min-width : 790px) {
   .template-dir-record {
     nav:has(.pager) {
-      margin-top: $pager-margin-top;
+      margin-top: v.$pager-margin-top;
       margin-bottom: 0;
     }
 

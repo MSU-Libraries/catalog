@@ -15,7 +15,7 @@
   <?=$this->component('show-account-menu-button')?>
 <?php endif; ?>
 
-<h1 class="h2-style"><?=$this->transEsc($pageTitle); ?></h1><?php /** MSU */ ?>
+<h1><?=$this->transEsc($pageTitle); ?></h1><?php /** MSU */ ?>
 
 <form class="form-edit-list" method="post" name="<?=$this->newList ? 'newList' : 'editListForm'?>" action="<?=$this->url('editList'); ?>">
   <input type="hidden" name="id" value="<?=$this->newList || empty($listId = $this->list->getId()) ? 'NEW' : $this->escapeHtmlAttr($listId) ?>">

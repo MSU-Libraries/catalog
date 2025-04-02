@@ -17,7 +17,7 @@ $formatLinkedProperty = function ($datafield, $name, $label) {
     $translate = function ($str) use ($that, $label) {
         return $that->transEsc($label . $str);
     };
-    return '<span class="mr-1 author-property-' . $name . '"> = ' . implode(', ', array_unique(array_map($translate, $datafield))) . '</span>';
+    return '<span class="me-1 author-property-' . $name . '"> = ' . implode(', ', array_unique(array_map($translate, $datafield))) . '</span>';
 };
 $formattedAuthors = [];
 ?>
