@@ -192,12 +192,12 @@ apply_prod_changes() {
         # Set cron/build placement constraint
         ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.catalog.yml;
         ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.build.yml;
-        # Increase Solr RAM to 8+2.5GB (prod is granted more than non-prod envs)
+        # Increase Solr RAM to 10+3GB (prod is granted more than non-prod envs)
         ./yq -i \
-        ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms8192m -Xmx8192m -XX:MaxDirectMemorySize=2560m\"" \
+        ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms10240m -Xmx10240m -XX:MaxDirectMemorySize=3072m\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
-        ".services.solr.deploy.resources.limits.memory = \"16384M\"" \
+        ".services.solr.deploy.resources.limits.memory = \"17408M\"" \
         docker-compose.solr-cloud.yml;
 
         # Override default router rule
