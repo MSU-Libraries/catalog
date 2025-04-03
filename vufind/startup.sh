@@ -3,7 +3,6 @@
 echo "Startup script..."
 
 SHARED_STORAGE="/mnt/shared/local"
-TIMESTAMP=$( date +%Y%m%d%H%M%S )
 
 if [[ "${STACK_NAME}" != catalog-prod ]]; then
     echo "Replacing robots.txt file with disallow contents"
@@ -15,101 +14,30 @@ fi
 # Populating the shared storage if empty
 if [[ "${STACK_NAME}" == devel-* ]]; then
     echo "Setting up links for module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
-    mkdir -p "${SHARED_STORAGE}/${STACK_NAME}/local-confs"
-    mkdir -p "${SHARED_STORAGE}/${STACK_NAME}/repo"
-    chmod g+ws "${SHARED_STORAGE}/${STACK_NAME}/local-confs"
-    chmod g+ws "${SHARED_STORAGE}/${STACK_NAME}/repo"
     # Set up deploy key
     install -d -m 700 ~/.ssh/
     base64 -d "$DEPLOY_KEY_FILE" > ~/.ssh/id_ed25519
     ( umask 022; touch ~/.ssh/known_hosts )
     chmod 600 ~/.ssh/id_ed25519
     ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
-    # Set up the "repo" dir
-    if [ ! -d "${SHARED_STORAGE}/${STACK_NAME}/repo/.git" ]; then
-        # Clone repository
-        git clone -b "${STACK_NAME}" git@gitlab.msu.edu:msu-libraries/devops/catalog.git "${SHARED_STORAGE}/${STACK_NAME}/repo"
-        # Set up the repository for group editing
-        git config --system --add safe.directory \*
-        git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo config core.sharedRepository group
-        chgrp -R 1000 "${SHARED_STORAGE}/${STACK_NAME}"/repo
-        chmod -R g+rw "${SHARED_STORAGE}/${STACK_NAME}"/repo
-        chmod g-w "${SHARED_STORAGE}/${STACK_NAME}"/repo/.git/objects/pack/*
-        find "${SHARED_STORAGE}/${STACK_NAME}" -type d -exec chmod g+s {} \;
-        chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/
-        chown 1000 -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/module/
-    fi
+    git config --system --add safe.directory \*
+    # Update the repo (repo is initially cloned during first CI run for branch)
     git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch
-    # Setting up "local" sync dir
-    if [[ -n $(ls -A "${SHARED_STORAGE}/${STACK_NAME}"/local-confs/*) ]]; then
-        # archive the last pipeline's configs
-        mkdir -p "${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}"
-        mv "${SHARED_STORAGE}/${STACK_NAME}"/local-confs/* "${SHARED_STORAGE}/${STACK_NAME}/.archive/${TIMESTAMP}"
-    fi
-    # Sync over the current pipeline's configs
-    rsync -ai /usr/local/vufind/local/ "${SHARED_STORAGE}/${STACK_NAME}/local-confs/"
-
-    # Shallow clone of vufind core's code
-    mkdir -p "${SHARED_STORAGE}/${STACK_NAME}/core-repo"
-    git clone -n /mnt/shared/vufind "${SHARED_STORAGE}/${STACK_NAME}/core-repo"
-    git -C "${SHARED_STORAGE}/${STACK_NAME}/core-repo" sparse-checkout init
-    git -C "${SHARED_STORAGE}/${STACK_NAME}/core-repo" sparse-checkout set module themes public
-    git -C "${SHARED_STORAGE}/${STACK_NAME}/core-repo" checkout "v${VUFIND_VERSION}"
 
     # Set up the symlink to be able to access code from host machine
-    rm -rf /usr/local/vufind/themes/*
-    rm -rf /usr/local/vufind/module/*
-    rm -rf /usr/local/vufind/local
-    ln -sf "${SHARED_STORAGE}/${STACK_NAME}/local-confs" /usr/local/vufind/local
-    ln -sf "${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/themes/msul" /usr/local/vufind/themes
-    if [[ ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
-      ln -sf "${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog" /usr/local/vufind/module
-    fi
-
-    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/public" /usr/local/vufind/public
-    mv /usr/local/vufind/vendor "${SHARED_STORAGE}/${STACK_NAME}/core-repo"
-    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/vendor" /usr/local/vufind/vendor
-
     if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
-      # Linking all the themes
-      ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootprint3" /usr/local/vufind/themes/bootprint3
-      ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/sandal" /usr/local/vufind/themes/sandal
-      ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/sandal5" /usr/local/vufind/themes/sandal5
-      ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootstrap5" /usr/local/vufind/themes/bootstrap5
-    fi
-    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/bootstrap3" /usr/local/vufind/themes/bootstrap3
-    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/themes/root" /usr/local/vufind/themes/root
-    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFind" /usr/local/vufind/module/VuFind
-    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindAdmin" /usr/local/vufind/module/VuFindAdmin
-    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindApi" /usr/local/vufind/module/VuFindApi
-    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindConsole" /usr/local/vufind/module/VuFindConsole
-    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindDevTools" /usr/local/vufind/module/VuFindDevTools
-    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindLocalTemplate" /usr/local/vufind/module/VuFindLocalTemplate
-    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindSearch" /usr/local/vufind/module/VuFindSearch
-    ln -s "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module/VuFindTheme" /usr/local/vufind/module/VuFindTheme
-    ln -f -s "${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/local/config/vufind/RecordDataFormatter.ini" /usr/local/vufind/local/config/vufind/RecordDataFormatter.ini
-
-    if [[ ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
-      # Add a link in core-repo so that unit tests work
-      ln -s "${SHARED_STORAGE}/${STACK_NAME}/repo/vufind/module/Catalog" "${SHARED_STORAGE}/${STACK_NAME}/core-repo/module"
+        rm -r /usr/local/vufind/module/Catalog /usr/local/vufind/themes/msul
+        # Changing theme in config
+        sed -i -r 's/^(theme\s+= )msul/\1bootstrap3/' /usr/local/vufind/local/config/vufind/config.ini
     fi
 
     # Enable detailed error reporting for devel
-    sed -i -E 's/^(file\s+= /var/log/vufind/vufind.log:).*$/\1alert-5,error-5,notice-5,debug-1/' /usr/local/vufind/local/config/vufind/config.ini
+    sed -i -E 's#^(file\s+= /var/log/vufind/vufind.log:).*$#\1alert-5,error-5,notice-5,debug-1#' /usr/local/vufind/local/config/vufind/config.ini
 
     # Make sure permissions haven't gotten changed on the share along the way
     # (This can happen no matter what on devel container startup)
-    chown 1000:1000 -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/*
+    chown 1000:1000 -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/
     chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/msul/
-    chown 1000:1000 -R "${SHARED_STORAGE}/${STACK_NAME}"/local-confs/*
-    rsync -aip --chmod=D2775,F664 --exclude "*.sh" --exclude "cicd" --exclude "*scripts*" "${SHARED_STORAGE}/${STACK_NAME}"/ "${SHARED_STORAGE}/${STACK_NAME}"/
-
-    if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
-      # Commenting the setEnv directive
-      sed -i -r 's/^\s+SetEnv VUFIND_LOCAL_MODULES Catalog/#&/' /usr/local/vufind/local/httpd-vufind.conf
-      # Changing theme in config
-      sed -i -r 's/^(theme\s+= )msul/\1bootstrap3/' /usr/local/vufind/local/config/vufind/config.ini
-    fi
 fi
 
 # Save the logs in the logs docker volume
@@ -127,11 +55,6 @@ chown www-data:www-data /mnt/logs/vufind/vufind.log /var/log/simplesamlphp/simpl
 ln -f -s /mnt/shared/config/BannerNotices.yaml /usr/local/vufind/local/config/vufind/BannerNotices.yaml
 ln -f -s /mnt/shared/config/LocationNotices.yaml /usr/local/vufind/local/config/vufind/LocationNotices.yaml
 ln -f -s /mnt/shared/config/RequestNotices.yaml /usr/local/vufind/local/config/vufind/RequestNotices.yaml
-
-if [[ "${STACK_NAME}" != devel-* || ${VUFIND_CORE_INSTALLATION} == 0 ]]; then
-  # Update the phing commands to use our module instead of VuFind for tests
-  sed -i 's#VuFind/tests#Catalog\/tests#' /usr/local/vufind/build.xml
-fi
 
 # Prepare cache cli dir (volume only exists after start)
 clear-vufind-cache
