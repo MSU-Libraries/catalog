@@ -68,9 +68,9 @@ add_config_symlinks() {
 }
 
 main() {
-    # Wait for Solr to be healthy
-    check solr
-    check zk
+    # Wait for Solr to be healthy if not a fresh deploy
+    # check solr
+    # check zk
 
     # Pull images now to save time with stack deploy
     run_on_all_nodes "docker pull $CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}"

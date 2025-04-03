@@ -1,7 +1,5 @@
 <?php
 
-use Laminas\ServiceManager\Factory\InvokableFactory;
-
 return [
   'router' => [
     'routes' => [
