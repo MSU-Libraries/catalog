@@ -106,6 +106,7 @@ with a `POST` request to `/perms/permissions`.
 * `circulation-storage.requests.collection.get`
 * `circulation-storage.request-preferences.collection.get`
 * `users.collection.get`
+* `ui-requests.view`
 * `accounts.collection.get`
 * `course-reserves-storage.courselistings.collection.get`
 * `course-reserves-storage.courselistings.courses.collection.get`

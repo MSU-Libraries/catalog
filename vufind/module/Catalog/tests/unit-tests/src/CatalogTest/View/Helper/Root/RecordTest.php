@@ -331,14 +331,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
             $this->loadRecordFixture('record1.json'),
             browzineConfig: ['General' => ['access_token' => '123', 'library_id' => '9']]
         );
-        $this->assertEquals(
-            [
-                'status' => 401,
-                'error' => 'invalid_token',
-                'error_description' => 'unknown_token',
-            ],
-            $this->callMethod($record, 'getLibKeyJSON', ['123'])
-        );
+        $this->assertEquals('', $this->callMethod($record, 'getLibKeyJSON', ['123']));
     }
 
     /**

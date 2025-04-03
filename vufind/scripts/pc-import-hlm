@@ -546,12 +546,12 @@ import() {
     verbose "Processing delete records from harvest."
     countdown 5
     if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
-        if ! /usr/local/vufind/harvest/batch-delete.sh hlm | tee "$LOG_FILE"; then
+        if ! /usr/local/vufind/harvest/batch-delete.sh hlm -vv --id-prefix=hlm | tee "$LOG_FILE"; then
             verbose "ERROR: Batch delete script failed with code: $?" 1
             exit 1
         fi
     else
-        if ! /usr/local/vufind/harvest/batch-delete.sh hlm >> "$LOG_FILE"; then
+        if ! /usr/local/vufind/harvest/batch-delete.sh hlm -vv --id-prefix=hlm >> "$LOG_FILE"; then
             verbose "ERROR: Batch delete script failed with code: $?" 1
             exit 1
         fi

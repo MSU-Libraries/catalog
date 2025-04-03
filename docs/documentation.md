@@ -13,7 +13,7 @@ If there are issues with the page displaying there are two things you can try.
 
 2. If that does not work, verify the output of the GitHub Action job log to make sure there were no
    errors building the documentation site. Find the most recent
-   [pipleine](https://github.com/MSU-Libraries/catalog/actions/workflows/ci.yml)
+   [pipeline](https://github.com/MSU-Libraries/catalog/actions/workflows/ci.yml)
    then click into it, and then into the `deploy` job. You can expand each section to see messages.
    The one most likely to cause issues would be the step called `Run mkdocs gh-deploy --force`.
    There could be errors listed like syntax errors in the `.md` files, or possibly even just re-running
@@ -29,9 +29,19 @@ cd ${CATALOG_REPO_DIR}
 python3 -m mkdocs serve
 ```
 
-You should now be able to open your brower to the link in the `serve` output to verify.
+You should now be able to open your browser to the link in the `serve` output to verify.
 Additionally, the output of the serve command would display any errors with building
 the site.
 
 As long as the `serve` command is running, it will auto-detect changes to the files so you can
 continue to modify them and see the updates in your browser.
+
+## Running checks on Markdown files
+
+```bash
+cd ${CATALOG_REPO_DIR}
+# Lint checks
+docker run --rm -it -v $PWD:/code registry.gitlab.com/pipeline-components/markdownlint:latest mdl --style all --warnings .
+# Spell checks
+docker run --rm -it -v $PWD:/code registry.gitlab.com/pipeline-components/markdown-spellcheck:latest mdspell --report '**/*.md' --ignore-numbers --ignore-acronyms
+```

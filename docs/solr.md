@@ -162,7 +162,7 @@ replica to re-sync with the new leader.
 
 You can verify current leadership status via the Solr Admin interface in Cloud -> Graph.
 
-You can verify counts on each replica by doing a curl call (or viewing in your browser, replacing with your site's url):
+You can verify counts on each replica by doing a curl call (or viewing in your browser, replacing with your site's URL):
 
 ```bash
 curl 'http://solr:8983/solr/admin/metrics?nodes=solr1:8983_solr,solr2:8983_solr,solr3:8983_solr&prefix=SEARCHER.searcher.numDocs,SEARCHER.searcher.deletedDocs&wt=json'

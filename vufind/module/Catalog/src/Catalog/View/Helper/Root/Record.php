@@ -371,9 +371,10 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
         $output = curl_exec($curl);
 
         // if there are no errors, attempt to decode the json response
-        if ($e = curl_error($curl)) {
+        $responseCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        if ($e = curl_error($curl) || $responseCode != 200) {
             $this->logError('Error occurred when querying LibKey API for DOI ' .
-                            $doi . '. ' . $e);
+                            $doi . '. ' . '[Response Code: ' . $responseCode . '] ' . $e);
         } else {
             // if there was no data from the API, then  they don't have that DOI in the LibKey system
             if (empty($output)) {
@@ -382,7 +383,8 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             $data = json_decode($output, true);
             if ($data === null) {
                 $this->logError('Error occured parsing the JSON data from LibKey for DOI ' .
-                                $doi . '. Error: ' . json_last_error_msg() . '. Full Response: ' . $output);
+                                $doi . '. Error: ' . json_last_error_msg() .
+                                '. Full Response: ' . $output);
                 $data = '';
             } else {
                 // remove the layer of nesting to make parsing later more straight forward

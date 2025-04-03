@@ -1,2 +1,2 @@
 #!/bin/bash
-zk-shell "${SOLR_ZK_HOSTS}"
+/.local/bin/zk-shell "${SOLR_ZK_HOSTS}"
