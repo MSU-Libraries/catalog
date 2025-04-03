@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck disable=SC2155,SC1091
+# shellcheck disable=SC2155,SC1091,SC2034
 
 SCRIPT_DIR=$( dirname "$0" )
 SCRIPT_NAME=$( basename "$0" )
