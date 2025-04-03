@@ -18,7 +18,6 @@ This document contains who to contact and when in various circumstances.
 
 | Who to Contact          | When to Contact                      |
 |-------------------------|--------------------------------------|
-| LIB.DL.CDAWG@msu.edu    | Within the week prior to the upgrade |
 | LIB.DL.libstaff@msu.edu | Within the week prior to the upgrade |
 
 ## Major VuFind Version Upgrades
@@ -43,7 +42,6 @@ This document contains who to contact and when in various circumstances.
 |--------------------------|-----------------------------------------|
 | LIB.DL.CDAWG@msu.edu     | 1 month prior to the upgrade            |
 | Library Staff Newsletter | Newsletter edition prior to the upgrade |
-| LIB.DL.CDAWG@msu.edu     | Within the week prior to the upgrade    |
 | LIB.DL.libstaff@msu.edu  | Within the week prior to the upgrade    |
 
 ## VuFind Outages
