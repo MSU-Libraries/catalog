@@ -67,6 +67,32 @@ Shellcheck:
     reports:
       metrics: metrics.txt
 
+markdownlint:
+  stage: lint
+  allow_failure: true
+  tags:
+    - msul-shared
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
+  image: registry.gitlab.com/pipeline-components/markdownlint-cli2:latest
+  script:
+    - markdownlint-cli2  "**/**.md"
+
+markdown-spellcheck:
+  stage: lint
+  allow_failure: true
+  tags:
+    - msul-shared
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
+  image: registry.gitlab.com/pipeline-components/markdown-spellcheck:latest
+  script:
+    - mdspell --report '**/*.md' --ignore-numbers --ignore-acronyms
+
 VuFind Tests:
   stage: Optional Steps
   image: $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA

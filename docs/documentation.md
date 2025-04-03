@@ -41,7 +41,19 @@ continue to modify them and see the updates in your browser.
 ```bash
 cd ${CATALOG_REPO_DIR}
 # Lint checks
-docker run --rm -it -v $PWD:/code registry.gitlab.com/pipeline-components/markdownlint:latest mdl --style all --warnings .
+docker run --rm -it -v $PWD:/code registry.gitlab.com/pipeline-components/markdownlint-cli2:latest markdownlint-cli2  "**/**.md"
 # Spell checks
 docker run --rm -it -v $PWD:/code registry.gitlab.com/pipeline-components/markdown-spellcheck:latest mdspell --report '**/*.md' --ignore-numbers --ignore-acronyms
+```
+
+### Ignoring findings
+
+To ignore `mdspell` findings, add them to the `.spelling` file.
+
+To ignore `markdownlint-cli2` fingings, use in-line disables, for example:
+
+```txt
+my line to ignore<!-- markdownlint-disable MD013 -->
+or
+<!-- markdownlint-disable-next-lint MD013 Optional comment why it is disabled-->
 ```
