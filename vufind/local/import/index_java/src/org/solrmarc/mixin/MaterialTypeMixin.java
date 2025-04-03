@@ -55,10 +55,7 @@ public class MaterialTypeMixin extends SolrIndexerMixin {
         List<String> result = new ArrayList<String>();
 
         if ((formats.contains("Atlas") && !formats.contains("Electronic")) ||
-                (formats.contains("Book") && !formats.contains("Electronic")) ||
-                (contentTypes.contains("text") &&
-                    mediaTypes.contains("unmediated") &&
-                    carrierTypes.contains("volume"))
+                (formats.contains("Book") && !formats.contains("Electronic"))
             )
             result.add("1/At the Libraries/Books/");
 

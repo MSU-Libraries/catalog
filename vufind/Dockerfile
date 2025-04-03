@@ -204,8 +204,15 @@ RUN \
 
 EXPOSE 80
 
-HEALTHCHECK --interval=1m --timeout=40s --start-period=30s --retries=6 \
-   CMD curl --fail -s http://localhost:80/ || exit 1
+# --timeout=12s: because 5s solr timeout * 2 attempts + 2s wait between attempts
+# --interval=10s: so the checks start sooner after the container starts
+# --start-period=60s: so failures before 60s + (3*10s) don't kill the container
+#   particularly on devel envs where they need more startup time
+# --retries=3: will have 3*10s to recover before killed after healthy
+# checking the search results page to make sure solr connection is working and kill
+# container if we have a stale solr connection from previous deploy.
+HEALTHCHECK --interval=10s --timeout=12s --start-period=60s --retries=3 \
+   CMD curl --fail -s http://localhost:80/Search/Results?type=AllFields || exit 1
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD /startup.sh

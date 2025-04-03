@@ -1,5 +1,7 @@
 <?php
 
+use Laminas\ServiceManager\Factory\InvokableFactory;
+
 return [
   'router' => [
     'routes' => [
@@ -109,12 +111,14 @@ return [
             Catalog\RecordTab\Description::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
             Catalog\RecordTab\HoldingsILS::class => VuFind\RecordTab\HoldingsILSFactory::class,
             Catalog\RecordTab\HoldingsWorldCat2::class => VuFind\RecordTab\HoldingsWorldCat2Factory::class,
+            Catalog\RecordTab\StaffViewMARC::class => InvokableFactory::class,
             Catalog\RecordTab\TOC::class => VuFind\RecordTab\TOCFactory::class,
         ],
         'aliases' => [
             VuFind\RecordTab\Description::class => Catalog\RecordTab\Description::class,
             VuFind\RecordTab\HoldingsILS::class => Catalog\RecordTab\HoldingsILS::class,
             VuFind\RecordTab\HoldingsWorldCat2::class => Catalog\RecordTab\HoldingsWorldCat2::class,
+            VuFind\RecordTab\StaffViewMARC::class => Catalog\RecordTab\StaffViewMARC::class,
             VuFind\RecordTab\TOC::class => Catalog\RecordTab\TOC::class,
         ],
       ],

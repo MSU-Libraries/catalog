@@ -283,11 +283,13 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             if (count($subf6Parts) > 1 && $subf6Parts[0] == '880') {
                 $index = $subf6Parts[1];
                 $linked = $marc->getLinkedField('880', $field, $index, $subfieldFilters);
-                foreach ($linked['subfields'] as $lsf) {
-                    if (!in_array($lsf['code'], $subfieldFilters) || $lsf['code'] == self::LINKSUBF) {
-                        continue;
+                if ($linked && array_key_exists('subfields', $linked) && is_array($linked)) {
+                    foreach ($linked['subfields'] as $lsf) {
+                        if (!in_array($lsf['code'], $subfieldFilters) || $lsf['code'] == self::LINKSUBF) {
+                            continue;
+                        }
+                        $linkedVals[] = $lsf['data'];
                     }
-                    $linkedVals[] = $lsf['data'];
                 }
             }
         }
@@ -1098,7 +1100,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 $sfvals[$subfield['code']] = $subfield['data'];
             }
             if (str_contains($sfvals['u'], 'bookplate')) {
-                $bookplates[] = ['note' => $sfvals['y'], 'url' => $sfvals['u']];
+                $bookplates[] = ['note' => trim($sfvals['y']), 'url' => $sfvals['u']];
             }
         }
 
@@ -1114,14 +1116,14 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             // if so, use the bookplate values instead
             $bookplateMatch = false;
             foreach ($bookplates as $bookplate) {
-                if (strcasecmp($bookplate['note'] ?? '', $sfvals['a']) === 0) {
+                if (strcasecmp($bookplate['note'] ?? '', trim($sfvals['a'])) === 0) {
                     $notes[] = ['note' => $sfvals['a'], 'url' => $bookplate['url']];
                     $bookplateMatch = true;
                     break;
                 }
             }
             if (!$bookplateMatch) {
-                $notes[] = ['note' => $sfvals['a']];
+                $notes[] = ['note' => trim($sfvals['a'])];
             }
         }
         return $notes;
@@ -1715,6 +1717,18 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         // and does NOT have ind2 = 6
         foreach ($allFields as $result) {
             if (isset($result['tag']) && in_array($result['tag'], $subjectFieldsKeys) && $result['i2'] != '6') {
+                // MSU:  Skip if $2 == fast (PC-1216)
+                $skip = false;
+                foreach ($result['subfields'] as $sf) {
+                    if ($sf['code'] == '2' && $sf['data'] == 'fast') {
+                        $skip = true;
+                        break;
+                    }
+                }
+                if ($skip) {
+                    continue;
+                }
+
                 $fieldType = $this->subjectFields[$result['tag']];
 
                 // Start an array for holding the chunks of the current heading:
@@ -1983,7 +1997,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                                 $index,
                                 range('a', 'z')
                             );
-                            $currentArray['linked'] = implode(' ', $this->getSubfieldArray($linked, range('a', 'z')));
+                            $currentArray['linked'] = empty($linked) ?
+                                '' :
+                                implode(' ', $this->getSubfieldArray($linked, range('a', 'z')));
                         }
                     }
 

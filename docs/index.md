@@ -30,3 +30,6 @@ suggestions you have!
 * [Using Core VuFind Only](core-vufind.md)
 * [Alphabrowse Internals](alphabrowse.md)
 * [Documentation](documentation.md)
+
+## Processes
+* [Communication Processes](communication-processes.md)
