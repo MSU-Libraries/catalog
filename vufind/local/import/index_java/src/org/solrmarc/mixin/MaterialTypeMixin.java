@@ -24,11 +24,6 @@ public class MaterialTypeMixin extends SolrIndexerMixin {
             result.add("Streaming Video");
 
         if (contentTypes.contains("text") &&
-                mediaTypes.contains("unmediated") &&
-                carrierTypes.contains("volume"))
-            result.add("Physical Book");
-
-        if (contentTypes.contains("text") &&
                 mediaTypes.contains("computer") &&
                 carrierTypes.contains("online resource"))
             result.add("Electronic Book");
