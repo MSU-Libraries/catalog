@@ -42,7 +42,7 @@ use function is_array;
 
 class RecordTest extends \PHPUnit\Framework\TestCase
 {
-    use \Catalog\Feature\FixtureTrait;
+    use \VuFindTest\Feature\FixtureTrait;
     use \VuFindTest\Feature\ReflectionTrait;
 
     /**
