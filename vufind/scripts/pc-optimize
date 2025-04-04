@@ -69,7 +69,10 @@ main() {
 
     print_info "Command: mysql" "${OPT_ARGS[@]}"
     if [[ $ARG_DRY_RUN -eq 0 ]]; then
-        mysql --defaults-extra-file=<(printf "[client]\nuser=vufind\npassword=%s\nhost=galera\n" "${MARIADB_VUFIND_PASSWORD}") vufind -e "$SQL_CMDS"
+        mysql --defaults-extra-file=<(\
+        echo -e "[client]\nuser=vufind\npassword=\
+        $(< "${MARIADB_VUFIND_PASSWORD_FILE}")\nhost=galera\n")\
+        vufind -e "$SQL_CMDS"
     fi
 }
 

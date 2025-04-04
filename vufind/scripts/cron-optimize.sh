@@ -8,5 +8,6 @@ export LOG_PATH=/mnt/logs/vufind/optimize_cleanup.log
 export EXIT_CODE_PATH=/mnt/logs/vufind/optimize_exit_code
 export DOCKER_TAG=OPTIMIZE_DB
 export OUTPUT_LOG=0
+export MARIADB_VUFIND_PASSWORD_FILE=$MARIADB_VUFIND_PASSWORD_FILE
 
 cron-common.sh
