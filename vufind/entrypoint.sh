@@ -12,6 +12,7 @@ envsubst < local/config/vufind/EPF.ini | sponge local/config/vufind/EPF.ini
 envsubst < local/config/vufind/BrowZine.ini | sponge local/config/vufind/BrowZine.ini
 envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini
 envsubst < /etc/aliases | sponge /etc/aliases
+envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
 
 # Finish SimpleSAMLphp config setup
 # shellcheck disable=SC2016

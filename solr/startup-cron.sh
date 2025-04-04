@@ -12,9 +12,6 @@ elif [[ "${STACK_NAME}" == "catalog-preview" ]]; then
 fi
 export ALPHA_CRON_HOURS
 
-# Replace $STACK_NAME, $NODE and $ALPHA_CRON_HOURS in the crontab entry
-envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
-
 # Start up syslog (required for cron)
 rsyslogd
 
