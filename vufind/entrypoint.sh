@@ -12,12 +12,14 @@ envsubst < local/config/vufind/EPF.ini | sponge local/config/vufind/EPF.ini
 envsubst < local/config/vufind/BrowZine.ini | sponge local/config/vufind/BrowZine.ini
 envsubst < local/harvest/oai.ini | sponge local/harvest/oai.ini
 envsubst < /etc/aliases | sponge /etc/aliases
-envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
 
 # Finish SimpleSAMLphp config setup
 # shellcheck disable=SC2016
 envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW_FILE} ${SIMPLESAMLPHP_CUSTOM_DIR} ${MARIADB_VUFIND_PASSWORD_FILE}' < "${SIMPLESAMLPHP_CONFIG_DIR}/config.php" | \
     sponge "${SIMPLESAMLPHP_CONFIG_DIR}/config.php"
+
+# Add in only the password file to the crontab for now
+envsubst '${MARIADB_VUFIND_PASSWORD_FILE}' < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
 
 # Unset env variables that are just used in config files and don't need to be in the environment after this.
 # SIMPLESAMLPHP_HOME, BROWZINE_LIBRARY and BROWZINE_TOKEN
