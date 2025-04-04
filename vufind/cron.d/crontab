@@ -24,6 +24,7 @@
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=$EMAIL
+MARIADB_VUFIND_PASSWORD_FILE=$MARIADB_VUFIND_PASSWORD_FILE
 
 # VuFund cache clear on start
 @reboot root chronic clear-vufind-cache 2>&1 | logger -t CACHE_CLEAR
