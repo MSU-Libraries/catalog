@@ -19,6 +19,7 @@ envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW_FILE} ${SIMPLESAMLPHP_C
     sponge "${SIMPLESAMLPHP_CONFIG_DIR}/config.php"
 
 # Add in only the password file to the crontab for now
+# shellcheck disable=SC2016
 envsubst '${MARIADB_VUFIND_PASSWORD_FILE}' < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
 
 # Unset env variables that are just used in config files and don't need to be in the environment after this.
