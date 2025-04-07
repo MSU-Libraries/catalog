@@ -24,6 +24,7 @@
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=$EMAIL
+MARIADB_VUFIND_PASSWORD_FILE=$MARIADB_VUFIND_PASSWORD_FILE
 
 # VuFund cache clear on start
 @reboot root chronic clear-vufind-cache 2>&1 | logger -t CACHE_CLEAR
@@ -39,3 +40,5 @@ ${RESRV_CRON_MINS} *	* * *	root    cron-reserves.sh
 # Cleanup data
 0  0       * * *   root    cron-searches.sh
 15 0,6,18  * * *   root    cron-sessions.sh
+# Run on the first day of every month
+30 1       1 * *   root    cron-optimize.sh

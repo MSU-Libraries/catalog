@@ -18,6 +18,10 @@ envsubst < /etc/aliases | sponge /etc/aliases
 envsubst '${SIMPLESAMLPHP_SALT} ${SIMPLESAMLPHP_ADMIN_PW_FILE} ${SIMPLESAMLPHP_CUSTOM_DIR} ${MARIADB_VUFIND_PASSWORD_FILE}' < "${SIMPLESAMLPHP_CONFIG_DIR}/config.php" | \
     sponge "${SIMPLESAMLPHP_CONFIG_DIR}/config.php"
 
+# Add in only the password file to the crontab for now
+# shellcheck disable=SC2016
+envsubst '${MARIADB_VUFIND_PASSWORD_FILE}' < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
+
 # Unset env variables that are just used in config files and don't need to be in the environment after this.
 # SIMPLESAMLPHP_HOME, BROWZINE_LIBRARY and BROWZINE_TOKEN
 # cannot be unset yet because our custom PHP code uses the environment variables instead of the configs.
@@ -30,19 +34,12 @@ unset FOLIO_URL FOLIO_USER FOLIO_PASS FOLIO_TENANT FOLIO_REC_ID FOLIO_CANCEL_ID 
 if [[ "$1" == "/startup-cron.sh" ]]; then
     if ! grep -q STACK_NAME /etc/environment; then
         # Set required environment variables so cron jobs have access to them
-        if [[ "${STACK_NAME}" == devel-* && ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
-          echo 'Devel environment, core-vufind asked, set with modules empty'
-          VUFIND_LOCAL_MODULES='VUFIND_LOCAL_MODULES=""'
-        else
-          # shellcheck disable=SC2089
-          VUFIND_LOCAL_MODULES='VUFIND_LOCAL_MODULES="Catalog"'
-        fi
         {
             echo JAVA_HOME="$JAVA_HOME"
             echo VUFIND_HOME="$VUFIND_HOME"
             echo VUFIND_LOCAL_DIR="$VUFIND_LOCAL_DIR"
             echo VUFIND_CACHE_DIR="$VUFIND_CACHE_DIR"
-            echo "$VUFIND_LOCAL_MODULES"
+            echo VUFIND_LOCAL_MODULES="$VUFIND_LOCAL_MODULES"
             echo HLM_FTP_USER="$HLM_FTP_USER"
             echo HLM_FTP_PASSWORD_FILE="$HLM_FTP_PASSWORD_FILE"
             echo AUTH_FTP_USER="$AUTH_FTP_USER"

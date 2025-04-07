@@ -37,7 +37,7 @@ fi
 export FOLIO_CRON_MINS
 export HARV_CRON_MINS
 export RESRV_CRON_MINS
-# Replace the $NODE in the crontab entry
+
 envsubst < /etc/cron.d/crontab | sponge /etc/cron.d/crontab
 
 # Put the database password used for backups in the environment file

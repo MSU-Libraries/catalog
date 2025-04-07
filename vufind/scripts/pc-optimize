@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# shellcheck disable=SC2034
+
+SCRIPT_DIR=$( dirname "$0" )
+SCRIPT_NAME=$( basename "$0" )
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/pc-common"
+
+init_log_level
+
+run_help_optimize() {
+    run_help "Optimize vufind databse table"
+}
+
+help_examples_optimize() {
+    echo "# Optimize the session table"
+    echo "./$SCRIPT_NAME -t session"
+}
+
+parse_flags_table() {
+    VAR_NAME=TABLE
+    FLAG_PATTERN="-t"
+    HELP_TEXT="The name of the table to optimize (multiple tables comma delimited)"
+    VAR_DEFAULT=
+    VAR_IS_BOOL=0
+    format_flag_info
+}
+
+parse_flags_dry_run() {
+    VAR_NAME=DRY_RUN
+    FLAG_PATTERN="-n|--dry-run"
+    HELP_TEXT="Dry run the command; print what would happen, but make no changes."
+    VAR_DEFAULT=0
+    VAR_IS_BOOL=1
+    format_flag_info
+}
+
+load_flags
+
+# Capture all the common pleads for help
+if [[ -z "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    run_help_optimize
+    exit 0
+fi
+
+validate_args() {
+    if [[ -z ${ARG_TABLE} ]]; then
+        die "Table name must be specified with -t flag."
+    fi
+    if [[ $ARG_DRY_RUN -eq 1 ]]; then
+        export LOG_LEVEL=$(( LOG_LEVEL < 2 ? 2 : LOG_LEVEL ))
+        print_info "DRY RUN mode. No changes will occur."
+    fi
+}
+
+main() {
+    validate_args
+
+    print_info "Optimizing: $ARG_TABLE"
+
+    SQL_CMDS=
+    for table in ${ARG_TABLE//,/ }; do
+        SQL_CMDS+="OPTIMIZE TABLE \`$ARG_TABLE\`;"
+    done
+
+    declare -a OPT_ARGS
+    OPT_ARGS+=("--defaults-extra-file=/dev/TEMP_AUTH_FILE" "vufind" "-e" "$SQL_CMDS")
+
+    print_info "Command: mysql" "${OPT_ARGS[@]}"
+    if [[ $ARG_DRY_RUN -eq 0 ]]; then
+        mysql --defaults-extra-file=<(\
+        echo -e "[client]\nuser=vufind\npassword=\
+        $(< "${MARIADB_VUFIND_PASSWORD_FILE}")\nhost=galera\n")\
+        vufind -e "$SQL_CMDS"
+    fi
+}
+
+# shellcheck disable=SC2046
+parse_args $(split_flags "$@")
+main

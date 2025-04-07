@@ -27,6 +27,7 @@ def homepage() -> str:
     status_list['hlm_harvest'] = status.get_cron_status('hlm', statuses)
     status_list['authority_harvest'] = status.get_cron_status('authority', statuses)
     status_list['reserves_update'] = status.get_cron_status('reserves', statuses)
+    status_list['optimize'] = status.get_cron_status('optimize', statuses)
     status_list['alphabrowse'] = status.get_cron_status('alphabrowse', statuses)
     status_list['searches_cleanup'] = status.get_cron_status('searches', statuses)
     status_list['sessions_cleanup'] = status.get_cron_status('sessions', statuses)
