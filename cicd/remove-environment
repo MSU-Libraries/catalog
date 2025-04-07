@@ -65,12 +65,24 @@ removesecrets() {
     fi
 }
 
+remove_bind_mount() {
+    declare MOUNT_DIR="$1"
+    run_on_all_nodes "pc-fstab $STACK_NAME --rm -m \"${MOUNT_DIR}\""
+}
+
 main() {
     # Add .aws credentials
     envsubst < provision-dns-playbook/variables.yml | sponge provision-dns-playbook/variables.yml;
 
     # Replace STACK_NAME in env/prod/main.tf and create host file in provision-dns-playbook
     envsubst < dns-terraform/env/prod/main.tf | sponge dns-terraform/env/prod/main.tf;
+
+    # Remove devel stack bind mounts
+    if [[ $STACK_NAME == devel-* ]]; then
+        declare LIVE_DIR="/mnt/shared/local/${STACK_NAME}/live"
+        remove_bind_mount "$LIVE_DIR/module/Catalog"
+        remove_bind_mount "$LIVE_DIR/themes/msul"
+    fi
 
     # Run playbook
     ansible-playbook provision-dns-playbook/decommission.yml;

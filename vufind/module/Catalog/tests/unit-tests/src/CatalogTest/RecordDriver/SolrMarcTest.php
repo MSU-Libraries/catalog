@@ -45,7 +45,7 @@ use function strlen;
  */
 class SolrMarcTest extends \PHPUnit\Framework\TestCase
 {
-    use \Catalog\Feature\FixtureTrait;
+    use \VuFindTest\Feature\FixtureTrait;
     use \VuFindTest\Feature\ReflectionTrait;
 
     /**

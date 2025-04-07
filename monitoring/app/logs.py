@@ -78,6 +78,7 @@ def node_logs(service: str) -> str:
         'harvests/hlm':            '/mnt/logs/harvests/hlm.log',
         'harvests/authority':      '/mnt/logs/harvests/authority.log',
         'vufind/reserves_update':  '/mnt/logs/vufind/reserves_update.log',
+        'vufind/optimize':         '/mnt/logs/vufind/optimize_cleanup.log',
         'alphabrowse':             '/mnt/logs/alphabrowse/alphabrowse.log',
         'vufind/searches_cleanup': '/mnt/logs/vufind/searches_cleanup.log',
         'vufind/sessions_cleanup': '/mnt/logs/vufind/sessions_cleanup.log',

@@ -238,10 +238,12 @@ have done in our `check_solr.sh` NCPA plugin script. (TODO link to catalog-infra
 In the `/solr/` web page, under the "Cloud" tab on the left there is a "Nodes" and "Graph" section. The nodes section
 shows if nodes are up and happy, the graph section reports on if the replicas are up and ready.
 
-If the logs mention being unable to elect a leader, scale to 3 nodes (so they see each other), then scale down
+**If the logs mention being unable to elect a leader**, scale to 3 nodes (so they see each other), then scale down
 to 1 node (last node sees other nodes leave) and then wait for a leader election timeout. The remaining node will
 eventually (logs will periodically report a timeout period remaining) become the leader once the timeout happens,
-and it stops waiting for its peers to return. Then scale back up to 3.
+and it stops waiting for its peers to return. Then scale back up to 2, and then 3. You can tell when they are ready
+to be scaled back up once they show as green in /solr -> Cloud -> Graph. The command to scale the nodes is:
+`docker service scale catalog-prod-solr_solr=3`, changing the stack name and replica count as appropriate.
 
 For example if `solr2` complains after all 3 nodes are restarted that it couldn't connect to `solr1`, restarting
 `solr1` again fixes it.

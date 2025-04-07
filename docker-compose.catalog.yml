@@ -144,6 +144,7 @@ services:
       <<: *vufind_envs
     secrets: # secrets are prefixed with stack name in deploy-compose
       - HLM_FTP_PASSWORD
+      - MARIADB_VUFIND_PASSWORD
     deploy:
       mode: replicated
       replicas: 1
