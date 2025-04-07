@@ -239,9 +239,11 @@ copy_to_solr() {
         # First remove any remaining db-ready files so updates are not triggered before we copy the databases
         rm -f /bitnami/solr/server/solr/alphabetical_browse/*db-ready
         # Copy database files first, then the "-ready" files indicating they are ready to be used
+        verbose "cp -p \"${ARGS[SHARED_PATH]}/\"*db-updated /bitnami/solr/server/solr/alphabetical_browse/"
         cp -p "${ARGS[SHARED_PATH]}/"*db-updated /bitnami/solr/server/solr/alphabetical_browse/
         RCODE=$?
         if [[ "$RCODE" -eq 0 ]]; then
+            verbose "cp -p \"${ARGS[SHARED_PATH]}/\"*db-ready /bitnami/solr/server/solr/alphabetical_browse/"
             cp -p "${ARGS[SHARED_PATH]}/"*db-ready /bitnami/solr/server/solr/alphabetical_browse/
             RCODE=$?
         fi
@@ -273,11 +275,7 @@ main() {
     # This includes cleaning up old db files and copying new files to shared location.
     if [[ "${SKIP_BUILD}" -eq 0 ]]; then
         build_browse
-        RCODE=$?
-        if [[ "$RCODE" -ne 0 ]]; then
-            verbose "Rebuild failed. Exiting without copying to Solr."
-            exit $RCODE
-        fi
+        BUILD_RCODE=$?
         # Cleanup /tmp/alpha-browse if we were using it as a build path and if there was no error
         if [[ "${ARGS[BUILD_PATH]}" =~ ^/tmp/alpha-browse/ ]]; then
             verbose "Clearing ${ARGS[BUILD_PATH]}"
@@ -295,6 +293,7 @@ main() {
     fi
 
     verbose "All processing complete!"
+    exit ${BUILD_RCODE:-$RCODE}
 }
 
 # Parse and start running
