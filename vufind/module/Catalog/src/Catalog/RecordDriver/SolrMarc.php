@@ -322,7 +322,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getFullTitlesAltScript(): array
     {
         return $this->getMarcReader()
-            ->getLinkedFieldsSubfields('880', '245', ['a', 'b', 'c', 'n', 'p']);
+            ->getLinkedFieldsSubfields('880', '245', ['a', 'b', 'c', 'f', 'g', 'h', 'k', 'n', 'p', 's']);
     }
 
     /**
@@ -333,7 +333,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getTitleSection()
     {
-        return $this->getFirstFieldValue('245', ['n', 'p', 'c']);
+        return $this->getFirstFieldValue('245', ['c', 'f', 'g', 'h', 'k', 'n', 'p', 's']);
     }
 
     /**
