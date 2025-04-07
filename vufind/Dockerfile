@@ -216,7 +216,7 @@ EXPOSE 80
 # checking the search results page to make sure solr connection is working and kill
 # container if we have a stale solr connection from previous deploy.
 HEALTHCHECK --interval=10s --timeout=12s --start-period=60s --retries=3 \
-   CMD curl --fail -s http://localhost:80/Search/Results?type=AllFields || exit 1
+   CMD curl --fail -s http://localhost:80/ || exit 1
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD /startup.sh
