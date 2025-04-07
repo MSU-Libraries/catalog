@@ -326,14 +326,13 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
-     * MSU extended
-     * Get the text of the part/section portion of the title.
+     * Get the full titles of the record
      *
      * @return string
      */
-    public function getTitleSection()
+    public function getTitle()
     {
-        return $this->getFirstFieldValue('245', ['c', 'f', 'g', 'h', 'k', 'n', 'p', 's']);
+        return $this->getSolrField('title') ?? '';
     }
 
     /**
