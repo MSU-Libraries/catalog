@@ -293,7 +293,7 @@ main() {
     fi
 
     verbose "All processing complete!"
-    exit ${BUILD_RCODE:-$RCODE}
+    exit "${BUILD_RCODE:-$RCODE}"
 }
 
 # Parse and start running
