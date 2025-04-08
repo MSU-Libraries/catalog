@@ -1,5 +1,5 @@
 // MSUL Design System colors https://mainweb9.lib.msu.edu/designsystem
-// TODO -- this file is not being loaded, do we need it?
+@use 'sass:math';
 
 $eggplant:				#592646;
 $parakeetgreen:			#0A875F;
@@ -78,3 +78,17 @@ $form-select-indicator-padding:     .75rem !default;
 
 $table-bg-accent:                   #f9f9f9 !default;
 $table-striped-bg:                  #f9f9f9 !default;
+
+$alert-warning-bg:                  #fcf8e3;
+
+$font-size-base:                    17px;
+$line-height-base:                  1.428571429; // 20/14
+$line-height-computed:              math.floor(($font-size-base * $line-height-base)); // ~20px
+
+$table-cell-padding:                8px;
+$table-border-color:                #ddd;
+$font-family-monospace:             Menlo, Monaco, Consolas, "Courier New", monospace;
+$border-radius-base:                0.5rem; // 4px;
+$gray-base:                         #000;
+$nav-link-hover-bg:                 $lightgray;
+$pager-margin-top:                  -2.8rem;

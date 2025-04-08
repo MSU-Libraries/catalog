@@ -131,10 +131,10 @@ while [[ "$EXIT_STATUS" -eq 28 ]]; do # exit code 28 is curl timeout
 done
 echo "Solr ready!"
 
-# Run grunt if a devel/review site
+# Run npm if a devel/review site
 if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
-    echo "Starting grunt to auto-compile theme changes..."
-    grunt watch:scss&
+    echo "Starting npm to auto-compile theme changes..."
+    npm watch:scss&
 fi
 
 # Unset environment variables that are no longer necessary before starting Apache

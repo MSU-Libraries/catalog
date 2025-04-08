@@ -1,4 +1,5 @@
-@use 'variables' as v;
+//@use "bootstrap"; /* Include bootstrap theme's scss base */
+@use "bootstrap-variable-overrides" as v;
 
 // MSU Start
 .sidebar h2 {
@@ -22,10 +23,10 @@
   .collapsing,
   &.full-facet-list .facet {
     position: relative;
-    border-left: 1px solid v.$list-group-border;
-    border-right: 1px solid v.$list-group-border;
+    border-left: 1px solid $list-group-border;
+    border-right: 1px solid $list-group-border;
   }
-  &.full-facet-list :first-child .facet { border-top: 1px solid v.$list-group-border; }
+  &.full-facet-list :first-child .facet { border-top: 1px solid $list-group-border; }
 }
 
 .facet__list {
@@ -129,7 +130,7 @@
       border: 2px dotted transparent;
     }
     .exclude.selected {
-      border: 2px dotted v.$list-group-active-bg;
+      border: 2px dotted $list-group-active-bg;
     }
     .exclude {
       .icon {
@@ -175,14 +176,14 @@
 
 .active-filters .facet,
 .facet-group .active {
-  background-color: v.$list-group-active-bg;
+  background-color: $list-group-active-bg;
   color: #fff;
 
   a { color: #fff; text-decoration:none !important; } // MSU
 }
 .facet.active .badge {
   background-color: #fff;
-  color: v.$brand-primary;
+  color: $brand-primary;
 }
 
 .narrow-toggle { text-align: center; }
@@ -195,7 +196,7 @@
 .top-row .applied {
   font-weight: bold;
   &:hover {
-    color: v.$state-danger-text;
+    color: $state-danger-text;
     .fa.fa-check:before {
       content: "\f00d";
     }
@@ -204,8 +205,8 @@
 
 .full-facets {
   margin: 1rem 0;
-  border-top: 1px solid v.$list-group-border;
-  border-bottom: 1px solid v.$list-group-border;
+  border-top: 1px solid $list-group-border;
+  border-bottom: 1px solid $list-group-border;
 }
 .full-facet-list .active .fa.fa-times {
   float: right;
@@ -215,7 +216,7 @@
 body.rtl .full-facet-list .active .fa.fa-times { float: left; }
 .full-facet-controls .form-group {
   margin: 0;
-  padding: v.$padding-base-vertical 0;
+  padding: $padding-base-vertical 0;
 }
 
 .truncate-done {
@@ -240,7 +241,7 @@ body.rtl .full-facet-list .active .fa.fa-times { float: left; }
   .date-to   { padding-left:  .25rem; }
 }
 h3.facet-title {
-  font-size: v.$font-size-base;
+  font-size: $font-size-base;
   margin: 0;
 }
 @media (min-width: 768px) {
@@ -284,7 +285,7 @@ h3.facet-title {
   top: 0;
   padding: 1em;
   z-index: 40;
-  border-bottom: 1px solid v.$list-group-border;
+  border-bottom: 1px solid $list-group-border;
   box-shadow: 0 5px 5px -4px #000;
 }
 .multi-facet-selection-active {

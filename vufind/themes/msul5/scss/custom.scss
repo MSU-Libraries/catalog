@@ -2,9 +2,9 @@
 // TODO -- this is not an SCSS style
 //@use url("https://msu-p-001.sitecorecontenthub.cloud/api/public/content/1a1d46b45afb40eda6ebf4ed44077295");
 
-@use "bootstrap"; /* Include bootstrap theme's scss base */
-@use "variables" as v;
-@use "components/sidebar";
+@use "bootstrap-variable-overrides" as v;
+@import "bootstrap"; /* Include bootstrap theme's scss base */
+@import "components/sidebar";
 
 //Utility Classes
 
@@ -15,7 +15,7 @@
 // link color
 
 a {
-  color:$darkparakeetgreen;
+  color:v.$darkparakeetgreen;
 }
 
 //Focus indicators
@@ -268,7 +268,7 @@ header {
     text-decoration: none;
   }
   a:hover, a:active {
-    color: v.$gray-darker;
+    color: v.$darkgray;
     text-decoration: underline;
   }
 }
@@ -1198,7 +1198,7 @@ label {
   background-color:v.$lightgray;
   padding:0.5rem 1rem;
   border-radius:0.5rem;
-  color:v.$gray-darker;
+  color:v.$darkgray;
   font-size:18px;
   margin-bottom:1rem;
   margin-top:1rem;
@@ -1479,7 +1479,7 @@ body.template-dir-myresearch.template-name-profile {
 
   > ul > li {
     > a, > a:hover {
-      color: v.$gray-darker;
+      color: v.$darkgray;
       position: relative;
       // Increase z-index to place a tag in front of the :after triangle
       z-index: 10;
@@ -1502,7 +1502,7 @@ body.template-dir-myresearch.template-name-profile {
   &[disabled],
   fieldset[disabled] & {
     &:hover {
-      background-color: v.$gray-darker;
+      background-color: v.$darkgray;
       color: white;
    }
   }
@@ -1869,7 +1869,7 @@ mark {
   }
   .close {
     &:hover {
-      background-color: v.$gray;
+      background-color: v.$gray-base;
     }
   }
 }
