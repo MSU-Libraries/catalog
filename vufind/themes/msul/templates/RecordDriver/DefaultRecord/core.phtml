@@ -44,25 +44,8 @@
     </div>
   <?php endif; ?>
   <div class="media-body">
-
-      <?php
-        /** MSU */
-        $title = $this->driver->getShortTitle();
-        $emptySubtitle = true;
-        if (!empty($this->driver->getSubtitle())) {
-            // add a colon if getSubtitle has data
-            $title .= ' : ' . $this->driver->getSubtitle();
-            $emptySubtitle = false;
-        }
-        if (!empty($this->driver->getTitleSection())) {
-            if ($emptySubtitle) {
-                // add a slash if there is getTitleSection but no getSubtitle
-                $title .= ' /';
-            }
-            $title .= ' ' . $this->driver->getTitleSection();
-        }
-      ?>
-    <h1<?=$this->schemaOrg()->getAttributes(['property' => 'name'])?>><?=$this->escapeHtml($title)?></h1><?php /** MSU */?>
+    <!-- MSU PC-1354 Use solr field for title to match search results page -->
+    <h1<?=$this->schemaOrg()->getAttributes(['property' => 'name'])?>><?=$this->escapeHtml($this->driver->getTitle()) ?></h1>
     <?php //MSUL customization to add hidden fields used in support of PC-606 ?>
     <input type='hidden' id='title_short' value='<?= $this->escapeHtml($this->driver->getRawData()['title_short'] ?? '')?>'/>
     <input type='hidden' id='id' value='<?= $this->escapeHtml($this->driver->getRawData()['id'] ?? '')?>'/>

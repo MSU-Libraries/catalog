@@ -322,18 +322,17 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getFullTitlesAltScript(): array
     {
         return $this->getMarcReader()
-            ->getLinkedFieldsSubfields('880', '245', ['a', 'b', 'c', 'n', 'p']);
+            ->getLinkedFieldsSubfields('880', '245', ['a', 'b', 'c', 'f', 'g', 'h', 'k', 'n', 'p', 's']);
     }
 
     /**
-     * MSU extended
-     * Get the text of the part/section portion of the title.
+     * Get the full titles of the record
      *
      * @return string
      */
-    public function getTitleSection()
+    public function getTitle()
     {
-        return $this->getFirstFieldValue('245', ['n', 'p', 'c']);
+        return $this->getSolrField('title') ?? '';
     }
 
     /**
