@@ -1,0 +1,22 @@
+<?php
+$item = $this->getthis->getItem();
+$loc = $this->getthis->getLocation();
+$title = $this->driver->getTitle();
+$author = $this->driver->getPrimaryAuthor();
+$bibnum = $this->driver->getSierraBN();
+$callnum = $this->getthis->getCallNumber();
+?>
+<div>
+    <p>
+        <b>Request this Item:</b>
+        Materials must be paged before you can receive it. Please reach out to circulation
+        <!--
+        <a href='https://codeprod.lib.msu.edu/forms/reqform.php?TITLE=<?= $this->escapeUrl($title) ?>&CALL=<?= $this->escapeUrl($callnum) ?>&AUTHOR=<?= $this->escapeUrl($author) ?>&LOC=<?= $this->escapeUrl($loc) ?>&BIBNUM=<?= $this->escapeUrl($bibnum) ?>' target='_blank'>this form</a>
+        first and we will contact you when the item is ready for pickup.
+        -->
+        and they will help identify your options.
+        <?php if ($this->getthis->isLibUseOnly()) {
+            ?>However, this material cannot leave the building.<?php
+        } ?>
+    </p>
+</div>

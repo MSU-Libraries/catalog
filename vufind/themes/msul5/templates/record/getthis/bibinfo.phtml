@@ -1,0 +1,33 @@
+<!-- Get-this: Bibinfo -->
+<?php
+$item = $this->getthis->getItem();
+$callnum = $this->getthis->getCallNumber();
+$location = $this->getthis->getLocation();
+$notices = $this->Notices('RequestNotices.yaml');
+?>
+<div>
+  <p>
+    <b>Title:</b> <?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?>
+  </p>
+  <p>
+    <b>Call Number:</b>
+    <?php if ($callnum ?? false): ?>
+      <span><?=$this->escapeHtml($callnum) ?></span>
+    <?php endif; ?>
+  </p>
+  <?php if ($location ?? false): ?>
+    <p>
+      <b>Location:</b>
+        <span><?=$this->escapeHtml($location) ?></span>
+    </p>
+  <?php endif; ?>
+  <p>
+    <b>Status:</b> <?= $this->getthis->getStatus() ?>
+  </p>
+  <?php if (!empty($item)): ?>
+    <?= $this->locationNotices($item) ?>
+  <?php endif; ?>
+  <?=$notices->renderNotices('custom-notices-item')?>
+  <hr/>
+  <?=$this->render('record/getthis/placerequest.phtml')?>
+</div>

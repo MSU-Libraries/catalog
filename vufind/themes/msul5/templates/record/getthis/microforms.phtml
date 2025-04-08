@@ -1,0 +1,34 @@
+<?php
+use Catalog\Utils\RegexLookup as Regex;
+
+$loc = $this->getthis->getLocation();
+?>
+<div>
+    <p>
+        <b>Request Viewing of Item:</b>
+        Microform materials can be accessed and viewed on 2 West of the Main Library
+        during the Hollander MakeCentral Service Desk <a href="https://lib.msu.edu/hours">open hours</a>.
+
+        <ul>
+        <?php if (Regex::REMOTE($loc)): ?>
+            <li>Please note remotely held materials will have to be requested in advance of
+                in-person viewing to allow time for retrieval. For more details on requesting
+                remote microforms for viewing, visit the
+                <a href='https://lib.msu.edu/general/collections/microforms/'
+                target='_blank'>Microforms Library homepage</a>.
+            </li>
+        <?php elseif (Regex::MAP($loc)): ?>
+            <li>For more details on requesting viewing for map items, please contact the
+                <a href='https://lib.msu.edu/map' target='_blank'>Map Library</a>.
+            </li>
+        <?php else: ?>
+            <li>Microform items held within the main library building are available for walk-in viewing.
+                Questions should be directed to the
+                <a href='https://lib.msu.edu/hollander-makecentral#contact-hollander-makecentral'
+                target='_blank'>Hollander MakeCentral Service Desk</a>.
+            </li>
+        <?php endif; ?>
+        </ul>
+    </p>
+</div>
+

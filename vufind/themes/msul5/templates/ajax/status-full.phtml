@@ -1,0 +1,98 @@
+<?php
+/** MSU - Except marked part, all code has been modified by MSU */
+/** MSU START */
+use Catalog\GetThis\GetThisLoader;
+
+$selected = '';
+/** @var Catalog\View\Helper\Root\Record $record */
+$record = $this->record($this->driver);
+foreach ($this->statusItems as $item) {
+  if ($selected == '') {
+    $selected = $item;
+    $selectedStatus = $record->getStatus($selected);
+  } elseif ($selectedStatus != 'Available') {
+    $itemStatus = $record->getStatus($item);
+    if ($itemStatus == 'Available' || ($selectedStatus != 'Library Use Only' && $itemStatus == 'Library Use Only')) {
+      $selected = $item;
+      $selectedStatus = $record->getStatus($selected);
+    }
+  }
+  $itemHasAdditionalHoldingsFields = false;
+  foreach ($this->holdingsTextFieldNames as $holdingsTextField) {
+    if (!empty($item[$holdingsTextField])) {
+      $itemHasAdditionalHoldingsFields = true;
+      break;
+    }
+}
+if ($selected != '') {
+  $location = $selected['location'];
+  $callnumber = $selected['callnumber'];
+  $callNumPrefix = !empty($selected['callnumber_prefix']) ? $selected['callnumber_prefix'] . ' ' : '';
+
+}
+
+}
+/** MSU END */
+?>
+<?php if ($selected != ''): ?>
+  <div<?=$itemHasAdditionalHoldingsFields ? $this->htmlAttributes(['class' => 'itemWithAdditionalHoldingFields']) : ''?>>
+    <strong>Holdings:</strong>
+    <span class="fullAvailability">
+        <?php /** @var $availabilityStatus VuFind\ILS\Logic\AvailabilityStatus */ ?>
+        <?php $availabilityStatus = $selected['availability']; ?>
+        <?php /** NOT MSU START */ ?>
+          <?php
+            $statusClass = $this->availabilityStatus()->getClass($availabilityStatus);
+            if ($availabilityStatus->isAvailable() && $item['reserve'] === 'Y') {
+              $statusDescription = 'On Reserve';
+            } else {
+              $statusDescription = $availabilityStatus->getStatusDescription();
+            }
+            $statusDescriptionTokens = $availabilityStatus->getStatusDescriptionTokens();
+            /** NOT MSU END */
+          ?>
+          <strong class="<?=$this->escapeHtmlAttr($statusClass)?>"><?=$this->transEsc($statusDescription, $statusDescriptionTokens)?></strong>
+    </span>
+    <?php if ($location != ''): ?>
+      at
+      <span class="fullLocation">
+        <?php $locationText = $this->transEsc($location); ?>
+        <?php if (count($this->statusItems) > 1): ?>
+          <?=$locationText?>&nbsp;&nbsp;<a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getUrl($selected['id']))?>/Holdings#tabnav" target="_blank">see more</a>
+        <?php else: ?>
+          <?=$locationText?>
+        <?php endif; ?>
+      </span>
+    <?php endif; ?>
+    <?php $id = $selected['id']; ?>
+    <?php $item_id = $selected['item_id']; ?>
+    <?php $getthis = new GetThisLoader($record, $this->statusItems, $item_id); ?>
+    <?php if ($getthis && ! str_starts_with($id, 'hlm.') && ! $getthis->isOnlineResource()): ?>
+      <a class="pl-1 placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
+        <?=$this->transEsc('Get this')?>
+      </a>
+    <?php endif; ?>
+  </div>
+  <?php if ($callnumber != ''): ?>
+    <div>
+      <strong>Call Number:</strong>
+      <span class="fullCallnumber">
+          <?=$this->escapeHtml($callNumPrefix)?><?=$this->escapeHtml($callnumber)?>
+      </span>
+    </div>
+  <?php endif; ?>
+  <?php if (!empty($selected)): ?>
+    <?= $this->locationNotices($selected) ?>
+  <?php endif; ?>
+  <?php foreach ($this->holdingsTextFieldNames as $holdingsTextField): ?>
+    <?php if (!empty($item[$holdingsTextField])): ?>
+      <div>
+        <span class="statusItemsHoldingsTextFields">
+          <strong><?= $this->transEsc(ucfirst($holdingsTextField)) ?>: </strong><span><?= $this->escapeHtml(implode('; ', ((array)$item[$holdingsTextField]))); ?></span>
+        </span>
+      </div>
+    <?php endif; ?>
+  <?php endforeach; ?>
+<?php else: ?>
+  <span class="fullAvailability"><strong class="text-danger">Unavailable</strong></span>
+<?php endif; ?>

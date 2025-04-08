@@ -1,0 +1,23 @@
+<?php
+$callnum = $this->getthis->getCallNumber();
+?>
+<div>
+    <p>
+        <b>
+            <a href='https://lib.msu.edu/ua' target='_blank'>
+            University Archives Collections Access</a>:
+        </b>
+        You may review the material at the University Archives &amp; Historical Collections in
+        <a href='https://goo.gl/maps/cJzgFWghhRRAcFU5A' target='_blank'>Conrad Hall</a> using call number
+        <b><?= $this->escapeHtml($callnum) ?></b> during the
+        <a href='https://lib.msu.edu/ua/Research/ReadingRoom' target='_blank'>Reading Room</a>&#39;s open hours.
+        <ul>
+            <li>
+                Please contact the University Archives &amp; Historical Collections at
+                <a href='mailto:archives@msu.edu?subject=Re: <?= $this->escapeUrl($callnum) ?>' target='_blank'>archives@msu.edu</a> or visit
+                <a href='https://lib.msu.edu/ua' target='_blank'>University Archives</a> for information on how
+                to access these materials.
+            </li>
+        </ul>
+    </p>
+</div>

@@ -28,7 +28,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
         rm -r /usr/local/vufind/module/Catalog /usr/local/vufind/themes/msul
         # Changing theme in config
-        sed -i -r 's/^(theme\s+= )msul/\1bootstrap3/' /usr/local/vufind/local/config/vufind/config.ini
+        sed -i -r 's/^(theme\s+= )msul/\1bootstrap5/' /usr/local/vufind/local/config/vufind/config.ini
     fi
 
     # Enable detailed error reporting for devel
@@ -134,8 +134,7 @@ echo "Solr ready!"
 # Run grunt if a devel/review site
 if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
     echo "Starting grunt to auto-compile theme changes..."
-    # TODO vufind10 use scss
-    grunt watch:less&
+    grunt watch:scss&
 fi
 
 # Unset environment variables that are no longer necessary before starting Apache

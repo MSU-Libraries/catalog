@@ -1,0 +1,27 @@
+<?php
+# This file contains shared logic used by the other reqscan_*.phtml templates
+
+$item = $this->getthis->getItem();
+$authors = $this->driver->getDeduplicatedAuthors();
+$authors = array_keys(array_merge(
+    $authors['primary'],
+    $authors['secondary'],
+    $authors['corporate'],
+));
+$isxns = array_merge($this->driver->getISSNs(), $this->driver->getISBNs());
+$pass_params = [];
+$pass_params['PhotoJournalTitle'] = $this->driver->getTitle();
+$pass_params['PhotoArticleAuthor'] = count($authors) == 1 ? $authors[0] : '';
+$pass_params['ISSN'] = count($isxns) == 1 ? $isxns[0] : '';
+# Clean the ISxN
+if ($pos = strpos($pass_params['ISSN'], ' ')) {
+    $pass_params['ISSN'] = substr($pass_params['ISSN'], 0, $pos);
+}
+$pass_params['CallNumber'] = $this->getthis->getCallNumber();
+$pass_params['PhotoJournalVolume'] = $item['enumchron'] ?? '';
+$param_str = '';
+foreach ($pass_params as $pkey => $pval) {
+    if (!empty($pval)) {
+        $param_str .= "&amp;{$pkey}=" . $this->escapeUrl($pval);
+    }
+}

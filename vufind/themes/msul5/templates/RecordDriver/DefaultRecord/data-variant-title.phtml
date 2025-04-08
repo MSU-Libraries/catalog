@@ -1,0 +1,10 @@
+<?php if (is_array($data)): ?>
+  <?php foreach ($data as $field): ?>
+      <div class="variant-line" property="keywords">
+          <?php $title = trim($field['title'] ?? ''); ?>
+          <?php $type = trim($field['type'] ?? ''); ?>
+          <?php $link = trim($field['link'] ?? ''); ?>
+          <?= empty($type) ? '' : '[' . $this->escapeHtml($type) . '] '?><?=trim($this->escapeHtml($title))?><?= empty($link) ? '' : ' = ' . $this->escapeHtml($link)?>
+      </div>
+  <?php endforeach; ?>
+<?php endif; ?>

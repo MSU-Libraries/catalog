@@ -1,0 +1,19 @@
+<?php
+$item = $this->getthis->getItem();
+$loc = $this->getthis->getLocation();
+$title = $this->driver->getTitle();
+$author = $this->driver->getPrimaryAuthor();
+$bibnum = $this->driver->getSierraBN();
+$callnum = $this->getthis->getCallNumber();
+?>
+<div>
+    <p>
+        <b>Request Digital Lending:</b>
+        Materials must be paged for in-building use. Please reach out to circulation
+        <!--
+        Please fill out
+        <a href='https://codeprod.lib.msu.edu/forms/reqform.php?TITLE=<?= $this->escapeUrl($title) ?>&CALL=<?= $this->escapeUrl($callnum) ?>&AUTHOR=<?= $this->escapeUrl($author) ?>&LOC=<?= $this->escapeUrl($loc) ?>&BIBNUM=<?= $this->escapeUrl($bibnum) ?>' target='_blank'>this form</a>
+        -->
+        and they will help identify your viewing options.
+    </p>
+</div>

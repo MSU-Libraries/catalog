@@ -1,0 +1,28 @@
+<?php
+  $truncateSettings = [
+    'rows' => $this->config()->getRecordSubjectLimit(),
+    'top-toggle' => 30,
+  ];
+?>
+<div class="truncate-subjects" data-truncate="<?=$this->htmlSafeJsonEncode($truncateSettings)?>">
+  <?php foreach ($data as $field): ?>
+    <div class="subject-line"<?=$this->schemaOrg()->getAttributes(['property' => 'keywords'])?>>
+      <?php
+        $subject = '';
+        $i = 0;
+      ?>
+      <?php foreach ($field as $subfield): ?>
+        <?=($i++ == 0) ? '' : ' &gt; '?>
+        <?php $subject = trim($subject . ' ' . $subfield['subject']); ?>
+        <?php
+          if ($subfield['linked']) {
+            $linked = ' = ' . trim($subfield['linked']);
+          } else {
+            $linked = '';
+          }
+        ?>
+        <a title="<?=$this->escapeHtmlAttr($subject)?>" href="<?=$this->record($this->driver)->getLink('subject', $subject)?>" rel="nofollow"><?=trim($this->escapeHtml($subfield['subject']))?></a><?= $linked ?>
+      <?php endforeach; ?>
+    </div>
+  <?php endforeach; ?>
+</div>

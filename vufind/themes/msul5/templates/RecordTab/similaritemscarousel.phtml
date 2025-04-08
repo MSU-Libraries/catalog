@@ -1,0 +1,18 @@
+<!-- MSU -->
+<?php
+  $i = 1;
+?>
+<h2><?=$this->transEsc('Similar Items')?></h2>
+<ol class="record-list" start="1">
+  <?php foreach ($this->tab->getResults() as $current): ?>
+    <li class="result">
+      <div class="record-number">
+        <?=$i ?>
+      </div>
+      <?=$this->record($current)->getSearchResult('list', $this->tab)?>
+    </li>
+    <?php
+      $i++;
+    ?>
+  <?php endforeach; ?>
+</ol>
