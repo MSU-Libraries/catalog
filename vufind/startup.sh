@@ -134,7 +134,7 @@ echo "Solr ready!"
 # Run npm if a devel/review site
 if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
     echo "Starting npm to auto-compile theme changes..."
-    npm watch:scss&
+    npm run watch:scss&
 fi
 
 # Unset environment variables that are no longer necessary before starting Apache
