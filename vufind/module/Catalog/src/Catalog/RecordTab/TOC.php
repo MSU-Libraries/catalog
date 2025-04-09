@@ -54,4 +54,16 @@ class TOC extends \VuFind\RecordTab\TOC implements TranslatorAwareInterface
     {
         return $this->translate('contents_summary');
     }
+
+    /**
+     * Is this tab active?
+     *
+     * @return bool
+     */
+    public function isActive()
+    {
+        $toc = $this->getRecordDriver()->tryMethod('getTOC');
+        $summary = $this->getRecordDriver()->tryMethod('getSummary');
+        return !empty($toc) || !empty($summary);
+    }
 }

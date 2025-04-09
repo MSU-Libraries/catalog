@@ -29,6 +29,8 @@
 
 namespace Catalog\View\Helper\Root;
 
+use Psr\Container\ContainerInterface;
+use VuFind\View\Helper\Root\RecordDataFormatter\SpecBuilder;
 use function count;
 
 /**
@@ -42,6 +44,20 @@ use function count;
  */
 class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataFormatterFactory
 {
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    {
+        $helper = parent::__invoke($container, $requestedName, $options);
+        $helper->setDefaults('toc', [$this, 'getDefaultTocSpecs']);
+        return $helper;
+    }
+
+    public function getDefaultDescriptionSpecs()
+    {
+        $array = parent::getDefaultDescriptionSpecs();
+        unset($array['Summary']);
+        return $array;
+    }
+
     /**
      * MSUL - PC-936 add 'link' to the author output
      * Get the callback function for processing authors.
@@ -88,5 +104,17 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
             }
             return $final;
         };
+    }
+
+    /**
+     * Get default specifications for displaying data in the toc tab.
+     *
+     * @return array
+     */
+    public function getDefaultTocSpecs()
+    {
+        $spec = new SpecBuilder();
+        $spec->setTemplateLine('Summary', true, 'data-summary.phtml');
+        return $spec->getArray();
     }
 }
