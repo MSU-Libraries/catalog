@@ -1,0 +1,83 @@
+// Button btn-primary
+.btn-primary {
+  line-height:1.4;
+    &:hover {
+      background-color:$darkparakeetgreen;
+      border-color:$darkparakeetgreen;
+      color:#fff;
+  }
+    &:active {
+      background-color:$msugreen !important;
+      border-color:$msugreen !important;
+      color:#fff;
+  }
+    &:focus {
+      background-color:$parakeetgreen !important;
+      border-color:$parakeetgreen;
+      color:#fff;
+  }
+}
+
+//Filter button on Articles and More when 4+ selected
+.search-filter-dropdown {
+  .btn-primary {
+    border-radius: 4px;
+    padding: 2px 8px;
+    color: #fff;
+    background: $parakeetgreen;
+    vertical-align: baseline;
+    &:hover {
+      background-color:$darkparakeetgreen;
+      border-color:$darkparakeetgreen;
+      color:#fff;
+    }
+    &:active {
+      background-color:$msugreen !important;
+      border-color:$msugreen !important;
+      color:#fff !important;
+    }
+  }
+  ul {
+    padding:0.5rem;
+  }
+}
+
+// Fix visibility of text for on-hover of disabled buttons
+.btn-group input {
+  &.disabled,
+  &[disabled],
+  fieldset[disabled] & {
+    &:hover {
+      background-color: $darkgray;
+      color: white;
+   }
+  }
+}
+
+.bulkActionButtons {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  .selection-controls-bar {
+    order: 10;
+  }
+  .action-toolbar {
+    order: 20;
+  }
+  .bulk-checkbox input {
+    height:1.25rem;
+    width:1.25rem;
+    vertical-align:text-bottom;
+  }
+  .action-toolbar li button {
+    background-color:transparent;
+    color:$darkparakeetgreen;
+  }
+}
+
+// Focus indicator
+.btn-default:focus {
+  color:initial;
+  background-color:initial;
+  border-color:revert;
+}

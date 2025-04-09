@@ -2,10 +2,6 @@
 return [
     'extends' => 'bootstrap5',
 
-    'less' => [
-        'active' => true,
-        'compiled.less',
-    ],
     'js' => [
         ['file' => 'get-this-dropdown.js', 'priority' => 450],
         ['file' => 'check_item_statuses.js', 'priority' => 450],
@@ -43,6 +39,7 @@ return [
              */
             'send-sms' => 'FontAwesome:mobile',
             'user-list-add' => 'FontAwesome:star',
+            'export' => 'FontAwesome:arrow-right',
         ],
     ],
 ];

@@ -1,0 +1,178 @@
+.placehold {
+  display:inline-block;
+  text-decoration: none !important;
+  color:$parakeetgreen;
+  border: 2px solid $parakeetgreen;
+  -webkit-border-radius: 7rem;
+  -moz-border-radius: 7rem;
+  border-radius: 7rem;
+  padding: 0.2rem 0.75rem 0.2rem 0.65rem;
+  margin: 0 1rem 0 1rem;
+  transition:box-shadow .3s linear;
+  -moz-transition:-moz-box-shadow .3s linear;
+  -webkit-transition:-webkit-box-shadow .3s linear;
+  &:hover {
+    text-decoration:none;
+    color:$darkparakeetgreen !important;
+    border: 2px solid $darkparakeetgreen !important;
+  }
+  &:active {
+    text-decoration:none;
+    color:$parakeetgreen;
+    border: 2px solid $parakeetgreen;
+    box-shadow: inset 0 1rem 1rem $lightgray, 0 0 0.5rem $parakeetgreen;
+    -webkit-box-shadow: inset 0 1rem 1rem $lightgray, 0 0 0.5rem $parakeetgreen;
+  }
+  i {
+    display:none;
+  }
+}
+
+/* Disable links (such as the request button */
+.disabled {
+  color: $darkgray;
+  border-color: $darkgray;
+  background-color: $lightgray;
+  cursor: not-allowed;
+  &:hover {
+    color: $darkgray;
+    border-color: $darkgray;
+    background-color: $lightgray;
+    cursor: not-allowed;
+  }
+}
+
+.result-body {
+  /* Get this button on the search results page */
+  .placehold {
+    padding: 0 .5rem 0 .5rem;
+    font-size: 75%;
+    font-weight: 700;
+    margin-left: 0;
+  }
+  /* Fix top padding on badges */
+  .format {
+    padding: .3em .6em .3em;
+  }
+  /* Hide status tag, as we're using the Get-this button instead */
+  .status {
+    display: none;
+  }
+  h2 {
+    margin-bottom:0.2rem;
+  }
+  h2 a {
+    color: $msugreen;
+    &:hover {
+      color: black;
+    }
+    text-decoration: underline;
+  }
+}
+
+// Turn ul into a dropdown
+.get-this-dropdown {
+  font-family: monospace;
+  font-size: 1.1rem;
+  letter-spacing: 0;
+
+  a {
+    text-decoration: none;
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+    padding: 0.3rem;
+  }
+
+  > ul, div {
+    border: 0.15rem solid $medgray;
+    border-radius: 0.2rem;
+  }
+
+  ul {
+    width: 100%;
+    background: $lightgray;
+    list-style: none;
+    margin: 0;
+    padding-left: 0;
+  }
+
+  li {
+    display: block;
+    position: relative;
+    text-decoration: none;
+    transition-duration: 0.25s;
+  }
+
+  div {
+    max-height: 15rem;
+    overflow-y: auto;
+    width: calc(100% + 0.3rem);
+    position: absolute;
+    margin: -0.15rem;
+    margin-top: 1px;
+    left: 0;
+    visibility: hidden;
+    opacity: 0;
+    display: none;
+
+    &.active {
+      visibility: visible;
+      opacity: 1;
+      display: block;
+    }
+
+    a {
+      color: $violet;
+
+      &.current {
+        font-weight: bold;
+      }
+    }
+
+    li {
+      width: 100%;
+
+      &:hover {
+        background-color: $medgray;
+      }
+    }
+  }
+
+  > ul > li {
+    > a, > a:hover {
+      color: $darkgray;
+      position: relative;
+      // Increase z-index to place a tag in front of the :after triangle
+      z-index: 10;
+    }
+
+    &:after {
+      content: "▼";
+      position: absolute;
+      transition: all 0.1s linear;
+      right: 1rem;
+      top: 0.3rem;
+      display: inline-block;
+    }
+  }
+}
+
+.modal-loading-overlay {
+  z-index: 999;
+}
+
+.loading-spinner {
+  z-index: 1000;
+}
+
+#modal .modal-content {
+  h1 {
+    margin-bottom:2rem;
+  }
+  .close {
+    &:hover {
+      background-color: $gray-base;
+    }
+  }
+}

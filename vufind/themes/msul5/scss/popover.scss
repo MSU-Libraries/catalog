@@ -1,0 +1,23 @@
+// Popover
+.popover {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.msul-online-access {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+
+  button {
+    padding: .25rem .75rem .25rem .75rem;
+    margin-left: 1rem;
+    margin-bottom: -0.1rem;
+    font-size: 1rem;
+    background-color: white !important;
+  }
+  .fa-info {
+    padding-right: 0.5rem;
+  }
+}
