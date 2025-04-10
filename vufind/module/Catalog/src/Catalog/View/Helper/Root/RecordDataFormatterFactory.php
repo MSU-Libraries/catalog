@@ -31,6 +31,7 @@ namespace Catalog\View\Helper\Root;
 
 use Psr\Container\ContainerInterface;
 use VuFind\View\Helper\Root\RecordDataFormatter\SpecBuilder;
+
 use function count;
 
 /**
@@ -44,18 +45,27 @@ use function count;
  */
 class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataFormatterFactory
 {
+    /**
+     *  MSUL PC-1347 Change order of TOC tab
+     *
+     * @param ContainerInterface $container     Service manager
+     * @param string             $requestedName Service being created
+     * @param null|array         $options       Extra options (optional)
+     *
+     * @return object
+     *
+     * @throws ServiceNotFoundException if unable to resolve the service.
+     * @throws ServiceNotCreatedException if an exception is raised when
+     * creating a service.
+     * @throws ContainerException&\Throwable if any other error occurs
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $helper = parent::__invoke($container, $requestedName, $options);
         $helper->setDefaults('toc', [$this, 'getDefaultTocSpecs']);
         return $helper;
-    }
-
-    public function getDefaultDescriptionSpecs()
-    {
-        $array = parent::getDefaultDescriptionSpecs();
-        unset($array['Summary']);
-        return $array;
     }
 
     /**
@@ -114,7 +124,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
     public function getDefaultTocSpecs()
     {
         $spec = new SpecBuilder();
-        $spec->setTemplateLine('Summary', true, 'data-summary.phtml');
+        $spec->setTemplateLine('Summary', true, 'data-notes.phtml');
         return $spec->getArray();
     }
 }
