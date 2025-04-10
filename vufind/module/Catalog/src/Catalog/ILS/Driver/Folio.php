@@ -1084,8 +1084,9 @@ class Folio extends \VuFind\ILS\Driver\Folio
             && !$this->failureCodeIsAllowed($code, $allowedFailureCodes)
         ) {
             $this->logError(
-                "Unexpected error response (attempt #$attemptNumber"
-                . "); code: {$response->getStatusCode()}, body: {$response->getBody()}"
+                "Unexpected error response (attempt #${attemptNumber}); "
+                . "code: {$response->getStatusCode()}, request: {$method} {$path}, "
+                . "body: {$response->getBody()}"
             );
             if ($this->shouldRetryAfterUnexpectedStatusCode($response, $attemptNumber)) {
                 return $this->makeRequest(
