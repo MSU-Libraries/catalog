@@ -71,10 +71,19 @@
     <?php endif; ?>
 
     <?php /** MSU START */ ?>
-    <?php $summary = $this->driver->getSummary();
-      if (isset($summary)):
-        for ($i = 0; $i < count($summary); $i++):
-          $this->escapeHtml($summary[$i]);
+    <?php $summaries = $this->driver->getSummary();
+      $summary = [];
+      if (isset($summaries)):
+        for ($i = 0; $i < count($summaries); $i++):
+          if (is_array($summaries[$i])):
+            $link = trim($summaries[$i]['link'] ?? '');
+            $curSummary = trim($summaries[$i]['note']) . (empty($link) ? '' : ' = ' . $link);
+            $this->escapeHtml($curSummary);
+            $summary[] = $curSummary;
+          else:
+            $this->escapeHtml($summaries[$i]);
+            $summary[] = $summaries[$i];
+          endif;
         endfor;
         $summary = implode(' ', $summary);
       else:
