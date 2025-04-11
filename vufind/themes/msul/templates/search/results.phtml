@@ -99,10 +99,13 @@
       <div class="search-controls">
         <?=$this->slot('search-controls')?>
       </div>
-      <?php /* MSU Moved view.phtml here from above  */ ?>
-      <?=$this->render('search/controls/view.phtml')?>
     <?php endif; ?>
   </div>
+  <?php /* MSU Moved view.phtml here from above and made conditional*/ ?>
+  <?php $viewList = $this->params->getViewList(); ?>
+  <?php if ($recordTotal > 0 && count($viewList) > 1): ?>
+      <?=$this->render('search/controls/view.phtml')?>
+  <?php endif; /* MSU end */ ?>
   <?php /* End Listing Options */ ?>
 
   <?php if ($recordTotal < 1): ?>
