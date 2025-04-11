@@ -4,12 +4,24 @@
 
     // Set up breadcrumbs:
     $this->layout()->breadcrumbs = '<li class="active">' . $this->transEsc('New Items') . '</li>';
+    //Load the javascript
+    $this->headScript()->appendFile(
+    $this->advancedSearchJsOverride ?? 'advanced_search.js');
+    //Add expanders
+    $this->extraAdvancedControls = $this->render('search/advanced/solr.phtml');
+
 
     // Convenience variable:
     $offlineMode = $this->ils()->getOfflineMode();
     $this->layout()->searchbox = false; /** MSU */
     $this->defaultSort = 'first_indexed'; /** MSU */
 ?>
+<div style="display: none" id="jsContent">
+  <div class="expander">
+    <span class="chevronRight"><?= $this->icon('chevron-right') ?></span>
+    <span class="chevronDown"><?= $this->icon('chevron-down') ?></span>
+  </div>
+</div>
 <h1><?=$this->transEsc('Find New Items')?></h1><?php /** MSU */ ?>
 <?php if ($offlineMode == 'ils-offline'): ?>
   <?=$this->render('Helpers/ils-offline.phtml', ['offlineModeMsg' => 'ils_offline_holdings_message'])?>

@@ -1980,12 +1980,42 @@ mark {
 }
 
 //New Items page location format
-.form-search-newitem .solr-adv-facet #limit_building {
-    overflow: auto;
-    height:16.7rem;
-    margin-bottom:1rem;
+.form-search-newitem {
+  .solr-adv-facet {
+    overflow: auto; 
+    #limit_building.form-control {
+      padding: 0.1rem;
+      margin-bottom: 1rem;
+      height: 13.75em;
+      overflow: auto;
+      white-space: nowrap;
+      max-width:100%; //override core max-width 400px
       label {
-        font-weight: 400;
+        font-weight: inherit;
         color: inherit;
+      }
+    }
+  
+    .form-control.expandableLeveledCheckboxes {
+      .leveledCheckbox {
+        height: auto;
+      }
+      .leveledCheckbox:not(.expandable):not(.leveledCheckbox[data-level="0"]):not(.visibleLevel) {
+        display: none;
+      }
+      .expandable .expander,
+      .notExpandable .expander {
+        display: inline-block;
+        width: 17px;
+      }
+      .notExpandable .expander {
+        visibility: hidden;
+      }
+      .expandable.expanded > .expander .chevronRight,
+      .expandable:not(.expanded) > .expander .chevronDown,
+      .notExpandable > .expander .chevronDown {
+        display: none;
+      }
+    }
   }
 }
