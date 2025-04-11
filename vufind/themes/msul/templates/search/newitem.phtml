@@ -6,10 +6,10 @@
     $this->layout()->breadcrumbs = '<li class="active">' . $this->transEsc('New Items') . '</li>';
     //Load the javascript
     $this->headScript()->appendFile(
-    $this->advancedSearchJsOverride ?? 'advanced_search.js');
+        $this->advancedSearchJsOverride ?? 'advanced_search.js'
+    );
     //Add expanders
     $this->extraAdvancedControls = $this->render('search/advanced/solr.phtml');
-
 
     // Convenience variable:
     $offlineMode = $this->ils()->getOfflineMode();
