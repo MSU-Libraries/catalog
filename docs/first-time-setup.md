@@ -85,6 +85,7 @@ following permissions within FOLIO. They need to be created as a permission set 
 with a `POST` request to `/perms/permissions`.
 
 * `inventory.instances.item.get`
+* `inventory.items-by-holdings-id.collection.get` (Required as of Ramsons for `/inventory/items-by-holdings-id`)
 * `inventory.items.collection.get`
 * `inventory.items.item.get`
 * `inventory-storage.bound-with-parts.collection.get`

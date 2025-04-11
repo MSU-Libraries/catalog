@@ -219,7 +219,6 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 $this->getUnmatchedLinkedSubfieldData($field, $subfieldFilters, $indData)
             );
         }
-
         return $vals;
     }
 
@@ -283,9 +282,12 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             if (count($subf6Parts) > 1 && $subf6Parts[0] == '880') {
                 $index = $subf6Parts[1];
                 $linked = $marc->getLinkedField('880', $field, $index, $subfieldFilters);
-                if ($linked && array_key_exists('subfields', $linked) && is_array($linked)) {
+                if ($linked !== null && is_array($linked) && array_key_exists('subfields', $linked)) {
                     foreach ($linked['subfields'] as $lsf) {
-                        if (!in_array($lsf['code'], $subfieldFilters) || $lsf['code'] == self::LINKSUBF) {
+                        if (
+                            ($subfieldFilters !== null && !in_array($lsf['code'], $subfieldFilters))
+                            || $lsf['code'] == self::LINKSUBF
+                        ) {
                             continue;
                         }
                         $linkedVals[] = $lsf['data'];
@@ -322,18 +324,17 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getFullTitlesAltScript(): array
     {
         return $this->getMarcReader()
-            ->getLinkedFieldsSubfields('880', '245', ['a', 'b', 'c', 'n', 'p']);
+            ->getLinkedFieldsSubfields('880', '245', ['a', 'b', 'c', 'f', 'g', 'h', 'k', 'n', 'p', 's']);
     }
 
     /**
-     * MSU extended
-     * Get the text of the part/section portion of the title.
+     * Get the full titles of the record
      *
      * @return string
      */
-    public function getTitleSection()
+    public function getTitle()
     {
-        return $this->getFirstFieldValue('245', ['n', 'p', 'c']);
+        return $this->getSolrField('title') ?? '';
     }
 
     /**
@@ -1414,11 +1415,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getCallNumbers()
     {
-        return array_unique(
-            isset($this->fields['callnumber-full_str_mv'])
-            ? array_map('trim', $this->fields['callnumber-full_str_mv'])
-            : []
-        );
+        return array_unique($this->fields['callnumber-full_str_mv'] ?? []);
     }
 
     /**

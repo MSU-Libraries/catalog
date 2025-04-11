@@ -372,8 +372,8 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
 
         // if there are no errors, attempt to decode the json response
         $responseCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        if ($e = curl_error($curl) || $responseCode != 200) {
-            $this->logError('Error occurred when querying LibKey API for DOI ' .
+        if ($e = curl_error($curl) || !in_array($responseCode, [200, 404])) {
+            $this->logWarning('Error occurred when querying LibKey API for DOI ' .
                             $doi . '. ' . '[Response Code: ' . $responseCode . '] ' . $e);
         } else {
             // if there was no data from the API, then  they don't have that DOI in the LibKey system
