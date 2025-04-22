@@ -36,7 +36,7 @@ markdownlint-cli2:
     - msul-shared
   image: registry.gitlab.com/pipeline-components/markdownlint-cli2:latest
   script:
-    - markdownlint-cli2 .
+    - markdownlint-cli2 "**/**.md"
 
 markdown-spellcheck:
   stage: test
