@@ -187,7 +187,7 @@ curl 'http://solr:8983/solr/admin/metrics?nodes=solr1:8983_solr,solr2:8983_solr,
 If every node is out of sync, then you will want to look at the volume file
 timestamps to determine the most recently modified as well as determining
 which has the highest index count. Then, to force that node to become leader,
-ou will need to pause the other docker nodes (the ones you do NOT want to be
+you will need to pause the other docker nodes (the ones you do NOT want to be
 the new leader) from accepting containers, stop the ones you don't want to be
 leader one at a time, so the container remaining becomes leader. Once complete,
 un-pause the docker nodes, so they can accept new containers again. You can watch

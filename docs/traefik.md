@@ -54,9 +54,9 @@ go tool pprof -top mutex.pprof
 go tool pprof -top goroutine.pprof
 ```
 
-## Reseting the LetsEncrypt Config
+## Resetting the Let's Encrypt Config
 
-Periodically you may want to reset the LetsEncrypt config to clear out
+Periodically you may want to reset the Let's Encrypt config to clear out
 old certificates for sites that no longer exist. This is the
 process you will want to use that will ensure there is limited downtime.
 
@@ -78,7 +78,7 @@ docker node update --label-add deployglobal=false catalog-3-dev.aws.lib.msu.edu
 docker service update --constraint-add 'node.labels.deployglobal == true' traefik_traefik
 ```
 
-* On the 3rd node, clear out the LetsEncypt config
+* On the 3rd node, clear out the Let's Encrypt config
 
 ```bash
 mkdir -p /tmp/acme_backup/
@@ -93,7 +93,7 @@ docker node update --label-add deployglobal=false catalog-2-dev.aws.lib.msu.edu
 docker node update --label-add deployglobal=true catalog-3-dev.aws.lib.msu.edu
 ```
 
-* On the 2nd node, clear out the LetsEncypt config
+* On the 2nd node, clear out the Let's Encrypt config
 
 ```bash
 mkdir -p /tmp/acme_backup/
@@ -108,7 +108,7 @@ docker node update --label-add deployglobal=true catalog-2-dev.aws.lib.msu.edu
 docker node update --label-add deployglobal=true catalog-3-dev.aws.lib.msu.edu
 ```
 
-* On the 1st node, clear out the LetsEncypt config
+* On the 1st node, clear out the Let's Encrypt config
 
 ```bash
 mkdir -p /tmp/acme_backup/
@@ -198,7 +198,7 @@ tail -f /var/lib/docker/volumes/traefik_logs/_data/traefik.log -n10
 cp /tmp/acme_backup/* /var/lib/docker/volumes/traefik_traefik/_data/
 ```
 
-* Remove the temporary contraint and labels
+* Remove the temporary constraint and labels
 
 ```bash
 docker service update --constraint-rm 'node.labels.deployglobal == true' traefik_traefik
