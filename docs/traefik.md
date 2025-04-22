@@ -1,6 +1,7 @@
 # Traefik
 
 ## Re-deploying
+
 If you ever need to re-deploy the stack, you can use the
 [pc-deploy](helper-scripts.md#deploy-helper-pc-deploy) script.
 
@@ -14,7 +15,8 @@ sudo -Hu deploy pc-deploy core-stacks traefik
 ## Troubleshooting
 
 * Your first line of defense when debugging issues with Traefik is
-navigating to the Traefik dashboard at https://your-site/dashboard/
+navigating to the Traefik dashboard at
+[https://your-site/dashboard/](https://your-site/dashboard/)
 where you can see all the routers and services that have been defined.
 This is helpful when the issue is a configuration issue either in the
 Traefik command or labels.
@@ -57,7 +59,6 @@ go tool pprof -top goroutine.pprof
 Periodically you may want to reset the LetsEncrypt config to clear out
 old certificates for sites that no longer exist. This is the
 process you will want to use that will ensure there is limited downtime.
-
 
 ### On the development nodes
 
@@ -129,7 +130,8 @@ docker node update --label-rm  deployglobal catalog-3-dev.aws.lib.msu.edu
   sites and have them point to the 1st node and wait for DNS to update
 
 * On the 1st node, we will need to prevent traefik from running temporarily
-  while we quickly remove the certificate files. *DO THIS QUICKLY TO LIMIT DOWNTIME*.
+  while we quickly remove the certificate files. *DO THIS QUICKLY
+  TO LIMIT DOWNTIME*.
 
 ```bash
 docker node update --label-add deployglobal=false catalog-1.aws.lib.msu.edu
