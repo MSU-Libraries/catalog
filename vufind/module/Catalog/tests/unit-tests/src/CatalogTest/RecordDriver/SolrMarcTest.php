@@ -83,6 +83,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
             [
                 [
                     'isn' => '978-3-16-148410-0',
+                    'qual' => 'qual-data',
                     'type' => 'valid',
                 ],
                 [
