@@ -1,0 +1,16 @@
+<?php foreach ($data as $field): ?>
+    <?php $isn = trim($field['isn'] ?? ''); ?>
+    <?php $type = trim($field['type'] ?? 'valid'); ?>
+    <?php $qual = trim($field['qual'] ?? ''); ?>
+    <?php if ($qual && $qual[0] != '('): ?>
+        <?php $qual = '(' . $qual . ')'; ?>
+    <?php endif; ?>
+    <?php if ($type == 'valid'): ?>
+      <div class="isn-line">
+        <?= $this->escapeHtml($isn) ?> <?= $this->escapeHtml($qual) ?>
+    <?php else: ?>
+      <div class="isn-line isn-invalid">
+        <?= $this->escapeHtml($isn) ?> <?= $this->escapeHtml($qual) ?> (<?= $this->escapeHtml(ucwords($type)) ?>)
+    <?php endif; ?>
+    </div>
+<?php endforeach; ?>

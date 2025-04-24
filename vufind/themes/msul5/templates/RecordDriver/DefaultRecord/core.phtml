@@ -72,10 +72,19 @@
     <?php endif; ?>
 
     <?php /** MSU START */ ?>
-    <?php $summary = $this->driver->getSummary();
-      if (isset($summary)):
-        for ($i = 0; $i < count($summary); $i++):
-          $this->escapeHtml($summary[$i]);
+    <?php $summaries = $this->driver->getSummary();
+      $summary = [];
+      if (isset($summaries)):
+        for ($i = 0; $i < count($summaries); $i++):
+          if (is_array($summaries[$i])):
+            $link = trim($summaries[$i]['link'] ?? '');
+            $curSummary = trim($summaries[$i]['note']) . (empty($link) ? '' : ' = ' . $link);
+            $this->escapeHtml($curSummary);
+            $summary[] = $curSummary;
+          else:
+            $this->escapeHtml($summaries[$i]);
+            $summary[] = $summaries[$i];
+          endif;
         endfor;
         $summary = implode(' ', $summary);
       else:
@@ -87,7 +96,7 @@
       <p><?=$this->truncate($summary, 300)?></p>
 
       <?php if (strlen($summary) > 300): ?>
-        <p><a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getTabUrl($this->driver, 'Description'))?>#tabnav"><?=$this->transEsc('Full description')?></a></p>
+        <p><a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getTabUrl($this->driver, 'TOC'))?>#tabnav"><?=$this->transEsc('Full description')?></a></p><?php /** MSU */ ?>
       <?php endif; ?>
     <?php endif; ?>
 

@@ -19,7 +19,6 @@
         'hasDefaultsApplied' => $this->params->hasDefaultsApplied(),
         'selectedShards' => $this->params->getSelectedShards(),
         'ignoreHiddenFiltersInRequest' => $this->ignoreHiddenFiltersInRequest ?? false,
-        'ignoreHiddenFilterMemory' => $this->ignoreHiddenFilterMemory ?? false,
       ]
   );
 
@@ -32,7 +31,7 @@
       $this->slot('search-controls')->set(
           $this->render('search/controls/limit.phtml')
           . ' ' . $this->render('search/controls/sort.phtml')
-          . ' ' . $this->render('search/controls/view.phtml')
+          /* MSU moved search/controls/view.phtml outside the search-controls box below */
       );
   }
 
@@ -101,8 +100,12 @@
         <?=$this->slot('search-controls')?>
       </div>
     <?php endif; ?>
-    <div style="clear: both;"></div><?php /** MSU */ ?>
   </div>
+  <?php /* MSU Moved view.phtml here from above and made conditional*/ ?>
+  <?php $viewList = $this->params->getViewList(); ?>
+  <?php if ($recordTotal > 0 && count($viewList) > 1): ?>
+      <?=$this->render('search/controls/view.phtml')?>
+  <?php endif; /* MSU end */ ?>
   <?php /* End Listing Options */ ?>
 
   <?php if ($recordTotal < 1): ?>
