@@ -1,6 +1,7 @@
 # Traefik
 
 ## Re-deploying
+
 If you ever need to re-deploy the stack, you can use the
 [pc-deploy](helper-scripts.md#deploy-helper-pc-deploy) script.
 
@@ -14,7 +15,8 @@ sudo -Hu deploy pc-deploy core-stacks traefik
 ## Troubleshooting
 
 * Your first line of defense when debugging issues with Traefik is
-navigating to the Traefik dashboard at https://your-site/dashboard/
+navigating to the Traefik dashboard at
+[https://your-site/dashboard/](https://your-site/dashboard/)
 where you can see all the routers and services that have been defined.
 This is helpful when the issue is a configuration issue either in the
 Traefik command or labels.
@@ -52,12 +54,11 @@ go tool pprof -top mutex.pprof
 go tool pprof -top goroutine.pprof
 ```
 
-## Reseting the LetsEncrypt Config
+## Resetting the Let's Encrypt Config
 
-Periodically you may want to reset the LetsEncrypt config to clear out
+Periodically you may want to reset the Let's Encrypt config to clear out
 old certificates for sites that no longer exist. This is the
 process you will want to use that will ensure there is limited downtime.
-
 
 ### On the development nodes
 
@@ -77,7 +78,7 @@ docker node update --label-add deployglobal=false catalog-3-dev.aws.lib.msu.edu
 docker service update --constraint-add 'node.labels.deployglobal == true' traefik_traefik
 ```
 
-* On the 3rd node, clear out the LetsEncypt config
+* On the 3rd node, clear out the Let's Encrypt config
 
 ```bash
 mkdir -p /tmp/acme_backup/
@@ -92,7 +93,7 @@ docker node update --label-add deployglobal=false catalog-2-dev.aws.lib.msu.edu
 docker node update --label-add deployglobal=true catalog-3-dev.aws.lib.msu.edu
 ```
 
-* On the 2nd node, clear out the LetsEncypt config
+* On the 2nd node, clear out the Let's Encrypt config
 
 ```bash
 mkdir -p /tmp/acme_backup/
@@ -107,7 +108,7 @@ docker node update --label-add deployglobal=true catalog-2-dev.aws.lib.msu.edu
 docker node update --label-add deployglobal=true catalog-3-dev.aws.lib.msu.edu
 ```
 
-* On the 1st node, clear out the LetsEncypt config
+* On the 1st node, clear out the Let's Encrypt config
 
 ```bash
 mkdir -p /tmp/acme_backup/
@@ -129,7 +130,8 @@ docker node update --label-rm  deployglobal catalog-3-dev.aws.lib.msu.edu
   sites and have them point to the 1st node and wait for DNS to update
 
 * On the 1st node, we will need to prevent traefik from running temporarily
-  while we quickly remove the certificate files. *DO THIS QUICKLY TO LIMIT DOWNTIME*.
+  while we quickly remove the certificate files. *DO THIS QUICKLY
+  TO LIMIT DOWNTIME*.
 
 ```bash
 docker node update --label-add deployglobal=false catalog-1.aws.lib.msu.edu
@@ -196,7 +198,7 @@ tail -f /var/lib/docker/volumes/traefik_logs/_data/traefik.log -n10
 cp /tmp/acme_backup/* /var/lib/docker/volumes/traefik_traefik/_data/
 ```
 
-* Remove the temporary contraint and labels
+* Remove the temporary constraint and labels
 
 ```bash
 docker service update --constraint-rm 'node.labels.deployglobal == true' traefik_traefik

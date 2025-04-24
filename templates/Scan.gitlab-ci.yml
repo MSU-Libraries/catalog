@@ -25,6 +25,32 @@ gemnasium-python-dependency_scanning:
     - apt install -y libmariadb-dev
     - /analyzer run
 
+markdownlint-cli2:
+  stage: test
+  interruptible: true
+  allow_failure: true
+  environment:
+    name: $CI_COMMIT_BRANCH/markdown-lint
+    auto_stop_in: 2 weeks
+  tags:
+    - msul-shared
+  image: registry.gitlab.com/pipeline-components/markdownlint-cli2:latest
+  script:
+    - markdownlint-cli2 "**/**.md"
+
+markdown-spellcheck:
+  stage: test
+  interruptible: true
+  allow_failure: true
+  environment:
+    name: $CI_COMMIT_BRANCH/markdown-spellcheck
+    auto_stop_in: 2 weeks
+  tags:
+    - msul-shared
+  image: registry.gitlab.com/pipeline-components/markdown-spellcheck:latest
+  script:
+    - mdspell --report '**/*.md' --ignore-numbers --ignore-acronyms
+
 # Does not have the environment tag due to this being run on merge requests
 # and the $CI_COMMIT_BRANCH variable may not exist yet and could cause this error:
 # "This job could not be executed because it would create an environment with an invalid parameter."
