@@ -1,7 +1,11 @@
 // Change all bootstrap variables before importing bootstrap
 // ---------------------------------------------------------
 @import "variables";
-@import "bootstrap";
+//@import "bootstrap";
+@import "../../bootstrap5/scss/bootstrap";
+
+// Metropolis theme
+@import url("https://msu-p-001.sitecorecontenthub.cloud/api/public/content/1a1d46b45afb40eda6ebf4ed44077295");
 
 // Utility Classes
 // ---------------

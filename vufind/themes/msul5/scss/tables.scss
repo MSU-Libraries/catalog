@@ -22,7 +22,7 @@
       }
 
       > td {
-        padding: $table-cell-padding;
+        padding: $table-cell-padding-y $table-cell-padding-x $table-cell-padding-y $table-cell-padding-x;
         line-height: $line-height-base;
         width:auto;
         border-top: 0 solid $table-border-color;
