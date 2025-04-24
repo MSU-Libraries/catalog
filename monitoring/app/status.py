@@ -347,6 +347,8 @@ def _harvest_delta(name: str) -> timedelta:
     '''
     if name == 'authority':
         return timedelta(days=7)
+    if name == 'optimize':
+        return timedelta(days=31)
     return timedelta(days=1)
 
 def _node_cron_exit_codes() -> dict[str, str]:

@@ -5,25 +5,44 @@
     // MSUL Customizations to split TOC data by indicator PC-927
 
     $toc = $this->tab->getContent();
-    $driverToc = $this->driver->getContentsNotes();
-    if (!empty($driverToc)) {
-        $toc['RecordDriver'] = $driverToc;
+    $unavailableToc = empty($toc);
+    $tocs = [
+        'Contents' => $toc,
+        'Incomplete Contents' => $toc,
+        'Partial Contents' => $toc,
+    ];
+    if ($driverToc = $this->driver->getContentsNotes()) {
+        $tocs['Contents']['RecordDriver'] = $driverToc;
+        $unavailableToc = false;
     }
 
-    $incompleteToc = $this->tab->getContent();
-    $driverToc = $this->driver->getIncompleteContentsNotes();
-    if (!empty($driverToc)) {
-        $incompleteToc['RecordDriver'] = $driverToc;
+    if ($driverToc = $this->driver->getIncompleteContentsNotes()) {
+        $tocs['Incomplete Contents']['RecordDriver'] = $driverToc;
+        $unavailableToc = false;
     }
 
-    $partialToc = $this->tab->getContent();
-    $driverToc = $this->driver->getPartialContentsNotes();
-    if (!empty($driverToc)) {
-        $partialToc['RecordDriver'] = $driverToc;
+    if ($driverToc = $this->driver->getPartialContentsNotes()) {
+        $tocs['Partial Contents']['RecordDriver'] = $driverToc;
+        $unavailableToc = false;
     }
+
+    $formatter = $this->recordDataFormatter($this->driver);
+    $mainFields = $formatter->getData($formatter->getDefaults('toc'));
 ?>
+<table>
+    <?php if (!empty($mainFields)): ?>
+        <?php foreach ($mainFields as $current): ?>
+            <tr><th><?=$this->transEsc($current['label'])?>:</th><td><?=$current['value']?></td></tr>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</table>
+<?php
+/** MSU START*/
+foreach ($tocs as $title => $toc) {
+    /** MSU END */
+    ?>
 <?php if (!empty($toc)): ?>
-  <strong><?=$this->transEsc('Contents')?>: </strong>
+  <strong><?=$this->transEsc($title) /** MSU */ ?>: </strong>
   <?php foreach ($toc as $provider => $content): ?>
     <?php if (!is_array($content)): // treat non-array content as raw HTML ?>
       <?=$content?>
@@ -35,35 +54,9 @@
       </ul>
     <?php endif; ?>
   <?php endforeach; ?>
+<?php /** MSU START*/ ?>
 <?php endif; ?>
-<?php if (!empty($incompleteToc)): ?>
-  <strong><?=$this->transEsc('Incomplete Contents')?>: </strong>
-  <?php foreach ($incompleteToc as $provider => $content): ?>
-    <?php if (!is_array($content)): // treat non-array content as raw HTML ?>
-      <?=$content?>
-    <?php else: ?>
-      <ul class="toc">
-      <?php foreach ($content as $line): ?>
-        <li><?=$this->escapeHtml($line)?></li>
-      <?php endforeach; ?>
-      </ul>
-    <?php endif; ?>
-  <?php endforeach; ?>
-<?php endif; ?>
-<?php if (!empty($partialToc)): ?>
-  <strong><?=$this->transEsc('Partial Contents')?>: </strong>
-  <?php foreach ($partialToc as $provider => $content): ?>
-    <?php if (!is_array($content)): // treat non-array content as raw HTML ?>
-      <?=$content?>
-    <?php else: ?>
-      <ul class="toc">
-      <?php foreach ($content as $line): ?>
-        <li><?=$this->escapeHtml($line)?></li>
-      <?php endforeach; ?>
-      </ul>
-    <?php endif; ?>
-  <?php endforeach; ?>
-<?php endif; ?>
-<?php if (empty($toc) && empty($incompleteToc) && empty($partialToc)): ?>
-  <?=$this->transEsc('Table of Contents unavailable')?>.
-<?php endif; ?>
+<?php
+}
+/** MSU END */
+?>

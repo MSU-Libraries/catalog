@@ -219,7 +219,6 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 $this->getUnmatchedLinkedSubfieldData($field, $subfieldFilters, $indData)
             );
         }
-
         return $vals;
     }
 
@@ -283,9 +282,12 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             if (count($subf6Parts) > 1 && $subf6Parts[0] == '880') {
                 $index = $subf6Parts[1];
                 $linked = $marc->getLinkedField('880', $field, $index, $subfieldFilters);
-                if ($linked && array_key_exists('subfields', $linked) && is_array($linked)) {
+                if ($linked !== null && is_array($linked) && array_key_exists('subfields', $linked)) {
                     foreach ($linked['subfields'] as $lsf) {
-                        if (!in_array($lsf['code'], $subfieldFilters) || $lsf['code'] == self::LINKSUBF) {
+                        if (
+                            ($subfieldFilters !== null && !in_array($lsf['code'], $subfieldFilters))
+                            || $lsf['code'] == self::LINKSUBF
+                        ) {
                             continue;
                         }
                         $linkedVals[] = $lsf['data'];
@@ -322,18 +324,17 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function getFullTitlesAltScript(): array
     {
         return $this->getMarcReader()
-            ->getLinkedFieldsSubfields('880', '245', ['a', 'b', 'c', 'n', 'p']);
+            ->getLinkedFieldsSubfields('880', '245', ['a', 'b', 'c', 'f', 'g', 'h', 'k', 'n', 'p', 's']);
     }
 
     /**
-     * MSU extended
-     * Get the text of the part/section portion of the title.
+     * Get the full titles of the record
      *
      * @return string
      */
-    public function getTitleSection()
+    public function getTitle()
     {
-        return $this->getFirstFieldValue('245', ['n', 'p', 'c']);
+        return $this->getSolrField('title') ?? '';
     }
 
     /**
@@ -1414,11 +1415,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getCallNumbers()
     {
-        return array_unique(
-            isset($this->fields['callnumber-full_str_mv'])
-            ? array_map('trim', $this->fields['callnumber-full_str_mv'])
-            : []
-        );
+        return array_unique($this->fields['callnumber-full_str_mv'] ?? []);
     }
 
     /**
@@ -1450,15 +1447,26 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         $isns = [];
         $marc = $this->getMarcReader();
-        $marcArr020 = $marc->getFields('020', ['a', 'z']);
+        $marcArr020 = $marc->getFields('020', ['a','q','z']);
         foreach ($marcArr020 as $marc020) {
+            $isn = [];
             foreach ($marc020['subfields'] as $subfield) {
                 if ($subfield['code'] == 'a') {
-                    $isns[] = ['isn' => $subfield['data'], 'type' => 'valid'];
+                    $isn = array_merge(
+                        $isn,
+                        ['isn' => $subfield['data'], 'type' => 'valid']
+                    );
                 } elseif ($subfield['code'] == 'z') {
-                    $isns[] = ['isn' => $subfield['data'], 'type' => 'canceled/invalid'];
+                    $isn = array_merge(
+                        $isn,
+                        ['isn' => $subfield['data'], 'type' => 'canceled/invalid']
+                    );
+                }
+                if ($subfield['code'] == 'q') {
+                    $isn['qual'] = $subfield['data'];
                 }
             }
+            $isns[] = $isn;
         }
         return $isns;
     }
@@ -1496,18 +1504,29 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         $isns = [];
         $marc = $this->getMarcReader();
-        $marcArr024 = $marc->getFields('024', ['a', 'z']);
+        $marcArr024 = $marc->getFields('024', ['a','q','z']);
         foreach ($marcArr024 as $marc024) {
             if (($marc024['i1'] ?? '') != '2') {
                 continue;
             }
+            $isn = [];
             foreach ($marc024['subfields'] as $subfield) {
                 if ($subfield['code'] == 'a') {
-                    $isns[] = ['isn' => $subfield['data'], 'type' => 'valid'];
+                    $isn = array_merge(
+                        $isn,
+                        ['isn' => $subfield['data'], 'type' => 'valid']
+                    );
                 } elseif ($subfield['code'] == 'z') {
-                    $isns[] = ['isn' => $subfield['data'], 'type' => 'canceled/invalid'];
+                    $isn = array_merge(
+                        $isn,
+                        ['isn' => $subfield['data'], 'type' => 'canceled/invalid']
+                    );
+                }
+                if ($subfield['code'] == 'q') {
+                    $isn['qual'] = $subfield['data'];
                 }
             }
+            $isns[] = $isn;
         }
         return $isns;
     }

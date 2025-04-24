@@ -1,6 +1,7 @@
 # First Time Setup
 
 ## Building the VuFind image
+
 Before bringing up the application stack, you need to build the custom
 VuFind images. There are helper scripts in this repository to build one
 for each service, such as VuFind and Solr.
@@ -13,10 +14,12 @@ The more complex one, VuFind, has its
 which includes the documentation on which environment variables it expects
 to be defined when calling the script. For example:
 
-```
-# Build vufind:new using vufind:latest's build cache with the 9.0.1 VuFind version
-# NOTE: this is missing many other required environment variables to be a running VuFind
-# environment and is just meant to be an example to get you started!
+```bash
+# Build vufind:new using vufind:latest's build cache with the 9.0.1
+# VuFind version
+# NOTE: this is missing many other required environment variables to
+# be a running VuFind environment and is just meant to be an example
+# to get you started!
 LATEST=vufind:latest CURR=vufind:new VUFIND_VERSION=9.0.1 cicd/build-vufind
 ```
 
@@ -24,7 +27,8 @@ For the rest of the components, they share a
 [single script](https://github.com/MSU-Libraries/catalog/blob/main/cicd/build-general)
 to build their images and can be run like this:
 
-```
+<!-- markdownlint-disable MD013 -->
+```bash
 # Build the Solr image as vufind:new using solr:latst's build cache using data from
 # VuFind 9.0.1 (in this case the Solr schema and solrconfig)
 LATEST=solr:latest CURR=solr:new COMPONENT=solr VUFIND_VERSION=9.0.1 cicd/build-general
@@ -36,17 +40,24 @@ LATEST=ansible:latest CURR=ansible:new COMPONENT=ansible VUFIND_VERSION=9.0.1 ci
 LATEST=monitoring:latest CURR=monitoring:new COMPONENT=monitoring VUFIND_VERSION=9.0.1 cicd/build-general
 LATEST=legacylinks:latest CURR=legacylinks:new COMPONENT=legacylinks VUFIND_VERSION=9.0.1 cicd/build-general
 ```
+<!-- markdownlint-enable MD013 -->
 
 ## To start the application stack
+
 During the first time you are bringing up the stack, you will need
 to run these first to bootstrap Solr and MariaDB:
+
+<!-- markdownlint-disable MD013 -->
 ```bash
 docker stack deploy -c <(source .env; envsubst <docker-compose.solr-cloud-bootstrap.yml) solr
 docker stack deploy -c <(source .env; envsubst <docker-compose.mariadb-cloud-bootstrap.yml) mariadb
 ```
+<!-- markdownlint-enable MD013 -->
 
 Subsequently, you will run these commands (during the initial deploy
 and whenever you need to deploy updates):
+
+<!-- markdownlint-disable MD013 -->
 ```bash
 # Public network
 docker stack deploy -c <(source .env; envsubst <docker-compose.public.yml) public
@@ -72,19 +83,24 @@ docker stack deploy -c <(source .env; envsubst <docker-compose.swarm-cleanup.yml
 # Deploy the monitoring stack
 docker stack deploy -c <(source .env; envsubst <docker-compose.monitoring.yml) monitoring
 ```
+<!-- markdownlint-enable MD013 -->
 
 ## Creating a FOLIO user
+
 In order for VuFind to connect to FOLIO to make API calls, it
 requires a generic user to be created, called `vufind`.
 
 The users credentials are provided as build arguments to the VuFind image:
 `FOLIO_USER` and `FOLIO_PASS`.
 
-The `vufind` application user (set in `local/confing/vufind/folio.ini`) requires the
-following permissions within FOLIO. They need to be created as a permission set with the FOLIO API,
-with a `POST` request to `/perms/permissions`.
+The `vufind` application user (set in `local/confing/vufind/folio.ini`)
+requires the following permissions within FOLIO. They need to be created
+as a permission set with the FOLIO API, with a `POST` request to
+`/perms/permissions`.
 
 * `inventory.instances.item.get`
+* `inventory.items-by-holdings-id.collection.get` (Required as of Ramsons for
+  `/inventory/items-by-holdings-id`)
 * `inventory.items.collection.get`
 * `inventory.items.item.get`
 * `inventory-storage.bound-with-parts.collection.get`
@@ -95,7 +111,8 @@ with a `POST` request to `/perms/permissions`.
 * `inventory-storage.items.item.get`
 * `inventory-storage.locations.collection.get`
 * `inventory-storage.locations.item.get`
-* `inventory-storage.loan-types.collection.get` (For MSUL customization to display loan type)
+* `inventory-storage.loan-types.collection.get` (For MSUL customization
+  to display loan type)
 * `inventory-storage.service-points.collection.get`
 * `circulation.loans.collection.get`
 * `circulation.requests.allowed-service-points.get`
@@ -116,29 +133,37 @@ with a `POST` request to `/perms/permissions`.
 * `course-reserves-storage.reserves.collection.get`
 * `course-reserves-storage.terms.collection.get`
 * `oai-pmh.records.collection.get`
-* `kb-ebsco.packages.collection.get` (For MSUL customization to add license agreement information to record pages)
+* `kb-ebsco.packages.collection.get` (For MSUL customization to add license
+  agreement information to record pages)
 * `proxiesfor.collection.get`
 
 ## For GitLab users
+
 ### Creating a CI/CD Token
+
 Create a new [access token](https://gitlab.msu.edu/help/user/project/settings/project_access_tokens)
-that has `read_registry` privileges to the repository and create a new CI/CD variable with the
-resulting key value (`REGISTRY_ACCESS_TOKEN`).
+that has `read_registry` privileges to the repository and create a new
+CI/CD variable with the resulting key value (`REGISTRY_ACCESS_TOKEN`).
 
 ### Create CI/CD Variables
-There are a number of variables that are required for the CI/CD pipeline to run. Refer to the
-[CI/CD variables section](CICD.md#variables) for details.
+
+There are a number of variables that are required for the CI/CD pipeline
+to run. Refer to the [CI/CD variables section](CICD.md#variables) for details.
 
 ## For local development
-To make changes to the theme, custom module, or files stored within `local` you can either
-modify them directly inside the containers, or you can mount the shared storage and make
-changes there. Changes to the live storage are symbolically linked to the containers and will
-appear real time in the environment -- very handy for theme development!
-This is only available for development environment starting with devel-*.
 
-Within the shared storage there will be a subdirectory for each branch name. This documentation assumes that the share has been set up and configured already on the hosts. The subdirectory
-will contain a clone of this repository which can be easily used to track changes between
-subsequent deploys to the same branch.
+To make changes to the theme, custom module, or files stored within `local`
+you can either modify them directly inside the containers, or you can mount
+the shared storage and make changes there. Changes to the live storage are
+symbolically linked to the containers and will appear real time in the
+environment -- very handy for theme development! This is only available for
+development environment starting with devel-\*.
 
-Note that subsequent deploys only do a `git fetch` to avoid overwriting local changes. You are
-responsible for doing a `git pull` to apply new changes.
+Within the shared storage there will be a subdirectory for each branch name.
+This documentation assumes that the share has been set up and configured
+already on the hosts. The subdirectory will contain a clone of this repository
+which can be easily used to track changes between subsequent deploys to
+the same branch.
+
+Note that subsequent deploys only do a `git fetch` to avoid overwriting
+local changes. You are responsible for doing a `git pull` to apply new changes.
