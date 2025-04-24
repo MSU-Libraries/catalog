@@ -12,6 +12,8 @@
         <datafield tag="020" ind1=" " ind2=" ">
             <subfield code="a">978-3-16-148410-0</subfield>
             <subfield code="q">qual-data</subfield>
+        </datafield>
+        <datafield tag="020" ind1=" " ind2=" ">
             <subfield code="z">978-3-16-148410-1</subfield>
         </datafield>
         <datafield tag="010" ind1=" " ind2=" ">
