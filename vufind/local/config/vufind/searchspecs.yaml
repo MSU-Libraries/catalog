@@ -374,7 +374,6 @@ AllFields:
     - isbn^10
     - issn^10
     - ismn^10
-    - allfields
     - fulltext
     - description
     - long_lat_display
