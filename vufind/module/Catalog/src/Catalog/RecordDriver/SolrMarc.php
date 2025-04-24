@@ -1447,15 +1447,26 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         $isns = [];
         $marc = $this->getMarcReader();
-        $marcArr020 = $marc->getFields('020', ['a', 'z']);
+        $marcArr020 = $marc->getFields('020', ['a','q','z']);
         foreach ($marcArr020 as $marc020) {
+            $isn = [];
             foreach ($marc020['subfields'] as $subfield) {
                 if ($subfield['code'] == 'a') {
-                    $isns[] = ['isn' => $subfield['data'], 'type' => 'valid'];
+                    $isn = array_merge(
+                        $isn,
+                        ['isn' => $subfield['data'], 'type' => 'valid']
+                    );
                 } elseif ($subfield['code'] == 'z') {
-                    $isns[] = ['isn' => $subfield['data'], 'type' => 'canceled/invalid'];
+                    $isn = array_merge(
+                        $isn,
+                        ['isn' => $subfield['data'], 'type' => 'canceled/invalid']
+                    );
+                }
+                if ($subfield['code'] == 'q') {
+                    $isn['qual'] = $subfield['data'];
                 }
             }
+            $isns[] = $isn;
         }
         return $isns;
     }
@@ -1493,18 +1504,29 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         $isns = [];
         $marc = $this->getMarcReader();
-        $marcArr024 = $marc->getFields('024', ['a', 'z']);
+        $marcArr024 = $marc->getFields('024', ['a','q','z']);
         foreach ($marcArr024 as $marc024) {
             if (($marc024['i1'] ?? '') != '2') {
                 continue;
             }
+            $isn = [];
             foreach ($marc024['subfields'] as $subfield) {
                 if ($subfield['code'] == 'a') {
-                    $isns[] = ['isn' => $subfield['data'], 'type' => 'valid'];
+                    $isn = array_merge(
+                        $isn,
+                        ['isn' => $subfield['data'], 'type' => 'valid']
+                    );
                 } elseif ($subfield['code'] == 'z') {
-                    $isns[] = ['isn' => $subfield['data'], 'type' => 'canceled/invalid'];
+                    $isn = array_merge(
+                        $isn,
+                        ['isn' => $subfield['data'], 'type' => 'canceled/invalid']
+                    );
+                }
+                if ($subfield['code'] == 'q') {
+                    $isn['qual'] = $subfield['data'];
                 }
             }
+            $isns[] = $isn;
         }
         return $isns;
     }
