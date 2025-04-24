@@ -32,6 +32,10 @@ markdownlint-cli2:
   environment:
     name: $CI_COMMIT_BRANCH/markdown-lint
     auto_stop_in: 2 weeks
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
   tags:
     - msul-shared
   image: registry.gitlab.com/pipeline-components/markdownlint-cli2:latest
@@ -45,6 +49,10 @@ markdown-spellcheck:
   environment:
     name: $CI_COMMIT_BRANCH/markdown-spellcheck
     auto_stop_in: 2 weeks
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
   tags:
     - msul-shared
   image: registry.gitlab.com/pipeline-components/markdown-spellcheck:latest
