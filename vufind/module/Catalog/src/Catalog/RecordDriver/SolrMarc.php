@@ -2131,6 +2131,36 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get the Abbreviated Title
+     *
+     * @return string
+     */
+    public function getAbbreviatedTitle()
+    {
+        return $this->getMarcFieldWithInd('210', ['a', 'b']);
+    }
+
+    /**
+     * Get the Key Title
+     *
+     * @return string
+     */
+    public function getKeyTitle()
+    {
+        return $this->getMarcFieldWithInd('222', ['a', 'b']);
+    }
+
+    /**
+     * Get the Collective Uniform Title
+     *
+     * @return string
+     */
+    public function getCollectiveUniformTitle()
+    {
+        return $this->getUniformTitleFromMarc('243', range('a', 'z'));
+    }
+
+    /**
      * PC-789 Return first non-empty highlighted text
      * Pick one line from the highlighted text (if any) to use as a snippet.
      *

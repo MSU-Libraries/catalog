@@ -355,4 +355,53 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
             $this->getDriver()->getPublicationDetails()
         );
     }
+
+    /**
+     * Test getAbbreviatedTitle
+     *
+     * @return void
+     */
+    public function testgetAbbreviatedTitle()
+    {
+        $this->assertEquals(
+            [
+                'Abbr title',
+            ],
+            $this->getDriver()->getAbbreviatedTitle()
+        );
+    }
+
+    /**
+     * Test getKeyTitle
+     *
+     * @return void
+     */
+    public function testgetKetTitle()
+    {
+        $this->assertEquals(
+            [
+                'Key title',
+            ],
+            $this->getDriver()->getKeyTitle()
+        );
+    }
+
+    /**
+     * Test getCollectiveUniformTitle
+     *
+     * @return void
+     */
+    public function testgetCollectiveUniformTitle()
+    {
+        $this->assertEquals(
+            [
+                [
+                    'name' => 'Collective uniform title',
+                    'value' => '',
+                    'link' => '',
+                ],
+            ],
+            $this->getDriver()->getCollectiveUniformTitle()
+        );
+    }
 }
