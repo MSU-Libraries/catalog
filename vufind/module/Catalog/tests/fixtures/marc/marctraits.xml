@@ -67,6 +67,15 @@
         <datafield tag="110" ind1="2" ind2=" ">
             <subfield code="a">Testcorp</subfield>
         </datafield>
+        <datafield tag="210" ind1=" " ind2=" ">
+            <subfield code="a">Abbr title</subfield>
+        </datafield>
+        <datafield tag="222" ind1=" " ind2=" ">
+            <subfield code="a">Key title</subfield>
+        </datafield>
+        <datafield tag="243" ind1=" " ind2=" ">
+            <subfield code="a">Collective uniform title</subfield>
+        </datafield>
         <datafield tag="245" ind1="0" ind2="4">
             <subfield code="a">The Foo:</subfield>
             <subfield code="b">Bar! /</subfield>
