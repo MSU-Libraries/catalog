@@ -157,10 +157,11 @@ resources such as Solr and the Traefik dashboard
 * `VUFIND_CORE_INSTALLATION`: Set to `1` in the pipelines to install core-vufind without MSUL Catalog module. Set to `0` otherwise.
 
 ## Scheduled Pipelines
-For the Ansible image to build overnight, saving time on regular daily builds, we can set up a scheduled pipeline to
-run off-hours in GitLab. This is done in the [Schedules](https://gitlab.msu.edu/msu-libraries/devops/catalog/-/pipeline_schedules)
-tab in the CI/CD page of GitLab. You should configure it for the `main` branch and set it to run at whatever time is convenient
-for your team.
+For the Ansible image to build overnight, saving time on regular daily builds,
+we can set up a scheduled pipeline to run off-hours in GitLab. This is done
+in the [Schedules](https://gitlab.msu.edu/msu-libraries/catalog/catalog/-/pipeline_schedules)
+tab in the CI/CD page of GitLab. You should configure it for the `main` branch
+and set it to run at whatever time is convenient for your team.
 
 [^1]
     There are many ways to generate this password hash, such as online generators or command

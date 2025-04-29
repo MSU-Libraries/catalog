@@ -12,8 +12,8 @@ access to by EBSCO. The records contain the HLM dataset that is missing from FOL
 Used to harvest and import MARC data from Backstage into the `authority` collection in Solr from the FTP location
 provided by Backstage.  
 * [cron-reserves.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/cron-reserves.sh):
-* [pc-full-import](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-full-import?ref_type=heads):
-Wrapper script for the `pc-import-folio` and `pc-import-hlm` scripts to perform a full import of data.  
+* [pc-full-import](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-full-import?ref_type=heads):
+  Wrapper script for the `pc-import-folio` and `pc-import-hlm` scripts to perform a full import of data.
 
 ## HLM Data
 One of our sources is HLM (Holdings Link Management) which is files from EBSCO's FTP server with electronic

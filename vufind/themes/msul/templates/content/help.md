@@ -44,9 +44,13 @@ The weightings above (e.g. the `^750` part of `title_short^750`) add a relative 
 
 The presence of a generic `allfields` field in the list indicates that all fields indexed in VuFind should return results in the default search box. Searching within the confines of a limiter, such as author or title, simply reduces the number of results.
 
-The search configurations for each of these fielded searches are specified in the local [`searchspecs.yaml` file](https://gitlab.msu.edu/msu-libraries/devops/catalog/-/blob/main/vufind/local/config/vufind/searchspecs.yaml). For each particular search type, the fields searched are listed in the same format as above. The author search for example:
+The search configurations for each of these fielded searches are
+specified in the local
+[`searchspecs.yaml` file](https://gitlab.msu.edu/msu-libraries/catalog/catalog/-/blob/main/vufind/local/config/vufind/searchspecs.yaml).
+For each particular search type, the fields searched are listed
+in the same format as above. The author search for example:
 
-```
+```yaml
 Author:
   DismaxFields:
     - author^100
@@ -91,13 +95,27 @@ A more elaborate faceted browsing experience is available by using the "Browse t
 
 #### The Local Catalog (FOLIO)
 
-All FOLIO inventory records are updated in the VuFind Public Catalog index at least once daily. After an initial full load of all records, incremental updates to new, changed, or deleted records are updated at a specific hour every evening.
- 
-All MARC bibliographic records stored in the FOLIO inventory are harvested (via OAI-PMH) and indexed in the public catalog according to a particular indexing scheme. The default settings for this scheme come from [VuFind’s marc.properties file](https://github.com/vufind-org/vufind/blob/release-8.1/import/marc.properties), but some are extended or overridden by MSUL’s own local customizations in the [marc_local.properties file](https://gitlab.msu.edu/msu-libraries/devops/catalog/-/blob/main/vufind/local/import/marc_local.properties). 
+All FOLIO inventory records are updated in the VuFind Public Catalog
+index at least once daily. After an initial full load of all records,
+incremental updates to new, changed, or deleted records are updated
+at a specific hour every evening.
 
-These configuration files are quite powerful and allow for a good deal of customization. For example, the `title` field (used in search results) is specified by VuFind as `title = 245ab, first`. This indicates that the `245` fields `a` and `b` are concatenated to form the title. The `first` argument indicates that if there are multiple `245` fields, only the first one will be selected and indexed. This default title specification is, however, overridden by a local configuration:
+All MARC bibliographic records stored in the FOLIO inventory are
+harvested (via OAI-PMH) and indexed in the public catalog according
+to a particular indexing scheme. The default settings for this scheme
+come from [VuFind’s marc.properties file](https://github.com/vufind-org/vufind/blob/release-8.1/import/marc.properties),
+but some are extended or overridden by MSUL’s own local customizations
+in the [marc_local.properties file](https://gitlab.msu.edu/msu-libraries/catalog/catalog/-/blob/main/vufind/local/import/marc_local.properties).
 
-```
+These configuration files are quite powerful and allow for a good deal of
+customization. For example, the `title` field (used in search results)
+is specified by VuFind as `title = 245ab, first`. This indicates that
+the `245` fields `a` and `b` are concatenated to form the title. The
+`first` argument indicates that if there are multiple `245` fields,
+only the first one will be selected and indexed. This default title
+specification is, however, overridden by a local configuration:
+
+```ini
 title = 245ab, (pattern_map.title), first
 pattern_map.title.pattern_0 = (.*)\s?\/$=>$1
 pattern_map.title.pattern_1 = keepRaw

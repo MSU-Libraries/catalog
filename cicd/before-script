@@ -47,7 +47,7 @@ check() {
 }
 
 get_pc_common() {
-    git clone "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure.git" /tmp/catalog-infrastructure/
+    git clone "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure.git" /tmp/catalog-infrastructure/
     cp /tmp/catalog-infrastructure/configure-playbook/roles/deploy-helper-scripts/files/pc-common .
     rm -rf /tmp/catalog-infrastructure/
     # shellcheck disable=SC1091

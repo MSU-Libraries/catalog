@@ -32,7 +32,7 @@ significantly for other users.
    ```
 
 4. Now that we know what to block, update the
-   [badbots compose file](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/core-stacks/files/docker-compose.badbots.yml)
+   [badbots compose file](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/core-stacks/files/docker-compose.badbots.yml)
    with the new `ClientIP` or `User-Agent` in that file. If you know the name
    of the bot (also shown in the `whois` output) then add a comment block in the file for reference.
    ```yaml
