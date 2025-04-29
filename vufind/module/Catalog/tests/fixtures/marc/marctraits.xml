@@ -85,8 +85,14 @@
             <subfield code="h">Format 1</subfield>
             <subfield code="h">Format 2</subfield>
         </datafield>
+        <datafield tag="247" ind1=" " ind2=" ">
+            <subfield code="a">former title</subfield>
+        </datafield>
         <datafield tag="250" ind1=" " ind2=" ">
             <subfield code="a">2nd ed.</subfield>
+        </datafield>
+        <datafield tag="254" ind1=" " ind2=" ">
+            <subfield code="a">full score</subfield>
         </datafield>
         <datafield tag="260" ind1=" " ind2=" ">
             <subfield code="a">260 Location :</subfield>
@@ -122,6 +128,10 @@
         <datafield tag="310" ind1=" " ind2=" ">
             <subfield code="a">Frequency varies,</subfield>
             <subfield code="b">2020-</subfield>
+        </datafield>
+        <datafield tag="351" ind1=" " ind2=" ">
+            <subfield code="a">Test</subfield>
+            <subfield code="b">data</subfield>
         </datafield>
         <datafield tag="362" ind1=" " ind2=" ">
             <subfield code="a">2020-</subfield>

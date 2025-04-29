@@ -404,4 +404,50 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
             $this->getDriver()->getCollectiveUniformTitle()
         );
     }
+
+    /**
+     * Test getFormerTitle
+     *
+     * @return void
+     */
+    public function testgetFormerTitle()
+    {
+        $this->assertEquals(
+            [
+                'former title',
+            ],
+            $this->getDriver()->getFormerTitle()
+        );
+    }
+
+    /**
+     * Test getOrganizationAndArrangementOfMaterials
+     *
+     * @return void
+     */
+    public function testgetOrganizationAndArrangementOfMaterials()
+    {
+        $this->assertEquals(
+            [
+                'Test data',
+            ],
+            $this->getDriver()->getOrganizationAndArrangementOfMaterials()
+        );
+    }
+
+    /**
+     * Test getEditions
+     *
+     * @return void
+     */
+    public function testgetEditions()
+    {
+        $this->assertEquals(
+            [
+                '2nd ed.',
+                'full score',
+            ],
+            $this->getDriver()->getEditions()
+        );
+    }
 }
