@@ -253,6 +253,27 @@
             <subfield code="a">Old Journal</subfield>
             <subfield code="x">6666-7777</subfield>
         </datafield>
+        <datafield tag="780" ind1="0" ind2="1">
+            <subfield code="a">ind2 = 1</subfield>
+        </datafield>
+        <datafield tag="780" ind1="0" ind2="2">
+            <subfield code="a">ind2 = 2</subfield>
+        </datafield>
+        <datafield tag="780" ind1="0" ind2="3">
+            <subfield code="a">ind2 = 3</subfield>
+        </datafield>
+        <datafield tag="780" ind1="0" ind2="4">
+            <subfield code="a">ind2 = 4</subfield>
+        </datafield>
+        <datafield tag="780" ind1="0" ind2="5">
+            <subfield code="a">ind2 = 5</subfield>
+        </datafield>
+        <datafield tag="780" ind1="0" ind2="6">
+            <subfield code="a">ind2 = 6</subfield>
+        </datafield>
+        <datafield tag="780" ind1="0" ind2="7">
+            <subfield code="a">ind2 = 7</subfield>
+        </datafield>
         <datafield tag="785" ind1="0" ind2="0">
             <subfield code="a">New Journal</subfield>
             <subfield code="x">7777-8888</subfield>
