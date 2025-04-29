@@ -2274,6 +2274,86 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get Continues
+     *
+     * @return array
+     */
+    public function getContinues()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['0']]]);
+    }
+
+    /**
+     * Get Continues in part
+     *
+     * @return array
+     */
+    public function getContinuesInPart()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['1']]]);
+    }
+
+    /**
+     * Get Supersedes
+     *
+     * @return array
+     */
+    public function getSupersedes()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['2']]]);
+    }
+
+    /**
+     * Get Supersedes in part by
+     *
+     * @return array
+     */
+    public function getSupersedesInPartBy()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['3']]]);
+    }
+
+    /**
+     * Get Formed by the union of
+     *
+     * @return array
+     */
+    public function getFormedByTheUnionOf()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['4']]]);
+    }
+
+    /**
+     * Get Absorbed
+     *
+     * @return array
+     */
+    public function getAbsorbed()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['5']]]);
+    }
+
+    /**
+     * Get Absorbed in part
+     *
+     * @return array
+     */
+    public function getAbsorbedInPart()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['6']]]);
+    }
+
+    /**
+     * Get Separated from
+     *
+     * @return array
+     */
+    public function getSeparatedFrom()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['7']]]);
+    }
+
+    /**
      * PC-789 Return first non-empty highlighted text
      * Pick one line from the highlighted text (if any) to use as a snippet.
      *
