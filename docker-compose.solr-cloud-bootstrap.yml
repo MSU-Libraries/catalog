@@ -22,7 +22,7 @@ x-solr-deploy: &solr_deploy
 version: "3.8"
 services:
   solr:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
+    image: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     volumes:
       - bitnami:/bitnami
       - logs:/mnt/logs
