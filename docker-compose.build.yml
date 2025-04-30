@@ -5,7 +5,7 @@ version: "3.8"
 
 services:
   build:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
+    image: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     command: /startup-build.sh
     volumes:
       - logs:/mnt/logs
