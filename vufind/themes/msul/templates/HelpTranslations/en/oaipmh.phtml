@@ -1,0 +1,10 @@
+<h1>OAI-PMH Access</h1>
+<?php $baseUrl = $this->url('oai-server'); ?>
+<p>
+    The Michigan State Libraries catalog metadata is available for harvest via
+    <a href="https://www.openarchives.org/OAI/openarchivesprotocol.html">OAI-PMH v2</a> with<br/>
+    the base url of <a target="_blank" href="<?= $baseUrl ?>" data-lightbox-ignore><?= $this->serverUrl($baseUrl) ?></a>.
+</p>
+<p>
+    For example: <a target="_blank" href="<?= $baseUrl ?>?verb=Identify" data-lightbox-ignore><?= $this->serverUrl($baseUrl) ?>?verb=Identify</a>
+</p>

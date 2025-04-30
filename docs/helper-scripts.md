@@ -63,12 +63,14 @@ pc-locate-oai in00005342798,in00001442723 --extract
 ```
 
 ## Record manipulation ([pc-record](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-record?ref_type=heads))
-Helper to manipulate records
-Currently available :
 
-- Delete :
-    delete records from provided files and or inline ids. The script is available on the host
-    machines as well as within the `catalog`, `cron` and `build` containers in the `catalog` stack.
+Helper to manipulate records.
+
+Currently available:
+
+* **delete:** delete records from provided files and or inline ids. The script
+  is available on the host machines as well as within the `catalog`, `cron` and
+  `build` containers in the `catalog` stack.
 
 ```bash
 # delete the record with id hlm.in01234 on catalog-beta
@@ -77,9 +79,9 @@ pc-record delete catalog-beta hlm.in01234
 # delete records with ids in input file on devel-robby being verbose
 pc-record delete devel-robby --input file_containing_ids.txt --debug
 
-# show the command to delete the record with id in01234 (folio.in01234 with prefix) on catalog-beta being verbose 
+# show the command to delete the record with id in01234
+# (folio.in01234 with prefix) on catalog-beta being verbose 
 pc-record delete catalog-beta in01234 --dry-run --vvv --prefix folio
-
 ```
 
 ## Connect to container ([pc-connect](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-connect?ref_type=heads))
@@ -100,7 +102,6 @@ pc-connect catalog-prod-solr_solr --zk
 
 # Dry-run to locate an instance
 pc-connect devel-test-catalog_catalog -n
-
 ```
 
 ## Run full import ([pc-full-import](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-full-import?ref_type=heads))
@@ -119,7 +120,8 @@ sudo pc-full-import catalog-prod --list
 # Run a full import with debug output saving to a file
 sudo pc-full-import catalog-prod --debug 2>&1 | tee catalog-prod-import_$(date -I).log
 
-# Run only a few steps from script bypassing user confirmation (if that step asks for it)
+# Run only a few steps from script bypassing user confirmation
+# (if that step asks for it)
 sudo pc-full-import catalog-prod --first-step 3 --last-step 5 --debug --yes
 
 # Do a dry run of the full import to show what steps it would perform
