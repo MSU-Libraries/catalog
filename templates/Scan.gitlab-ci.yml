@@ -158,7 +158,7 @@ Pylint Monitoring:
 #  needs:
 #    - Build Vufind Image
 #  variables:
-#    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:$CI_COMMIT_SHORT_SHA
+#    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/vufind:$CI_COMMIT_SHORT_SHA
 #    GIT_STRATEGY: fetch
 #    SECURE_LOG_LEVEL: warn
 #    DOCKERFILE_PATH: vufind/Dockerfile
@@ -201,7 +201,7 @@ Pylint Monitoring:
 #  rules:
 #    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
 #  variables:
-#    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/devops/catalog/$COMPONENT:latest
+#    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/$COMPONENT:latest
 #    GIT_STRATEGY: fetch
 #    DOCKERFILE_PATH: $COMPONENT/Dockerfile
 

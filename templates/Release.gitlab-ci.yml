@@ -23,7 +23,7 @@ Tag Release:
     - apk add git
   script:
     - rm -rf clone/ || true
-    - git clone https://gitlab-ci-token:$RW_CICD_TOKEN@gitlab.msu.edu/msu-libraries/devops/catalog.git clone/
+    - git clone https://gitlab-ci-token:$RW_CICD_TOKEN@gitlab.msu.edu/msu-libraries/catalog/catalog.git clone/
     - cd clone/ # doing this to avoid runner cache
     - major_ver=$(date +'%y.%-m')
     - latest_patch=$(git tag -l $major_ver* --sort=-v:refname | head -n 1 | cut -d'.' -f 3)
@@ -56,7 +56,7 @@ GitHub Release:
     - apk add git curl
   script:
     - rm -rf catalog.git
-    - git clone --mirror https://RW_CICD_TOKEN:$RW_CICD_TOKEN@gitlab.msu.edu/msu-libraries/devops/catalog.git
+    - git clone --mirror https://RW_CICD_TOKEN:$RW_CICD_TOKEN@gitlab.msu.edu/msu-libraries/catalog/catalog.git
     - cd catalog.git
     - git push --force --mirror https://$GITHUB_USER_TOKEN@github.com/MSU-Libraries/catalog.git
     - echo "{\"tag_name\":\"${TAG}\", \"target_commitish\":\"${CI_COMMIT_SHA}\"}" > data.json

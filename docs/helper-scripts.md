@@ -1,6 +1,6 @@
 # Helper Scripts
 
-As part of our [infrastructure repository](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure)
+As part of our [infrastructure repository](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure)
 (soon to be open source), we have a set of helper scripts to help with common
 tasks that have long or hard to remember commands. The following documentation
 serves as a quick reference to know which scripts are available.
@@ -8,7 +8,7 @@ serves as a quick reference to know which scripts are available.
 Each script has its own `--help` flag to get more detailed information.
 Each script also offers tab completion for ease-of-use.
 
-## Deploy Helper ([pc-deploy](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-deploy?ref_type=heads))
+## Deploy Helper ([pc-deploy](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-deploy?ref_type=heads))
 
 Deploys stacks for a given environment and docker compose. This is useful
 because it does the step of sourcing the `.env` file for the environment
@@ -35,7 +35,7 @@ sudo -Hu deploy pc-deploy devel-test solr-bootstrap
 sudo -Hu deploy pc-deploy devel-test docker-compose.solr-bootstrap.yml
 ```
 
-## OAI File Locator ([pc-locate-oai](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-locate-oai?ref_type=heads))
+## OAI File Locator ([pc-locate-oai](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-locate-oai?ref_type=heads))
 
 Locates the OAI harvest file that contains the given FOLIO instance ID,
 which can be then used for importing a specific record into your stack
@@ -62,7 +62,7 @@ pc-locate-oai in01234 catalog-beta
 pc-locate-oai in00005342798,in00001442723 --extract
 ```
 
-## Record manipulation ([pc-record](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-record?ref_type=heads))
+## Record manipulation ([pc-record](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-record?ref_type=heads))
 
 Helper to manipulate records.
 
@@ -84,7 +84,7 @@ pc-record delete devel-robby --input file_containing_ids.txt --debug
 pc-record delete catalog-beta in01234 --dry-run --vvv --prefix folio
 ```
 
-## Connect to container ([pc-connect](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-connect?ref_type=heads))
+## Connect to container ([pc-connect](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-connect?ref_type=heads))
 
 Helper to connect to a container for a given service (and optionally, on a
 particular node). Also has the option to override the `bash` command with
@@ -104,7 +104,7 @@ pc-connect catalog-prod-solr_solr --zk
 pc-connect devel-test-catalog_catalog -n
 ```
 
-## Run full import ([pc-full-import](https://gitlab.msu.edu/msu-libraries/devops/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-full-import?ref_type=heads))
+## Run full import ([pc-full-import](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-full-import?ref_type=heads))
 
 Helper to run a full import of data into an environment using the folio and
 hlm data in their `processed` or `current` directories. This should be run

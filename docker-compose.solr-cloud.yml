@@ -30,7 +30,7 @@ x-solrproxy-deploy: &solrproxy_deploy
 version: "3.8"
 services:
   solr:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
+    image: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     volumes:
       - bitnami:/bitnami
       - /mnt/shared/backups/${STACK_NAME}/solr_dropbox:/mnt/solr_backups
@@ -65,7 +65,7 @@ services:
         max_replicas_per_node: 1
 
   cron:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
+    image: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     command: /startup-cron.sh
     user: "0"
     volumes:
