@@ -69,6 +69,9 @@ $border-radius-small:       0.4rem;
 
 $component-active-bg:       $darkparakeetgreen !default;
 
+$link-hover-color:          black !default;
+$link-color:                $darkparakeetgreen !default;
+
 //== Tables
 //
 //## Customizes the `.table` component with basic values, each used across all table variations.
@@ -86,7 +89,7 @@ $btn-primary-bg:                 $parakeetgreen;
 $btn-primary-border:             $parakeetgreen; // darken($btn-primary-bg, 5%);
 
 // Allows for customizing button radius independently from global border radius
-$btn-border-radius-base:         2rem; 
+$btn-border-radius-base:         2rem;
 
 //== Alphabrowse
 // MSUL -- borrowed from sandal theme for PC-448
