@@ -22,7 +22,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
     git config --system --add safe.directory \*
     # Update the repo (repo is initially cloned during first CI run for branch)
-    git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch
+    (umask 0002; git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch)
 
     # Set up the symlink to be able to access code from host machine
     if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
