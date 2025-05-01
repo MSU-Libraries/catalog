@@ -74,7 +74,7 @@ simply reduces the number of results.
 
 The search configurations for each of these fielded searches are
 specified in the local
-[`searchspecs.yaml` file](https://gitlab.msu.edu/msu-libraries/catalog/catalog/-/blob/main/vufind/local/config/vufind/searchspecs.yaml).
+[`searchspecs.yaml` file](https://gitlab.msu.edu/msu-libraries/devops/catalog/-/blob/main/vufind/local/config/vufind/searchspecs.yaml).
 For each particular search type, the fields searched are listed
 in the same format as above. The author search for example:
 
@@ -153,7 +153,7 @@ harvested (via OAI-PMH) and indexed in the public catalog according
 to a particular indexing scheme. The default settings for this scheme
 come from [VuFind’s marc.properties file](https://github.com/vufind-org/vufind/blob/release-8.1/import/marc.properties),
 but some are extended or overridden by MSUL’s own local customizations
-in the [marc_local.properties file](https://gitlab.msu.edu/msu-libraries/catalog/catalog/-/blob/main/vufind/local/import/marc_local.properties).
+in the [marc_local.properties file](https://gitlab.msu.edu/msu-libraries/devops/catalog/-/blob/main/vufind/local/import/marc_local.properties).
 
 These configuration files are quite powerful and allow for a good deal of
 customization. For example, the `title` field (used in search results)
