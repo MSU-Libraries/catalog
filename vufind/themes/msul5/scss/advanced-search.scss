@@ -74,8 +74,7 @@ fieldset.solr-facets {
 
 // outer gray box around groups
 .adv-group-msul {
-  // TODO investigate
-  //@include clearfix();
+  @include clearfix();
   position: relative;
   margin-bottom: .5rem;
   padding: 1rem;
@@ -147,11 +146,53 @@ fieldset.solr-facets {
     }
   }  @media (min-width: 1630px) {
     .solr-adv-facet {
-      flex: 1 1 23%;
-      width: 23%;
+      flex: 1 1 48%;
+      width: 48%;
     }
   }
 }
+
+//New Items page location format using styles for advanced search page above
+.form-search-newitem {
+  .solr-adv-facet {
+    overflow: auto; 
+    #limit_building.form-control {
+      padding: 0.1rem;
+      margin-bottom: 1rem;
+      height: 16.7rem;
+      overflow: auto;
+      white-space: nowrap;
+      max-width:100%; //override core max-width 400px
+      label {
+        font-weight: inherit;
+        color: inherit;
+      }
+    }
+  
+    .form-control.expandableLeveledCheckboxes {
+      .leveledCheckbox {
+        height: auto;
+      }
+      .leveledCheckbox:not(.expandable):not(.leveledCheckbox[data-level="0"]):not(.visibleLevel) {
+        display: none;
+      }
+      .expandable .expander,
+      .notExpandable .expander {
+        display: inline-block;
+        width: 17px;
+      }
+      .notExpandable .expander {
+        visibility: hidden;
+      }
+      .expandable.expanded > .expander .chevronRight,
+      .expandable:not(.expanded) > .expander .chevronDown,
+      .notExpandable > .expander .chevronDown {
+        display: none;
+      }
+    }
+  }
+}
+
 
 // reduce font size and spacing below headers on catalog advanced search
 #advSearchForm {
@@ -168,6 +209,7 @@ fieldset.solr-facets {
 .template-dir-search.template-name-advanced {
   counter-reset: adv-group-num;
     .msul-adv-group-num::before {
+        display:block;
         counter-increment: adv-group-num;
         content: "Group " counter(adv-group-num) " ";
         margin-bottom:0.5rem;

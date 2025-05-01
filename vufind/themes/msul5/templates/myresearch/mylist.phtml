@@ -28,7 +28,7 @@
 <?=$this->component('show-account-menu-button')?>
 
 <div class="<?=$this->layoutClass('mainbody')?>">
-  <h1><?=$list ? $this->escapeHtml($list->getTitle()) : $this->transEsc('saved_items')?></h1><?php /** MSU */ ?>
+  <h1 class="h2-style"><?=$list ? $this->escapeHtml($list->getTitle()) : $this->transEsc('saved_items')?></h1><?php /** MSU */ ?>
 
   <?php if ($list && $user && $list->getUser()->getId() === $user->getId() && $list->isPublic()): ?>
     <strong>

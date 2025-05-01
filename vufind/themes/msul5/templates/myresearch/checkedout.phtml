@@ -13,7 +13,7 @@
 <?=$this->component('show-account-menu-button')?>
 
 <div class="<?=$this->layoutClass('mainbody')?>">
-  <h1><?=$this->transEsc('Your Checked Out Items')?></h1><?php /** MSU */ ?>
+  <h1 class="h2-style"><?=$this->transEsc('Your Checked Out Items')?></h1><?php /** MSU */ ?>
   <?=$this->flashmessages()?>
 
   <?=$this->context($this)->renderInContext('librarycards/selectcard.phtml', ['user' => $this->auth()->getUserObject()]); ?>

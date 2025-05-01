@@ -32,9 +32,8 @@
 }
 
 .view-buttons {
-  clear: both; // MSU
-  margin-top:.5rem;
-  margin-bottom:1.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .search-term {
@@ -49,50 +48,64 @@
 
 // move sort dropdown left
 @media only screen and (min-width : 768px) {
+  :not(nav) > .pager {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+  }
+  .view-buttons {
+    > a, > a:visited {
+      text-align:center;
+      padding:0.5rem;
+      text-decoration: none;
+      color:#18453b;
+      background-color: $lightsage;
+      -webkit-border-radius: 0.5rem;
+      -moz-border-radius: 0.5rem;
+      border-radius: 0.5rem;
+    }
+
+    > a:hover, > a:active, > span {
+      text-align:center;
+      padding:0.5rem;
+      text-decoration: none;
+      color:#ffffff;
+      background-color: $parakeetgreen;
+      -webkit-border-radius: 0.5rem;
+      -moz-border-radius: 0.5rem;
+      border-radius: 0.5rem;
+    }
+
+    .icon-link__label {
+      text-decoration: none;
+    }
+  }
+
   div.search-header {
-    display:block;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    column-gap: 2.5rem;
 
     .search-stats {
-      float:left;
-      margin-right:2rem;
+      padding-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      column-gap: 2rem;
     }
 
     .search-controls {
-      text-align:left;
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
 
       .search-result-limit {
-        float:left;
         margin-right:2rem;
       }
       .search-sort .form-control {
         width:15rem;
-      }
-      .view-buttons {
-        > a, > a:visited {
-          text-align:center;
-          padding:0.5rem;
-          text-decoration: none;
-          color:#18453b;
-          background-color: $lightsage;
-          -webkit-border-radius: 0.5rem;
-          -moz-border-radius: 0.5rem;
-          border-radius: 0.5rem;
-        }
-
-        > a:hover, > a:active, > span {
-          text-align:center;
-          padding:0.5rem;
-          text-decoration: none;
-          color:#ffffff;
-          background-color: $parakeetgreen;
-          -webkit-border-radius: 0.5rem;
-          -moz-border-radius: 0.5rem;
-          border-radius: 0.5rem;
-        }
-
-        .icon-link__label {
-          text-decoration: none;
-        }
       }
     }
   }

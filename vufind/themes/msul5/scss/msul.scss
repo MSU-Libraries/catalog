@@ -1,7 +1,6 @@
 // Change all bootstrap variables before importing bootstrap
 // ---------------------------------------------------------
 @import "variables";
-//@import "bootstrap";
 @import "../../bootstrap5/scss/bootstrap";
 
 // Metropolis theme
@@ -61,6 +60,7 @@ input[type="checkbox"] {
 
 label {
   color: $msugreen;
+  font-weight: 700;
 }
 
 // Import local customizations
@@ -96,3 +96,7 @@ label {
 @import "login.scss";
 
 @import "popover.scss";
+
+@import "reserves.scss";
+
+@import "feedback.scss";

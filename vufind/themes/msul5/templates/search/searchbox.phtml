@@ -2,9 +2,11 @@
     // Initialize from current search (if available and not explicitly overridden) or defaults:
     if ($results = ($this->results ?? $this->searchMemory()->getCurrentSearch())) {
       $params = $results->getParams();
+      $fromSearchMemory = true;
       $this->searchClassId = $params->getSearchClassId();
     } else {
       $params = null;
+      $fromSearchMemory = false;
       $this->searchClassId ??= $this->config()->get('config')->Site->defaultSearchBackend
         ?? 'Solr';
     }
@@ -70,6 +72,7 @@
               'checkboxFilters' => $showFilters ? $checkboxFilters : [],
               'searchClassId' => $this->searchClassId,
               'searchType' => $this->searchType,
+              'fromSearchMemory' => $fromSearchMemory,
             ]
         );
       ?>

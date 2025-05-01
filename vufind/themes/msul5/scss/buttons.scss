@@ -1,6 +1,8 @@
 // Button btn-primary
 .btn-primary {
+  border-radius: 2rem;
   line-height:1.4;
+  padding: 0.375rem 0.75rem;
     &:hover {
       background-color:$darkparakeetgreen;
       border-color:$darkparakeetgreen;
@@ -16,6 +18,15 @@
       border-color:$parakeetgreen;
       color:#fff;
   }
+}
+
+.btn-default {
+  border-radius: 2rem;
+}
+
+// Button link color
+.btn-link {
+  color:$darkparakeetgreen;
 }
 
 //Filter button on Articles and More when 4+ selected
@@ -51,6 +62,23 @@
       background-color: $darkgray;
       color: white;
    }
+  }
+}
+
+// Fix styling of the range selector on the new items page
+.form-search-newitem .btn-group {
+  display: flex;
+  gap: 0.5rem;
+
+  >label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    >.msul-btn-group-span {
+      line-height: 1rem;
+      padding: inherit;
+    }
   }
 }
 

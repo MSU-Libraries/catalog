@@ -30,6 +30,7 @@
           <li><a href="https://lib.msu.edu/callnumbers" target="_blank">Call Number Locations<?= $this->icon('fa-external-link', 'fa-external-link') ?></a></li>
           <li><a href="https://lib.msu.edu/contact/askalib/" target="_blank">Ask a Librarian<?= $this->icon('fa-external-link', 'fa-external-link') ?></a></li>
           <li><a href="<?=$this->url('help', ['topic' => 'z3950'])?>" data-lightbox><?=$this->transEsc('Z39.50 Access')?></a></li>
+          <li><a href="<?=$this->url('help', ['topic' => 'oaipmh'])?>" data-lightbox><?=$this->transEsc('OAI-PMH Access')?></a></li>
 <!--         <li><a href="<?=$this->url('content-page', ['page' => 'faq']) ?>"><?=$this->transEsc('FAQs')?></a></li> -->
           <?php if ($this->cookieConsent()->isEnabled()): ?>
             <li><a href="#" data-cc="show-preferencesModal" aria-haspopup="dialog"><?=$this->transEsc('Cookie Settings')?></a></li>
@@ -113,7 +114,7 @@
         
 
 
-  <div class="col-lg-9 col-lg-push-3">
+  <div class="col-lg-9 order-2">
         
         <ul>
             <li class="small-text">
@@ -143,7 +144,7 @@ SPARTANS WILL.
   </div>
 
 
-  <div class="col-lg-3 col-lg-pull-9">
+  <div class="col-lg-3 order-1">
     <a href="https://msu.edu/"><img src="/themes/msul/images/msu-wordmark-green.svg?la=en&amp;hash=8E089B07620E2E1A11309309C66BC6F3" alt="Michigan State University Home"></a>
   </div>
 

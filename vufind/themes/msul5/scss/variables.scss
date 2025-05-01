@@ -67,6 +67,8 @@ $border-radius-base:        0.5rem;
 $border-radius-large:       0.6rem;
 $border-radius-small:       0.4rem;
 
+$component-active-bg:       $darkparakeetgreen !default;
+
 //== Tables
 //
 //## Customizes the `.table` component with basic values, each used across all table variations.
@@ -102,3 +104,11 @@ $badge-color:                 #535054;
 //** Linked badge text color on hover
 $badge-link-hover-color:      $parakeetgreen;
 $badge-bg:                    #fff;
+
+//== List group
+//
+//##
+
+
+//** Background color of active list items
+$list-group-active-bg:          $brand-primary;

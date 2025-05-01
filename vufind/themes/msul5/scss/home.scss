@@ -8,7 +8,7 @@
     padding-left:5%;
 
     &.home-reserves {
-      border-left:1px solid #c1c1c1; //TODO - create variable
+      border-left:1px solid $medgray;
     }
   }
   form.searchForm {
