@@ -5,7 +5,7 @@ version: "3.8"
 
 services:
   catalog:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
+    image: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     hostname: vufind{{slice .Node.Hostname 8 9}}
     volumes:
       - logs:/mnt/logs
@@ -61,7 +61,7 @@ services:
         - "traefik.http.services.${STACK_NAME}-https-app.loadbalancer.server.port=80"
 
   legacylinks:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/legacylinks:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
+    image: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/legacylinks:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     networks:
       - public
     environment:
@@ -87,7 +87,7 @@ services:
         - "traefik.http.services.${STACK_NAME}-https-links-app.loadbalancer.server.port=80"
 
   croncache:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
+    image: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     command: /startup-croncache.sh
     volumes:
       - vufind_cache:/mnt/vufind_cache
@@ -113,7 +113,7 @@ services:
         delay: 10s
 
   cron:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
+    image: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     command: /startup-cron.sh
     volumes:
       - logs:/mnt/logs

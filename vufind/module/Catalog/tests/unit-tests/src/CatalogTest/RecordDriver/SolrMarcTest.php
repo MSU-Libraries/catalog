@@ -355,4 +355,219 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
             $this->getDriver()->getPublicationDetails()
         );
     }
+
+    /**
+     * Test getAbbreviatedTitle
+     *
+     * @return void
+     */
+    public function testgetAbbreviatedTitle()
+    {
+        $this->assertEquals(
+            [
+                'Abbr title',
+            ],
+            $this->getDriver()->getAbbreviatedTitle()
+        );
+    }
+
+    /**
+     * Test getKeyTitle
+     *
+     * @return void
+     */
+    public function testgetKetTitle()
+    {
+        $this->assertEquals(
+            [
+                'Key title',
+            ],
+            $this->getDriver()->getKeyTitle()
+        );
+    }
+
+    /**
+     * Test getCollectiveUniformTitle
+     *
+     * @return void
+     */
+    public function testgetCollectiveUniformTitle()
+    {
+        $this->assertEquals(
+            [
+                [
+                    'name' => 'Collective uniform title',
+                    'value' => '',
+                    'link' => '',
+                ],
+            ],
+            $this->getDriver()->getCollectiveUniformTitle()
+        );
+    }
+
+    /**
+     * Test getFormerTitle
+     *
+     * @return void
+     */
+    public function testgetFormerTitle()
+    {
+        $this->assertEquals(
+            [
+                'former title',
+            ],
+            $this->getDriver()->getFormerTitle()
+        );
+    }
+
+    /**
+     * Test getOrganizationAndArrangementOfMaterials
+     *
+     * @return void
+     */
+    public function testgetOrganizationAndArrangementOfMaterials()
+    {
+        $this->assertEquals(
+            [
+                'Test data',
+            ],
+            $this->getDriver()->getOrganizationAndArrangementOfMaterials()
+        );
+    }
+
+    /**
+     * Test getEditions
+     *
+     * @return void
+     */
+    public function testgetEditions()
+    {
+        $this->assertEquals(
+            [
+                '2nd ed.',
+                'full score',
+            ],
+            $this->getDriver()->getEditions()
+        );
+    }
+
+    /**
+     * Test getContinues
+     *
+     * @return void
+     */
+    public function testgetContinues()
+    {
+        $this->assertEquals(
+            [
+                'Old Journal',
+            ],
+            $this->getDriver()->getContinues()
+        );
+    }
+
+    /**
+     * Test getContinuesInPart
+     *
+     * @return void
+     */
+    public function testgetContinuesInPart()
+    {
+        $this->assertEquals(
+            [
+                'ind2 = 1',
+            ],
+            $this->getDriver()->getContinuesInPart()
+        );
+    }
+
+    /**
+     * Test getSupersedes
+     *
+     * @return void
+     */
+    public function testgetSupersedes()
+    {
+        $this->assertEquals(
+            [
+                'ind2 = 2',
+            ],
+            $this->getDriver()->getSupersedes()
+        );
+    }
+
+    /**
+     * Test getSupersedesInPartBy
+     *
+     * @return void
+     */
+    public function testgetSupersedesInPartBy()
+    {
+        $this->assertEquals(
+            [
+                'ind2 = 3',
+            ],
+            $this->getDriver()->getSupersedesInPartBy()
+        );
+    }
+
+    /**
+     * Test getFormedByTheUnionOf
+     *
+     * @return void
+     */
+    public function testgetFormedByTheUnionOf()
+    {
+        $this->assertEquals(
+            [
+                'ind2 = 4',
+            ],
+            $this->getDriver()->getFormedByTheUnionOf()
+        );
+    }
+
+    /**
+     * Test getAbsorbed
+     *
+     * @return void
+     */
+    public function testgetAbsorbed()
+    {
+        $this->assertEquals(
+            [
+                'ind2 = 5',
+            ],
+            $this->getDriver()->getAbsorbed()
+        );
+    }
+
+    /**
+     * Test getAbsorbedInPart
+     *
+     * @return void
+     */
+    public function testgetAbsorbedInPart()
+    {
+        $this->assertEquals(
+            [
+                'ind2 = 6',
+            ],
+            $this->getDriver()->getAbsorbedInPart()
+        );
+    }
+
+    /**
+     * Test getSeparatedFrom
+     *
+     * @return void
+     */
+    public function testgetSeparatedFrom()
+    {
+        $this->assertEquals(
+            [
+                'ind2 = 7',
+            ],
+            $this->getDriver()->getSeparatedFrom()
+        );
+    }
 }
