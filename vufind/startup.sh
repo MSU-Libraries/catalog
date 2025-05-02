@@ -135,7 +135,11 @@ echo "Solr ready!"
 if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
     echo "Starting npm to auto-compile theme changes..."
     npm run watch:scss&
+else
+    echo "Running npm to compile theme changes..."
+    npm run build:scss
 fi
+
 
 # Unset environment variables that are no longer necessary before starting Apache
 unset DEPLOY_KEY_FILE VUFIND_CORE_INSTALLATION
