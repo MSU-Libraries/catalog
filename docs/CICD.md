@@ -202,6 +202,7 @@ want to match it to followed by a wildcard (`*`). For example: `devel-mytest*`.
   without MSUL Catalog module. Set to `0` otherwise.
 
 ## Scheduled Pipelines
+
 For the Ansible image to build overnight, saving time on regular daily builds,
 we can set up a scheduled pipeline to run off-hours in GitLab. This is done
 in the [Schedules](https://gitlab.msu.edu/msu-libraries/catalog/catalog/-/pipeline_schedules)
