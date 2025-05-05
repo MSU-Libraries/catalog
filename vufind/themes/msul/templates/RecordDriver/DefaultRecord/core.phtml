@@ -1,6 +1,7 @@
 <?php
   $this->layout()->showSearchBacklink = true; // MSU
   $this->metadata()->generateMetatags($this->driver);
+  $this->headScript()->appendFile('get_license_agreement.js'); // MSU
 ?>
 <div class="media"<?=$this->schemaOrg()->getAttributes(['vocab' => 'http://schema.org/', 'resource' => '#record', 'typeof' => $this->schemaOrg()->getRecordTypes($this->driver)])?>>
   <?php

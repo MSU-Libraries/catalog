@@ -1,0 +1,285 @@
+// LibKey and EDS link styling
+.result-body {
+  .custom-link {
+    display: inline-block;
+    padding-right: 1rem;
+  }
+  .libkey-link {
+    display: inline-block;
+    .icon-link__label {
+      padding-right: 1rem;
+    }
+    .fa-lock {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Remove color background from alert-info on results pages
+.template-dir-search.template-name-results, .template-dir-eds.template-name-search, .template-dir-combined.template-name-results {
+  .alert {
+    padding-left:0;
+  }
+  .alert-info {
+    background:none;
+    border:none;
+  }
+}
+
+// Searchtools spacing
+.searchtools {
+  margin-bottom:1rem;
+}
+
+.view-buttons {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.search-term {
+  background-color:$lightgray;
+  padding:0.5rem 1rem;
+  border-radius:0.5rem;
+  color:$darkgray;
+  font-size:18px;
+  margin-bottom:1rem;
+  margin-top:1rem;
+}
+
+// move sort dropdown left
+@media only screen and (min-width : 768px) {
+  :not(nav) > .pager {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+  }
+  .view-buttons {
+    > a, > a:visited {
+      text-align:center;
+      padding:0.5rem;
+      text-decoration: none;
+      color:#18453b;
+      background-color: $lightsage;
+      -webkit-border-radius: 0.5rem;
+      -moz-border-radius: 0.5rem;
+      border-radius: 0.5rem;
+    }
+
+    > a:hover, > a:active, > span {
+      text-align:center;
+      padding:0.5rem;
+      text-decoration: none;
+      color:#ffffff;
+      background-color: $parakeetgreen;
+      -webkit-border-radius: 0.5rem;
+      -moz-border-radius: 0.5rem;
+      border-radius: 0.5rem;
+    }
+
+    .icon-link__label {
+      text-decoration: none;
+    }
+  }
+
+  div.search-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    column-gap: 2.5rem;
+
+    .search-stats {
+      padding-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      column-gap: 2rem;
+    }
+
+    .search-controls {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+
+      .search-result-limit {
+        margin-right:2rem;
+      }
+      .search-sort .form-control {
+        width:15rem;
+      }
+    }
+  }
+}
+
+// Highlighting
+.highlight,
+mark {
+  background: #E5E5E5;
+  padding: .1em .2em;
+}
+
+// results record list design clean up
+.result {
+  margin-bottom:1rem;
+  .checkbox-select-item {
+    display:block;
+    height:1.25rem;
+    width:1.25rem;
+  }
+  .result-body {
+    font-size: 1.1rem;
+    h2 {
+      font-size: 1.15rem;
+    }
+    .fulltext {
+      display:inline;
+    }
+    & :not(:first-child) {
+      line-height:1.7rem;
+   }
+
+    .result-formats span {
+      font-size:13px;
+      line-height:1rem;
+      margin-top:0.5rem;
+    }
+  }
+  .media {
+    .media-left {
+      font-size:14px;
+      }
+  @media only screen and (min-width : 768px) {
+    .result-links {
+      padding-left:1rem;
+    }
+  }
+}
+}
+form.searchForm, .record-tabs, .navbar-form {
+  ul.nav-tabs {
+    border-bottom:0;
+    margin-bottom:2rem;
+
+    li {
+      height:3rem;
+      @media only screen and (min-width : 992px) {
+        font-size:larger;
+        height:2rem;
+      }
+    }
+    a, &:active a, &:hover a {
+      border-left:0;
+      border-top:0;
+      border-right:0.4rem solid transparent;
+      border-bottom:0.4rem solid transparent;
+      outline:0;
+      background:none;
+      text-decoration:none;
+      color: $eggplant !important;
+      padding:0;
+      margin:0 0.7rem;
+    }
+    a.nav-link.active {
+      background:none;
+    }
+    li:first-child a {
+      margin-left:0;
+    }
+    .navtab-digrepo {
+      @media only screen and (min-width : 998px) {
+        border-left:0.2rem solid $eggplant;
+        padding-left:0.5rem;
+        margin-left:0.5rem;
+        }
+    }
+    a:hover {
+      border-bottom: 0.4rem solid #ACB3C9;
+      border-right: 0.4rem solid transparent;
+      border-left:0;
+      border-top:0;
+    }
+    .active a {
+      border-bottom: 0.4rem solid $eggplant;
+      border-right: 0.4rem solid transparent;
+      border-left:0;
+      border-top:0;
+    }
+  }
+}
+
+.mainbody.right {
+  .searchbox {
+    @media only screen and (max-width : 1235px) {
+      label, input, select, button {
+        display:block;
+        margin-bottom:0.3rem;
+      }
+      select {
+        width: 100%;
+      }
+      input {
+        margin-bottom:1rem;
+      }
+    }
+    @media only screen and (min-width : 992px) {
+      .searchForm_lookfor {
+        border-radius:0.5rem;
+      }
+      button[type=submit].btn-primary {
+        border-radius: 2rem;
+        margin-left:0;
+      }
+
+    }
+    @media only screen and (min-width : 1236px) {
+      .searchForm_lookfor {
+        border-radius:0.5rem 0 0 0.5rem;
+      }
+      button[type=submit].btn-primary {
+        border-radius: 0 0.5rem 0.5rem 0;
+        margin-left: -0.4rem;
+        margin-top: -0.1rem;
+      }
+
+    }
+  }
+  @media only screen and (min-width : 768px) {
+      .container {
+        padding-left:0;
+      }
+      #search-cart-form {
+        margin-top: -1rem;
+    }
+  }
+  @media only screen and (min-width : 1315px) {
+      .searchForm-query {
+        width:33%;
+    }
+  }
+  @media only screen and (min-width : 1445px) {
+      .searchForm-query {
+        width:100%;
+        max-width: 500px;
+    }
+  }
+}
+
+//Focus indicators
+a.sr-only:focus {
+  background-color:#ffffff !important;
+}
+
+*, .form-control, .active-filters .filters .filter-value, .slider-container .slider-handle {
+  &:focus {
+    outline-color: transparent !important; // shows on Windows high contrast, box shadow doesn't
+    outline-width: 2px !important;
+    outline-style: solid !important;
+    box-shadow: 0px 0px 2px 2px rgba(0, 122, 255, .7), 0 0 2px 2px rgba(255, 255, 255, .9);
+  }
+}
+
+@media only screen and (max-width : 767px) {
+  .result .checkbox {
+    display:block;
+  }
+}

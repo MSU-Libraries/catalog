@@ -27,6 +27,7 @@ PC-686
 Playbooks
 PubCat
 Pylint
+Ramsons
 RefWorks
 Route53
 SimpleSAMLphp
@@ -67,6 +68,7 @@ env
 galera
 healthcheck
 hlm
+i
 index.html
 js
 k6
@@ -75,6 +77,7 @@ marc-utils
 marc.properties
 marc_local.properties
 mariadb
+msu.edu
 ok
 pc-import-hlm
 pc-locate-oai

@@ -1,0 +1,124 @@
+// increase media-left to prevent overflowing text
+@media only screen and (max-width : 768px) {
+  .record .media {
+    flex-direction:column-reverse;
+  }
+}
+
+@media only screen and (min-width : 768px) {
+  .record .media-left.medium {
+    width: auto;
+  }
+}
+
+// dispay media-left on left for desktop width after reversing order on template for a11y
+.record.sourceEDS .media {
+    @media only screen and (max-width : 767px) {
+      display:block;
+    }
+    @media only screen and (min-width : 768px) {
+      flex-direction:row-reverse;
+    }
+}
+
+// spacing around full text finder link in EDS
+.record.sourceEDS {
+  .resultItemLine4 {
+    padding:1em 0 2em 0;
+  }
+}
+
+// margin above notes in holdings
+.item-notes {
+  margin-top:1rem;
+}
+
+// reduce space in staff view between field number and content (core set at 15%)
+.staff-view--marc .marc__tag {
+  width:8%;
+}
+
+//monospace font for staff view
+.tab-content .details-tab {
+  font-family: $font-family-monospace;
+  font-size: 1.1rem;
+  letter-spacing: 0;
+}
+
+.tag-record {
+  border: 2px solid $parakeetgreen;
+  -webkit-border-radius: 7rem;
+  -moz-border-radius: 7rem;
+  border-radius: 7rem;
+  padding: 0.2rem 0.5rem;
+  margin-left:1rem;
+  text-decoration:none;
+
+  &:hover {
+    border: 2px solid $parakeetgreen;
+    text-decoration:none;
+    color:$darkparakeetgreen;
+  }
+}
+
+.record-nav {
+  .action-toolbar li a {
+    background-color:revert;
+    color:$darkparakeetgreen;
+  }
+}
+
+.record-tabs {
+  ul.nav-tabs {
+    // Override search-results.scss nav-tabs
+    border-bottom: 1px solid $medgray !important;
+    margin-top:3rem;
+    margin-bottom:2rem;
+
+    li.record-tab {
+      border-right:1px solid $eggplant;
+      margin-bottom:1rem;
+      height:2rem;
+    }
+    li.record-tab:last-child {
+      border-right:none;
+    }
+  }
+  .tab-content {
+    .tab-pane {
+      h3:first-child {
+        margin-top:0;
+      }
+      h3:not(:first-child) {
+        border-top:1px solid $medgray;
+        padding-top:1rem;
+      }
+      .copy-number > span {
+        display: inline-block;
+        margin-top: calc(0.3rem + 1px);
+      }
+    }
+  }
+}
+
+// Prevent wrapping long field names on tabs
+// ex: in00005965624 Special Audience Characteristics
+.tab-content {
+  th {
+    white-space: nowrap;
+  }
+}
+
+// Show the icon next to the export button on the record page
+.dropdown-toggle .icon:last-child {
+  display: inherit;
+}
+// hide the arrow next to the dropdown of the export options
+.dropdown-toggle::after {
+ display: none;
+}
+
+//Fix display of export options
+#export-options li {
+    display:block;
+}

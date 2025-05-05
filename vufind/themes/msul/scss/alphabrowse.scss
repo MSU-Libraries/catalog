@@ -1,0 +1,46 @@
+// Fix layout on alphabrowse page
+.template-dir-alphabrowse {
+  .search.container.navbar {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+  }
+}
+
+
+// Add hover to browse (.alphabrowse) and border radius rounded
+.alphabrowse tbody tr {
+  &:hover {
+    background-color:$lightgray;
+  }
+  &.title {
+    min-width:10rem;
+  }
+}
+
+// Make See also (.authoritybox) display inline
+.authoritybox {display:inline-flex;}
+.authoritybox div {
+  margin-right:1rem;
+}
+
+.pager li {
+  background-color:transparent;
+  a {
+    border-radius:0.5rem;
+  }
+}
+
+// MSUL -- borrowed from sandal theme for PC-448
+@media only screen and (min-width : 790px) {
+  .template-dir-record {
+    nav:has(.pager) {
+      margin-top: $pager-margin-top;
+      margin-bottom: 0;
+    }
+
+    nav .pager {
+      margin: 0;
+    }
+  }
+}
