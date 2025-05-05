@@ -89,7 +89,10 @@ deleteSearch = function _deleteSearch(group, sindex) {
 
 function _renumberGroupLinkLabels() {
   $('.adv-group-close').each(function deleteGroupLinkLabel(i, link) {
-    $(link).attr('aria-label', VuFind.translate('del_search_num', {'%%num%%': i + 1}));
+    $(link).attr(
+      'aria-label',
+      VuFind.translate('del_search_num', { '%%num%%': i + 1 })
+    );
   });
 }
 
@@ -160,15 +163,10 @@ deleteGroup = function _deleteGroup(group) {
   return false;
 };
 
-function toggleExpansion(itemOrEvent) {
+function toggleExpansion(item) {
   // There is a bug with firefox 122, it jumps higher on the page when toggling for the fist time
   // To reproduce the bug, load the page, scroll down to the list, refresh the page, try to toggle an element without doing anything before
-  let leveledCheckbox;
-  if (itemOrEvent.target !== undefined) {
-    leveledCheckbox = $(itemOrEvent.target).closest('.leveledCheckbox');
-  } else {
-    leveledCheckbox = itemOrEvent;
-  }
+  let leveledCheckbox = $(item.target).closest('.leveledCheckbox');
   let expanding = !leveledCheckbox.hasClass('expanded');
   leveledCheckbox.toggleClass('expanded', expanding);
   let nextItem = leveledCheckbox.next();
@@ -176,33 +174,6 @@ function toggleExpansion(itemOrEvent) {
     $(nextItem).toggleClass('visibleLevel', expanding);
     nextItem = nextItem.next();
   }
-}
-
-function openParentIfChildChecked() {
-  $('.leveledCheckboxes').each(function openParentFn() {
-    let item = $(this).find('.leveledCheckbox').last();
-    let openParent = false;
-    let currentLevel = parseInt($(item).attr('data-level'));
-    let previousLevel;
-    let previousItem = item.prev();
-    let previousItemCheckbox = $(previousItem).find('input[type="checkbox"]');
-    while (previousItem.length > 0) {
-      previousLevel = parseInt($(previousItem).attr('data-level'));
-      // Handle if it's a superior level
-      if (previousLevel < currentLevel && openParent === true) {
-        toggleExpansion(previousItem);
-      } else if (openParent === false && previousItemCheckbox.prop('checked')) {
-        // If it's the same level, and we don't know yet if we have to open the parent and it's checked
-        openParent = true;
-      }
-      previousItem = previousItem.prev();
-      previousItemCheckbox = $(previousItem).find('input[type="checkbox"]');
-      currentLevel = previousLevel;
-      if (currentLevel === 0) {
-        openParent = false;
-      }
-    }
-  });
 }
 
 function toggleChildren(check, item) {
@@ -273,44 +244,36 @@ function uncheckChildrenIfParentCheckedRoutine(item) {
 /**
  * Check the state of previous elements in the list and for parents, toggling to adapt the checkmark
  * @param itemToStartWith
- * @param initiallyIndeterminate if we know at this point that the parent will be in indeterminate state
- * @param runWholeList if we stop at a root parent or go through the entire list (when starting at the last element)
+ * @param indeterminate if we know at this point that the parent will be in indeterminate state
+ * @param runAllTheList if we stop at a root parent or go through the entire list (when starting at the last element)
  */
-function checkAndUpdatePreviousLeveledCheckboxes(itemToStartWith, initiallyIndeterminate = undefined, runWholeList = false) {
-  let previousItemChecked, previousItemIndeterminate, previousItemCheckbox, currentLevel;
-  let indeterminate = initiallyIndeterminate;
+function checkAndUpdatePreviousLeveledCheckboxes(itemToStartWith, indeterminate = undefined, runAllTheList = false) {
+  let tmp;
+  let currentLevel = parseInt($(itemToStartWith).attr('data-level'));
   let itemChecked = $(itemToStartWith).find('input[type="checkbox"]').prop('checked');
-  let previousItem = itemToStartWith;
-  let previousLevel = parseInt($(previousItem).attr('data-level'));
-  do {
-    currentLevel = previousLevel;
-    previousItem = previousItem.prev();
-    if (previousItem.length === 0) break;
-    previousLevel = parseInt($(previousItem).attr('data-level'));
-    previousItemCheckbox = $(previousItem).find('input[type="checkbox"]');
-
+  let previousItem = itemToStartWith.prev();
+  while (previousItem.length > 0 && (currentLevel > 0 || runAllTheList)) {
     // Handle if it's a superior level
-    if (previousLevel < currentLevel) {
+    tmp = parseInt($(previousItem).attr('data-level'));
+    if (tmp < currentLevel) {
       if (indeterminate === true) {
-        previousItemCheckbox.prop('indeterminate', true);
-        previousItemCheckbox.prop('checked', false);
+        $(previousItem).find('input[type="checkbox"]').prop('indeterminate', true);
+        $(previousItem).find('input[type="checkbox"]').prop('checked', false);
       } else {
-        previousItemCheckbox.prop('checked', itemChecked);
-        previousItemCheckbox.prop('indeterminate', false);
+        $(previousItem).find('input[type="checkbox"]').prop('checked', itemChecked);
+        $(previousItem).find('input[type="checkbox"]').prop('indeterminate', false);
       }
+      currentLevel = tmp;
+    }
+
+    if (parseInt($(previousItem).attr('data-level')) === 0) {
+      previousItem = previousItem.prev();
+      currentLevel = parseInt($(previousItem).attr('data-level'));
+      itemChecked = $(previousItem).find('input[type="checkbox"]').prop('checked');
     } else {
-      // If it's the same level
-      previousItemChecked = previousItemCheckbox.prop('checked');
-      previousItemIndeterminate = previousItemCheckbox.prop('indeterminate');
-      if (itemChecked !== previousItemChecked || previousItemIndeterminate) {
-        indeterminate = true;
-      }
+      previousItem = previousItem.prev();
     }
-    if (currentLevel === 0) {
-      indeterminate = undefined;
-      itemChecked = previousItemCheckbox.prop('checked');
-    }
-  } while (currentLevel > 0 || runWholeList);
+  }
 }
 
 function runCheckAndUpdatePreviousLeveledCheckboxesOnWholeList() {
@@ -321,14 +284,14 @@ function runCheckAndUpdatePreviousLeveledCheckboxesOnWholeList() {
 
 function toggleCheck(item) {
   if ($(item.originalEvent.originalTarget).closest('.expander').length > 0) return;
-  const checkboxContainer = $(item.target).parents('.leveledCheckbox');
-  if (!checkboxContainer.hasClass('leveledCheckbox')) return;
+  var parents = $(item.target).parents('.leveledCheckbox');
+  if (!parents.hasClass('leveledCheckbox')) return;
 
-  const itemChecked = $(checkboxContainer).find('input[type="checkbox"]').prop('checked');
+  let itemChecked = $(parents).find('input[type="checkbox"]').prop('checked');
 
   // Modifying children
   // If the select checkbox contains a sub selection, check / uncheck the sub selection
-  let nextItem = toggleChildren(itemChecked, checkboxContainer);
+  let nextItem = toggleChildren(itemChecked, parents);
 
   let indeterminate, currentItemChecked, currentItemIndeterminate;
   // Continue looping to see the state of the other elements in the (sub)list
@@ -344,7 +307,7 @@ function toggleCheck(item) {
   }
 
   // Modifying parents and checking previous items
-  checkAndUpdatePreviousLeveledCheckboxes(checkboxContainer, indeterminate, false);
+  checkAndUpdatePreviousLeveledCheckboxes(parents, indeterminate, false);
 }
 
 function JSifyLeveledSelect() {
@@ -382,7 +345,6 @@ function JSifyLeveledSelect() {
     }
     prevLevel = currentLevel;
   }
-  openParentIfChildChecked();
   $('.leveledCheckbox .expander').on('click', this, toggleExpansion);
 }
 

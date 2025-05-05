@@ -18,7 +18,8 @@
   collection in Solr from the FTP location provided by Backstage.
 * [cron-reserves.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/cron-reserves.sh):
 * [pc-full-import](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-full-import?ref_type=heads):
-  Wrapper script for the `pc-import-folio` and `pc-import-hlm` scripts to perform a full import of data.
+  Wrapper script for the `pc-import-folio` and `pc-import-hlm` scripts to
+  perform a full import of data.
 
 ## HLM Data
 
