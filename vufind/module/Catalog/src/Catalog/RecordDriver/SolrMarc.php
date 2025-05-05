@@ -18,6 +18,7 @@ use function array_key_exists;
 use function count;
 use function in_array;
 use function is_array;
+use function sprintf;
 
 /**
  * Extends the record driver with additional data from Solr
@@ -1447,15 +1448,26 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         $isns = [];
         $marc = $this->getMarcReader();
-        $marcArr020 = $marc->getFields('020', ['a', 'z']);
+        $marcArr020 = $marc->getFields('020', ['a','q','z']);
         foreach ($marcArr020 as $marc020) {
+            $isn = [];
             foreach ($marc020['subfields'] as $subfield) {
                 if ($subfield['code'] == 'a') {
-                    $isns[] = ['isn' => $subfield['data'], 'type' => 'valid'];
+                    $isn = array_merge(
+                        $isn,
+                        ['isn' => $subfield['data'], 'type' => 'valid']
+                    );
                 } elseif ($subfield['code'] == 'z') {
-                    $isns[] = ['isn' => $subfield['data'], 'type' => 'canceled/invalid'];
+                    $isn = array_merge(
+                        $isn,
+                        ['isn' => $subfield['data'], 'type' => 'canceled/invalid']
+                    );
+                }
+                if ($subfield['code'] == 'q') {
+                    $isn['qual'] = $subfield['data'];
                 }
             }
+            $isns[] = $isn;
         }
         return $isns;
     }
@@ -1493,18 +1505,29 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         $isns = [];
         $marc = $this->getMarcReader();
-        $marcArr024 = $marc->getFields('024', ['a', 'z']);
+        $marcArr024 = $marc->getFields('024', ['a','q','z']);
         foreach ($marcArr024 as $marc024) {
             if (($marc024['i1'] ?? '') != '2') {
                 continue;
             }
+            $isn = [];
             foreach ($marc024['subfields'] as $subfield) {
                 if ($subfield['code'] == 'a') {
-                    $isns[] = ['isn' => $subfield['data'], 'type' => 'valid'];
+                    $isn = array_merge(
+                        $isn,
+                        ['isn' => $subfield['data'], 'type' => 'valid']
+                    );
                 } elseif ($subfield['code'] == 'z') {
-                    $isns[] = ['isn' => $subfield['data'], 'type' => 'canceled/invalid'];
+                    $isn = array_merge(
+                        $isn,
+                        ['isn' => $subfield['data'], 'type' => 'canceled/invalid']
+                    );
+                }
+                if ($subfield['code'] == 'q') {
+                    $isn['qual'] = $subfield['data'];
                 }
             }
+            $isns[] = $isn;
         }
         return $isns;
     }
@@ -1813,6 +1836,37 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             }
         }
 
+        // MSU Get unmatched 880 fields
+        foreach ($subjectFieldsKeys as $subjectFieldKey) {
+            $linkedFields = $this->getMarcReader()->getLinkedFields('880', $subjectFieldKey, []);
+            foreach ($linkedFields as $linkedField) {
+                // Anytime there is a link with an occurrence of '00' it means it is unlinked
+                if ($linkedField['link']['occurrence'] != self::UNLINKPOS) {
+                    continue;
+                }
+                $fieldVals = [];
+                // MSU:  Skip if $2 == fast (PC-1216)
+                $skip = false;
+                foreach ($linkedField['subfields'] as $sf) {
+                    if ($sf['code'] == '2' && $sf['data'] == 'fast') {
+                        $skip = true;
+                        break;
+                    }
+                }
+                if ($skip) {
+                    continue;
+                }
+                $current = [];
+                foreach ($linkedField['subfields'] as $subfield) {
+                    if ($subfield['code'] != '6') {
+                        //$fieldVals[] = $subfield['data'];
+                        $current[] = ['subject' => $subfield['data'], 'linked' => ''];
+                    }
+                }
+                $retval[] = $current;
+            }
+        }
+
         // Remove duplicates and then send back everything we collected:
         return array_map(
             'unserialize',
@@ -1854,6 +1908,54 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             $this->getFieldArray('710', ['a', 'b']),
             $this->getMarcFieldWithInd('711', ['a', 'b'], ['1' => ['', '0', '1', '2'], '2' => ['']])
         );
+    }
+
+    /**
+     * MSU -- customized to handle when linked data is included
+     * Get Author Information with Associated Data Fields
+     *
+     * @param string $index      The author index [primary, corporate, or secondary]
+     * used to construct a method name for retrieving author data (e.g.
+     * getPrimaryAuthors).
+     * @param array  $dataFields An array of fields to used to construct method
+     * names for retrieving author-related data (e.g., if you pass 'role' the
+     * data method will be similar to getPrimaryAuthorsRoles). This value will also
+     * be used as a key associated with each author in the resulting data array.
+     *
+     * @return array
+     */
+    public function getAuthorDataFields($index, $dataFields = [])
+    {
+        $data = $dataFieldValues = [];
+
+        // Collect author data
+        $authorMethod = sprintf('get%sAuthors', ucfirst($index));
+        $authors = $this->tryMethod($authorMethod, [], []);
+
+        // Collect attribute data
+        foreach ($dataFields as $field) {
+            $fieldMethod = $authorMethod . ucfirst($field) . 's';
+            $dataFieldValues[$field] = $this->tryMethod($fieldMethod, [], []);
+        }
+
+        // Match up author and attribute data (this assumes that the attribute
+        // arrays have the same indices as the author array; i.e. $author[$i]
+        // has $dataFieldValues[$attribute][$i].
+        foreach ($authors as $i => $author) {
+            // MSU
+            $authorVal = is_array($author) ? $author['note'] : $author;
+            if (!isset($data[$authorVal])) {
+                $data[$authorVal] = [];
+            }
+
+            foreach ($dataFieldValues as $field => $dataFieldValue) {
+                if (!empty($dataFieldValue[$i])) {
+                    $data[$authorVal][$field][] = $dataFieldValue[$i];
+                }
+            }
+        }
+
+        return $data;
     }
 
     /**
@@ -2074,6 +2176,19 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Get ALL editions of the current record.
+     *
+     * @return string
+     */
+    public function getEditions()
+    {
+        return array_merge(
+            $this->getMarcFieldWithInd('250', ['a', 'b', '3']),
+            $this->getMarcFieldWithInd('254', ['a'])
+        );
+    }
+
+    /**
      * Get the former publication frequency
      *
      * @return string
@@ -2106,6 +2221,136 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     {
         // PC-1105
         return $this->getMarcFieldWithInd('264', ['a', 'b', '3'], [[2 => ['0']]]);
+    }
+
+    /**
+     * Get the Abbreviated Title
+     *
+     * @return string
+     */
+    public function getAbbreviatedTitle()
+    {
+        return $this->getMarcFieldWithInd('210', ['a', 'b']);
+    }
+
+    /**
+     * Get the Key Title
+     *
+     * @return string
+     */
+    public function getKeyTitle()
+    {
+        return $this->getMarcFieldWithInd('222', ['a', 'b']);
+    }
+
+    /**
+     * Get the Former Title
+     *
+     * @return string
+     */
+    public function getFormerTitle()
+    {
+        return $this->getMarcFieldWithInd('247', ['a', 'b', 'f', 'g', 'h', 'n', 'p', 'x']);
+    }
+
+    /**
+     * Get the Collective Uniform Title
+     *
+     * @return string
+     */
+    public function getCollectiveUniformTitle()
+    {
+        return $this->getUniformTitleFromMarc('243', range('a', 'z'));
+    }
+
+    /**
+     * Get the Organization and Arrangement of Materials
+     *
+     * @return string
+     */
+    public function getOrganizationAndArrangementOfMaterials()
+    {
+        return $this->getMarcFieldWithInd('351', ['a', 'b', 'c', '3']);
+    }
+
+    /**
+     * Get Continues
+     *
+     * @return array
+     */
+    public function getContinues()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['0']]]);
+    }
+
+    /**
+     * Get Continues in part
+     *
+     * @return array
+     */
+    public function getContinuesInPart()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['1']]]);
+    }
+
+    /**
+     * Get Supersedes
+     *
+     * @return array
+     */
+    public function getSupersedes()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['2']]]);
+    }
+
+    /**
+     * Get Supersedes in part by
+     *
+     * @return array
+     */
+    public function getSupersedesInPartBy()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['3']]]);
+    }
+
+    /**
+     * Get Formed by the union of
+     *
+     * @return array
+     */
+    public function getFormedByTheUnionOf()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['4']]]);
+    }
+
+    /**
+     * Get Absorbed
+     *
+     * @return array
+     */
+    public function getAbsorbed()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['5']]]);
+    }
+
+    /**
+     * Get Absorbed in part
+     *
+     * @return array
+     */
+    public function getAbsorbedInPart()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['6']]]);
+    }
+
+    /**
+     * Get Separated from
+     *
+     * @return array
+     */
+    public function getSeparatedFrom()
+    {
+        return $this->getMarcFieldWithInd('780', ['a', 'b', 'd', 't'], [[1 => ['0'], 2 => ['7']]]);
     }
 
     /**

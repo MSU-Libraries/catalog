@@ -11,6 +11,9 @@
         <controlfield tag="008">021122s2020    en            000 0 eng d</controlfield>
         <datafield tag="020" ind1=" " ind2=" ">
             <subfield code="a">978-3-16-148410-0</subfield>
+            <subfield code="q">qual-data</subfield>
+        </datafield>
+        <datafield tag="020" ind1=" " ind2=" ">
             <subfield code="z">978-3-16-148410-1</subfield>
         </datafield>
         <datafield tag="010" ind1=" " ind2=" ">
@@ -64,6 +67,15 @@
         <datafield tag="110" ind1="2" ind2=" ">
             <subfield code="a">Testcorp</subfield>
         </datafield>
+        <datafield tag="210" ind1=" " ind2=" ">
+            <subfield code="a">Abbr title</subfield>
+        </datafield>
+        <datafield tag="222" ind1=" " ind2=" ">
+            <subfield code="a">Key title</subfield>
+        </datafield>
+        <datafield tag="243" ind1=" " ind2=" ">
+            <subfield code="a">Collective uniform title</subfield>
+        </datafield>
         <datafield tag="245" ind1="0" ind2="4">
             <subfield code="a">The Foo:</subfield>
             <subfield code="b">Bar! /</subfield>
@@ -73,8 +85,14 @@
             <subfield code="h">Format 1</subfield>
             <subfield code="h">Format 2</subfield>
         </datafield>
+        <datafield tag="247" ind1=" " ind2=" ">
+            <subfield code="a">former title</subfield>
+        </datafield>
         <datafield tag="250" ind1=" " ind2=" ">
             <subfield code="a">2nd ed.</subfield>
+        </datafield>
+        <datafield tag="254" ind1=" " ind2=" ">
+            <subfield code="a">full score</subfield>
         </datafield>
         <datafield tag="260" ind1=" " ind2=" ">
             <subfield code="a">260 Location :</subfield>
@@ -110,6 +128,10 @@
         <datafield tag="310" ind1=" " ind2=" ">
             <subfield code="a">Frequency varies,</subfield>
             <subfield code="b">2020-</subfield>
+        </datafield>
+        <datafield tag="351" ind1=" " ind2=" ">
+            <subfield code="a">Test</subfield>
+            <subfield code="b">data</subfield>
         </datafield>
         <datafield tag="362" ind1=" " ind2=" ">
             <subfield code="a">2020-</subfield>
@@ -230,6 +252,27 @@
         <datafield tag="780" ind1="0" ind2="0">
             <subfield code="a">Old Journal</subfield>
             <subfield code="x">6666-7777</subfield>
+        </datafield>
+        <datafield tag="780" ind1="0" ind2="1">
+            <subfield code="a">ind2 = 1</subfield>
+        </datafield>
+        <datafield tag="780" ind1="0" ind2="2">
+            <subfield code="a">ind2 = 2</subfield>
+        </datafield>
+        <datafield tag="780" ind1="0" ind2="3">
+            <subfield code="a">ind2 = 3</subfield>
+        </datafield>
+        <datafield tag="780" ind1="0" ind2="4">
+            <subfield code="a">ind2 = 4</subfield>
+        </datafield>
+        <datafield tag="780" ind1="0" ind2="5">
+            <subfield code="a">ind2 = 5</subfield>
+        </datafield>
+        <datafield tag="780" ind1="0" ind2="6">
+            <subfield code="a">ind2 = 6</subfield>
+        </datafield>
+        <datafield tag="780" ind1="0" ind2="7">
+            <subfield code="a">ind2 = 7</subfield>
         </datafield>
         <datafield tag="785" ind1="0" ind2="0">
             <subfield code="a">New Journal</subfield>

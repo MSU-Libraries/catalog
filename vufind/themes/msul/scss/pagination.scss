@@ -1,0 +1,31 @@
+.pagination {
+    margin:0 0 1rem 0;
+    justify-content: inherit;
+  }
+
+.pagination>li>a, .pagination>li>span {
+  position:relative;
+  float:left;
+  padding:6px 12px;
+  margin-left:-1px;
+  line-height:1.42857143;
+  color:#888;
+  text-decoration:none;
+  background-color:#fff;
+}
+.pagination li {
+  color:#18453b;
+  font-weight:300;
+
+  a {
+    color:#18453b;
+
+  }
+}
+
+.pagination li a span.fa-angle-left {
+  margin-left: 0.5rem;
+}
+.pagination li a span.fa-angle-right {
+  margin-right: 0.5rem;
+}

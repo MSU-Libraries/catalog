@@ -1,0 +1,102 @@
+// Change all bootstrap variables before importing bootstrap
+// ---------------------------------------------------------
+@import "variables";
+@import "../../bootstrap5/scss/bootstrap";
+
+// Metropolis theme
+@import url("https://msu-p-001.sitecorecontenthub.cloud/api/public/content/1a1d46b45afb40eda6ebf4ed44077295");
+
+// Utility Classes
+// ---------------
+.bg-color-white {
+  background-color:#ffffff;
+}
+
+// Bootstrap Class overrides
+// * Note: Somore more specific overrides exist elsewhere,
+//   like buttons.scss
+// -------------------------
+.container {
+  width: 100%;
+  margin-left: 0rem;
+  margin-right: 0rem;
+  max-width: unset;
+}
+
+.media-left {
+  a {
+    padding-bottom: .25rem;
+  }
+}
+
+// HTML element overrides
+// * Note: some more specific overrides exist elsewhere,
+//   like tables.scss
+// ----------------------
+a {
+  color:$darkparakeetgreen;
+}
+
+body, button, select, input {
+  letter-spacing:.04rem;
+}
+
+h1 {
+  color: $eggplant;
+  font-weight: 600;
+}
+
+h2 a {
+  color: $eggplant;
+  text-decoration:none;
+  &:hover {
+    color:$eggplant;
+  }
+}
+
+input[type="checkbox"] {
+  accent-color: $darkparakeetgreen
+}
+
+label {
+  color: $msugreen;
+  font-weight: 700;
+}
+
+// Import local customizations
+// ---------------------------
+@import "header";
+
+@import "footer";
+
+@import "home"; 
+
+@import "get-this";
+
+@import "facets.scss";
+
+@import "pagination.scss";
+
+@import "tables.scss";
+
+@import "myaccount.scss";
+
+@import "record.scss";
+
+@import "search-results.scss";
+
+@import "advanced-search.scss";
+
+@import "alphabrowse.scss";
+
+@import "buttons.scss";
+
+@import "custom-notices.scss";
+
+@import "login.scss";
+
+@import "popover.scss";
+
+@import "reserves.scss";
+
+@import "feedback.scss";

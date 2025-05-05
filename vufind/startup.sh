@@ -22,13 +22,13 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
     git config --system --add safe.directory \*
     # Update the repo (repo is initially cloned during first CI run for branch)
-    git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch
+    (umask 0002; git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch)
 
     # Set up the symlink to be able to access code from host machine
     if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
         rm -r /usr/local/vufind/module/Catalog /usr/local/vufind/themes/msul
         # Changing theme in config
-        sed -i -r 's/^(theme\s+= )msul/\1bootstrap3/' /usr/local/vufind/local/config/vufind/config.ini
+        sed -i -r 's/^(theme\s+= )msul/\1bootstrap5/' /usr/local/vufind/local/config/vufind/config.ini
     fi
 
     # Enable detailed error reporting for devel
@@ -131,12 +131,15 @@ while [[ "$EXIT_STATUS" -eq 28 ]]; do # exit code 28 is curl timeout
 done
 echo "Solr ready!"
 
-# Run grunt if a devel/review site
+# Run npm if a devel/review site
 if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
-    echo "Starting grunt to auto-compile theme changes..."
-    # TODO vufind10 use scss
-    grunt watch:less&
+    echo "Starting npm to auto-compile theme changes..."
+    npm run watch:scss&
+else
+    echo "Running npm to compile theme changes..."
+    npm run build:scss
 fi
+
 
 # Unset environment variables that are no longer necessary before starting Apache
 unset DEPLOY_KEY_FILE VUFIND_CORE_INSTALLATION

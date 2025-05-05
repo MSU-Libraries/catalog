@@ -1,16 +1,11 @@
 <?php
 return [
-    'extends' => 'bootstrap3',
+    'extends' => 'bootstrap5',
 
-    'less' => [
-        'active' => true,
-        'compiled.less',
-    ],
     'js' => [
         ['file' => 'get-this-dropdown.js', 'priority' => 450],
         ['file' => 'check_item_statuses.js', 'priority' => 450],
         ['file' => 'get_license_agreement.js', 'priority' => 450],
-        ['file' => 'combined-handler.js', 'priority' => 450],
     ],
     'favicon' => 'msul-favicon.ico',
     'helpers' => [
@@ -44,6 +39,7 @@ return [
              */
             'send-sms' => 'FontAwesome:mobile',
             'user-list-add' => 'FontAwesome:star',
+            'export' => 'FontAwesome:arrow-right',
         ],
     ],
 ];

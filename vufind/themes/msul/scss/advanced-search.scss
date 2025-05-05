@@ -1,0 +1,222 @@
+// Remove catalog only checkbox & location options from EDS Advanced Search
+.template-dir-eds.template-name-advanced {
+  label[for=limit_FC], label[for=limit_LB], label[for=limit_FT1], #limit_LB {
+    display:none;
+  }
+}
+
+// Alignment for flipped advanced search select & input fields
+.adv-term-type {
+  float:none;
+  margin-bottom:1%;
+}
+.adv-term-input,
+.adv-term-op,
+.adv-group-match {
+  max-width:80%;
+  float:left;
+}
+
+.adv-term-remove {
+  width:1em !important;
+  height:1em;
+  line-height:1em;
+  margin-top:0.4rem;
+  margin-left:0.5rem;
+  &:focus {
+    border-radius:1.5rem;
+    box-shadow: 0px 0px 2px 2px rgba(0, 122, 255, 1)
+  }
+}
+
+.add_search_link {
+  margin-top:0 !important;
+  padding-top:0;
+}
+
+#groupJoin {
+  margin-left:-0.5rem;
+}
+
+@media (min-width: 768px) {
+  .eds-adv {
+    .adv-search:first-of-type {
+      .adv-term-input {
+        margin-left: 0;
+       }
+      .adv-term-type {
+        margin-left: 17%;
+      }
+    }
+  }
+  .adv-search {
+    .adv-term-type {
+      margin-right:1%;
+    }
+  .adv-term-input {
+    margin-right:0;
+    }
+  }
+}
+
+// space below advanced search button mobile and up
+fieldset.eds,
+fieldset.solr-facets {
+  margin-top:1rem;
+}
+
+// spacing below advanced search items
+#groupPlaceHolder,
+.adv-submit,
+.eds-adv {
+  margin-bottom:1rem;
+}
+
+// outer gray box around groups
+.adv-group-msul {
+  @include clearfix();
+  position: relative;
+  margin-bottom: .5rem;
+  padding: 1rem;
+  border-radius: $border-radius-base;
+  margin-bottom:1rem;
+  background-color:$lightgray;
+}
+
+// catalog advanced search
+// spacing between selection boxes
+// leveled checkboxes (expandables) to be used by js
+#advSearchForm {
+  .solr-adv-facet {
+    .form-control {
+      padding: 0.1rem;
+      margin-bottom: 1rem;
+      height: 15.5em;
+      overflow: auto;
+      white-space: nowrap;
+      max-width:100%; //override core max-width 400px
+
+      label {
+        font-weight: inherit;
+        color: inherit;
+      }
+    }
+
+    .form-control.expandableLeveledCheckboxes {
+      .leveledCheckbox {
+        height: auto;
+      }
+
+      .leveledCheckbox:not(.expandable):not(.leveledCheckbox[data-level="0"]):not(.visibleLevel) {
+        display: none;
+      }
+
+      .expandable .expander,
+      .notExpandable .expander {
+        display: inline-block;
+        width: 17px;
+      }
+
+      .notExpandable .expander {
+        visibility: hidden;
+      }
+
+      .expandable.expanded > .expander .chevronRight,
+      .expandable:not(.expanded) > .expander .chevronDown,
+      .notExpandable > .expander .chevronDown {
+        display: none;
+      }
+    }
+  }
+
+  @media (min-width: 768px) {
+    .solr-facet-container {
+      justify-content: space-around;
+      gap: 0.4rem;
+    }
+    .solr-adv-facet {
+      flex: 1 1 98%;
+      width: 98%;
+    }
+  }
+  @media (min-width: 992px) {
+    .solr-adv-facet {
+      flex: 1 1 48%;
+      width: 48%;
+    }
+  }  @media (min-width: 1630px) {
+    .solr-adv-facet {
+      flex: 1 1 48%;
+      width: 48%;
+    }
+  }
+}
+
+//New Items page location format using styles for advanced search page above
+.form-search-newitem {
+  .solr-adv-facet {
+    overflow: auto; 
+    #limit_building.form-control {
+      padding: 0.1rem;
+      margin-bottom: 1rem;
+      height: 16.7rem;
+      overflow: auto;
+      white-space: nowrap;
+      max-width:100%; //override core max-width 400px
+      label {
+        font-weight: inherit;
+        color: inherit;
+      }
+    }
+  
+    .form-control.expandableLeveledCheckboxes {
+      .leveledCheckbox {
+        height: auto;
+      }
+      .leveledCheckbox:not(.expandable):not(.leveledCheckbox[data-level="0"]):not(.visibleLevel) {
+        display: none;
+      }
+      .expandable .expander,
+      .notExpandable .expander {
+        display: inline-block;
+        width: 17px;
+      }
+      .notExpandable .expander {
+        visibility: hidden;
+      }
+      .expandable.expanded > .expander .chevronRight,
+      .expandable:not(.expanded) > .expander .chevronDown,
+      .notExpandable > .expander .chevronDown {
+        display: none;
+      }
+    }
+  }
+}
+
+
+// reduce font size and spacing below headers on catalog advanced search
+#advSearchForm {
+  fieldset {
+    margin-bottom:1rem;
+  legend {
+    margin-bottom:1rem;
+    font-size:20px;
+    }
+  }
+}
+
+// add group numbers on catalog advanced search
+.template-dir-search.template-name-advanced {
+  counter-reset: adv-group-num;
+    .msul-adv-group-num::before {
+        display:block;
+        counter-increment: adv-group-num;
+        content: "Group " counter(adv-group-num) " ";
+        margin-bottom:0.5rem;
+  }
+}
+
+// align advanced searchbox left
+.mainbody.right .searchbox .navbar-form {
+  padding-left:0;
+}

@@ -55,7 +55,7 @@ remove_bind_mount() {
 }
 
 sync_git_repo() {
-    run_on_node "1" "pc-clone $STACK_NAME -p /repo -u git@gitlab.msu.edu:msu-libraries/devops/catalog.git -b \"$DEPLOY_KEY\""
+    run_on_node "1" "pc-clone $STACK_NAME -p /repo -u git@gitlab.msu.edu:msu-libraries/catalog/catalog.git -b \"$DEPLOY_KEY\""
 }
 
 add_config_symlinks() {

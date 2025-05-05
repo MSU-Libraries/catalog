@@ -11,7 +11,7 @@ x-zookeeper-envs: &zookeeper_envs
 version: "3.8"
 services:
   zk:
-    image: registry.gitlab.msu.edu/msu-libraries/devops/catalog/zk:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
+    image: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/zk:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     volumes:
       - zk-bitnami:/bitnami
     hostname: zk{{slice .Node.Hostname 8 9}}

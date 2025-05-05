@@ -1,0 +1,291 @@
+.template-dir-search.template-name-home header, .template-dir-eds.template-name-home header, .template-dir-combined.template-name-home header {
+  display:flex;
+  flex-direction:column;
+  background-color:$msugreen;
+  background-image:
+  linear-gradient(
+    rgba(24, 69, 59, 0.8),
+    rgba(24, 69, 59, 0.8)
+  ),
+  url(/vufind/themes/msul/images/banner-image.jpg);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: 50% 80%;
+  background-size: cover;
+  margin-bottom: 3rem;
+  .banner.container {
+    background: none;
+    margin-bottom:0;
+    order:1;
+  }
+  .search.container.navbar {
+    order:2;
+  }
+  .custom-notices {
+    order:3;
+    margin:0;
+  }
+}
+
+// center on home page at medium width
+.template-dir-search.template-name-home .search.container, .template-dir-eds.template-name-home .search.container, .template-dir-combined.template-name-home .search.container {
+    @media only screen and (min-width : 992px) {
+      text-align:center;
+      margin-left:auto;
+      margin-right:auto;
+      width:95%;
+    }
+  }
+
+// home page search form appearance
+.template-dir-search.template-name-home form.searchForm, .template-dir-eds.template-name-home form.searchForm, .template-dir-combined.template-name-home form.searchForm  {
+  background: rgba(255,255,255,0.8);
+  border-radius: 0.5rem;
+  padding: 2rem 2rem 3rem 2rem;
+  margin-top:1.25rem;
+  margin-bottom:3rem;
+  width:100%;
+  @media only screen and (min-width : 992px) {
+    .searchForm-query {
+      width: 25%;
+    }
+
+  }
+  @media only screen and (min-width : 1090px) {
+   .searchForm-query {
+      width: 35%;
+    }
+  }
+  @media only screen and (min-width : 1260px) {
+   .searchForm-query {
+      width: 50%;
+    }
+  }
+}
+
+header {
+  .banner.container {
+    background-color:$msugreen;
+    background-image:
+    linear-gradient(
+      rgba(24, 69, 59, 0.8),
+      rgba(24, 69, 59, 0.8)
+    ),
+    url(/vufind/themes/msul/images/banner-image.jpg);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 50% 110%;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    border: 0;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+
+  .navbar-header {
+    a,  a:hover, a:active, a:visited {
+      color:#fff;
+      text-decoration:none;
+    }
+    .fa {
+      font-size:2rem;
+      color:#fff;
+    }
+    padding:1rem;
+    @media only screen and (max-width : 991px) {
+      width:100%;
+    }
+  }
+  .navbar-msubrand {
+    margin-bottom:1rem;
+    a {
+      display:inline-block; //for focus indicator
+    }
+  }
+
+  .navbar-msul {
+    font-size:2rem;
+    font-weight:500;
+    margin-bottom:0.25rem;
+
+      a {
+        padding:0.5rem;
+      }
+      @media only screen and (min-width : 992px) {
+        display:inline-block;
+        font-size:2.5rem;
+        line-height:2.5rem;
+      }
+  }
+  .navbar-catalog {
+    font-size:2.5rem;
+    font-weight:500;
+
+    a {
+      padding:0.5rem;
+    }
+    @media only screen and (min-width : 992px) {
+      display:inline-block;
+      border-left:0.2rem solid #fff;
+      padding-left:0.5rem;
+      line-height:2.5rem;
+    }
+  }
+  .navbar-toggle {
+    margin-top:3.5rem;
+  }
+}
+
+.navbar-collapse {
+  margin-top:-6rem;
+  a, a:visited {
+    color:#fff;
+  }
+  a:hover, a:active, a:focus {
+    color:#fff;
+    & .fa {
+      color:#fff;
+    }
+  }
+  .nav > li > a {
+    padding-top:0.2rem;
+    padding-bottom:0.2rem;
+    margin-top:1rem;
+    &:hover {
+      color: #fff;
+      background-color: initial;
+      outline-color:transparent;
+    }
+    &:focus {
+      color: #fff;
+      background-color: initial;
+    }
+  }
+}
+
+// override vertical align
+@media (min-width: 768px) {
+  .navbar-form .form-control {
+    vertical-align: initial;
+  }
+}
+
+// hide back to catalog link
+.template-dir-channels,
+.template-dir-content,
+.template-name-results,
+.template-name-search,
+.template-name-advanced
+{
+  .backtocat {
+    display:none;
+  }
+}
+
+.backtocat>p>a,
+.backtoorigin>p>a {
+  text-decoration: none;
+}
+
+// searchbox responsive styling
+.searchbox .searchForm {
+      #searchForm-reset {
+        position:absolute;
+        right: 3px;
+        top:0.37em;
+        line-height:1em;
+        width:1.5em !important;
+        height:1.5em;
+    }
+      .search-tips-mobile {
+        position:absolute;
+        right:4rem;
+        margin-top:0.5rem;
+      }
+      .search-tips-icon {
+        display:none;
+      }
+  @media only screen and (max-width : 767px) {
+    label, input, select, button {
+      width:100%;
+    }
+    .searchForm-query {
+      max-width:100% !important;
+    }
+  }
+
+  @media only screen and (max-width : 1235px) {
+    .searchForm-query {
+      width:100%;
+      max-width:400px;
+    }
+  }
+
+  @media only screen and (max-width : 991px) {
+    label, input, select, button {
+      display:block;
+      margin-bottom:0.3rem;
+    }
+    input, select {
+      width:100% !important;
+    }
+  }
+
+  @media only screen and (max-width : 1228px) {
+    input {
+      margin-bottom:1rem;
+    }
+  }
+
+  @media only screen and (min-width : 992px) {
+    .searchForm-query .searchForm_lookfor {
+      width: 100%;
+      max-width: initial;
+      border-radius:0.5rem 0 0 0.5rem;
+      padding-right:5rem !important;
+    }
+    .searchForm-query #searchForm_controls {
+      width: 4.5rem;
+    }
+    .search-tips-icon {
+      display:block;
+      position: absolute;
+      background-color:#fff;
+      border:0;
+      top:0.5rem;
+      right:0.5rem;
+      height:1.5em;
+      width:1.5em;
+    }
+    .search-tips-mobile {
+      display:none;
+    }
+    #searchForm-reset {
+      right: 2.7rem;
+    }
+    button[type=submit].btn-primary {
+      position: relative;
+      z-index: 2;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin-left: -0.4rem;
+    }
+  }
+  @media only screen and (min-width : 1236px) {
+  }
+}
+
+.template-dir-search.template-name-results .searchbox {
+  @media only screen and (max-width : 767px) {
+  }
+  @media only screen and (max-width : 1228px) {
+    label, input, select, button {
+      display:block;
+    }
+  }
+}

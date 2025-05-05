@@ -1,0 +1,52 @@
+// Remove table striping
+// Baseline styles
+.table, .tab-content table {
+  width: auto;
+  max-width: 100%;
+  margin-bottom: $line-height-computed;
+  // Cells
+  > thead,
+  > tbody,
+  > tfoot {
+    > tr {
+      vertical-align:text-top;
+
+      >  th {
+        border:0;
+        width:auto;
+
+        @media only screen and (max-width : 992px) {
+          display:revert; // headings in alphabrowse don't collapse at mobile
+          padding-bottom:0;
+        }
+      }
+
+      > td {
+        padding: $table-cell-padding-y $table-cell-padding-x $table-cell-padding-y $table-cell-padding-x;
+        line-height: $line-height-base;
+        width:auto;
+        border-top: 0 solid $table-border-color;
+        overflow-wrap: anywhere;
+
+        @media only screen and (max-width : 992px) {
+        }
+      }
+    }
+  }
+}
+
+table tr {
+  line-height: 2.5rem;
+  vertical-align: text-top;
+
+  th {
+    padding-right: 2rem;
+    @media only screen and (max-width : 991px) {
+      display:flex;
+      padding-bottom:0;
+    }
+    @media only screen and (min-width : 992px) {
+      width:30%;
+    }
+  }
+}

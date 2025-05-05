@@ -1,0 +1,15 @@
+// Fix for checkboxes on feedback form
+.dynamic-form .group-problem_language {
+  margin-bottom: 0;
+
+  label {
+    display: inline-flex !important;
+    align-items: center;
+    line-height: 1rem;
+  }
+}
+
+// Fix the textarea on the feedback form
+#form_FeedbackSite_message {
+  height: auto;
+}

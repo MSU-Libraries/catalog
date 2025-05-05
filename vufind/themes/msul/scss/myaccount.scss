@@ -1,0 +1,47 @@
+body.template-dir-myresearch.template-name-profile {
+  .table {
+    tbody {
+      tr:nth-child(4) {
+        vertical-align:middle;
+      }
+    }
+  }
+}
+
+//Myresearch sidebar styling
+#myresearch-sidebar {
+  margin-top:1rem;
+    h2 {
+      margin-top:1rem;
+    }
+}
+
+//styling h1's to appear as h2's on account page
+.template-dir-myresearch.template-name-mylist, 
+.template-dir-myresearch.template-name-checkedout,
+.template-dir-holds.template-name-list,
+.template-dir-myresearch.template-name-fines,
+.template-dir-myresearch.template-name-editlist {
+  h1 {
+    font-size:23px;
+    font-weight:normal;
+  }
+}
+
+//Modal content
+.lightbox-header { //for non-modal layout /MyResearch/Home
+  margin-bottom:2rem;
+}
+
+// Fix checkboxes disapearing on account page
+.result .record-checkbox {
+  display:block;
+  flex: 0;
+  cursor: pointer;
+}
+
+.result .record-number {
+  display: block;
+  flex: 0 2rem;
+  text-align: center;
+}

@@ -1,4 +1,4 @@
-/*global VuFind, getFocusableNodes, recaptchaOnLoad, resetCaptcha */
+/*global VuFind, bootstrap, getFocusableNodes, recaptchaOnLoad, resetCaptcha */
 VuFind.register('lightbox', function Lightbox() {
   var child = "";
   var parent = "";
@@ -12,6 +12,8 @@ VuFind.register('lightbox', function Lightbox() {
   var _modalParams = {};
   // Elements
   var _modal, _modalBody, _clickedButton = null;
+  // Boostrap modal
+  var _bsModal = null;
   // Utilities
   function _storeClickedStatus() {
     _clickedButton = this;
@@ -25,12 +27,12 @@ VuFind.register('lightbox', function Lightbox() {
     }
     if ($h2.length > 0) {
       $h2.attr('id', 'lightbox-title');
-      _modal.attr('aria-labelledby', 'lightbox-title');
+      _modal.setAttribute('aria-labelledby', 'lightbox-title');
     } else {
-      _modal.removeAttr('aria-labelledby');
+      _modal.removeAttribute('aria-labelledby');
     }
     _lightboxTitle = false;
-    _modal.modal('handleUpdate');
+    _bsModal.handleUpdate();
   }
 
   function _addQueryParameters(url, params) {
@@ -49,8 +51,8 @@ VuFind.register('lightbox', function Lightbox() {
   function showAlert(message, _type) {
     var type = _type || 'info';
     _html('<div class="flash-message alert alert-' + type + '">' + message + '</div>'
-        + '<button class="btn btn-default" data-dismiss="modal">' + VuFind.translate('close') + '</button>');
-    _modal.modal('show');
+        + '<button class="btn btn-default" data-bs-dismiss="modal">' + VuFind.translate('close') + '</button>');
+    _bsModal.show();
   }
   function flashMessage(message, _type) {
     var type = _type || 'info';
@@ -59,7 +61,7 @@ VuFind.register('lightbox', function Lightbox() {
       .after('<div class="flash-message alert alert-' + type + '">' + message + '</div>');
   }
   function close() {
-    _modal.modal('hide');
+    _bsModal.hide();
   }
 
   /**
@@ -358,7 +360,7 @@ VuFind.register('lightbox', function Lightbox() {
    * if no other nodes exist then focuses on first close trigger
    */
   function setFocusToFirstNode() {
-    var focusableNodes = getFocusableNodes(_modal.get(0));
+    var focusableNodes = getFocusableNodes(_modal);
 
     // no focusable nodes
     if (focusableNodes.length === 0) return;
@@ -368,8 +370,8 @@ VuFind.register('lightbox', function Lightbox() {
     // form-control element instead of 1st non-close button in modal (PC-814)
     var nodesWhichAreNotCloseTargets = focusableNodes.filter(function nodeFilter(node) {
       return !node.hasAttribute("data-lightbox-close") && (
-        !node.hasAttribute("data-dismiss") ||
-        node.getAttribute("data-dismiss") !== "modal"
+        !node.hasAttribute("data-bs-dismiss") ||
+        node.getAttribute("data-bs-dismiss") !== "modal"
       ) && (node.classList.contains("placehold") ||
       node.classList.contains("form-control"));
     });
@@ -383,7 +385,7 @@ VuFind.register('lightbox', function Lightbox() {
   }
 
   function retainFocus(event) {
-    var focusableNodes = getFocusableNodes(_modal.get(0));
+    var focusableNodes = getFocusableNodes(_modal);
 
     // no focusable nodes
     if (focusableNodes.length === 0) return;
@@ -397,7 +399,7 @@ VuFind.register('lightbox', function Lightbox() {
     });
 
     // if disableFocus is true
-    if (!_modal[0].contains(document.activeElement)) {
+    if (!_modal.contains(document.activeElement)) {
       focusableNodes[0].focus();
     } else {
       var focusedItemIndex = focusableNodes.indexOf(document.activeElement);
@@ -510,9 +512,13 @@ VuFind.register('lightbox', function Lightbox() {
   }
 
   function init() {
-    _modal = $('#modal');
-    _modalBody = _modal.find('.modal-body');
-    _modal.on('hide.bs.modal', function lightboxHide() {
+    _modal = document.querySelector('#modal');
+    if (!_modal) {
+      console.error('#modal not found');
+      return;
+    }
+    _modalBody = $(_modal).find('.modal-body');
+    _modal.addEventListener('hide.bs.modal', function lightboxHide() {
       if (VuFind.lightbox.refreshOnClose) {
         VuFind.refreshPage();
       } else {
@@ -525,34 +531,25 @@ VuFind.register('lightbox', function Lightbox() {
         VuFind.emit('lightbox.closing');
       }
     });
-    _modal.on('hidden.bs.modal', function lightboxHidden() {
+    _modal.addEventListener('hidden.bs.modal', function lightboxHidden() {
       VuFind.lightbox.reset();
       VuFind.emit('lightbox.closed');
     });
-    _modal.on("shown.bs.modal", function lightboxShown() {
+    _modal.addEventListener("shown.bs.modal", function lightboxShown() {
       bindFocus();
-
-      // Disable bootstrap-accessibility.js "enforceFocus" events.
-      // retainFocus() above handles it better.
-      // This is moot once that library (and bootstrap3) are retired.
-      try {
-        var focEls = _modal.find(":tabbable");
-        var firstEl = $(focEls[0]);
-        var lastEl = $(focEls[focEls.length - 1]);
-        $(firstEl).add(lastEl).off('keydown.bs.modal');
-      } catch (ex) {
-        // :tabbable won't work if bootstrap-accessibility.js isn't loaded, in which case we're already good
-      }
     });
+    _bsModal = new bootstrap.Modal(_modal, _modalParams);
 
     VuFind.modal = function modalShortcut(cmd) {
       if (cmd === 'show') {
         _beforeOpenElement = document.activeElement;
-        _modal.modal($.extend({ show: true }, _modalParams)).attr('aria-hidden', false);
+        _bsModal.show();
         // Set keyboard focus
         setFocusToFirstNode();
+      } else if (cmd === 'hide') {
+        _bsModal.hide();
       } else {
-        _modal.modal(cmd);
+        console.error("Unknown modal command: " + cmd);
       }
     };
     VuFind.listen('results-init', updateContainer);

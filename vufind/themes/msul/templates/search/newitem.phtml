@@ -32,11 +32,12 @@
   <?php endif; ?>
   <div class="form-group">
     <label class="control-label"><?=$this->transEsc('Range')?>:</label>
-    <div class="btn-group" data-toggle="buttons">
+    <div class="btn-group" data-bs-toggle="buttons">
       <?php foreach ($this->ranges as $key => $range): ?>
         <label class="btn btn-primary<?php if ($key == 0): ?> active<?php endif ?>">
           <input type="radio" name="range" id="newitem_range_<?=$this->escapeHtmlAttr($key)?>" value="<?=$this->escapeHtmlAttr($range)?>"<?=($key == 0) ? ' checked="checked"' : ''?>>
-          <?=$this->transEsc('past_days', ['range' => $this->escapeHtml($range)], null, true)?>
+          <!-- MSUL -- Add span element for styling -->
+          <span class="msul-btn-group-span"><?=$this->transEsc('past_days', ['range' => $this->escapeHtml($range)], null, true)?></span>
         </label>
       <?php endforeach; ?>
     </div>
