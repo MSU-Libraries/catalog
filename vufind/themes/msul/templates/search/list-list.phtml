@@ -1,0 +1,27 @@
+<?php
+  if (!isset($this->indexStart)) {
+    $this->indexStart = 0;
+  }
+  $i = $this->indexStart;
+  $listStart = $this->results->getStartRecord() + $i - $this->indexStart;
+  $showCheckboxes = $this->searchSettings($this->results->getParams())->checkboxesEnabled();
+?>
+<ol class="<?=$this->escapeHtmlAttr(trim('record-list ' . ($this->resultsClass ?? '')))?>" start="<?=$listStart?>"<?=isset($this->resultsAttrs) ? ' ' . $this->resultsAttrs : ''?>>
+  <?php foreach ($this->results->getResults() as $current): ?>
+    <?php $recordNumber = $this->results->getStartRecord() + $i - $this->indexStart; ?>
+    <?php // Data-record-number attribute is for analytics use.  Do not remove. ?>
+    <li<?php if (empty($this->excludeResultIds)): ?> id="result<?=$i?>"<?php endif; ?> class="result<?=$current->supportsAjaxStatus() ? ' ajaxItem' : ''?> row" data-record-number="<?=$this->escapeHtmlAttr($recordNumber)?>"><!--MSUL added 'row' class to li to reorder checkbox first -->
+      <div class="record-number col order-2"> <!-- MSUL added classes 'col' 'order-2' -->
+        <?=$recordNumber ?>
+      </div>
+      <?=$this->record($current)->getSearchResult('list', $this->results)?>
+      <?php if ($showCheckboxes): ?> <!-- MSUL moved checkboxes to after record in li -->
+        <?=$this->record($current)->getCheckbox('', 'search-cart-form', $recordNumber)?>
+      <?php endif; ?>
+    </li>
+    <?php
+      // First record is 0, so increment the counter after each record:
+      $i++;
+    ?>
+  <?php endforeach; ?>
+</ol>
