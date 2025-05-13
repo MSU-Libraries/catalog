@@ -22,7 +22,7 @@
 <?php ob_end_clean(); ?>
 <input type="hidden" value="<?=$this->escapeHtmlAttr($this->driver->getUniqueID())?>" class="hiddenId">
 <input type="hidden" value="<?=$this->escapeHtmlAttr($this->driver->getSourceIdentifier())?>" class="hiddenSource">
-<div class="media<?=$this->driver->supportsAjaxStatus() ? ' ajaxItem' : ''?> col order-3"> <!-- MSUL added classes 'col' 'order-3' to reorder checkboxes for A11Y -->
+<div class="media<?=$this->driver->supportsAjaxStatus() ? ' ajaxItem' : ''?> order-3"> <!-- MSUL added classes 'col' 'order-3' to reorder checkboxes for A11Y -->
   <?php if ($thumbnail && $thumbnailAlignment == 'left'): ?>
     <?=$thumbnail ?>
   <?php endif; ?>
