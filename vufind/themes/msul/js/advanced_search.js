@@ -243,35 +243,43 @@ function uncheckChildrenIfParentCheckedRoutine(item) {
 
 /**
  * Check the state of previous elements in the list and for parents, toggling to adapt the checkmark
- * @param itemToStartWith
+ * @param currentItem
  * @param indeterminate if we know at this point that the parent will be in indeterminate state
  * @param runAllTheList if we stop at a root parent or go through the entire list (when starting at the last element)
  */
-function checkAndUpdatePreviousLeveledCheckboxes(itemToStartWith, indeterminate = undefined, runAllTheList = false) {
-  let tmp;
-  let currentLevel = parseInt($(itemToStartWith).attr('data-level'));
-  let itemChecked = $(itemToStartWith).find('input[type="checkbox"]').prop('checked');
-  let previousItem = itemToStartWith.prev();
-  while (previousItem.length > 0 && (currentLevel > 0 || runAllTheList)) {
-    // Handle if it's a superior level
-    tmp = parseInt($(previousItem).attr('data-level'));
-    if (tmp < currentLevel) {
+function checkAndUpdatePreviousLeveledCheckboxes(currentItem, indeterminate = undefined, runAllTheList = false) {
+  let belowItemLevel, currentItemLevel, currentItemChecked, belowItemChecked;
+
+  currentItemLevel = parseInt($(currentItem).attr('data-level'));
+  currentItemChecked = $(currentItem).find('input[type="checkbox"]').prop('checked');
+
+  belowItemLevel = currentItemLevel;
+  belowItemChecked = currentItemChecked;
+  currentItem = currentItem.prev();
+
+  while (currentItem.length > 0 && (belowItemLevel > 0 || runAllTheList)) {
+    currentItemLevel = parseInt($(currentItem).attr('data-level'));
+    currentItemChecked = $(currentItem).find('input[type="checkbox"]').prop('checked');
+
+    if (currentItemLevel < belowItemLevel) {
+      // Handle if it's a parent level
       if (indeterminate === true) {
-        $(previousItem).find('input[type="checkbox"]').prop('indeterminate', true);
-        $(previousItem).find('input[type="checkbox"]').prop('checked', false);
+        $(currentItem).find('input[type="checkbox"]').prop('indeterminate', true);
+        $(currentItem).find('input[type="checkbox"]').prop('checked', false);
       } else {
-        $(previousItem).find('input[type="checkbox"]').prop('checked', itemChecked);
-        $(previousItem).find('input[type="checkbox"]').prop('indeterminate', false);
+        $(currentItem).find('input[type="checkbox"]').prop('checked', belowItemChecked);
+        $(currentItem).find('input[type="checkbox"]').prop('indeterminate', false);
       }
-      currentLevel = tmp;
+    } else if (currentItemChecked !== belowItemChecked && currentItemLevel !== 0 && belowItemLevel !== 0) {
+      // If it's a sibling, not root level and with different state
+      indeterminate = true;
     }
 
-    if (parseInt($(previousItem).attr('data-level')) === 0) {
-      previousItem = previousItem.prev();
-      currentLevel = parseInt($(previousItem).attr('data-level'));
-      itemChecked = $(previousItem).find('input[type="checkbox"]').prop('checked');
-    } else {
-      previousItem = previousItem.prev();
+    belowItemLevel = currentItemLevel;
+    belowItemChecked = currentItemChecked;
+    currentItem = currentItem.prev();
+    if (currentItemLevel === 0) {
+      indeterminate = undefined;
     }
   }
 }
