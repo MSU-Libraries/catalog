@@ -10,8 +10,8 @@
   <?php foreach ($this->results->getResults() as $current): ?>
     <?php $recordNumber = $this->results->getStartRecord() + $i - $this->indexStart; ?>
     <?php // Data-record-number attribute is for analytics use.  Do not remove. ?>
-    <li<?php if (empty($this->excludeResultIds)): ?> id="result<?=$i?>"<?php endif; ?> class="result<?=$current->supportsAjaxStatus() ? ' ajaxItem' : ''?> row" data-record-number="<?=$this->escapeHtmlAttr($recordNumber)?>"><!--MSUL added 'row' class to li to reorder checkbox first -->
-      <div class="record-number col order-2"> <!-- MSUL added classes 'col' 'order-2' -->
+    <li<?php if (empty($this->excludeResultIds)): ?> id="result<?=$i?>"<?php endif; ?> class="result<?=$current->supportsAjaxStatus() ? ' ajaxItem' : ''?> d-flex" data-record-number="<?=$this->escapeHtmlAttr($recordNumber)?>"><!--MSUL added 'd-flex' class to li to reorder checkbox first -->
+      <div class="record-number order-2"> <!-- MSUL added classes 'order-2' -->
         <?=$recordNumber ?>
       </div>
       <?=$this->record($current)->getSearchResult('list', $this->results)?>

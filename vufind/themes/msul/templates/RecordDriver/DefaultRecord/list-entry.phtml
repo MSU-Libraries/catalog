@@ -15,10 +15,10 @@
   $thumbnail = false;
   $thumbnailAlignment = $this->record($this->driver)->getThumbnailAlignment('list');
 ?>
-<li class="result<?php if ($this->driver->supportsAjaxStatus()): ?> ajaxItem<?php endif ?>">
+<li class="result<?php if ($this->driver->supportsAjaxStatus()): ?> ajaxItem<?php endif ?> d-flex"> <!--MSUL add 'd-flex' class for a11y reordering checkbox -->
   <?php if ($cover):
     ob_start(); ?>
-    <div class="media-<?=$thumbnailAlignment ?> <?=$this->escapeHtmlAttr($coverDetails['size'])?>">
+    <div class="media-<?=$thumbnailAlignment ?> <?=$this->escapeHtmlAttr($coverDetails['size'])?> order-2 ms-3"> <!-- MSUL added classes 'order-2 ms-3' -->
       <?=$cover ?>
     </div>
     <?php $thumbnail = ob_get_contents(); ?>
@@ -26,12 +26,11 @@
   <?php endif; ?>
   <input type="hidden" value="<?=$this->escapeHtmlAttr($id) ?>" class="hiddenId">
   <input type="hidden" value="<?=$this->escapeHtmlAttr($source) ?>" class="hiddenSource">
-  <?=$this->record($this->driver)->getCheckbox()?>
   <div class="media">
     <?php if ($thumbnail && $thumbnailAlignment == 'left'): ?>
       <?=$thumbnail ?>
     <?php endif; ?>
-    <div class="media-body">
+    <div class="media-body order-3"> <!-- MSUL added 'order-3' -->
       <div class="result-body">
         <div class="resultItemLine1">
           <h2>
@@ -237,6 +236,7 @@
     <?php if ($thumbnail && $thumbnailAlignment == 'right'): ?>
       <?=$thumbnail ?>
     <?php endif; ?>
+    <?=$this->record($this->driver)->getCheckbox()?> <!--MSUL moved from line 29 to recorder checkboxes a11y -->
   </div>
   <?php
     $escId = $this->escapeJs($id);

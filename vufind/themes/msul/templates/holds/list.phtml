@@ -73,17 +73,13 @@
       <?php foreach ($this->recordList as $resource): ?>
         <?php $iteration++; ?>
         <?php $ilsDetails = $resource->getExtraDetail('ils_details'); ?>
-        <li class="result">
+        <li class="result d-flex"> <!-- MSUL added class 'd-flex -->
           <?php if (($this->cancelForm && isset($ilsDetails['cancel_details'])) || ($this->updateForm && isset($ilsDetails['updateDetails']))): ?>
             <?php $safeId = preg_replace('/[^a-zA-Z0-9]/', '', $ilsDetails['cancel_details'] ?? $ilsDetails['updateDetails']); ?>
             <?php if ($this->cancelForm && isset($ilsDetails['cancel_details'])): ?>
               <input type="hidden" name="cancelAllIDS[]" value="<?=$this->escapeHtmlAttr($ilsDetails['cancel_details']) ?>">
             <?php endif; ?>
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" name="selectedIDS[]" value="<?=$this->escapeHtmlAttr($ilsDetails['cancel_details'] ?? $ilsDetails['updateDetails']) ?>" id="checkbox_<?=$safeId?>" class="checkbox-select-item" aria-label="<?=$this->transEscAttr('select_item_hold_cancel')?>">
-              </label>
-            </div>
+            <!-- MSUL Moved checkbox to line 209 -->
           <?php elseif ($this->cancelForm || $this->updateForm): ?>
             <?php // Reserve space for the checkbox to keep columns aligned ?>
             <div class="checkbox">
@@ -104,7 +100,7 @@
               <?php $thumbnail = ob_get_contents(); ?>
             <?php ob_end_clean(); ?>
           <?php endif; ?>
-          <div class="media">
+          <div class="media order-2">  <!-- MSUL add class 'order-2' -->
             <?php if ($thumbnail && $thumbnailAlignment == 'left'): ?>
               <?=$thumbnail ?>
             <?php endif ?>
@@ -211,6 +207,11 @@
             <?php endif ?>
           </div>
           <?=$resource->tryMethod('supportsCoinsOpenUrl') ? '<span class="Z3988" aria-hidden="true" title="' . $this->escapeHtmlAttr($resource->getCoinsOpenUrl()) . '"></span>' : ''?>
+            <div class="checkbox order-1"> <!-- MSUL moved from line 82 and added class 'order-1' -->
+              <label>
+                <input type="checkbox" name="selectedIDS[]" value="<?=$this->escapeHtmlAttr($ilsDetails['cancel_details'] ?? $ilsDetails['updateDetails']) ?>" id="checkbox_<?=$safeId?>" class="checkbox-select-item" aria-label="<?=$this->transEscAttr('select_item_hold_cancel')?>">
+              </label>
+            </div>
         </li>
       <?php endforeach; ?>
     </ul>
