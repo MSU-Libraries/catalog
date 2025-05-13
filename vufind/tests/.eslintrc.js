@@ -18,7 +18,6 @@ module.exports = {
     "block-scoped-var": "error",
     "func-names": ["error", "as-needed"],
     "no-loop-func": "error",
-    "no-param-reassign": "error",
     "no-shadow": "error",
     "no-unused-expressions": "error",
 
@@ -42,6 +41,9 @@ module.exports = {
     "space-infix-ops": "warn",
 
     // the following is required for Bootstrap 3 collapse:
-    "no-jquery/no-support": "off"
+    "no-jquery/no-support": "off",
+
+    // MSUL disabled to avoid adding arbitrary complexity to advanced_search.js
+    "no-param-reassign": "off",
   }
 };
