@@ -23,14 +23,14 @@ async function getLicenseAgreement(title) {
       btn.appendChild(icon);
       label.innerText = "More Info";
       btn.appendChild(label);
-      btn.setAttribute("data-content", record.concurrent_users + record.authorized_users + record.accessibility_link);
-      btn.setAttribute("data-toggle", "popover");
-      btn.setAttribute("data-html", "true");
+      btn.setAttribute("data-bs-content", record.concurrent_users + record.authorized_users + record.accessibility_link);
+      btn.setAttribute("data-bs-toggle", "popover");
+      btn.setAttribute("data-bs-html", "true");
       btn.setAttribute("class", "placehold");
       link[0].parentNode.append(btn);
+      new bootstrap.Popover(btn);
     }
   });
-  $('[data-toggle="popover"]').popover();
 }
 
 $( function pageLoad() {
