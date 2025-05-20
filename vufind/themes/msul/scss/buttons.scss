@@ -20,6 +20,15 @@
   }
 }
 
+// override bootstrap5 > scss > bs3-compat.scss gray more button
+.btn.more-btn:not(.facet) { 
+  background-color:$parakeetgreen;
+  &:hover {
+    background-color:$darkparakeetgreen;
+    border-color:$darkparakeetgreen;
+  }
+}
+
 .btn-default {
   border-radius: 2rem;
 }
