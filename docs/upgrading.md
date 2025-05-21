@@ -94,7 +94,12 @@ page matches what is in the "Get This" button status.
 
 * Check import scripts
 
-* Check placing and canceling a request
+* Check placing and canceling a request. Specifically check some "bound with"
+  records that have previously had problems:
+
+```txt
+https://catalog.lib.msu.edu/Record/folio.in00005032730
+```
 
 * Confirm there are no errors/warnings we should address in the VuFind
   or Apache logs

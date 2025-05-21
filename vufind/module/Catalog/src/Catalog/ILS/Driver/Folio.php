@@ -36,7 +36,9 @@ use VuFind\Exception\ILS as ILSException;
 use VuFind\ILS\Logic\AvailabilityStatus;
 
 use function count;
+use function func_num_args;
 use function in_array;
+use function is_int;
 use function is_object;
 use function is_string;
 
@@ -616,7 +618,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
         // have to obtain a list of IDs to use as a filter below.
         $legalServicePoints = null;
         if ($holdInfo) {
-            $allowed = $this->getAllowedServicePoints($this->getInstanceByBibId($holdInfo['id'])->id, $patron['id']);
+            // MSUL customization to add item_id param for PC-1405
+            $allowed = $this->getAllowedServicePoints(
+                $this->getInstanceByBibId($holdInfo['id'])->id,
+                $patron['id'],
+                'create',
+                $holdInfo['item_id']
+            );
             if ($allowed !== null) {
                 $legalServicePoints = [];
                 $preferredRequestType = $this->getPreferredRequestType($holdInfo);
@@ -1124,5 +1132,174 @@ class Folio extends \VuFind\ILS\Driver\Folio
             }
         }
         return $response;
+    }
+
+    /**
+     * MSUL PC-1405 Use itemId or instanceId based on if title level holds is enabled
+     * Get allowed service points for a request. Returns null if data cannot be obtained.
+     *
+     * @param string $instanceId  Instance UUID being requested
+     * @param string $requesterId Patron UUID placing request
+     * @param string $operation   Operation type (default = create)
+     *
+     * @return ?array
+     */
+    public function getAllowedServicePoints(
+        string $instanceId,
+        string $requesterId,
+        string $operation = 'create'
+    ): ?array {
+        try {
+            // This won't be required in a PR -- doing it this way here
+            // since we can't change the function signature to add a new
+            // parameter directly
+            $itemId = null;
+            if (func_num_args() >= 4) {
+                $itemId = func_get_arg(3);
+            }
+            // circulation.requests.allowed-service-points.get
+            $response = $this->makeRequest(
+                'GET',
+                '/circulation/requests/allowed-service-points?'
+                . http_build_query(compact(empty($itemId) ? 'instanceId' : 'itemId', 'requesterId', 'operation'))
+            );
+            if (!$response->isSuccess()) {
+                $this->warning('Unexpected service point lookup response: ' . $response->getBody());
+                return null;
+            }
+        } catch (\Exception $e) {
+            $this->warning('Exception during allowed service point lookup: ' . (string)$e);
+            return null;
+        }
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * MSUL PC-1405 Pass item_id to getAllowedServicePoints
+     * Place Hold
+     *
+     * Attempts to place a hold or recall on a particular item and returns
+     * an array with result details.
+     *
+     * @param array $holdDetails An array of item and patron data
+     *
+     * @return mixed An array of data on the request including
+     * whether or not it was successful and a system message (if available)
+     */
+    public function placeHold($holdDetails)
+    {
+        if (
+            !empty($holdDetails['requiredByTS'])
+            && !is_int($holdDetails['requiredByTS'])
+        ) {
+            throw new ILSException('hold_date_invalid');
+        }
+        $requiredBy = !empty($holdDetails['requiredByTS'])
+            ? gmdate('Y-m-d', $holdDetails['requiredByTS']) : null;
+
+        $instance = $this->getInstanceByBibId($holdDetails['id']);
+        $isTitleLevel = ($holdDetails['level'] ?? '') === 'title';
+        if ($isTitleLevel) {
+            $baseParams = [
+                'instanceId' => $instance->id,
+                'requestLevel' => 'Title',
+            ];
+        } else {
+            // Note: early Lotus releases require instanceId and holdingsRecordId
+            // to be set here as well, but the requirement was lifted in a hotfix
+            // to allow backward compatibility. If you need compatibility with one
+            // of those versions, you can add additional identifiers here, but
+            // applying the latest hotfix is a better solution!
+            $baseParams = ['itemId' => $holdDetails['item_id']];
+        }
+        // Account for an API spelling change introduced in mod-circulation v24:
+        $fulfillmentKey = $this->getModuleMajorVersion('mod-circulation') >= 24
+            ? 'fulfillmentPreference' : 'fulfilmentPreference';
+        $fulfillmentValue = $holdDetails['requestGroupId'] ?? 'Hold Shelf';
+        $fulfillmentLocationKey = match ($fulfillmentValue) {
+            'Hold Shelf' => 'pickupServicePointId',
+            'Delivery' => 'deliveryAddressTypeId',
+        };
+        $requestBody = $baseParams + [
+            'requesterId' => $holdDetails['patron']['id'],
+            'requestDate' => date('c'),
+            $fulfillmentKey => $fulfillmentValue,
+            'requestExpirationDate' => $requiredBy,
+            $fulfillmentLocationKey => $holdDetails['pickUpLocation'],
+        ];
+        if (!empty($holdDetails['proxiedUser'])) {
+            $requestBody['requesterId'] = $holdDetails['proxiedUser'];
+            $requestBody['proxyUserId'] = $holdDetails['patron']['id'];
+        }
+        if (!empty($holdDetails['comment'])) {
+            $requestBody['patronComments'] = $holdDetails['comment'];
+        }
+        // MSU - add item_id parameter
+        $allowed = $this->getAllowedServicePoints(
+            $instance->id,
+            $holdDetails['patron']['id'],
+            'create',
+            $holdDetails['item_id']
+        );
+        $preferredRequestType = $this->getPreferredRequestType($holdDetails);
+        foreach ($this->getRequestTypeList($preferredRequestType) as $requestType) {
+            // Skip illegal request types, if we have validation data available:
+            if (null !== $allowed) {
+                if (
+                    // Unsupported request type:
+                    !isset($allowed[$requestType])
+                    // Unsupported pickup location:
+                    || !in_array($holdDetails['pickUpLocation'], array_column($allowed[$requestType] ?? [], 'id'))
+                ) {
+                    continue;
+                }
+            }
+            $requestBody['requestType'] = $requestType;
+            $result = $this->performHoldRequest($requestBody);
+            if ($result['success']) {
+                break;
+            }
+        }
+        return $result ?? ['success' => false, 'status' => 'Unexpected failure'];
+    }
+
+    /**
+     * MSUL PC-1405 Pass item_id to getAllowedServicePoints
+     * Check if request is valid
+     *
+     * This is responsible for determining if an item is requestable
+     *
+     * @param string $id     The record id
+     * @param array  $data   An array of item data
+     * @param array  $patron An array of patron data
+     *
+     * @return array Two entries: 'valid' (boolean) plus 'status' (message to display to user)
+     */
+    public function checkRequestIsValid($id, $data, $patron)
+    {
+        // First check outstanding loans:
+        $currentLoan = empty($data['item_id'])
+            ? null
+            : $this->getCurrentLoan($data['item_id']);
+        if ($currentLoan && !$this->isHoldableByCurrentLoan($currentLoan)) {
+            return [
+                'valid' => false,
+                'status' => 'hold_error_current_loan_patron_group',
+            ];
+        }
+
+        // MSU - add item_id parameter
+        $allowed = $this->getAllowedServicePoints(
+            $this->getInstanceByBibId($id)->id,
+            $patron['id'],
+            'create',
+            $data['item_id']
+        );
+        return [
+            // If we got this far, it's valid if we can't obtain allowed service point
+            // data, or if the allowed service point data is non-empty:
+            'valid' => null === $allowed || !empty($allowed),
+            'status' => 'request_place_text',
+        ];
     }
 }
