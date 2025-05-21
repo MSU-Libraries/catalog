@@ -1,3 +1,5 @@
+/* global bootstrap */
+
 async function getLicenseAgreement(title) {
   // Make the AJAX call to get the data
   const agreements = await fetch("/AJAX/JSON?method=getLicenseAgreement&title=" + encodeURIComponent(title));
