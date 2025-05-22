@@ -156,18 +156,25 @@ fieldset.solr-facets {
 .form-search-newitem {
   .solr-adv-facet {
     overflow: auto; 
-    #limit_building.form-control {
-      padding: 0.1rem;
-      margin-bottom: 1rem;
-      height: 16.7rem;
-      overflow: auto;
-      white-space: nowrap;
-      max-width:100%; //override core max-width 400px
-      label {
-        font-weight: inherit;
-        color: inherit;
+      #limit_material-type_str_mv, #limit_building {
+        &.form-control {
+          padding: 0.1rem;
+          margin-bottom: 1rem;
+          height: 15.5em;
+          overflow: auto;
+          white-space: nowrap;
+          max-width:100%; //override core max-width 400px
+          label {
+            font-weight: inherit;
+            color: inherit;
+          }
+        }
       }
-    }
+      #limit_callnumber-first, #limit_language, #limit_format {
+        &.form-control {
+          height: 15.5em;
+        }
+      }
   
     .form-control.expandableLeveledCheckboxes {
       .leveledCheckbox {
