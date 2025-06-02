@@ -3,7 +3,12 @@
     // Determine if this is a search results page
     // If so, we will retain existing search filters on subsequent searches
     // otherwise they will be cleared
-    $isResultsPage = (strpos($_SERVER['REQUEST_URI'], '/Results') !== false) ? true : false;
+    $isResultsPage =
+        (
+            strpos($_SERVER['REQUEST_URI'], '/Results') !== false ||
+            strpos($_SERVER['REQUEST_URI'], '/EDS/Search') !== false
+        ) ?
+        true : false;
 
     // Initialize from current search (if available and not explicitly overridden) or defaults:
     if ($this->results === null && $isResultsPage) { // MSU
