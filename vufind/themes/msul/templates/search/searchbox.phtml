@@ -5,8 +5,8 @@
     // otherwise they will be cleared
     $isResultsPage =
         (
-            strpos($_SERVER['REQUEST_URI'], '/Results') !== false ||
-            strpos($_SERVER['REQUEST_URI'], '/EDS/Search') !== false
+            str_contains($_SERVER['REQUEST_URI'], '/Results') ||
+            str_contains($_SERVER['REQUEST_URI'], '/EDS/Search')
         ) ?
         true : false;
 
