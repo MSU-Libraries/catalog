@@ -1,13 +1,22 @@
 <?php
+    // MSU - PC-584
+    // Determine if this is a search results page
+    // If so, we will retain existing search filters on subsequent searches
+    // otherwise they will be cleared
+    $isResultsPage = (
+        str_contains($_SERVER['REQUEST_URI'], '/Results') ||
+        str_contains($_SERVER['REQUEST_URI'], '/EDS/Search')
+    );
+
     // Initialize from current search (if available and not explicitly overridden) or defaults:
-    if ($this->results === null) {
+    if ($this->results === null && $isResultsPage) { // MSU
       $fromSearchMemory = true;
       $results = $this->searchMemory()->getCurrentSearch();
     } else {
       $fromSearchMemory = false;
       $results = $this->results;
     }
-    if ($results) {
+    if ($results && $isResultsPage) { // MSU
       $params = $results->getParams();
       $this->searchClassId = $params->getSearchClassId();
     } else {
@@ -16,7 +25,7 @@
         ?? 'Solr';
     }
     // Initialize from current search if eligible, defaults otherwise:
-    if (isset($params) && $this->searchClassId === $params->getSearchClassId() && !$params->isSpecializedSearch()) {
+    if (isset($params) && $this->searchClassId === $params->getSearchClassId() && !$params->isSpecializedSearch() && $isResultsPage) { // MSU
       $hiddenFilters = $params->getHiddenFilters();
       $lastSort = $params->getSort();
       $lastLimit = $params->getLimit();
@@ -45,7 +54,7 @@
     $searchHome = $options->getSearchHomeAction();
     $advSearch = $options->getAdvancedSearchAction();
 
-    if (!isset($this->filterList) || !isset($this->checkboxFilters)) {
+    if (!isset($this->filterList) || !isset($this->checkboxFilters) && $isResultsPage) { // MSU
         $params ??= $this->searchMemory()->getLastSearchParams($this->searchClassId);
         $filterList = $params->getFilterList(true);
         $checkboxFilters = $params->getCheckboxFacets();
@@ -53,8 +62,8 @@
         $filterList = is_array($this->filterList) ? $this->filterList : [];
         $checkboxFilters = is_array($this->checkboxFilters) ? $this->checkboxFilters : [];
     }
-    $filterDetails = $this->searchbox()->getFilterDetails($filterList, $checkboxFilters);
-    $showFilters = $filterDetails && ($results || $options->getRetainFilterSetting());
+    $filterDetails = $isResultsPage ? $this->searchbox()->getFilterDetails($filterList, $checkboxFilters) : []; // MSU
+    $showFilters = $filterDetails && ($results || $options->getRetainFilterSetting()) && $isResultsPage; // MSU
 ?>
 <?php $tabConfig = $this->searchTabs()->getTabConfig($this->searchClassId, $this->lookfor, $this->searchIndex, $this->searchType, $hiddenFilters); ?>
 <?php if ($this->searchType == 'advanced'): ?>
@@ -234,7 +243,7 @@
           'search/filters.phtml',
           [
             'params' => $params ?? null,
-            'urlQuery' => isset($results) ? $results->getUrlQuery() : null,
+            'urlQuery' => isset($results) && $isResultsPage ? $results->getUrlQuery() : null, // MSU
             'filterList' => $showFilters ? $filterList : [],
             'checkboxFilters' => $showFilters ? $checkboxFilters : [],
             'searchClassId' => $this->searchClassId,
