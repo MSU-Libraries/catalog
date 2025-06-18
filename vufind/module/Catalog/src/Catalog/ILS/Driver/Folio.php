@@ -54,6 +54,32 @@ use function is_string;
 class Folio extends \VuFind\ILS\Driver\Folio
 {
     /**
+     * Configuration file reader object (PluginManager)
+     *
+     * @var \VuFind\Config\PluginManager
+     */
+    protected $configReader = null;
+
+    /**
+     * Constructor
+     * MSUL PC-1416 customized to add configReader param for reading msul.ini
+     *
+     * @param \VuFind\Date\Converter       $dateConverter  Date converter object
+     * @param callable                     $sessionFactory Factory function returning
+     * SessionContainer object
+     * @param \VuFind\Config\PluginManager $configReader   Config reader object
+     */
+    public function __construct(
+        \VuFind\Date\Converter $dateConverter,
+        $sessionFactory,
+        $configReader,
+    ) {
+        $this->dateConverter = $dateConverter;
+        $this->sessionFactory = $sessionFactory;
+        $this->configReader = $configReader; // MSUL PC-1416 New param to read msul.ini
+    }
+
+    /**
      * Given an instance object or identifer, or a holding or item identifier,
      * determine an appropriate value to use as VuFind's bibliographic ID.
      *
@@ -188,6 +214,53 @@ class Folio extends \VuFind\ILS\Driver\Folio
             !Regex::ONLINE($this->getLocationData($locationId)['name'])
         ) {
             $item->status->name = 'Restricted';
+        }
+        // PC-1416: If the location code is mnmn (the generic "Main library" code), then
+        // attempt to get the location data from helm if we have a callnumber
+        if ($locAndHoldings['location_code'] == 'mnmn' && !empty($callNumberData['callnumber'])) {
+            // Prase the config and get the required data
+            $msulConfig = $this->configReader->get('msul');
+            $apiUrl = $msulConfig['Locations']['api_url'];
+            $topKey = $msulConfig['Locations']['response_top_key'];
+            $floorKey = $msulConfig['Locations']['response_floor_key'] ?? '';
+            $locationKey = $msulConfig['Locations']['response_location_key'] ?? '';
+
+            // Replace %%callnumber%% with the real callnumber
+            $apiUrl = str_replace('%%callnumber%%', urlencode($callNumberData['callnumber']), $apiUrl);
+
+            // Get the API data
+            // TODO -- handle API errors (similate by changing URL in config)
+            $data = null;
+            try {
+                $response = $this->makeExternalRequest('GET', $apiUrl);
+                $data = json_decode($response->getBody());
+            } catch (ILSException $e) {
+                // We don't care if there are issues with the API, just log it and ignore
+                $this->logWarning(
+                    'Could not get location data for callnumber ' . $callNumberData['callnumber'] . ' (' . $bibId . ')'
+                );
+            }
+
+            // Parse the response and add to our location results
+            if (isset($data->$topKey) && count($data->$topKey) >= 1) {
+                $floor = $floorKey ? ($data->$topKey[0]->$floorKey ?? '') : '';
+                $location = $locationKey ? ($data->$topKey[0]->$locationKey ?? '') : '';
+
+                $floorPart = !empty($floor) ? ' - ' . $floor : '';
+                $locationPart = !empty($location) ? '(' . $location . ')' : '';
+                $combinedPart = $floorPart . ' ' . $locationPart;
+
+                if (!empty(trim($combinedPart))) {
+                    $locAndHoldings['location'] .= $combinedPart;
+                    $this->debug(
+                        'Found additional location data for callnumber ' . $callNumberData['callnumber'] .
+                        ' (' . $bibId . ')' . '. Updating location to: ' . $locAndHoldings['location']
+                    );
+                }
+            } else {
+                $this->debug('No data found for callnumber ' . $callNumberData['callnumber'] . ' (' . $bibId . ')');
+                $this->debug(var_export($data, 1));
+            }
         }
         // MSU END
 
@@ -1301,5 +1374,94 @@ class Folio extends \VuFind\ILS\Driver\Folio
             'valid' => null === $allowed || !empty($allowed),
             'status' => 'request_place_text',
         ];
+    }
+
+    /**
+     * Make external API requests
+     * MSUL PC-1416 Added to support external API calls
+     *
+     * @param string            $method              GET/POST/PUT/DELETE/etc
+     * @param string            $url                 API URL
+     * @param string|array      $params              Query parameters
+     * @param array             $headers             Additional headers
+     * @param true|int[]|string $allowedFailureCodes HTTP failure codes that should
+     * NOT cause an ILSException to be thrown. May be an array of integers, a regular
+     * expression, or boolean true to allow all codes.
+     * @param string|array      $debugParams         Value to use in place of $params
+     * in debug messages (useful for concealing sensitive data, etc.)
+     * @param int               $attemptNumber       Counter to keep track of attempts
+     * (starts at 1 for the first attempt)
+     *
+     * @return \Laminas\Http\Response
+     * @throws ILSException
+     */
+    public function makeExternalRequest(
+        $method = 'GET',
+        $url = '',
+        $params = [],
+        $headers = [],
+        $allowedFailureCodes = [],
+        $debugParams = null,
+        $attemptNumber = 1
+    ) {
+        $client = $this->httpService->createClient(
+            $url,
+            $method,
+            120
+        );
+
+        // Add default headers and parameters
+        $req_headers = $client->getRequest()->getHeaders();
+        $req_headers->addHeaders($headers);
+        [$req_headers, $params] = $this->preRequest($req_headers, $params);
+
+        if ($this->logger) {
+            $this->debugRequest($method, $url, $debugParams ?? $params, $req_headers);
+        }
+
+        // Add params
+        if ($method == 'GET') {
+            $client->setParameterGet($params);
+        } else {
+            if (is_string($params)) {
+                $client->getRequest()->setContent($params);
+            } else {
+                $client->setParameterPost($params);
+            }
+        }
+        $startTime = microtime(true);
+        try {
+            $response = $client->send();
+        } catch (\Exception $e) {
+            $this->logError('Unexpected ' . $e::class . ': ' . (string)$e);
+            throw new ILSException('Error during send operation.');
+        }
+        $endTime = microtime(true);
+        $responseTime = $endTime - $startTime;
+        $this->debug('Request Response Time --- ' . $responseTime . ' seconds. ' . $url);
+        $code = $response->getStatusCode();
+        if (
+            !$response->isSuccess()
+            && !$this->failureCodeIsAllowed($code, $allowedFailureCodes)
+        ) {
+            $this->logError(
+                "Unexpected error response (attempt #$attemptNumber"
+                . "); code: {$response->getStatusCode()}, body: {$response->getBody()}"
+            );
+            if ($this->shouldRetryAfterUnexpectedStatusCode($response, $attemptNumber)) {
+                return $this->makeExternalRequest(
+                    $method,
+                    $url,
+                    $params,
+                    $headers,
+                    $allowedFailureCodes,
+                    $debugParams,
+                    $attemptNumber + 1
+                );
+            } else {
+                throw new ILSException('Unexpected error code.');
+            }
+        }
+        return $response;
     }
 }

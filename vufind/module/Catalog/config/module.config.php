@@ -81,7 +81,7 @@ return [
       ],
       'ils_driver' => [
         'factories' => [
-          Catalog\ILS\Driver\Folio::class => VuFind\ILS\Driver\FolioFactory::class,
+          Catalog\ILS\Driver\Folio::class => Catalog\ILS\Driver\FolioFactory::class,
           Catalog\ILS\Driver\MultiBackend::class => VuFind\ILS\Driver\MultiBackendFactory::class,
         ],
         'aliases' => [
