@@ -220,46 +220,54 @@ class Folio extends \VuFind\ILS\Driver\Folio
         if ($locAndHoldings['location_code'] == 'mnmn' && !empty($callNumberData['callnumber'])) {
             // Prase the config and get the required data
             $msulConfig = $this->configReader->get('msul');
-            $apiUrl = $msulConfig['Locations']['api_url'];
-            $topKey = $msulConfig['Locations']['response_top_key'];
-            $floorKey = $msulConfig['Locations']['response_floor_key'] ?? '';
-            $locationKey = $msulConfig['Locations']['response_location_key'] ?? '';
+            if (isset($msulConfig)) {
+                $apiUrl = $msulConfig['Locations']['api_url'] ?? '';
+                $topKey = $msulConfig['Locations']['response_top_key'] ?? 'callnumbers';
+                $floorKey = $msulConfig['Locations']['response_floor_key'] ?? '';
+                $locationKey = $msulConfig['Locations']['response_location_key'] ?? '';
 
-            // Replace %%callnumber%% with the real callnumber
-            $apiUrl = str_replace('%%callnumber%%', urlencode($callNumberData['callnumber']), $apiUrl);
+                if (!empty($apiUrl)) {
+                    // Replace %%callnumber%% with the real callnumber
+                    $apiUrl = str_replace('%%callnumber%%', urlencode($callNumberData['callnumber']), $apiUrl);
 
-            // Get the API data
-            // TODO -- handle API errors (similate by changing URL in config)
-            $data = null;
-            try {
-                $response = $this->makeExternalRequest('GET', $apiUrl);
-                $data = json_decode($response->getBody());
-            } catch (ILSException $e) {
-                // We don't care if there are issues with the API, just log it and ignore
-                $this->logWarning(
-                    'Could not get location data for callnumber ' . $callNumberData['callnumber'] . ' (' . $bibId . ')'
-                );
-            }
+                    // Get the API data
+                    // TODO -- handle API errors (similate by changing URL in config)
+                    $data = null;
+                    try {
+                        $response = $this->makeExternalRequest('GET', $apiUrl);
+                        $data = json_decode($response->getBody());
+                    } catch (ILSException $e) {
+                        // We don't care if there are issues with the API, just log it and ignore
+                        $this->logWarning(
+                            'Could not get location data for callnumber '
+                            . $callNumberData['callnumber'] . ' (' . $bibId . ')'
+                        );
+                    }
 
-            // Parse the response and add to our location results
-            if (isset($data->$topKey) && count($data->$topKey) >= 1) {
-                $floor = $floorKey ? ($data->$topKey[0]->$floorKey ?? '') : '';
-                $location = $locationKey ? ($data->$topKey[0]->$locationKey ?? '') : '';
+                    // Parse the response and add to our location results
+                    if (isset($data->$topKey) && count($data->$topKey) >= 1) {
+                        $floor = $floorKey ? ($data->$topKey[0]->$floorKey ?? '') : '';
+                        $location = $locationKey ? ($data->$topKey[0]->$locationKey ?? '') : '';
 
-                $floorPart = !empty($floor) ? ' - ' . $floor : '';
-                $locationPart = !empty($location) ? '(' . $location . ')' : '';
-                $combinedPart = $floorPart . ' ' . $locationPart;
+                        $floorPart = !empty($floor) ? ' - ' . $floor : '';
+                        $locationPart = !empty($location) ? '(' . $location . ')' : '';
+                        $combinedPart = $floorPart . ' ' . $locationPart;
 
-                if (!empty(trim($combinedPart))) {
-                    $locAndHoldings['location'] .= $combinedPart;
-                    $this->debug(
-                        'Found additional location data for callnumber ' . $callNumberData['callnumber'] .
-                        ' (' . $bibId . ')' . '. Updating location to: ' . $locAndHoldings['location']
-                    );
+                        if (!empty(trim($combinedPart))) {
+                            $locAndHoldings['location'] = trim($locAndHoldings['location'] . $combinedPart);
+                            $this->debug(
+                                'Found additional location data for callnumber ' . $callNumberData['callnumber'] .
+                                ' (' . $bibId . ')' . '. Updating location to: ' . $locAndHoldings['location']
+                            );
+                        }
+                    } else {
+                        $this->debug(
+                            'No data found for callnumber '
+                            . $callNumberData['callnumber'] . ' (' . $bibId . ')'
+                        );
+                        $this->debug(var_export($data, 1));
+                    }
                 }
-            } else {
-                $this->debug('No data found for callnumber ' . $callNumberData['callnumber'] . ' (' . $bibId . ')');
-                $this->debug(var_export($data, 1));
             }
         }
         // MSU END
@@ -1165,7 +1173,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             && !$this->failureCodeIsAllowed($code, $allowedFailureCodes)
         ) {
             $this->logError(
-                "Unexpected error response (attempt #${attemptNumber}); "
+                "Unexpected error response (attempt #{$attemptNumber}); "
                 . "code: {$response->getStatusCode()}, request: {$method} {$path}, "
                 . "body: {$response->getBody()}"
             );
