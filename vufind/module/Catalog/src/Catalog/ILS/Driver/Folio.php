@@ -231,7 +231,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $apiUrl = str_replace('%%callnumber%%', urlencode($callNumberData['callnumber']), $apiUrl);
 
                     // Get the API data
-                    // TODO -- handle API errors (similate by changing URL in config)
                     $data = null;
                     try {
                         $response = $this->makeExternalRequest('GET', $apiUrl);
@@ -1385,8 +1384,29 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
+     * Get the timeout for external API calls
+     * MSUL PC-1416 Added to support external API calls
+     * If this is ever added to VF core, likely just move
+     * this setting to config.ini.
+     *
+     * @return int
+     */
+    protected function getExternalTimeout()
+    {
+        $msulConfig = $this->configReader->get('msul');
+
+        if (isset($msulConfig)) {
+            return $msulConfig['Locations']['timeout'] ?? 2;
+        }
+
+        return 2;
+    }
+
+    /**
      * Make external API requests
      * MSUL PC-1416 Added to support external API calls
+     * If ever made into a PR, likely have makeRequest call this function
+     * to avoid code duplication.
      *
      * @param string            $method              GET/POST/PUT/DELETE/etc
      * @param string            $url                 API URL
@@ -1417,6 +1437,9 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $method,
             120
         );
+
+        // MSUL -- Set timeout
+        $client->setOptions(['timeout' => $this->getExternalTimeout()]);
 
         // Add default headers and parameters
         $req_headers = $client->getRequest()->getHeaders();
