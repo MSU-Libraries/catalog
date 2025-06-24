@@ -294,7 +294,7 @@ archive_harvest() {
 
 clear_harvest_files() {
     countdown 5
-    find "${1}" -mindepth 1 -maxdepth 1 \( -name '*.marc' -o -name '*.zip' \) -delete
+    find "${1}/" -mindepth 1 -maxdepth 1 \( -name '*.marc' -o -name '*.zip' \) -delete
 }
 
 # Determines if a file matches any of the provided ignore substring patterns
@@ -323,10 +323,18 @@ is_zip_or_marc_file() {
 # than the version we have downloaded already
 is_missing_or_different_size() {
     FILE="${1}"
-    if [ ! -f "${ARGS[VUFIND_HARVEST_DIR]}/${FILE}" ]; then
+    LOCAL_FILE_PATH=""
+
+    if [ -f "${ARGS[VUFIND_HARVEST_DIR]}/${FILE}" ]; then
+        LOCAL_FILE_PATH="${ARGS[VUFIND_HARVEST_DIR]}/${FILE}"
+    elif [ -f "${ARGS[VUFIND_HARVEST_DIR]}/processed/${FILE}" ]; then
+        LOCAL_FILE_PATH="${ARGS[VUFIND_HARVEST_DIR]}/processed/${FILE}"
+    else
+        # File path is missing and we need to download it
         return 1
     fi
-    LOCAL_SIZE=$(stat -c %s "${ARGS[VUFIND_HARVEST_DIR]}/$FILE")
+
+    LOCAL_SIZE=$(stat -c %s "${LOCAL_FILE_PATH}")
     REMOTE_SIZE=$(curl "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${FILE// /%20}" --netrc -sI | grep -i Content-Length | awk '{print $2}' | sed -e 's/[[:space:]]*$//')
     if [ "$LOCAL_SIZE" -ne "$REMOTE_SIZE" ]; then
         return 1
@@ -432,7 +440,7 @@ import() {
       else
         verbose "ERROR during extracting process"
       fi
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}" -mindepth 1 -maxdepth 1 -name '*.zip')
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.zip')
     verbose "Zip extraction completed"
 
     verbose "Cleaning up filenames of extracted files"
@@ -444,6 +452,9 @@ import() {
             mv "${FILE}" "${CLEAN_NAME}"
         fi
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -iname '*.m*c')
+
+    verbose "Cleaning up extra .csv files"
+    find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -iname '*.csv' -delete
 
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" ]]; then
         verbose "Will only import ${ARGS[LIMIT_BY_DELETE]} MARC files; others will be deleted."
