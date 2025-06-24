@@ -7,8 +7,10 @@ mv /usr/local/vufind/local/harvest/folio/ /tmp/
 ln -s "/mnt/shared/oai/${STACK_NAME}/harvest_folio_build/" /usr/local/vufind/local/harvest/folio
 ln -s "/mnt/shared/oai/${STACK_NAME}/" /mnt/oai
 # HLM
-mkdir -p "/mnt/shared/hlm/${STACK_NAME}/current/" "/mnt/shared/hlm/${STACK_NAME}/archives/"
-ln -s "/mnt/shared/hlm/${STACK_NAME}/" /mnt/hlm
+mkdir -p "/mnt/shared/hlm/${STACK_NAME}/harvest_hlm_build/" "/mnt/shared/hlm/${STACK_NAME}/archives/"
+mv /usr/local/vufind/local/harvest/hlm/ /tmp/
+ln -s "/mnt/shared/hlm/${STACK_NAME}/harvest_hlm_build/" /usr/local/vufind/local/harvest/hlm
+ln -s "/mnt/shared/hlm/${STACK_NAME}"/ /mnt/hlm
 # AUTHORITY
 mkdir -p "/mnt/shared/authority/${STACK_NAME}/current/" "/mnt/shared/authority/${STACK_NAME}/archives/"
 ln -s "/mnt/shared/authority/${STACK_NAME}/" /mnt/authority
