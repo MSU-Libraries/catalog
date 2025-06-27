@@ -325,10 +325,21 @@ is_missing_or_different_size() {
     FILE="${1}"
     LOCAL_FILE_PATH=""
 
+    if [[ "${FILE}" == *.zip ]]; then
+      EXTENSION=".zip"
+    elif [[ "${FILE}" == *.marc || "${FILE}" == *.mrc ]]; then
+      EXTENSION=".marc"
+    else
+      EXTENSION=".marc"
+    fi
+
+    # Generate the "clean" file name so it matches what we'd have stored locally
+    CLEAN_NAME="$(echo "${FILE}" | sed -e "s/\.marc$//" -e "s/\.mrc$//" -e "s/\.zip$//" -e "s/ /_/g")"${EXTENSION}
+
     if [ -f "${ARGS[VUFIND_HARVEST_DIR]}/${FILE}" ]; then
-        LOCAL_FILE_PATH="${ARGS[VUFIND_HARVEST_DIR]}/${FILE}"
-    elif [ -f "${ARGS[VUFIND_HARVEST_DIR]}/processed/${FILE}" ]; then
-        LOCAL_FILE_PATH="${ARGS[VUFIND_HARVEST_DIR]}/processed/${FILE}"
+        LOCAL_FILE_PATH="${ARGS[VUFIND_HARVEST_DIR]}/${CLEAN_NAME}"
+    elif [ -f "${ARGS[VUFIND_HARVEST_DIR]}/processed/${CLEAN_NAME}" ]; then
+        LOCAL_FILE_PATH="${ARGS[VUFIND_HARVEST_DIR]}/processed/${CLEAN_NAME}"
     else
         # File path is missing and we need to download it
         return 1
