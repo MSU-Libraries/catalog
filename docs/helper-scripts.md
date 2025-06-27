@@ -62,6 +62,20 @@ pc-locate-oai in01234 catalog-beta
 pc-locate-oai in00005342798,in00001442723 --extract
 ```
 
+## HLM File Locator ([pc-locate-hlm](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-locate-hlm?ref_type=heads))
+
+Locates the HLM harvest file that contains the given pattern,
+and display the files that the match is found in.
+The script is available on the host machines.
+
+```bash
+# Locate the file that contains '123456789' in catalog-prod's HLM files
+pc-locate-hlm catalog-prod -p 123456789
+
+# Give verbose output to show you the grep command being run
+pc-locate-hlm catalog-prod -p 123456789 --debug
+```
+
 ## Record manipulation ([pc-record](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-record?ref_type=heads))
 
 Helper to manipulate records.
