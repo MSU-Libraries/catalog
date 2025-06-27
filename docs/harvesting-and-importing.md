@@ -84,16 +84,12 @@ normal flags, here are the steps you would need to do in order to prepare
 the environment.
 
 <!-- markdownlint-disable MD013 MD031 -->
-1. Remove all files from the `/mnt/shared/hlm/[STACK_NAME]/current/` directory
-   and remove all files from the container's `local/harvest/hlm`. You can also
-   just move them somewhere else if you want to preserve a copy of them.
+1. Remove all files from the `/mnt/shared/hlm/[STACK_NAME]/harvest_hlm/`
+   directory. You can also just move them somewhere else if you want to preserve a copy of them.
    ```bash
-   find /mnt/shared/hlm/[STACK_NAME]/current/ -maxdepth 1 -name '*.marc' -print0 | tar -czf archive_[SOME_DATE].tar.gz --null -T -
-   find /mnt/shared/hlm/[STACK_NAME]/current/ -maxdepth 1 -name '*.marc' -delete
-   
-   # exec in to the container and run
-   find /usr/local/vufind/local/harvest/hlm -mindepth 1 -maxdepth 1 -name '*.marc' -delete
-   rm /usr/local/vufind/local/harvest/hlm/processed/*
+   cd /mnt/shared/hlm/[STACK_NAME]/harvest_hlm/
+   mv processed processed_old
+   mv log log_old
    ```
 
 2. Monitor progress after it starts via the cron job in the monitoring app or

@@ -7,9 +7,7 @@ default_args() {
     declare -g -A ARGS
     ARGS[HARVEST]=0
     ARGS[FULL]=0
-    ARGS[COPY_SHARED]=0
     ARGS[IMPORT]=0
-    ARGS[LIMIT]=
     ARGS[LIMIT_BY_DELETE]=
     ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/hlm
     ARGS[FTP_SERVER]=atozftp.ebsco.com
@@ -48,18 +46,11 @@ run_help() {
     echo "  -t|--harvest"
     echo "      Run an harvest into VUFIND_HARVEST_DIR. Will attempt"
     echo "      to resume from last harvest state unless -f flag given."
-    echo "      On success, sync a copy of harvest files to SHARED_DIR/current/."
     echo "  -f|--full"
     echo "      Forces a reset of VUFIND_HARVEST_DIR, resulting"
     echo "      in a full harvest. Must be used with --harvest."
     echo "  -i|--import"
     echo "      Run VuFind batch import on files within VUFIND_HARVEST_DIR."
-    echo "  -c|--copy-shared"
-    echo "      Copy MARC file(s) from SHARED_DIR back to VUFIND_HARVEST_DIR."
-    echo "      Only usable when NOT running a harvest (see also --limit)."
-    echo "  -l|--limit COPY_COUNT"
-    echo "      Usable with --copy-shared only. This will limit the number"
-    echo "      of files copied from SHARED_DIR to VUFIND_HARVEST_DIR."
     echo "  -p|--ignore-file PATH"
     echo "      Path to a newline separated file with substrings to match which will"
     echo "      be ignored when harvesting."
@@ -112,9 +103,6 @@ parse_args() {
         -f|--full)
             ARGS[FULL]=1
             shift;;
-        -c|--copy-shared)
-            ARGS[COPY_SHARED]=1
-            shift;;
         -n|--dry-run)
             ARGS[DRY_RUN]=1
             shift;;
@@ -125,14 +113,6 @@ parse_args() {
             ARGS[IGNORE_FILE]=$1
             if [ ! -f "${ARGS[IGNORE_FILE]}" ]; then
                 echo "ERROR: -p|--ignore-file is not a valid file"
-                exit 1
-            fi
-            shift 2
-            ;;
-        -l|--limit)
-            ARGS[LIMIT]="$2"
-            if [[ ! "${ARGS[LIMIT]}" -gt 0 ]]; then
-                echo "ERROR: -l|--limit only accept positive integers"
                 exit 1
             fi
             shift 2
@@ -193,14 +173,6 @@ parse_args() {
 }
 
 catch_invalid_args() {
-    if [[ "${ARGS[HARVEST]}" -eq 1 && "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
-        echo "ERROR: It is invalid to set both --harvest and --copy-shared flags."
-        exit 1
-    fi
-    if [[ -n "${ARGS[LIMIT]}" && "${ARGS[COPY_SHARED]}" -ne 1 ]]; then
-        echo "ERROR: The --limit flag is only valid when --copy-shared is also set."
-        exit 1
-    fi
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" && "${ARGS[IMPORT]}" -ne 1 ]]; then
         echo "ERROR: The --limit-by-delete flag is only valid when --import is also set."
         exit 1
@@ -212,7 +184,6 @@ assert_shared_dir_writable() {
         echo "ERROR: Shared storage location is not writable: ${ARGS[SHARED_DIR]}"
         exit 1
     fi
-    mkdir -p "${ARGS[SHARED_DIR]}/current/"
     mkdir -p "${ARGS[SHARED_DIR]}/archives/"
 }
 
@@ -297,7 +268,7 @@ last_modified() {
     fi
 }
 
-archive_current_harvest() {
+archive_harvest() {
     assert_shared_dir_writable
     verbose "Creating archive of latest harvest"
 
@@ -323,7 +294,7 @@ archive_current_harvest() {
 
 clear_harvest_files() {
     countdown 5
-    find "${1}" -mindepth 1 -maxdepth 1 \( -name '*.marc' -o -name '*.zip' \) -delete
+    find "${1}/" -mindepth 1 -maxdepth 1 \( -name '*.marc' -o -name '*.zip' \) -delete
 }
 
 # Determines if a file matches any of the provided ignore substring patterns
@@ -352,10 +323,29 @@ is_zip_or_marc_file() {
 # than the version we have downloaded already
 is_missing_or_different_size() {
     FILE="${1}"
-    if [ ! -f "${ARGS[SHARED_DIR]}/current/${FILE}" ]; then
+    LOCAL_FILE_PATH=""
+
+    if [[ "${FILE}" == *.zip ]]; then
+      EXTENSION=".zip"
+    elif [[ "${FILE}" == *.marc || "${FILE}" == *.mrc ]]; then
+      EXTENSION=".marc"
+    else
+      EXTENSION=".marc"
+    fi
+
+    # Generate the "clean" file name so it matches what we'd have stored locally
+    CLEAN_NAME="$(echo "${FILE}" | sed -e "s/\.marc$//" -e "s/\.mrc$//" -e "s/\.zip$//" -e "s/ /_/g")"${EXTENSION}
+
+    if [ -f "${ARGS[VUFIND_HARVEST_DIR]}/${FILE}" ]; then
+        LOCAL_FILE_PATH="${ARGS[VUFIND_HARVEST_DIR]}/${CLEAN_NAME}"
+    elif [ -f "${ARGS[VUFIND_HARVEST_DIR]}/processed/${CLEAN_NAME}" ]; then
+        LOCAL_FILE_PATH="${ARGS[VUFIND_HARVEST_DIR]}/processed/${CLEAN_NAME}"
+    else
+        # File path is missing and we need to download it
         return 1
     fi
-    LOCAL_SIZE=$(stat -c %s "${ARGS[SHARED_DIR]}/current/$FILE")
+
+    LOCAL_SIZE=$(stat -c %s "${LOCAL_FILE_PATH}")
     REMOTE_SIZE=$(curl "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${FILE// /%20}" --netrc -sI | grep -i Content-Length | awk '{print $2}' | sed -e 's/[[:space:]]*$//')
     if [ "$LOCAL_SIZE" -ne "$REMOTE_SIZE" ]; then
         return 1
@@ -377,13 +367,10 @@ harvest() {
     read -a IGNORE_SUBSTR -rd EOF < "${ARGS[IGNORE_FILE]}"
 
     if [[ "${ARGS[FULL]}" -eq 1 ]]; then
+        archive_harvest
         verbose "Clearing VuFind harvest directory for new full harvest."
         clear_harvest_files "${ARGS[VUFIND_HARVEST_DIR]}/"
 
-        archive_current_harvest
-
-        verbose "Clearing shared current directory before we sync the new full harvest."
-        clear_harvest_files "${ARGS[SHARED_DIR]}/current/"
     fi
 
     verbose "Starting harvest of new files."
@@ -403,33 +390,6 @@ harvest() {
         fi
     done < <(curl "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}" --netrc -l -s)
     cd - || (verbose "ERROR: Failed to cd to previous dir" 1 && exit 1)
-
-    verbose "Syncing harvest files to shared storage."
-    if ! rsync -ai --exclude "processed" --exclude "log" --exclude ".gitkeep" "${ARGS[VUFIND_HARVEST_DIR]}"/ "${ARGS[SHARED_DIR]}/current/" > /dev/null 2>&1; then
-        verbose "ERROR: Failed to sync harvest files to shared storage from ${ARGS[VUFIND_HARVEST_DIR]}" 1
-        exit 1
-    fi
-}
-
-# Copy MARC and zip files back from shared dir to VuFind dir
-copy_back_from_shared() {
-    assert_vufind_harvest_dir_writable
-    verbose "Replacing any VuFind MARC/ZIP with files from shared directory."
-    countdown 5
-
-    # Clear out any exising marc files before copying back from shared storage
-    clear_harvest_files "${ARGS[VUFIND_HARVEST_DIR]}/"
-
-    COPIED_COUNT=0
-    while read -r FILE; do
-        cp --preserve=timestamps "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/"
-        (( COPIED_COUNT += 1 ))
-        if [[ -n "${ARGS[LIMIT]}" && "${COPIED_COUNT}" -ge "${ARGS[LIMIT]}" ]]; then
-            # If limit is set, only copy the provided limit of marc files over to the VUFIND_HARVEST_DIR
-            break
-        fi
-    done < <(find "${ARGS[SHARED_DIR]}/current/" -mindepth 1 -maxdepth 1 \( -name '*.marc' -o -name '*.zip' \))
-
 }
 
 # Remove processed .delete entries matching ids in the last harvest
@@ -491,7 +451,7 @@ import() {
       else
         verbose "ERROR during extracting process"
       fi
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}" -mindepth 1 -maxdepth 1 -name '*.zip')
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.zip')
     verbose "Zip extraction completed"
 
     verbose "Cleaning up filenames of extracted files"
@@ -503,6 +463,9 @@ import() {
             mv "${FILE}" "${CLEAN_NAME}"
         fi
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -iname '*.m*c')
+
+    verbose "Cleaning up extra .csv files"
+    find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -iname '*.csv' -delete
 
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" ]]; then
         verbose "Will only import ${ARGS[LIMIT_BY_DELETE]} MARC files; others will be deleted."
@@ -574,8 +537,6 @@ main() {
 
     if [[ "${ARGS[HARVEST]}" -eq 1 ]]; then
         harvest
-    elif [[ "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
-        copy_back_from_shared
     fi
     if [[ "${ARGS[IMPORT]}" -eq 1 ]]; then
         import
