@@ -485,7 +485,15 @@ import() {
     verbose "Pre-processing deletion files to extract IDs from EBSCO MARC records"
     while read -r FILE; do
         DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/"$(basename "${FILE}")"
-        LANG=C grep -oUaP "(?<=\x1e)ebs[0-9]+e(?=\x1e)" "${FILE}" | sed -e 's/^/hlm./' > "${DEL_FILE%.marc}".delete
+        TARGET_DEL_FILE="${DEL_FILE%.marc}".delete
+        # If the target .delete file already exists, then skip this step
+        # so that we avoid overwritting what might be an edittined .delete file from the
+        # update_processed_delete_files step run next
+        if [ -f "${TARGET_DEL_FILE}" ]; then
+            verbose "Skipping processing of ${FILE} since ${TARGET_DEL_FILE} already exists"
+        else
+            LANG=C grep -oUaP "(?<=\x1e)ebs[0-9]+e(?=\x1e)" "${FILE}" | sed -e 's/^/hlm./' > "${DEL_FILE%.marc}".delete
+        fi
         # Cleanup the other files that the batch-delete.sh script won't move to the processed dir
         mv "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/processed"
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -iname '*-Del*.marc')
