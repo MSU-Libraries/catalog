@@ -7,7 +7,8 @@ import org.marc4j.marc.VariableField;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FormatCalculator extends org.vufind.index.FormatCalculator {
+public class FormatCalculator extends org.vufind.index.FormatCalculator
+{
     /**
      * Return the best format string based on codes extracted from 007; return
      * blank string for ambiguous/irrelevant results.
@@ -77,5 +78,137 @@ public class FormatCalculator extends org.vufind.index.FormatCalculator {
             }
         }
         return formats;
+    }
+
+    /**
+     * Return the best format string based on record type in leader; return
+     * blank string for ambiguous/irrelevant results.
+     *
+     * @param Record record
+     * @param char recordType
+     * @param ControlField marc008
+     * @param List formatCodes007
+     * @return String
+     */
+    @Override protected String getFormatFromRecordType(Record record, char recordType, ControlField marc008, List formatCodes007)
+    {
+        // PC-1424 MSUL - Add logic to change 'Kit' and 'Collection' assignment
+        String leader = record.getLeader().toString();
+        char bibLevel = Character.toLowerCase(leader.charAt(7));
+        switch (recordType) {
+            case 'o':
+                return "Kit";
+            case 'p':
+                if (bibLevel == 'c') {
+                    return "Collection";
+                }
+                break;
+        }
+
+        return super.getFormatFromRecordType(record, recordType, marc008, formatCodes007);
+    }
+
+    /**
+     * MSUL - PC-1424 Override "last resort" logic for format
+     * Determine Record Format(s)
+     *
+     * @param  Record record
+     * @return Set format(s) of record
+     */
+    @Override protected List<String> getFormatsAsList(Record record) {
+        List<String> result = new ArrayList<String>();
+        String leader = record.getLeader().toString();
+        ControlField marc008 = (ControlField) record.getVariableField("008");
+        String formatString;
+        char formatCode = ' ';
+        char recordType = Character.toLowerCase(leader.charAt(6));
+        char bibLevel = Character.toLowerCase(leader.charAt(7));
+
+        // This record could be a book... until we prove otherwise!
+        boolean couldBeBook = true;
+
+        // Some format-specific special cases:
+        if (isGovernmentDocument(record)) {
+            result.add("GovernmentDocument");
+        }
+        if (isThesis(record)) {
+            result.add("Thesis");
+        }
+        if (isElectronic(record, recordType)) {
+            result.add("Electronic");
+        }
+        if (isConferenceProceeding(record)) {
+            result.add("ConferenceProceeding");
+        }
+
+        // check the 33x fields; these may give us clear information in newer records;
+        // in current partial implementation of getFormatsFrom33xFields(), if we find
+        // something here, it indicates non-book content.
+        List formatsFrom33x = getFormatsFrom33xFields(record);
+        if (formatsFrom33x.size() > 0) {
+            couldBeBook = false;
+            result.addAll(formatsFrom33x);
+        }
+
+        // check the 007 - this is a repeating field
+        List<Character> formatCodes007 = new ArrayList<Character>();
+        for (VariableField variableField : record.getVariableFields("007")) {
+            ControlField formatField = (ControlField) variableField;
+            formatString = formatField.getData().toLowerCase();
+            formatCode = formatString.length() > 0 ? formatString.charAt(0) : ' ';
+            formatCodes007.add(formatCode);
+            if (definitelyNotBookBasedOn007(formatCode)) {
+                couldBeBook = false;
+            }
+            if (formatCode == 'v') {
+                // All video content should get flagged as video; we will also
+                // add a more detailed value in getFormatFrom007 to distinguish
+                // different types of video.
+                result.add("Video");
+            }
+            String formatFrom007 = getFormatFrom007(formatCode, formatString);
+            if (formatFrom007.length() > 0) {
+                result.add(formatFrom007);
+            }
+        }
+
+        // check the Leader at position 6
+        if (definitelyNotBookBasedOnRecordType(recordType, marc008)) {
+            couldBeBook = false;
+        }
+        // If we already have 33x results, skip the record type:
+        String formatFromRecordType = formatsFrom33x.size() == 0
+            ? getFormatFromRecordType(record, recordType, marc008, formatCodes007)
+            : "";
+        if (formatFromRecordType.length() > 0) {
+            result.add(formatFromRecordType);
+        }
+
+        // check the Leader at position 7
+        String formatFromBibLevel = getFormatFromBibLevel(
+            record, recordType, bibLevel, marc008, couldBeBook, formatCodes007
+        );
+        if (formatFromBibLevel.length() > 0) {
+            result.add(formatFromBibLevel);
+        }
+
+        // Nothing worked -- time to set up a value of last resort!
+        if (result.isEmpty()) {
+            // If LDR/07 indicates a "Collection" or "Sub-Unit," treat it as a Collection for now;
+            // this is a rare case but helps cut down on the number of unknowns.
+            if (bibLevel == 'c' || bibLevel == 'd') {
+                // START OF MSUL CUSTOMIZATIONS FOR PC-1424
+                result.add("Collection");
+                // END OF MSUL CUSTOMIZATIONS
+            } else if (recordType == 'a') {
+                // If LDR/06 indicates "Language material," map to "Text";
+                // this helps cut down on the number of unknowns.
+                result.add("Text");
+            } else {
+                result.add("Unknown");
+            }
+        }
+
+        return result;
     }
 }
