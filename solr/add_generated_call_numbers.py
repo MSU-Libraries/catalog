@@ -17,7 +17,7 @@ def read_results():
     filename = "/mnt/shared/call-numbers/call_numbers.csv"
     with open(filename, 'r', encoding='utf-8') as f:
         for line in f:
-            parts = line.split(',')
+            parts = line.rstrip('\n').split(',')
             yield {"id": parts[0], "cn": parts[1]}
 
 
