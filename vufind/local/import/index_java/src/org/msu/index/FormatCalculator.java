@@ -194,21 +194,34 @@ public class FormatCalculator extends org.vufind.index.FormatCalculator
 
         // Nothing worked -- time to set up a value of last resort!
         if (result.isEmpty()) {
-            // If LDR/07 indicates a "Collection" or "Sub-Unit," treat it as a Collection for now;
-            // this is a rare case but helps cut down on the number of unknowns.
-            if (bibLevel == 'c' || bibLevel == 'd') {
-                // START OF MSUL CUSTOMIZATIONS FOR PC-1424
-                result.add("Collection");
-                // END OF MSUL CUSTOMIZATIONS
-            } else if (recordType == 'a') {
-                // If LDR/06 indicates "Language material," map to "Text";
-                // this helps cut down on the number of unknowns.
-                result.add("Text");
-            } else {
-                result.add("Unknown");
+            // START OF MSUL CUSTOMIZATION (ADDED IN PC-1424)
+            String formatLastResort = getLastResortFormatForRecord(record, recordType, bibLevel);
+            if (formatLastResort.length() > 0) {
+                result.add(formatLastResort);
             }
+            // END OF MSUL CUSTOMIZATIONS
         }
 
         return result;
+    }
+
+    /**
+     * MSUL -- PC-1424 Update last resort logic; eventually turn this into an override
+     * if accepted in a PR.
+     * Return the best format string to use as a last resort.
+     *
+     * @param Record record
+     * @param char recordType
+     * @param char bibLevel
+     * @return String
+     */
+    protected String getLastResortFormatForRecord(Record record, char recordType, char bibLevel) {
+        // MSUL PC-1424 Update last resort to use collection if bibLevel is 'c'
+        if (bibLevel == 'c' || bibLevel == 'd') {
+            return "Collection";
+        } else if (recordType == 'a') {
+            return"Text";
+        }
+        return "Unknown";
     }
 }
