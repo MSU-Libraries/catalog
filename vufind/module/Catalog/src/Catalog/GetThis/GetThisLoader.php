@@ -339,6 +339,26 @@ class GetThisLoader
     }
 
     /**
+     * Check if item is non-Makerspace equipment
+     *
+     * @param string $item_id Item ID to filter for
+     *
+     * @return bool
+     */
+    public function isEquipment($item_id = null)
+    {
+        $loc_code = $this->getLocationCode($item_id);
+        $item = $this->getItem($item_id);
+        // If the location is (Kline DM or circulation)
+        // and the callnumber or material type is equipment
+        return ($loc_code == 'dmres' || $loc_code == 'mnres')
+            && (
+                stripos($item['callnumber'], 'equipment') === 0
+                || $item['material_type'] == '2D/3D/Kit/Equipment'
+            );
+    }
+
+    /**
      * Get the description for the record
      *
      * @return string The description string
@@ -502,6 +522,8 @@ class GetThisLoader
                 $this->msgTemplate = 'law.phtml';
             } elseif (Regex::MAKERSPACE($loc)) {
                 $this->msgTemplate = 'maker.phtml';
+            } elseif ($this->isEquipment($item_id)) {
+                $this->msgTemplate = 'equipment.phtml';
             } elseif (Regex::MAP($loc)) {
                 if (Regex::CIRCULATING($loc) && $this->isLibUseOnly()) {
                     $this->msgTemplate = 'ask.phtml';
@@ -558,6 +580,7 @@ class GetThisLoader
                 || Regex::TURFGRASS($loc)
             )
             && !$this->isMakerspace($item_id)
+            && !$this->isEquipment($item_id)
             && !$this->isAudioVideoMedia($item_id)
             && !Regex::VINCENT_VOICE($loc)
         ) {
@@ -582,6 +605,7 @@ class GetThisLoader
         if (
             !Regex::AVAILABLE($stat)
             && !$this->isMakerspace($item_id)
+            && !$this->isEquipment($item_id)
             && !$this->isAudioVideoMedia($item_id)
             && !Regex::SPEC_COLL($loc)
             && !Regex::SPEC_COLL_REMOTE($loc)
@@ -696,7 +720,8 @@ class GetThisLoader
             Regex::FICHE($loc) ||
             Regex::MICROFORMS($loc) ||
             Regex::MICROPRINT($callNum) ||
-            $this->isMakerspace($item_id)
+            $this->isMakerspace($item_id) ||
+            $this->isEquipment($item_id)
         ) {
             return false;
         }
@@ -745,7 +770,8 @@ class GetThisLoader
             Regex::FICHE($loc) ||
             Regex::MICROFORMS($loc) ||
             Regex::MICROPRINT($callNum) ||
-            $this->isMakerspace($item_id)
+            $this->isMakerspace($item_id) ||
+            $this->isEquipment($item_id)
         ) {
             return false;
         }
@@ -808,7 +834,7 @@ class GetThisLoader
         $item_id = $this->getItemId($item_id);
         $loc = $this->getLocation($item_id);
 
-        if ($this->isMakerspace($item_id) || Regex::VINCENT_VOICE($loc)) {
+        if ($this->isMakerspace($item_id) || Regex::VINCENT_VOICE($loc) || $this->isEquipment($item_id)) {
             return false;
         }
 
