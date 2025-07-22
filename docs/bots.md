@@ -12,14 +12,17 @@ over-utilize resources and slow down the site significantly for other users.
 1. To identify that there is a bot "attack" happening, you can check the CPU
    and memory usage of the catalog container. In our case, their values will
    be under 20%, and be around 80% or more if there is heavy bot traffic.
+   Alternatively, you can check the
+   [Apache Requests Graph](https://catalog.lib.msu.edu/monitoring/graphs/apache_requests/day)
+   on the monitoring site to look for spikes.
    ```bash
    docker stats $(docker ps -q -f name=catalog-prod-catalog_catalog)
    ```
 
-2. Tail the traefik access log to identify the IP or user agent making a
-   drastic number of requests:
+2. Tail the Apache access log for the stack to identify the IP or user agent
+   making a drastic number of requests:
    ```bash
-   tail -f -n10 /var/lib/docker/volumes/traefik_logs/_data/access.log
+   tail -f -n10 /var/lib/docker/volumes/catalog-prod_logs/_data/apache/access.log
    ```
 
 3. If there is a distinct bot user-agent, just use that for the block. But
