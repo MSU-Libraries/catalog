@@ -270,7 +270,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
             }
         }
         // MSU END
-
         return $callNumberData + $locAndHoldings + [
             'id' => $bibId,
             'item_id' => $item->id,
@@ -288,6 +287,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             'issues' => $holdingDetails['holdingsStatements'], // MSU
             'electronic_access' => $item->electronicAccess, // MSU
             'temporary_loan_type' => $tempLoanType, // MSU
+            'material_type' => $item->materialType->name ?? '', // MSU PC-1426
         ];
     }
 
@@ -362,7 +362,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 }
                 // MSU - PC-930: Add Loan Type to results
                 $tempLoanType = $this->getLoanType($item->temporaryLoanTypeId ?? null);
-
                 $nextItem = $this->formatHoldingItem(
                     $bibId,
                     $holdingDetails,
