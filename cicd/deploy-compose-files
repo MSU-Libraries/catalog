@@ -32,13 +32,13 @@ apply_devel_changes() {
     HTTPS_MIDDLEWARES+=("ip-campus")
     # Use dnschallenge cert resolver (instead of httpchallenge)
     ./yq -i \
-    ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt-dns\"" \
+    ".services.captcha.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt-dns\"" \
     docker-compose.catalog.yml;
     ./yq -i \
-    ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].main=aws.lib.msu.edu\"" \
+    ".services.captcha.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].main=aws.lib.msu.edu\"" \
     docker-compose.catalog.yml;
     ./yq -i \
-    ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
+    ".services.captcha.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.domains[0].sans=*.aws.lib.msu.edu\"" \
     docker-compose.catalog.yml;
     ./yq -i \
     ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.certresolver=msul-letsencrypt-dns\"" \
@@ -140,7 +140,7 @@ apply_prod_changes() {
 
     # Use httpchallenge cert resolver (instead of dnschallenge)
     ./yq -i \
-    ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt\"" \
+    ".services.captcha.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.tls.certresolver=msul-letsencrypt\"" \
     docker-compose.catalog.yml;
     ./yq -i \
     ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.tls.certresolver=msul-letsencrypt\"" \
@@ -177,7 +177,7 @@ apply_prod_changes() {
         ## both catalog-beta and catalog-preview
         # Override default router rule
         ./yq -i \
-        ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" \
+        ".services.captcha.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" \
         docker-compose.catalog.yml;
         ./yq -i \
         ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
@@ -205,7 +205,7 @@ apply_prod_changes() {
 
         # Override default router rule
         ./yq -i \
-        ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`catalog.lib.msu.edu\`)\"" \
+        ".services.captcha.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`catalog.lib.msu.edu\`)\"" \
         docker-compose.catalog.yml;
         ./yq -i \
         ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`catalog.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
@@ -274,7 +274,7 @@ main() {
 
     # Add in middlewares
     ./yq -i \
-    ".services.catalog.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.middlewares=$(IFS=, ; echo "${HTTPS_MIDDLEWARES[*]}")\"" \
+    ".services.captcha.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.middlewares=$(IFS=, ; echo "${HTTPS_MIDDLEWARES[*]}")\"" \
     docker-compose.catalog.yml;
 
     # Authentication environment changes

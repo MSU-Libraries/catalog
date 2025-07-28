@@ -49,6 +49,14 @@ Build LegacyLinks Image:
     name: $CI_COMMIT_BRANCH/build-legacylinks
     auto_stop_in: 2 weeks
 
+Build Captcha Image:
+  variables:
+     COMPONENT: captcha
+  extends: .build_template
+  environment:
+    name: $CI_COMMIT_BRANCH/build-captcha
+    auto_stop_in: 2 weeks
+
 Build Vufind Image:
   stage: Build
   environment:
