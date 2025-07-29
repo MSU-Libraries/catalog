@@ -53,6 +53,10 @@ challenge-template-overrides:
 # Advanced backend configuration
 # Backends setup via cmdline will be added here
 backends:
+  "badbots":
+    url: "http://badbots_badbot:80"
+    ip-header: "X-Forwarded-For"
+
   # Example HTTP backend and setting client ip header
   #"git.example.com":
   #  url: "http://forgejo:3000"
