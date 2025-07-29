@@ -21,8 +21,8 @@ temporary challenge page for a second or two the first time a user visits.
 The configuration and rule definition for what traffic is given challenges and
 what traffic is considered okay versus suspected bots are available in the files:
 
-* [captcha/config.yml](https://github.com/MSU-Libraries/catalog/blob/main/captcha/config.yml)
-* [captcha/rules.yml](https://github.com/MSU-Libraries/catalog/blob/main/captcha/policy.yml)
+* [`captcha/config.yml`](https://github.com/MSU-Libraries/catalog/blob/main/captcha/config.yml)
+* [`captcha/rules.yml`](https://github.com/MSU-Libraries/catalog/blob/main/captcha/policy.yml)
 
 Documentation on how to configure `go-away` is available on their [wiki](https://git.gammaspectra.live/git/go-away/wiki/?action=_pages).
 
@@ -32,10 +32,10 @@ Documentation on how to configure `go-away` is available on their [wiki](https:/
 1. To identify that there is a bot "attack" happening, you can check the CPU
    and memory usage of the catalog container. If you see unusually high CPU load
    versus normal traffic, this might be an indicator of bots. Additionally,
-   if you see a rise in the number of requests to the catalog (such as from the 
+   if you see a rise in the number of requests to the catalog (such as from the
    [Apache Requests Graph](https://catalog.lib.msu.edu/monitoring/graphs/apache_requests/day)
    on the monitoring site), this can be an indication that bots are crawling
-   the site aggresively.
+   the site aggressively
    ```bash
    # Checking container stats for CPU usage
    docker stats $(docker ps -q -f name=catalog-prod-catalog_catalog)
