@@ -693,6 +693,8 @@ conditions:
     # Old generic browsers
     - 'userAgent.startsWith("Opera/")'
     - 'userAgent.matches("^Mozilla/[1-4]")'
+    # No user agent set
+    - 'userAgent == ""'
     # Detected sus agents
     - 'userAgent.matches("Firefox/[0-9]{1,2}\\.")'
     - 'userAgent.matches("Firefox/1[0-1][0-9]\\.")'
@@ -730,47 +732,12 @@ rules:
       - '($is-network-isp)'
     action: pass
 
-  - name: allow-well-known-resources
-    conditions:
-      - '($is-well-known-asset)'
-    action: pass
-
-  - name: allow-static-resources
-    conditions:
-      - '($is-static-asset)'
-    action: pass
-
-  - name: desired-crawlers
-    conditions:
-      - *is-bot-googlebot
-      - *is-bot-bingbot
-      - *is-bot-duckduckbot
-      - *is-bot-kagibot
-      - *is-bot-qwantbot
-      - *is-bot-yandexbot
-    action: pass
-
   - name: known-bad-ranges
     conditions:
       - '($is-network-malicious)'
     action: proxy
     settings:
       proxy-backend: "badbots"
-
-  - name: allow-allowed-agents
-    conditions:
-      - '($is-allowed-agent)'
-    action: pass
-
-  - name: allow-api-calls
-    conditions:
-      - '($is-api-path)'
-    action: pass
-
-  - name: homesite
-    conditions:
-      - 'path == "/"'
-    action: pass
 
   - name: undesired-crawlers
     conditions:
@@ -800,16 +767,44 @@ rules:
     settings:
       proxy-backend: "badbots"
 
-  - name: anonymous-crawlers
+  - name: allow-well-known-resources
     conditions:
-      # No user agent set
-      - 'userAgent == ""'
-    action: proxy
-    settings:
-      proxy-backend: "badbots"
+      - '($is-well-known-asset)'
+    action: pass
+
+  - name: allow-static-resources
+    conditions:
+      - '($is-static-asset)'
+    action: pass
+
+  - name: desired-crawlers
+    conditions:
+      - *is-bot-googlebot
+      - *is-bot-bingbot
+      - *is-bot-duckduckbot
+      - *is-bot-kagibot
+      - *is-bot-qwantbot
+      - *is-bot-yandexbot
+    action: pass
+
+  - name: allow-allowed-agents
+    conditions:
+      - '($is-allowed-agent)'
+    action: pass
+
+  - name: allow-api-calls
+    conditions:
+      - '($is-api-path)'
+    action: pass
+
+  - name: homesite
+    conditions:
+      - 'path == "/"'
+    action: pass
 
   - name: suspicious-crawlers
-    conditions: ['($is-suspicious-crawler)']
+    conditions:
+      - '($is-suspicious-crawler)'
     action: none
     children:
       - name: 0
