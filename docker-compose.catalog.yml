@@ -76,7 +76,7 @@ services:
       GOAWAY_BACKEND: "*=http://${STACK_NAME}-catalog_catalog:80"
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 3
       resources:
         limits:
           memory: 128M
