@@ -113,8 +113,9 @@ apply_devel_changes() {
     # Disable healthchecks on catalog service
     ./yq -i ".services.catalog.healthcheck.disable=true" docker-compose.catalog.yml
 
-    # Reduce the catalog service replicas to 1
+    # Reduce the catalog and captcha service replicas to 1
     ./yq -i ".services.catalog.deploy.replicas = 1" docker-compose.catalog.yml
+    ./yq -i ".services.captcha.deploy.replicas = 1" docker-compose.catalog.yml
 
     # Mount monitoring files in container for easier editting
     ./yq -i ".services.monitoring.volumes += \"/mnt/shared/local/${STACK_NAME}/repo/monitoring/:/app/\"" docker-compose.monitoring.yml;
