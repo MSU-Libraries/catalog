@@ -722,8 +722,8 @@ conditions:
 rules:
   - name: allow-private-networks
     conditions:
-      - *is-network-localhost
-      - *is-network-private
+      - '($is-network-localhost)'
+      - '($is-network-private)'
     action: pass
 
   - name: allow-known-ip-ranges
@@ -795,11 +795,6 @@ rules:
   - name: allow-api-calls
     conditions:
       - '($is-api-path)'
-    action: pass
-
-  - name: homesite
-    conditions:
-      - 'path == "/"'
     action: pass
 
   - name: suspicious-crawlers
