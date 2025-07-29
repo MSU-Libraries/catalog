@@ -2,7 +2,7 @@
 # Parameters that exist both on config and cmdline will have cmdline as preference
 
 bind:
-  address: ":8080"
+  address: ":80"
   #network: "tcp"
   #socket-mode": "0770"
 
