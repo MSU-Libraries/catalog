@@ -1,0 +1,130 @@
+# Configuration file
+# Parameters that exist both on config and cmdline will have cmdline as preference
+
+bind:
+  address: ":80"
+  #network: "tcp"
+  #socket-mode": "0770"
+
+  # Enable PROXY mode on this listener, to allow passing origin info. Default false
+  #proxy: true
+
+  # Enable passthrough mode, which will allow traffic onto the backends while rules load. Default false
+  #passthrough: true
+
+  # Enable TLS on this listener and obtain certificates via an ACME directory URL, or letsencrypt
+  #tls-acme-autocert: "letsencrypt"
+
+  # Enable TLS on this listener and obtain certificates via a certificate and key file on disk
+  # Only set one of tls-acme-autocert or tls-certificate+tls-key
+  #tls-certificate: ""
+  #tls-key: ""
+
+# Bind the Go debug port
+#bind-debug: ":6060"
+
+# Bind the Prometheus metrics onto /metrics path on this port
+#bind-metrics: ":9090"
+
+# These links will be shown on the presented challenge or error pages
+links:
+  #- name: Privacy
+  #  url: "/privacy.html"
+  #- name: Contact
+  #  url: "mailto:admin@example.com"
+  #- name: Donations
+  #  url: "https://donations.example.com/abcd"
+  - name: Need help?
+    url: "https://lib.msu.edu/rds/askus"
+  - name: (517) 353-8700
+    url: "tel:+15173538700"
+
+# HTML Template to use for challenge or error pages
+# External templates can be included by providing a disk path
+# Bundled templates:
+#  anubis: An Anubis-like template with no configuration parameters. Supports Logo.
+#  forgejo: Looks like native Forgejo. Includes logos and resources from your instance. Supports Theme, Logo.
+#
+#challenge-template: "anubis"
+
+# Allows overriding specific settings set on templates. Key-Values will be passed to templates as-is
+challenge-template-overrides:
+  # Set template theme if supported
+  #Theme: "forgejo-auto"
+  # Set logo on template if supported
+  #Logo: "/my/custom/logo/path.png"
+
+# Advanced backend configuration
+# Backends setup via cmdline will be added here
+backends:
+  "badbots":
+    url: "http://badbots_badbot:80"
+    ip-header: "X-Forwarded-For"
+
+  # Example HTTP backend and setting client ip header
+  #"git.example.com":
+  #  url: "http://forgejo:3000"
+  #  ip-header: "X-Client-Ip"
+
+  # Example HTTP backend matching a non-standard port in Host
+  # Standard ports are 80 and 443. Others will be sent in Host by browsers
+  #"git.example.com:8080":
+  #  url: "http://forgejo:3000"
+  #  ip-header: "X-Client-Ip"
+
+  # Example HTTPS backend with host/SNI override, HTTP/2 and no certificate verification
+  #"ssl.example.com":
+  #  url: "https://127.0.0.1:8443"
+  #  host: ssl.example.com
+  #  http2-enabled: true
+  #  tls-skip-verify: true
+
+  # Example HTTPS transparent backend with host/SNI override, HTTP/2, and subdirectory
+  #"ssl.example.com":
+  #  url: "https://ssl.example.com/subdirectory/"
+  #  host: ssl.example.com
+  #  http2-enabled: true
+  #  ip-header: "-"
+  #  transparent: true
+
+# List of strings you can replace to alter the presentation on challenge/error templates
+# Note raw HTML is allowed, be careful with it.
+# Default strings exist in code, uncomment any to set it
+strings:
+  title_challenge: "Verifying you are human..."
+  title_error: "Oh no!"
+  noscript_warning: "<p>You may need to enable JavaScript to get past this challenge.</p>"
+  details_title: "Why am I seeing this?"
+  details_text: >
+    <p>
+    Some poorly behaved bots trying to harvest data for AI training have been trying to scan our site
+    much faster than we can handle. We normally don't mind bots crawling our sites, but these bots have
+    been so aggressive that it has made the site slow and unresponsive for other users.
+    </p>
+    <p>
+    We've added these automated challenges your browser will perform when first loading the site; these
+    challenges combat the overload coming from the bots.
+    </p>
+    <p>
+    Please note that some challenges requires the use of modern JavaScript features and some browser
+    plugins might cause them to fail. Disable such plugins for this site if you encounter any issues.
+    </p>
+    <p>If problems persist, please reach out to us using any of the following methods:</p>
+    <ul>
+      <li>The <a href="https://lib.msu.edu/rds/askus">Reference &amp; Discovery Services</a> form</li>
+      <li>By phone: (517) 353-8700</li>
+      <li>The <a href="https://lib.msu.edu/contact/askalib/">Ask a Librarian</a> form</li>
+    </ul>
+    <p>And we will work with you to resolve the issue.</p>
+
+  details_contact_admin_with_request_id: "If you have any issues, promptly reach out to us and provide the following Request Id"
+
+  button_refresh_page: "Refresh page"
+
+  status_loading_challenge: "Loading challenge"
+  status_starting_challenge: "Starting challenge"
+  status_loading: "Loading..."
+  status_calculating: "Calculating..."
+  status_challenge_success: "Looking good so far!"
+  status_challenge_done_took: "Done! Took"
+  status_error: "Error:"
