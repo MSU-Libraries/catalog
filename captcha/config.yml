@@ -34,6 +34,10 @@ links:
   #  url: "mailto:admin@example.com"
   #- name: Donations
   #  url: "https://donations.example.com/abcd"
+  - name: Need help?
+    url: "https://lib.msu.edu/rds/askus"
+  - name: (517) 353-8700
+    url: "tel:+15173538700"
 
 # HTML Template to use for challenge or error pages
 # External templates can be included by providing a disk path
@@ -87,7 +91,7 @@ backends:
 # Note raw HTML is allowed, be careful with it.
 # Default strings exist in code, uncomment any to set it
 strings:
-  title_challenge: "Checking your Sparty level..."
+  title_challenge: "Verifying you are human..."
   title_error: "Oh no!"
   noscript_warning: "<p>You may need to enable JavaScript to get past this challenge.</p>"
   details_title: "Why am I seeing this?"
