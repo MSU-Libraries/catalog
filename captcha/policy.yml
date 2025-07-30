@@ -611,6 +611,10 @@ networks:
       - "166.220.0.0/16"
       - "172.0.0.0/12"
       - "184.128.0.0/12"
+      # T-Mobile
+      # TODO
+      # Verizon
+      # TODO
 
 challenges:
   # Challenges will get included from snippets
@@ -650,6 +654,24 @@ conditions:
     - 'path.matches("^/api/")'
     - 'path.matches("^/AJAX/")'
     - 'path.matches("^/OAI/")'
+
+  is-lightbox-path:
+    - 'path.matches("^/MyResearch/UserLogin")'
+    - 'path.matches("^/Feedback/Home")'
+    - 'path.matches("^/Help/Home")'
+    - 'path.matches("^/Cart")'
+    - 'path.matches("/Holdings$")'
+    - 'path.matches("/TOC$")'
+    - 'path.matches("/Description$")'
+    - 'path.matches("/Similar$")'
+    - 'path.matches("/Details$")'
+    - 'path.matches("/Save$")'
+    - 'path.matches("/GetThis$")'
+    - 'path.matches("/FacetList$")'
+    - 'path.matches("/Permalink$")'
+    - 'path.matches("/Cite$")'
+    - 'path.matches("/SMS$")'
+    - 'path.matches("/Email$")'
 
   is-tool-ua:
     - 'userAgent.startsWith("python-requests/")'
@@ -785,6 +807,7 @@ rules:
   - name: allow-api-calls
     conditions:
       - '($is-api-path)'
+      - '($is-lightbox-path)'
     action: pass
 
   - name: suspicious-crawlers
