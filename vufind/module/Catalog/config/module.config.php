@@ -130,6 +130,8 @@ return [
         'aliases' => [
           VuFind\Search\Solr\Results::class => Catalog\Search\Solr\Results::class,
           'solr' => Catalog\Search\Solr\Results::class,
+          VuFind\Search\EDS\Results::class => Catalog\Search\EDS\Results::class,
+          'eds' => Catalog\Search\EDS\Results::class,
         ],
       ],
     ],

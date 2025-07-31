@@ -5,7 +5,7 @@
     // Set up breadcrumbs:
     $this->layout()->breadcrumbs = '<li class="active">' . $this->transEsc('New Items') . '</li>';
     //Load the javascript
-    $this->headScript()->appendFile(
+    $this->assetManager()->appendScriptLink(
         $this->advancedSearchJsOverride ?? 'advanced_search.js'
     );
     //Add expanders
