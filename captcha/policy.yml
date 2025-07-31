@@ -118,6 +118,7 @@ rules:
     conditions:
       - '($is-network-academic)'
       - '($is-network-isp)'
+      - '($is-network-gov)'
     action: pass
 
   - name: known-bad-ranges
