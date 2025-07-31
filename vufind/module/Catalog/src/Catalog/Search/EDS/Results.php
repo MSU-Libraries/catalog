@@ -1,6 +1,10 @@
 <?php
 
 /**
+ * EDS API Results - customization
+ *
+ * PHP version 8
+ *
  * @category VuFind
  * @package  EBSCO
  * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
@@ -24,7 +28,7 @@ use VuFindSearch\Command\SearchCommand;
  */
 class Results extends \VuFind\Search\EDS\Results
 {
-        /**
+    /**
      * Support method for performAndProcessSearch -- perform a search based on the
      * parameters passed to the object.
      *
