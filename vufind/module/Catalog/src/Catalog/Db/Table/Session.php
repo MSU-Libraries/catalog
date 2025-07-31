@@ -112,6 +112,7 @@ class Session extends \VuFind\Db\Table\Session implements \Laminas\Log\LoggerAwa
                 } catch (Exception $e) {
                     $this->logException($e);
                     $retryCount++;
+                    usleep(2 ** $retryCount * 1000);
                 }
             }
         }
@@ -141,6 +142,7 @@ class Session extends \VuFind\Db\Table\Session implements \Laminas\Log\LoggerAwa
             } catch (Exception $e) {
                 $this->logException($e);
                 $retryCount++;
+                usleep(2 ** $retryCount * 1000);
             }
         }
     }
