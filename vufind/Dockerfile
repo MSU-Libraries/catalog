@@ -158,6 +158,7 @@ COPY module/Catalog /usr/local/vufind/module/Catalog
 COPY tests/ /tests
 COPY tests/.eslintrc.js /usr/local/vufind/.eslintrc.js
 COPY robots.txt /usr/local/vufind/public/robots.txt
+COPY public/index.php  /usr/local/vufind/public/index.php
 COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
 COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh backup.sh restore.sh /
