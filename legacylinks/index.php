@@ -60,7 +60,7 @@ $r = preg_match(
 if ($r === 1) {
     $record = $matches[1] . compute_check_digit($matches[1]);
     list($httpcode, $json) = api_json(
-        "http://" . getenv("STACK_NAME") . "-catalog_catalog/api/v1/search?lookfor=." .
+        "http://" . getenv("STACK_NAME") . "-catalog_captcha/api/v1/search?lookfor=." .
         rawurlencode($record) . "&type=Bibnum&field[]=id"
     );
 
