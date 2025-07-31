@@ -132,6 +132,17 @@ return [
           'solr' => Catalog\Search\Solr\Results::class,
         ],
       ],
+      'db_table' => [
+        'factories' => [
+           Catalog\Db\Table\Session::class => Catalog\Db\Table\GatewayFactory::class,
+           //Catalog\Db\Table\Session::class => VuFind\Db\Table\GatewayFactory::class,
+          //Catalog\Db\Table\Session::class => Catalog\Db\Table\SessionFactory::class,
+        ],
+        'aliases' => [
+          VuFind\Db\Table\Session::class => Catalog\Db\Table\Session::class,
+          'session' => Catalog\Db\Table\Session::class,
+        ],
+      ],
     ],
   ],
   'service_manager' => [

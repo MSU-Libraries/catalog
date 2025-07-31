@@ -8,8 +8,8 @@ if (!empty($vufindProfiler)) {
 }
 
 use Laminas\Db\Adapter\Exception\RuntimeException as DbRuntimeException;
-use Laminas\ServiceManager\Exception\ServiceNotCreatedException;
 use Laminas\Mvc\Application;
+use Laminas\ServiceManager\Exception\ServiceNotCreatedException;
 
 $maxRetries = 3; // Maximum number of times to retry the request
 $currentRetry = 0;
@@ -52,7 +52,7 @@ do {
             if (($innerException instanceof DbRuntimeException || $innerException instanceof \mysqli_sql_exception)) {
                 // MySQL/MariaDB deadlock error code is 1213
                 // TODO for a PR we will need to have it check more codes and messages
-                if ($innerException->getCode() == 1213 || strpos($innerException->getMessage(), 'Deadlock found') !== false) {
+                if ($innerException->getCode() == 1213 || str_contains($innerException->getMessage(), 'Deadlock found')) {
                     $deadlockDetected = true;
                     break; // Found the deadlock, no need to check further
                 }
@@ -83,7 +83,7 @@ do {
     if ($deadlockDetected && $currentRetry < $maxRetries) {
         // Exponential backoff: 10ms, 20ms, 40ms, etc.
         // Adjust these values as needed. A very small initial delay is usually sufficient.
-        usleep(pow(2, $currentRetry) * 10000);
+        usleep(2 ** $currentRetry * 10000);
     }
 
 } while (!$requestSucceeded && $deadlockDetected && $currentRetry < $maxRetries);
