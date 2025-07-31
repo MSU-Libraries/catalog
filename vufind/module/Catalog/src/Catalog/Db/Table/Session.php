@@ -109,8 +109,8 @@ class Session extends \VuFind\Db\Table\Session implements \Laminas\Log\LoggerAwa
                     $s->last_used = time();
                     $s->save();
                     $updated = true;
-                } catch (Exception $e) {
-                    $this->logException($e);
+                } catch (\Exception $e) {
+                    $this->logException($e, $retryCount, $maxRetries);
                     $retryCount++;
                     usleep(2 ** $retryCount * 1000);
                 }
@@ -139,8 +139,8 @@ class Session extends \VuFind\Db\Table\Session implements \Laminas\Log\LoggerAwa
                 $s->data = $data;
                 $s->save();
                 $updated = true;
-            } catch (Exception $e) {
-                $this->logException($e);
+            } catch (\Exception $e) {
+                $this->logException($e, $retryCount, $maxRetries);
                 $retryCount++;
                 usleep(2 ** $retryCount * 1000);
             }
@@ -151,11 +151,13 @@ class Session extends \VuFind\Db\Table\Session implements \Laminas\Log\LoggerAwa
      * Check the exception for a deadlock error to determine the appropriate
      * log message for debugging.
      *
-     * @param Exception $e Exception object to check how to specifically log
+     * @param Exception $e          Exception object to check how to specifically log
+     * @param int       $retryCount Number of retries so far
+     * @param int       $maxRetries Max number of retries
      *
      * @return void
      */
-    protected function logException(Exception $e)
+    protected function logException(\Exception $e, int $retryCount = 0, int $maxRetries = 3)
     {
         if (str_contains($e->getMessage(), 'Deadlock found') || $e->getCode() == 1213) {
             $msg = 'Deadlock detected saving session. ';
