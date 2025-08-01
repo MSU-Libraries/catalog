@@ -1,5 +1,5 @@
 <?php /** This one I'm not sure */ ?>
-<?php $this->headLink()->appendStylesheet('EDS.css'); ?>
+<?php $this->assetManager()->appendStyleLink('EDS.css'); ?>
 <?php
     $this->layout()->showSearchBacklink = true; // MSU
     $items = $this->driver->getItems('core');

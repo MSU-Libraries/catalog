@@ -542,7 +542,10 @@ VuFind.register('lightbox', function Lightbox() {
 
     VuFind.modal = function modalShortcut(cmd) {
       if (cmd === 'show') {
-        _beforeOpenElement = document.activeElement;
+        // This can get called multiple times, so only take the active element if we don't already have it:
+        if (!_beforeOpenElement) {
+          _beforeOpenElement = document.activeElement;
+        }
         _bsModal.show();
         // Set keyboard focus
         setFocusToFirstNode();

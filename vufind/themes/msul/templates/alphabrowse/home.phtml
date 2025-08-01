@@ -131,7 +131,7 @@
                 endif;
               ?>
               <?php if ($url = $this->alphabrowse()->getUrl($this->source, $item, $this->origin)): ?>
-                <a href="<?=$this->escapeHtmlAttr($url)?>"><?=preg_replace('/ --$/', '', $label)?></a><?php if(str_ends_with($label, ' --')) {
+                <a href="<?=$this->escapeHtmlAttr($url)?>"><?=preg_replace('/ --$/', '', $label)?></a><?php if (str_ends_with($label, ' --')) {
                    echo "<span class='fw-normal'> [chapter/part]</span>";
                 }?>
               <?php else: ?>
