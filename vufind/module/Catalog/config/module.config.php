@@ -126,6 +126,7 @@ return [
       'search_results' => [
         'factories' => [
           Catalog\Search\Solr\Results::class => VuFind\Search\Solr\ResultsFactory::class,
+          Catalog\Search\EDS\Results::class => Catalog\Search\EDS\EDSSearchResultsFactory::class,
         ],
         'aliases' => [
           VuFind\Search\Solr\Results::class => Catalog\Search\Solr\Results::class,
