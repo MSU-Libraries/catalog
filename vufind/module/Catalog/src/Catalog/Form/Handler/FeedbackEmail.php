@@ -65,7 +65,7 @@ class FeedbackEmail extends \VuFind\Form\Handler\Email
         $fields[] = [
             'type' => 'hidden',
             'label' => 'VFUserID',
-            'value' => $user->id ?? 'none',
+            'value' => $user->getId() ?? 'none',
         ];
         // MSUL End
         $emailMessage = $this->viewRenderer->render(

@@ -77,7 +77,7 @@
         })
         JS;
 ?>
-<?=$this->inlineScript(\Laminas\View\Helper\HeadScript::SCRIPT, $script, 'SET') ?>
+<?=$this->assetManager()->outputInlineScriptString($script) ?>
 
 <?php
 $this->layout()->searchbox = false; /** MSU */
