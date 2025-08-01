@@ -188,26 +188,11 @@ rules:
     action: pass
 
   - name: suspicious-crawlers
+    action: check
+    settings:
+      challenges: [js-pow-sha256]
     conditions:
       - '($is-suspicious-crawler)'
-    action: none
-    children:
-      - name: 0
-        action: check
-        settings:
-          challenges: [js-refresh]
-      - name: 1
-        action: check
-        settings:
-          challenges: [js-pow-sha256]
-      - name: 2
-        action: check
-        settings:
-          challenges: [preload-link, resource-load]
-      - name: 3
-        action: check
-        settings:
-          challenges: [header-refresh]
 
   - name: suspicious-fetchers
     action: check
@@ -223,31 +208,9 @@ rules:
       - '!(method == "HEAD" || method == "GET")'
 
   - name: plaintext-browser
-    action: challenge
-    settings:
-      challenges: [meta-refresh, cookie]
     conditions:
       - 'userAgent.startsWith("Lynx/")'
       - 'userAgent.startsWith("Links ")'
-
-  # rules for tools like python requests or PHP Guzzle
-  - name: standard-tools
-    action: challenge
-    settings:
-      challenges: [cookie]
-    conditions:
-      - '($is-tool-ua)'
-
-  - name: standard-browser
-    action: challenge
-    settings:
-      challenges: [preload-link, meta-refresh, resource-load, js-refresh]
-    conditions:
-      - '($is-generic-browser)'
-
-  - name: unknown-browser
-    conditions:
-      - '!($is-suspicious-crawler)'
     action: none
     children:
       - name: 0
@@ -255,6 +218,51 @@ rules:
         settings:
           challenges: [cookie]
       - name: 1
+        action: challenge
+        settings:
+          challenges: [meta-refresh]
+
+  # rules for tools like python requests or PHP Guzzle
+  - name: standard-tools
+    conditions:
+      - '($is-tool-ua)'
+    action: none
+    children:
+      - name: 0
+        action: check
+        settings:
+          challenges: [cookie]
+      - name: 1
+        action: challenge
+        settings:
+          challenges: [header-refresh]
+
+  # final check applies to ALL requests still not yet PASSed
+  - name: standard-browser
+    #action: challenge
+    #settings:
+    #  challenges: [preload-link, meta-refresh, resource-load, js-refresh]
+    #conditions:
+    #  - '($is-generic-browser)'
+    action: none
+    children:
+      - name: 0
+        action: check
+        settings:
+          challenges: [js-refresh]
+      - name: 1
+        action: check
+        settings:
+          challenges: [cookie]
+      - name: 2
+        action: check
+        settings:
+          challenges: [preload-link, resource-load]
+      - name: 3
+        action: check
+        settings:
+          challenges: [meta-refresh]
+      - name: 4
         action: check
         settings:
           challenges: [header-refresh]
