@@ -159,8 +159,8 @@ apply_prod_changes() {
     # Remove mailcatcher service
     ./yq -i "del(.services.mail-*)" docker-compose.catalog.yml;
 
-    # Remove captcha DEBUG logging
-    ./yq -i "del(.services.captcha.environment.GOAWAY_SLOG_LEVEL)" docker-compose.catalog.yml;
+    # Increase captcha logging from DEBUG to INFO
+    ./yq -i ".services.captcha.environment.GOAWAY_SLOG_LEVEL = \"INFO\"" docker-compose.catalog.yml;
 
     ## Changes for catalog-beta and catalog-preview
     if [ "${STACK_NAME}" == "catalog-beta" ] || [ "${STACK_NAME}" == "catalog-preview" ]; then
