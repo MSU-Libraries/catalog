@@ -272,6 +272,7 @@ Subject:
 #  ExactSettings:
 #    DismaxFields:
 #      - topic_unstemmed^150
+#    DismaxHandler: edismax
 
 
 Coordinate:
@@ -303,6 +304,7 @@ JournalTitle:
     DismaxFields:
       - title_exactish^500
       - title_full_unstemmed^100
+    DismaxHandler: edismax
 #    FilterQuery: "format:Journal OR format:Article"
     FilterQuery: "format:Journal"
 
@@ -323,6 +325,7 @@ NewspaperTitle:
     DismaxFields:
       - title_exactish^500
       - title_full_unstemmed^100
+    DismaxHandler: edismax
     FilterQuery: "format:Newspaper"
 
 Title:
@@ -341,6 +344,7 @@ Title:
     DismaxFields:
       - title_exactish^500
       - title_full_unstemmed^100
+    DismaxHandler: edismax
 
 Series:
   DismaxFields:
@@ -390,6 +394,7 @@ AllFields:
       - issn^10
       - ismn^10
       - invalid_isn
+    DismaxHandler: edismax
 
 # These are advanced searches that never use Dismax:
 id:
