@@ -19,6 +19,7 @@ use Catalog\Utils\RegexLookup as Regex;
 use function array_key_exists;
 use function count;
 use function in_array;
+use function is_array;
 
 /**
  * Class to hold data for the Get This button
@@ -365,11 +366,26 @@ class GetThisLoader
      */
     public function getDescription()
     {
+        $results = [];
         // TODO how to get actual description?
         // Does appear to work on items that show a description on record page:
         // https://devel-getthis.aws.lib.msu.edu/Record/folio.in00006771086
         // (then var_dump this desc and the value matches)
-        return implode(', ', $this->record->getSummary());
+        $data = $this->record->getSummary();
+
+        // if there is linked data in the description get the differently
+        if (isset($data) && is_array($data[0])) {
+            foreach ($data as $item) {
+                if ($item['link']) {
+                    $results[] = ($item['note'] ?? '') . ' = ' . ($item['link'] ?? '');
+                } else {
+                    $results[] = $item['note'] ?? '';
+                }
+            }
+        } else {
+            $results = implode(', ', $this->record->getSummary());
+        }
+        return $results;
     }
 
     /**
