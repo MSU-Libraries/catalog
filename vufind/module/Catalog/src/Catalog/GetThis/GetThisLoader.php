@@ -373,7 +373,8 @@ class GetThisLoader
         // (then var_dump this desc and the value matches)
         $data = $this->record->getSummary();
 
-        // if there is linked data in the description get the differently
+        // If there is linked data in the description, it will need to
+        // be parsed out with an '=' separating it
         if (isset($data) && is_array($data[0])) {
             foreach ($data as $item) {
                 if ($item['link']) {
@@ -383,9 +384,9 @@ class GetThisLoader
                 }
             }
         } else {
-            $results = implode(', ', $this->record->getSummary());
+            $results = $data;
         }
-        return $results;
+        return implode(', ', $results);
     }
 
     /**
