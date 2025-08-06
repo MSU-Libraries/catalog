@@ -1,0 +1,6 @@
+<?php
+// MSU -- since we load in the solr template on the new items page,
+// we define 'ranges' differently there and want to avoid an index error
+if (isset($this->ranges) && !empty($this->ranges) && is_array($this->ranges[0])) {
+    include $this->parentTemplate('search/advanced/ranges.phtml');
+}
