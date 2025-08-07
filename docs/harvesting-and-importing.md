@@ -138,8 +138,8 @@ in the log file on the container or volume (`/mnt/logs/harvests/`).
     sudo screen
     # Prompting for confirmation
     pc-full-import catalog-prod --debug 2>&1 | tee /mnt/shared/logs/catalog-prod-import_$(date -I).log
-    # Bypassing user confirmation
-    pc-full-import catalog-prod --yes --debug 2>&1 | tee /mnt/shared/logs/catalog-prod-import_$(date -I).log
+    # Bypassing user confirmation and notifying pubcat on completion
+    pc-full-import catalog-prod --email LIB.DL.pubcat@msu.edu --yes --debug 2>&1 | tee /mnt/shared/logs/catalog-prod-import_$(date -I).log
     ```
 
     Should you choose to do the steps manually, this section will describe
