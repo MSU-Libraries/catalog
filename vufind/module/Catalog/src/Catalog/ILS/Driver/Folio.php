@@ -574,7 +574,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $electronicAccess = null;
             $urlPattern = '/https?:\/\/catalog\.lib\.msu\.edu\/Record\/([.a-zA-Z0-9]+)/i';
             if ($itemId !== null) {
-                $links = $this->getElectronicAccessLinks($itemId);
+                $links = $this->getElectronicAccessLinks($itemId) ?? [];
                 foreach ($links as $link) {
                     if ($link->uri !== null && preg_match($urlPattern, $link->uri, $matches) && count($matches) > 1) {
                         $bibId = $matches[1]; // this gives us the VuFind ID with the prefix it has in the Biblio index
@@ -633,10 +633,15 @@ class Folio extends \VuFind\ILS\Driver\Folio
         try {
             $response = $this->makeRequest(
                 'GET',
-                '/item-storage/items/' . $itemId
+                '/item-storage/items/' . $itemId,
+                allowedFailureCodes: [404]
             );
-            $item = json_decode($response->getBody());
-            return $item->electronicAccess;
+            if ($response) {
+                $item = json_decode($response->getBody());
+                return $item?->electronicAccess ?? [];
+            } else {
+                return [];
+            }
         } catch (ILSException $e) {
             return [];
         }
@@ -1159,7 +1164,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $this->logError('Unexpected ' . $e::class . ': ' . (string)$e);
             throw new ILSException('Error during send operation.');
         }
-        $code = $response->getStatusCode();
         $code = $response->getStatusCode();
         $endTime = microtime(true);
         $responseTime = $endTime - $startTime;
