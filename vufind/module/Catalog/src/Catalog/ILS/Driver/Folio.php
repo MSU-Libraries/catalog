@@ -134,7 +134,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
     protected function getByBatch($ids, $idField, $responseKey, $endpoint, $querySuffix = '')
     {
         foreach (array_chunk($ids, self::QUERY_BY_IDS_BATCH_SIZE) as $idsInBatch) {
-            $itemQueries = array_map(fn ($id) => $idField . '=="' . $id . '"', $idsInBatch);
+            $itemQueries = array_map(fn ($id) => $idField . '=="' . $this->escapeCql($id) . '"', $idsInBatch);
             $query = [
                 'query' => '(' . implode(' OR ', $itemQueries) . ')' . $querySuffix,
             ];
@@ -1122,16 +1122,21 @@ class Folio extends \VuFind\ILS\Driver\Folio
         // directly:
         $idType = $this->getBibIdType();
         $idField = $idType === 'instance' ? 'id' : $idType;
-        $idQueries = array_map(fn ($bibId) => $idField . '=="' . $this->escapeCql($bibId) . '"', $bibIds);
-        $query = [
-            'query' => '(' . implode(' OR ', $idQueries) . ')',
-        ];
-        $response = $this->makeRequest('GET', '/instance-storage/instances', $query);
-        $instances = json_decode($response->getBody());
-        if (count($instances->instances ?? []) == 0) {
+        $instances = [];
+        foreach (
+            $this->getByBatch(
+                $bibIds,
+                $idField,
+                'instances',
+                '/instance-storage/instances'
+            ) as $instance
+        ) {
+            $instances[] = $instance;
+        }
+        if (count($instances ?? []) == 0) {
             throw new ILSException('None of the instances was found');
         }
-        return $instances->instances;
+        return $instances;
     }
 
     /**
