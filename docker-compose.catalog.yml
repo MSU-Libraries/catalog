@@ -20,7 +20,6 @@ services:
       - /etc/bash_completion.d/pc-record:/etc/bash_completion.d/pc-record:ro
       - /usr/local/bin/pc-common:/usr/local/bin/pc-common:ro
     networks:
-      - public
       - internal
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -44,6 +43,43 @@ services:
       resources:
         limits:
           memory: 3072M
+      placement:
+        max_replicas_per_node: 1
+      restart_policy:
+        window: 15s
+      update_config:
+        parallelism: 1
+        failure_action: rollback
+        delay: 5s
+        monitor: 10s
+
+  captcha:
+    image: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/captcha:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
+    hostname: captcha
+    networks:
+      - public
+      - internal
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    environment:
+      STACK_NAME: "${STACK_NAME}"
+      GOAWAY_CACHE: "/cache"
+      GOAWAY_SLOG_LEVEL: "DEBUG"
+      GOAWAY_JWT_PRIVATE_KEY_SEED: "${GOAWAY_JWT_PRIVATE_KEY_SEED}"
+      GOAWAY_CLIENT_IP_HEADER: "X-Forwarded-For"
+      GOAWAY_CONFIG: "/config.yml"
+      GOAWAY_POLICY: "/policy.yml"
+      GOAWAY_CHALLENGE_TEMPLATE: msul
+      GOAWAY_BACKEND: "*=http://${STACK_NAME}-catalog_catalog:80"
+    deploy:
+      mode: replicated
+      replicas: 3
+      resources:
+        limits:
+          memory: 128M
       placement:
         max_replicas_per_node: 1
       restart_policy:

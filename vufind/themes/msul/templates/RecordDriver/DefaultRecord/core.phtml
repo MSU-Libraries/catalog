@@ -1,7 +1,7 @@
 <?php
   $this->layout()->showSearchBacklink = true; // MSU
   $this->metadata()->generateMetatags($this->driver);
-  $this->headScript()->appendFile('get_license_agreement.js'); // MSU
+  $this->assetManager()->appendScriptLink('get_license_agreement.js'); // MSU
 ?>
 <div class="media"<?=$this->schemaOrg()->getAttributes(['vocab' => 'http://schema.org/', 'resource' => '#record', 'typeof' => $this->schemaOrg()->getRecordTypes($this->driver)])?>>
   <?php
@@ -72,24 +72,25 @@
     <?php endif; ?>
 
     <?php /** MSU START */ ?>
-    <?php $summaries = $this->driver->getSummary();
+    <?php
+      $summaries = $this->driver->getSummary();
       $summary = [];
-      if (isset($summaries)):
-        for ($i = 0; $i < count($summaries); $i++):
-          if (is_array($summaries[$i])):
+      if (isset($summaries)) {
+        for ($i = 0; $i < count($summaries); $i++) {
+          if (is_array($summaries[$i])) {
             $link = trim($summaries[$i]['link'] ?? '');
             $curSummary = trim($summaries[$i]['note']) . (empty($link) ? '' : ' = ' . $link);
             $this->escapeHtml($curSummary);
             $summary[] = $curSummary;
-          else:
+          } else {
             $this->escapeHtml($summaries[$i]);
             $summary[] = $summaries[$i];
-          endif;
-        endfor;
+          }
+        }
         $summary = implode(' ', $summary);
-      else:
+      } else {
         $summary = false;
-      endif;
+      }
     ?>
     <?php if ($summary): ?>
     <?php /** MSU END */ ?>

@@ -177,6 +177,9 @@ want to match it to followed by a wildcard (`*`). For example: `devel-mytest*`.
 * `HLM_FTP_PASSWORD_FILE`: File path containing the password for `HLM_FTP_USER`
 * `HLM_FTP_USER`: Username for the EBSCO FTP server
 * `GITHUB_USER_TOKEN`: Token used to publish releases to GitHub repository
+* `GOAWAY_JWT_PRIVATE_KEY_SEED`: Seed for captcha challenge verification; this
+  should be set to a unique 64 char hex value, which allows captcha
+  containers to validate challenges across replicas.
 * `MATOMO_SEARCHBACKEND_DIMENSION`: ID for the custom dimension in Matomo to
   track the search backend used for the request
 * `MATOMO_SITE_ID`: Matomo site identifier for the website you want the

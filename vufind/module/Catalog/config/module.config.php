@@ -126,10 +126,24 @@ return [
       'search_results' => [
         'factories' => [
           Catalog\Search\Solr\Results::class => VuFind\Search\Solr\ResultsFactory::class,
+          Catalog\Search\EDS\Results::class => Catalog\Search\EDS\EDSSearchResultsFactory::class,
         ],
         'aliases' => [
           VuFind\Search\Solr\Results::class => Catalog\Search\Solr\Results::class,
           'solr' => Catalog\Search\Solr\Results::class,
+          VuFind\Search\EDS\Results::class => Catalog\Search\EDS\Results::class,
+          'eds' => Catalog\Search\EDS\Results::class,
+        ],
+      ],
+      'db_table' => [
+        'factories' => [
+           Catalog\Db\Table\Session::class => Catalog\Db\Table\GatewayFactory::class,
+           //Catalog\Db\Table\Session::class => VuFind\Db\Table\GatewayFactory::class,
+          //Catalog\Db\Table\Session::class => Catalog\Db\Table\SessionFactory::class,
+        ],
+        'aliases' => [
+          VuFind\Db\Table\Session::class => Catalog\Db\Table\Session::class,
+          'session' => Catalog\Db\Table\Session::class,
         ],
       ],
     ],

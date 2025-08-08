@@ -574,7 +574,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $electronicAccess = null;
             $urlPattern = '/https?:\/\/catalog\.lib\.msu\.edu\/Record\/([.a-zA-Z0-9]+)/i';
             if ($itemId !== null) {
-                $links = $this->getElectronicAccessLinks($itemId);
+                $links = $this->getElectronicAccessLinks($itemId) ?? [];
                 foreach ($links as $link) {
                     if ($link->uri !== null && preg_match($urlPattern, $link->uri, $matches) && count($matches) > 1) {
                         $bibId = $matches[1]; // this gives us the VuFind ID with the prefix it has in the Biblio index
@@ -633,10 +633,14 @@ class Folio extends \VuFind\ILS\Driver\Folio
         try {
             $response = $this->makeRequest(
                 'GET',
-                '/item-storage/items/' . $itemId
+                '/item-storage/items/' . $itemId,
+                allowedFailureCodes: [404]
             );
-            $item = json_decode($response->getBody());
-            return $item->electronicAccess;
+            if ($response && $response->getStatusCode() != 404) {
+                $item = json_decode($response->getBody());
+                return $item->electronicAccess;
+            }
+            return [];
         } catch (ILSException $e) {
             return [];
         }
@@ -1160,7 +1164,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
             throw new ILSException('Error during send operation.');
         }
         $code = $response->getStatusCode();
-        $code = $response->getStatusCode();
         $endTime = microtime(true);
         $responseTime = $endTime - $startTime;
         $this->debug(
@@ -1380,6 +1383,59 @@ class Folio extends \VuFind\ILS\Driver\Folio
             'valid' => null === $allowed || !empty($allowed),
             'status' => 'request_place_text',
         ];
+    }
+
+    /**
+     * Get request groups
+     * MSUL - customized to check if results come back before assuming.
+     * This is a good candidate for a PR, but we couldn't find a specific
+     * scenario/user that would trigger this.
+     *
+     * @param int   $bibId       BIB ID
+     * @param array $patron      Patron information returned by the patronLogin
+     * method.
+     * @param array $holdDetails Optional array, only passed in when getting a list
+     * in the context of placing a hold; contains most of the same values passed to
+     * placeHold, minus the patron data. May be used to limit the request group
+     * options or may be ignored.
+     *
+     * @return array  False if request groups not in use or an array of
+     * associative arrays with id and name keys
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
+    public function getRequestGroups(
+        $bibId = null,
+        $patron = null,
+        $holdDetails = null
+    ) {
+        // circulation-storage.request-preferences.collection.get
+        $response = $this->makeRequest(
+            'GET',
+            '/request-preference-storage/request-preference?query=userId==' . $patron['id']
+        );
+        // MSU Start -- Add null checks for $requestPreferences
+        $requestPreferencesResponse = json_decode($response->getBody());
+        $requestPreferences = $requestPreferencesResponse->requestPreferences[0] ?? null;
+        $allowHoldShelf = $requestPreferences?->holdShelf ?? null;
+        $allowDelivery = ($requestPreferences?->delivery ?? null) && ($this->config['Holds']['allowDelivery'] ?? true);
+        // MSU End
+        $locationsLabels = $this->config['Holds']['locationsLabelByRequestGroup'] ?? [];
+        if ($allowHoldShelf && $allowDelivery) {
+            return [
+                [
+                    'id' => 'Hold Shelf',
+                    'name' => 'fulfillment_method_hold_shelf',
+                    'locationsLabel' => $locationsLabels['Hold Shelf'] ?? null,
+                ],
+                [
+                    'id' => 'Delivery',
+                    'name' => 'fulfillment_method_delivery',
+                    'locationsLabel' => $locationsLabels['Delivery'] ?? null,
+                ],
+            ];
+        }
+        return false;
     }
 
     /**

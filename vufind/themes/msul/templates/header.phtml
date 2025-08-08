@@ -134,7 +134,7 @@
     <div class="nav searchbox hidden-print" role="search">
       <?php $this->slot('search-home-hero')->start() /** MSU */ ?>
       <?=$this->layout()->searchbox ?>
-      <?=$this->inlineScript(\Laminas\View\Helper\HeadScript::SCRIPT, '$("#searchForm_lookfor").focus();', 'SET'); /** MSU */ ?>
+      <?=$this->assetManager()->outputInlineScriptString('$("#searchForm_lookfor").focus();'); /** MSU */ ?>
       <?=$this->slot('search-home-hero')->end() /** MSU */ ?>
     </div>
   </div>

@@ -1,0 +1,270 @@
+networks:
+  # Networks will get included from snippets
+
+challenges:
+  # Challenges will get included from snippets
+
+  # Overriding proof-of-work to lower difficulty
+  js-pow-sha256:
+    runtime: js
+    parameters:
+      path: "js-pow-sha256"
+      js-loader: load.mjs
+      wasm-runtime: runtime.wasm
+      wasm-runtime-settings:
+        difficulty: 16
+      verify-probability: 0.02
+
+conditions:
+  # Conditions will get replaced on rules AST when found as ($condition-name)
+  # Conditions will get included from snippets
+
+  is-static-asset:
+    - 'path == "/apple-touch-icon.png"'
+    - 'path == "/apple-touch-icon-precomposed.png"'
+    - 'path.matches("^/themes/")'
+    - 'path.matches("^/Cover/Show")'
+    - 'path.matches("\\.(manifest|ttf|woff|woff2|jpg|jpeg|gif|png|webp|avif|svg|mp4|webm|css|js|mjs|wasm)$")'
+
+  is-api-path:
+    - 'path.matches("^/api/")'
+    - 'path.matches("^/AJAX/")'
+    - 'path.matches("^/OAI/")'
+
+  is-lightbox-path:
+    - 'path.matches("^/MyResearch/UserLogin")'
+    - 'path.matches("^/Feedback/Home")'
+    - 'path.matches("^/Help/Home")'
+    - 'path.matches("^/Cart")'
+    - 'path.matches("/Holdings$")'
+    - 'path.matches("/TOC$")'
+    - 'path.matches("/Description$")'
+    - 'path.matches("/Similar$")'
+    - 'path.matches("/Details$")'
+    - 'path.matches("/Save$")'
+    - 'path.matches("/GetThis$")'
+    - 'path.matches("/FacetList$")'
+    - 'path.matches("/Permalink$")'
+    - 'path.matches("/Cite$")'
+    - 'path.matches("/SMS$")'
+    - 'path.matches("/Email$")'
+
+  is-tool-ua:
+    - 'userAgent.startsWith("python-requests/")'
+    - 'userAgent.startsWith("Python-urllib/")'
+    - 'userAgent.startsWith("python-httpx/")'
+    - 'userAgent.contains("aoihttp/")'
+    - 'userAgent.startsWith("http.rb/")'
+    - 'userAgent.startsWith("curl/")'
+    - 'userAgent.startsWith("Wget/")'
+    - 'userAgent.startsWith("libcurl/")'
+    - 'userAgent.startsWith("okhttp/")'
+    - 'userAgent.startsWith("Java/")'
+    - 'userAgent.startsWith("Apache-HttpClient//")'
+    - 'userAgent.startsWith("Go-http-client/")'
+    - 'userAgent.startsWith("node-fetch/")'
+    - 'userAgent.startsWith("Guzzle")'
+
+  is-allowed-agent:
+    - 'userAgent.contains("Silktide")'
+
+  is-suspicious-crawler:
+    - 'userAgent.contains("Presto/") || userAgent.contains("Trident/")'
+    # Old IE browsers
+    - 'userAgent.matches("MSIE ([2-9]|10|11)\\.")'
+    # Old Linux browsers
+    - 'userAgent.matches("Linux i[63]86") || userAgent.matches("FreeBSD i[63]86")'
+    # Old Windows browsers
+    - 'userAgent.matches("Windows (3|95|98|CE)") || userAgent.matches("Windows NT [1-5]\\.")'
+    # Old mobile browsers
+    - 'userAgent.matches("Android [1-5]\\.") || userAgent.matches("(iPad|iPhone) OS [1-9]_")'
+    # Old generic browsers
+    - 'userAgent.startsWith("Opera/")'
+    - 'userAgent.matches("^Mozilla/[1-4]")'
+    # No user agent set
+    - 'userAgent == ""'
+    # Detected sus agents
+    - 'userAgent.matches("Firefox/[0-9]{1,2}\\.")'
+    - 'userAgent.matches("Firefox/1[0-1][0-9]\\.")'
+    - 'userAgent.matches("Opera/[0-9]\\.")'
+    - 'userAgent.matches("iPhone OS [0-9]_")'
+    - 'userAgent.matches("Gecko/1[0-9][0-9][0-9]-")'
+    - 'userAgent.matches("Gecko/20[4-9][0-9]-")'
+    - 'userAgent.matches("Gecko/2[1-9][0-9][0-9]-")'
+    - 'userAgent.matches("Gecko/[03-9][0-9][0-9][0-9]-")'
+    - 'userAgent.matches("MSIE [0-9]\\.")'
+    - 'userAgent.matches("Windows 9[5-8x]")'
+    - 'userAgent.matches("Chrome/[0-9]{1,2}\\.")'
+    - 'userAgent.matches("Chrome/11[0-9]\\.")'
+    - 'userAgent.matches("Chrome/12[0-4]\\.")'
+    - 'userAgent.matches("Android [1-6]\\.")'
+    - 'userAgent.matches("Version/[0-9]\\.[0-9](\\.[0-9])? Safari")'
+    - 'userAgent.matches("FxiOS/[0-9]{1,2}\\.")'
+    - 'userAgent.matches("CriOS/[0-9]{1,2}\\.")'
+    - 'userAgent.matches("PPC Mac OS X")'
+    - 'userAgent.matches("Windows NT [0-9]\\.[0-9]")'
+    - 'userAgent.matches("Trident [0-9]\\.[0-9]")'
+
+# Rules are checked sequentially in order, from top to bottom.
+# If a pass action is met, no further rule are checked.
+rules:
+  - name: allow-private-networks
+    conditions:
+      - '($is-network-localhost)'
+      - '($is-network-private)'
+    action: pass
+
+  - name: allow-known-ip-ranges
+    conditions:
+      - '($is-network-academic)'
+      - '($is-network-isp)'
+      - '($is-network-gov)'
+    action: pass
+
+  - name: known-bad-ranges
+    conditions:
+      - '($is-network-malicious)'
+    action: proxy
+    settings:
+      proxy-backend: "badbots"
+
+  - name: undesired-crawlers
+    conditions:
+      - '($is-headless-chromium)'
+      - 'userAgent.startsWith("Lightpanda/")'
+      - 'userAgent.startsWith("masscan/")'
+      # Typo'd opera botnet
+      - 'userAgent.matches("^Opera/[0-9.]+\\.\\(")'
+      # AI bullshit stuff, they do not respect robots.txt even while they read it
+      # TikTok Bytedance AI training
+      - 'userAgent.contains("Bytedance") || userAgent.contains("Bytespider") || userAgent.contains("TikTokSpider")'
+      # Meta AI training; The Meta-ExternalAgent crawler crawls the web for use cases such as training AI models or improving products by indexing content directly.
+      - 'userAgent.contains("meta-externalagent/") || userAgent.contains("meta-externalfetcher/") || userAgent.contains("FacebookBot")'
+      # Anthropic AI training and usage
+      - 'userAgent.contains("ClaudeBot") || userAgent.contains("Claude-User")|| userAgent.contains("Claude-SearchBot")'
+      # Common Crawl AI crawlers
+      - 'userAgent.contains("CCBot")'
+      # ChatGPT AI crawlers https://platform.openai.com/docs/bots
+      - 'userAgent.contains("GPTBot") || userAgent.contains("OAI-SearchBot") || userAgent.contains("ChatGPT-User")'
+      # Other AI crawlers
+      - 'userAgent.contains("Amazonbot") || userAgent.contains("Google-Extended") || userAgent.contains("PanguBot") || userAgent.contains("AI2Bot") || userAgent.contains("Diffbot") || userAgent.contains("cohere-training-data-crawler") || userAgent.contains("Applebot-Extended")'
+      # SEO / Ads and marketing
+      - 'userAgent.contains("BLEXBot")'
+      # Previously detected badly behaved bots; (?i) = case insensitive match
+      - 'userAgent.matches("(?i)(AcademicBotRTU|GoogleOther|FriendlyCrawler|SemrushBot|Diffbot|HawaiiBot|DataForSeoBot)")'
+    action: proxy
+    settings:
+      proxy-backend: "badbots"
+
+  - name: allow-well-known-resources
+    conditions:
+      - '($is-well-known-asset)'
+    action: pass
+
+  - name: allow-static-resources
+    conditions:
+      - '($is-static-asset)'
+    action: pass
+
+  - name: desired-crawlers
+    conditions:
+      - *is-bot-googlebot
+      - *is-bot-bingbot
+      - *is-bot-duckduckbot
+      - *is-bot-kagibot
+      - *is-bot-qwantbot
+      - *is-bot-yandexbot
+    action: pass
+
+  - name: allow-allowed-agents
+    conditions:
+      - '($is-allowed-agent)'
+    action: pass
+
+  - name: allow-api-calls
+    conditions:
+      - '($is-api-path)'
+      - '($is-lightbox-path)'
+    action: pass
+
+  - name: suspicious-crawlers
+    action: check
+    settings:
+      challenges: [js-pow-sha256]
+    conditions:
+      - '($is-suspicious-crawler)'
+
+  - name: suspicious-fetchers
+    action: check
+    settings:
+      challenges: [js-refresh]
+    conditions:
+      - 'userAgent.contains("facebookexternalhit/") || userAgent.contains("facebookcatalog/")'
+
+  # Allow PUT/DELETE/PATCH/POST requests in general
+  - name: non-get-request
+    action: pass
+    conditions:
+      - '!(method == "HEAD" || method == "GET")'
+
+  - name: plaintext-browser
+    conditions:
+      - 'userAgent.startsWith("Lynx/")'
+      - 'userAgent.startsWith("Links ")'
+    action: none
+    children:
+      - name: 0
+        action: check
+        settings:
+          challenges: [cookie]
+      - name: 1
+        action: challenge
+        settings:
+          challenges: [meta-refresh]
+
+  # rules for tools like python requests or PHP Guzzle
+  - name: standard-tools
+    conditions:
+      - '($is-tool-ua)'
+    action: none
+    children:
+      - name: 0
+        action: check
+        settings:
+          challenges: [cookie]
+      - name: 1
+        action: challenge
+        settings:
+          challenges: [header-refresh]
+
+  # final check applies to ALL requests still not yet PASSed
+  - name: standard-browser
+    #action: challenge
+    #settings:
+    #  challenges: [preload-link, meta-refresh, resource-load, js-refresh]
+    #conditions:
+    #  - '($is-generic-browser)'
+    action: none
+    children:
+      - name: 0
+        action: check
+        settings:
+          challenges: [js-refresh]
+      - name: 1
+        action: check
+        settings:
+          challenges: [cookie]
+      - name: 2
+        action: check
+        settings:
+          challenges: [preload-link, resource-load]
+      - name: 3
+        action: check
+        settings:
+          challenges: [meta-refresh]
+      - name: 4
+        action: check
+        settings:
+          challenges: [header-refresh]
+
+# If end of rules is reached, default is PASS
