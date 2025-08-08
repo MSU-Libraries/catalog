@@ -636,12 +636,11 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 '/item-storage/items/' . $itemId,
                 allowedFailureCodes: [404]
             );
-            if ($response) {
+            if ($response && $response->getStatusCode() != 404) {
                 $item = json_decode($response->getBody());
-                return $item?->electronicAccess ?? [];
-            } else {
-                return [];
+                return $item->electronicAccess;
             }
+            return [];
         } catch (ILSException $e) {
             return [];
         }
