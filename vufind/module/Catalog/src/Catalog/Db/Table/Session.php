@@ -96,7 +96,7 @@ class Session extends \VuFind\Db\Table\Session implements \Laminas\Log\LoggerAwa
             throw new SessionExpiredException('Session expired!');
         }
 
-        $url_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $url_path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
         $skip_paths = $this->getSkipPaths();
 
         // Skip updating the last_used if the request is from one of these urls
