@@ -375,7 +375,7 @@ class GetThisLoader
 
         // If there is linked data in the description, it will need to
         // be parsed out with an '=' separating it
-        if (isset($data) && is_array($data[0])) {
+        if (isset($data) &&isset($data[0]) && is_array($data[0])) {
             foreach ($data as $item) {
                 if ($item['link']) {
                     $results[] = ($item['note'] ?? '') . ' = ' . ($item['link'] ?? '');

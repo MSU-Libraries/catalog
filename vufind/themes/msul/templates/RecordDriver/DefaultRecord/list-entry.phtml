@@ -178,9 +178,9 @@
             <?php $urls = is_array($urls) ? $urls : []; ?>
             <?php if (!$this->driver->isCollection()): ?>
               <?php foreach ($urls as $current): ?>
-                <a href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url']))?>" class="fulltext icon-link" target="new">
+                <a href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url'] ?? ''))?>" class="fulltext icon-link" target="new">
                   <?=$this->icon('external-link', 'icon-link__icon') ?>
-                  <span class="icon-link__label"><?=($current['url'] == $current['desc']) ? $this->transEsc('Get full text') : $this->escapeHtml($current['desc'])?></span>
+                  <span class="icon-link__label"><?=(($current['url'] ?? '') == ($current['desc'] ?? '') ? $this->transEsc('Get full text') : $this->escapeHtml($current['desc'] ?? '')?></span>
                 </a>
               <?php endforeach; ?>
             <?php endif; ?>
