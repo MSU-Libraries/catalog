@@ -90,6 +90,8 @@ page matches what is in the "Get This" button status.
 
 * Check the login
 
+* Check the feedback form submits (you can check result at /mail/ on devel instances)
+
 * Check holdings status (Available, Checked out, ...)
 
 * Check import scripts
