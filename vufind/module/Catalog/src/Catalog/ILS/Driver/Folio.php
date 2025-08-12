@@ -129,10 +129,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
      * @param string   $querySuffix optional string to append to the queries
      *
      * @return \Generator<object>
-     * @throws ILSException
+     * @throws ILSException if there is an issue with the FOLIO response
      */
     protected function getByBatch($ids, $idField, $responseKey, $endpoint, $querySuffix = '')
     {
+        if (count($ids) == 0) {
+            return;
+        }
         foreach (array_chunk($ids, self::QUERY_BY_IDS_BATCH_SIZE) as $idsInBatch) {
             $itemQueries = array_map(fn ($id) => $idField . '=="' . $this->escapeCql($id) . '"', $idsInBatch);
             $query = [
@@ -156,10 +159,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
      * @param string[] $instanceIds the FOLIO instance ids
      *
      * @return object[]
-     * @throws ILSException
+     * @throws ILSException if there is an issue with the FOLIO response
      */
     protected function getHoldingsByInstanceIds(array $instanceIds)
     {
+        if (count($instanceIds) == 0) {
+            return [];
+        }
         $holdings = [];
         $querySuffix = ' NOT discoverySuppress==true';
         foreach (
@@ -182,10 +188,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
      * @param string[] $holdingIds the FOLIO holdings ids
      *
      * @return object[]
-     * @throws ILSException
+     * @throws ILSException if there is an issue with the FOLIO response
      */
     protected function getItemsByHoldingIds(array $holdingIds)
     {
+        if (count($holdingIds) == 0) {
+            return [];
+        }
         $items = [];
         $folioItemSort = $this->config['Holdings']['folio_sort'] ?? '';
         if (!empty($folioItemSort)) {
@@ -206,6 +215,71 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $items[] = $item;
         }
         return $items;
+    }
+
+    /**
+     * Retrieve FOLIO instances using VuFind's chosen bibliographic identifiers.
+     *
+     * @param string[] $bibIds Bib-level ids
+     *
+     * @return object[]
+     * @throws ILSException if there is an issue with the FOLIO response or an instance is not found
+     */
+    protected function getInstancesByBibIds($bibIds)
+    {
+        // Figure out which ID type to use in the CQL query; if the user configured
+        // instance IDs, use the 'id' field, otherwise pass the setting through
+        // directly:
+        $idType = $this->getBibIdType();
+        $idField = $idType === 'instance' ? 'id' : $idType;
+        $instances = [];
+        foreach (
+            $this->getByBatch(
+                $bibIds,
+                $idField,
+                'instances',
+                '/instance-storage/instances'
+            ) as $instance
+        ) {
+            $instances[] = $instance;
+        }
+        if (count($instances) != count($bibIds)) {
+            throw new ILSException('An instance was not found, bibIds=' . implode(',', $bibIds));
+        }
+        return $instances;
+    }
+
+    /**
+     * Get the instance record by the Sierra bib number
+     *
+     * @param string $bibId Bib number
+     *
+     * @return object
+     * @throws ILSException if there is an issue with the FOLIO response or the instance is not found
+     */
+    public function getInstanceByBibId($bibId)
+    {
+        // MSUL override to make publicly available to reserve index command
+        // NOTE: getInstancesByBibIds() throws an exception if there is no instance matching bibId
+        return $this->getInstancesByBibIds([$bibId])[0];
+    }
+
+    /**
+     * Return statuses for an array of bibIds, optimizing retrieval with bulk calls
+     *
+     * @param string[] $idList array of bibIds
+     *
+     * @return array[] the items for each bibId (in the given order)
+     * @throws ILSException
+     */
+    public function getStatuses($idList)
+    {
+        $statuses = [];
+        $holdings = $this->getHoldings($idList);
+        foreach ($holdings as $holding) {
+            $statuses[] = $holding['holdings'] ?? [];
+        }
+        return $statuses;
     }
 
     /**
@@ -520,12 +594,15 @@ class Folio extends \VuFind\ILS\Driver\Folio
      * @param array  $patron  Patron login information from $this->patronLogin
      * @param array  $options Extra options (not currently used)
      *
-     * @return array An array of associative holding arrays
+     * @return array An associative array with the keys: total, holdings, electronic_holdings
+     * @throws ILSException if there is an issue with a FOLIO response or the instance is not found
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function getHolding($bibId, array $patron = null, array $options = [])
     {
+        // NOTE: getHoldings() always returns something for a bibId, unless the instance is not found.
+        // If the instance is not found, an ILSException is thrown.
         return $this->getHoldings([$bibId])[0];
     }
 
@@ -535,6 +612,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
      * @param string[] $bibIds Bib-level ids
      *
      * @return array[] An array of associative arrays, one for each bibId
+     * @throws ILSException if there is an issue with a FOLIO response or an instance is not found
      */
     public function getHoldings($bibIds)
     {
@@ -556,12 +634,16 @@ class Folio extends \VuFind\ILS\Driver\Folio
         }
         $holdings = $this->getHoldingsByInstanceIds($instanceIds);
         $holdingIds = array_map(fn ($holding) => $holding->id, $holdings);
-        $rawItems = $this->getItemsByHoldingIds($holdingIds);
+        if (count($holdings) == 0) {
+            $folioItems = [];
+        } else {
+            $folioItems = $this->getItemsByHoldingIds($holdingIds);
+        }
         $results = [];
         foreach ($bibIds as $bibId) {
             $instanceId = $bibIdToInstanceId[$bibId];
             $holdingsForInstance = array_filter($holdings, fn ($holding) => $holding->instanceId == $instanceId);
-            $results[] = $this->processInstanceHoldings($bibId, $holdingsForInstance, $rawItems);
+            $results[] = $this->processInstanceHoldings($bibId, $holdingsForInstance, $folioItems);
         }
         return $results;
     }
@@ -1106,68 +1188,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
             ];
         }
         return $locations;
-    }
-
-    /**
-     * Retrieve FOLIO instances using VuFind's chosen bibliographic identifiers.
-     *
-     * @param string[] $bibIds Bib-level ids
-     *
-     * @return object[]
-     */
-    protected function getInstancesByBibIds($bibIds)
-    {
-        // Figure out which ID type to use in the CQL query; if the user configured
-        // instance IDs, use the 'id' field, otherwise pass the setting through
-        // directly:
-        $idType = $this->getBibIdType();
-        $idField = $idType === 'instance' ? 'id' : $idType;
-        $instances = [];
-        foreach (
-            $this->getByBatch(
-                $bibIds,
-                $idField,
-                'instances',
-                '/instance-storage/instances'
-            ) as $instance
-        ) {
-            $instances[] = $instance;
-        }
-        if (count($instances ?? []) == 0) {
-            throw new ILSException('None of the instances was found');
-        }
-        return $instances;
-    }
-
-    /**
-     * Get the instance record by the Sierra bib number
-     *
-     * @param string $bibId Bib number
-     *
-     * @return object
-     */
-    public function getInstanceByBibId($bibId)
-    {
-        // MSUL override to make publicly available to reserve index command
-
-        return $this->getInstancesByBibIds([$bibId])[0];
-    }
-
-    /**
-     * Return statuses for an array of bibIds, optimizing retrieval with bulk calls
-     *
-     * @param string[] $idList array of bibIds
-     *
-     * @return array[] the items for each bibId (in the given order)
-     */
-    public function getStatuses($idList)
-    {
-        $statuses = [];
-        $holdings = $this->getHoldings($idList);
-        foreach ($holdings as $holding) {
-            $statuses[] = $holding['holdings'] ?? [];
-        }
-        return $statuses;
     }
 
     /**
