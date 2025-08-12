@@ -22,7 +22,7 @@
  *
  * @category VuFind
  * @package  ILS_Drivers
- * @author   Damien Guillaume <damieng@msu.edu>
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:ils_drivers Wiki
  */
@@ -47,7 +47,7 @@ use function is_string;
  *
  * @category VuFind
  * @package  ILS_Drivers
- * @author   Damien Guillaume <damieng@msu.edu>
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:ils_drivers Wiki
  */
@@ -250,9 +250,9 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
-     * Get the instance record by the Sierra bib number
+     * Retrieve FOLIO instance using VuFind's chosen bibliographic identifier.
      *
-     * @param string $bibId Bib number
+     * @param string $bibId Bib-level id
      *
      * @return object
      * @throws ILSException if there is an issue with the FOLIO response or the instance is not found
@@ -270,16 +270,12 @@ class Folio extends \VuFind\ILS\Driver\Folio
      * @param string[] $idList array of bibIds
      *
      * @return array[] the items for each bibId (in the given order)
-     * @throws ILSException
+     * @throws ILSException if there is an issue with a FOLIO response or an instance is not found
      */
     public function getStatuses($idList)
     {
-        $statuses = [];
         $holdings = $this->getHoldings($idList);
-        foreach ($holdings as $holding) {
-            $statuses[] = $holding['holdings'] ?? [];
-        }
-        return $statuses;
+        return array_map(fn ($holding) => $holding['holdings'], $holdings);
     }
 
     /**
@@ -1073,6 +1069,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             . 'sortBy requestDate/sort.ascending title/sort.ascending',
         ];
         $holds = [];
+        // MSU customization: allowCancelingAvailableRequests
         $allowCancelingAvailableRequests
             = $this->config['Holds']['allowCancelingAvailableRequests'] ?? true;
         foreach (
