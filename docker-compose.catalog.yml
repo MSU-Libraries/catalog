@@ -1,7 +1,6 @@
 ---
+# The below comment is matched in cicd/deploy-compose-files to insert envs
 #include vufind-envs
-
-version: "3.8"
 
 services:
   catalog:
@@ -203,6 +202,7 @@ services:
     ]
     networks:
       - public
+      - internal
     logging:
       driver: "json-file"
       options:
