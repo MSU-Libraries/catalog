@@ -860,7 +860,7 @@ class GetThisLoader
             $this->isMakerspace($item_id)
             || Regex::VINCENT_VOICE($loc)
             || $this->isEquipment($item_id)
-            || (Regex::MUSIC($loc) && Regex::REFERENCE($loc) && !$this->isUnavailable($item_id))
+            || (Regex::MUSIC($loc) && Regex::MUSIC_EXCLUDE_ILL($loc) && !$this->isUnavailable($item_id))
         ) {
             return false;
         }
