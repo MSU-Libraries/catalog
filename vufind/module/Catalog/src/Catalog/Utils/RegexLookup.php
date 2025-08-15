@@ -33,6 +33,7 @@ use function count;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/vufind/ Main page
  */
+
 class RegexLookup
 {
     /**
@@ -106,7 +107,8 @@ class RegexLookup
     public const MSU_SCAN_EXCLUDE_LOCATION      = ['/MUSIC CASSETTE/i', '#DVD/VIDEO#i'];
     public const MSU_ILL_EXCLUDE       = ['/REFERENCE/i'];
     public const MUSIC                 = ['/^MSU MUSIC LIBRARY/i'];
-    public const MUSIC_EXCLUDE_REQUEST = ['/JOURNAL ROOM/i', '/MUSIC.*MUSIC/i'];
+    public const MUSIC_EXCLUDE_ILL     = ['/RESERVE$/i'];
+    public const MUSIC_EXCLUDE_REQUEST = ['/CURRENT JOURNALS/i', '/-\s+MUSIC$/i'];
     public const MUSIC_ROVI_VINYL      = ['/ROVI\s+VINYL/i'];
     public const MUSIC_SERVICE_DESK    = ['/CD COLLECTION/i', '#DVD/VIDEO#i', '/OVERSIZE CD/i', '/RESERVE/i', '/ROVI MUSIC/i', '/ROVI\s+VINYL/i'];
     public const ONLINE                = ['/ONLINE RESOURCE/i', '/ELECTRONIC RESOURCES/i', '/INTERNET/i'];
