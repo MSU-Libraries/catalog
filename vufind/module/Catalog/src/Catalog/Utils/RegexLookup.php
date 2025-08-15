@@ -15,6 +15,8 @@
 
 namespace Catalog\Utils;
 
+use ArgumentCountError;
+
 use function constant;
 use function count;
 
@@ -101,7 +103,12 @@ class RegexLookup
     public const MAKERSPACE            = ['/MAKERSPACE/i'];
     public const MAP                   = ['/^MSU MAP/i'];
     public const MICROFORMS            = ['/^MSU MICROFORMS/i'];
+    public const MSU_SCAN_EXCLUDE_LOCATION      = ['/MUSIC CASSETTE/i', '#DVD/VIDEO#i'];
+    public const MSU_ILL_EXCLUDE       = ['/REFERENCE/i'];
     public const MUSIC                 = ['/^MSU MUSIC LIBRARY/i'];
+    public const MUSIC_EXCLUDE_REQUEST = ['/JOURNAL ROOM/i', '/MUSIC.*MUSIC/i'];
+    public const MUSIC_ROVI_VINYL      = ['/ROVI\s+VINYL/i'];
+    public const MUSIC_SERVICE_DESK    = ['/CD COLLECTION/i', '#DVD/VIDEO#i', '/OVERSIZE CD/i', '/RESERVE/i', '/ROVI MUSIC/i', '/ROVI\s+VINYL/i'];
     public const ONLINE                = ['/ONLINE RESOURCE/i', '/ELECTRONIC RESOURCES/i', '/INTERNET/i'];
     public const PERM                  = ['/PERM/i'];        // Legacy note: used for Art Reserves
     public const READING_ROOM          = ['/READING ROOM/i'];

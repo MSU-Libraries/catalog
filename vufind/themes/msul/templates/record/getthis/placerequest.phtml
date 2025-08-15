@@ -11,7 +11,8 @@ $notices = $this->Notices('RequestNotices.yaml');
     !$this->getthis->isOnlineResource() &&
     !$this->getthis->isMakerspace() &&
     $item['is_holdable'] &&
-    ($link ?? false)
+    ($link ?? false) &&
+    !$this->getthis->isROVIVinyl()
   ) { ?>
   <div>
     <p><b><a href='https://lib.msu.edu/circ/borrowing-at-msu' target='_blank'>On-Campus Pickup:</a></b>
