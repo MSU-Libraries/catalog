@@ -33,6 +33,16 @@ use function count;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/vufind/ Main page
  */
+//https://catalog-beta.lib.msu.edu/Record/folio.in00003496835
+//https://catalog-beta.lib.msu.edu/Record/folio.in00000530017
+//https://catalog-beta.lib.msu.edu/Record/folio.in00005990997
+//https://catalog-beta.lib.msu.edu/Record/folio.in00005274694
+//https://catalog-beta.lib.msu.edu/Record/folio.in00001748388
+//https://catalog-beta.lib.msu.edu/Record/folio.in00001220942
+//https://catalog-beta.lib.msu.edu/Record/folio.in00005833450
+//https://catalog-beta.lib.msu.edu/Record/folio.in00003273806
+//https://catalog-beta.lib.msu.edu/Record/folio.in00006760317
+//https://catalog-beta.lib.msu.edu/Record/folio.in00004621959
 class RegexLookup
 {
     /**
@@ -106,7 +116,8 @@ class RegexLookup
     public const MSU_SCAN_EXCLUDE_LOCATION      = ['/MUSIC CASSETTE/i', '#DVD/VIDEO#i'];
     public const MSU_ILL_EXCLUDE       = ['/REFERENCE/i'];
     public const MUSIC                 = ['/^MSU MUSIC LIBRARY/i'];
-    public const MUSIC_EXCLUDE_REQUEST = ['/JOURNAL ROOM/i', '/MUSIC.*MUSIC/i'];
+    public const MUSIC_EXCLUDE_ILL     = ['/RESERVE$/i'];
+    public const MUSIC_EXCLUDE_REQUEST = ['/CURRENT JOURNALS/i', '/-\s+MUSIC$/i'];
     public const MUSIC_ROVI_VINYL      = ['/ROVI\s+VINYL/i'];
     public const MUSIC_SERVICE_DESK    = ['/CD COLLECTION/i', '#DVD/VIDEO#i', '/OVERSIZE CD/i', '/RESERVE/i', '/ROVI MUSIC/i', '/ROVI\s+VINYL/i'];
     public const ONLINE                = ['/ONLINE RESOURCE/i', '/ELECTRONIC RESOURCES/i', '/INTERNET/i'];
