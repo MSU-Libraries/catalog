@@ -551,6 +551,8 @@ class GetThisLoader
                 $this->msgTemplate = 'turfgrass.phtml';
             } elseif (Regex::VINCENT_VOICE($loc)) {
                 $this->msgTemplate = 'vvlaccess.phtml';
+            } elseif (Regex::MUSIC($loc) && Regex::MUSIC_SERVICE_DESK($loc)) {
+                $this->msgTemplate = 'ask.phtml';
             }
         }
         return $this->msgTemplate !== null;
@@ -600,6 +602,7 @@ class GetThisLoader
             && !$this->isEquipment($item_id)
             && !$this->isAudioVideoMedia($item_id)
             && !Regex::VINCENT_VOICE($loc)
+            && !Regex::MSU_SCAN_EXCLUDE_LOCATION($loc)
         ) {
             return true;
         }
@@ -738,7 +741,8 @@ class GetThisLoader
             Regex::MICROFORMS($loc) ||
             Regex::MICROPRINT($callNum) ||
             $this->isMakerspace($item_id) ||
-            $this->isEquipment($item_id)
+            $this->isEquipment($item_id) ||
+            (Regex::MUSIC($loc) && Regex::MUSIC_EXCLUDE_REQUEST($loc))
         ) {
             return false;
         }
@@ -788,7 +792,8 @@ class GetThisLoader
             Regex::MICROFORMS($loc) ||
             Regex::MICROPRINT($callNum) ||
             $this->isMakerspace($item_id) ||
-            $this->isEquipment($item_id)
+            $this->isEquipment($item_id) ||
+            (Regex::MUSIC($loc) && Regex::MUSIC_EXCLUDE_REQUEST($loc))
         ) {
             return false;
         }
@@ -851,7 +856,12 @@ class GetThisLoader
         $item_id = $this->getItemId($item_id);
         $loc = $this->getLocation($item_id);
 
-        if ($this->isMakerspace($item_id) || Regex::VINCENT_VOICE($loc) || $this->isEquipment($item_id)) {
+        if (
+            $this->isMakerspace($item_id)
+            || Regex::VINCENT_VOICE($loc)
+            || $this->isEquipment($item_id)
+            || (Regex::MUSIC($loc) && Regex::REFERENCE($loc) && !$this->isUnavailable($item_id))
+        ) {
             return false;
         }
 
@@ -911,5 +921,17 @@ class GetThisLoader
             }
         }
         return false;
+    }
+
+    /**
+     * Determine if the item is part of the music ROVI Vinyl collection
+     *
+     * @param string $item_id Item ID to filter for
+     *
+     * @return bool  If the template should display
+     */
+    public function isROVIVinyl($item_id = null)
+    {
+        return Regex::MUSIC_ROVI_VINYL($this->getLocation($item_id));
     }
 }
