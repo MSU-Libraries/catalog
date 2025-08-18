@@ -23,7 +23,7 @@ RUN \
         # when we remove the patches for marc4j & solrmarc
         mysql-client openjdk-17-jre-headless apache2 libapache2-mod-php php-pear php \
         php-curl php-gd php-intl php-json php-ldap php-mbstring php-mysql php-soap php-xml \
-        libapache2-mod-security2 modsecurity-crs uuid-runtime && \
+        libapache2-mod-security2 modsecurity-crs uuid-runtime libsaxonhe-java && \
     # We can remove the following line when switching back to default-jre-headless
     cd /usr/lib/jvm && ln -s java-17-openjdk-amd64 default-java && \
     # TEMP(PART2):

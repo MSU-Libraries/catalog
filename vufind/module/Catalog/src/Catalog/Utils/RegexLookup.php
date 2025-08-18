@@ -15,6 +15,8 @@
 
 namespace Catalog\Utils;
 
+use ArgumentCountError;
+
 use function constant;
 use function count;
 
@@ -31,6 +33,7 @@ use function count;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/vufind/ Main page
  */
+
 class RegexLookup
 {
     /**
@@ -101,7 +104,13 @@ class RegexLookup
     public const MAKERSPACE            = ['/MAKERSPACE/i'];
     public const MAP                   = ['/^MSU MAP/i'];
     public const MICROFORMS            = ['/^MSU MICROFORMS/i'];
+    public const MSU_SCAN_EXCLUDE_LOCATION      = ['/MUSIC CASSETTE/i', '#DVD/VIDEO#i'];
+    public const MSU_ILL_EXCLUDE       = ['/REFERENCE/i'];
     public const MUSIC                 = ['/^MSU MUSIC LIBRARY/i'];
+    public const MUSIC_EXCLUDE_ILL     = ['/RESERVE$/i'];
+    public const MUSIC_EXCLUDE_REQUEST = ['/CURRENT JOURNALS/i', '/-\s+MUSIC$/i'];
+    public const MUSIC_ROVI_VINYL      = ['/ROVI\s+VINYL/i'];
+    public const MUSIC_SERVICE_DESK    = ['/CD COLLECTION/i', '#DVD/VIDEO#i', '/OVERSIZE CD/i', '/RESERVE/i', '/ROVI MUSIC/i', '/ROVI\s+VINYL/i'];
     public const ONLINE                = ['/ONLINE RESOURCE/i', '/ELECTRONIC RESOURCES/i', '/INTERNET/i'];
     public const PERM                  = ['/PERM/i'];        // Legacy note: used for Art Reserves
     public const READING_ROOM          = ['/READING ROOM/i'];

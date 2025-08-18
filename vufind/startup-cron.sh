@@ -12,8 +12,10 @@ mv /usr/local/vufind/local/harvest/hlm/ /tmp/
 ln -s "/mnt/shared/hlm/${STACK_NAME}/harvest_hlm/" /usr/local/vufind/local/harvest/hlm
 ln -s "/mnt/shared/hlm/${STACK_NAME}"/ /mnt/hlm
 # AUTHORITY
-mkdir -p "/mnt/shared/authority/${STACK_NAME}/current/" "/mnt/shared/authority/${STACK_NAME}/archives/"
-ln -s "/mnt/shared/authority/${STACK_NAME}/" /mnt/authority
+mkdir -p "/mnt/shared/authority/${STACK_NAME}/harvest_authority/" "/mnt/shared/authority/${STACK_NAME}/archives/"
+mv /usr/local/vufind/local/harvest/authority/ /tmp/
+ln -s "/mnt/shared/authority/${STACK_NAME}/harvest_authority/" /usr/local/vufind/local/harvest/authority
+ln -s "/mnt/shared/authority/${STACK_NAME}"/ /mnt/authority
 
 # Save the logs in the logs docker volume
 mkdir -p /mnt/logs/vufind /mnt/logs/harvests

@@ -1,4 +1,5 @@
 ---
+# The below comment is matched in cicd/deploy-compose-files to insert envs
 #include vufind-envs
 
 version: "3.8"
@@ -184,6 +185,9 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+      resources:
+        limits:
+          memory: 4096M
       restart_policy:
         window: 15s
       update_config:
@@ -203,6 +207,7 @@ services:
     ]
     networks:
       - public
+      - internal
     logging:
       driver: "json-file"
       options:
