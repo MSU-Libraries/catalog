@@ -607,7 +607,6 @@ split_by_tag() {
             java -cp /usr/share/java/Saxon-HE.jar
             net.sf.saxon.Query
             -s:"${SOURCE_FILE}"
-            #-qs:"//record[datafield[@tag=\"${TAG}\"]]"
             -qs:"//*[local-name()='record'][*[local-name()='datafield'][@tag=\"${TAG}\"]]"
             -o:"${NEW_PATH}"
         )
