@@ -104,18 +104,13 @@ flags, here are the steps you would need to do in order to prepare
 the environment.
 
 <!-- markdownlint-disable MD031 -->
-1. Remove all files from the `/mnt/shared/authority/[STACK_NAME]/current/`
-   directory and remove all files from the container's `local/authority/hlm`.
+1. Remove all files from the `/mnt/shared/authority/$STACK_NAME/harvest_authority/`
+   directory.
    You can also just move them somewhere else if you want to preserve a copy
    of them.
    ```bash
-   tar -czf archive_[SOME_DATE].tar.gz /mnt/shared/authority/[STACK_NAME]/current/
-   rm /mnt/shared/authority/[STACK_NAME]/current/processed/*
-   rm /mnt/shared/authority/[STACK_NAME]/current/*
-   
-   # exec in to the container and run
-   rm /usr/local/vufind/local/harvest/authority/*
-   rm /usr/local/vufind/local/harvest/authority/processed/*
+   tar -czf archive_[SOME_DATE].tar.gz /mnt/shared/authority/$STACK_NAME/harvest_authority/
+   find /mnt/shared/authority/$STACK_NAME/harvest_authority/ -type f -delete
    ```
 
 2. Monitor progress after it starts via the cron job in the monitoring app or
@@ -362,20 +357,19 @@ docker exec -it \
 Similar to the process for HLM records, copy the files from the shared
 directory into the containers import location prior to starting the script.
 Then start a `screen` session and connect to the container again and run
-the command to import the files. Note that this will get terminated and not
-be in a recoverable state if the container is stopped due to a deploy.
+the command to import the files.
 Process can be monitored by seeing the remaining files in the
 `/usr/local/harvest/authority` directory and by re-attaching to the
 `screen` (by using `screen -r`) to see if the command has completed.
 
+<!-- markdownlint-disable MD013 MD031 -->
 ```bash
-# Done inside the container
-cp /mnt/shared/authority/[STACK_NAME]/current/processed/*.xml /usr/local/vufind/local/harvest/authority/
+mv /mnt/shared/authority/$STACK_NAME/harvest_authority/processed/*.[0-9][0-9][0-9].xml /mnt/shared/authority/$STACK_NAME/harvest_authority
 
-# You will want to kick off this command in a screen session,
-# since it can take many hours to run
+# You can either run the command manually in a screen, or let the cron pick it up
 /usr/local/bin/pc-import-authority -i -B
 ```
+<!-- markdownlint-enable MD013 MD031 -->
 
 ### `reserves` Index
 
