@@ -185,6 +185,9 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+      resources:
+        limits:
+          memory: 4096M
       restart_policy:
         window: 15s
       update_config:

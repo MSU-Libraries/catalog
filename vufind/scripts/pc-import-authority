@@ -2,14 +2,14 @@
 
 SCRIPT_NAME="$(basename "$0")"
 
+# TODO References to .MRC should be more flexible to handle .mrc, .marc, .MRC, .MARC
+
 # Set defaults
 default_args() {
     declare -g -A ARGS
     ARGS[HARVEST]=0
     ARGS[FULL]=0
-    ARGS[COPY_SHARED]=0
     ARGS[IMPORT]=0
-    ARGS[LIMIT]=
     ARGS[LIMIT_BY_DELETE]=
     ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/authority
     ARGS[FTP_SERVER]=ftp.bslw.com
@@ -22,6 +22,7 @@ default_args() {
     ARGS[QUICK]=0
     ARGS[VERBOSE]=0
     ARGS[BYPASS_PREPROCESS]=0
+    ARGS[IGNORE_FILE]=/mnt/shared/authority/ignore_patterns.txt
     declare -g -a TAGS=( 100 110 111 130 150 151 155 )
 }
 default_args
@@ -50,18 +51,15 @@ run_help() {
     echo "  -t|--harvest"
     echo "      Run an harvest into VUFIND_HARVEST_DIR. Will attempt"
     echo "      to resume from last harvest state unless -f flag given."
-    echo "      On success, sync a copy of harvest files to SHARED_DIR/current/."
     echo "  -f|--full"
     echo "      Forces a reset of VUFIND_HARVEST_DIR, resulting"
     echo "      in a full harvest. Must be used with --harvest."
     echo "  -i|--import"
     echo "      Run VuFind batch import on files within VUFIND_HARVEST_DIR."
-    echo "  -c|--copy-shared"
-    echo "      Copy XML file(s) from SHARED_DIR back to VUFIND_HARVEST_DIR."
-    echo "      Only usable when NOT running a harvest (see also --limit)."
-    echo "  -l|--limit COPY_COUNT"
-    echo "      Usable with --copy-shared only. This will limit the number"
-    echo "      of files copied from SHARED_DIR to VUFIND_HARVEST_DIR."
+    echo "  -p|--ignore-file PATH"
+    echo "      Path to a newline separated file with substrings to match which will"
+    echo "      be ignored when harvesting."
+    echo "      Default ${ARGS[IGNORE_FILE]}"
     echo "  -B|--bypass-preprocess"
     echo "      Bypass the preprocessing step of this script which splits"
     echo "      the files into separate tag files. NOTE: the import will"
@@ -117,19 +115,9 @@ parse_args() {
         -f|--full)
             ARGS[FULL]=1
             shift;;
-        -c|--copy-shared)
-            ARGS[COPY_SHARED]=1
-            shift;;
         -i|--import)
             ARGS[IMPORT]=1
             shift;;
-        -l|--limit)
-            ARGS[LIMIT]="$2"
-            if [[ ! "${ARGS[LIMIT]}" -gt 0 ]]; then
-                echo "ERROR: -l|--limit only accept positive integers"
-                exit 1
-            fi
-            shift; shift ;;
         -X|--limit-by-delete)
             ARGS[LIMIT_BY_DELETE]="$2"
             if [[ ! "${ARGS[LIMIT_BY_DELETE]}" -gt 0 ]]; then
@@ -137,6 +125,14 @@ parse_args() {
                 exit 1
             fi
             shift; shift ;;
+        -p|--ignore-file)
+            ARGS[IGNORE_FILE]=$1
+            if [ ! -f "${ARGS[IGNORE_FILE]}" ]; then
+                echo "ERROR: -p|--ignore-file is not a valid file"
+                exit 1
+            fi
+            shift 2
+            ;;
         -d|--vufind-harvest-dir)
             ARGS[VUFIND_HARVEST_DIR]=$( readlink -f "$2" )
             RC=$?
@@ -185,14 +181,6 @@ parse_args() {
 }
 
 catch_invalid_args() {
-    if [[ "${ARGS[HARVEST]}" -eq 1 && "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
-        echo "ERROR: It is invalid to set both --harvest and --copy-shared flags."
-        exit 1
-    fi
-    if [[ -n "${ARGS[LIMIT]}" && "${ARGS[COPY_SHARED]}" -ne 1 ]]; then
-        echo "ERROR: The --limit flag is only valid when --copy-shared is also set."
-        exit 1
-    fi
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" && "${ARGS[IMPORT]}" -ne 1 ]]; then
         echo "ERROR: The --limit-by-delete flag is only valid when --import is also set."
         exit 1
@@ -204,7 +192,6 @@ assert_shared_dir_writable() {
         echo "ERROR: Shared storage location is not writable: ${ARGS[SHARED_DIR]}"
         exit 1
     fi
-    mkdir -p "${ARGS[SHARED_DIR]}/current/"
     mkdir -p "${ARGS[SHARED_DIR]}/archives/"
 }
 
@@ -246,12 +233,23 @@ create_netrc_if_needed() {
 
 # Print message if verbose is enabled
 verbose() {
-    LOG_TS=$(date +%Y-%m-%d\ %H:%M:%S)
-    MSG="[${LOG_TS}] $1"
     if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
-        echo "${MSG}"
+        _log "$*"
     fi
+}
+
+# Always print the message
+error() {
+    _log "ERROR: " "$*"
+    exit 1
+}
+
+_log() {
+    LOG_TS=$(date +%Y-%m-%d\ %H:%M:%S)
+    MSG="[${LOG_TS}] $*"
+    echo "${MSG}"
     echo "${MSG}" >> "$LOG_FILE"
+
 }
 
 verbose_inline() {
@@ -288,7 +286,7 @@ last_modified() {
     fi
 }
 
-archive_current_harvest() {
+archive_harvest() {
     assert_shared_dir_writable
     verbose "Creating archive of latest harvest"
 
@@ -326,6 +324,67 @@ is_bigger_than_50mb() {
     fi
 }
 
+# Determines if a file matches any of the provided ignore substring patterns
+# Returns 0 if there is a match found.
+# Returns 1 when the file is not found in any of the ignored substrings
+is_ignored() {
+    FILE="${1}"
+    for SUBSTR in "${IGNORE_SUBSTR[@]}"; do
+        if [[ "${FILE}" == *"${SUBSTR}"* ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+is_zip_or_marc_file() {
+  if [[ "${1}" == *.m*c || "${1}" == *.zip || "${1}" == *.M*C || "${1}" == *.ZIP ]]; then
+    return 0
+  fi
+  return 1
+}
+
+
+# Returns 0 when the file exists with the same size
+# Returns 1 when the file is missing or the file has a different size
+# than the version we have downloaded already
+is_missing_or_different_size() {
+    FILE="${1}"
+    LOCAL_FILE_PATH=""
+
+    if [[ "${FILE}" == *.zip ]]; then
+      EXTENSION=".zip"
+    elif [[ "${FILE}" == *.marc || "${FILE}" == *.mrc ]]; then
+      EXTENSION=".marc"
+    else
+      EXTENSION=""
+    fi
+
+    # Generate the "clean" file name so it matches what we'd have stored locally
+    CLEAN_NAME="$(echo "${FILE}" | sed -e "s/\.marc$//" -e "s/\.mrc$//" -e "s/\.zip$//" -e "s/ /_/g")"${EXTENSION}
+
+    if [ -f "${ARGS[VUFIND_HARVEST_DIR]}/${FILE}" ]; then
+        LOCAL_FILE_PATH="${ARGS[VUFIND_HARVEST_DIR]}/${CLEAN_NAME}"
+    elif [ -f "${ARGS[VUFIND_HARVEST_DIR]}/processed/${CLEAN_NAME}" ]; then
+        LOCAL_FILE_PATH="${ARGS[VUFIND_HARVEST_DIR]}/processed/${CLEAN_NAME}"
+    else
+        # File path is missing and we need to download it
+        verbose "Could not find ${FILE} (${CLEAN_NAME}) locally"
+        return 1
+    fi
+
+    LOCAL_SIZE=$(stat -c %s "${LOCAL_FILE_PATH}")
+    REMOTE_SIZE=$(curl "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${FILE// /%20}" --netrc -sI | grep -i Content-Length | awk '{print $2}' | sed -e 's/[[:space:]]*$//')
+    if [ "$LOCAL_SIZE" -ne "$REMOTE_SIZE" ]; then
+        verbose "${FILE} (${LOCAL_SIZE}) exists locally but is a different size from the remote (${REMOTE_SIZE}). Removing local copy first"
+        if ! rm "${LOCAL_FILE_PATH}"; then
+            error "Could not remove original ${LOCAL_FILE_PATH} before downloading newer version on remote"
+        fi
+        return 1
+    fi
+    return 0
+}
+
 # Perform an harvest of HLM Records
 harvest() {
     assert_vufind_harvest_dir_writable
@@ -333,70 +392,49 @@ harvest() {
     create_netrc_if_needed
     assert_ftp_readable
 
+    # Read the ignore pattern file into the array
+    # Ignoring shellcheck not recognizing EOF
+    # shellcheck disable=SC2034
+    touch "${ARGS[IGNORE_FILE]}"
+    IGNORE_SUBSTR=()
+    while IFS= read -r line; do
+        IGNORE_SUBSTR+=("$line")
+    done < "${ARGS[IGNORE_FILE]}"
+
     if [[ "${ARGS[FULL]}" -eq 1 ]]; then
+        archive_harvest
         verbose "Clearing VuFind harvest directory for new full harvest."
         clear_harvest_files "${ARGS[VUFIND_HARVEST_DIR]}/"
 
-        archive_current_harvest
-
-        verbose "Clearing shared current directory before we sync the new full harvest."
-        clear_harvest_files "${ARGS[SHARED_DIR]}/current/"
     fi
 
+    cd "${ARGS[VUFIND_HARVEST_DIR]}" || error "Failed to cd to \"${ARGS[VUFIND_HARVEST_DIR]}\""
     # Check FTP server to compare files for ones we don't have
-    OLD_PWD=$(pwd)
-    if ! cd "${ARGS[VUFIND_HARVEST_DIR]}"; then
-        verbose "Failed to change directory into the harvest dir" 1
-        exit 1
-    fi
     while IFS= read -r AUTH_FILE
     do
-        # If it is not in the harvest dir and it is an zip file, then get it
-        if [ ! -f "${ARGS[SHARED_DIR]}/current/${AUTH_FILE}" ] && [[ ${AUTH_FILE} == *.zip ]]; then
+        # If it is not an ignored pattern, not in the shared storage, and it is a MARC or zip file, then get it
+        if ! is_ignored "${AUTH_FILE}" && is_zip_or_marc_file "${AUTH_FILE}" && ! is_missing_or_different_size "${AUTH_FILE}"; then
+            verbose "Getting ${AUTH_FILE}"
             if ! wget "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${AUTH_FILE}" > /dev/null 2>&1; then
-                verbose "ERROR: Failed to retrieve ${AUTH_FILE} from FTP server" 1
-                exit 1
+                error "Failed to retrieve ${AUTH_FILE} from FTP server"
             fi
-            mkdir -p "${ARGS[VUFIND_HARVEST_DIR]}/tmp"
-            unzip -qq "${AUTH_FILE}" -d "${ARGS[VUFIND_HARVEST_DIR]}/tmp"
-            for F in tmp/* ; do if [[ ${F} == *.MRC ]]; then mv "${F}" "${AUTH_FILE%.zip}"_"${F#tmp/}"; fi done
-            rm -rf "${ARGS[VUFIND_HARVEST_DIR]}/tmp"
+
+            # Extract the files if it is a zip
+            if [[ "${AUTH_FILE}" == *.zip ]]; then
+                mkdir -p "${ARGS[VUFIND_HARVEST_DIR]}/tmp"
+                unzip -qq "${AUTH_FILE}" -d "${ARGS[VUFIND_HARVEST_DIR]}/tmp"
+                for F in tmp/* ; do if [[ ${F} == *.MRC ]]; then mv "${F}" "${AUTH_FILE%.zip}"_"${F#tmp/}"; fi done
+                rm -rf "${ARGS[VUFIND_HARVEST_DIR]}/tmp"
+                # Move the zip file to the processed directory since we don't need it for anything else
+                mv "${AUTH_FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/processed"
+            fi
 
             # Remove the files we don't currently import
             find "${ARGS[VUFIND_HARVEST_DIR]}" -maxdepth 1 \( -name "*FAST*" -o -name "*MESH.GENRE*" -o -name "*MESH.NAME*" \
                 -o -name "*_NAME.CHG*" -o -name "*_NAME.NEW*" \) -delete
         fi
     done < <(curl "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}" --netrc -l -s)
-    if ! cd "${OLD_PWD}"; then
-        verbose "Failed to change directory to original path" 1
-        exit 1
-    fi
-
-    verbose "Syncing harvest files to shared storage."
-    if ! rsync -ai --exclude "processed" --exclude "log" --exclude ".gitkeep" "${ARGS[VUFIND_HARVEST_DIR]}"/ "${ARGS[SHARED_DIR]}/current/" > /dev/null 2>&1; then
-        verbose "ERROR: Failed to sync harvest files to shared storage from ${ARGS[VUFIND_HARVEST_DIR]}" 1
-        exit 1
-    fi
-}
-
-# Copy MRC files back from shared dir to VuFind dir
-copy_back_from_shared() {
-    assert_vufind_harvest_dir_writable
-    verbose "Replacing any VuFind files with files from shared directory."
-    countdown 5
-
-    # Clear out any exising xml files before copying back from shared storage
-    clear_harvest_files "${ARGS[VUFIND_HARVEST_DIR]}/"
-
-    COPIED_COUNT=0
-    while read -r FILE; do
-        cp --preserve=timestamps "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/"
-        (( COPIED_COUNT += 1 ))
-        if [[ -n "${ARGS[LIMIT]}" && "${COPIED_COUNT}" -ge "${ARGS[LIMIT]}" ]]; then
-            # If limit is set, only copy the provided limit of xml files over to the VUFIND_HARVEST_DIR
-            break
-        fi
-    done < <(find "${ARGS[SHARED_DIR]}/current/" -mindepth 1 -maxdepth 1 -name '*.MRC')
+    cd - || error "Failed to cd to previous dir"
 }
 
 # Perform VuFind batch import of HLM records
@@ -423,10 +461,22 @@ import() {
     # Create required sub directories in case they don't already exist on the container
     mkdir -p "${ARGS[VUFIND_HARVEST_DIR]}/processed"
 
+    # If there are existing part files from a prior run, clean them up
+    verbose "Cleaning up leftover part files from prior runs (if any)"
+    find "${ARGS[VUFIND_HARVEST_DIR]}/" -name "*-[[:digit:]]*.xml" -not -name '*.[[:digit:]]*.xml' -delete
+
     # Convert each file from .MRC to .xml
     verbose "Pre-processing files to convert from .MRC to .xml"
     while read -r FILE; do
-        marc2xml "${FILE}" > "${FILE%.MRC}".xml
+        DIR_PATH=$(dirname "$FILE")
+        FILENAME=$(basename "$FILE")
+        filename_without_ext="${FILENAME%.*}"
+        modified_filename="${filename_without_ext//./_}.xml"
+        NEW_FILE_PATH="${DIR_PATH}/${modified_filename}"
+        verbose "marc2xml ${FILE} > ${NEW_FILE_PATH}"
+        if ! marc2xml "${FILE}" > "${NEW_FILE_PATH}"; then
+            error "Failed to convert MARC -> XML ($FILE)"
+        fi
         mv "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/processed/"
     done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.MRC')
 
@@ -466,17 +516,16 @@ import() {
 
         while read -r FILE; do
             if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
-                "$VUFIND_HOME"/import-marc-auth.sh "${FILE}" ${PROP_FILE} | tee "$LOG_FILE"
-                EXIT_CODE=$?
+                if ! "$VUFIND_HOME"/import-marc-auth.sh "${FILE}" ${PROP_FILE} | tee "$LOG_FILE"; then
+                    error "Batch import failed for ${FILE}."
+                fi
             else
-                "$VUFIND_HOME"/import-marc-auth.sh "${FILE}" "${PROP_FILE}" >> "$LOG_FILE" 2>&1
-                EXIT_CODE=$?
+                if "$VUFIND_HOME"/import-marc-auth.sh "${FILE}" "${PROP_FILE}" >> "$LOG_FILE" 2>&1; then
+                    error "Batch import failed for ${FILE}."
+                fi
             fi
-            if [[ ${EXIT_CODE} -eq 0 ]]; then
-                mv "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}"/processed/"$(basename "${FILE}")"
-            else
-                verbose "ERROR: Batch import failed with code: ${EXIT_CODE}" 1
-                exit 1
+            if ! mv "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}"/processed/"$(basename "${FILE}")"; then
+                error "Failed to moved imported file (${FILE}) to processed directory"
             fi
         done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name "*${TAG}.xml" | sort)
     done
@@ -488,26 +537,22 @@ import() {
     countdown 5
     if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
         if ! /usr/local/vufind/harvest/batch-delete.sh authority | tee "$LOG_FILE"; then
-            verbose "ERROR: Batch delete script failed with code: $?" 1
-            exit 1
+            error "Batch delete script failed with code: $?"
         fi
     else
         if ! /usr/local/vufind/harvest/batch-delete.sh authority >> "$LOG_FILE"; then
-            verbose "ERROR: Batch delete script failed with code: $?" 1
-            exit 1
+            error "Batch delete script failed with code: $?"
         fi
     fi
     verbose "Completed processing records to be deleted."
-
-    verbose "Syncing imported files to shared storage."
-    mkdir -p "${ARGS[SHARED_DIR]}/current/processed/"
-    if ! rsync -ai "${ARGS[VUFIND_HARVEST_DIR]}"/processed/ "${ARGS[SHARED_DIR]}/current/processed/" > /dev/null 2>&1; then
-        verbose "ERROR: Failed to sync imported files to shared storage from ${ARGS[VUFIND_HARVEST_DIR]}/processed" 1
-        exit 1
-    fi
 }
 
 slice_marc_files() {
+    verbose "Checking for Saxon"
+    if [[ ! -f "/usr/share/java/Saxon-HE.jar" ]]; then
+        error "Failed to locate saxon at /usr/share/java/Saxon-HE.jar"
+    fi
+
     verbose "Pre-processing files to split into parts by tag attribute"
     while read -r FILE; do
         # Split each file into small chunks so we don't run out of memory
@@ -523,37 +568,18 @@ slice_marc_files() {
                 split_by_tag "${PART_FILE}"
             done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name "${SEARCH}*-[[:digit:]]*.xml")
 
-            # Next, merge the parts for each tag together
-            for TAG in "${TAGS[@]}"; do
-                OUT_FILE=${FILE%.xml}.${TAG}.xml
-                verbose "Merging parts for tag ${TAG} back into ${OUT_FILE}"
-                if ! OUTPUT=$(xml_grep --pretty_print indented --cond "collection" "${ARGS[VUFIND_HARVEST_DIR]}/${SEARCH}*.${TAG}.xml" > "${ARGS[VUFIND_HARVEST_DIR]}/${OUT_FILE}"); then
-                    verbose "ERROR: Failed to merge the parts for ${TAG} back into ${OUT_FILE}. ${OUTPUT}" 1
-                fi
-                # Cleaning up tags to match what import script expects
-                if ! OUTPUT=$(sed -i '/<collection>/d' "${ARGS[VUFIND_HARVEST_DIR]}/${OUT_FILE}"); then
-                    verbose "ERROR: Failed to remove opening tag from ${OUT_FILE}. ${OUTPUT}" 1
-                fi
-                if ! OUTPUT=$(sed -i '/<\/collection>/d' "${ARGS[VUFIND_HARVEST_DIR]}/${OUT_FILE}"); then
-                    verbose "ERROR: Failed to remove closing tag from ${OUT_FILE}. ${OUTPUT}" 1
-                fi
-                if ! OUTPUT=$(sed -i 's/xml_grep/collection/g' "${ARGS[VUFIND_HARVEST_DIR]}/${OUT_FILE}"); then
-                    verbose "ERROR: Failed to replace generic xml_grep wrapping tag with collection tag in ${OUT_FILE}. ${OUTPUT}" 1
-                fi
-                # TODO Find a new way to check this, the file will no longer be empty since it will have opening and closing tags
-                # If the file is empty, just delete it
-                #if [[ ! -s ${OUT_FILE} ]]; then
-                #    verbose "Removing empty merge file ${OUT_FILE}"
-                #    rm "${OUT_FILE}"
-                #fi
-            done
-
             # Finally, remove the part files
-            verbose "Cleaning up remaining unmerged part files"
-            find "${ARGS[VUFIND_HARVEST_DIR]}/" -name "${SEARCH}*-[[:digit:]]*.xml" -delete
+            verbose "Cleaning up the un-tagged part files"
+            CMD_ARRAY=(
+                find "${ARGS[VUFIND_HARVEST_DIR]}/"
+                -name "${SEARCH}*.xml"
+                -not -name '*.[[:digit:]]*.xml'
+                -delete
+            )
 
-            verbose "Cleaning up original non-tag xml file: ${FILE%".xml"}"
-            rm "${FILE%".xml"}"
+            if ! "${CMD_ARRAY[@]}"; then
+                error "Failed to remove un-tagged part files for ${SEARCH}. Command: ${CMD}"
+            fi
         else
             # We only need to split each part into separate files based on the tag attribute
             split_by_tag "${FILE}"
@@ -563,7 +589,8 @@ slice_marc_files() {
             rm "${FILE}"
         fi
 
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.xml')
+    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.xml' -not -name '*.[[:digit:]]*.xml')
+    # Only pre-process the unprocessed files (the ones without [name].[digit].xml)
 
    verbose "Completed pre-processing"
 }
@@ -575,14 +602,22 @@ split_by_tag() {
     for TAG in "${TAGS[@]}"; do
         NEW_PATH=${SOURCE_FILE%.xml}.${TAG}.xml
 
-        verbose "Running xpath on tag ${TAG} with ${SOURCE_FILE} to ${NEW_PATH}"
-        if ! xpath -q -e "//record[datafield[@tag=\"${TAG}\"]]" "${SOURCE_FILE}" > "${NEW_PATH}"; then
-            verbose "Failed to split out ${TAG} tag on ${SOURCE_FILE}" 1
-            exit 1
+        verbose "Splitting on tag ${TAG} with ${SOURCE_FILE} to ${NEW_PATH}"
+        CMD_ARRAY=(
+            java -cp /usr/share/java/Saxon-HE.jar
+            net.sf.saxon.Query
+            -s:"${SOURCE_FILE}"
+            #-qs:"//record[datafield[@tag=\"${TAG}\"]]"
+            -qs:"//*[local-name()='record'][*[local-name()='datafield'][@tag=\"${TAG}\"]]"
+            -o:"${NEW_PATH}"
+        )
+        verbose "${CMD_ARRAY[@]}"
+        if ! "${CMD_ARRAY[@]}"; then
+            error "Failed to split out ${TAG} tag on ${SOURCE_FILE}"
         fi
 
         # If the file is empty, just delete it
-        if [[ -f ${NEW_PATH} ]] && [[ ! -s ${NEW_PATH} ]]; then
+        if [[ -f ${NEW_PATH} ]] && [[ $(wc -l < "${NEW_PATH}") -le 3 ]]; then
             verbose "Removing empty tag file ${NEW_PATH}"
             rm "${NEW_PATH}"
         fi
@@ -590,8 +625,14 @@ split_by_tag() {
         # Run sed on it to wrap it in <collection>
         if [[ -f ${NEW_PATH} ]]; then
             if ! sed -i -e '1 i\<collection>' -e '$a\</collection>' "${NEW_PATH}"; then
-                verbose "Failed to wrap ${NEW_PATH} in <collection> element" 1
-                exit 1
+                error "Failed to wrap ${NEW_PATH} in <collection> element"
+            fi
+        fi
+
+        # Run sed on it to remove the xml tag
+        if [[ -f ${NEW_PATH} ]]; then
+            if ! sed -i 's|<?xml version="1.0" encoding="UTF-8"?>||g' "${NEW_PATH}"; then
+                error "Failed to remove xml tag from ${NEW_PATH}"
             fi
         fi
 
@@ -618,15 +659,12 @@ main() {
     verbose "Logging to ${LOG_FILE}"
     verbose "Using VUFIND_HOME of ${VUFIND_HOME}"
     if ! pushd "${VUFIND_HOME}" 2> /dev/null; then
-        verbose "Could change directory to VUFIND_HOME!" 1
-        exit 1
+        error "Could change directory to VUFIND_HOME!"
     fi
     verbose "Starting processing for ${STACK_NAME}"
 
     if [[ "${ARGS[HARVEST]}" -eq 1 ]]; then
         harvest
-    elif [[ "${ARGS[COPY_SHARED]}" -eq 1 ]]; then
-        copy_back_from_shared
     fi
     if [[ "${ARGS[RESET_SOLR]}" -eq 1 ]]; then
         reset_solr
@@ -636,8 +674,7 @@ main() {
     fi
 
     if ! popd 2> /dev/null; then
-        verbose "Warning: could not change directory back to prior directory" 1
-        exit 0
+        error "Warning: could not change directory back to prior directory"
     fi
     verbose "All processing complete!"
 }
