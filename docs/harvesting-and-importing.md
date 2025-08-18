@@ -362,12 +362,14 @@ Process can be monitored by seeing the remaining files in the
 `/usr/local/harvest/authority` directory and by re-attaching to the
 `screen` (by using `screen -r`) to see if the command has completed.
 
+<!-- markdownlint-disable MD013 MD031 -->
 ```bash
 mv /mnt/shared/authority/$STACK_NAME/harvest_authority/processed/*.[0-9][0-9][0-9].xml /mnt/shared/authority/$STACK_NAME/harvest_authority
 
 # You can either run the command manually in a screen, or let the cron pick it up
 /usr/local/bin/pc-import-authority -i -B
 ```
+<!-- markdownlint-enable MD013 MD031 -->
 
 ### `reserves` Index
 
