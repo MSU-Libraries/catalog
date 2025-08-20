@@ -110,7 +110,14 @@ class RegexLookup
     public const MUSIC_EXCLUDE_ILL     = ['/RESERVE$/i'];
     public const MUSIC_EXCLUDE_REQUEST = ['/CURRENT JOURNALS/i', '/-\s+MUSIC$/i'];
     public const MUSIC_ROVI_VINYL      = ['/ROVI\s+VINYL/i'];
-    public const MUSIC_SERVICE_DESK    = ['/CD COLLECTION/i', '#DVD/VIDEO#i', '/OVERSIZE CD/i', '/RESERVE/i', '/ROVI MUSIC/i', '/ROVI\s+VINYL/i'];
+    public const MUSIC_SERVICE_DESK    = [
+        '/CD COLLECTION/i',
+        '#DVD/VIDEO#i',
+        '/OVERSIZE CD/i',
+        '/RESERVE/i',
+        '/ROVI MUSIC/i',
+        '/ROVI\s+VINYL/i'
+    ];
     public const ONLINE                = ['/ONLINE RESOURCE/i', '/ELECTRONIC RESOURCES/i', '/INTERNET/i'];
     public const PERM                  = ['/PERM/i'];        // Legacy note: used for Art Reserves
     public const READING_ROOM          = ['/READING ROOM/i'];
