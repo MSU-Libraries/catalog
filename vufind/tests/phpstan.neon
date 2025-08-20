@@ -12,7 +12,6 @@ parameters:
         - '#Class VuFind\\Content\\[a-zA-Z0-9]+\\Amazon[a-zA-Z0-9]* not found#'
         - '#Call to an undefined static method Catalog\\Utils\\RegexLookup::[A-Z0-9_]+\(\).#'
         - '#Instantiated class SimpleSAML\\Auth\\Simple not found.#'
-        - '#Instantiated class [A-Za-z\\]+ArgumentCountError not found.#'
     bootstrapFiles:
         - phpstan-constants.php
     level: 1
