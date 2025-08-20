@@ -116,7 +116,7 @@ class RegexLookup
         '/OVERSIZE CD/i',
         '/RESERVE/i',
         '/ROVI MUSIC/i',
-        '/ROVI\s+VINYL/i'
+        '/ROVI\s+VINYL/i',
     ];
     public const ONLINE                = ['/ONLINE RESOURCE/i', '/ELECTRONIC RESOURCES/i', '/INTERNET/i'];
     public const PERM                  = ['/PERM/i'];        // Legacy note: used for Art Reserves
