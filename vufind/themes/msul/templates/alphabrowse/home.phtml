@@ -6,16 +6,7 @@
 
   // Set up upper search box if necessary:
   $this->layout()->searchbox = false;
-  /* MSUL: Do not want the search box displayed on for alphabrowse */
-  #if ($this->searchbox()->alphaBrowseOptionsEnabled()) {
-  #  $this->layout()->searchbox = $this->context($this)->renderInContext(
-  #      'search/searchbox.phtml',
-  #      [
-  #        'lookfor' => $this->from,
-  #        'searchIndex' => 'AlphaBrowse:' . $this->source,
-  #      ]
-  #  );
-  #}
+  /* MSUL: Code removed Do not want the search box displayed on for alphabrowse */
 ?>
 
 <?php /* LOAD THE LINK INFORMATION INTO $pageLinks, similar to smarty's {capture} */ ?>
@@ -143,7 +134,8 @@
               <div>
                 <?=$this->transEsc('Use instead') ?>:
                 <ul>
-                  <?php foreach ($item['useInstead'] as $heading): ?>
+                  <? // MSUL: PC-1492 Remove duplicate values ?>
+                  <?php foreach (array_unique($item['useInstead']) as $heading): ?>
                   <li><a href="<?=$this->escapeHtmlAttr($this->url('alphabrowse-home', [], ['query' => ['from' => $heading] + $baseQuery]))?>"><?=$this->escapeHtml($heading)?></a></li>
                   <?php endforeach; ?>
                 </ul>
@@ -154,7 +146,8 @@
               <div>
                 <?=$this->transEsc('See also') ?>:
                 <ul>
-                  <?php foreach ($item['seeAlso'] as $heading): ?>
+                  <? // MSUL: PC-1492 Remove duplicate values ?>
+                  <?php foreach (array_unique($item['seeAlso']) as $heading): ?>
                   <li><a href="<?=$this->escapeHtmlAttr($this->url('alphabrowse-home', [], ['query' => ['from' => $heading] + $baseQuery]))?>"><?=$this->escapeHtml($heading)?></a></li>
                   <?php endforeach; ?>
                 </ul>
