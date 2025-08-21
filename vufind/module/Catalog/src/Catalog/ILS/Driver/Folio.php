@@ -1255,24 +1255,43 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $response = $this->makeRequest('GET', '/erm/sas/publicLookup', $query);
         $licenses = json_decode($response->getBody());
         // Get the license agreement data for the record if there was one found
-        if (count($licenses->records) == 0) {
-            $this->debug('Unable to get records from licenses');
+        $licenseRecords = $licenses->records;
+        if (count($licenseRecords) == 0) {
+            $this->debug('Unable to get records from licenses (no license record) - packageId: ' . $packageId);
             return [];
-        } else {
-            $customProperties = $licenses->records[0]?->linkedLicenses[0]?->remoteId_object?->customProperties;
-
-            $licenseAgreement = [];
-            if (isset($customProperties->vendoraccessibilityinfo[0]->value)) {
-                $licenseAgreement['vendoraccessibilityinfo'] = $customProperties->vendoraccessibilityinfo[0]->value;
-            }
-            if (isset($customProperties->authorizedusers[0]->value->label)) {
-                $licenseAgreement['authorizedusers'] = $customProperties->authorizedusers[0]->value->label;
-            }
-            if (isset($customProperties->ConcurrentUsers[0]->value)) {
-                $licenseAgreement['ConcurrentUsers'] = $customProperties->ConcurrentUsers[0]->value;
-            }
-            return $licenseAgreement;
         }
+        $linkedLicenses = $licenseRecords[0]->linkedLicenses;
+        if (count($linkedLicenses) == 0) {
+            $this->debug('Unable to get records from licenses (no linked license) - packageId: ' . $packageId);
+            return [];
+        }
+        $linkedLicense = $linkedLicenses[0];
+        if (isset($linkedLicense->error)) {
+            if (isset($linkedLicense->message)) {
+                $message = " - message: " . $linkedLicense->message;
+            } else {
+                $message = '';
+            }
+            $this->logError('Error getting records from licenses (FOLIO error) - packageId: ' . $packageId . $message);
+            return [];
+        }
+        if (!isset($linkedLicense->remoteId_object)) {
+            $this->debug('Unable to get records from licenses (no remoteId object) - packageId: ' . $packageId);
+            return [];
+        }
+        $customProperties = $linkedLicense->remoteId_object?->customProperties;
+
+        $licenseAgreement = [];
+        if (isset($customProperties->vendoraccessibilityinfo[0]->value)) {
+            $licenseAgreement['vendoraccessibilityinfo'] = $customProperties->vendoraccessibilityinfo[0]->value;
+        }
+        if (isset($customProperties->authorizedusers[0]->value->label)) {
+            $licenseAgreement['authorizedusers'] = $customProperties->authorizedusers[0]->value->label;
+        }
+        if (isset($customProperties->ConcurrentUsers[0]->value)) {
+            $licenseAgreement['ConcurrentUsers'] = $customProperties->ConcurrentUsers[0]->value;
+        }
+        return $licenseAgreement;
     }
 
     /**
