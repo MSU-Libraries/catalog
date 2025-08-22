@@ -1268,7 +1268,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $linkedLicense = $linkedLicenses[0];
         if (isset($linkedLicense->error)) {
             if (isset($linkedLicense->message)) {
-                $message = " - message: " . $linkedLicense->message;
+                $message = ' - message: ' . $linkedLicense->message;
             } else {
                 $message = '';
             }
