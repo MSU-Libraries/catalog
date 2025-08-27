@@ -623,7 +623,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
         } else {
             $instances = $this->getInstancesByBibIds($bibIds);
             $instanceIds = array_map(fn ($instance) => $instance->id, $instances);
-            $idType = $this->getBibIdType();
             foreach ($instances as $instance) {
                 $bibIdToInstanceId[$instance->$idType] = $instance->id;
             }
