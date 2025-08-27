@@ -191,7 +191,7 @@ backup_collection() {
         if [[ "${EXPECTED}" != "" ]]; then
             verbose "Backup still in progress (${ACTUAL}/${EXPECTED} files copied)"
         fi
-        sleep 3
+        sleep 5
         EXPECTED="$(curl -sS "http://$SOLR_NODE:8983/solr/${COLL}/replication?command=details&wt=json" | jq '.details.commits[0][5]|length')"
         ACTUAL="$(find "${ARGS[SHARED_DIR]}/solr_dropbox/${COLL}/${SNAPSHOT}" -type f 2>/dev/null | wc -l)"
         CUR_WAIT=$((CUR_WAIT+1))
