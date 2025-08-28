@@ -182,6 +182,7 @@ Deploy Vufind:
     - job: Set Stack Name
       artifacts: true
     - Deploy Internal Network
+    - Build Captcha Image
     - Build Vufind Image
     - Deploy DB
     - Deploy Solr
