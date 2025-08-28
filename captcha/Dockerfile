@@ -1,4 +1,4 @@
-FROM registry.gitlab.msu.edu/msu-libraries/public/go-away:v0.7.0
+FROM goaway:testing
 
 RUN apk add bash vim htop && \
     mkdir /cache
