@@ -33,8 +33,7 @@ conditions:
 
   is-lightbox-path:
     - 'path.matches("^/MyResearch/UserLogin")'
-    # Disabled for /Feedback due to Referer bug in go-away. See PC-1484
-    #- 'path.matches("^/Feedback/")'
+    - 'path.matches("^/Feedback/Home")'
     - 'path.matches("^/Help/Home")'
     - 'path.matches("^/Cart")'
     - 'path.matches("/Holdings$")'
@@ -117,10 +116,9 @@ rules:
 
   - name: allow-known-ip-ranges
     conditions:
-      # Disabled for /Feedback due to Referer bug in go-away. See PC-1484
-      - '($is-network-academic) && !path.matches("^/Feedback/")'
-      - '($is-network-isp) && !path.matches("^/Feedback/")'
-      - '($is-network-gov) && !path.matches("^/Feedback/")'
+      - '($is-network-academic)'
+      - '($is-network-isp)'
+      - '($is-network-gov)'
     action: pass
 
   - name: known-bad-ranges
@@ -207,8 +205,7 @@ rules:
   - name: non-get-request
     action: pass
     conditions:
-      # Disabled for /Feedback due to Referer bug in go-away. See PC-1484
-      - '!(method == "HEAD" || method == "GET") && !path.matches("^/Feedback/")'
+      - '!(method == "HEAD" || method == "GET")'
 
   - name: plaintext-browser
     conditions:
