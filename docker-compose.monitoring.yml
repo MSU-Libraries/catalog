@@ -40,7 +40,7 @@ services:
         monitor: 10s
 
   proxymon-$STACK_NAME:
-    image: bitnami/nginx
+    image: bitnamilegacy/nginx
     networks:
       - public
       - internal
