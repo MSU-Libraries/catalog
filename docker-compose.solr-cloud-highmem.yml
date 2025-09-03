@@ -97,7 +97,7 @@ services:
         max_replicas_per_node: 1
 
   proxysolr:
-    image: bitnami/nginx
+    image: bitnamilegacy/nginx
     networks:
       - public
       - internal
