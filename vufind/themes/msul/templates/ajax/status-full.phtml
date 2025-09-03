@@ -14,6 +14,8 @@ foreach ($this->statusItems as $item) {
     $score = 4;
   } elseif ($itemStatus == 'Library Use Only') {
     $score = 2;
+  } else {
+    $score = 0;
   }
   if ($itemLocation != 'MSU Remote Storage') {
     $score += 1;
