@@ -136,7 +136,20 @@ class Folio extends \VuFind\ILS\Driver\Folio
         if (count($ids) == 0) {
             return;
         }
-        foreach (array_chunk($ids, self::QUERY_BY_IDS_BATCH_SIZE) as $idsInBatch) {
+        $idToKey = fn ($id) => $endpoint . '[' . $idField . '=' . $id . ']';
+        $idsToLookFor = [];
+        foreach ($ids as $id) {
+            $items = $this->getCachedData($idToKey($id));
+            if ($items == null) {
+                $idsToLookFor[] = $id;
+            } else {
+                foreach ($items as $item) {
+                    yield $item;
+                }
+            }
+        }
+        $resultsToCache = [];
+        foreach (array_chunk($idsToLookFor, self::QUERY_BY_IDS_BATCH_SIZE) as $idsInBatch) {
             $idsWithQuotes = array_map(fn ($id) => '"' . $this->escapeCql($id) . '"', $idsInBatch);
             $query = [
                 'query' => $idField . ' == (' . implode(' OR ', $idsWithQuotes) . ')' . $querySuffix,
@@ -148,8 +161,17 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $query
                 ) as $item
             ) {
+                $key = $idToKey($item->$idField);
+                if (isset($resultsToCache[$key])) {
+                    $resultsToCache[$key][] = $item;
+                } else {
+                    $resultsToCache[$key] = [ $item ];
+                }
                 yield $item;
             }
+        }
+        foreach ($resultsToCache as $key => $items) {
+            $this->putCachedData($key, $items);
         }
     }
 
@@ -392,16 +414,19 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $apiUrl = str_replace('%%callnumber%%', urlencode($callNumberData['callnumber']), $apiUrl);
 
                     // Get the API data
-                    $data = null;
-                    try {
-                        $response = $this->makeExternalRequest('GET', $apiUrl);
-                        $data = json_decode($response->getBody());
-                    } catch (ILSException $e) {
-                        // We don't care if there are issues with the API, just log it and ignore
-                        $this->logWarning(
-                            'Could not get location data for callnumber '
-                            . $callNumberData['callnumber'] . ' (' . $bibId . ')'
-                        );
+                    $data = $this->getCachedData($apiUrl);
+                    if ($data == null) {
+                        try {
+                            $response = $this->makeExternalRequest('GET', $apiUrl);
+                            $data = json_decode($response->getBody());
+                            $this->putCachedData($apiUrl, $data);
+                        } catch (ILSException $e) {
+                            // We don't care if there are issues with the API, just log it and ignore
+                            $this->logWarning(
+                                'Could not get location data for callnumber '
+                                . $callNumberData['callnumber'] . ' (' . $bibId . ')'
+                            );
+                        }
                     }
 
                     // Parse the response and add to our location results
