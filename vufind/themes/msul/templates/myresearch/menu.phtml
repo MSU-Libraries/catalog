@@ -55,8 +55,11 @@
 <?php if ($user && $this->userlist()->getMode() !== 'disabled'): ?>
   <?php if (!$isCommunityBorrower): ?>
     <hr>
-      &nbsp&nbsp<a target="_blank" href="https://interlib.lib.msu.edu/">
-        <?= $this->icon('fa-external-link', 'fa-external-link') ?> Illiad Account
-      </a><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>(MSU Students, Staff, and Faculty)</small>
+        <div class="myresearch-menu">
+            <a href="https://interlib.lib.msu.edu/" class="icon-link">
+                <?= $this->icon('fa-external-link', 'fa-external-link icon-link__icon') ?>
+                <span class="icon-link__label">Illiad Account <small>(MSU Students, Staff, and Faculty)</small></span>
+            </a>
+        </div>
   <?php endif; ?>
 <?php endif; ?>

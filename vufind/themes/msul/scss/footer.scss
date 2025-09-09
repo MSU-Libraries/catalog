@@ -162,7 +162,7 @@ footer .msu-footer ul:first-child li {
   }
 }
 
-.fa-external-link {
+footer .fa-external-link {
   padding-left: 0.3rem;
 }
 
@@ -180,7 +180,7 @@ footer .msu-footer ul:first-child li {
 }
 
 // Focus indicator
-.navbar, nav-tabs li, .home-askalib, .msul-prefooter, .msu-footer .col-lg-3  {
+.navbar, .nav-tabs li, .home-askalib, .msul-prefooter, .msu-footer .col-lg-3  {
   a:focus {
   border-radius:0.5rem;
   }
