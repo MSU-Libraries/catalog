@@ -136,7 +136,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         if (count($ids) == 0) {
             return;
         }
-        $idToKey = fn($id) => $endpoint . '[' . $idField . '=' . $id . ']';
+        $idToKey = fn ($id) => $endpoint . '[' . $idField . '=' . $id . ']';
         $idsToLookFor = [];
         foreach ($ids as $id) {
             $items = $this->getCachedData($idToKey($id));
