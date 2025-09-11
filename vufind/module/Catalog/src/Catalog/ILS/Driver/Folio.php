@@ -753,9 +753,9 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 'renew' => $trans->renewalCount ?? 0,
                 'renewable' => true,
                 'title' => $trans->item->title,
-                'borrowingLocation' => $trans->item->location->name, // MSU
+                'borrowingLocation' => $trans->item->location?->name ?? null, // MSU
                 'volume' => $trans->item->volume ?? null, // MSU
-                'callNumber' => $trans->item->callNumber, // MSU
+                'callNumber' => $trans->item->callNumber ?? null, // MSU
             ];
         }
         // If we have a full page or have applied an offset, we need to look up the total count of transactions:
