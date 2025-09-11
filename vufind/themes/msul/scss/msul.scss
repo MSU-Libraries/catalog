@@ -18,14 +18,39 @@
 // -------------------------
 .container {
   width: 100%;
-  margin-left: 0rem;
-  margin-right: 0rem;
+  margin-left: 0;
+  margin-right: 0;
   max-width: unset;
 }
 
 .media-left {
   a {
     padding-bottom: .25rem;
+  }
+}
+
+.badge {
+  background-color: inherit;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.browse-item.with-badge {
+  padding-right: 0;
+  display: flex;
+  justify-content: space-between;
+  text-decoration: none;
+
+  > :not(.badge) {
+    text-decoration: underline;
+  }
+
+  .badge {
+    position: relative;
+    top: inherit;
+    right: inherit;
+    display: inline-block;
+    text-decoration: none;
   }
 }
 
