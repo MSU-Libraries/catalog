@@ -145,6 +145,7 @@ EDSAPI[API]
 end
 
 subgraph CoverImages["**Cover Images**"]
+Syndetics[Syndetics]
 BrowZine[BrowZine]
 Google[Google]
 end
