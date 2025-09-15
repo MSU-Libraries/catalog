@@ -122,6 +122,7 @@ networks:
 
 volumes:
   bitnami:
+  solr:
   logs:
     external: true
     name: "${STACK_NAME}_logs"
