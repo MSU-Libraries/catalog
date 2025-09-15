@@ -20,7 +20,7 @@ RUN \
     (umask 0022; mkdir /.zk_shell) && \
     (umask 0133; touch /.zk_shell/config) && \
     (umask 0177; touch /.zk_shell/history) && \
-    chown -R ${SOLR_UID}:${SOLR_GID} /.zk_shell && \
+    chown -R "${SOLR_UID}:${SOLR_GID}" /.zk_shell && \
 # Setup Timezone
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
@@ -38,15 +38,14 @@ RUN cp /tmp/build/cron.d/* /etc/cron.d/ && \
 RUN \
     cd /tmp/build/ && \
     cp startup.sh startup-cron.sh healthcheck.sh clusterhealth.sh cron-alphabrowse.sh alpha-browse.sh lock-state.sh add_generated_call_numbers.py / && \
-    cd - && \
     mkdir -p /solr_confs/import/lib && \
     wget https://github.com/vufind-org/vufind/archive/refs/tags/v${VUFIND_VERSION}.tar.gz && \
     tar -xf v${VUFIND_VERSION}.tar.gz  && \
-    cp -r /vufind-${VUFIND_VERSION}/solr/vufind/* /solr_confs/ && \
-    cp /vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar /vufind-${VUFIND_VERSION}/import/lib/reload4j-*.jar /solr_confs/import/lib/ && \
+    cp -r vufind-${VUFIND_VERSION}/solr/vufind/* /solr_confs/ && \
+    cp vufind-${VUFIND_VERSION}/import/lib/marc4j-*.jar vufind-${VUFIND_VERSION}/import/lib/reload4j-*.jar /solr_confs/import/lib/ && \
     rm v${VUFIND_VERSION}.tar.gz && \
-    cp /vufind-${VUFIND_VERSION}/import/*.jar /solr_confs/import/ && \
-    rm -rf /vufind-${VUFIND_VERSION} && \
+    cp vufind-${VUFIND_VERSION}/import/*.jar /solr_confs/import/ && \
+    rm -rf vufind-${VUFIND_VERSION} && \
     # Overriding browse-handler.jar and browse-indexing.jar won't be needed when we use a version of VuFind with the new TitleNormalizer
     cp /tmp/build/browse-handler.jar /solr_confs/jars/ && \
     cp /tmp/build/browse-indexing.jar /solr_confs/import/ && \
@@ -79,11 +78,12 @@ RUN \
     sed -i "s/\\bbiblio1\\b/biblio2/" /solr_confs/biblio2/conf/solrconfig.xml && \
     # Create solr data directory with the right permissions
     mkdir -p /var/solr/data && \
-    chown -R ${SOLR_UID}:${SOLR_GID} /var/solr && \
+    chown -R "${SOLR_UID}:${SOLR_GID}" /var/solr && \
     # Use /mnt/logs/solr for the Solr logs
     rm -rf /var/solr/logs && \
     ln -s /mnt/logs/solr /var/solr/logs && \
     cp /tmp/build/solr-zk-shell.sh /usr/local/bin/solr-zk-shell && \
+    cd /opt/solr && \
     rm -r /tmp/build/
 
 HEALTHCHECK --interval=1m --timeout=10s --start-period=180s --retries=6 \

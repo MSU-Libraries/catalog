@@ -167,7 +167,7 @@ rebuild_databases() {
     fi
 
     # Change ownership so it is correct before we copy to shared
-    chown -f ${SOLR_UID}:${SOLR_GID} "${ARGS[BUILD_PATH]}"/alphabetical_browse/*
+    chown -f "${SOLR_UID}:${SOLR_GID}" "${ARGS[BUILD_PATH]}"/alphabetical_browse/*
 
     return $RCODE
 }
@@ -261,7 +261,7 @@ main() {
 
     # Ensure the directory exists on the volume
     mkdir -p /var/solr/data/alphabetical_browse
-    chown ${SOLR_UID}:${SOLR_GID} /var/solr/data/alphabetical_browse
+    chown "${SOLR_UID}:${SOLR_GID}" /var/solr/data/alphabetical_browse
 
     # Ensure the directory exists on the shared path
     mkdir -p "${ARGS[SHARED_PATH]}"
