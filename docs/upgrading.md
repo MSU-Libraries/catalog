@@ -144,7 +144,7 @@ wget https://raw.githubusercontent.com/vufind-org/vufind/v9.0.2/solr/vufind/bibl
 * Upload the config to the Zookeepers:
 
 ```bash
-solr zk upconfig -confname biblio9 -confdir /tmp/biblio9 -z $SOLR_ZK_HOSTS/solr
+solr zk upconfig -confname biblio9 -confdir /tmp/biblio9 -z $ZK_HOST
 ```
 
 * Create the new collection:

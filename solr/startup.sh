@@ -29,7 +29,7 @@ for COLL_DIR in "${COLLEX_CONFIGS}/"*; do
     if [[ -d "$COLL_DIR" && "$COLL" != "jars" ]]; then
         echo "Attempting to upload Solr config for $COLL collection..."
         # Add configuration files
-        solr zk upconfig -confname "$COLL" -confdir "$COLL_DIR/conf" -z "$SOLR_ZK_HOSTS/solr"
+        solr zk upconfig -confname "$COLL" -confdir "$COLL_DIR/conf" -z "$ZK_HOST"
         echo "Created config set for $COLL with files from $COLL_DIR/conf"
     fi
 done
