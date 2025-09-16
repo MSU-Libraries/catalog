@@ -28,7 +28,7 @@ main() {
     # Create logs volume and set permissions for /mnt/logs/mariadb so that mariadb can write the log there (same for solr)
     run_on_all_nodes "docker volume create ${STACK_NAME}_logs &&
                 docker run --rm -v ${STACK_NAME}_logs:/mnt/logs \
-                    alpine sh -c 'mkdir -p /mnt/logs/mariadb /mnt/logs/solr && chown 1001 /mnt/logs/mariadb && chown 8983 /mnt/logs/solr'"
+                    alpine sh -c 'mkdir -p /mnt/logs/mariadb /mnt/logs/solr && chown 1001 /mnt/logs/mariadb && chown -R 8983 /mnt/logs/solr'"
 
     # Create a bind mount for the nagios user
     run_on_all_nodes "sudo /usr/local/bin/pc-mount-logs ${STACK_NAME} /home/nagios/ -v --create-service";
