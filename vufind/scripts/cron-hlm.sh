@@ -8,5 +8,6 @@ export LOG_PATH=/mnt/logs/harvests/hlm.log
 export EXIT_CODE_PATH=/mnt/logs/harvests/hlm_exit_code
 export DOCKER_TAG=HLM_IMPORT
 export OUTPUT_LOG=1
+export NICENESS=19
 
 cron-common.sh
