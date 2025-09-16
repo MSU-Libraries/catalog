@@ -279,8 +279,8 @@ wait
 ```
 <!-- markdownlint-enable MD013 -->
 
-`/bitnami/solr/server/solr/biblioN/spellShingle` and
-`/bitnami/solr/server/solr/biblioN/spellchecker` should have a significant
+`/var/solr/data/biblioN/spellShingle` and
+`/var/solr/data/biblioN/spellchecker` should have a significant
 size afterward in the solr container (replace `biblioN` by the
 `biblio-build` collection)
 

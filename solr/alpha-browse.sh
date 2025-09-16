@@ -148,7 +148,7 @@ rebuild_databases() {
         return 1
     fi
     BIBLIO_COLLECTION_NAME=$(echo "$ALIASES" | grep '"biblio"' | sed -e 's/.*>\([^<]*\)<.*/\1/')
-    BIBLIO_COLLECTION_PATH="/bitnami/solr/server/solr/${BIBLIO_COLLECTION_NAME}"
+    BIBLIO_COLLECTION_PATH="/var/solr/data/${BIBLIO_COLLECTION_NAME}"
     if [ ! -d "$BIBLIO_COLLECTION_PATH" ]; then
         echo "Could not find the collection directory at $BIBLIO_COLLECTION_PATH"
         return 1
@@ -156,10 +156,10 @@ rebuild_databases() {
     ln -s "$BIBLIO_COLLECTION_PATH" "${ARGS[BUILD_PATH]}/biblio"
 
     if [[ ! -h ${ARGS[BUILD_PATH]}/authority ]]; then
-        ln -s /bitnami/solr/server/solr/authority "${ARGS[BUILD_PATH]}/authority"
+        ln -s /var/solr/data/authority "${ARGS[BUILD_PATH]}/authority"
     fi
 
-    if ! JAVA_HOME=/opt/bitnami/java SOLR_HOME=${ARGS[BUILD_PATH]} SOLR_JAR_PATH=/opt/bitnami/solr VUFIND_HOME=/solr_confs /solr_confs/index-alphabetic-browse.sh; then
+    if ! JAVA_HOME=/opt/java/openjdk SOLR_HOME=${ARGS[BUILD_PATH]} SOLR_JAR_PATH=/opt/solr VUFIND_HOME=/solr_confs /solr_confs/index-alphabetic-browse.sh; then
         verbose "Error occurred while running index-alphabetic-browse.sh script!"
         RCODE=1
     else
@@ -167,7 +167,7 @@ rebuild_databases() {
     fi
 
     # Change ownership so it is correct before we copy to shared
-    chown -f 1001 "${ARGS[BUILD_PATH]}"/alphabetical_browse/*
+    chown -f "${SOLR_UID}:${SOLR_GID}" "${ARGS[BUILD_PATH]}"/alphabetical_browse/*
 
     return $RCODE
 }
@@ -237,12 +237,12 @@ copy_to_solr() {
     if [[ -n $(find "${ARGS[SHARED_PATH]}/" -type f -mmin -$(( ARGS[MAX_AGE_HOURS] * 60 )) ! -name "*lock" ) ]]; then
         verbose "Identified existing database files that can be used; starting copy."
         # First remove any remaining db-ready files so updates are not triggered before we copy the databases
-        rm -f /bitnami/solr/server/solr/alphabetical_browse/*db-ready
+        rm -f /var/solr/data/alphabetical_browse/*db-ready
         # Copy database files first, then the "-ready" files indicating they are ready to be used
-        cp -p "${ARGS[SHARED_PATH]}/"*db-updated /bitnami/solr/server/solr/alphabetical_browse/
+        cp -p "${ARGS[SHARED_PATH]}/"*db-updated /var/solr/data/alphabetical_browse/
         RCODE=$?
         if [[ "$RCODE" -eq 0 ]]; then
-            cp -p "${ARGS[SHARED_PATH]}/"*db-ready /bitnami/solr/server/solr/alphabetical_browse/
+            cp -p "${ARGS[SHARED_PATH]}/"*db-ready /var/solr/data/alphabetical_browse/
             RCODE=$?
         fi
     fi
@@ -260,8 +260,8 @@ main() {
     verbose "Starting processing..."
 
     # Ensure the directory exists on the volume
-    mkdir -p /bitnami/solr/server/solr/alphabetical_browse
-    chown 1001 /bitnami/solr/server/solr/alphabetical_browse
+    mkdir -p /var/solr/data/alphabetical_browse
+    chown "${SOLR_UID}:${SOLR_GID}" /var/solr/data/alphabetical_browse
 
     # Ensure the directory exists on the shared path
     mkdir -p "${ARGS[SHARED_PATH]}"
