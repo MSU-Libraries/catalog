@@ -1,4 +1,4 @@
-# VuFind Public Catalog
+# MSU Libraries Public Catalog
 
 ## Installation and Configuration
 
