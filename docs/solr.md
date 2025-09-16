@@ -243,7 +243,7 @@ customizes them. It also edits the lib paths in `solrconfig.xml`.
 To run `index-alphabetic-browse.sh`, `alphabrowse.sh` sets
 `SOLR_HOME=/tmp/alpha-browse/build` and `VUFIND_HOME=/solr_confs`
 and adds a symlink from `/tmp/alpha-browse/build/jars` to
-`/var/solr/data/jars/`.
+`/solr_confs/jars`.
 
 One thing to keep in mind when changing the structure is that the `/var/solr`
 directory is stored in the `solr` Docker volume. So any change to the

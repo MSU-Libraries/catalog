@@ -5,6 +5,7 @@ x-solr-envs: &solr_envs
   SOLR_JAVA_MEM: -Xms10240m -Xmx10240m -XX:MaxDirectMemorySize=3072m
   SOLR_OPTS: "-Dsolr.allowPaths=/mnt/solr_backups"
   STACK_NAME: "${STACK_NAME}"
+  solr.config.lib.enabled: "true"
 
 x-solrproxy-deploy: &solrproxy_deploy
   mode: replicated
