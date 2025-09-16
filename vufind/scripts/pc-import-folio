@@ -19,6 +19,7 @@ default_args() {
     ARGS[BYPASS_DISABLED]=0
     ARGS[VERBOSE]=0
     ARGS[QUICK]=0
+    ARGS[NICENESS]=19
     ARGS[TEST_HARVEST]=
 }
 default_args
@@ -82,6 +83,9 @@ run_help() {
     echo "      Clear out the Solr collection prior to importing."
     echo "  -B|--bypass-disabled"
     echo "      Runs script even if the 'disabled' file exists in SHARED_DIR."
+    echo "  -n|--niceness PRIORITY"
+    echo "      Set the niceness for script."
+    echo "      Default: 19"
     echo "  -v|--verbose"
     echo "      Show verbose output."
     echo "  -q|--quick"
@@ -168,6 +172,9 @@ parse_args() {
         -v|--verbose)
             ARGS[VERBOSE]=1
             shift;;
+        -n|--niceness)
+            ARGS[NICENESS]="$2"
+            shift; shift ;;
         -q|--quick)
             ARGS[QUICK]=1
             shift;;
@@ -572,6 +579,9 @@ main() {
     verbose "Using VUFIND_HOME of ${VUFIND_HOME}"
     check_harvest_disabled
     pushd "${VUFIND_HOME}" > /dev/null 2>&1 || exit 1
+    if [[ $NICENESS -ne 0 ]]; then
+        renice -n $NICENESS $$
+    fi
     verbose "Starting processing for ${STACK_NAME}"
 
     if [[ "${ARGS[OAI_HARVEST]}" -eq 1 ]]; then

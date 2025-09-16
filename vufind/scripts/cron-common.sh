@@ -1,7 +1,14 @@
 #!/bin/bash
 
 # Run a cron command and save output and exit code
-# Takes these parameters: CRON_COMMAND, LATEST_PATH, LOG_PATH, EXIT_CODE_PATH, DOCKER_TAG, OUTPUT_LOG
+# Takes these parameters:
+#   CRON_COMMAND    : Required, command to run
+#   LATEST_PATH     : Required, where to latest log
+#   LOG_PATH        : Required, the log file
+#   EXIT_CODE_PATH  : Required, the path to the exit code file
+#   DOCKER_TAG      : Required, the tag to send to the logger
+#   OUTPUT_LOG      : Optional, 0 = no output, 1 = out to stdout (default)
+#   NICENESS        : Optional, default of 0
 # (all the vufind cron scripts are assumed to be on the PATH)
 # NOTE: solr/cron-alphabrowse.sh duplicates this code
 
@@ -9,9 +16,11 @@
 # reduce additional Nagios alerts for long running cronjobs.
 true > "$EXIT_CODE_PATH"
 
+OUTPUT_LOG=${OUTPUT_LOG:-1}
+NICENESS=${NICENESS:-0}
 TIMESTAMP=$( date +%Y%m%d%H%M%S )
 LATEST_PATH_WITH_TS="${LATEST_PATH}.${TIMESTAMP}"
-$CRON_COMMAND > "${LATEST_PATH_WITH_TS}" 2>&1
+nice -n $NICENESS $CRON_COMMAND > "${LATEST_PATH_WITH_TS}" 2>&1
 EXIT_CODE=$?
 
 if [[ $EXIT_CODE -eq 255 ]]; then

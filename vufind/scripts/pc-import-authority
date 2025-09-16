@@ -23,6 +23,7 @@ default_args() {
     ARGS[VERBOSE]=0
     ARGS[BYPASS_PREPROCESS]=0
     ARGS[IGNORE_FILE]=/mnt/shared/authority/ignore_patterns.txt
+    ARGS[NICENESS]=19
     declare -g -a TAGS=( 100 110 111 130 150 151 155 )
 }
 default_args
@@ -94,6 +95,9 @@ run_help() {
     echo "      Clear out the authority Solr collection prior to importing."
     echo "  -q|--quick"
     echo "      Skip the countdown delays before each stage of the script."
+    echo "  -n|--niceness PRIORITY"
+    echo "      Set the niceness for script."
+    echo "      Default: 19"
     echo "  -v|--verbose"
     echo "      Show verbose output."
     echo ""
@@ -170,6 +174,9 @@ parse_args() {
         -q|--quick)
             ARGS[QUICK]=1
             shift;;
+        -n|--niceness)
+            ARGS[NICENESS]="$2"
+            shift; shift ;;
         -v|--verbose)
             ARGS[VERBOSE]=1
             shift;;
@@ -659,6 +666,9 @@ main() {
     verbose "Using VUFIND_HOME of ${VUFIND_HOME}"
     if ! pushd "${VUFIND_HOME}" 2> /dev/null; then
         error "Could change directory to VUFIND_HOME!"
+    fi
+    if [[ $NICENESS -ne 0 ]]; then
+        renice -n $NICENESS $$
     fi
     verbose "Starting processing for ${STACK_NAME}"
 
