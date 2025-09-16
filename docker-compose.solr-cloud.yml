@@ -3,9 +3,8 @@ x-solr-envs: &solr_envs
   SOLR_ZK_HOSTS: zk1:2181,zk2:2181,zk3:2181
   ZK_HOST: zk1:2181,zk2:2181,zk3:2181/solr
   SOLR_JAVA_MEM: -Xms512m -Xmx512m -XX:MaxDirectMemorySize=256m
-  SOLR_OPTS: "-Dsolr.allowPaths=/mnt/solr_backups"
+  SOLR_OPTS: "-Dsolr.config.lib.enabled=true -Dsolr.allowPaths=/mnt/solr_backups"
   STACK_NAME: "${STACK_NAME}"
-  solr.config.lib.enabled: "true"
 
 x-solrproxy-deploy: &solrproxy_deploy
   mode: replicated
