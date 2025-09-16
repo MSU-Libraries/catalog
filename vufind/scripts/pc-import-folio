@@ -579,8 +579,8 @@ main() {
     verbose "Using VUFIND_HOME of ${VUFIND_HOME}"
     check_harvest_disabled
     pushd "${VUFIND_HOME}" > /dev/null 2>&1 || exit 1
-    if [[ $NICENESS -ne 0 ]]; then
-        renice -n "$NICENESS" $$
+    if [[ ${ARGS[NICENESS]} -ne 0 ]]; then
+        renice -n "${ARGS[NICENESS]}" $$
     fi
     verbose "Starting processing for ${STACK_NAME}"
 

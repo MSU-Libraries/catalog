@@ -667,8 +667,8 @@ main() {
     if ! pushd "${VUFIND_HOME}" 2> /dev/null; then
         error "Could change directory to VUFIND_HOME!"
     fi
-    if [[ $NICENESS -ne 0 ]]; then
-        renice -n "$NICENESS" $$
+    if [[ ${ARGS[NICENESS]} -ne 0 ]]; then
+        renice -n "${ARGS[NICENESS]}" $$
     fi
     verbose "Starting processing for ${STACK_NAME}"
 

@@ -549,8 +549,8 @@ main() {
     verbose "Logging to ${LOG_FILE}"
     verbose "Using VUFIND_HOME of ${VUFIND_HOME}"
     pushd "${VUFIND_HOME}" 2> /dev/null || (verbose "ERROR: Failed to pushd \"${ARGS[VUFIND_HOME]}\"" 1 && exit 1)
-    if [[ $NICENESS -ne 0 ]]; then
-        renice -n "$NICENESS" $$
+    if [[ ${ARGS[NICENESS]} -ne 0 ]]; then
+        renice -n "${ARGS[NICENESS]}" $$
     fi
     verbose "Starting processing for ${STACK_NAME}"
 
