@@ -95,7 +95,7 @@ run_help() {
     echo "      Clear out the authority Solr collection prior to importing."
     echo "  -q|--quick"
     echo "      Skip the countdown delays before each stage of the script."
-    echo "  -n|--niceness PRIORITY"
+    echo "  -N|--niceness PRIORITY"
     echo "      Set the niceness for script."
     echo "      Default: 19"
     echo "  -v|--verbose"
@@ -174,7 +174,7 @@ parse_args() {
         -q|--quick)
             ARGS[QUICK]=1
             shift;;
-        -n|--niceness)
+        -N|--niceness)
             ARGS[NICENESS]="$2"
             shift; shift ;;
         -v|--verbose)
@@ -668,7 +668,7 @@ main() {
         error "Could change directory to VUFIND_HOME!"
     fi
     if [[ $NICENESS -ne 0 ]]; then
-        renice -n $NICENESS $$
+        renice -n "$NICENESS" $$
     fi
     verbose "Starting processing for ${STACK_NAME}"
 
