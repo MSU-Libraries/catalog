@@ -168,7 +168,7 @@ restore_collection() {
     fi
 
     chmod -R 777 "${ARGS[SHARED_DIR]}/solr_dropbox/"
-    chown -R 1001:1001 "${ARGS[SHARED_DIR]}/solr_dropbox"
+    chown -R 8983:8983 "${ARGS[SHARED_DIR]}/solr_dropbox"
 
     # Trigger the backup in Solr
     verbose "Starting restore of '${COLL}' index"
