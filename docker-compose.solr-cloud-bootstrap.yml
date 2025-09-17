@@ -24,7 +24,6 @@ services:
   solr:
     image: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     volumes:
-      - bitnami:/bitnami
       - solr:/var/solr
       - logs:/mnt/logs
     hostname: solr{{slice .Node.Hostname 8 9}}
@@ -48,7 +47,6 @@ networks:
     external: true
 
 volumes:
-  bitnami:
   solr:
   logs:
     external: true
