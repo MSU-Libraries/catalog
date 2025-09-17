@@ -30,7 +30,7 @@ main() {
     # otherwise this can cause occasional errors on the Verify Stack Health when it checks galera because the service logs will
     # report that it needs to be run with force_bootstrap
     SSH_COMMAND="(docker volume ls | grep -q ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.mariadb-cloud-bootstrap.yml) ${STACK_NAME}-mariadb && sleep 30 && docker stack rm ${STACK_NAME}-mariadb && sleep 25)) &&
-    (docker volume ls | grep -q ${STACK_NAME}-solr_zk || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.zk.yml) ${STACK_NAME}-solr && sleep 60)) &&
+    (docker volume ls | grep -q ${STACK_NAME}-solr_zk || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.zk.yml) ${STACK_NAME}-solr && sleep 60))"
     run_on_node 1 "$SSH_COMMAND"
 
     # Get runtime metrics
