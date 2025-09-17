@@ -4,18 +4,25 @@
 use Catalog\GetThis\GetThisLoader;
 
 $selected = '';
+$selectedScore = -1;
 /** @var Catalog\View\Helper\Root\Record $record */
 $record = $this->record($this->driver);
 foreach ($this->statusItems as $item) {
-  if ($selected == '') {
+  $itemStatus = $record->getStatus($item);
+  $itemLocation = $item['location'];
+  if ($itemStatus == 'Available') {
+    $score = 4;
+  } elseif ($itemStatus == 'Library Use Only') {
+    $score = 2;
+  } else {
+    $score = 0;
+  }
+  if ($itemLocation != 'MSU Remote Storage') {
+    $score += 1;
+  }
+  if ($score > $selectedScore) {
     $selected = $item;
-    $selectedStatus = $record->getStatus($selected);
-  } elseif ($selectedStatus != 'Available') {
-    $itemStatus = $record->getStatus($item);
-    if ($itemStatus == 'Available' || ($selectedStatus != 'Library Use Only' && $itemStatus == 'Library Use Only')) {
-      $selected = $item;
-      $selectedStatus = $record->getStatus($selected);
-    }
+    $selectedScore = $score;
   }
   $itemHasAdditionalHoldingsFields = false;
   foreach ($this->holdingsTextFieldNames as $holdingsTextField) {
@@ -23,14 +30,12 @@ foreach ($this->statusItems as $item) {
       $itemHasAdditionalHoldingsFields = true;
       break;
     }
-}
-if ($selected != '') {
-  $location = $selected['location'];
-  $callnumber = $selected['callnumber'];
-  $callNumPrefix = !empty($selected['callnumber_prefix']) ? $selected['callnumber_prefix'] . ' ' : '';
-
-}
-
+  }
+  if ($selected != '') {
+    $location = $selected['location'];
+    $callnumber = $selected['callnumber'];
+    $callNumPrefix = !empty($selected['callnumber_prefix']) ? $selected['callnumber_prefix'] . ' ' : '';
+  }
 }
 /** MSU END */
 ?>

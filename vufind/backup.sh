@@ -181,19 +181,18 @@ backup_collection() {
     # Verify that the backup successfully completed
     MAX_WAITS=900
     CUR_WAIT=1
-    EXPECTED=""
-    ACTUAL="0"
-    while [[ "${EXPECTED}" != "${ACTUAL}" ]]; do
+    EXPECTED_STATUS="success"
+    ACTUAL_STATUS="null"
+    STATUS_ENDTIME="null"
+    while [[ "${EXPECTED_STATUS}" != "${ACTUAL_STATUS}" ]] && [[ "${STATUS_SNAPSHOT}" != "${SNAPSHOT}" ]] && [[ "${STATUS_ENDTIME}" == "null" ]]; do
         if [ "$CUR_WAIT" -gt "$MAX_WAITS" ]; then
-            verbose "ERROR: Backup never completed for '${COLL}' index! (${ACTUAL}/${EXPECTED} files copied)" 1
+            verbose "ERROR: Backup never completed for '${COLL}' index! (status: $ACTUAL_STATUS)" 1
             exit 1
         fi
-        if [[ "${EXPECTED}" != "" ]]; then
-            verbose "Backup still in progress (${ACTUAL}/${EXPECTED} files copied)"
-        fi
-        sleep 3
-        EXPECTED="$(curl -sS "http://$SOLR_NODE:8983/solr/${COLL}/replication?command=details&wt=json" | jq '.details.commits[0][5]|length')"
-        ACTUAL="$(find "${ARGS[SHARED_DIR]}/solr_dropbox/${COLL}/${SNAPSHOT}" -type f 2>/dev/null | wc -l)"
+        sleep 30
+        STATUS_SNAPSHOT="$(curl -sS "http://$SOLR_NODE:8983/solr/${COLL}/replication?command=details&wt=json" | jq '.details.backup.snapshotName')"
+        STATUS_ENDTIME="$(curl -sS "http://$SOLR_NODE:8983/solr/${COLL}/replication?command=details&wt=json" | jq '.details.backup.snapshotCompletedAt')"
+        ACTUAL_STATUS="$(curl -sS "http://$SOLR_NODE:8983/solr/${COLL}/replication?command=details&wt=json" | jq '.details.backup.status')"
         CUR_WAIT=$((CUR_WAIT+1))
     done
 
@@ -202,6 +201,7 @@ backup_collection() {
     chown -R root:root "${ARGS[SHARED_DIR]}/solr/${COLL}"
     chmod -R 660 "${ARGS[SHARED_DIR]}/solr/${COLL}"
 
+    verbose "Backup complete"
     verbose "Compressing the backup"
     PREV_CWD="$(pwd)"
     if ! cd "${ARGS[SHARED_DIR]}/solr/${COLL}"; then

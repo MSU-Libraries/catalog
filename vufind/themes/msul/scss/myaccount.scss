@@ -45,3 +45,14 @@ body.template-dir-myresearch.template-name-profile {
   flex: 0 2rem;
   text-align: center;
 }
+
+// Following block can be removed when upgrading to version containing PR-4595 (maybe VF11?)
+.myresearch-menu {
+  .icon-link {
+    .icon-link__icon,
+    .icon-link__label {
+      flex-grow: 1;
+      width: auto;
+    }
+  }
+}

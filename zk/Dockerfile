@@ -1,4 +1,4 @@
-FROM bitnami/zookeeper:3.9
+FROM bitnamilegacy/zookeeper:3.9
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Detroit

@@ -1,11 +1,16 @@
 #!/bin/bash
 
-echo "Startup script..."
+verbose() {
+    LOG_TS=$(date +%Y-%m-%d\ %H:%M:%S)
+    echo "[${LOG_TS}] $1"
+}
+
+verbose "Startup script..."
 
 SHARED_STORAGE="/mnt/shared/local"
 
 if [[ "${STACK_NAME}" != catalog-prod ]]; then
-    echo "Replacing robots.txt file with disallow contents"
+    verbose "Replacing robots.txt file with disallow contents"
     echo "User-agent: *" > "${VUFIND_HOME}/public/robots.txt"
     echo "Disallow: /" >> "${VUFIND_HOME}/public/robots.txt"
 fi
@@ -13,7 +18,7 @@ fi
 # Create symlinks to the shared storage for non-production environments
 # Populating the shared storage if empty
 if [[ "${STACK_NAME}" == devel-* ]]; then
-    echo "Setting up links for module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
+    verbose "Setting up links for module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
     # Set up deploy key
     install -d -m 700 ~/.ssh/
     base64 -d "$DEPLOY_KEY_FILE" > ~/.ssh/id_ed25519
@@ -63,11 +68,11 @@ clear-vufind-cache
 CLUSTER_STATUS_URL="http://solr:8983/solr/admin/collections?action=clusterstatus"
 SOLR_CLUSTER_SIZE=0
 while [[ "$SOLR_CLUSTER_SIZE" -lt 1 ]]; do
-    echo "No Solr nodes online yet. Waiting..."
+    verbose "No Solr nodes online yet. Waiting..."
     sleep 5
     SOLR_CLUSTER_SIZE=$(curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.live_nodes | length")
 done
-echo "Solr nodes online."
+verbose "Solr nodes online."
 
 # Sleep before creating collections so all
 # nodes don't try at the same time
@@ -80,12 +85,12 @@ COLLS=("biblio1" "biblio2" "authority" "reserves" "website")
 for COLL in "${COLLS[@]}"
 do
     # See if the collection already exists in Solr
-    echo "Existing collections:"
+    verbose "Existing collections:"
     curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.collections | keys[]"
 
     MATCHED_COLL=$(curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.collections | keys[]" | grep "${COLL}")
     while [[ -z "${MATCHED_COLL}" ]]; do
-        echo "Existing collections:"
+        verbose "Existing collections:"
         curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.collections | keys[]"
 
         # Create collection
@@ -93,50 +98,50 @@ do
         HAS_ERROR=$(echo "${OUTPUT}" | grep -c "SolrException")
 
         if [[ ${HAS_ERROR} -gt 0 ]]; then
-            echo "Failed to create Solr collection ${COLL}. ${OUTPUT}"
+            verbose "Failed to create Solr collection ${COLL}. ${OUTPUT}"
             sleep 5
         else
-            echo "Created Solr collection for ${COLL}."
+            verbose "Created Solr collection for ${COLL}."
             # Not breaking here so we can do a final curl call to verify it is showing in the cluster status properly
         fi
         MATCHED_COLL=$(curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.collections | keys[]" | grep "${COLL}")
     done
-    echo "Verified that Solr collection ${COLL} exists."
+    verbose "Verified that Solr collection ${COLL} exists."
 done
 
-echo "If there are no aliases create them"
+verbose "If there are no aliases create them"
 if ! ALIASES=$(curl "http://solr:8983/solr/admin/collections?action=LISTALIASES&wt=json" -s); then
-    echo "Failed to query to the collection aliases in Solr. Exiting. ${ALIASES}"
+    verbose "Failed to query to the collection aliases in Solr. Exiting. ${ALIASES}"
     exit 1
 fi
 if ! [[ "${ALIASES}" =~ .*"biblio".* ]]; then
     if ! OUTPUT=$(curl -s "http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1"); then
-        echo "Failed to create biblio alias pointing to biblio1. Exiting. ${OUTPUT}"
+        verbose "Failed to create biblio alias pointing to biblio1. Exiting. ${OUTPUT}"
         exit 1
     fi
     if ! OUTPUT=$(curl -s "http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio2");then
-        echo "Failed to create biblio-build alias pointing to biblio2. Exiting. ${OUTPUT}"
+        verbose "Failed to create biblio-build alias pointing to biblio2. Exiting. ${OUTPUT}"
         exit 1
     fi
 fi
 
-echo "Running Solr query with healthcheck ID to confirm Solr readiness"
+verbose "Running Solr query with healthcheck ID to confirm Solr readiness"
 OUTPUT=$(curl --max-time 5 -o /dev/null -s "http://solr:8983/solr/biblio/select?fl=%2A&wt=json&json.nl=arrarr&q=id%3A%22folio.${FOLIO_REC_ID}%22")
 EXIT_STATUS=$?
 while [[ "$EXIT_STATUS" -eq 28 ]]; do # exit code 28 is curl timeout
-    echo "Solr not ready yet (timed out). Waiting..."
+    verbose "Solr not ready yet (timed out). Waiting..."
     sleep 5
     OUTPUT=$(curl --max-time 5 -o /dev/null -s "http://solr:8983/solr/biblio/select?fl=%2A&wt=json&json.nl=arrarr&q=id%3A%22folio.${FOLIO_REC_ID}%22")
     EXIT_STATUS=$?
 done
-echo "Solr ready!"
+verbose "Solr ready!"
 
 # Run npm if a devel/review site
 if [[ ! ${SITE_HOSTNAME} = catalog* ]]; then
-    echo "Starting npm to auto-compile theme changes..."
+    verbose "Starting npm to auto-compile theme changes..."
     npm run watch:scss&
 else
-    echo "Running npm to compile theme changes..."
+    verbose "Running npm to compile theme changes..."
     npm run build:scss
 fi
 
@@ -145,4 +150,7 @@ fi
 unset DEPLOY_KEY_FILE VUFIND_CORE_INSTALLATION
 
 # Start Apache
-tail -f /var/log/vufind/vufind.log & apachectl -DFOREGROUND
+verbose "Starting Apache..."
+# shellcheck disable=SC1091
+source /etc/apache2/envvars
+tail -f /var/log/vufind/vufind.log & /usr/sbin/apache2 -DFOREGROUND "$@"

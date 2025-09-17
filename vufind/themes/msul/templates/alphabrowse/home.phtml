@@ -134,7 +134,7 @@
               <div>
                 <?=$this->transEsc('Use instead') ?>:
                 <ul>
-                  <? // MSUL: PC-1492 Remove duplicate values ?>
+                  <?php // MSUL: PC-1492 Remove duplicate values. Can be removed when https://github.com/vufind-org/vufind/pull/4560 is in VF ?>
                   <?php foreach (array_unique($item['useInstead']) as $heading): ?>
                   <li><a href="<?=$this->escapeHtmlAttr($this->url('alphabrowse-home', [], ['query' => ['from' => $heading] + $baseQuery]))?>"><?=$this->escapeHtml($heading)?></a></li>
                   <?php endforeach; ?>
@@ -146,7 +146,7 @@
               <div>
                 <?=$this->transEsc('See also') ?>:
                 <ul>
-                  <? // MSUL: PC-1492 Remove duplicate values ?>
+                  <?php // MSUL: PC-1492 Remove duplicate values. Can be removed when https://github.com/vufind-org/vufind/pull/4560 is in VF ?>
                   <?php foreach (array_unique($item['seeAlso']) as $heading): ?>
                   <li><a href="<?=$this->escapeHtmlAttr($this->url('alphabrowse-home', [], ['query' => ['from' => $heading] + $baseQuery]))?>"><?=$this->escapeHtml($heading)?></a></li>
                   <?php endforeach; ?>

@@ -117,11 +117,14 @@ apply_devel_changes() {
     ./yq -i ".services.catalog.deploy.replicas = 1" docker-compose.catalog.yml
     ./yq -i ".services.captcha.deploy.replicas = 1" docker-compose.catalog.yml
 
-    # Mount monitoring files in container for easier editting
-    ./yq -i ".services.monitoring.volumes += \"/mnt/shared/local/${STACK_NAME}/repo/monitoring/:/app/\"" docker-compose.monitoring.yml;
+    # Make updates specific to non-review environments
+    if [[ "${STACK_NAME}" != review-* ]]; then
+        # Mount monitoring files in container for easier editting
+        ./yq -i ".services.monitoring.volumes += \"/mnt/shared/local/${STACK_NAME}/repo/monitoring/:/app/\"" docker-compose.monitoring.yml;
 
-    # Mount host live/ dir for /usr/local/vufind/
-    ./yq -i ".services.catalog.volumes += \"/mnt/shared/local/${STACK_NAME}/live/:/usr/local/vufind/\"" docker-compose.catalog.yml;
+        # Mount host live/ dir for /usr/local/vufind/
+        ./yq -i ".services.catalog.volumes += \"/mnt/shared/local/${STACK_NAME}/live/:/usr/local/vufind/\"" docker-compose.catalog.yml;
+    fi
 }
 
 apply_prod_changes() {

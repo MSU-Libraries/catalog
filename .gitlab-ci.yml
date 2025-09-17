@@ -107,6 +107,7 @@ Bootstrap Stacks:
     - Deploy Compose Files
     - Deploy Internal Network
     - Build DB Image
+    - Build ZK Image
     - Build Solr Image
   script:
     - bash ./cicd/bootstrap-stacks
@@ -182,6 +183,7 @@ Deploy Vufind:
     - job: Set Stack Name
       artifacts: true
     - Deploy Internal Network
+    - Build Captcha Image
     - Build Vufind Image
     - Deploy DB
     - Deploy Solr

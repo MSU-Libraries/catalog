@@ -19,6 +19,7 @@ default_args() {
     ARGS[QUICK]=0
     ARGS[VERBOSE]=0
     ARGS[IGNORE_FILE]=/mnt/shared/hlm/ignore_patterns.txt
+    ARGS[NICENESS]=19
     declare -a IGNORE_SUBSTR=()
 }
 default_args
@@ -82,6 +83,9 @@ run_help() {
     echo "      Default: Stored in the filepath stocked in environment variable \$HLM_FTP_PASSWORD_FILE"
     echo "  -q|--quick"
     echo "      Skip the countdown delays before each stage of the script."
+    echo "  -N|--niceness PRIORITY"
+    echo "      Set the niceness for script."
+    echo "      Default: 19"
     echo "  -v|--verbose"
     echo "      Show verbose output."
     echo ""
@@ -157,6 +161,10 @@ parse_args() {
             ;;
         -P|--ftp-password)
             ARGS[FTP_PASSWORD]="$2"
+            shift 2
+            ;;
+        -N|--niceness)
+            ARGS[NICENESS]="$2"
             shift 2
             ;;
         -q|--quick)
@@ -541,6 +549,9 @@ main() {
     verbose "Logging to ${LOG_FILE}"
     verbose "Using VUFIND_HOME of ${VUFIND_HOME}"
     pushd "${VUFIND_HOME}" 2> /dev/null || (verbose "ERROR: Failed to pushd \"${ARGS[VUFIND_HOME]}\"" 1 && exit 1)
+    if [[ ${ARGS[NICENESS]} -ne 0 ]]; then
+        renice -n "${ARGS[NICENESS]}" $$
+    fi
     verbose "Starting processing for ${STACK_NAME}"
 
     if [[ "${ARGS[HARVEST]}" -eq 1 ]]; then

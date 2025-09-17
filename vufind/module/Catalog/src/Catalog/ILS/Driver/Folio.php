@@ -136,7 +136,20 @@ class Folio extends \VuFind\ILS\Driver\Folio
         if (count($ids) == 0) {
             return;
         }
-        foreach (array_chunk($ids, self::QUERY_BY_IDS_BATCH_SIZE) as $idsInBatch) {
+        $idToKey = fn ($id) => $endpoint . '[' . $idField . '=' . $id . ']';
+        $idsToLookFor = [];
+        foreach ($ids as $id) {
+            $items = $this->getCachedData($idToKey($id));
+            if ($items == null) {
+                $idsToLookFor[] = $id;
+            } else {
+                foreach ($items as $item) {
+                    yield $item;
+                }
+            }
+        }
+        $resultsToCache = [];
+        foreach (array_chunk($idsToLookFor, self::QUERY_BY_IDS_BATCH_SIZE) as $idsInBatch) {
             $idsWithQuotes = array_map(fn ($id) => '"' . $this->escapeCql($id) . '"', $idsInBatch);
             $query = [
                 'query' => $idField . ' == (' . implode(' OR ', $idsWithQuotes) . ')' . $querySuffix,
@@ -148,8 +161,17 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $query
                 ) as $item
             ) {
+                $key = $idToKey($item->$idField);
+                if (isset($resultsToCache[$key])) {
+                    $resultsToCache[$key][] = $item;
+                } else {
+                    $resultsToCache[$key] = [ $item ];
+                }
                 yield $item;
             }
+        }
+        foreach ($resultsToCache as $key => $items) {
+            $this->putCachedData($key, $items);
         }
     }
 
@@ -392,16 +414,19 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     $apiUrl = str_replace('%%callnumber%%', urlencode($callNumberData['callnumber']), $apiUrl);
 
                     // Get the API data
-                    $data = null;
-                    try {
-                        $response = $this->makeExternalRequest('GET', $apiUrl);
-                        $data = json_decode($response->getBody());
-                    } catch (ILSException $e) {
-                        // We don't care if there are issues with the API, just log it and ignore
-                        $this->logWarning(
-                            'Could not get location data for callnumber '
-                            . $callNumberData['callnumber'] . ' (' . $bibId . ')'
-                        );
+                    $data = $this->getCachedData($apiUrl);
+                    if ($data == null) {
+                        try {
+                            $response = $this->makeExternalRequest('GET', $apiUrl);
+                            $data = json_decode($response->getBody());
+                            $this->putCachedData($apiUrl, $data);
+                        } catch (ILSException $e) {
+                            // We don't care if there are issues with the API, just log it and ignore
+                            $this->logWarning(
+                                'Could not get location data for callnumber '
+                                . $callNumberData['callnumber'] . ' (' . $bibId . ')'
+                            );
+                        }
                     }
 
                     // Parse the response and add to our location results
@@ -623,7 +648,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
         } else {
             $instances = $this->getInstancesByBibIds($bibIds);
             $instanceIds = array_map(fn ($instance) => $instance->id, $instances);
-            $idType = $this->getBibIdType();
             foreach ($instances as $instance) {
                 $bibIdToInstanceId[$instance->$idType] = $instance->id;
             }
@@ -729,9 +753,9 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 'renew' => $trans->renewalCount ?? 0,
                 'renewable' => true,
                 'title' => $trans->item->title,
-                'borrowingLocation' => $trans->item->location->name, // MSU
+                'borrowingLocation' => $trans->item->location?->name ?? null, // MSU
                 'volume' => $trans->item->volume ?? null, // MSU
-                'callNumber' => $trans->item->callNumber, // MSU
+                'callNumber' => $trans->item->callNumber ?? null, // MSU
             ];
         }
         // If we have a full page or have applied an offset, we need to look up the total count of transactions:
@@ -1255,24 +1279,43 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $response = $this->makeRequest('GET', '/erm/sas/publicLookup', $query);
         $licenses = json_decode($response->getBody());
         // Get the license agreement data for the record if there was one found
-        if (count($licenses->records) == 0) {
-            $this->debug('Unable to get records from licenses');
+        $licenseRecords = $licenses->records;
+        if (count($licenseRecords) == 0) {
+            $this->debug('Unable to get records from licenses (no license record) - packageId: ' . $packageId);
             return [];
-        } else {
-            $customProperties = $licenses->records[0]?->linkedLicenses[0]?->remoteId_object?->customProperties;
-
-            $licenseAgreement = [];
-            if (isset($customProperties->vendoraccessibilityinfo[0]->value)) {
-                $licenseAgreement['vendoraccessibilityinfo'] = $customProperties->vendoraccessibilityinfo[0]->value;
-            }
-            if (isset($customProperties->authorizedusers[0]->value->label)) {
-                $licenseAgreement['authorizedusers'] = $customProperties->authorizedusers[0]->value->label;
-            }
-            if (isset($customProperties->ConcurrentUsers[0]->value)) {
-                $licenseAgreement['ConcurrentUsers'] = $customProperties->ConcurrentUsers[0]->value;
-            }
-            return $licenseAgreement;
         }
+        $linkedLicenses = $licenseRecords[0]->linkedLicenses;
+        if (count($linkedLicenses) == 0) {
+            $this->debug('Unable to get records from licenses (no linked license) - packageId: ' . $packageId);
+            return [];
+        }
+        $linkedLicense = $linkedLicenses[0];
+        if (isset($linkedLicense->error)) {
+            if (isset($linkedLicense->message)) {
+                $message = ' - message: ' . $linkedLicense->message;
+            } else {
+                $message = '';
+            }
+            $this->logError('Error getting records from licenses (FOLIO error) - packageId: ' . $packageId . $message);
+            return [];
+        }
+        if (!isset($linkedLicense->remoteId_object)) {
+            $this->debug('Unable to get records from licenses (no remoteId object) - packageId: ' . $packageId);
+            return [];
+        }
+        $customProperties = $linkedLicense->remoteId_object?->customProperties;
+
+        $licenseAgreement = [];
+        if (isset($customProperties->vendoraccessibilityinfo[0]->value)) {
+            $licenseAgreement['vendoraccessibilityinfo'] = $customProperties->vendoraccessibilityinfo[0]->value;
+        }
+        if (isset($customProperties->authorizedusers[0]->value->label)) {
+            $licenseAgreement['authorizedusers'] = $customProperties->authorizedusers[0]->value->label;
+        }
+        if (isset($customProperties->ConcurrentUsers[0]->value)) {
+            $licenseAgreement['ConcurrentUsers'] = $customProperties->ConcurrentUsers[0]->value;
+        }
+        return $licenseAgreement;
     }
 
     /**
