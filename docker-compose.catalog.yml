@@ -24,8 +24,6 @@ services:
       - internal
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    healthcheck:
-      disable: true
     logging:
       driver: "json-file"
       options:
