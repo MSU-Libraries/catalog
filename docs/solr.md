@@ -243,19 +243,14 @@ customizes them. It also edits the lib paths in `solrconfig.xml`.
 To run `index-alphabetic-browse.sh`, `alphabrowse.sh` sets
 `SOLR_HOME=/tmp/alpha-browse/build` and `VUFIND_HOME=/solr_confs`
 and adds a symlink from `/tmp/alpha-browse/build/jars` to
-`/bitnami/solr/server/solr/jars/`.
+`/solr_confs/jars`.
 
-One thing to keep in mind when changing the structure is that the `/bitnami`
-directory is stored in the `solr_bitnami` Docker volume. So any change to the
-files in the image copied to `/bitnami` during initialization is not
+One thing to keep in mind when changing the structure is that the `/var/solr`
+directory is stored in the `solr` Docker volume. So any change to the
+files in the image copied to `/var/solr` during initialization is not
 necessarily reflected in the volume after deployment, and it might require
-manual updates. We used to copy jar files into
-`/opt/bitnami/solr/server/solr/jars` and
-`/opt/bitnami/solr/server/solr-webapp/webapp/WEB-INF/lib/` and these files
-were copied on startup to `/bitnami/solr/...`, but these were not getting
-updated automatically after a change. Now that we keep files in `/solr_confs`
-and change the paths in `solrconfig.xml`, updates to the jars are applied
-automatically.
+manual updates. To keep jars up to date, we keep files in `/solr_confs`
+and change the paths in `solrconfig.xml`.
 
 ## Restarting Solr
 

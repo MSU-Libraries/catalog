@@ -24,15 +24,13 @@ fi
 main() {
     # Pull images now to save time with stack deploy
     run_on_all_nodes "docker pull $CI_REGISTRY_IMAGE/db:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}"
-    run_on_all_nodes "docker pull $CI_REGISTRY_IMAGE/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}"
     run_on_all_nodes "docker pull $CI_REGISTRY_IMAGE/zk:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}"
 
     # TODO Make the db bootstrap more intelligent to check when it has completed startup, then wait until it has completed shutdown
     # otherwise this can cause occasional errors on the Verify Stack Health when it checks galera because the service logs will
     # report that it needs to be run with force_bootstrap
     SSH_COMMAND="(docker volume ls | grep -q ${STACK_NAME}-mariadb || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.mariadb-cloud-bootstrap.yml) ${STACK_NAME}-mariadb && sleep 30 && docker stack rm ${STACK_NAME}-mariadb && sleep 25)) &&
-    (docker volume ls | grep -q ${STACK_NAME}-solr_zk || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.zk.yml) ${STACK_NAME}-solr && sleep 60)) &&
-    (docker volume ls | grep -q ${STACK_NAME}-solr_bitnami || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.solr-cloud-bootstrap.yml) ${STACK_NAME}-solr && sleep 90))"
+    (docker volume ls | grep -q ${STACK_NAME}-solr_zk || (docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.zk.yml) ${STACK_NAME}-solr && sleep 60))"
     run_on_node 1 "$SSH_COMMAND"
 
     # Get runtime metrics
