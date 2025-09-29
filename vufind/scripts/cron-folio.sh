@@ -8,5 +8,6 @@ export LOG_PATH=/mnt/logs/harvests/folio.log
 export EXIT_CODE_PATH=/mnt/logs/harvests/folio_exit_code
 export DOCKER_TAG=FOLIO_HARVEST
 export OUTPUT_LOG=1
+export NICENESS=19
 
 cron-common.sh

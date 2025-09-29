@@ -8,10 +8,12 @@ LOG_PATH=/mnt/logs/alphabrowse/alphabrowse.log
 EXIT_CODE_PATH=/mnt/logs/alphabrowse/alphabrowse_exit_code
 DOCKER_TAG=ALPHA_BROWSE
 OUTPUT_LOG=0
+NICENESS=19
 
 TIMESTAMP=$( date +%Y%m%d%H%M%S )
 LATEST_PATH_WITH_TS="${LATEST_PATH}.${TIMESTAMP}"
-$CRON_COMMAND > "${LATEST_PATH_WITH_TS}" 2>&1
+# shellcheck disable=SC2086
+nice -n $NICENESS $CRON_COMMAND > "${LATEST_PATH_WITH_TS}" 2>&1
 EXIT_CODE=$?
 
 cat "${LATEST_PATH_WITH_TS}" >>$LOG_PATH
