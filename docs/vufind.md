@@ -67,7 +67,6 @@ VuFind container:
 ```bash
 clear-vufind-cache
 ```
- ```
 
 * To add log messages within the code that will only show up in the `vufind.log`
   file, open the related code file and implement the logger interface and then
