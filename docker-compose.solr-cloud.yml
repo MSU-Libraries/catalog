@@ -100,12 +100,12 @@ services:
         max_replicas_per_node: 1
 
   proxysolr:
-    image: bitnamilegacy/nginx
+    image: nginx:1.29
     networks:
       - public
       - internal
     volumes:
-      - /mnt/shared/local/${STACK_NAME}/deploy/proxysolr/proxysolr.conf:/opt/bitnami/nginx/conf/server_blocks/proxysolr.conf:ro
+      - /mnt/shared/local/${STACK_NAME}/deploy/proxysolr/proxysolr.conf:/etc/nginx/conf.d/proxysolr.conf:ro
     logging:
       driver: "json-file"
       options:
