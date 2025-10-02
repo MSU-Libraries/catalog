@@ -2,7 +2,6 @@ FROM solr:9.8
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Detroit
-ENV BITNAMI_DEBUG=true
 ARG VUFIND_VERSION
 
 USER root
