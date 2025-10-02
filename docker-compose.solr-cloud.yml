@@ -31,7 +31,6 @@ services:
   solr:
     image: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/solr:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     volumes:
-      - bitnami:/bitnami
       - solr:/var/solr
       - /mnt/shared/backups/${STACK_NAME}/solr_dropbox:/mnt/solr_backups
       - logs:/mnt/logs
@@ -71,7 +70,6 @@ services:
     command: /startup-cron.sh
     user: "0"
     volumes:
-      - bitnami:/bitnami
       - solr:/var/solr
       - /mnt/shared:/mnt/shared:rw
       - logs:/mnt/logs
@@ -123,7 +121,6 @@ networks:
     external: true
 
 volumes:
-  bitnami:
   solr:
   logs:
     external: true

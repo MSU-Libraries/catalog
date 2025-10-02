@@ -67,3 +67,19 @@ VuFind container:
 ```bash
 clear-vufind-cache
 ```
+
+* To add log messages within the code that will only show up in the `vufind.log`
+  file, open the related code file and implement the logger interface and then
+  import the logger trait to start using it. Later in your code you can then
+  start logging messages.
+
+```php
+class SomeClass implements \Laminas\Log\LoggerAwareInterface
+{
+    use \VuFind\Log\LoggerAwareTrait;
+
+    public function someFunction() {
+        $this->logError("My error message");
+        $this->logWarning("My warning message");
+    }
+```
