@@ -1,6 +1,6 @@
 x-zookeeper-envs: &zookeeper_envs
   ALLOW_ANONYMOUS_LOGIN: "yes"
-  ZOO_SERVERS: server.1=zk1:2888:3888 server.2=zk2:2888:3888 server.3=zk3:2888:3888
+  ZOO_SERVERS: server.1=zk1:2888:3888;2181 server.2=zk2:2888:3888;2181 server.3=zk3:2888:3888;2181
   ZOO_LISTEN_ALLIPS_ENABLED: "yes"
   ZOO_4LW_COMMANDS_WHITELIST: srvr,mntr,conf,ruok,stat
   ZOO_HEAP_SIZE: 512
