@@ -1,6 +1,6 @@
 x-zookeeper-envs: &zookeeper_envs
   ALLOW_ANONYMOUS_LOGIN: "yes"
-  ZOO_SERVERS: zk1:2888:3888::1 zk2:2888:3888::2 zk3:2888:3888::3
+  ZOO_SERVERS: server.1=zk1:2888:3888 server.2=zk2:2888:3888 server.3=zk3:2888:3888
   ZOO_LISTEN_ALLIPS_ENABLED: "yes"
   ZOO_4LW_COMMANDS_WHITELIST: srvr,mntr,conf,ruok,stat
   ZOO_HEAP_SIZE: 512
@@ -17,7 +17,7 @@ services:
       - zk-datalog:/datalog
     hostname: zk{{slice .Node.Hostname 8 9}}
     environment:
-      ZOO_SERVER_ID: "{{slice .Node.Hostname 8 9}}"
+      ZOO_MY_ID: "{{slice .Node.Hostname 8 9}}"
       <<: *zookeeper_envs
     networks:
       - internal
