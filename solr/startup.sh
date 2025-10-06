@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Copy data from the old bitnami volume into the new solr volume, changing the user/group
-if [ -d /bitnami/solr/server/solr ] && [ -z "$(ls -A /var/solr/data)" ]; then
-    echo "Copying Solr data from bitnami..."
-    cp -r --preserve=mode,timestamps /bitnami/solr/server/solr/* /var/solr/data/
-fi
-
 # Java security manager is incompatible with AlphaBrowse handler
 export SOLR_SECURITY_MANAGER_ENABLED="false"
 
