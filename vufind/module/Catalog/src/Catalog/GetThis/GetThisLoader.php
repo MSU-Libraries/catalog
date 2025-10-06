@@ -517,7 +517,10 @@ class GetThisLoader
                 $this->msgTemplate = 'makercheckedout.phtml';
             }
         } else {
-            if (Regex::ART($loc) && Regex::PERM($loc)) {
+            if (
+                Regex::ART($loc) && Regex::PERM($loc)
+                || Regex::RESERV($loc)
+            ) {
                 $this->msgTemplate = 'reserve.phtml';
             } elseif (Regex::ART($loc) || Regex::REFERENCE($loc)) {
                 $this->msgTemplate = 'ask.phtml';
