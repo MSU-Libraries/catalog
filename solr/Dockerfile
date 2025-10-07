@@ -2,6 +2,8 @@ FROM solr:9.8
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Detroit
+ENV PIPX_HOME=/opt/pipx
+ENV PIPX_BIN_DIR=/usr/local/bin
 ARG VUFIND_VERSION
 
 USER root
