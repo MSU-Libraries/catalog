@@ -40,12 +40,12 @@ services:
         monitor: 10s
 
   proxymon-$STACK_NAME:
-    image: bitnamilegacy/nginx
+    image: nginx:1.29
     networks:
       - public
       - internal
     volumes:
-      - /mnt/shared/local/${STACK_NAME}/deploy/proxymonitoring/proxymonitoring.conf:/opt/bitnami/nginx/conf/server_blocks/proxymonitoring.conf:ro
+      - /mnt/shared/local/${STACK_NAME}/deploy/proxymonitoring/proxymonitoring.conf:/etc/nginx/conf.d/proxymonitoring.conf:ro
     logging:
       driver: "json-file"
       options:
