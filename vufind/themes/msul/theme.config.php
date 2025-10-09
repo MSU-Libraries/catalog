@@ -18,6 +18,8 @@ return [
             Catalog\View\Helper\Root\Notices::class => Catalog\View\Helper\Root\NoticesFactory::class,
             Catalog\View\Helper\Root\LocationNotices::class => Catalog\View\Helper\Root\LocationNoticesFactory::class,
             Catalog\View\Helper\Root\AlphaBrowse::class => VuFind\View\Helper\Root\AlphaBrowseFactory::class,
+            Catalog\View\Helper\Root\SearchBox::class => VuFind\View\Helper\Root\SearchBoxFactory::class,
+            Catalog\View\Helper\Root\SearchTabs::class => VuFind\View\Helper\Root\SearchTabsFactory::class,
         ],
         'aliases' => [
             'record' => Catalog\View\Helper\Root\Record::class,
@@ -26,6 +28,8 @@ return [
             'Notices' => Catalog\View\Helper\Root\Notices::class,
             'locationNotices' => Catalog\View\Helper\Root\LocationNotices::class,
             'alphabrowse' => Catalog\View\Helper\Root\AlphaBrowse::class,
+            'searchbox' => Catalog\View\Helper\Root\SearchBox::class,
+            'searchTabs' => Catalog\View\Helper\Root\SearchTabs::class,
         ],
     ],
 
