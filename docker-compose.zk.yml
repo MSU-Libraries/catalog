@@ -13,6 +13,7 @@ services:
     volumes:
       - zk-data:/data
       - zk-datalog:/datalog
+      - zk-logs:/logs
     hostname: zk{{slice .Node.Hostname 8 9}}
     environment:
       ZOO_MY_ID: "{{slice .Node.Hostname 8 9}}"
@@ -43,3 +44,4 @@ networks:
 volumes:
   zk-data:
   zk-datalog:
+  zk-logs:
