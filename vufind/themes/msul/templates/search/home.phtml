@@ -13,17 +13,8 @@
   }
 
   $this->layout()->breadcrumbs = false;
+  // MSU -- render searchbox right away, otherwise tab underlining will fail
+  $this->layout()->searchbox = $this->context($this)->renderInContext('search/searchbox.phtml', []);
 ?>
-
-<?php
-  // MSU -- This search box is in body of search home pages and is hidden as we're using the one in header
-  // Removing this form breaks the tab underlining for some reason, so we have to keep it here
-?>
-<div class="searchHomeContent" style="display: none;">
-  <?php $this->slot('search-home-hero')->start() ?>
-    <?=$this->render('search/searchbox.phtml')?>
-    <?=$this->assetManager()->outputInlineScriptString('$("#searchForm_lookfor").focus();'); ?>
-  <?=$this->slot('search-home-hero')->end() ?>
-</div>
 
 <?=implode('', array_map([$this, 'contentBlock'], $blocks ?? []))?>
