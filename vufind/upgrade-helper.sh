@@ -40,7 +40,7 @@ default_args() {
     ARGS[TARGET_RELEASE]=
     ARGS[CURRENT_RELEASE]=
     # Ignore changes in these partial paths since we don't override them in our local code
-    IGNORE_PATHS=( "themes/bootstrap5" "themes/bootprint3" "themes/local_mixin_example" "themes/local_theme_example" "themes/sandal" "themes/sandal5" )
+    IGNORE_PATHS=( "themes/bootstrap3" "themes/bootprint3" "themes/local_mixin_example" "themes/local_theme_example" "themes/sandal" "themes/sandal5" )
 }
 
 # Parse command arguments
