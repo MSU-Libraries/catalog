@@ -585,7 +585,10 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $nextBatch = [];
             $sortNeeded = false;
             $number = 0;
-            $folioItemsForHolding = array_filter($folioItems, fn ($item) => $item->queryHoldingsRecordId == $holding->id);
+            $folioItemsForHolding = array_filter(
+                $folioItems,
+                fn ($item) => $item->queryHoldingsRecordId == $holding->id
+            );
             foreach ($folioItemsForHolding as $item) {
                 if ($item->discoverySuppress ?? false) {
                     continue;
