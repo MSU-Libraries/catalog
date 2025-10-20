@@ -250,7 +250,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 $querySuffix
             ) as $item
         ) {
-            $item->queryHoldingsRecordId = $holdingIds[0];
+            $item->queryHoldingsRecordId = $item->holdingsRecordId;
             $items[] = $item;
         }
         $boundWithItemIds = [];
