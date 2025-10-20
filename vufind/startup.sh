@@ -65,12 +65,12 @@ ln -f -s /mnt/shared/config/RequestNotices.yaml /usr/local/vufind/local/config/v
 clear-vufind-cache
 
 verbose "Running Solr query with healthcheck ID to confirm Solr readiness"
-OUTPUT=$(curl --max-time 5 -o /dev/null -s "http://solr:8983/solr/biblio/select?fl=%2A&wt=json&json.nl=arrarr&q=id%3A%22folio.${FOLIO_REC_ID}%22")
+curl --max-time 5 -o /dev/null -s "http://solr:8983/solr/biblio/select?fl=%2A&wt=json&json.nl=arrarr&q=id%3A%22folio.${FOLIO_REC_ID}%22"
 EXIT_STATUS=$?
 while [[ "$EXIT_STATUS" -eq 28 ]]; do # exit code 28 is curl timeout
     verbose "Solr not ready yet (timed out). Waiting..."
     sleep 5
-    OUTPUT=$(curl --max-time 5 -o /dev/null -s "http://solr:8983/solr/biblio/select?fl=%2A&wt=json&json.nl=arrarr&q=id%3A%22folio.${FOLIO_REC_ID}%22")
+    curl --max-time 5 -o /dev/null -s "http://solr:8983/solr/biblio/select?fl=%2A&wt=json&json.nl=arrarr&q=id%3A%22folio.${FOLIO_REC_ID}%22"
     EXIT_STATUS=$?
 done
 verbose "Solr ready!"

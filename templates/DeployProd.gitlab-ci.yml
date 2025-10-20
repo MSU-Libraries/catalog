@@ -92,6 +92,19 @@ Deploy Prod Solr:
     - Deploy Prod ZK
     - Bootstrap Prod Stacks
 
+Create Prod Solr Collections:
+  stage: Deploy Prod
+  extends: Create Solr Collections
+  environment:
+    name: $CI_COMMIT_BRANCH-prod/create-solr-colls
+    auto_stop_in: 2 weeks
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Deploy Prod Solr
+
 Deploy Prod DB:
   stage: Deploy Prod
   extends: Deploy DB
@@ -175,7 +188,7 @@ Verify Prod Solr Health:
       artifacts: true
     - job: Deploy Prod Compose Files
       artifacts: true
-    - Deploy Prod Solr
+    - Create Prod Solr Collections
 
 Verify Prod DB Health:
   stage: Deploy Prod

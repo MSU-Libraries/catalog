@@ -151,6 +151,21 @@ Deploy Solr:
   script:
     - bash ./cicd/deploy-solr
 
+Create Solr Collections:
+  extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/create-solr-colls
+    auto_stop_in: 2 weeks
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Deploy Solr
+  script:
+    - bash ./cicd/create-solr-collections
+
 Deploy DB:
   extends: .stack_template
   environment:
@@ -259,7 +274,7 @@ Verify Solr Health:
       artifacts: true
     - job: Deploy Compose Files
       artifacts: true
-    - Deploy Solr
+    - Create Solr Collections
   script:
     - bash ./cicd/verify-solr-health
 
