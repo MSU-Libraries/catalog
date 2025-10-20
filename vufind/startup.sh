@@ -64,67 +64,6 @@ ln -f -s /mnt/shared/config/RequestNotices.yaml /usr/local/vufind/local/config/v
 # Prepare cache cli dir (volume only exists after start)
 clear-vufind-cache
 
-# Ensure SolrCloud is available prior to creating Collections
-CLUSTER_STATUS_URL="http://solr:8983/solr/admin/collections?action=clusterstatus"
-SOLR_CLUSTER_SIZE=0
-while [[ "$SOLR_CLUSTER_SIZE" -lt 1 ]]; do
-    verbose "No Solr nodes online yet. Waiting..."
-    sleep 5
-    SOLR_CLUSTER_SIZE=$(curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.live_nodes | length")
-done
-verbose "Solr nodes online."
-
-# Sleep before creating collections so all
-# nodes don't try at the same time
-SLEEP_TIME=$(( NODE*4 ))
-sleep $SLEEP_TIME
-
-# Create Solr collections
-# biblio needs to be done first in order to initialize the ICUTokenizerFactory
-COLLS=("biblio1" "biblio2" "authority" "reserves" "website")
-for COLL in "${COLLS[@]}"
-do
-    # See if the collection already exists in Solr
-    verbose "Existing collections:"
-    curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.collections | keys[]"
-
-    MATCHED_COLL=$(curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.collections | keys[]" | grep "${COLL}")
-    while [[ -z "${MATCHED_COLL}" ]]; do
-        verbose "Existing collections:"
-        curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.collections | keys[]"
-
-        # Create collection
-        OUTPUT=$(curl -s "http://solr:8983/solr/admin/collections?action=CREATE&name=${COLL}&numShards=1&replicationFactor=3&wt=xml&collection.configName=${COLL}")
-        HAS_ERROR=$(echo "${OUTPUT}" | grep -c "SolrException")
-
-        if [[ ${HAS_ERROR} -gt 0 ]]; then
-            verbose "Failed to create Solr collection ${COLL}. ${OUTPUT}"
-            sleep 5
-        else
-            verbose "Created Solr collection for ${COLL}."
-            # Not breaking here so we can do a final curl call to verify it is showing in the cluster status properly
-        fi
-        MATCHED_COLL=$(curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.collections | keys[]" | grep "${COLL}")
-    done
-    verbose "Verified that Solr collection ${COLL} exists."
-done
-
-verbose "If there are no aliases create them"
-if ! ALIASES=$(curl "http://solr:8983/solr/admin/collections?action=LISTALIASES&wt=json" -s); then
-    verbose "Failed to query to the collection aliases in Solr. Exiting. ${ALIASES}"
-    exit 1
-fi
-if ! [[ "${ALIASES}" =~ .*"biblio".* ]]; then
-    if ! OUTPUT=$(curl -s "http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio&collections=biblio1"); then
-        verbose "Failed to create biblio alias pointing to biblio1. Exiting. ${OUTPUT}"
-        exit 1
-    fi
-    if ! OUTPUT=$(curl -s "http://solr:8983/solr/admin/collections?action=CREATEALIAS&name=biblio-build&collections=biblio2");then
-        verbose "Failed to create biblio-build alias pointing to biblio2. Exiting. ${OUTPUT}"
-        exit 1
-    fi
-fi
-
 verbose "Running Solr query with healthcheck ID to confirm Solr readiness"
 OUTPUT=$(curl --max-time 5 -o /dev/null -s "http://solr:8983/solr/biblio/select?fl=%2A&wt=json&json.nl=arrarr&q=id%3A%22folio.${FOLIO_REC_ID}%22")
 EXIT_STATUS=$?

@@ -46,6 +46,18 @@ check() {
     done
 }
 
+run_script() {
+    SCRIPT=$1;
+    NODE_HOSTNAME=$(node_hostname "1")
+    echo "$(date +'%m-%d-%Y %T %z') -- (${NODE_HOSTNAME}): Running: $SCRIPT";
+    if run_on_node "${HOST}" "$SCRIPT"; then
+        echo "$(date +'%m-%d-%Y %T %z') -- (${NODE_HOSTNAME}): Success!";
+    else
+        echo "$(date +'%m-%d-%Y %T %z') -- (${NODE_HOSTNAME}): Failure!";
+        exit 1;
+    fi
+}
+
 get_pc_common() {
     git clone "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure.git" /tmp/catalog-infrastructure/
     cp /tmp/catalog-infrastructure/configure-playbook/roles/deploy-helper-scripts/files/pc-common .

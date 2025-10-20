@@ -182,12 +182,10 @@ Deploy Vufind:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Deploy Internal Network
     - Build Captcha Image
     - Build Vufind Image
-    - Deploy DB
-    - Deploy Solr
-    - Deploy Compose Files
+    - Verify DB Health
+    - Verify Solr Health
   script:
     - bash ./cicd/deploy-vufind
   artifacts:
@@ -234,7 +232,7 @@ Deploy Monitoring:
   script:
     - bash ./cicd/deploy-monitoring
 
-Verify Stack Health:
+Verify Docker Health:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/verify
@@ -248,7 +246,37 @@ Verify Stack Health:
     - Deploy Monitoring
     - Deploy Vufind
   script:
-    - bash ./cicd/verify-stack-health
+    - bash ./cicd/verify-docker-health
+
+Verify Solr Health:
+  extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/verify
+    auto_stop_in: 2 weeks
+  timeout: 40m
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - job: Deploy Compose Files
+      artifacts: true
+    - Deploy Solr
+  script:
+    - bash ./cicd/verify-solr-health
+
+Verify DB Health:
+  extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/verify
+    auto_stop_in: 2 weeks
+  timeout: 40m
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - job: Deploy Compose Files
+      artifacts: true
+    - Deploy DB
+  script:
+    - bash ./cicd/verify-db-health
 
 Populate Vufind Environment:
   extends: .stack_template
@@ -261,7 +289,7 @@ Populate Vufind Environment:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Verify Stack Health
+    - Verify Docker Health
   script:
     - bash ./cicd/populate-vufind-environment
 
@@ -280,7 +308,7 @@ Populate Course Reserves:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Verify Stack Health
+    - Verify Docker Health
   script:
     - bash ./cicd/populate-coursereserves
 
@@ -295,7 +323,7 @@ Run Functional Tests:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Verify Stack Health
+    - Verify Docker Health
   script:
     - bash ./cicd/run-functional-tests
 
