@@ -50,7 +50,7 @@ run_script() {
     SCRIPT=$1;
     NODE_HOSTNAME=$(node_hostname "1")
     echo "$(date +'%m-%d-%Y %T %z') -- (${NODE_HOSTNAME}): Running: $SCRIPT";
-    if run_on_node "${HOST}" "$SCRIPT"; then
+    if run_on_node "1" "$SCRIPT"; then
         echo "$(date +'%m-%d-%Y %T %z') -- (${NODE_HOSTNAME}): Success!";
     else
         echo "$(date +'%m-%d-%Y %T %z') -- (${NODE_HOSTNAME}): Failure!";
