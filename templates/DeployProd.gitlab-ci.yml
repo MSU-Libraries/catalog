@@ -163,6 +163,7 @@ Verify Prod Docker Health:
     - Deploy Prod Vufind
 
 Verify Prod Solr Health:
+  stage: Deploy Prod
   extends: Verify Solr Health
   environment:
     name: $CI_COMMIT_BRANCH-prod/verify
@@ -177,6 +178,7 @@ Verify Prod Solr Health:
     - Deploy Prod Solr
 
 Verify Prod DB Health:
+  stage: Deploy Prod
   extends: Verify DB Health
   environment:
     name: $CI_COMMIT_BRANCH-prod/verify
