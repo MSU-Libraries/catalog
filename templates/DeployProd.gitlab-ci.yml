@@ -163,38 +163,32 @@ Verify Prod Docker Health:
     - Deploy Prod Vufind
 
 Verify Prod Solr Health:
-  extends: .stack_template
+  extends: Verify Solr Health
   environment:
-    name: $CI_COMMIT_BRANCH/verify
+    name: $CI_COMMIT_BRANCH-prod/verify
     auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-  timeout: 40m
   needs:
     - job: Set Stack Name
       artifacts: true
     - job: Deploy Prod Compose Files
       artifacts: true
     - Deploy Prod Solr
-  script:
-    - bash ./cicd/verify-solr-health
 
 Verify Prod DB Health:
-  extends: .stack_template
+  extends: Verify DB Health
   environment:
-    name: $CI_COMMIT_BRANCH/verify
+    name: $CI_COMMIT_BRANCH-prod/verify
     auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-  timeout: 40m
   needs:
     - job: Set Stack Name
       artifacts: true
     - job: Deploy Prod Compose Files
       artifacts: true
     - Deploy Prod DB
-  script:
-    - bash ./cicd/verify-db-health
 
 Prod Run Functional Tests:
   stage: Deploy Prod
