@@ -103,6 +103,8 @@ Create Prod Solr Collections:
   needs:
     - job: Set Stack Name
       artifacts: true
+    - job: Deploy Prod Compose Files
+      artifacts: true
     - Deploy Prod Solr
 
 Deploy Prod DB:
