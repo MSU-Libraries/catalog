@@ -167,6 +167,8 @@ Verify Prod Solr Health:
   environment:
     name: $CI_COMMIT_BRANCH/verify
     auto_stop_in: 2 weeks
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   timeout: 40m
   needs:
     - job: Set Stack Name
@@ -182,6 +184,8 @@ Verify Prod DB Health:
   environment:
     name: $CI_COMMIT_BRANCH/verify
     auto_stop_in: 2 weeks
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   timeout: 40m
   needs:
     - job: Set Stack Name
