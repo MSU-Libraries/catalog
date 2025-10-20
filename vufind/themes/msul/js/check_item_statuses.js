@@ -129,10 +129,8 @@ VuFind.register('itemStatuses', function ItemStatuses() {
       });
 
       // PC-667 Required to load Get this button lightbox after added via AJAX
-      items.forEach(item => {
-        var el = item.el.id;
-        VuFind.lightbox.bind("#" + el);
-      });
+      // PC-1544 Note: elements in the "All" tab search results do not have an id
+      items.forEach(item => VuFind.lightbox.bind(item.el));
 
       VuFind.emit("item-status-done");
     });

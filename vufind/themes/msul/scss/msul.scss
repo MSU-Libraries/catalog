@@ -29,7 +29,9 @@
   }
 }
 
-.badge {
+// Styling for all badges except the format badges on
+// search result pages
+.badge:not(.format) {
   background-color: inherit;
   font-weight: bold;
   font-size: 1.1rem;
