@@ -58,8 +58,10 @@ main() {
         echo "Running Folio import now (pc-import-folio)";
         run_on_node "${CATALOG_NODE}" "docker exec ${CATALOG_CONTAINER} /usr/local/bin/pc-import-folio -c /mnt/shared/oai/devel-batch -l 1 -b -r >/dev/null 2>&1";
         echo "Import completed with exit code $?";
+        echo "Copying file for HLM import";
+        run_on_node "${CATALOG_NODE}" "docker exec ${CATALOG_CONTAINER} cp /mnt/shared/hlm/devel-batch/* local/harvest/hlm/";
         echo "Running HLM import now (pc-import-hlm)";
-        run_on_node "${CATALOG_NODE}" "docker exec ${CATALOG_CONTAINER} /usr/local/bin/pc-import-hlm -l 1 -c -i -s /mnt/shared/hlm/devel-batch >/dev/null 2>&1";
+        run_on_node "${CATALOG_NODE}" "docker exec ${CATALOG_CONTAINER} /usr/local/bin/pc-import-hlm -i >/dev/null 2>&1";
         echo "Import completed with exit code $?";
         # Rebuild alphabetic browse databases
         echo "Running Alphabetic browse database build";

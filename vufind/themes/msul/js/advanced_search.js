@@ -359,12 +359,9 @@ function JSifyLeveledSelect() {
 $(function advSearchReady() {
   $('.clear-btn').on("click", function clearBtnClick() {
     //MSUL a11y announces All Fields Cleared on click
-    window.setTimeout(function fn() {
-      document.getElementById('msulClearall').innerText = 'All Fields';
-    }, 10);
-    window.setTimeout(function fn() {
-      document.body.removeChild(document.getElementById('msulClearall').innerText = '');
-    }, 5000);
+    let span = $(this).children('span').first();
+    setTimeout(() => span.text('All Fields'), 10);
+    setTimeout(() => span.empty(), 5000);
     //MSUL end a11y fix
     $('input[type="text"]').val('');
     $('input[type="checkbox"],input[type="radio"]').each(function onEachCheckbox() {

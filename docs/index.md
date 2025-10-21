@@ -16,6 +16,7 @@ questions or suggestions you have!
 
 ## Administration
 
+* [General](general.md)
 * [Backup & Restore](backup-and-restore.md)
 * [Upgrading](upgrading.md)
 * [VuFind](vufind.md)
