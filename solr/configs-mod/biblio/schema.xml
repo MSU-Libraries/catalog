@@ -28,6 +28,7 @@
         <field name="invalid_isn" type="isn" indexed="true" stored="false" multiValued="true"/>
     </fields>
     <copyField source="allfields" dest="spelling" deleteElement="true"/>
+    <copyField source="allfields" dest="allfields_unstemmed" deleteElement="true"/>
     <copyField source="allfields_unstemmed" dest="spelling"/>
     <copyField source="format" dest="allfields" deleteElement="true"/>
     <copyField source="title" dest="title_exactish"/>
