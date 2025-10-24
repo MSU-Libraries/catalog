@@ -4,6 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Detroit
 ENV PIPX_HOME=/opt/pipx
 ENV PIPX_BIN_DIR=/usr/local/bin
+ENV SOLR_LOGS_DIR=/mnt/logs/solr
 ARG VUFIND_VERSION
 
 USER root
@@ -82,9 +83,6 @@ RUN \
     # Create solr data directory with the right permissions
     mkdir -p /var/solr/data && \
     chown -R "${SOLR_UID}:${SOLR_GID}" /var/solr && \
-    # Use /mnt/logs/solr for the Solr logs
-    rm -rf /var/solr/logs && \
-    ln -s /mnt/logs/solr /var/solr/logs && \
     cp /tmp/build/solr-zk-shell.sh /usr/local/bin/solr-zk-shell && \
     cd /opt/solr && \
     rm -r /tmp/build/
