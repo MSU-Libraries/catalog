@@ -8,7 +8,7 @@ stages:
   - Release
 
 variables:
-  VUFIND_VERSION: "10.2.0"
+  VUFIND_VERSION: "10.2.1"
   SIMPLESAMLPHP_VERSION: "2.1.1"
   COMPOSE_PATH: /home/deploy/$STACK_NAME
   SSH_USER: "deploy"
@@ -312,7 +312,6 @@ Remove Environment:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Deploy Vufind
   script:
     - ./cicd/remove-environment
 
