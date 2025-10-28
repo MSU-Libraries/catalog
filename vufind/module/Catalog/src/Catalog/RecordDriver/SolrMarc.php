@@ -1714,10 +1714,13 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Utility function for getAllSubjectHeadings()
      * Check if subject should be skipped
+     *
      * @param array $field the subject field, as returned by the MARC reader
+     *
      * @return bool true if the subject should be skipped
      */
-    private function skipSubject($field) {
+    private function skipSubject($field)
+    {
         // Skip if ind2 = 6, or ind2 = 7 and $2 does not match SOURCE_WHITELIST
         if ($field['i2'] == '6') {
             return true;
@@ -1735,10 +1738,13 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Utility function for getAllSubjectHeadings()
      * Get the transliterated 880 values for each result if it has a subfield 6
+     *
      * @param array $field the subject field, as returned by the MARC reader
+     *
      * @return array the transliterated 880 values
      */
-    private function getLinked($field) {
+    private function getLinked($field)
+    {
         $linked = [];
         foreach ($field['subfields'] as $subfield) {
             if ($subfield['code'] == '6') {
@@ -1762,11 +1768,14 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      * Utility function for getAllSubjectHeadings()
      * Get all the chunks and collect them together:
      * Track the previous subfield code and index so we can get the correct linked one.
+     *
      * @param array $field the subject field, as returned by the MARC reader
      * @param array $linked the transliterated 880 values
+     *
      * @return array chunks of the current heading
      */
-    private function getChunks($field, $linked) {
+    private function getChunks($field, $linked)
+    {
         $current = [];
         $prevCode = '';
         $codeIndex = 0;
@@ -1808,10 +1817,14 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Utility function for getAllSubjectHeadings()
      * Add unmatched 880 fields to the results
+     *
      * @param array $subjectFieldsKeys subject fields keys
-     * @param array &$retval results, passed by reference
+     * @param array $retval            results, passed by reference
+     *
+     * @return void
      */
-    private function addUnmatched($subjectFieldsKeys, &$retval) {
+    private function addUnmatched($subjectFieldsKeys, &$retval)
+    {
         foreach ($subjectFieldsKeys as $subjectFieldKey) {
             $linkedFields = $this->getMarcReader()->getLinkedFields('880', $subjectFieldKey, []);
             foreach ($linkedFields as $linkedField) {
