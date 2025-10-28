@@ -53,7 +53,6 @@ AllFields:
     - genre^300
     - allfields_unstemmed^10
     - fulltext_unstemmed^10
-    - allfields
     - fulltext
     - description
     - isbn
@@ -67,9 +66,9 @@ field. This ensures that a term that matches the title of an item will be
 ranked higher (and appear earlier) in search results than if the match were
 in, say, the description of the item.
 
-The presence of a generic `allfields` field in the list indicates that all
-fields indexed in VuFind should return results in the default search box.
-Searching within the confines of a limiter, such as author or title,
+The presence of a generic `allfields_unstemmed` field in the list indicates
+that all fields indexed in VuFind should return results in the default search
+box. Searching within the confines of a limiter, such as author or title,
 simply reduces the number of results.
 
 The search configurations for each of these fielded searches are
