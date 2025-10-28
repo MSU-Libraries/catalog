@@ -6,9 +6,10 @@
   .home-facet {
     padding-right:5%;
     padding-left:5%;
+    border-right:1px solid $medgray;
 
     &.home-reserves {
-      border-left:1px solid $medgray;
+      border-right:none;
     }
   }
   form.searchForm {
@@ -30,7 +31,10 @@
     }
     #reservesSearchForm_lookfor,
     #alphaBrowseForm_from,
-    #alphaBrowseForm_source {
+    #alphaBrowseForm_source,
+    #browseForm_source,
+    {
+      min-width: 17rem;
       width:100%;
     }
     h2 {
