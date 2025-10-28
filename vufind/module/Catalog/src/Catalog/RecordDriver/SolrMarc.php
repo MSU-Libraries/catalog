@@ -33,6 +33,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 {
     public const LINKSUBF = '6'; // subfield code that has field link information
     public const UNLINKPOS = '00'; // occurance position in the linked subfield that represents unlinked 880s
+    // SOURCE_WHITELIST should match the list used for topic in marc_local.properties
+    private const SOURCE_WHITELIST = '/^lcgft|aat|local|gsafd|tgm|olacvggt|vgmsgg|discogsgenre|' .
+        'discogsstyle|rbgenr|rbbin|rbpap|rbpri|rbprov|rbtyp|rbmscv|homoit|homoit/eng$/';
 
     /**
      * Fields that may contain subject headings, and their descriptions
@@ -1709,6 +1712,129 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Utility function for getAllSubjectHeadings()
+     * Check if subject should be skipped
+     * @param array $field the subject field, as returned by the MARC reader
+     * @return bool true if the subject should be skipped
+     */
+    private function skipSubject($field) {
+        // Skip if ind2 = 6, or ind2 = 7 and $2 does not match SOURCE_WHITELIST
+        if ($field['i2'] == '6') {
+            return true;
+        }
+        if ($field['i2'] == '7') {
+            foreach ($field['subfields'] as $sf) {
+                if ($sf['code'] == '2' && !preg_match(self::SOURCE_WHITELIST, $sf['data'])) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Utility function for getAllSubjectHeadings()
+     * Get the transliterated 880 values for each result if it has a subfield 6
+     * @param array $field the subject field, as returned by the MARC reader
+     * @return array the transliterated 880 values
+     */
+    private function getLinked($field) {
+        $linked = [];
+        foreach ($field['subfields'] as $subfield) {
+            if ($subfield['code'] == '6') {
+                $explodedSubfield = explode('-', $subfield['data']);
+                if (count($explodedSubfield) > 1) {
+                    $index = $explodedSubfield[1];
+                    $linked = $this->getMarcReader()->getLinkedField(
+                        '880',
+                        $field['tag'],
+                        $index,
+                        range('a', 'z')
+                    );
+                    break;
+                }
+            }
+        }
+        return $linked;
+    }
+
+    /**
+     * Utility function for getAllSubjectHeadings()
+     * Get all the chunks and collect them together:
+     * Track the previous subfield code and index so we can get the correct linked one.
+     * @param array $field the subject field, as returned by the MARC reader
+     * @param array $linked the transliterated 880 values
+     * @return array chunks of the current heading
+     */
+    private function getChunks($field, $linked) {
+        $current = [];
+        $prevCode = '';
+        $codeIndex = 0;
+        foreach ($field['subfields'] as $subfield) {
+            if ($prevCode == $subfield['code']) {
+                $codeIndex = $codeIndex + 1;
+            }
+            // Numeric subfields are for control purposes and should not
+            // be displayed:
+            if (!is_numeric($subfield['code'])) {
+                $linkedVal = '';
+                if (array_key_exists('subfields', $linked)) {
+                    $linkedPrevCode = '';
+                    $linkedCodeIndex = 0;
+                    foreach ($linked['subfields'] as $linkedSubfield) {
+                        if ($linkedPrevCode == $linkedSubfield['code']) {
+                            $linkedCodeIndex = $linkedCodeIndex + 1;
+                        }
+                        // Use if we found the matching subfield code
+                        // and it is not the same value as the original
+                        if (
+                            $linkedSubfield['code'] == $subfield['code'] &&
+                            $linkedCodeIndex == $codeIndex &&
+                            $linkedSubfield['data'] != $subfield['data']
+                        ) {
+                            $linkedVal = $linkedSubfield['data'];
+                            break;
+                        }
+                        $linkedPrevCode = $linkedSubfield['code'];
+                    }
+                }
+                $current[] = ['subject' => $subfield['data'], 'linked' => $linkedVal];
+                $prevCode = $subfield['code'];
+            }
+        }
+        return $current;
+    }
+
+    /**
+     * Utility function for getAllSubjectHeadings()
+     * Add unmatched 880 fields to the results
+     * @param array $subjectFieldsKeys subject fields keys
+     * @param array &$retval results, passed by reference
+     */
+    private function addUnmatched($subjectFieldsKeys, &$retval) {
+        foreach ($subjectFieldsKeys as $subjectFieldKey) {
+            $linkedFields = $this->getMarcReader()->getLinkedFields('880', $subjectFieldKey, []);
+            foreach ($linkedFields as $linkedField) {
+                // Anytime there is a link with an occurrence of '00' it means it is unlinked
+                if ($linkedField['link']['occurrence'] != self::UNLINKPOS) {
+                    continue;
+                }
+                // Skip in some cases
+                if ($this->skipSubject($linkedField)) {
+                    continue;
+                }
+                $current = [];
+                foreach ($linkedField['subfields'] as $subfield) {
+                    if ($subfield['code'] != '6') {
+                        $current[] = ['subject' => $subfield['data'], 'linked' => ''];
+                    }
+                }
+                $retval[] = $current;
+            }
+        }
+    }
+
+    /**
      * Modification of the original function in MarcAdvancedTrait.php to display subjects in same order ad marc records
      * Get all subject headings associated with this record. Each heading is
      * returned as an array of chunks, increasing from least specific to most
@@ -1726,94 +1852,28 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getAllSubjectHeadings($extended = false)
     {
+        /* START MSU */
+        /* This function is heavily modified */
         // This is all the collected data:
         $retval = [];
 
-        /* START MSU */
-        /* This modification replaces the two foreach from the trait */
         $allFields = $this->getMarcReader()->getAllFields();
         $subjectFieldsKeys = array_keys($this->subjectFields);
         // Go through all the fields and handle them if they are part of what we want
-        // and does NOT have ind2 = 6
         foreach ($allFields as $result) {
-            if (isset($result['tag']) && in_array($result['tag'], $subjectFieldsKeys) && $result['i2'] != '6') {
-                // MSU:  Skip if $2 == fast (PC-1216)
-                $skip = false;
-                foreach ($result['subfields'] as $sf) {
-                    if ($sf['code'] == '2' && $sf['data'] == 'fast') {
-                        $skip = true;
-                        break;
-                    }
-                }
-                if ($skip) {
-                    continue;
-                }
-
+            if (
+                isset($result['tag'])
+                && in_array($result['tag'], $subjectFieldsKeys)
+                && !$this->skipSubject($result)
+            ) {
                 $fieldType = $this->subjectFields[$result['tag']];
 
-                // Start an array for holding the chunks of the current heading:
-                $current = [];
+                $linked = $this->getLinked($result);
 
-                /* START MSU */
-                // Get the transliterated 880 values for each result
-                // if it has a subfield 6
-                $linked = [];
-                foreach ($result['subfields'] as $subfield) {
-                    if ($subfield['code'] == '6') {
-                        $explodedSubfield = explode('-', $subfield['data']);
-                        if (count($explodedSubfield) > 1) {
-                            $index = $explodedSubfield[1];
-                            $linked = $this->getMarcReader()->getLinkedField(
-                                '880',
-                                $result['tag'],
-                                $index,
-                                range('a', 'z')
-                            );
-                            break;
-                        }
-                    }
-                }
+                $current = $this->getChunks($result, $linked);
 
-                // Get all the chunks and collect them together:
-                // Track the previous subfield code and index so we can get the
-                // correct linked one.
-                $prevCode = '';
-                $codeIndex = 0;
-                foreach ($result['subfields'] as $subfield) {
-                    if ($prevCode == $subfield['code']) {
-                        $codeIndex = $codeIndex + 1;
-                    }
-                    // Numeric subfields are for control purposes and should not
-                    // be displayed:
-                    if (!is_numeric($subfield['code'])) {
-                        $linkedVal = '';
-                        if (array_key_exists('subfields', $linked)) {
-                            $linkedPrevCode = '';
-                            $linkedCodeIndex = 0;
-                            foreach ($linked['subfields'] as $linkedSubfield) {
-                                if ($linkedPrevCode == $linkedSubfield['code']) {
-                                    $linkedCodeIndex = $linkedCodeIndex + 1;
-                                }
-                                // Use if we found the matching subfield code
-                                // and it is not the same value as the original
-                                if (
-                                    $linkedSubfield['code'] == $subfield['code'] &&
-                                    $linkedCodeIndex == $codeIndex &&
-                                    $linkedSubfield['data'] != $subfield['data']
-                                ) {
-                                    $linkedVal = $linkedSubfield['data'];
-                                    break;
-                                }
-                                $linkedPrevCode = $linkedSubfield['code'];
-                            }
-                        }
-                        $current[] = ['subject' => $subfield['data'], 'linked' => $linkedVal];
-                        $prevCode = $subfield['code'];
-                    }
-                }
-                /* MSU END */
-
-                // If we found at least one chunk, add a heading to our result:
+                // NOT MSU: If we found at least one chunk, add a heading to our result:
+                // (in Vufind this code is part of MarcAdvancedTrait - processSubjectHeadings())
                 if (!empty($current)) {
                     if ($extended) {
                         $sourceIndicator = $result['i2'];
@@ -1836,42 +1896,14 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             }
         }
 
-        // MSU Get unmatched 880 fields
-        foreach ($subjectFieldsKeys as $subjectFieldKey) {
-            $linkedFields = $this->getMarcReader()->getLinkedFields('880', $subjectFieldKey, []);
-            foreach ($linkedFields as $linkedField) {
-                // Anytime there is a link with an occurrence of '00' it means it is unlinked
-                if ($linkedField['link']['occurrence'] != self::UNLINKPOS) {
-                    continue;
-                }
-                $fieldVals = [];
-                // MSU:  Skip if $2 == fast (PC-1216)
-                $skip = false;
-                foreach ($linkedField['subfields'] as $sf) {
-                    if ($sf['code'] == '2' && $sf['data'] == 'fast') {
-                        $skip = true;
-                        break;
-                    }
-                }
-                if ($skip) {
-                    continue;
-                }
-                $current = [];
-                foreach ($linkedField['subfields'] as $subfield) {
-                    if ($subfield['code'] != '6') {
-                        //$fieldVals[] = $subfield['data'];
-                        $current[] = ['subject' => $subfield['data'], 'linked' => ''];
-                    }
-                }
-                $retval[] = $current;
-            }
-        }
+        $this->addUnmatched($subjectFieldsKeys, $retval);
 
         // Remove duplicates and then send back everything we collected:
         return array_map(
             'unserialize',
             array_unique(array_map('serialize', $retval))
         );
+        /* MSU END */
     }
 
     /**
