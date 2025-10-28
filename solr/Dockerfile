@@ -70,6 +70,8 @@ RUN \
     sed -i 's/title_fullStr/title_browse/' /solr_confs/biblio/conf/solrconfig.xml && \
     # Browse by title: limit size of extra fields to avoid a timeout - PC-1384
     sed -i 's/<lst name="title">/<lst name="title">\n      <str name="maxBibListSize">1000<\/str>/' /solr_confs/biblio/conf/solrconfig.xml && \
+    # Replace default (df) of allfields by allfields_unstemmed (PC-1393)
+    sed -i 's/>allfields</>allfields_unstemmed</g' /solr_confs/biblio/conf/solrconfig.xml && \
     # Apply customizations to the Solr schema
     xsltproc --stringparam modFile "/tmp/build/configs-mod/biblio/schema.xml" \
         /tmp/build/configs-mod/schema.xslt /solr_confs/biblio/conf/schema.xml \
