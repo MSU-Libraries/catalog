@@ -35,7 +35,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public const UNLINKPOS = '00'; // occurance position in the linked subfield that represents unlinked 880s
     // SOURCE_WHITELIST should match the list used for topic in marc_local.properties
     private const SOURCE_WHITELIST = '/^lcgft|aat|local|gsafd|tgm|olacvggt|vgmsgg|discogsgenre|' .
-        'discogsstyle|rbgenr|rbbin|rbpap|rbpri|rbprov|rbtyp|rbmscv|homoit|homoit/eng$/';
+        'discogsstyle|rbgenr|rbbin|rbpap|rbpri|rbprov|rbtyp|rbmscv|homoit|homoit\/eng$/';
 
     /**
      * Fields that may contain subject headings, and their descriptions
@@ -1769,7 +1769,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      * Get all the chunks and collect them together:
      * Track the previous subfield code and index so we can get the correct linked one.
      *
-     * @param array $field the subject field, as returned by the MARC reader
+     * @param array $field  the subject field, as returned by the MARC reader
      * @param array $linked the transliterated 880 values
      *
      * @return array chunks of the current heading
