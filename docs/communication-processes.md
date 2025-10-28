@@ -4,12 +4,29 @@
 
 This document contains who to contact and when in various circumstances.
 
+## Patch VuFind Version Upgrades
+
+### What Qualifies
+
+* Any VuFind patch release upgrade. Which would include increments
+  to the 3rd number of the version (1.2.1 to 1.2.2).
+
+### What Information to Include in Communication
+
+* Highlights of any key changes in the upgrade that impact our institution
+
+### Communication Method
+
+| Who to Contact                                            | When to Contact                      |
+|-----------------------------------------------------------|--------------------------------------|
+| Library Staff Newsletter                                  | Newsletter edition after the upgrade |
+
 ## Minor VuFind Version Upgrades
 
 ### What Qualifies
 
 * Any VuFind minor release upgrade. Which would include increments
-  to the 2nd or 3rd number of the version (1.2 to 1.3 or 1.2.1 to 1.2.2).
+  to the 2nd number of the version (1.2 to 1.3 or 1.2.1 to 1.3.1).
 
 ### What Information to Include in Communication
 
@@ -21,6 +38,7 @@ This document contains who to contact and when in various circumstances.
 | Who to Contact                                            | When to Contact                      |
 |-----------------------------------------------------------|--------------------------------------|
 | [LIB.DL.libstaff@msu.edu](mailto:LIB.DL.libstaff@msu.edu) | Within the week prior to the upgrade |
+| Library Staff Newsletter                                  | Newsletter edition after the upgrade |
 
 ## Major VuFind Version Upgrades
 
