@@ -56,6 +56,14 @@
   }
 }
 
+// Fix the hover text color on selected items on
+// the browse page
+.browse-item {
+  &:hover {
+    color: black;
+  }
+}
+
 // HTML element overrides
 // * Note: some more specific overrides exist elsewhere,
 //   like tables.scss
