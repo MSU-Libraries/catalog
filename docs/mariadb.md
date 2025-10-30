@@ -72,16 +72,17 @@ docker stack rm $STACK_NAME-mariadb
   data from the `vufind` database.
 
 ```bash
-# Run these on all of your nodes and compare timestamps
+# Run these on all of your nodes as root and compare timestamps
 
 STACK_NAME=catalog-prod
+sudo -s # root is required to view Docker volume data
 cd /var/lib/docker/volumes/${STACK_NAME}-mariadb_db-bitnami/_data/mariadb/data
 
-# Particular file to look at would be:
+# Particular file to look at would be (in general order of importance):
 # grastate.dat, gvwstate.dat, mysql-bin*
 ls -ltr ./
 
-# Key files (tables) here are:
+# Key files (tables) here are (in general order of importance):
 # change_tracker.ibd, user.ibd, user_list.ibd
 ls -ltr vufind
 
@@ -112,10 +113,12 @@ rsync -ain /var/lib/docker/volumes/${STACK_NAME}-mariadb_db-bitnami/_data/mariad
     bootstrap the cluster with that node.
 
 * Now we're ready to start recovering the cluster from the selected node by
-  updating the `docker-compose.mariadb-cloud-force.yml` file and setting the
-  `"node.labels.nodeid==N"` to change the `N` to you your node number, i.e.
-  a value 1-3. Then also update the `max_replicas_per_node` to `1` to indicate
-  that you're ready to deploy.
+  updating the
+  `/home/deploy/${STACK_NAME}/docker-compose.mariadb-cloud-force.yml`
+  file located on node 1 in the cluster, and setting the
+  `"node.labels.nodeid==N"` to change the `N` to you
+  your node number, i.e. a value 1-3. Then also update the
+  `max_replicas_per_node` to `1` to indicate that you're ready to deploy.
 
 * Now we're ready to bring back up the stack with just the single node in
   bootstrap mode.
@@ -278,7 +281,7 @@ Comparing these, you can immediately notice some patterns:
 ## How to break the cluster
 
 ...for testing purposes only of course. In case you want to test-run the recovery
-process, you can intentionally get you Galera cluster in an unhappy state by
+process, you can intentionally get your Galera cluster in an unhappy state by
 force stopping all of the containers on all the nodes at the same time.
 
 Log on to each of the nodes in your cluster and run the commands as close together
