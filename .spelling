@@ -88,6 +88,7 @@ proxymon
 proxysolr
 reCaptcha
 restore.sh
+rsync
 solr
 startup
 stylesheets
@@ -97,6 +98,7 @@ timestamp
 tmp
 traefik
 un-pause
+uncleanly
 yml
 zk
 zk-shell
