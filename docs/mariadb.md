@@ -19,8 +19,8 @@ connect
 If you ever need to re-deploy the stack, you can use the
 [pc-deploy](helper-scripts.md#deploy-helper-pc-deploy) script.
 
-Make sure you run it as the deploy user so that the proper Docker
-container registry credentials are passed.
+You can run it as either `sudo` or the `deploy` user
+(the script will have the Docker command run as the `deploy` user either way).
 
 ```bash
 sudo pc-deploy catalog-prod mariadb-cloud
@@ -178,6 +178,10 @@ sudo rm -rf /tmp/${STACK_NAME}_mariadb_backup_$(date -I)/
 ```
 
 ### Verifying cluster health
+
+The quickest way to verify the status of the cluster is by viewing the
+monitoring application at: https://[your stack URL]/monitoring.
+Specifically look at the "Galera" status.
 
 You can verify that all nodes are joined to the cluster via the Docker service
 logs and scrolling up to look for the members list. There should be a list
