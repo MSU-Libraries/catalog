@@ -179,7 +179,7 @@ Multi-valued fields, such as Topic, can be populated from a whole set of
 fields:
 
 ```ini
-topic_facet = 600x:610x:611x:630x:648x:650a:650x:651x:655x
+topic_facet = 600x:610x:611x:630x:650a:650x:651x:655x
 ```
 
 The topic facet field pulls values from all of the MARC fields specified above.
