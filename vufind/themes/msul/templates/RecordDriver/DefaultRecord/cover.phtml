@@ -12,14 +12,14 @@
 <?php endif; ?>
 <?php /* Display thumbnail if appropriate: */ ?>
 <?php if ($cover): ?>
-  <img src="<?=$this->escapeHtmlAttr($cover); ?>" <?php if ($linkPreview): ?>data-linkpreview="true" <?php endif; ?>class="recordcover" role="presentation" alt=""> <!--PC-504: made empty alt tag, add role="presentation"-->
+  <img src="<?=$this->escapeHtmlAttr($cover); ?>" <?php if ($linkPreview): ?>data-linkpreview="true" <?php endif; ?>class="recordcover" role="presentation" alt="cover image">
 <?php elseif ($cover === false): ?>
-  <img src="<?=$this->url('cover-unavailable')?>" <?php if ($linkPreview): ?>data-linkpreview="true" <?php endif; ?>class="recordcover" role="presentation" alt=""> <!--PC-504: added role="presentation"-->
+  <img src="<?=$this->url('cover-unavailable')?>" <?php if ($linkPreview): ?>data-linkpreview="true" <?php endif; ?>class="recordcover" role="presentation" alt="no cover image">
 <?php else: ?>
   <div class="ajaxcover">
     <div class="spinner"><?=$this->icon('spinner') ?> <?=$this->translate('loading_ellipsis')?></div>
     <div class="cover-container">
-      <img <?php if ($linkPreview): ?>data-linkpreview="true" <?php endif; ?>data-context="<?=$this->escapeHtmlAttr($this->context)?>" data-recordsource="<?=$this->escapeHtmlAttr($driver->getSourceIdentifier())?>" data-recordid="<?=$this->escapeHtmlAttr($driver->getUniqueID())?>" data-coversize="<?=$this->escapeHtmlAttr($size)?>" class="recordcover ajax" role="presentation" alt=""> <!--PC-504: made empty alt tag, add role="presentation"-->
+      <img <?php if ($linkPreview): ?>data-linkpreview="true" <?php endif; ?>data-context="<?=$this->escapeHtmlAttr($this->context)?>" data-recordsource="<?=$this->escapeHtmlAttr($driver->getSourceIdentifier())?>" data-recordid="<?=$this->escapeHtmlAttr($driver->getUniqueID())?>" data-coversize="<?=$this->escapeHtmlAttr($size)?>" class="recordcover ajax" role="presentation" alt="cover image">
     </div>
   </div>
 <?php endif; ?>
