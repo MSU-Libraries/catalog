@@ -34,6 +34,7 @@ the containers one-by-one. Just wait for the restarted container to be
 "healthy" before restarting the next.
 
 ```bash
+# Run the stop command to force a new container to be created
 docker stop $(docker ps -q -f name=catalog-prod-mariadb_galera)
 # Wait for the new container to report healthy
 watch 'docker ps | grep catalog-prod-mariadb_galera'
@@ -116,7 +117,7 @@ rsync -ain /var/lib/docker/volumes/${STACK_NAME}-mariadb_db-bitnami/_data/mariad
   updating the
   `/home/deploy/${STACK_NAME}/docker-compose.mariadb-cloud-force.yml`
   file located on node 1 in the cluster, and setting the
-  `"node.labels.nodeid==N"` to change the `N` to you
+  `"node.labels.nodeid==N"` to change the `N` to
   your node number, i.e. a value 1-3. Then also update the
   `max_replicas_per_node` to `1` to indicate that you're ready to deploy.
 
