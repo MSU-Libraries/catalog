@@ -88,9 +88,9 @@
     <table class="table table-striped">
     <tr>
       <!-- MSU REMOVE -->
-      <th class="course"><?=$this->transEsc('Course')?></th>
-      <th class="instructor"><?=$this->transEsc('Instructor')?></th>
-      <th class="items"><?=$this->transEsc('Items')?></th>
+      <th scope="col" class="course"><?=$this->transEsc('Course')?></th>
+      <th scope="col" class="instructor"><?=$this->transEsc('Instructor')?></th>
+      <th scope="col" class="items"><?=$this->transEsc('Items')?></th>
     </tr>
     <?php foreach ($this->results->getResults() as $record): ?>
       <?php
