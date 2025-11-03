@@ -33,7 +33,7 @@
         <?php if (!empty($item['Data'])): ?>
           <?php if ('Au' == $item['Group'] && $authorDisplay == 'short'): ?>
             <tr>
-              <th><?=empty($item['Label']) ? '' : $this->transEsc($item['Label']) . ':'?></th>
+              <th scope="row"><?=empty($item['Label']) ? '' : $this->transEsc($item['Label']) . ':'?></th>
               <?php
                 $authors = $driver->getPrimaryAuthorsWithHighlighting();
                 $authorCount = count($authors);
@@ -59,7 +59,7 @@
             <?php /* Do nothing: skip AuInfo data in short author mode... */ ?>
           <?php else: ?>
             <tr>
-              <th><?=empty($item['Label']) ? '' : $this->transEsc($item['Label']) . ':'?></th>
+              <th scope="row"><?=empty($item['Label']) ? '' : $this->transEsc($item['Label']) . ':'?></th>
               <td class="record__biblio-value"><?=$this->driver->linkUrls($item['Data'])?></td>
             </tr>
           <?php endif; ?>
@@ -68,7 +68,7 @@
 
       <?php if ($dbLabel): ?>
         <tr>
-          <th><?=$this->transEsc('Database')?>:</th>
+          <th scope="row"><?=$this->transEsc('Database')?>:</th>
           <td><?=$this->escapeHtml($dbLabel)?></td>
         </tr>
       <?php endif; ?>
