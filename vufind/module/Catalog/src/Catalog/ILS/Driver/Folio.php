@@ -82,6 +82,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
+     * MSUL -- Can remove once PR 4810 is in our VuFind version
      * Initialize the driver.
      *
      * Check or renew our auth token
@@ -107,7 +108,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 'Token taken from ' . $cacheType . ' cache: ' . substr($this->token, 0, 30) . '...'
             );
         }
-        // MSU: added try/catch
+        // MSU: added try/catch (PR 4810)
         try {
             if ($this->token == null) {
                 $this->renewTenantToken();
