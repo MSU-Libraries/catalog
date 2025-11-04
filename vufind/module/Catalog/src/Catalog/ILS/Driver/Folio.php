@@ -82,6 +82,46 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
+     * Initialize the driver.
+     *
+     * Check or renew our auth token
+     *
+     * @return void
+     */
+    public function init()
+    {
+        $factory = $this->sessionFactory;
+        $this->sessionCache = $factory($this->tenant);
+        $cacheType = 'session';
+        if ($this->useGlobalTokenCache()) {
+            $globalTokenData = (array)($this->getCachedData('token') ?? []);
+            if (count($globalTokenData) === 2) {
+                $cacheType = 'global';
+                [$this->sessionCache->folio_token, $this->sessionCache->folio_token_expiration] = $globalTokenData;
+            }
+        }
+        if ($this->sessionCache->folio_token ?? false) {
+            $this->token = $this->sessionCache->folio_token;
+            $this->tokenExpiration = $this->sessionCache->folio_token_expiration ?? null;
+            $this->debug(
+                'Token taken from ' . $cacheType . ' cache: ' . substr($this->token, 0, 30) . '...'
+            );
+        }
+        // MSU: added try/catch
+        try {
+            if ($this->token == null) {
+                $this->renewTenantToken();
+            } else {
+                $this->checkTenantToken();
+            }
+        } catch (\Exception $e) {
+            // Errors in init() should not be fatal, it could prevent using EDS when FOLIO fails
+            $this->token = $this->tokenExpiration = null;
+            $this->logError("Failed to get a token to initialize the FOLIO driver: " . $e->getMessage());
+        }
+    }
+
+    /**
      * Given an instance object or identifer, or a holding or item identifier,
      * determine an appropriate value to use as VuFind's bibliographic ID.
      *
