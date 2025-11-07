@@ -41,7 +41,7 @@
                 <?php endforeach; ?>
               </div>
             <?php else: ?>
-              <select class="form-control"
+              <select id="limit_<?=$fieldname?>" class="form-control"
                       aria-labelledby="label_<?=$this->escapeHtmlAttr(str_replace(' ', '', $field))?>"
                       name="filter[]" multiple="multiple" size="10">
               <?php /** MSU END */ ?>
