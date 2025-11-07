@@ -93,7 +93,7 @@ input[type="checkbox"] {
   accent-color: $darkparakeetgreen
 }
 
-label {
+label, .field-label {
   color: $msugreen;
   font-weight: 700;
 }
