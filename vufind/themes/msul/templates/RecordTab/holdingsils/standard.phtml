@@ -19,7 +19,7 @@ use Catalog\GetThis\GetThisLoader; /** MSU */
   <tr class="holding-row"<?=$this->schemaOrg()->getAttributes(['vocab' => 'http://schema.org/', 'typeof' => 'Offer'])?>>
     <th scope="row" class="copy-number"><?php /** MSU */ ?>
       <?php if ($callnum ?? false): /** MSU */ ?>
-        <span><?=$this->escapeHtml($callnum) ?></span><?php /** MSU */ ?>
+        <?=$this->escapeHtml($callnum) ?><?php /** MSU */ ?>
       <?php endif; ?>
     </th>
     <td>
