@@ -93,19 +93,18 @@
         border-top:1px solid $medgray;
         padding-top:1rem;
       }
-      .copy-number > span {
-        display: inline-block;
-        margin-top: calc(0.3rem + 1px);
-      }
     }
   }
 }
 
 // Prevent wrapping long field names on tabs
 // ex: in00005965624 Special Audience Characteristics
-.tab-content {
-  th {
-    white-space: nowrap;
+// but wrap text for short width for accessibility (to avoid scrollbars)
+@media only screen and (min-width : 600px) {
+  .tab-content {
+    th {
+      white-space: nowrap;
+    }
   }
 }
 
