@@ -77,7 +77,7 @@
   <table class="alphabrowse table"> <!--removed .table-striped class-->
     <thead>
       <tr>
-        <th class="<?=$this->source ?>">
+        <th scope="col" class="<?=$this->source ?>">
           <?=$this->transEsc('browse_' . $this->source) ?>
         </th>
         <?php foreach ($this->extras as $e): ?>
@@ -87,9 +87,9 @@
               continue;
             endif;
           ?>
-          <th><?=$this->transEsc('browse_' . $e) ?></th>
+          <th scope="col"><?=$this->transEsc('browse_' . $e) ?></th>
         <?php endforeach; ?>
-        <th class="titles"><?=$this->transEsc('alphabrowse_matches') ?></th>
+        <th scope="col" class="titles"><?=$this->transEsc('alphabrowse_matches') ?></th>
       </tr>
     </thead>
     <tbody>

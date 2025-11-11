@@ -312,7 +312,6 @@ Remove Environment:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Deploy Vufind
   script:
     - ./cicd/remove-environment
 

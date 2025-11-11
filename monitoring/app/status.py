@@ -189,15 +189,15 @@ async def _check_vufind_browse_by_subject_page(node: str, aiohttp_session: Clien
     )
 
 async def _check_vufind_browse_by_author_page(node: str, aiohttp_session: ClientSession) -> str:
-    url = f'http://vufind{node}/Alphabrowse/Home?source=author&from=Hoek%2C+M'
+    url = f'http://vufind{node}/Alphabrowse/Home?source=author&from=Yuille'
     return await _check_vufind_search_base(
-        aiohttp_session, url, '>Hoek, Marga</a>', 'browse by author'
+        aiohttp_session, url, '>Yuille, Martin</a>', 'browse by author'
     )
 
 async def _check_vufind_browse_by_title_page(node: str, aiohttp_session: ClientSession) -> str:
-    url = f'http://vufind{node}/Alphabrowse/Home?source=title&from=Artificial+Intelligence+and+the+City' # pylint: disable=line-too-long
+    url = f'http://vufind{node}/Alphabrowse/Home?source=title&from=Yukiki'
     return await _check_vufind_search_base(
-        aiohttp_session, url, 'Urbanistic Perspectives on AI', 'browse by title'
+        aiohttp_session, url, '>Yukiko</a>', 'browse by title'
     )
 
 async def _check_vufind_browse_by_call_number_page(node: str, aiohttp_session: ClientSession) -> str: # pylint: disable=line-too-long

@@ -72,6 +72,7 @@
 // Fix styling of the range selector on the new items page
 .form-search-newitem .btn-group {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
 
   >label {

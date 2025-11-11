@@ -5,13 +5,14 @@
     $formatter = $this->recordDataFormatter($driver);
     $mainFields = $formatter->getData($formatter->getDefaults('description'));
 ?>
-<table>
-  <caption class="sr-only"><?=$this->transEsc('Description')?></caption>
-  <?php if (!empty($mainFields)): ?>
+<?php /** MSU: changed this block (no_description as a p, table attributes, th scope) */ ?>
+<?php if (empty($mainFields)): ?>
+  <p><?=$this->transEsc('no_description')?></p>
+<?php else: ?>
+  <table>
+    <caption class="sr-only"><?=$this->transEsc('Description')?></caption>
     <?php foreach ($mainFields as $current): ?>
-      <tr><th><?=$this->transEsc($current['label'])?>:</th><td><?=$current['value']?></td></tr>
+      <tr><th scope="row"><?=$this->transEsc($current['label'])?>:</th><td><?=$current['value']?></td></tr>
     <?php endforeach; ?>
-  <?php else: ?>
-    <tr><td><?=$this->transEsc('no_description')?></td></tr>
-  <?php endif; ?>
-</table>
+  </table>
+<?php endif; ?>

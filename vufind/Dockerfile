@@ -96,7 +96,9 @@ RUN \
     touch /usr/local/vufind/package-lock.json && \
     chown -R 1000:1000 /usr/local/vufind/node_modules /usr/local/vufind/package-lock.json && \
     # Enable bash completion for all users
-    echo ". /usr/share/bash-completion/bash_completion" >> /etc/bash.bashrc
+    echo ". /usr/share/bash-completion/bash_completion" >> /etc/bash.bashrc && \
+    # Remove allfields field (PC-1393)
+    sed -i '/^allfields =/d' /usr/local/vufind/import/marc.properties
 
 # TEMP(PART3):
 # - Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/100

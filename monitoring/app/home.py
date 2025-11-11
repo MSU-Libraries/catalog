@@ -11,7 +11,7 @@ def homepage() -> str:
     '''
     stack_name = os.getenv('STACK_NAME')
     is_prod = stack_name == 'catalog-prod'
-    is_dev = stack_name.startswith('devel-')
+    is_dev = stack_name.startswith('devel-') or stack_name.startswith('review-')
     statuses = status.get_node_statuses()
 
     if isinstance(statuses, str):

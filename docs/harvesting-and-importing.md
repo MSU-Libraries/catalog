@@ -49,13 +49,18 @@ each source.
 ### FOLIO
 
 <!-- markdownlint-disable MD031 -->
-1. Ensure that your OAI settings on the FOLIO tenant are what you want
+1. Notify your hosting provider prior to your harvest attempt (EBSCO
+   in our case) so that they can prepare the environment to allocate
+   appropriate additional resources and advise you on the window in
+   which you should start the harvest.
+
+2. Ensure that your OAI settings on the FOLIO tenant are what you want
    them to be for this particular harvest. For example, if you wish to
    include storage and inventory records (i.e. the records without a
    MARC source) then you will need to modify the "Record Source" field
    in the OAI Settings in FOLIO.
 
-2. Next you will need to clear out the contents of the `harvest_folio`
+3. Next you will need to clear out the contents of the `harvest_folio`
    directory before the next cron job will run. Assuming you want to
    preserve the last harvest for the time being, you can simply move
    those directories somewhere else and rename them. Below is an example,
@@ -65,16 +70,90 @@ each source.
    (they technically can have files in them, you just will not want
    them to have files since they will get mixed in with your new harvest).
    ```bash
-   cd /mnt/shared/oai/[STACK_NAME]/harvest_folio/
+   STACK_NAME=catalog-preview
+   cd /mnt/shared/oai/${STACK_NAME}/harvest_folio/
+
+   # Option 1: Preserving the last harvest set
    mv processed processed_old
    mv log log_old
    mv last_state.txt last_state.txt.old
    mv harvest.log harvest.log.old
+
+   # Option 2: Not preserving the last harvest set (if you have
+   # other copies already such as in -beta or -prod and you are
+   # doing the harvest in -preview)
+   sudo find . -type f -delete
    ```
 
-3. Monitor progress after it starts via the cron job in the monitoring app
+4. Monitor progress after it starts via the cron job in the monitoring app
    or in the log file on the container or volume (`/mnt/logs/harvests/`).
 <!-- markdownlint-enable MD031 -->
+
+#### Syncing the harvest files to other environments
+
+If you have done the harvest for one environment and you want to sync the
+newly harvested set over to the other environments you can follow these steps:
+
+<!-- markdownlint-disable MD013 MD031 -->
+1. Disable the FOLIO cron for the source and target environment
+   ```bash
+   # Define the source and target
+   SOURCE_STACK=catalog-preview
+   TARGET_STACK=catalog-beta
+
+   sudo mv /mnt/shared/oai/${SOURCE_STACK}/enabled /mnt/shared/oai/${SOURCE_STACK}/disabled
+   sudo mv /mnt/shared/oai/${TARGET_STACK}/enabled /mnt/shared/oai/${TARGET_STACK}/disabled
+   ```
+
+2. Create a faster compression script (if not done already)
+   ```bash
+   #!/bin/bash
+   # Contents of /usr/local/bin/fastpigz
+   nice -n 19 /usr/bin/pigz -p 4 --fast "$@"
+   ```
+
+3. Give the script execute permissions (if not done already)
+   ```bash
+   chmod +x /usr/local/bin/fastpigz
+   ```
+
+4. Archive the target environment's `harvest_folio` directory
+   ```bash
+   sudo screen
+   cd /mnt/shared/oai/${TARGET_STACK}/harvest_folio
+   tar -cv -I /usr/local/bin/fastpigz -f ../archives/${TARGET_STACK}-$(date -I).tar.gz .
+   ```
+
+5. Clear out the `harvest_folio` directory and sync over the source
+   environment files
+   ```bash
+   cd /mnt/shared/oai/${TARGET_STACK}/harvest_folio
+   sudo find . -type f -delete
+   # Run this once with -n for dry-run, then again without the -n to do it for real
+   sudo rsync -aivn /mnt/shared/oai/${SOURCE_STACK}/harvest_folio/ /mnt/shared/oai/${TARGET_STACK}/harvest_folio/
+   ```
+
+6. Run the `pc-full-import` script on the target environment
+   ```bash
+   sudo screen
+   pc-full-import ${TARGET_STACK} --email LIB.DL.pubcat@msu.edu --yes --debug 2>&1 | tee /mnt/shared/logs/${TARGET_STACK}-import_$(date -I).log
+   ```
+
+7. Verify that you are happy with the counts in the new environment
+
+8. Repeat steps 1 through 7 with any other environment you want to sync to
+
+9. Once you are done syncing to all environments, you can re-enable the
+   source environment's cron. There is no need to do this for the target
+   environment(s) since the full import script will have done that.
+   ```bash
+   sudo mv /mnt/shared/oai/${SOURCE_STACK}/disabled /mnt/shared/oai/${SOURCE_STACK}/enabled
+   ```
+
+10. You will eventually want to clean up the archives to save disk
+    space, but keep them around for a while until you are confident
+    in the data in the new set
+<!-- markdownlint-enable MD013 MD031 -->
 
 ### HLM
 
