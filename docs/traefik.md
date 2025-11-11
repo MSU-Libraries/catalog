@@ -16,8 +16,9 @@ sudo -Hu deploy pc-deploy core-stacks traefik
 
 * Your first line of defense when debugging issues with Traefik is
 navigating to the Traefik dashboard at
-[https://your-site/dashboard/](https://your-site/dashboard/)
+[https://node-hostname/dashboard/](https://node-hostname/dashboard/)
 where you can see all the routers and services that have been defined.
+For instance [https://catalog-1-dev.aws.lib.msu.edu/dashboard/](https://catalog-1-dev.aws.lib.msu.edu/dashboard/).
 This is helpful when the issue is a configuration issue either in the
 Traefik command or labels.
 

@@ -33,6 +33,34 @@
         </form>
       </div>
     </div>
+
+    <div class="home-facet">
+      <h2>Browse by Categories</h2>
+      <div class="home-facet-container">
+        <?php $browseConfigs = $this->config()->get('config')->Browse; ?>
+        <ul class="home-facet-list">
+        <?php foreach ($browseConfigs as $key => $item): ?>
+          <?php
+           // Browse configs contains other settings, we only need the ones where
+           // it is configured to display (i.e. the settings is true)
+          ?>
+          <?php
+          if ($item != '1') {
+            continue;
+          }
+          ?>
+          <li><a href="<?=$this->url('browse-' . $key) ?>">
+            <?php
+              // Using logic from buildBrowseOptions() in the BrowseController
+              $label = ($key == 'lcc') ? 'Call Number' : ucwords($key);
+            ?>
+            <?=$this->transEsc($label) ?>
+          </a></li>
+        <?php endforeach; ?>
+        </ul>
+      </div>
+    </div>
+
     <div class="home-facet home-reserves">
       <h2>Course Reserves</h2>
       <div class="home-facet-container">
@@ -41,17 +69,6 @@
             <input id="reservesSearchForm_lookfor" placeholder="Search terms" type="text" name="lookfor" size="40" value="" <?=$this->searchOptions('SolrReserves')->autocompleteEnabled() ? ' class="form-control autocomplete searcher:SolrReserves type:Reserves"' : ''?> >
             <input class="btn btn-primary" type="submit" name="submit" value="<?=$this->transEscAttr('Find')?>">
           </form>
-      </div>
-    </div>
-        <div class="home-facet home-askalib">
-      <div class="home-facet-container text-center">
-<a href="https://lib.msu.edu/contact/askalib">
-            <p class="need-help">Need help getting started?</p>
-            
-            <img class="ask-icon d-lg-block" alt="" role="presentation" aria-hidden="true" src="/themes/msul/images/Icons_Ask_Us_World_Default.png"> <!-- MSU removed d-none from img -->
-            <br>
-            <p class="askalibrarian">Ask Us</p>
-      </a>
       </div>
     </div>
 </div>

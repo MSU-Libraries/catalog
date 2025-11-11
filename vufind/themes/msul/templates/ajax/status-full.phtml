@@ -63,7 +63,7 @@ foreach ($this->statusItems as $item) {
       <span class="fullLocation">
         <?php $locationText = $this->transEsc($location); ?>
         <?php if (count($this->statusItems) > 1): ?>
-          <?=$locationText?>&nbsp;&nbsp;<a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getUrl($selected['id']))?>/Holdings#tabnav" target="_blank">see more</a>
+          <?=$locationText?>&nbsp;&nbsp;<a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getUrl($selected['id']))?>/Holdings#tabnav" target="_blank">more holdings</a>
         <?php else: ?>
           <?=$locationText?>
         <?php endif; ?>

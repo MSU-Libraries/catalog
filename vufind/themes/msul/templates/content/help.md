@@ -53,7 +53,6 @@ AllFields:
     - genre^300
     - allfields_unstemmed^10
     - fulltext_unstemmed^10
-    - allfields
     - fulltext
     - description
     - isbn
@@ -67,9 +66,9 @@ field. This ensures that a term that matches the title of an item will be
 ranked higher (and appear earlier) in search results than if the match were
 in, say, the description of the item.
 
-The presence of a generic `allfields` field in the list indicates that all
-fields indexed in VuFind should return results in the default search box.
-Searching within the confines of a limiter, such as author or title,
+The presence of a generic `allfields_unstemmed` field in the list indicates
+that all fields indexed in VuFind should return results in the default search
+box. Searching within the confines of a limiter, such as author or title,
 simply reduces the number of results.
 
 The search configurations for each of these fielded searches are
@@ -179,7 +178,7 @@ Multi-valued fields, such as Topic, can be populated from a whole set of
 fields:
 
 ```ini
-topic_facet = 600x:610x:611x:630x:648x:650a:650x:651x:655x
+topic_facet = 600x:610x:611x:630x:650a:650x:651x:655x
 ```
 
 The topic facet field pulls values from all of the MARC fields specified above.

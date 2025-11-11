@@ -27,6 +27,7 @@ main() {
     SITE_HOSTNAME=
     MAIL_HOST=host.docker.internal
     MAIL_PORT=25
+    MAX_LENGTH=21 # Max length of STACK_NAME due to limitations of docker service name lengths
 
     if [[ $PROD == "true" ]]; then
         STACK_NAME="catalog-prod"
@@ -52,8 +53,16 @@ main() {
         echo "MAIL_PORT=${MAIL_PORT}"
     } > build.env
 
-    test -n "${STACK_NAME}"
-    test -f build.env
+    test -n "${STACK_NAME}" || { echo "Error: STACK_NAME cannot be empty."; exit 1; }
+    test -f build.env || { echo "Error: build.env file not found."; exit 1; }
+
+    STACK_NAME_LENGTH=${#STACK_NAME}
+
+    if [[ ${STACK_NAME_LENGTH} -gt ${MAX_LENGTH} ]]; then
+        echo "Error: STACK_NAME is too long. Max length is ${MAX_LENGTH} characters."
+        echo "Current length: ${STACK_NAME_LENGTH}"
+        exit 1
+    fi
 
     # Get the number of attempts for this job
     apk add jq curl || apt install -y jq curl;

@@ -95,7 +95,7 @@ footer {
         position:relative;
 
         &.small-text {
-          font-size:.8125rem;
+          font-size:.85rem;
           color:#000;
           font-weight:400
         }
@@ -103,7 +103,6 @@ footer {
           font-weight:400;
         }
         a {
-           /*font-size:.8125rem;*/
           font-weight:400;
           color:#0A875F !important;
           display:inline-block;
@@ -113,8 +112,8 @@ footer {
           }
         }
         span {
-          margin-left:0.1rem;
-          margin-right:0.1rem;
+          margin-left:0.2rem;
+          margin-right:0.2rem;
           display:inline-block
         }
       }
