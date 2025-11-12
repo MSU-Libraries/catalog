@@ -95,7 +95,7 @@ footer {
         position:relative;
 
         &.small-text {
-          font-size:.85rem;
+          font-size:.9rem;
           color:#000;
           font-weight:400
         }
@@ -112,8 +112,8 @@ footer {
           }
         }
         span {
-          margin-left:0.2rem;
-          margin-right:0.2rem;
+          margin-left:0.3rem;
+          margin-right:0.3rem;
           display:inline-block
         }
       }
@@ -121,7 +121,7 @@ footer {
   }
 }
 
-@media only screen and (max-width:991.98px) {
+@media only screen and (max-width:1180px) {
   footer .msu-footer .col-lg-3 img {
     margin-bottom:30px;
     max-width:265px
