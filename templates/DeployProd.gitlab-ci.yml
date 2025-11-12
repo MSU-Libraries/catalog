@@ -6,7 +6,7 @@ Begin Prod Deploy:
     # This can't be part of -prod env because we would need a coresponding Remove Environment job
     name: $CI_COMMIT_BRANCH
   needs:
-    - Verify Stack Health
+    - Verify Docker Health
   variables:
     PROD: "true"
   rules:
@@ -92,6 +92,21 @@ Deploy Prod Solr:
     - Deploy Prod ZK
     - Bootstrap Prod Stacks
 
+Create Prod Solr Collections:
+  stage: Deploy Prod
+  extends: Create Solr Collections
+  environment:
+    name: $CI_COMMIT_BRANCH-prod/create-solr-colls
+    auto_stop_in: 2 weeks
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - job: Deploy Prod Compose Files
+      artifacts: true
+    - Deploy Prod Solr
+
 Deploy Prod DB:
   stage: Deploy Prod
   extends: Deploy DB
@@ -117,8 +132,8 @@ Deploy Prod Vufind:
   needs:
     - job: Begin Prod Deploy
       artifacts: true
-    - Deploy Prod DB
-    - Deploy Prod Solr
+    - Verify Prod DB Health
+    - Verify Prod Solr Health
 
 Deploy Prod Vufind Build Env:
   extends: Deploy Vufind Build Env
@@ -146,9 +161,9 @@ Deploy Prod Monitoring:
       artifacts: true
     - Deploy Prod Internal Network
 
-Verify Prod Stack Health:
+Verify Prod Docker Health:
   stage: Deploy Prod
-  extends: Verify Stack Health
+  extends: Verify Docker Health
   environment:
     name: $CI_COMMIT_BRANCH-prod/verify
     auto_stop_in: 2 weeks
@@ -162,6 +177,36 @@ Verify Prod Stack Health:
     - Deploy Prod Monitoring
     - Deploy Prod Vufind
 
+Verify Prod Solr Health:
+  stage: Deploy Prod
+  extends: Verify Solr Health
+  environment:
+    name: $CI_COMMIT_BRANCH-prod/verify
+    auto_stop_in: 2 weeks
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - job: Deploy Prod Compose Files
+      artifacts: true
+    - Create Prod Solr Collections
+
+Verify Prod DB Health:
+  stage: Deploy Prod
+  extends: Verify DB Health
+  environment:
+    name: $CI_COMMIT_BRANCH-prod/verify
+    auto_stop_in: 2 weeks
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - job: Deploy Prod Compose Files
+      artifacts: true
+    - Deploy Prod DB
+
 Prod Run Functional Tests:
   stage: Deploy Prod
   extends: Run Functional Tests
@@ -173,4 +218,4 @@ Prod Run Functional Tests:
   needs:
     - job: Begin Prod Deploy
       artifacts: true
-    - Verify Prod Stack Health
+    - Verify Prod Docker Health

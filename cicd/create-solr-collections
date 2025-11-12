@@ -1,0 +1,41 @@
+#!/bin/bash
+
+source "${CI_PROJECT_DIR}"/cicd/before-script
+
+run_help() {
+    echo ""
+    echo "Purpose: Create any Solr collections that are missing"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - STACK_NAME: Name of the stack"
+    echo "  - DEPLOY_HOST_1: The first host in the cluster"
+    echo "  - DEPLOY_HOST_2: The second host in the cluster"
+    echo "  - DEPLOY_HOST_3: The third host in the cluster"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - If the pc-solr script returns a non-zero exit code"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    run_help
+    exit 0
+fi
+
+main() {
+    echo "Run pc-solr to create any missing Solr collections"
+    run_script "pc-solr $STACK_NAME --create --verbose"
+
+    # Get metrics for stage runtime
+    STAGE_END=$(date +%s);
+    STAGE_START=$(cat "${CI_JOB_STAGE// /_}"_start.txt);
+    STAGE_RUNTIME=$((STAGE_END-STAGE_START)); STAGE_HOURS=$((STAGE_RUNTIME / 3600)); STAGE_MINUTES=$(( (STAGE_RUNTIME % 3600) / 60 )); STAGE_SECONDS=$(( (STAGE_RUNTIME % 3600) % 60 ));
+    echo "${CI_JOB_STAGE// /_}_StageRuntime" $STAGE_HOURS:$STAGE_MINUTES:$STAGE_SECONDS >> metrics.txt;
+
+    # Get runtime metrics
+    END=$(date +%s); RUNTIME=$((END-START)); HOURS=$((RUNTIME / 3600)); MINUTES=$(( (RUNTIME % 3600) / 60 )); SECONDS=$(( (RUNTIME % 3600) % 60 ));
+    echo "${CI_JOB_NAME// /_}_Runtime" $HOURS:$MINUTES:$SECONDS >> metrics.txt
+}
+
+before_script
+main

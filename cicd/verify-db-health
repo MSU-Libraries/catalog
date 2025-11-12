@@ -4,8 +4,8 @@ source "${CI_PROJECT_DIR}"/cicd/before-script
 
 run_help() {
     echo ""
-    echo "Purpose: Verify the health of the stack by calling the check"
-    echo "         scripts used by the NCPA plugin"
+    echo "Purpose: Verify the health of the database stack by calling the"
+    echo "         script used by the NCPA plugin"
     echo ""
     echo "Expected User-defined Variables:"
     echo "  - STACK_NAME: Name of the stack"
@@ -25,10 +25,7 @@ fi
 
 main() {
     echo "Run checks using the NCPA scripts"
-    check solr
-    check zk
     check galera
-    check docker
 
     # Get metrics for stage runtime
     STAGE_END=$(date +%s);
