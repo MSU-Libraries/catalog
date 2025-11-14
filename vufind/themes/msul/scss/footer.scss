@@ -81,6 +81,7 @@ footer {
       padding: 0;
 
       &:first-child {
+        display: inline-block;
         border-bottom: 1px dotted #979797;
         padding-bottom: 0.6rem;
       }
@@ -108,7 +109,7 @@ footer {
   }
 }
 
-@media only screen and (max-width:1190px) {
+@media only screen and (max-width:1200px) {
   footer .msu-footer .col-lg-3 img {
     margin-bottom: 2rem;
     max-width: 265px;
@@ -125,6 +126,7 @@ footer {
 
 @media only screen and (max-width:575.98px) {
   footer .msu-footer ul:first-child {
+    display: block !important;
     margin-bottom: 1rem;
   }
 }
