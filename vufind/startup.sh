@@ -152,8 +152,8 @@ fi
 unset DEPLOY_KEY_FILE VUFIND_CORE_INSTALLATION
 
 verbose "Starting Apache..."
-# shellcheck disable=SC1091
 verbose "  setting apache envvars..."
+# shellcheck disable=SC1091
 source /etc/apache2/envvars
 verbose "  starting apache2 process..."
 tail -f /var/log/vufind/vufind.log & /usr/sbin/apache2 -DFOREGROUND "$@"
