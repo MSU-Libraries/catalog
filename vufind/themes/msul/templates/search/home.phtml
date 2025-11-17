@@ -17,4 +17,7 @@
   $this->layout()->searchbox = $this->context($this)->renderInContext('search/searchbox.phtml', []);
 ?>
 
+<?php // this div might be updated dynamically to contain the ILS offline message ?>
+<div class="searchHomeContent"></div>
+
 <?=implode('', array_map([$this, 'contentBlock'], $blocks ?? []))?>
