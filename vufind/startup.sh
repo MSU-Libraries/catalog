@@ -18,34 +18,36 @@ fi
 # Create symlinks to the shared storage for non-production environments
 # Populating the shared storage if empty
 if [[ "${STACK_NAME}" == devel-* ]]; then
+    verbose "Devel environment detected."
     verbose "Setting up links for module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
-    # Set up deploy key
+    verbose "  Set up deploy key..."
     install -d -m 700 ~/.ssh/
     base64 -d "$DEPLOY_KEY_FILE" > ~/.ssh/id_ed25519
     ( umask 022; touch ~/.ssh/known_hosts )
     chmod 600 ~/.ssh/id_ed25519
     ssh-keyscan gitlab.msu.edu >> ~/.ssh/known_hosts
     git config --system --add safe.directory \*
-    # Update the repo (repo is initially cloned during first CI run for branch)
+    verbose "  Update the repo (repo is initially cloned during first CI run for branch)..."
     (umask 0002; git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch)
 
-    # Set up the symlink to be able to access code from host machine
     if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
+        verbose "  VuFind core install: set up the symlink to be able to access code from host machine..."
         rm -r /usr/local/vufind/module/Catalog /usr/local/vufind/themes/msul
         # Changing theme in config
         sed -i -r 's/^(theme\s+= )msul/\1bootstrap5/' /usr/local/vufind/local/config/vufind/config.ini
     fi
 
-    # Enable detailed error reporting for devel
+    verbose "  Enable detailed error reporting for devel"
     sed -i -E 's#^(file\s+= /var/log/vufind/vufind.log:).*$#\1alert-5,error-5,notice-5,debug-1#' /usr/local/vufind/local/config/vufind/config.ini
 
     # Make sure permissions haven't gotten changed on the share along the way
     # (This can happen no matter what on devel container startup)
+    verbose "  Update permissions...  "
     chown 1000:1000 -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/
     chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/msul/
 fi
 
-# Save the logs in the logs docker volume
+verbose "Save the logs in the logs docker volume...  "
 mkdir -p /mnt/logs/apache /mnt/logs/vufind /mnt/logs/simplesamlphp /mnt/logs/harvests /mnt/logs/backups
 chown www-data:www-data /mnt/logs/simplesamlphp
 rm -rf /var/log/apache2
@@ -56,30 +58,30 @@ touch /mnt/logs/vufind/vufind.log
 touch /var/log/simplesamlphp/simplesamlphp.log
 chown www-data:www-data /mnt/logs/vufind/vufind.log /var/log/simplesamlphp/simplesamlphp.log
 
-# Link to shared BannerNotices.yaml
+verbose "Link to shared BannerNotices.yaml..."
 ln -f -s /mnt/shared/config/BannerNotices.yaml /usr/local/vufind/local/config/vufind/BannerNotices.yaml
 ln -f -s /mnt/shared/config/LocationNotices.yaml /usr/local/vufind/local/config/vufind/LocationNotices.yaml
 ln -f -s /mnt/shared/config/RequestNotices.yaml /usr/local/vufind/local/config/vufind/RequestNotices.yaml
 
-# Prepare cache cli dir (volume only exists after start)
+verbose "Prepare cache cli dir (volume only exists after start)..."
 clear-vufind-cache
 
-# Ensure SolrCloud is available prior to creating Collections
+verbose "Ensure SolrCloud is available prior to creating Collections"
 CLUSTER_STATUS_URL="http://solr:8983/solr/admin/collections?action=clusterstatus"
 SOLR_CLUSTER_SIZE=0
 while [[ "$SOLR_CLUSTER_SIZE" -lt 1 ]]; do
-    verbose "No Solr nodes online yet. Waiting..."
+    verbose "  No Solr nodes online yet. Waiting..."
     sleep 5
     SOLR_CLUSTER_SIZE=$(curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.live_nodes | length")
 done
-verbose "Solr nodes online."
+verbose "  Solr nodes online."
 
 # Sleep before creating collections so all
 # nodes don't try at the same time
 SLEEP_TIME=$(( NODE*4 ))
 sleep $SLEEP_TIME
 
-# Create Solr collections
+verbose "Create Solr collections"
 # biblio needs to be done first in order to initialize the ICUTokenizerFactory
 COLLS=("biblio1" "biblio2" "authority" "reserves" "website")
 for COLL in "${COLLS[@]}"
@@ -93,15 +95,15 @@ do
         verbose "Existing collections:"
         curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.collections | keys[]"
 
-        # Create collection
+        verbose "Create collection ${COLL}..."
         OUTPUT=$(curl -s "http://solr:8983/solr/admin/collections?action=CREATE&name=${COLL}&numShards=1&replicationFactor=3&wt=xml&collection.configName=${COLL}")
         HAS_ERROR=$(echo "${OUTPUT}" | grep -c "SolrException")
 
         if [[ ${HAS_ERROR} -gt 0 ]]; then
-            verbose "Failed to create Solr collection ${COLL}. ${OUTPUT}"
+            verbose "  Failed to create Solr collection ${COLL}. ${OUTPUT}"
             sleep 5
         else
-            verbose "Created Solr collection for ${COLL}."
+            verbose "  Created Solr collection for ${COLL}."
             # Not breaking here so we can do a final curl call to verify it is showing in the cluster status properly
         fi
         MATCHED_COLL=$(curl -s "${CLUSTER_STATUS_URL}" | jq ".cluster.collections | keys[]" | grep "${COLL}")
@@ -149,8 +151,9 @@ fi
 # Unset environment variables that are no longer necessary before starting Apache
 unset DEPLOY_KEY_FILE VUFIND_CORE_INSTALLATION
 
-# Start Apache
 verbose "Starting Apache..."
 # shellcheck disable=SC1091
+verbose "  setting apache envvars..."
 source /etc/apache2/envvars
+verbose "  starting apache2 process..."
 tail -f /var/log/vufind/vufind.log & /usr/sbin/apache2 -DFOREGROUND "$@"
