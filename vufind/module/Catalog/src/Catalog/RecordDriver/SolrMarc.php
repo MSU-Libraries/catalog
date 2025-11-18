@@ -282,7 +282,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             return array_key_exists('code', $subf) && $subf['code'] == self::LINKSUBF;
         });
         if ($subf6) {
-            $subf6Parts = explode('-', $subf6[0]['data']);
+            $subf6Parts = explode('-', $subf6[array_key_first($subf6)]['data']);
             if (count($subf6Parts) > 1 && $subf6Parts[0] == '880') {
                 $index = $subf6Parts[1];
                 $linked = $marc->getLinkedField('880', $field, $index, $subfieldFilters);
