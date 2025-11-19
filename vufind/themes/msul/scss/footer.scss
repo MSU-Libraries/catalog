@@ -110,24 +110,23 @@ footer {
 }
 
 @media only screen and (max-width:1200px) {
-  footer .msu-footer .col-lg-3 img {
+  footer .msu-footer .col-lg-3 {
     margin-bottom: 2rem;
-    max-width: 265px;
+    img {
+      max-width: 265px;
+    }
   }
 }
 
 @media only screen and (max-width:575.98px) {
-  footer .msu-footer .col-lg-3 img {
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-  }
-}
-
-@media only screen and (max-width:575.98px) {
-  footer .msu-footer ul:first-child {
-    display: block !important;
-    margin-bottom: 1rem;
+  footer .msu-footer {
+    .col-lg-3 {
+      text-align: center;
+    }
+    ul:first-child {
+      display: block !important;
+      margin-bottom: 1rem;
+    }
   }
 }
 
