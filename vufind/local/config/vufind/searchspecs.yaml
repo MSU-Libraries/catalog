@@ -426,7 +426,7 @@ AuthorBrowse:
 TitleBrowse:
   QueryFields:
     title_browse:
-      - [onephrase, ~]
+      - [identity, ~]
 
 DeweyBrowse:
   QueryFields:
