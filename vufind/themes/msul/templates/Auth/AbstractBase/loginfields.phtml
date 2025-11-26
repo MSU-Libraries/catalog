@@ -1,6 +1,7 @@
 <div class="form-group">
   <label class="control-label" for="login_<?=$this->escapeHtmlAttr($topClass)?>_username"><?=$this->transEsc('Username')?>:</label>
-  <input style=type="text" name="username" placeholder="21293500779430" id="login_<?=$this->escapeHtmlAttr($topClass)?>_username" value="<?=$this->escapeHtmlAttr($this->request->get('username'))?>" class="form-control" autofocus autocomplete="username">
+  (example: 21293500779430)
+  <input type="text" name="username" id="login_<?=$this->escapeHtmlAttr($topClass)?>_username" value="<?=$this->escapeHtmlAttr($this->request->get('username'))?>" class="form-control" autofocus autocomplete="username">
 </div>
 <div class="form-group">
   <label class="control-label" for="login_<?=$this->escapeHtmlAttr($topClass)?>_password"><?=$this->transEsc('Password')?>:</label>
