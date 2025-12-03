@@ -592,7 +592,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $boundWithRecords = $this->getBoundWithRecords($item);
         }
         // MSU - PC-930: Add Loan Type to results
-        $tempLoanType = $this->getLoanType($item->temporaryLoanTypeId ?? null);
+        $tempLoanType = $this->getLoanType($item->temporaryLoanType->id ?? null);
         $nextItem = $this->formatHoldingItem(
             $bibId,
             $holdingDetails,
