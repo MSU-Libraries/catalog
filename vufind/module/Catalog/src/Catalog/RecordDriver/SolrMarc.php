@@ -33,9 +33,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 {
     public const LINKSUBF = '6'; // subfield code that has field link information
     public const UNLINKPOS = '00'; // occurance position in the linked subfield that represents unlinked 880s
-    // SOURCE_WHITELIST should match the list used for topic in marc_local.properties
-    private const SOURCE_WHITELIST = '/^lcgft|aat|local|gsafd|tgm|olacvggt|vgmsgg|discogsgenre|' .
-        'discogsstyle|rbgenr|rbbin|rbpap|rbpri|rbprov|rbtyp|rbmscv|homoit|homoit\/eng$/';
+    // SOURCE_WHITELIST should match the list used for topic and other fields in marc_local.properties
+    private const SOURCE_WHITELIST = '/^aat|discogsgenre|discogsstyle|homoit|homoit\/eng|lcgft|' .
+        'local|olacvggt|rbbin|rbgenr|rbmscv|rbpap|rbpri|rbprov|rbpub|rbtyp|tgm|tgn|vgmsgg$/';
 
     /**
      * Fields that may contain subject headings, and their descriptions
@@ -47,7 +47,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         '610' => 'corporate name',
         '611' => 'meeting name',
         '630' => 'uniform title',
-        '648' => 'chronological',
+//        '648' => 'chronological', // MSU commented
         '650' => 'topic',
         '651' => 'geographic',
         '653' => '',
@@ -1721,8 +1721,8 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     private function skipSubject($field)
     {
-        // Skip if ind2 = 6, or ind2 = 7 and $2 does not match SOURCE_WHITELIST
-        if ($field['i2'] == '6') {
+        // Skip if ind2 = 5 (except for 653), ind2 = 6, or ind2 = 7 and $2 does not match SOURCE_WHITELIST
+        if (($field['tag'] != '653' && $field['i2'] == '5') || $field['i2'] == '6') {
             return true;
         }
         if ($field['i2'] == '7') {
