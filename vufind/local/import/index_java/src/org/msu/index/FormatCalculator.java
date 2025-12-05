@@ -65,6 +65,9 @@ public class FormatCalculator extends org.vufind.index.FormatCalculator
             String desc = getSubfieldOrDefault(typeField, 'a', "");
             String code = getSubfieldOrDefault(typeField, 'b', "");
             String source = getSubfieldOrDefault(typeField, '2', "");
+            if (desc.equals("computer program")) {
+                return List.of(); // rely on getFormatFromRecordType(), 008/26 is more precise
+            }
             if ((desc.equals("two-dimensional moving image") || code.equals("tdi")) && source.equals("rdacontent")) {
                 formats.add("Video");
                 if (isOnline) {
