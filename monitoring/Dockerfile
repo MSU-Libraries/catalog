@@ -1,10 +1,10 @@
-FROM python:3.10-alpine
+FROM python:3.10.18-alpine
 
 ENV PYTHONUNBUFFERED=1
 
 RUN \
     apk update && \
-    apk add mariadb-client=10.6 mariadb-dev=10.6 mariadb-connector-c=3.1 gcc musl-dev tzdata vim && \
+    apk add mariadb-client mariadb-dev mariadb-connector-c gcc musl-dev tzdata vim && \
     ln -fs /usr/share/zoneinfo/America/Detroit /etc/localtime
 
 ENV TZ=America/Detroit
