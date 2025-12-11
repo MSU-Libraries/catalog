@@ -184,7 +184,7 @@ services:
       - MARIADB_VUFIND_PASSWORD
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # catprod shouldn't run cron for now
       resources:
         limits:
           memory: 4096M
