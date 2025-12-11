@@ -29,15 +29,21 @@ main() {
     MAIL_PORT=25
     MAX_LENGTH=21 # Max length of STACK_NAME due to limitations of docker service name lengths
 
-    if [[ $PROD == "true" ]]; then
-        STACK_NAME="catalog-prod"
-        SITE_HOSTNAME="catalog.lib.msu.edu"
-    elif [[ "${CI_COMMIT_BRANCH}" == "catprod" ]]; then
-        STACK_NAME="catalog-beta"
-        SITE_HOSTNAME="catalog-beta.lib.msu.edu"
-    elif [[ "${CI_COMMIT_BRANCH}" == "catalog-preview" ]]; then
+    if [[ "${CI_COMMIT_BRANCH}" == "catprod" && $PROD == "true" ]]; then # TODO Can remove catprod check once catprod merged
+        STACK_NAME="catprod-prod"
+        SITE_HOSTNAME="catprod.lib.msu.edu"
+    elif [[ "${CI_COMMIT_BRANCH}" == "catprod" ]]; then # TODO Change back to CI_DEFAULT_BRANCH once catprod merged
+        STACK_NAME="catprod-beta"
+        SITE_HOSTNAME="catprod-beta.lib.msu.edu"
+    elif [[ "${CI_COMMIT_BRANCH}" == "catalog-preview" ]]; then # TODO -- move preview site
         STACK_NAME="catalog-preview"
         SITE_HOSTNAME="catalog-preview.lib.msu.edu"
+    elif [[ "${CI_COMMIT_BRANCH}" == "main" && $PROD == "true" ]]; then # TODO MUST remove once catprod is merged
+        STACK_NAME="catalog-prod"
+        SITE_HOSTNAME="catalog.lib.msu.edu"
+    elif [[ "${CI_COMMIT_BRANCH}" == "main" ]]; then # TODO MUST remove once catprod is merged
+        STACK_NAME="catalog-beta"
+        SITE_HOSTNAME="catalog-beta.lib.msu.edu"
     elif [[ "${CI_COMMIT_BRANCH}" == "devel-"* || "${CI_COMMIT_BRANCH}" == "review-"* ]]; then
         STACK_NAME="${CI_COMMIT_BRANCH}"
         SITE_HOSTNAME="${STACK_NAME}.aws.lib.msu.edu"
