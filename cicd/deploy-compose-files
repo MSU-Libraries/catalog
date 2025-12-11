@@ -270,7 +270,7 @@ main() {
     done
 
     # Development environment changes
-    if [[ "${STACK_NAME}" != catalog-* ]] || [[ "${STACK_NAME}" != catprod-* ]]; then
+    if [[ "${STACK_NAME}" != catalog-* ]] && [[ "${STACK_NAME}" != catprod-* ]]; then
         apply_devel_changes;
     fi
     # Production environment changes
