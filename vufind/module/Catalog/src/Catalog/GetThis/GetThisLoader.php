@@ -674,40 +674,6 @@ class GetThisLoader
     }
 
     /**
-     * Determine if the get locker pickup template should display
-     *
-     * @param string $item_id Item ID to filter for
-     *
-     * @return bool  If the template should display
-     */
-    public function showLockerPick($item_id = null)
-    {
-        $item_id = $this->getItemId($item_id);
-        $stat = $this->getStatus($item_id);
-        $loc = $this->getLocation($item_id);
-
-        if (
-            (Regex::ART($loc) && !Regex::PERM($loc) && !$this->isLibUseOnly()) ||
-             (Regex::BROWSING($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::CAREER($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::CESAR_CHAVEZ($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::KLINE_DMC($loc) && !Regex::RESERV($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::FACULTY_BOOK($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::GOV($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::MAKERSPACE($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::MAP($loc) && Regex::CIRCULATING($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::MUSIC($loc) && !(Regex::REF($loc) || Regex::RESERV($loc))) ||
-             (Regex::ROVI($loc)) ||
-             (Regex::TRAVEL($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::MAIN($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::AVAILABLE($stat))
-        ) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * Determine if the get remote item template should display
      *
      * @param string $item_id Item ID to filter for
