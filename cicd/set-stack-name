@@ -32,7 +32,7 @@ main() {
     if [[ $PROD == "true" ]]; then
         STACK_NAME="catalog-prod"
         SITE_HOSTNAME="catalog.lib.msu.edu"
-    elif [[ $CI_DEFAULT_BRANCH == "${CI_COMMIT_BRANCH}" ]]; then
+    elif [[ "${CI_COMMIT_BRANCH}" == "catprod" ]]; then
         STACK_NAME="catalog-beta"
         SITE_HOSTNAME="catalog-beta.lib.msu.edu"
     elif [[ "${CI_COMMIT_BRANCH}" == "catalog-preview" ]]; then
