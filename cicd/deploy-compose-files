@@ -165,11 +165,11 @@ apply_prod_changes() {
     ./yq -i ".services.captcha.environment.GOAWAY_SLOG_LEVEL = \"INFO\"" docker-compose.catalog.yml;
 
     ## Changes for catalog-beta and catalog-preview
-    if [ "${STACK_NAME}" == "catalog-beta" ] || [ "${STACK_NAME}" == "catalog-preview" ]; then
+    if [ "${STACK_NAME}" == "catalog-beta" ] || [ "${STACK_NAME}" == "catalog-preview" ] || [ "${STACK_NAME}" == "catprod-beta" ]; then
         # Restrict both beta/preview to campus IPs only
         HTTPS_MIDDLEWARES+=("ip-campus")
         ## Only catalog-beta
-        if [ "${STACK_NAME}" == "catalog-beta" ]; then
+        if [ "${STACK_NAME}" == "catalog-beta" ] || [ "${STACK_NAME}" == "catprod-beta" ]; then
             # Set cron/build placement constraint
             ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_2}\"]" docker-compose.catalog.yml;
             ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_2}\"]" docker-compose.build.yml;
@@ -197,7 +197,7 @@ apply_prod_changes() {
     fi
 
     ## Changes for catalog-prod
-    if [ "${STACK_NAME}" == "catalog-prod" ]; then
+    if [ "${STACK_NAME}" == "catalog-prod" ] || [ "${STACK_NAME}" == "catprod-prod" ]; then
         # Set cron/build placement constraint
         ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.catalog.yml;
         ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.build.yml;
@@ -270,11 +270,11 @@ main() {
     done
 
     # Development environment changes
-    if [[ "${STACK_NAME}" != catalog-* ]]; then
+    if [[ "${STACK_NAME}" != catalog-* ]] || [[ "${STACK_NAME}" != catprod-* ]]; then
         apply_devel_changes;
     fi
     # Production environment changes
-    if [[ "${STACK_NAME}" == catalog-* ]]; then
+    if [[ "${STACK_NAME}" == catalog-* ]] || [[ "${STACK_NAME}" == catprod-* ]]; then
         apply_prod_changes;
     fi
 
@@ -284,7 +284,7 @@ main() {
     docker-compose.catalog.yml;
 
     # Authentication environment changes
-    if [[ "${STACK_NAME}" == catalog-* ]] || [ "${STACK_NAME}" == "devel-authentication" ]; then
+    if [[ "${STACK_NAME}" == catalog-* ]] || [[ "${STACK_NAME}" == catprod-* ]] || [ "${STACK_NAME}" == "devel-authentication" ]; then
       ./yq -i ".services.catalog.volumes += \"/home/deploy/samlcerts/${STACK_NAME}:/mnt/samlcerts:ro\"" docker-compose.catalog.yml;
     fi
 
