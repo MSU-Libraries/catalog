@@ -211,16 +211,16 @@ apply_prod_changes() {
 
         # Override default router rule
         ./yq -i \
-        ".services.captcha.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`catalog.lib.msu.edu\`)\"" \
+        ".services.captcha.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${SITE_HOSTNAME}\`)\"" \
         docker-compose.catalog.yml;
         ./yq -i \
-        ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`catalog.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
+        ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`${SITE_HOSTNAME}\`) && PathPrefix(\`/record=\`)\"" \
         docker-compose.catalog.yml;
         ./yq -i \
-        ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
+        ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`${SITE_HOSTNAME}\`) && PathPrefix(\`/solr\`)\"" \
         docker-compose.solr-cloud.yml;
         ./yq -i \
-        ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
+        ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`${SITE_HOSTNAME}\`) && PathPrefix(\`/monitoring\`)\"" \
         docker-compose.monitoring.yml;
     fi
 }
