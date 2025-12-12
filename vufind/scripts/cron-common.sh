@@ -14,6 +14,8 @@
 
 # Clear out previous exit code while we run. This helps to
 # reduce additional Nagios alerts for long running cronjobs.
+# Keep a copy of the previous exit code for monitoring.
+cp --preserve=timestamps "$EXIT_CODE_PATH" "${EXIT_CODE_PATH}_previous"
 true > "$EXIT_CODE_PATH"
 
 OUTPUT_LOG=${OUTPUT_LOG:-1}
@@ -31,6 +33,7 @@ fi
 cat "${LATEST_PATH_WITH_TS}" >> "$LOG_PATH"
 
 echo $EXIT_CODE > "$EXIT_CODE_PATH"
+rm -f "${EXIT_CODE_PATH}_previous"
 
 if [[ $EXIT_CODE -ne 0 ]]; then
     logger -t "$DOCKER_TAG" -f "${LATEST_PATH_WITH_TS}"

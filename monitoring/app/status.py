@@ -373,6 +373,9 @@ def _node_cron_exit_codes() -> dict[str, str]:
     exit_codes = {}
     for name, path in paths.items():
         path = pathlib.Path(path)
+        path_previous = pathlib.Path(f"{path}_previous")
+        if path_previous.is_file():
+            path = path_previous
         if path.is_file():
             date = datetime.fromtimestamp(path.stat().st_mtime)
             check_date = datetime.now() - _harvest_delta(name)
