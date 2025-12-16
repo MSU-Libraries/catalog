@@ -31,10 +31,10 @@ main() {
 
     if [[ "${CI_COMMIT_BRANCH}" == "catprod" && $PROD == "true" ]]; then # TODO Can remove catprod check once catprod merged
         STACK_NAME="catprod-prod"
-        SITE_HOSTNAME="catprod.lib.msu.edu"
+        SITE_HOSTNAME="catalog.lib.msu.edu"
     elif [[ "${CI_COMMIT_BRANCH}" == "catprod" ]]; then # TODO Change back to CI_DEFAULT_BRANCH once catprod merged
         STACK_NAME="catprod-beta"
-        SITE_HOSTNAME="catprod-beta.lib.msu.edu"
+        SITE_HOSTNAME="catalog-beta.lib.msu.edu"
     elif [[ "${CI_COMMIT_BRANCH}" == "catalog-preview" ]]; then # TODO -- move preview site
         STACK_NAME="catalog-preview"
         SITE_HOSTNAME="catalog-preview.lib.msu.edu"
