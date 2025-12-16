@@ -85,7 +85,7 @@ services:
       STACK_NAME: "${STACK_NAME}"
     deploy:
       mode: replicated
-      replicas: 0 # catprod shouldn't run cron for now
+      replicas: 3
       restart_policy:
         window: 15s
       update_config:
