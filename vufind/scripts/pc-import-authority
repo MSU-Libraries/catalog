@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 SCRIPT_NAME="$(basename "$0")"
 
 # TODO References to .MRC should be more flexible to handle .mrc, .marc, .MRC, .MARC
@@ -433,7 +435,7 @@ harvest() {
                 for F in tmp/* ; do if [[ ${F} == *.MRC ]]; then mv "${F}" "${AUTH_FILE%.zip}"_"${F#tmp/}"; fi done
                 rm -rf "${ARGS[VUFIND_HARVEST_DIR]}/tmp"
                 # Move the zip file to the processed directory since we don't need it for anything else
-                mv "${AUTH_FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/processed"
+                mv "${AUTH_FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/processed/"
             fi
 
             # Remove the files we don't currently import
