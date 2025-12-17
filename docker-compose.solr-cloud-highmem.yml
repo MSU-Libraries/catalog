@@ -2,7 +2,7 @@
 x-solr-envs: &solr_envs
   SOLR_ZK_HOSTS: zk1:2181,zk2:2181,zk3:2181
   ZK_HOST: zk1:2181,zk2:2181,zk3:2181/solr
-  SOLR_JAVA_MEM: -Xms10240m -Xmx10240m -XX:MaxDirectMemorySize=3072m
+  SOLR_JAVA_MEM: -Xms16384m -Xmx16384m -XX:MaxDirectMemorySize=8192m
   SOLR_OPTS: "-Dsolr.config.lib.enabled=true -Dsolr.allowPaths=/mnt/solr_backups"
   STACK_NAME: "${STACK_NAME}"
 
@@ -52,7 +52,8 @@ services:
       replicas: 3
       resources:
         limits:
-          memory: 1536M
+          # Update this value when changing SOLR_JAVA_MEM
+          memory: 26624M
       restart_policy:
         window: 15s
       update_config:
