@@ -206,8 +206,8 @@ apply_prod_changes() {
         ./yq -i \
         ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms16384m -Xmx16384m -XX:MaxDirectMemorySize=8192m\"" \
         docker-compose.solr-cloud.yml;
-        ./yq -i \
         # Container memory limit set to combined values of SOLR_JAVA_MEM + 2GB
+        ./yq -i \
         ".services.solr.deploy.resources.limits.memory = \"26624M\"" \
         docker-compose.solr-cloud.yml;
     fi
