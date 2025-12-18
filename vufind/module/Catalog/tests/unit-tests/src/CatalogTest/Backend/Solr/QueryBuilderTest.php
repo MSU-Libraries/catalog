@@ -27,7 +27,7 @@
 
 namespace VuFindTest\Backend\Solr;
 
-use VuFindSearch\Backend\Solr\QueryBuilder;
+use Catalog\Backend\Solr\QueryBuilder;
 use VuFindSearch\Query\Query;
 
 /**
