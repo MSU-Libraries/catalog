@@ -125,6 +125,7 @@ return [
       'search_backend' => [
         'factories' => [
           'EDS' => Catalog\Search\Factory\EdsBackendFactory::class,
+          'Solr' => Catalog\Search\Factory\SolrDefaultBackendFactory::class,
         ],
       ],
       'search_results' => [
