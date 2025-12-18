@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 SCRIPT_NAME="$(basename "$0")"
 
 # TODO References to .MRC should be more flexible to handle .mrc, .marc, .MRC, .MARC
