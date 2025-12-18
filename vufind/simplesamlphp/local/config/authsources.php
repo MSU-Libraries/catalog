@@ -1,10 +1,10 @@
 <?php
 // Select the IdP with its entityId; see saml20-idp-remote.php for available IdPs.
-if (getenv('STACK_NAME') == 'catalog-prod')
+if (getenv('SITE_HOSTNAME') == 'catalog.lib.msu.edu')
     $idpEntityId = 'http://www.okta.com/exkvvwpups2ANo53d357';
-elseif (getenv('STACK_NAME') == 'catalog-beta')
+elseif (getenv('SITE_HOSTNAME') == 'catalog-beta.lib.msu.edu')
     $idpEntityId = 'http://www.okta.com/exkvvw8b28ES52GeY357';
-elseif (getenv('STACK_NAME') == 'catalog-preview')
+elseif (getenv('SITE_HOSTNAME') == 'catalog-preview.lib.msu.edu')
     $idpEntityId = 'http://www.okta.com/exkvuaj28f9YbgMpE357';
 else
     $idpEntityId = 'http://www.okta.com/exkvspdzpbUAmE6mM357';
