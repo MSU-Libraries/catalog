@@ -71,9 +71,8 @@ Build Vufind Image:
     action: prepare
   interruptible: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == "catprod" && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == "catalog-preview"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH =~ /^-preview/'
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
     - if: $CI_COMMIT_TAG
@@ -104,9 +103,8 @@ Build Vufind Image:
   timeout: 10m
   interruptible: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == "catprod" && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == "catalog-preview"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH =~ /^-preview/'
   variables:
     LATEST: $CI_REGISTRY_IMAGE/$COMPONENT:latest
     CURR: $CI_REGISTRY_IMAGE/$COMPONENT:$CI_COMMIT_SHORT_SHA

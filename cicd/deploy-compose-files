@@ -127,7 +127,7 @@ apply_devel_changes() {
 }
 
 apply_prod_changes() {
-    ## Apply to catalog-preview, catalog-beta, and catalog-prod ##
+    ## Apply to catprod-preview, catprod-beta, and catprod-prod ##
 
     # Build extra environment suffix for image tag
     export EXTRA_TAG_SUFFIX="-main";
@@ -179,26 +179,26 @@ apply_prod_changes() {
     ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`${SITE_HOSTNAME}\`) && PathPrefix(\`/monitoring\`)\"" \
     docker-compose.monitoring.yml;
 
-    ## Changes for catalog-beta and catalog-preview
-    if [ "${STACK_NAME}" == "catalog-beta" ] || [ "${STACK_NAME}" == "catalog-preview" ] || [ "${STACK_NAME}" == "catprod-beta" ]; then
+    ## Changes for catprod-beta and catprod-preview
+    if [[ "${STACK_NAME}" == *"-beta" ]] || [[ "${STACK_NAME}" == *"-preview" ]]; then
         # Restrict both beta/preview to campus IPs only
         HTTPS_MIDDLEWARES+=("ip-campus")
-        ## Only catalog-beta
-        if [ "${STACK_NAME}" == "catalog-beta" ] || [ "${STACK_NAME}" == "catprod-beta" ]; then
+        ## Only catprod-beta
+        if [[ "${STACK_NAME}" == *"-beta" ]]; then
             # Set cron/build placement constraint
             ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_2}\"]" docker-compose.catalog.yml;
             ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_2}\"]" docker-compose.build.yml;
         fi;
-        ## Only catalog-preview
-        if [ "${STACK_NAME}" == "catalog-preview" ]; then
+        ## Only catprod-preview
+        if [[ "${STACK_NAME}" == *"-preview" ]]; then
             # Set cron/build placement constraint
             ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_3}\"]" docker-compose.catalog.yml;
             ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_3}\"]" docker-compose.build.yml;
         fi;
     fi
 
-    ## Changes for catalog-prod
-    if [ "${STACK_NAME}" == "catalog-prod" ] || [ "${STACK_NAME}" == "catprod-prod" ]; then
+    ## Changes for catprod-prod
+    if [[ "${STACK_NAME}" == *"-prod" ]]; then
         # Set cron/build placement constraint
         ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.catalog.yml;
         ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.build.yml;
@@ -258,11 +258,11 @@ main() {
     done
 
     # Development environment changes
-    if [[ "${STACK_NAME}" != catalog-* ]] && [[ "${STACK_NAME}" != catprod-* ]]; then
+    if  [[ "${STACK_NAME}" != "catprod-"* ]]; then
         apply_devel_changes;
     fi
     # Production environment changes
-    if [[ "${STACK_NAME}" == catalog-* ]] || [[ "${STACK_NAME}" == catprod-* ]]; then
+    if [[ "${STACK_NAME}" == "catprod-"* ]]; then
         apply_prod_changes;
     fi
 
@@ -272,7 +272,7 @@ main() {
     docker-compose.catalog.yml;
 
     # Authentication environment changes
-    if [[ "${STACK_NAME}" == catalog-* ]] || [[ "${STACK_NAME}" == catprod-* ]] || [ "${STACK_NAME}" == "devel-authentication" ]; then
+    if [[ "${STACK_NAME}" == "catprod-"* ]] || [ "${STACK_NAME}" == "devel-authentication" ]; then
       ./yq -i ".services.catalog.volumes += \"/home/deploy/samlcerts/${STACK_NAME}:/mnt/samlcerts:ro\"" docker-compose.catalog.yml;
     fi
 
