@@ -1,10 +1,3 @@
-// Remove catalog only checkbox & location options from EDS Advanced Search
-.template-dir-eds.template-name-advanced {
-  label[for=limit_FC], label[for=limit_LB], label[for=limit_FT1], #limit_LB {
-    display:none;
-  }
-}
-
 // Alignment for flipped advanced search select & input fields
 .adv-term-type {
   float:none;
