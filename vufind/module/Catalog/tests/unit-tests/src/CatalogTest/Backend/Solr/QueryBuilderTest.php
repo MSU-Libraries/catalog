@@ -108,5 +108,4 @@ class QueryBuilderTest extends \PHPUnit\Framework\TestCase
             $this->assertEquals($output, $queryString);
         }
     }
-
 }

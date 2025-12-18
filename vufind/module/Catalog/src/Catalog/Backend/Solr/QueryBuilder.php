@@ -30,7 +30,6 @@ use VuFindSearch\Query\QueryGroup;
  */
 class QueryBuilder extends \VuFindSearch\Backend\Solr\QueryBuilder
 {
-
     /**
      * Return SOLR search parameters based on a user query and params.
      *
@@ -102,5 +101,4 @@ class QueryBuilder extends \VuFindSearch\Backend\Solr\QueryBuilder
         }
         return new QueryGroup($groupOperator, $subQueries);
     }
-
 }
