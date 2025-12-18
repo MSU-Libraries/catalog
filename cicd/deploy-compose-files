@@ -127,18 +127,19 @@ apply_devel_changes() {
 }
 
 apply_prod_changes() {
-    ## Apply to catalog-preview, catalog-beta, and catalog-prod ##
+    ## Apply to catprod-preview, catprod-beta, and catprod-prod ##
 
     # Build extra environment suffix for image tag
     export EXTRA_TAG_SUFFIX="-main";
 
-    # Increase Solr RAM to 4+1.5GB (note: prod is further increased below)
+    # Increase Solr RAM to 5+2GB (note: prod is further increased below)
     ./yq -i \
-    ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms4096m -Xmx4096m -XX:MaxDirectMemorySize=1536m\"" \
+    ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms5120m -Xmx5120m -XX:MaxDirectMemorySize=2048m\"" \
     docker-compose.solr-cloud.yml;
     # Increase Docker limit (note: prod is further increased below)
+    # - Container memory limit set to combined values of SOLR_JAVA_MEM + 2GB
     ./yq -i \
-    ".services.solr.deploy.resources.limits.memory = \"8192M\"" \
+    ".services.solr.deploy.resources.limits.memory = \"9216M\"" \
     docker-compose.solr-cloud.yml;
 
     # Use httpchallenge cert resolver (instead of dnschallenge)
@@ -164,64 +165,51 @@ apply_prod_changes() {
     # Increase captcha logging from DEBUG to INFO
     ./yq -i ".services.captcha.environment.GOAWAY_SLOG_LEVEL = \"INFO\"" docker-compose.catalog.yml;
 
-    ## Changes for catalog-beta and catalog-preview
-    if [ "${STACK_NAME}" == "catalog-beta" ] || [ "${STACK_NAME}" == "catalog-preview" ]; then
+    # Override default router rule
+    ./yq -i \
+    ".services.captcha.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${SITE_HOSTNAME}\`)\"" \
+    docker-compose.catalog.yml;
+    ./yq -i \
+    ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`${SITE_HOSTNAME}\`) && PathPrefix(\`/record=\`)\"" \
+    docker-compose.catalog.yml;
+    ./yq -i \
+    ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`${SITE_HOSTNAME}\`) && PathPrefix(\`/solr\`)\"" \
+    docker-compose.solr-cloud.yml;
+    ./yq -i \
+    ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`${SITE_HOSTNAME}\`) && PathPrefix(\`/monitoring\`)\"" \
+    docker-compose.monitoring.yml;
+
+    ## Changes for catprod-beta and catprod-preview
+    if [[ "${STACK_NAME}" == *"-beta" ]] || [[ "${STACK_NAME}" == *"-preview" ]]; then
         # Restrict both beta/preview to campus IPs only
         HTTPS_MIDDLEWARES+=("ip-campus")
-        ## Only catalog-beta
-        if [ "${STACK_NAME}" == "catalog-beta" ]; then
+        ## Only catprod-beta
+        if [[ "${STACK_NAME}" == *"-beta" ]]; then
             # Set cron/build placement constraint
             ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_2}\"]" docker-compose.catalog.yml;
             ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_2}\"]" docker-compose.build.yml;
         fi;
-        ## Only catalog-preview
-        if [ "${STACK_NAME}" == "catalog-preview" ]; then
+        ## Only catprod-preview
+        if [[ "${STACK_NAME}" == *"-preview" ]]; then
             # Set cron/build placement constraint
             ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_3}\"]" docker-compose.catalog.yml;
             ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_3}\"]" docker-compose.build.yml;
         fi;
-        ## both catalog-beta and catalog-preview
-        # Override default router rule
-        ./yq -i \
-        ".services.captcha.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`)\"" \
-        docker-compose.catalog.yml;
-        ./yq -i \
-        ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
-        docker-compose.catalog.yml;
-        ./yq -i \
-        ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
-        docker-compose.solr-cloud.yml;
-        ./yq -i \
-        ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`${STACK_NAME}.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
-        docker-compose.monitoring.yml;
     fi
 
-    ## Changes for catalog-prod
-    if [ "${STACK_NAME}" == "catalog-prod" ]; then
+    ## Changes for catprod-prod
+    if [[ "${STACK_NAME}" == *"-prod" ]]; then
         # Set cron/build placement constraint
         ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.catalog.yml;
         ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.build.yml;
-        # Increase Solr RAM to 10+3GB (prod is granted more than non-prod envs)
+        # Increase Solr RAM to 16+8GB (prod is granted more than non-prod envs)
         ./yq -i \
-        ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms10240m -Xmx10240m -XX:MaxDirectMemorySize=3072m\"" \
+        ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms16384m -Xmx16384m -XX:MaxDirectMemorySize=8192m\"" \
         docker-compose.solr-cloud.yml;
+        # Container memory limit set to combined values of SOLR_JAVA_MEM + 2GB
         ./yq -i \
-        ".services.solr.deploy.resources.limits.memory = \"17408M\"" \
+        ".services.solr.deploy.resources.limits.memory = \"26624M\"" \
         docker-compose.solr-cloud.yml;
-
-        # Override default router rule
-        ./yq -i \
-        ".services.captcha.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-router.rule=Host(\`catalog.lib.msu.edu\`)\"" \
-        docker-compose.catalog.yml;
-        ./yq -i \
-        ".services.legacylinks.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-links.rule=Host(\`catalog.lib.msu.edu\`) && PathPrefix(\`/record=\`)\"" \
-        docker-compose.catalog.yml;
-        ./yq -i \
-        ".x-solrproxy-deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxysolr-router.rule=Host(\`catalog.lib.msu.edu\`) && PathPrefix(\`/solr\`)\"" \
-        docker-compose.solr-cloud.yml;
-        ./yq -i \
-        ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`catalog.lib.msu.edu\`) && PathPrefix(\`/monitoring\`)\"" \
-        docker-compose.monitoring.yml;
     fi
 }
 
@@ -270,11 +258,11 @@ main() {
     done
 
     # Development environment changes
-    if [[ "${STACK_NAME}" != catalog-* ]]; then
+    if  [[ "${STACK_NAME}" != "catprod-"* ]]; then
         apply_devel_changes;
     fi
     # Production environment changes
-    if [[ "${STACK_NAME}" == catalog-* ]]; then
+    if [[ "${STACK_NAME}" == "catprod-"* ]]; then
         apply_prod_changes;
     fi
 
@@ -284,7 +272,7 @@ main() {
     docker-compose.catalog.yml;
 
     # Authentication environment changes
-    if [[ "${STACK_NAME}" == catalog-* ]] || [ "${STACK_NAME}" == "devel-authentication" ]; then
+    if [[ "${STACK_NAME}" == "catprod-"* ]] || [ "${STACK_NAME}" == "devel-authentication" ]; then
       ./yq -i ".services.catalog.volumes += \"/home/deploy/samlcerts/${STACK_NAME}:/mnt/samlcerts:ro\"" docker-compose.catalog.yml;
     fi
 

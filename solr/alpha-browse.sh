@@ -109,15 +109,15 @@ check_skip() {
     declare -g SKIP_BUILD
     SKIP_BUILD=0
     # Avoid running alpha-browse on prod and beta on the same node
-    if [[ "${STACK_NAME}" == "catalog-prod" && "${NODE}" != "1" ]]; then
+    if [[ "${STACK_NAME}" == *"-prod" && "${NODE}" != "1" ]]; then
         echo "Stack is prod: only building alpha-browse on node 1."
         SKIP_BUILD=1
     fi
-    if [[ "${STACK_NAME}" == "catalog-beta" && "${NODE}" != "2" ]]; then
+    if [[ "${STACK_NAME}" == *"-beta" && "${NODE}" != "2" ]]; then
         echo "Stack is beta: only building alpha-browse on node 2."
         SKIP_BUILD=1
     fi
-    if [[ "${STACK_NAME}" == "catalog-preview" && "${NODE}" != "3" ]]; then
+    if [[ "${STACK_NAME}" == *"-preview" && "${NODE}" != "3" ]]; then
         echo "Stack is preview: only building alpha-browse on node 3."
         SKIP_BUILD=1
     fi

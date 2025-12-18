@@ -26,14 +26,14 @@ touch /mnt/logs/vufind/vufind.log
 ln -s "/mnt/shared/backups/${STACK_NAME}/" /mnt/backups
 
 # Set custom cron minute offsets for OAI harvesting
-FOLIO_CRON_MINS="0,15,30,45"  # catalog-prod
+FOLIO_CRON_MINS="0,15,30,45"  # -prod
 HARV_CRON_MINS="30"
 RESRV_CRON_MINS="10"
-if [[ "${STACK_NAME}" == "catalog-beta" ]]; then
+if [[ "${STACK_NAME}" == *"-beta" ]]; then
     FOLIO_CRON_MINS="15"
     HARV_CRON_MINS="15"
     RESRV_CRON_MINS="20"
-elif [[ "${STACK_NAME}" == "catalog-preview" ]]; then
+elif [[ "${STACK_NAME}" == *"-preview" ]]; then
     FOLIO_CRON_MINS="45"
     HARV_CRON_MINS="45"
     RESRV_CRON_MINS="50"
@@ -50,8 +50,8 @@ echo "MARIADB_ROOT_PASSWORD=\"${MARIADB_ROOT_PASSWORD}\"" >> /etc/environment
 # Change to using file sessions
 sed -i 's/type\s*=\s*Database/type=File/' /usr/local/vufind/local/config/vufind/config.ini
 
-# If not catalog-prod remove the backup jobs
-if [[ "${STACK_NAME}" != catalog-prod ]]; then
+# If not -prod remove the backup jobs
+if [[ "${STACK_NAME}" != *"-prod" ]]; then
     rm /etc/cron.d/backups
 fi
 

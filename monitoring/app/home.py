@@ -9,8 +9,8 @@ def homepage() -> str:
     '''
     Gets the contents for the home page and renders the template
     '''
-    stack_name = os.getenv('STACK_NAME')
-    is_prod = stack_name == 'catalog-prod'
+    stack_name = os.getenv('STACK_NAME', '')
+    is_prod = stack_name.endswith('-prod')
     is_dev = stack_name.startswith('devel-') or stack_name.startswith('review-')
     statuses = status.get_node_statuses()
 

@@ -9,7 +9,7 @@ import logs # pylint: disable=import-error
 import status # pylint: disable=import-error
 
 
-debug = os.getenv('STACK_NAME') != 'catalog-prod'
+debug = not os.getenv('STACK_NAME', '').endswith('-prod')
 app = flask.Flask(__name__, static_url_path='/monitoring/static')
 
 # Initialize stats collector with a scheduler

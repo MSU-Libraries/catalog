@@ -9,7 +9,7 @@ verbose "Startup script..."
 
 SHARED_STORAGE="/mnt/shared/local"
 
-if [[ "${STACK_NAME}" != catalog-prod ]]; then
+if [[ "${STACK_NAME}" != *"-prod" ]]; then
     verbose "Replacing robots.txt file with disallow contents"
     echo "User-agent: *" > "${VUFIND_HOME}/public/robots.txt"
     echo "Disallow: /" >> "${VUFIND_HOME}/public/robots.txt"
