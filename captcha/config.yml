@@ -58,7 +58,7 @@ challenge-template-overrides:
 # Backends setup via cmdline will be added here
 backends:
   "badbots":
-    url: "http://badbots_badbot:80"
+    url: "http://badbots_badbot:80/access-limited/"
     ip-header: "X-Forwarded-For"
 
   # Example HTTP backend and setting client ip header
