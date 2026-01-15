@@ -1587,6 +1587,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
+     * MSUL -- Can remove once PR 5001 is merged
      * Get latest major version of a $moduleName enabled for a tenant.
      * Result is cached.
      *
@@ -1600,12 +1601,12 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $version = $this->getCachedData($cacheKey);
         if ($version === null) {
             // Get latest version of a module enabled for a tenant.
-            // Allow 403 to not trigger an error because that means we need to try the next call
-            // that is compatible with Sunflower.
+            // Allow errors to not trigger an exception because that means we need to try the
+            // next call that is compatible with pre-Sunflower.
             $response = $this->makeRequest(
                 'GET',
-                '/_/proxy/tenants/' . $this->tenant . '/modules?filter=' . $moduleName . '&latest=1',
-                allowedFailureCodes:[403]
+                '/modules/discovery?query=(name==' . $moduleName . ')',
+                allowedFailureCodes:[400, 403, 404, 500]
             );
 
             // If there was a failure with the first method, attempt the second
@@ -1614,12 +1615,12 @@ class Folio extends \VuFind\ILS\Driver\Folio
             if (empty($json) || isset($json['errors'])) {
                 $response = $this->makeRequest(
                     'GET',
-                    '/modules/discovery?query=(name==' . $moduleName .')'
+                    '/_/proxy/tenants/' . $this->tenant . '/modules?filter=' . $moduleName . '&latest=1',
                 );
                 $json = json_decode($response->getBody(), true);
-                $latest = $json['discovery'][0]['id'] ?? '0';
-            } else {
                 $latest = $json[0]['id'] ?? '0';
+            } else {
+                $latest = $json['discovery'][0]['id'] ?? '0';
             }
 
             // get version major from json result
