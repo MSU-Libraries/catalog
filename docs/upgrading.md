@@ -103,6 +103,11 @@ page matches what is in the "Get This" button status.
 https://catalog.lib.msu.edu/Record/folio.in00005032730
 ```
 
+* Test having an item checked out to you in FOLIO to make sure it shows
+  up in your account page in VuFind and that you can renew it. See
+  the steps in [the check out process](folio-tasks.md#the-check-out-process)
+  for how to do this.
+
 * Confirm there are no errors/warnings we should address in the VuFind
   or Apache logs
 

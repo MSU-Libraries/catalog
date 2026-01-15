@@ -17,6 +17,7 @@ LibKey
 MariaDB
 Matomo
 MkDocs
+NetID
 Nginx
 OAI-PMH
 PC-110
@@ -81,6 +82,7 @@ msu.edu
 ok
 pc-import-hlm
 pc-locate-oai
+permissionName
 playbook
 playbooks
 plugin

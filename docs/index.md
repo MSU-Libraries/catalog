@@ -39,3 +39,4 @@ questions or suggestions you have!
 ## Processes
 
 * [Communication Processes](communication-processes.md)
+* [FOLIO Tasks](folio-tasks.md)
