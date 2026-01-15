@@ -1587,6 +1587,55 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
+     * Get latest major version of a $moduleName enabled for a tenant.
+     * Result is cached.
+     *
+     * @param string $moduleName module name
+     *
+     * @return int module version or 0 if no module found
+     */
+    protected function getModuleMajorVersion(string $moduleName): int
+    {
+        $cacheKey = 'module_version:' . $moduleName;
+        $version = $this->getCachedData($cacheKey);
+        if ($version === null) {
+            // Get latest version of a module enabled for a tenant.
+            // Allow 403 to not trigger an error because that means we need to try the next call
+            // that is compatible with Sunflower.
+            $response = $this->makeRequest(
+                'GET',
+                '/_/proxy/tenants/' . $this->tenant . '/modules?filter=' . $moduleName . '&latest=1',
+                allowedFailureCodes:[403]
+            );
+
+            // If there was a failure with the first method, attempt the second
+            // endpoint to get the version.
+            $json = json_decode($response->getBody(), true);
+            if (empty($json) || isset($json['errors'])) {
+                $response = $this->makeRequest(
+                    'GET',
+                    '/modules/discovery?query=(name==' . $moduleName .')'
+                );
+                $json = json_decode($response->getBody(), true);
+                $latest = $json['discovery'][0]['id'] ?? '0';
+            } else {
+                $latest = $json[0]['id'] ?? '0';
+            }
+
+            // get version major from json result
+            preg_match_all('!\d+!', $latest, $matches);
+            $version = (int)($matches[0][0] ?? 0);
+            if ($version === 0) {
+                $this->debug('Unable to find version in ' . $response->getBody());
+            } else {
+                // Only cache non-zero values, so we don't persist an error condition:
+                $this->putCachedData($cacheKey, $version);
+            }
+        }
+        return $version;
+    }
+
+    /**
      * MSUL PC-1405 Pass item_id to getAllowedServicePoints
      * Place Hold
      *
