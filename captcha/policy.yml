@@ -126,7 +126,7 @@ rules:
       - '($is-network-malicious)'
     action: proxy
     settings:
-      proxy-backend: "badbots"
+      proxy-backend: "access-limited"
 
   - name: undesired-crawlers
     conditions:
@@ -154,7 +154,7 @@ rules:
       - 'userAgent.matches("(?i)(AcademicBotRTU|GoogleOther|FriendlyCrawler|SemrushBot|Diffbot|HawaiiBot|DataForSeoBot)")'
     action: proxy
     settings:
-      proxy-backend: "badbots"
+      proxy-backend: "access-limited"
 
   - name: allow-well-known-resources
     conditions:

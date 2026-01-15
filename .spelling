@@ -43,7 +43,6 @@ afterward
 async
 backend
 backup.sh
-badbots
 base64
 bcrypt
 biblio
@@ -78,6 +77,7 @@ marc.properties
 marc_local.properties
 mariadb
 msu.edu
+no-access
 ok
 pc-import-hlm
 pc-locate-oai
