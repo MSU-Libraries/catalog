@@ -5,6 +5,13 @@ var nextGroup = 0;
 var groupLength = [];
 var deleteGroup, deleteSearch;
 
+/**
+ * Add a new search field to a specified group in the advanced search form
+ * @param {number}  group          The ID of the group to add the search field to.
+ * @param {object}  [_fieldValues] Optional object with preset values for the search field.
+ * @param {boolean} [isUser]       Check whether the action was triggered by the user (default = false)
+ * @returns {boolean} Always return false to prevent default link behavior.
+ */
 function addSearch(group, _fieldValues, isUser = false) {
   var fieldValues = _fieldValues || {};
   // Build the new search

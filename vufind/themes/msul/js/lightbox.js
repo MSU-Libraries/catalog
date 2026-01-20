@@ -15,6 +15,8 @@ VuFind.register('lightbox', function Lightbox() {
   // Bootstrap modal
   var _bsModal = null;
 
+  /**
+   * Store the currently clicked button element to be used later in form submission.
    */
   function _storeClickedStatus() {
     _clickedButton = this;

@@ -103,8 +103,7 @@
     <?php endforeach; ?>
 
     <ul class="record-list">
-      <?php $i = 0; ?>
-      <?php foreach ($this->transactions as $resource): ?>
+      <?php foreach ($this->transactions as $i => $resource): ?>
         <?php $ilsDetails = $resource->getExtraDetail('ils_details'); ?>
         <li id="record<?=$this->escapeHtmlAttr($resource->getUniqueId())?>" class="result">
           <label class="checkbox-select">

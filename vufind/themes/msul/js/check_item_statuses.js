@@ -51,10 +51,14 @@ VuFind.register('itemStatuses', function ItemStatuses() {
     } else {
       // Default case -- load call number and location into appropriate containers:
       el.querySelectorAll('.callnumber').forEach((callnumber) => {
-        callnumber.innerHTML = formatCallnumbers(result.callnumber, result.callnumber_handler) + '<br>';
+        if (result.callnumberHtml) {
+          VuFind.setInnerHtml(callnumber, result.callnumberHtml + '<br>');
+        } else {
+          callnumber.textContent = '';
+        }
       });
       el.querySelectorAll('.location').forEach((location) => {
-        location.innerHTML = result.reserve === 'true'
+        location.textContent = result.reserve === 'true'
           ? result.reserve_message
           : result.location;
       });
