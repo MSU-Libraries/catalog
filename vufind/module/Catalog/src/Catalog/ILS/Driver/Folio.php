@@ -360,7 +360,19 @@ class Folio extends \VuFind\ILS\Driver\Folio
             // fill it with data from the FOLIO holdings record, and make it not appear in
             // the full record display using a non-visible AvailabilityStatus.
             if ($number == 0 && $showHoldingsNoItems) {
-                $nextBatch[] = $this->buildHoldingsNoItemsData($bibId, $holdingDetails, $holding);
+                $locAndHoldings = $this->getItemFieldsFromNonItemData($holding->effectiveLocationId, $holdingDetails);
+                $invisibleAvailabilityStatus = new AvailabilityStatus(
+                    true,
+                    'HoldingStatus::holding_no_items_availability_message'
+                );
+                $invisibleAvailabilityStatus->setVisibilityInHoldings(false);
+                $nextBatch[] = $locAndHoldings + [
+                    'id' => $bibId,
+                    'callnumber' => $holdingDetails['holdingCallNumber'],
+                    'callnumber_prefix' => $holdingDetails['holdingCallNumberPrefix'],
+                    'reserve' => 'N',
+                    'availability' => $invisibleAvailabilityStatus,
+                ];
             }
             $items = array_merge(
                 $items,
