@@ -9,9 +9,12 @@
         <?php
           $linkAttributes = [
             'data-source' => $tab['class'],
+            'class' => 'nav-link',
           ];
           if ($tab['selected']) {
             $hasSelectedTab = true;
+            $linkAttributes['class'] .= ' active';
+            $linkAttributes['aria-current'] = 'page';
             if ($this->showCounts && $resultTotal >= 0) {
               $linkAttributes['data-result-total'] = $resultTotal;
             } elseif ($this->showCounts) {
@@ -21,14 +24,14 @@
             $linkAttributes['href'] = $tab['url'];
           }
         ?>
-        <li<?=$tab['selected'] ? ' class="active"' : ''?><?=$this->showCounts ? ' data-show-counts' : ''?>>
-          <a <?=$this->htmlAttributes($linkAttributes)?>><?=$this->transEsc($tab['label']); ?></a>
+        <li class="nav-item"<?=$this->showCounts ? ' data-show-counts' : ''?>>
+          <a<?=$this->htmlAttributes($linkAttributes)?>><?=$this->transEsc($tab['label']); ?></a>
         </li>
       <?php elseif ($block = $this->permission()->getAlternateContent($tab['permission'])): ?>
         <?=$block?>
       <?php endif; ?>
     <?php endforeach; ?>
-    <?php /** MSU Start */ ?>
+    <?php /** MSU Start - Add DR link */ ?>
     <li class="navtab-digrepo">
       <a target="_blank" href="https://d.lib.msu.edu/">
         <span class="icon icon--font fa fa-sign-in" role="img" aria-hidden="true"></span>
@@ -37,8 +40,8 @@
     </li>
     <?php /** MSU End */ ?>
     <?php if (!$hasSelectedTab && !$this->translationEmpty('temporary_search_tab_title')): ?>
-      <li class="active">
-        <a><?=$this->transEsc('temporary_search_tab_title')?></a>
+      <li class="nav-item">
+        <a class="nav-link active" aria-current="page"><?=$this->transEsc('temporary_search_tab_title')?></a>
       </li>
     <?php endif; ?>
   </ul>

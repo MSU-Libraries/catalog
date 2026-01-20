@@ -11,9 +11,6 @@
     <?php $recordNumber = $this->results->getStartRecord() + $i - $this->indexStart; ?>
     <?php // Data-record-number attribute is for analytics use.  Do not remove. ?>
     <li<?php if (empty($this->excludeResultIds)): ?> id="result<?=$i?>"<?php endif; ?> class="result<?=$current->supportsAjaxStatus() ? ' ajaxItem' : ''?> d-flex" data-record-number="<?=$this->escapeHtmlAttr($recordNumber)?>"><!--MSUL added 'd-flex' class to li to reorder checkbox first -->
-      <div class="record-number order-2"> <!-- MSUL added classes 'order-2' -->
-        <?=$recordNumber ?>
-      </div>
       <?=$this->record($current)->getSearchResult('list', $this->results)?>
       <?php if ($showCheckboxes): ?> <!-- MSUL moved checkboxes to after record in li -->
         <?=$this->record($current)->getCheckbox('', 'search-cart-form', $recordNumber)?>

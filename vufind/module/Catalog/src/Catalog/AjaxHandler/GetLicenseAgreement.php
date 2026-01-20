@@ -58,11 +58,11 @@ use function is_array;
 class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
     \VuFind\I18n\Translator\TranslatorAwareInterface,
     \VuFind\I18n\HasSorterInterface,
-    \Laminas\Log\LoggerAwareInterface
+    Psr\Log\LoggerAwareInterface
 {
     use \VuFind\I18n\Translator\TranslatorAwareTrait;
     use \VuFind\I18n\HasSorterTrait;
-    use \VuFind\Log\LoggerAwareTrait;
+    use VuFind\Log\LoggerAwareTrait;
 
     /**
      * Top-level configuration

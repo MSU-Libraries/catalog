@@ -165,9 +165,6 @@ COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
 COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh backup.sh restore.sh /
 COPY msmtp/aliases msmtp/msmtprc /etc/
-# This could be removed once the mariadb connector is added to VuFind:
-RUN mv /usr/local/vufind/local/import/lib_local/mariadb-java-client-3.5.1.jar /usr/local/vufind/import/lib_local/ && \
-    sed -i "s/\\\\VuFind\\\\Db\\\\AdapterFactory/\\\\Catalog\\\\Db\\\\AdapterFactory/" /usr/local/vufind/module/VuFind/src/VuFindTest/Feature/LiveDatabaseTrait.php
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/

@@ -17,11 +17,11 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * along with this program; if not, see
+ * <https://www.gnu.org/licenses/>.
  *
  * @category VuFind
- * @package  View_Helper
+ * @package  View_Helpers
  * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:record_drivers Wiki
@@ -47,9 +47,9 @@ use function in_array;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:record_drivers Wiki
  */
-class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\LoggerAwareInterface
+class Record extends \VuFind\View\Helper\Root\Record implements Psr\Log\LoggerAwareInterface
 {
-    use \VuFind\Log\LoggerAwareTrait;
+    use VuFind\Log\LoggerAwareTrait;
 
     /**
      * Link labels loaded from 'labels' key in accesslinks.yaml config. Each entry:
@@ -302,8 +302,8 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             $due = isset($transEsc) ? $transEsc('Due') : 'Due';
             $suffix .= ' - ' . $due . ': ' . $holding['duedate'];
         }
-        if ($holding['temporary_loan_type'] ?? false) {
-            $suffix .= ' (' . $holding['temporary_loan_type'] . ')';
+        if ($holding['loan_type_name'] ?? false) {
+            $suffix .= ' (' . $holding['loan_type_name'] . ')';
         }
         return $suffix;
     }

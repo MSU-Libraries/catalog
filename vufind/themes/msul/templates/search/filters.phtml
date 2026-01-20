@@ -15,7 +15,8 @@ if ($filterCount == 1) {
 }
 
 if (!$skip) {
-/** MSU End */
+/** MSU End. Core template within if-statement */
+    <?php
       if (!isset($this->params)) {
         // No current search, use last search in memory
         $params = $this->searchMemory()->getLastSearchParams($this->searchClassId);
@@ -56,8 +57,8 @@ if (!$skip) {
               );
           ?>
           <?php if ($removeLink): ?>
-            <a class="filter-value" href="<?=$removeLink?>">
-              <span class="sr-only">
+            <a class="filter-value" href="<?=$removeLink?>" data-filter="<?=$this->escapeHtmlAttr($filter['filter'])?>">
+              <span class="visually-hidden">
                 <?=$this->translate('Remove filter') ?>
               </span>
               <span class="text"><?=$this->transEsc($filter['desc'])?></span>
@@ -76,6 +77,7 @@ if (!$skip) {
               <?php $safeId = preg_replace('/[^a-zA-Z0-9]/', '', $field); ?>
               <button id="dropdown-toggle-<?=$safeId?>" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
                 <?=$this->transEsc('filter_toggle_entries', ['%%count%%' => count($data)])?>
+                <?=$this->icon('dropdown-caret')?>
               </button>
               <ul class="dropdown-menu" role="menu" aria-labelledby="dropdown-toggle-<?=$safeId?>">
           <?php else: ?>
@@ -104,23 +106,31 @@ if (!$skip) {
               }
               $operatorClass = $this->escapeHtmlAttr(strtolower($value['operator']));
             ?>
-            <span class="filters-term filters-<?=$operatorClass?>">
-              <?=($index > 0 || 'NOT' === $value['operator']) ? $join : '' ?>
+            <span class="operator-and-term">
+              <span class="filters-term filters-<?=$operatorClass?>">
+                <?=($index > 0 || 'NOT' === $value['operator']) ? $join : '' ?>
+              </span>
+                <?php
+                  $removeLink = isset($this->urlQuery) && !$fromSearchMemory
+                    ? $urlQuery->removeFacet($value['field'], $value['value'], $value['operator'])
+                    : $this->searchMemory()->getEditLink($this->searchClassId, 'removeFacet', $value);
+                ?>
+              <a
+                class="<?=$dropdown ? 'dropdown-item ' : ''?>filter-value filters-<?=$operatorClass?>"
+                href="<?=$removeLink?>"
+                <?php if (isset($urlQuery)): ?>
+                  data-filter="<?=$this->escapeHtmlAttr($urlQuery->formatFilterString($value['field'], $value['value'], $value['operator']))?>"
+                <?php endif; ?>
+              >
+                <span class="visually-hidden">
+                  <?=$this->translate('Remove filter') ?>
+                </span>
+                <span class="text">
+                  <?=$this->escapeHtml($value['displayText'])?>
+                </span>
+                <?=$this->icon('search-filter-remove') ?>
+              </a>
             </span>
-              <?php
-                $removeLink = isset($this->urlQuery) && !$fromSearchMemory
-                  ? $urlQuery->removeFacet($value['field'], $value['value'], $value['operator'])
-                  : $this->searchMemory()->getEditLink($this->searchClassId, 'removeFacet', $value);
-              ?>
-            <a class="<?=$dropdown ? 'dropdown-item ' : ''?>filter-value filters-<?=$operatorClass?>" href="<?=$removeLink?>">
-              <span class="sr-only">
-                <?=$this->translate('Remove filter') ?>
-              </span>
-              <span class="text">
-                <?=$this->escapeHtml($value['displayText'])?>
-              </span>
-              <?=$this->icon('search-filter-remove') ?>
-            </a>
             <?php if ($dropdown): ?>
               </li>
             <?php endif; ?>
@@ -144,25 +154,25 @@ if (!$skip) {
         }
       ?>
       <?php // Normal view ?>
-      <div class="active-filters hidden-xs">
-        <span class="sr-only"><?=$this->transEsc('page_reload_on_deselect_hint') ?></span>
+      <div class="active-filters active-filters--uncollapsible">
+        <span class="visually-hidden"><?=$this->transEsc('page_reload_on_deselect_hint') ?></span>
         <?php if ($resetLink && $options->shouldDisplayResetFilters()): ?>
-          <a class="reset-filters-btn" href="<?=$resetLink?>"><?=$this->transEsc('Remove Filters')?></a>
+          <a class="reset-filters-btn" href="<?=$resetLink?>"><?=$this->transEsc('reset_filters_button')?></a>
         <?php elseif ($advancedSearch): ?>
           <p class="adv_search_filters"><?=$this->transEsc('adv_search_filters')?>:</p>
         <?php endif; ?>
         <div class="filters">
-          <span class="sr-only"><?=$this->transEsc('applied_filters') ?></span>
+          <span class="visually-hidden"><?=$this->transEsc('applied_filters') ?></span>
           <?=$filters ?>
         </div>
         <div class="clearfix"></div>
       </div>
       <?php // Narrow view ?>
-      <div class="active-filters visible-xs">
-        <span class="sr-only"><?=$this->transEsc('page_reload_on_deselect_hint') ?></span>
+      <div class="active-filters active-filters--collapsible">
+        <span class="visually-hidden"><?=$this->transEsc('page_reload_on_deselect_hint') ?></span>
         <div class="filters-toggle-bar">
           <?php if ($resetLink && $options->shouldDisplayResetFilters()): ?>
-            <a class="reset-filters-btn" href="<?=$resetLink?>"><?=$this->transEsc('Remove Filters') /** MSU */ ?></a>
+            <a class="reset-filters-btn" href="<?=$resetLink?>"><?=$this->transEsc('reset_filters_button')?></a>
           <?php endif; ?>
           <div class="filters-toggle collapsed" data-bs-toggle="collapse" data-bs-target="#active-filters-mobile">
             <?=$this->transEsc('show_filters_html', ['%%count%%' => $filterCount])?>
@@ -175,5 +185,4 @@ if (!$skip) {
         <div class="clearfix"></div>
       </div>
     <?php endif; ?>
-    <?php
 } /** MSU */

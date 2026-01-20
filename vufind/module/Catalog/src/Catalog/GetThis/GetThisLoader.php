@@ -212,8 +212,8 @@ class GetThisLoader
         if ($item['duedate'] ?? false) {
             $suffix .= ' - Due: ' . $item['duedate'];
         }
-        if ($item['temporary_loan_type'] ?? false) {
-            $suffix .= ' (' . $item['temporary_loan_type'] . ')';
+        if ($item['loan_type_name'] ?? false) {
+            $suffix .= ' (' . $item['loan_type_name'] . ')';
         }
         return $suffix;
     }

@@ -7,44 +7,19 @@
     <div class="solr-facet-container">
       <?php foreach ($this->facetList as $field => $list): ?>
         <div class="solr-adv-facet">
-          <?php /** MSU START */ ?>
+          <?php /** MSU Replaced label_ line with this */ ?>
           <?php $fieldname = $this->escapeHtmlAttr(str_replace(' ', '', $field)) ?>
           <span id="label_<?=$fieldname?>" class="field-label">
             <?=$this->transEsc($list['label'])?>:
           </span>
-          <?php /** MSU Code removed */ ?>
+         <?php /** MSU END */ ?>
+          <select class="form-select" id="limit_<?=$this->escapeHtmlAttr(str_replace(' ', '', $field))?>" aria-labelledby="label_<?=$this->escapeHtmlAttr(str_replace(' ', '', $field))?>" name="filter[]" multiple="multiple" size="10"> <?php // MSU add aria-labelledby ?>
             <?php if (is_array($this->hierarchicalFacets) && in_array($field, $this->hierarchicalFacets)): ?>
-              <div class="form-control leveledCheckboxes" id="limit_<?=$fieldname?>" aria-labelledby="label_<?=$fieldname?>">
-                <?php foreach ($list['list'] as $value): ?>
-                  <?php
-                  $padding = str_pad('', 4 * $value['level'] * 6, '&nbsp;', STR_PAD_LEFT);
-                  $display = $this->escapeHtml($value['displayText']);
-                  ?>
-                  <div
-                      class="leveledCheckbox"
-                      data-level="<?= $value['level'] ?>">
-                    <?= $padding ?>
-                    <label
-                        for="<?= $this->escapeHtmlAttr($this->operatorToFieldPrefix($value['operator']) . $field . ':"' .
-                          $value['value'] . '"') ?>">
-                      <input
-                          type="checkbox"
-                          name="filter[]"
-                          id="<?= $this->escapeHtmlAttr($this->operatorToFieldPrefix($value['operator']) . $field . ':"' .
-                            $value['value'] . '"') ?>"
-                          value="<?= $this->escapeHtmlAttr($this->operatorToFieldPrefix($value['operator']) . $field . ':"' .
-                            $value['value'] . '"') ?>"
-                        <?= (isset($value['selected']) && $value['selected']) ? ' checked="checked"' : '' ?>/>
-                      <?= $display ?>
-                    </label>
-                  </div>
-                <?php endforeach; ?>
-              </div>
+              <?php foreach ($list['list'] as $value): ?>
+                <?php $display = str_pad('', 4 * $value['level'] * 6, '&nbsp;', STR_PAD_LEFT) . $this->escapeHtml($value['displayText']); ?>
+                <option value="<?=$this->escapeHtmlAttr($this->operatorToFieldPrefix($value['operator']) . $field . ':"' . $value['value'] . '"')?>"<?=(isset($value['selected']) && $value['selected']) ? ' selected="selected"' : ''?>><?=$display?></option>
+              <?php endforeach; ?>
             <?php else: ?>
-              <select id="limit_<?=$fieldname?>" class="form-control"
-                      aria-labelledby="label_<?=$this->escapeHtmlAttr(str_replace(' ', '', $field))?>"
-                      name="filter[]" multiple="multiple" size="10">
-              <?php /** MSU END */ ?>
               <?php
               // Sort the current facet list alphabetically and filter items to
               // the top if they appear in the config; we'll use this data
@@ -81,9 +56,8 @@
                 <?php $value = $list['list'][$i]; ?>
                 <option value="<?=$this->escapeHtmlAttr(($value['operator'] == 'OR' ? '~' : '') . $field . ':"' . $value['value'] . '"')?>"<?=(isset($value['selected']) && $value['selected']) ? ' selected="selected"' : ''?>><?=$this->escapeHtml($display)?></option>
               <?php endforeach; ?>
-              </select><?php /** MSU */ ?>
             <?php endif; ?>
-          <?php /** MSU Code removed */ ?>
+          </select>
         </div>
       <?php endforeach; ?>
     </div>

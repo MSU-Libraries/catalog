@@ -1,7 +1,7 @@
 <?php
   /** @var \Laminas\View\Renderer\PhpRenderer $this */
   $this->headTitle($this->translate('Browse the Collection Alphabetically'));
-  $this->layout()->breadcrumbs = '<li><a href="' . $this->url('alphabrowse-home') . '">' . $this->transEsc('Browse Alphabetically') . '</a></li>';
+  $this->breadcrumbs()->set($this->translate('Browse Alphabetically'), $this->url('alphabrowse-home'));
   $baseQuery = ['source' => $this->source, 'from' => $this->from];
 
   // Set up upper search box if necessary:
@@ -45,7 +45,7 @@
   <h1 class="mb-5">Browse Alphabetically</h1>
   <form class="form-inline" method="get" action="<?=$this->url('alphabrowse-home')?>" name="alphaBrowseForm" id="alphaBrowseForm">
     <label for="alphaBrowseForm_source"><?=$this->transEsc('Browse by') ?></label> <!-- MSU -->
-    <select id="alphaBrowseForm_source" name="source" class="form-control">
+    <select id="alphaBrowseForm_source" name="source" class="form-select">
       <?php foreach ($this->alphaBrowseTypes as $key => $item): ?>
         <option value="<?=$this->escapeHtmlAttr($key) ?>"<?php if ($this->source == $key): ?> selected="selected"<?php endif; ?>><?=$this->transEsc($item) ?></option>
       <?php endforeach; ?>
@@ -77,7 +77,7 @@
   <table class="alphabrowse table"> <!--removed .table-striped class-->
     <thead>
       <tr>
-        <th scope="col" class="<?=$this->source ?>">
+        <th class="<?=$this->source ?>">
           <?=$this->transEsc('browse_' . $this->source) ?>
         </th>
         <?php foreach ($this->extras as $e): ?>
@@ -89,7 +89,7 @@
           ?>
           <th scope="col"><?=$this->transEsc('browse_' . $e) ?></th>
         <?php endforeach; ?>
-        <th scope="col" class="titles"><?=$this->transEsc('alphabrowse_matches') ?></th>
+        <th class="titles"><?=$this->transEsc('alphabrowse_matches') ?></th>
       </tr>
     </thead>
     <tbody>
@@ -134,7 +134,6 @@
               <div>
                 <?=$this->transEsc('Use instead') ?>:
                 <ul>
-                  <?php // MSUL: PC-1492 Remove duplicate values. Can be removed when https://github.com/vufind-org/vufind/pull/4560 is in VF ?>
                   <?php foreach (array_unique($item['useInstead']) as $heading): ?>
                   <li><a href="<?=$this->escapeHtmlAttr($this->url('alphabrowse-home', [], ['query' => ['from' => $heading] + $baseQuery]))?>"><?=$this->escapeHtml($heading)?></a></li>
                   <?php endforeach; ?>
@@ -146,7 +145,6 @@
               <div>
                 <?=$this->transEsc('See also') ?>:
                 <ul>
-                  <?php // MSUL: PC-1492 Remove duplicate values. Can be removed when https://github.com/vufind-org/vufind/pull/4560 is in VF ?>
                   <?php foreach (array_unique($item['seeAlso']) as $heading): ?>
                   <li><a href="<?=$this->escapeHtmlAttr($this->url('alphabrowse-home', [], ['query' => ['from' => $heading] + $baseQuery]))?>"><?=$this->escapeHtml($heading)?></a></li>
                   <?php endforeach; ?>

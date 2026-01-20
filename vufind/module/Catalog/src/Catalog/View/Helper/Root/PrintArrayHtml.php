@@ -3,7 +3,7 @@
 /**
  * View helper to print an array formatted for HTML display.
  *
- * PHP version 7
+ * PHP version 8
  *
  * Copyright (C) Michigan State University 2023.
  *
@@ -17,8 +17,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * along with this program; if not, see
+ * <https://www.gnu.org/licenses/>.
  *
  * @category VuFind
  * @package  View_Helpers
@@ -46,15 +46,16 @@ use function is_int;
 class PrintArrayHtml extends AbstractHelper
 {
     /**
+     * MSUL -- overriden to customize source record tab display
      * Print an array formatted for HTML display.
      * Function uses recursion to achieve desired results, so entry can be
      * either an array or a value to display.
      *
      * @param array|string $entry       An array or string to output
      * @param int          $indentLevel How many spaces to indent output
-     * @param bool         $indentFirst Whether the first item in an array should be indented
+     * @param bool         $indentFirst Should first item in array be indented
      *
-     * @return string
+     * @return string                   The formatted HTML for output
      */
     public function __invoke($entry, $indentLevel = 0, $indentFirst = true)
     {

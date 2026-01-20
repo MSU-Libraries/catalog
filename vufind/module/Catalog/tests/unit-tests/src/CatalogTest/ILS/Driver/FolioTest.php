@@ -227,7 +227,7 @@ class FolioTest extends \PHPUnit\Framework\TestCase
                     'folio_location_is_active' => true,
                     'issues' => ['foo', 'bar baz'],
                     'electronic_access' => [],
-                    'temporary_loan_type' => null,
+                    'loan_type_name' => null,
                     'material_type' => '',
                 ],
             ],

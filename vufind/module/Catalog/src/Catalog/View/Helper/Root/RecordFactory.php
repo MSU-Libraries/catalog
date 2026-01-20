@@ -1,9 +1,24 @@
 <?php
 
 /**
- * Factory for the Record
+ * Record helper factory.
  *
- * PHP version 7
+ * PHP version 8
+ *
+ * Copyright (C) Villanova University 2018.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see
+ * <https://www.gnu.org/licenses/>.
  *
  * @category VuFind
  * @package  Record_Factory
@@ -30,29 +45,35 @@ use VuFind\Tags\TagsService;
 class RecordFactory implements FactoryInterface
 {
     /**
-     * Invoke the factory for the record
+     * Create an object
      *
-     * @param ContainerInterface $container     Container to get configs and invoke
-     * @param string             $requestedName Record request to make
-     * @param array              $options       Options to pass to the request
+     * @param ContainerInterface $container     Service manager
+     * @param string             $requestedName Service being created
+     * @param null|array         $options       Extra options (optional)
      *
-     * @return Results from the request
+     * @return object
+     *
+     * @throws ServiceNotFoundException if unable to resolve the service.
+     * @throws ServiceNotCreatedException if an exception is raised when
+     * creating a service.
+     * @throws ContainerException&\Throwable if any other error occurs
      */
     public function __invoke(
         ContainerInterface $container,
         $requestedName,
-        array $options = null
+        ?array $options = null
     ) {
         if (!empty($options)) {
-            throw new \Exception('Unexpected options sent to factory.');
+            throw new \Exception('Unexpected options passed to factory.');
         }
-        $config = $container->get(\VuFind\Config\PluginManager::class)->get('config');
+        $config = $container->get(\VuFind\Config\ConfigManagerInterface::class)->getConfigObject('config');
+        $helper = new $requestedName($container->get(TagsService::class), $config, $browzineConfig ?? []); // MSU
 
         // MSU Start
         // Get the BrowZine config
         try {
-            $browzineConfig = $container->get(\VuFind\Config\PluginManager::class)
-                ->get('BrowZine');
+            $browzineConfig = $container->get(\VuFind\Config\ConfigManagerInterface::class)
+                ->getConfigObject('BrowZine');
         } catch (\Exception $e) {
             $logger = $container->get(\VuFind\Log\Logger::class);
             $logger->err(
@@ -61,7 +82,6 @@ class RecordFactory implements FactoryInterface
         }
         // MSU End
 
-        $helper = new $requestedName($container->get(TagsService::class), $config, $browzineConfig ?? []); // MSU
         $helper->setCoverRouter($container->get(\VuFind\Cover\Router::class));
         $helper->setSearchMemory($container->get(\VuFind\Search\Memory::class));
         return $helper;

@@ -1,12 +1,11 @@
 <?php
 
 /**
- * Table Definition for session
+ * Database service for Session.
  *
  * PHP version 8
  *
- * Copyright (C) Villanova University 2010.
- * Copyright (C) The National Library of Finland 2016.
+ * Copyright (C) Villanova University 2023.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2,
@@ -18,40 +17,44 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * along with this program; if not, see
+ * <https://www.gnu.org/licenses/>.
  *
  * @category VuFind
- * @package  Db_Table
+ * @package  Database
+ * @author   Demian Katz <demian.katz@villanova.edu>
+ * @author   Sudharma Kellampalli <skellamp@villanova.edu>
  * @author   Megan Schanz <schanzme@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
- * @link     https://vufind.org Main Page
+ * @link     https://vufind.org/wiki/development:plugins:database_gateways Wiki
  */
 
-namespace Catalog\Db\Table;
+namespace Catalog\Db\Service;
 
-use Laminas\Db\Adapter\Adapter;
-use VuFind\Db\Row\RowGateway;
-use VuFind\Db\Table\PluginManager;
+use VuFind\Db\Entity\SessionEntityInterface;
 use VuFind\Exception\SessionExpired as SessionExpiredException;
 
 use function in_array;
 
 /**
- * Table Definition for session
+ * Database service for Session.
  * MSUL Customizations for:
  *   - Skipping updates to the last_used time in the session based on configured paths
  *   - Retrying save attempts to the session when there is a failure
  *
  * @category VuFind
- * @package  Db_Table
+ * @package  Database
+ * @author   Demian Katz <demian.katz@villanova.edu>
+ * @author   Sudharma Kellampalli <skellamp@villanova.edu>
  * @author   Megan Schanz <schanzme@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
- * @link     https://vufind.org Main Site
+ * @link     https://vufind.org/wiki/development:plugins:database_gateways Wiki
  */
-class Session extends \VuFind\Db\Table\Session implements \Laminas\Log\LoggerAwareInterface
+class SessionService extends \VuFind\Db\Service\SessionService implements
+    Psr\Log\LoggerAwareInterface,
+    SessionServiceInterface,
 {
-    use \VuFind\Log\LoggerAwareTrait;
+    use VuFind\Log\LoggerAwareTrait;
 
     protected $configReader = null;
 
@@ -87,12 +90,15 @@ class Session extends \VuFind\Db\Table\Session implements \Laminas\Log\LoggerAwa
      * @throws SessionExpiredException
      * @return string     Session data
      */
-    public function readSession($sid, $lifetime)
+    public function readSession(string $sid, int $lifetime): string
     {
-        $s = $this->getBySessionId($sid);
-
+        $s = $this->getSessionById($sid);
+        if (!$s) {
+            throw new SessionExpiredException("Cannot read session $sid");
+        }
+        $lastused = $s->getLastUsed();
         // enforce lifetime of this session data
-        if (!empty($s->last_used) && $s->last_used + $lifetime <= time()) {
+        if (!empty($lastused) && $lastused + $lifetime <= time()) {
             throw new SessionExpiredException('Session expired!');
         }
 
@@ -116,7 +122,8 @@ class Session extends \VuFind\Db\Table\Session implements \Laminas\Log\LoggerAwa
                 }
             }
         }
-        return empty($s->data) ? '' : $s->data;
+        $data = $s->getData();
+        return $data ?? '';
     }
 
     /**
@@ -125,9 +132,9 @@ class Session extends \VuFind\Db\Table\Session implements \Laminas\Log\LoggerAwa
      * @param string $sid  Session ID to retrieve
      * @param string $data Data to store
      *
-     * @return void
+     * @return bool
      */
-    public function writeSession($sid, $data)
+    public function writeSession(string $sid, string $data): bool
     {
         $maxRetries = 3;
         $retryCount = 0;
@@ -145,6 +152,7 @@ class Session extends \VuFind\Db\Table\Session implements \Laminas\Log\LoggerAwa
                 usleep(2 ** $retryCount * 1000);
             }
         }
+        return $updated;
     }
 
     /**

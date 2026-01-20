@@ -9,7 +9,7 @@
  * @package  Search
  * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
- * @link     https://vufind.org/vufind/ Main page
+ * @link     https://vufind.org
  */
 
 namespace Catalog\Backend\Solr;
@@ -20,7 +20,7 @@ use VuFindSearch\Query\Query;
 use VuFindSearch\Query\QueryGroup;
 
 /**
- * SOLR QueryBuilder
+ * SOLR QueryBuilder.
  *
  * @category VuFind
  * @package  Search

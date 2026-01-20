@@ -327,7 +327,7 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
                 'item_id' => '123',
                 'availability' => new AvailabilityStatus(true, 'Available'),
                 'reserve' => 'N',
-                'temporary_loan_type' => 'test',
+                'loan_type_name' => 'test',
             ],
             [
                 'item_id' => '456',

@@ -276,7 +276,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
         $holding = [
             'availability' => new AvailabilityStatus(0, 'Paged'),
-            'temporary_loan_type' => 'LoanType',
+            'loan_type_name' => 'LoanType',
         ];
         $this->assertEquals('Checked Out (Paged) (LoanType)', $record->getStatus($holding, false));
     }

@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Auth helper factory.
+ * Database service factory
  *
  * PHP version 8
  *
- * Copyright (C) Villanova University 2018.
+ * Copyright (C) Villanova University 2021.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2,
@@ -21,29 +21,31 @@
  * <https://www.gnu.org/licenses/>.
  *
  * @category VuFind
- * @package  View_Helpers
- * @author   Robby ROUDON <roudonro@msu.edu>
+ * @package  Database
+ * @author   Demian Katz <demian.katz@villanova.edu>
+ * @author   Megan Schanz <schanzme@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
- * @link     https://vufind.org/wiki/development Wiki
+ * @link     https://vufind.org/wiki/development:plugins:database_gateways Wiki
  */
 
-namespace Catalog\View\Helper\Root;
+namespace Catalog\Db\Service;
 
-use Laminas\ServiceManager\Exception\ServiceNotCreatedException;
-use Laminas\ServiceManager\Exception\ServiceNotFoundException;
-use Psr\Container\ContainerExceptionInterface as ContainerException;
 use Psr\Container\ContainerInterface;
 
 /**
- * Auth helper factory.
+ * Database service factory
+ * MSUL Customizations for:
+ *  - Passing in the config reader when initializing the class
+ *  - Having the Db row prototype look in VuFind's module
  *
  * @category VuFind
- * @package  View_Helpers
- * @author   Robby ROUDON <roudonro@msu.edu>
+ * @package  Database
+ * @author   Demian Katz <demian.katz@villanova.edu>
+ * @author   Megan Schanz <schanzme@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
- * @link     https://vufind.org/wiki/development Wiki
+ * @link     https://vufind.org/wiki/development:plugins:database_gateways Wiki
  */
-class AuthFactory extends \VuFind\View\Helper\Root\AuthFactory
+class AbstractDbServiceFactory extends \VuFind\Db\Service\AbstractDbServiceFactory
 {
     /**
      * Create an object
@@ -64,13 +66,13 @@ class AuthFactory extends \VuFind\View\Helper\Root\AuthFactory
         $requestedName,
         ?array $options = null
     ) {
-        if (!empty($options)) {
-            throw new \Exception('Unexpected options passed to factory.');
-        }
         return new $requestedName(
-            $container->get(\VuFind\Auth\Manager::class),
-            $container->get(\VuFind\Auth\ILSAuthenticator::class),
-            $container->get(\VuFind\Config\PathResolver::class) // MSU
+            $container->get('doctrine.entitymanager.orm_vufind'),
+            $container->get(\VuFind\Db\Entity\PluginManager::class),
+            $container->get(PersistenceManager::class),
+            // MSUL customization to get the config reader
+            $container->get(\VuFind\Config\PluginManager::class),
+            ...($options ?? [])
         );
     }
 }
