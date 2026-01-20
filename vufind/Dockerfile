@@ -204,7 +204,8 @@ RUN \
     mv /tests/* ${VUFIND_HOME}/tests/ && \
     # Install grunt
     npm install -g grunt-cli && \
-    grunt less
+    npm run install:scss-dependencies && \
+    grunt scss
 
 EXPOSE 80
 

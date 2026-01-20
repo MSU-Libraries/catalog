@@ -3,7 +3,7 @@
 .table, .tab-content table {
   width: auto;
   max-width: 100%;
-  margin-bottom: $line-height-computed;
+  margin-bottom: calc($font-size-base * $line-height-base);
   // Cells
   > thead,
   > tbody,
