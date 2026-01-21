@@ -40,9 +40,6 @@ public class FormatCalculator extends org.vufind.index.FormatCalculator
      */
     @Override protected String getFormatFrom007(char formatCode, String formatString) {
         char formatCode2 = formatString.length() > 1 ? formatString.charAt(1) : ' ';
-        if (formatCode == 'v' && formatString.length() > 4 && formatString.charAt(1) == 'd' && formatString.charAt(4) == 'g') {
-            return "LaserDisc";
-        }
         // PC-1409
         if (formatCode == 's' && formatCode2 == 'd' && formatString.length() > 10 && formatString.charAt(10) == 'p') {
             return "VinylRecord";
