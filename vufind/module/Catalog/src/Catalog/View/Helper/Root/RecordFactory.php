@@ -66,9 +66,6 @@ class RecordFactory implements FactoryInterface
         if (!empty($options)) {
             throw new \Exception('Unexpected options passed to factory.');
         }
-        $config = $container->get(\VuFind\Config\ConfigManagerInterface::class)->getConfigObject('config');
-        $helper = new $requestedName($container->get(TagsService::class), $config, $browzineConfig ?? []); // MSU
-
         // MSU Start
         // Get the BrowZine config
         try {
@@ -80,7 +77,25 @@ class RecordFactory implements FactoryInterface
                 'Could not parse BrowZine.ini: ' . $e->getMessage()
             );
         }
+        // Get the Access Links config
+        try {
+            $yamlReader = $container->get(\VuFind\Config\YamlReader::class);
+            $accessLinksConfig = $yamlReader->get('accesslinks.yaml');
+        } catch (\Exception $e) {
+            $logger = $container->get(\VuFind\Log\Logger::class);
+            $logger->err(
+                'Could not parse accesslinks.yaml: ' . $e->getMessage()
+            );
+        }
         // MSU End
+        $config = $container->get(\VuFind\Config\ConfigManagerInterface::class)->getConfigObject('config');
+        // MSU add BrowZine and accesslinks configs
+        $helper = new $requestedName(
+            $container->get(TagsService::class),
+            $config,
+            $browzineConfig ?? [],
+            $accessLinksConfig ?? []
+        );
 
         $helper->setCoverRouter($container->get(\VuFind\Cover\Router::class));
         $helper->setSearchMemory($container->get(\VuFind\Search\Memory::class));

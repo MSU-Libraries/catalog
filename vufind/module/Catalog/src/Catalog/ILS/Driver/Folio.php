@@ -37,7 +37,6 @@ use VuFind\ILS\Logic\AvailabilityStatus;
 
 use function count;
 use function in_array;
-use function is_int;
 use function is_object;
 use function is_string;
 
@@ -620,59 +619,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
-     * Get request groups
-     * MSUL - customized to check if results come back before assuming.
-     * This is a good candidate for a PR, but we couldn't find a specific
-     * scenario/user that would trigger this.
-     *
-     * @param int   $bibId       BIB ID
-     * @param array $patron      Patron information returned by the patronLogin
-     * method.
-     * @param array $holdDetails Optional array, only passed in when getting a list
-     * in the context of placing a hold; contains most of the same values passed to
-     * placeHold, minus the patron data. May be used to limit the request group
-     * options or may be ignored.
-     *
-     * @return array  False if request groups not in use or an array of
-     * associative arrays with id and name keys
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
-    public function getRequestGroups(
-        $bibId = null,
-        $patron = null,
-        $holdDetails = null
-    ) {
-        // circulation-storage.request-preferences.collection.get
-        $response = $this->makeRequest(
-            'GET',
-            '/request-preference-storage/request-preference?query=userId==' . $patron['id']
-        );
-        // MSU Start -- Add null checks for $requestPreferences
-        $requestPreferencesResponse = json_decode($response->getBody());
-        $requestPreferences = $requestPreferencesResponse->requestPreferences[0] ?? null;
-        $allowHoldShelf = $requestPreferences?->holdShelf ?? null;
-        $allowDelivery = ($requestPreferences?->delivery ?? null) && ($this->config['Holds']['allowDelivery'] ?? true);
-        // MSU End
-        $locationsLabels = $this->config['Holds']['locationsLabelByRequestGroup'] ?? [];
-        if ($allowHoldShelf && $allowDelivery) {
-            return [
-                [
-                    'id' => 'Hold Shelf',
-                    'name' => 'fulfillment_method_hold_shelf',
-                    'locationsLabel' => $locationsLabels['Hold Shelf'] ?? null,
-                ],
-                [
-                    'id' => 'Delivery',
-                    'name' => 'fulfillment_method_delivery',
-                    'locationsLabel' => $locationsLabels['Delivery'] ?? null,
-                ],
-            ];
-        }
-        return false;
-    }
-
-    /**
      * This method queries the ILS for a patron's current holds
      *
      * Input: Patron array returned by patronLogin method
@@ -904,7 +850,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         }
         return $retVal;
     }
- 
+
     /**
      * MSUL-only function
      * Determine if the provided pickup service point is excluded or not

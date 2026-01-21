@@ -1,5 +1,10 @@
 /*global VuFind */
 
+/**
+ * Get the URL for the searchs results page
+ * @param {string} searchClassId the name of the search class to get the search page for
+ * @returns {string} Path to the search results page
+ */
 function getSearchRouteUrl(searchClassId) {
   return VuFind.config.get('search-class-urls')[searchClassId] || '/Search/Results';
 }
@@ -8,6 +13,7 @@ function getSearchRouteUrl(searchClassId) {
  * Javascript implementation of VuFind\Controller\CombinedController->searchboxAction()
  * Default action is NOT implemented and will fall back to using Controller.
  * When updating this method, you must also update the controller searchboxAction()
+ * @returns {boolean} if the action was successful
  */
 function searchboxAction() {
   const form = document.getElementById('searchForm');

@@ -69,7 +69,7 @@ class AbstractDbServiceFactory extends \VuFind\Db\Service\AbstractDbServiceFacto
         return new $requestedName(
             $container->get('doctrine.entitymanager.orm_vufind'),
             $container->get(\VuFind\Db\Entity\PluginManager::class),
-            $container->get(PersistenceManager::class),
+            $container->get(\VuFind\Db\PersistenceManager::class),
             // MSUL customization to get the config reader
             $container->get(\VuFind\Config\PluginManager::class),
             ...($options ?? [])

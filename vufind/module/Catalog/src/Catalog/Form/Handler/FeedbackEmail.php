@@ -29,7 +29,7 @@
 
 namespace Catalog\Form\Handler;
 
-use Laminas\Mail\Address;
+use Symfony\Component\Mime\Address;
 use VuFind\Db\Entity\UserEntityInterface;
 use VuFind\Exception\Mail as MailException;
 

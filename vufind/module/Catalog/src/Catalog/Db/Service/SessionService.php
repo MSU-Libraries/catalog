@@ -31,8 +31,14 @@
 
 namespace Catalog\Db\Service;
 
-use VuFind\Db\Entity\SessionEntityInterface;
+use Doctrine\ORM\EntityManager;
+use Psr\Log\LoggerAwareInterface;
+use VuFind\Db\Entity\PluginManager as EntityPluginManager;
+use VuFind\Db\PersistenceManager;
+use VuFind\Db\Service\Feature\DeleteExpiredInterface;
+use VuFind\Db\Service\SessionServiceInterface;
 use VuFind\Exception\SessionExpired as SessionExpiredException;
+use VuFind\Log\LoggerAwareTrait;
 
 use function in_array;
 
@@ -51,34 +57,31 @@ use function in_array;
  * @link     https://vufind.org/wiki/development:plugins:database_gateways Wiki
  */
 class SessionService extends \VuFind\Db\Service\SessionService implements
-    Psr\Log\LoggerAwareInterface,
+    LoggerAwareInterface,
     SessionServiceInterface,
+    DeleteExpiredInterface
 {
-    use VuFind\Log\LoggerAwareTrait;
+    use LoggerAwareTrait;
 
     protected $configReader = null;
 
     /**
      * Constructor
      *
-     * @param Adapter                      $adapter      Database adapter
-     * @param PluginManager                $tm           Table manager
-     * @param array                        $cfg          Laminas configuration
-     * @param RowGateway                   $rowObj       Row prototype object (null for default)
-     * @param \VuFind\Config\PluginManager $configReader Config reader object
-     * @param string                       $table        Name of database table to interface with
+     * @param EntityManager                $entityManager       Doctrine ORM entity manager
+     * @param EntityPluginManager          $entityPluginManager Database entity plugin manager
+     * @param PersistenceManager           $persistenceManager  Entity persistence manager
+     * @param \VuFind\Config\PluginManager $configReader        Config reader object
      */
     public function __construct(
-        \Laminas\Db\Adapter\Adapter $adapter,
-        \VuFind\Db\Table\PluginManager $tm,
-        $cfg,
-        ?\VuFind\Db\Row\RowGateway $rowObj = null,
+        protected EntityManager $entityManager,
+        protected EntityPluginManager $entityPluginManager,
+        protected PersistenceManager $persistenceManager,
         \VuFind\Config\PluginManager $configReader = null,
-        $table = 'session'
     ) {
         // Get the config reader for the skip paths setting
         $this->configReader = $configReader;
-        parent::__construct($adapter, $tm, $cfg, $rowObj, $table);
+        parent::__construct($entityManager, $entityPluginManager, $persistenceManager);
     }
 
     /**
@@ -112,8 +115,8 @@ class SessionService extends \VuFind\Db\Service\SessionService implements
             $updated = false;
             while ($retryCount < $maxRetries && !$updated) {
                 try {
-                    $s->last_used = time();
-                    $s->save();
+                    $s->setLastUsed(time());
+                    $this->persistEntity($s);
                     $updated = true;
                 } catch (\Exception $e) {
                     $this->logException($e, $retryCount, $maxRetries);
@@ -141,10 +144,9 @@ class SessionService extends \VuFind\Db\Service\SessionService implements
         $updated = false;
         while ($retryCount < $maxRetries && !$updated) {
             try {
-                $s = $this->getBySessionId($sid);
-                $s->last_used = time();
-                $s->data = $data;
-                $s->save();
+                $session = $this->getSessionById($sid);
+                $session->setLastUsed(time())->setData($data);
+                $this->persistEntity($session);
                 $updated = true;
             } catch (\Exception $e) {
                 $this->logException($e, $retryCount, $maxRetries);
@@ -165,7 +167,7 @@ class SessionService extends \VuFind\Db\Service\SessionService implements
      *
      * @return void
      */
-    protected function logException(\Exception $e, int $retryCount = 0, int $maxRetries = 3)
+    public function logException(\Exception $e, int $retryCount = 0, int $maxRetries = 3): void
     {
         if (str_contains($e->getMessage(), 'Deadlock found') || $e->getCode() == 1213) {
             $msg = 'Deadlock detected saving session. ';

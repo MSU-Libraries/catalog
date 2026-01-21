@@ -48,12 +48,13 @@ class AlphaBrowse extends \VuFind\View\Helper\Root\AlphaBrowse
     /**
      * Get link to browse results (or null if no valid URL available)
      *
-     * @param string $source AlphaBrowse index currently being used
-     * @param array  $item   Item to link to
+     * @param string                    $source AlphaBrowse index currently being used
+     * @param array                     $item   Item to link to
+     * @param AbstractSearchOrigin|null $origin Current page to provide the origin of the search
      *
-     * @return string
+     * @return string|null
      */
-    public function getUrl($source, $item)
+    public function getUrl($source, $item, ?AbstractSearchOrigin $origin = null): ?string
     {
         if ($item['count'] <= 0) {
             return null;

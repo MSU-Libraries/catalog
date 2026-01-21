@@ -1,4 +1,8 @@
 module.exports = {
+  parserOptions: {
+        ecmaVersion: 8,
+        sourceType: "module"
+    },
   plugins: ["no-jquery", "jsdoc"],
   ignorePatterns: [
     "themes/**/vendor/**",
@@ -27,6 +31,9 @@ module.exports = {
     "no-lonely-if": "warn",
     "no-console": ["warn", { "allow": ["warn", "error"] }],
     "no-unneeded-ternary": "warn",
+
+    // disable (MSU bs5 theme doesn't comply with ecma v8
+    "no-unused-vars": "off",
 
     // fixed automatically
     "block-spacing": ["warn", "always"],

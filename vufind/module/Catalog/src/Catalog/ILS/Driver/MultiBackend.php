@@ -31,16 +31,10 @@
 namespace Catalog\ILS\Driver;
 
 use VuFind\Exception\ILS as ILSException;
-use VuFind\ILS\Driver\AbstractMultiDriver;
 use VuFind\ILS\Driver\PluginManager;
 
-use function call_user_func_array;
-use function func_get_args;
 use function in_array;
 use function is_array;
-use function is_callable;
-use function is_int;
-use function is_string;
 use function strlen;
 
 /**
@@ -55,9 +49,9 @@ use function strlen;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:ils_drivers Wiki
  */
-class MultiBackend extends AbstractMultiDriver
+class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
 {
-    use VuFind\Log\LoggerAwareTrait {
+    use \VuFind\Log\LoggerAwareTrait {
         logError as error;
     }
 
@@ -72,13 +66,6 @@ class MultiBackend extends AbstractMultiDriver
      * @var string
      */
     protected $defaultDriver;
-
-    /**
-     * ILS authenticator
-     *
-     * @var \VuFind\Auth\ILSAuthenticator
-     */
-    protected $ilsAuth;
 
     /**
      * An array of methods that should determine source from a specific parameter
@@ -131,7 +118,7 @@ class MultiBackend extends AbstractMultiDriver
         protected \VuFind\Auth\ILSAuthenticator $ilsAuth,
         PluginManager $driverManager
     ) {
-        parent::__construct($configManager, $driverManager);
+        parent::__construct($configManager, $ilsAuth, $driverManager);
         $this->ilsAuth = $ilsAuth;
     }
 

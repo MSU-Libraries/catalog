@@ -29,8 +29,7 @@
 
 namespace Catalog\View\Helper\Root;
 
-use Laminas\Config\Config;
-use VuFind\Config\YamlReader;
+use VuFind\Config\Config;
 use VuFind\ILS\Logic\AvailabilityStatus;
 use VuFind\ILS\Logic\AvailabilityStatusInterface;
 use VuFind\Tags\TagsService;
@@ -47,9 +46,9 @@ use function in_array;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:record_drivers Wiki
  */
-class Record extends \VuFind\View\Helper\Root\Record implements Psr\Log\LoggerAwareInterface
+class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerAwareInterface
 {
-    use VuFind\Log\LoggerAwareTrait;
+    use \VuFind\Log\LoggerAwareTrait;
 
     /**
      * Link labels loaded from 'labels' key in accesslinks.yaml config. Each entry:
@@ -90,22 +89,25 @@ class Record extends \VuFind\View\Helper\Root\Record implements Psr\Log\LoggerAw
     /**
      * Constructor
      *
-     * @param TagsService            $tagsService    Tags service
-     * @param Config                 $config         Configuration from config.ini
-     * @param \Laminas\Config\Config $browzineConfig config object for the BrowZine.ini file // MSU
+     * @param TagsService            $tagsService       Tags service
+     * @param Config                 $config            Configuration from config.ini
+     * @param \Laminas\Config\Config $browzineConfig    config object for the BrowZine.ini file // MSU
+     * @param \Laminas\Config\Config $accessLinksConfig config object for the accesslinks.yaml file // MSU
      */
     public function __construct(
         protected TagsService $tagsService,
         protected ?Config $config = null,
-        $browzineConfig = null // MSU
+        $browzineConfig = [], // MSU
+        $accessLinksConfig = [] // MSU
     ) {
         parent::__construct($tagsService, $config);
-        $yamlReader = new YamlReader();
-        $this->accessLinksConfig = $yamlReader->get('accesslinks.yaml');
+        // MSU START
+        $this->browzineConfig = $browzineConfig;
+        $this->accessLinksConfig = $accessLinksConfig;
         if (array_key_exists('labels', $this->accessLinksConfig)) {
             $this->linkLabels = $this->accessLinksConfig['labels'];
         }
-        $this->browzineConfig = $browzineConfig;
+        // MSU END
     }
 
     /**

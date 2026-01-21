@@ -45,8 +45,6 @@ use Psr\Container\ContainerInterface;
  */
 class FolioFactory extends \VuFind\ILS\Driver\DriverWithDateConverterFactory
 {
-    use VuFind\Log\LoggerAwareTrait;
-
     /**
      * Create an object
      *

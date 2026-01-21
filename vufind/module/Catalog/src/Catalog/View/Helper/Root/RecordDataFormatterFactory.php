@@ -76,7 +76,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
      *
      * @deprecated Use \VuFind\RecordDataFormatter\Specs\DefaultRecord instead of defining the specs in this factory
      */
-    protected function getAuthorFunction()
+    protected function getAuthorFunction(): callable
     {
         return function ($data, $options) {
             // Lookup array of singular/plural labels (note that Other is always

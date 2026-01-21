@@ -231,9 +231,11 @@ class SAML extends \VuFind\Auth\AbstractBase
      * @param string $target Full URL where external authentication method should
      * send user after login (some drivers may override this).
      *
-     * @return bool|string
+     * @return ?string
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function getSessionInitiator($target)
+    public function getSessionInitiator($target): ?string
     {
         $config = $this->config->SAML;
         $samlTarget = $config->target ?? $target;

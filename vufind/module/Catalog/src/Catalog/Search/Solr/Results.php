@@ -31,7 +31,7 @@
 
 namespace Catalog\Search\Solr;
 
-use VuFind\Search\Solr\AbstractErrorListener as ErrorListener;
+use VuFind\Search\Solr\ErrorListener;
 use VuFindSearch\Command\SearchCommand;
 
 /**
@@ -44,10 +44,10 @@ use VuFindSearch\Command\SearchCommand;
  * @link     https://vufind.org Main Page
  */
 class Results extends \VuFind\Search\Solr\Results implements
-    Psr\Log\LoggerAwareInterface
+    \Psr\Log\LoggerAwareInterface
 {
     // MSU customization to add in logging
-    use VuFind\Log\LoggerAwareTrait;
+    use \VuFind\Log\LoggerAwareTrait;
 
     /**
      * Support method for performAndProcessSearch -- perform a search based on the

@@ -43,9 +43,9 @@ use function array_key_exists;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development Wiki
  */
-class Notices extends AbstractHelper implements Psr\Log\LoggerAwareInterface
+class Notices extends AbstractHelper implements \Psr\Log\LoggerAwareInterface
 {
-    use VuFind\Log\LoggerAwareTrait;
+    use \VuFind\Log\LoggerAwareTrait;
 
     /**
      * Container interface

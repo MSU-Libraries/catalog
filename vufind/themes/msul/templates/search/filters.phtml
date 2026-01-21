@@ -16,7 +16,6 @@ if ($filterCount == 1) {
 
 if (!$skip) {
 /** MSU End. Core template within if-statement */
-    <?php
       if (!isset($this->params)) {
         // No current search, use last search in memory
         $params = $this->searchMemory()->getLastSearchParams($this->searchClassId);
@@ -185,4 +184,6 @@ if (!$skip) {
         <div class="clearfix"></div>
       </div>
     <?php endif; ?>
+<?php
 } /** MSU */
+?>

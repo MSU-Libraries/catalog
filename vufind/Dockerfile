@@ -220,4 +220,4 @@ HEALTHCHECK --interval=10s --timeout=12s --start-period=90s --retries=3 \
    CMD curl --fail -s http://localhost:80/ || exit 1
 
 ENTRYPOINT [ "/entrypoint.sh" ]
-CMD /startup.sh
+CMD [ "/startup.sh" ]
