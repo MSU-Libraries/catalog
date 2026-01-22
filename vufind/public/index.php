@@ -7,7 +7,7 @@ if (!empty($vufindProfiler)) {
     enableVuFindProfiling($vufindProfiler);
 }
 
-use Laminas\Db\Adapter\Exception\RuntimeException as DbRuntimeException;
+use Doctrine\DBAL\Exception\DeadlockException;
 use Laminas\Mvc\Application;
 use Laminas\ServiceManager\Exception\ServiceNotCreatedException;
 
@@ -29,14 +29,13 @@ do {
             return $app->getServiceManager()
                 ->get(\VuFindConsole\ConsoleRunner::class)->run();
         } else {
-            // Setup remote code coverage if enabled (keep this inside the try block)
+            // Setup remote code coverage if enabled:
             if (getenv('VUFIND_CODE_COVERAGE')) {
                 $modules = $app->getServiceManager()
                     ->get(\Laminas\ModuleManager\ModuleManager::class)->getModules();
                 include __DIR__ . '/../module/VuFind/functions/codecoverage.php';
                 setupVuFindRemoteCodeCoverage($modules);
             }
-            // Run the application for a web request
             $app->run();
         }
 
@@ -48,14 +47,9 @@ do {
         $innerException = $e->getPrevious();
         // Traverse the exception chain to find the root cause
         while ($innerException !== null) {
-            // Check for specific database runtime exceptions or mysqli_sql_exception (for direct mysqli errors)
-            if (($innerException instanceof DbRuntimeException || $innerException instanceof \mysqli_sql_exception)) {
-                // MySQL/MariaDB deadlock error code is 1213
-                // TODO for a PR we will need to have it check more codes and messages
-                if ($innerException->getCode() == 1213 || str_contains($innerException->getMessage(), 'Deadlock found')) {
-                    $deadlockDetected = true;
-                    break; // Found the deadlock, no need to check further
-                }
+            if ($innerException instanceof DeadlockException) {
+                $deadlockDetected = true;
+                break; // Found the deadlock, no need to check further
             }
             $innerException = $innerException->getPrevious();
         }

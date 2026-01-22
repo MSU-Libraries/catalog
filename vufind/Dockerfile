@@ -65,6 +65,7 @@ RUN \
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
 
+COPY composer.local.json /usr/local/vufind/composer.local.json
 COPY install-composer.sh /install-composer.sh
 
 RUN \
