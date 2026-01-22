@@ -65,7 +65,7 @@ RUN \
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
 
-COPY composer.local.json /usr/local/vufind/composer.local.json
+COPY composer.local.json /tmp/composer.local.json
 COPY install-composer.sh /install-composer.sh
 
 RUN \
@@ -82,6 +82,7 @@ RUN \
     tar -xzvf vufind-${VUFIND_VERSION}.tar.gz -C /usr/local && \
     mv /usr/local/vufind-${VUFIND_VERSION} /usr/local/vufind && \
     rm vufind-${VUFIND_VERSION}.tar.gz && \
+    mv /tmp/composer.local.json /usr/local/vufind/composer.local.json && \
     # Install VuFind dev dependencies, for the tests
     composer --working-dir=/usr/local/vufind/ update && \
     # Remove unused Solr dependencies after Vufind is installed
