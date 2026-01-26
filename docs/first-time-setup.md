@@ -138,14 +138,13 @@ as a permission set with the FOLIO API, with a `POST` request to
 * `proxiesfor.collection.get`
 * `patron-pin.validate` (For MSUL barcode login)
 
-Sunflower Capabilities:
+### Sunflower Capabilities:
 
-**Procedural**
+#### Procedural:
 
 | Application          | Resource            | Execute |
 | -------------------- | ------------------- | ------- |
 | app-platform-minimal | Patron-Pin Validate | Yes     |
-
 
 ## For GitLab users
 
