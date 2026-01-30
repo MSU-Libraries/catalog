@@ -84,7 +84,7 @@ RUN \
     rm vufind-${VUFIND_VERSION}.tar.gz && \
     mv /tmp/composer.local.json /usr/local/vufind/composer.local.json && \
     # Install VuFind dev dependencies, for the tests
-    composer --working-dir=/usr/local/vufind/ update && \
+    composer --working-dir=/usr/local/vufind/ update --no-audit && \
     # Remove unused Solr dependencies after Vufind is installed
     mv /usr/local/vufind/solr /tmp && \
     mkdir -p /usr/local/vufind/solr/vendor/modules/analysis-extras /usr/local/vufind/solr/vendor/server/solr-webapp/webapp/WEB-INF && \
