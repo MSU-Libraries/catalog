@@ -6,7 +6,9 @@
   $loader = $plugins->getServiceLocator()->get(\VuFind\Record\Loader::class);
 ?>
 <h2><?=$this->transEsc('Similar Items')?></h2>
-<?php if (empty($this->channels)) return; ?>
+<?php if (empty($this->channels)) {
+return;
+} ?>
 <ol class="record-list" start="1">
   <?php foreach ($this->channels[0]['contents'] as $current): ?>
     <li class="result">

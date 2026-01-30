@@ -24,7 +24,7 @@
             $linkAttributes['href'] = $tab['url'];
           }
         ?>
-        <li class="nav-item<?=$tab['selected']? ' active' : ''?>"<?=$this->showCounts ? ' data-show-counts' : ''?>>
+        <li class="nav-item<?=$tab['selected'] ? ' active' : ''?>"<?=$this->showCounts ? ' data-show-counts' : ''?>>
           <a<?=$this->htmlAttributes($linkAttributes)?>><?=$this->transEsc($tab['label']); ?></a>
         </li>
       <?php elseif ($block = $this->permission()->getAlternateContent($tab['permission'])): ?>
