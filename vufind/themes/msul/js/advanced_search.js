@@ -187,6 +187,10 @@ deleteGroup = function _deleteGroup(group) {
   return false;
 };
 
+/**
+ * Toggle the expansion of the given item.
+ * @param {string}  [item]  Item to expand/collapse.
+ */
 function toggleExpansion(item) {
   // There is a bug with firefox 122, it jumps higher on the page when toggling for the fist time
   // To reproduce the bug, load the page, scroll down to the list, refresh the page, try to toggle an element without doing anything before
@@ -200,6 +204,12 @@ function toggleExpansion(item) {
   }
 }
 
+/**
+ * Toggle the expansion of the children of the given item.
+ * @param {boolean}    [check] Value of the checked attribute.
+ * @param {string}     [item]  Item to expand/collapse childen items of.
+ * @returns {string}   Next item after the given item.
+ */
 function toggleChildren(check, item) {
   let itemLevel = parseInt($(item).attr('data-level'));
   let nextItem = item.next();
@@ -211,6 +221,10 @@ function toggleChildren(check, item) {
   return nextItem;
 }
 
+/**
+ * Check all the children of the leveledCheckboxes elements and toggle
+ * their expansion to match the parent item.
+ */
 function checkChildrenIfParentCheckedRoutine() {
   $('.leveledCheckboxes').each(function checkChildren() {
     let item = $(this).find('.leveledCheckbox').first();
@@ -228,8 +242,8 @@ function checkChildrenIfParentCheckedRoutine() {
 
 /**
  * Recursive function
- * @param parentItem
- * @return item last handled item
+ * @param {string} parentItem Top level item to check.
+ * @returns {string} item last handled item.
  */
 function uncheckChildrenIfParentChecked(parentItem) {
   let itemChecked = $(parentItem).find('input[type="checkbox"]').prop('checked');
@@ -255,8 +269,8 @@ function uncheckChildrenIfParentChecked(parentItem) {
 }
 
 /**
- * Routine using the recursive function
- * @param item
+ * Routine using the recursive function.
+ * @param {string} item The item to uncheck children items if needed.
  */
 function uncheckChildrenIfParentCheckedRoutine(item) {
   let tmp = item;
@@ -267,9 +281,9 @@ function uncheckChildrenIfParentCheckedRoutine(item) {
 
 /**
  * Check the state of previous elements in the list and for parents, toggling to adapt the checkmark
- * @param currentItem
- * @param indeterminate if we know at this point that the parent will be in indeterminate state
- * @param runAllTheList if we stop at a root parent or go through the entire list (when starting at the last element)
+ * @param {string}  currentItem   The current item.
+ * @param {boolean} indeterminate if we know at this point that the parent will be in indeterminate state
+ * @param {boolean} runAllTheList if we stop at a root parent or go through the entire list (when starting at the last element)
  */
 function checkAndUpdatePreviousLeveledCheckboxes(currentItem, indeterminate = undefined, runAllTheList = false) {
   let belowItemLevel, currentItemLevel, currentItemChecked, belowItemChecked;
@@ -308,12 +322,19 @@ function checkAndUpdatePreviousLeveledCheckboxes(currentItem, indeterminate = un
   }
 }
 
+/**
+ * Calls the function to update previous checkboxes for all leveledCheckboxes items.
+ */
 function runCheckAndUpdatePreviousLeveledCheckboxesOnWholeList() {
   $('.leveledCheckboxes').each(function updatePreviousLevel() {
     checkAndUpdatePreviousLeveledCheckboxes($(this).find('.leveledCheckbox').last(), undefined, true);
   });
 }
 
+/**
+ * Toggle the check property of the given item.
+ * @param {string} item The item to toggle the check.
+ */
 function toggleCheck(item) {
   if ($(item.originalEvent.originalTarget).closest('.expander').length > 0) return;
   var parents = $(item.target).parents('.leveledCheckbox');
@@ -342,6 +363,9 @@ function toggleCheck(item) {
   checkAndUpdatePreviousLeveledCheckboxes(parents, indeterminate, false);
 }
 
+/**
+ * Prepare the leveled checkboxes on the page.
+ */
 function JSifyLeveledSelect() {
   // Leveling part
   $('.leveledCheckbox').closest('.leveledCheckboxes').addClass('expandableLeveledCheckboxes');

@@ -19,7 +19,6 @@ module.exports = {
     "block-scoped-var": "error",
     "func-names": ["error", "as-needed"],
     "no-loop-func": "error",
-    "no-param-reassign": "error",
     "no-shadow": "error",
     "no-unused-expressions": "error",
 
@@ -32,8 +31,10 @@ module.exports = {
     "no-console": ["warn", { "allow": ["warn", "error"] }],
     "no-unneeded-ternary": "warn",
 
-    // disable (MSU bs5 theme doesn't comply with ecma v8
+    // disable (MSU bs5 theme doesn't comply with ecma v8)
     "no-unused-vars": "off",
+    // disable (MSU  checkbox logic in advanced_search.js reassigns function params)
+    "no-param-reassign": "off",
 
     // fixed automatically
     "block-spacing": ["warn", "always"],
