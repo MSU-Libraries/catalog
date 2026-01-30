@@ -1,5 +1,4 @@
 <?php
-
 return [
   'router' => [
     'routes' => [
@@ -121,11 +120,11 @@ return [
       ],
       'db_service' => [
         'factories' => [
-           Catalog\Db\Service\SessionService::class => Catalog\Db\Service\AbstractDbServiceFactory::class,
+           \Catalog\Db\Service\SessionService::class => \Catalog\Db\Service\AbstractDbServiceFactory::class,
         ],
         'aliases' => [
-          VuFind\Db\Service\SessionService::class => Catalog\Db\Service\SessionService::class,
-          'session' => Catalog\Db\Service\SessionService::class,
+          \VuFind\Db\Service\SessionService::class => \Catalog\Db\Service\SessionService::class,
+          'session' => \Catalog\Db\Service\SessionService::class,
         ],
       ],
     ],

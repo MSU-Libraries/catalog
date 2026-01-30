@@ -1,16 +1,25 @@
 <?php
-    // Set up page title:
-    $this->headTitle($this->translate('New Item Search'));
+    // Set up breadcrumbs:
+    $this->breadcrumbs()->set($this->translate('New Items'), active: true);
 
     // Load advanced search Javascript to activate the clear button:
     $this->assetManager()->appendScriptLink('advanced_search.js');
+    // MSU Add expanders
+    $this->extraAdvancedControls = $this->render('search/advanced/solr.phtml');
 
     // Convenience variable:
     $offlineMode = $this->ils()->getOfflineMode();
     $this->layout()->searchbox = false; /** MSU */
     $this->defaultSort = 'first_indexed'; /** MSU */
 ?>
-<?=$this->component('page-title', ['title' => $this->translate('Find New Items'), 'headTitle' => $this->translate('New Item Search')]);?>
+<?php // MSU add chevrons to facets ?>
+<div style="display: none" id="jsContent">
+  <div class="expander">
+    <span class="chevronRight"><?= $this->icon('chevron-right') ?></span>
+    <span class="chevronDown"><?= $this->icon('chevron-down') ?></span>
+  </div>
+</div>
+<?=$this->component('page-title', ['title' => $this->translate('Find New Items'), 'headTitle' => $this->translate('New Item Search'), 'level' => 1]);?> <?php // MSU change to header level 1 ?>
 <?php if ($offlineMode == 'ils-offline'): ?>
   <?=$this->render('Helpers/ils-offline.phtml', ['offlineModeMsg' => 'ils_offline_holdings_message'])?>
 <?php endif; ?>

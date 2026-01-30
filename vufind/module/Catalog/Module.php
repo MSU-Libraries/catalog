@@ -58,8 +58,6 @@ class Module
      * @param MvcEvent $e Event
      *
      * @return void
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function onBootstrap(MvcEvent $e)
     {

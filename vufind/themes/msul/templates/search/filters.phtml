@@ -56,7 +56,7 @@ if (!$skip) {
               );
           ?>
           <?php if ($removeLink): ?>
-            <a class="filter-value" href="<?=$removeLink?>" data-filter="<?=$this->escapeHtmlAttr($filter['filter'])?>">
+            <a class="filter-value" href="<?=$removeLink?>">
               <span class="visually-hidden">
                 <?=$this->translate('Remove filter') ?>
               </span>
@@ -114,13 +114,7 @@ if (!$skip) {
                     ? $urlQuery->removeFacet($value['field'], $value['value'], $value['operator'])
                     : $this->searchMemory()->getEditLink($this->searchClassId, 'removeFacet', $value);
                 ?>
-              <a
-                class="<?=$dropdown ? 'dropdown-item ' : ''?>filter-value filters-<?=$operatorClass?>"
-                href="<?=$removeLink?>"
-                <?php if (isset($urlQuery)): ?>
-                  data-filter="<?=$this->escapeHtmlAttr($urlQuery->formatFilterString($value['field'], $value['value'], $value['operator']))?>"
-                <?php endif; ?>
-              >
+              <a class="<?=$dropdown ? 'dropdown-item ' : ''?>filter-value filters-<?=$operatorClass?>" href="<?=$removeLink?>">
                 <span class="visually-hidden">
                   <?=$this->translate('Remove filter') ?>
                 </span>

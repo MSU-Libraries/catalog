@@ -1,6 +1,6 @@
 <?php
   /** MSU START */
-  $user = $this->auth()->isLoggedIn();
+  $user = $this->auth()->getUserObject() == null ? false : true;
   $isCommunityBorrower = $user != null ? $this->auth()->isCommunityBorrower() : false;
   $isOnCampus = $this->auth()->isOnCampus();
 

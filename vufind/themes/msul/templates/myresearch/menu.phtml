@@ -11,19 +11,17 @@
 <?php endforeach ?>
 <?php
   // MSU Start
+  $user = $this->auth()->getUserObject();
   $isCommunityBorrower = $user != null ? $this->auth()->isCommunityBorrower() : false;
   $this->layout()->searchbox = false;
 ?>
-
-<?php if ($user && $this->userlist()->getMode() !== 'disabled'): ?>
-  <?php if (!$isCommunityBorrower): ?>
-    <hr>
-        <div class="myresearch-menu">
-            <a href="https://interlib.lib.msu.edu/" class="icon-link">
-                <?= $this->icon('fa-external-link', 'fa-external-link icon-link__icon') ?>
-                <span class="icon-link__label">Illiad Account <small>(MSU Students, Staff, and Faculty)</small></span>
-            </a>
-        </div>
-  <?php endif; ?>
+<?php if ($user && !$isCommunityBorrower): ?>
+<hr>
+    <div class="myresearch-menu">
+        <a href="https://interlib.lib.msu.edu/" class="icon-link">
+            <?= $this->icon('fa-external-link', 'fa-external-link icon-link__icon') ?>
+            <span class="icon-link__label">Illiad Account <small>(MSU Students, Staff, and Faculty)</small></span>
+        </a>
+    </div>
 <?php endif; ?>
 <?php // MSU end ?>

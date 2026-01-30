@@ -223,7 +223,7 @@ form.searchForm, .record-tabs, .navbar-form {
       border-left:0;
       border-top:0;
     }
-    .active a {
+    .active a, a.active {
       border-bottom: 0.4rem solid $eggplant;
       border-right: 0.4rem solid transparent;
       border-left:0;

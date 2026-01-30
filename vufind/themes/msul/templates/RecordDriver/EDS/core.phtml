@@ -4,7 +4,7 @@
 <div class="media"<?=$this->schemaOrg()->getAttributes(['vocab' => 'http://schema.org/', 'resource' => '#record', 'typeof' => $this->schemaOrg()->getRecordTypes($this->driver)])?>>
   <?php
     $this->layout()->showSearchBacklink = true; // MSU
-    $user = $this->auth()->isLoggedIn(); // MSU
+    $user = $this->auth()->getUserObject() == null ? false : true; // MSU
     $isCommunityBorrower = $user != null ? $this->auth()->isCommunityBorrower() : false; // MSU
     $isOnCampus = $this->auth()->isOnCampus(); // MSU
     $libkeyData = $this->record($this->driver)->getLibKeyData($this->driver->getCleanDOI()); // MSU
