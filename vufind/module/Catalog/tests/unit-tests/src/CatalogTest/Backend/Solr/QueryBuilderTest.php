@@ -25,7 +25,7 @@
  * @link     https://vufind.org
  */
 
-namespace VuFindTest\Backend\Solr;
+namespace CatalogTest\Backend\Solr;
 
 use Catalog\Backend\Solr\QueryBuilder;
 use VuFindSearch\Query\Query;

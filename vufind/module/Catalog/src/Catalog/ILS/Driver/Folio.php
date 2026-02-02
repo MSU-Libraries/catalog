@@ -17,8 +17,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * along with this program; if not, see
+ * <https://www.gnu.org/licenses/>.
  *
  * @category VuFind
  * @package  ILS_Drivers
@@ -36,9 +36,7 @@ use VuFind\Exception\ILS as ILSException;
 use VuFind\ILS\Logic\AvailabilityStatus;
 
 use function count;
-use function func_num_args;
 use function in_array;
-use function is_int;
 use function is_object;
 use function is_string;
 
@@ -53,8 +51,6 @@ use function is_string;
  */
 class Folio extends \VuFind\ILS\Driver\Folio
 {
-    protected const QUERY_BY_IDS_BATCH_SIZE = 20;
-
     /**
      * Configuration file reader object (PluginManager)
      *
@@ -82,48 +78,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
-     * MSUL -- Can remove once PR 4810 is in our VuFind version
-     * Initialize the driver.
-     *
-     * Check or renew our auth token
-     *
-     * @return void
-     */
-    public function init()
-    {
-        $factory = $this->sessionFactory;
-        $this->sessionCache = $factory($this->tenant);
-        $cacheType = 'session';
-        if ($this->useGlobalTokenCache()) {
-            $globalTokenData = (array)($this->getCachedData('token') ?? []);
-            if (count($globalTokenData) === 2) {
-                $cacheType = 'global';
-                [$this->sessionCache->folio_token, $this->sessionCache->folio_token_expiration] = $globalTokenData;
-            }
-        }
-        if ($this->sessionCache->folio_token ?? false) {
-            $this->token = $this->sessionCache->folio_token;
-            $this->tokenExpiration = $this->sessionCache->folio_token_expiration ?? null;
-            $this->debug(
-                'Token taken from ' . $cacheType . ' cache: ' . substr($this->token, 0, 30) . '...'
-            );
-        }
-        // MSU: added try/catch (PR 4810)
-        try {
-            if ($this->token == null) {
-                $this->renewTenantToken();
-            } else {
-                $this->checkTenantToken();
-            }
-        } catch (\Exception $e) {
-            // Errors in init() should not be fatal, it could prevent using EDS when FOLIO fails
-            $this->token = $this->tokenExpiration = null;
-            $this->logError('Failed to get a token to initialize the FOLIO driver: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Given an instance object or identifer, or a holding or item identifier,
+     * Given an instance object or identifier, or a holding or item identifier,
      * determine an appropriate value to use as VuFind's bibliographic ID.
      *
      * @param string $instanceOrInstanceId Instance object or ID (will be looked up
@@ -161,292 +116,18 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
-     * Get FOLIO records by batches of ids
-     *
-     * @param string[] $ids         ids to look for in the records
-     * @param string   $idField     field to compare to given ids
-     * @param string   $responseKey response key with the records to retrieve
-     * @param string   $endpoint    FOLIO API endpoint
-     * @param string   $querySuffix optional string to append to the queries
-     *
-     * @return \Generator<object>
-     * @throws ILSException if there is an issue with the FOLIO response
-     */
-    protected function getByBatch($ids, $idField, $responseKey, $endpoint, $querySuffix = '')
-    {
-        if (count($ids) == 0) {
-            return;
-        }
-        $idToKey = fn ($id) => $endpoint . '[' . $idField . '=' . $id . ']';
-        $idsToLookFor = [];
-        foreach ($ids as $id) {
-            $items = $this->getCachedData($idToKey($id));
-            if ($items == null) {
-                $idsToLookFor[] = $id;
-            } else {
-                foreach ($items as $item) {
-                    yield $item;
-                }
-            }
-        }
-        $resultsToCache = [];
-        foreach (array_chunk($idsToLookFor, self::QUERY_BY_IDS_BATCH_SIZE) as $idsInBatch) {
-            $idsWithQuotes = array_map(fn ($id) => '"' . $this->escapeCql($id) . '"', $idsInBatch);
-            $query = [
-                'query' => $idField . ' == (' . implode(' OR ', $idsWithQuotes) . ')' . $querySuffix,
-            ];
-            foreach (
-                $this->getPagedResults(
-                    $responseKey,
-                    $endpoint,
-                    $query
-                ) as $item
-            ) {
-                $key = $idToKey($item->$idField);
-                if (isset($resultsToCache[$key])) {
-                    $resultsToCache[$key][] = $item;
-                } else {
-                    $resultsToCache[$key] = [ $item ];
-                }
-                yield $item;
-            }
-        }
-        foreach ($resultsToCache as $key => $items) {
-            $this->putCachedData($key, $items);
-        }
-    }
-
-    /**
-     * Support method for getHoldings() -- retrieve holdings by instance ids
-     *
-     * @param string[] $instanceIds the FOLIO instance ids
-     *
-     * @return object[]
-     * @throws ILSException if there is an issue with the FOLIO response
-     */
-    protected function getHoldingsByInstanceIds(array $instanceIds)
-    {
-        if (count($instanceIds) == 0) {
-            return [];
-        }
-        $holdings = [];
-        $querySuffix = ' NOT discoverySuppress==true';
-        foreach (
-            $this->getByBatch(
-                $instanceIds,
-                'instanceId',
-                'holdingsRecords',
-                '/holdings-storage/holdings',
-                $querySuffix
-            ) as $holding
-        ) {
-            $holdings[] = $holding;
-        }
-        return $holdings;
-    }
-
-    /**
-     * Support method for getHoldings() -- retrieve items by holding ids (including bound-with items)
-     *
-     * @param string[] $holdingsIds the FOLIO holdings ids
-     *
-     * @return object[] The items, with an additional queryHoldingsRecordId property with the matching holdings id
-     * @throws ILSException if there is an issue with the FOLIO response
-     */
-    protected function getItemsByHoldingIds(array $holdingsIds)
-    {
-        if (count($holdingsIds) == 0) {
-            return [];
-        }
-        $items = [];
-        $folioItemSort = $this->config['Holdings']['folio_sort'] ?? '';
-        if (!empty($folioItemSort)) {
-            $querySuffix = ' sortby ' . $folioItemSort;
-        } else {
-            $querySuffix = '';
-        }
-        if (count($holdingsIds) == 1) {
-            // /inventory/items-by-holdings-id returns bound-with items too (but it only takes one holdingsRecordId)
-            foreach (
-                $this->getByBatch(
-                    $holdingsIds,
-                    'holdingsRecordId',
-                    'items',
-                    '/inventory/items-by-holdings-id',
-                    $querySuffix
-                ) as $item
-            ) {
-                $item->queryHoldingsRecordId = $holdingsIds[0];
-                $items[] = $item;
-            }
-            return $items;
-        }
-        // Retrieve the item records
-        $holdingsItemIds = [];
-        foreach ($holdingsIds as $holdingsId) {
-            $holdingsItemIds[$holdingsId] = [];
-        }
-        foreach (
-            $this->getByBatch(
-                $holdingsIds,
-                'holdingsRecordId',
-                'items',
-                '/inventory/items',
-                $querySuffix
-            ) as $item
-        ) {
-            $holdingsId = $item->holdingsRecordId;
-            $item->queryHoldingsRecordId = $holdingsId;
-            $holdingsItemIds[$holdingsId][] = $item->id;
-            $items[] = $item;
-        }
-        // Retrieve the related bound-with items
-        // Duplicate items are avoided for each holdings
-        $boundWithItemIds = [];
-        $itemIdToHoldingsRecordId = [];
-        foreach (
-            $this->getByBatch(
-                $holdingsIds,
-                'holdingsRecordId',
-                'boundWithParts',
-                '/inventory-storage/bound-with-parts',
-                $querySuffix
-            ) as $boundWithPart
-        ) {
-            $itemId = $boundWithPart->itemId;
-            $holdingsId = $boundWithPart->holdingsRecordId;
-            if (in_array($itemId, $holdingsItemIds[$holdingsId])) {
-                continue;
-            }
-            $holdingsItemIds[$holdingsId][] = $itemId;
-            $boundWithItemIds[] = $itemId;
-            $itemIdToHoldingsRecordId[$itemId] = $holdingsId;
-        }
-        foreach (
-            $this->getByBatch(
-                $boundWithItemIds,
-                'id',
-                'items',
-                '/inventory/items'
-            ) as $item
-        ) {
-            $item->queryHoldingsRecordId = $itemIdToHoldingsRecordId[$item->id];
-            $items[] = $item;
-        }
-        return $items;
-    }
-
-    /**
-     * Retrieve FOLIO instances using VuFind's chosen bibliographic identifiers.
-     *
-     * @param string[] $bibIds Bib-level ids
-     *
-     * @return object[]
-     * @throws ILSException if there is an issue with the FOLIO response or an instance is not found
-     */
-    protected function getInstancesByBibIds($bibIds)
-    {
-        // Figure out which ID type to use in the CQL query; if the user configured
-        // instance IDs, use the 'id' field, otherwise pass the setting through
-        // directly:
-        $idType = $this->getBibIdType();
-        $idField = $idType === 'instance' ? 'id' : $idType;
-        $instances = [];
-        foreach (
-            $this->getByBatch(
-                $bibIds,
-                $idField,
-                'instances',
-                '/instance-storage/instances'
-            ) as $instance
-        ) {
-            $instances[] = $instance;
-        }
-        if (count($instances) != count($bibIds)) {
-            throw new ILSException('An instance was not found, bibIds=' . implode(',', $bibIds));
-        }
-        return $instances;
-    }
-
-    /**
-     * Retrieve FOLIO instance using VuFind's chosen bibliographic identifier.
-     *
-     * @param string $bibId Bib-level id
-     *
-     * @return object
-     * @throws ILSException if there is an issue with the FOLIO response or the instance is not found
-     */
-    public function getInstanceByBibId($bibId)
-    {
-        // MSUL override to make publicly available to reserve index command
-        // NOTE: getInstancesByBibIds() throws an exception if there is no instance matching bibId
-        return $this->getInstancesByBibIds([$bibId])[0];
-    }
-
-    /**
-     * Return statuses for an array of bibIds, optimizing retrieval with bulk calls
-     *
-     * @param string[] $idList array of bibIds
-     *
-     * @return array[] the items for each bibId (in the given order)
-     * @throws ILSException if there is an issue with a FOLIO response or an instance is not found
-     */
-    public function getStatuses($idList)
-    {
-        $holdings = $this->getHoldings($idList);
-        return array_map(fn ($holding) => $holding['holdings'], $holdings);
-    }
-
-    /**
-     * Support method for getHoldings() -- given a loan type ID return the string name for it
-     *
-     * @param string|null $loanTypeId Loan Type ID (ie: the value of permanentLoanTypeId)
-     *
-     * @return string|null
-     * @throws ILSException
-     */
-    protected function getLoanType(string $loanTypeId = null): ?string
-    {
-        $loanType = null;
-
-        // Make sure a value was passed
-        if (empty($loanTypeId)) {
-            return $loanType;
-        }
-
-        // Query the loan type by the ID
-        $query = [
-            'query' => 'id=="' . $loanTypeId . '"',
-        ];
-        foreach (
-            $this->getPagedResults(
-                'loantypes',
-                '/loan-types',
-                $query
-            ) as $loanType
-        ) {
-            // There should only be one result
-            $loanType = $loanType->name;
-            break;
-        }
-
-        return $loanType;
-    }
-
-    /**
      * Support method for getHoldings() -- given a few key details, format an item
      * for inclusion in the return value.
      *
      * @param string     $bibId            Current bibliographic ID
      * @param array      $holdingDetails   Holding details produced by
-     *                                 getHoldingDetailsForItem()
+     *                                     getHoldingDetailsForItem()
      * @param object     $item             FOLIO item record (decoded from JSON)
      * @param int        $number           The current item number (position within
-     *                                 current holdings record)
+     *                                     current holdings record)
      * @param string     $dueDateValue     The due date to display to the user
      * @param array      $boundWithRecords Any bib records this holding is bound with
      * @param ?\stdClass $currentLoan      Any current loan on this item
-     * @param string     $tempLoanType     The temporary loan type for the item
      *
      * @return array
      */
@@ -457,13 +138,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
         $number,
         string $dueDateValue,
         $boundWithRecords,
-        $currentLoan,
-        string $tempLoanType = null
+        $currentLoan
     ): array {
         $itemNotes = array_filter(
             array_map([$this, 'formatNote'], $item->notes ?? [])
         );
         $locationId = $item->effectiveLocation->id;
+
         // concatenate enumeration fields if present
         $enum = implode(
             ' ',
@@ -476,7 +157,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
             )
         );
         $enum = str_ends_with($holdingDetails['holdingCallNumber'], $enum) ? '' : $enum; // MSU
-        $locAndHoldings = $this->getItemFieldsFromNonItemData($locationId, $holdingDetails, $currentLoan);
         $callNumberData = $this->chooseCallNumber(
             $holdingDetails['holdingCallNumberPrefix'],
             $holdingDetails['holdingCallNumber'],
@@ -485,11 +165,20 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $item->effectiveCallNumberComponents->callNumber
                 ?? $item->itemLevelCallNumber ?? ''
         );
+        $locAndHoldings = $this->getItemFieldsFromNonItemData($locationId, $holdingDetails, $currentLoan);
 
+        $loanTypeName = '';
+        $tempLoanTypeId = $item->temporaryLoanType->id ?? '';
+        $permLoanTypeId = $item->permanentLoanType->id ?? '';
+        $loanTypeId = !empty($tempLoanTypeId) ? $tempLoanTypeId : $permLoanTypeId;
+        if (!empty($loanTypeId)) {
+            $loanData = $this->getLoanTypeData($loanTypeId);
+            $loanTypeName = $loanData['name'];
+        }
         // MSU START
         // PC-835: Items with loan type "Non Circulating" should show as "Lib Use Only" after they're checked in
         if (
-            ($item->permanentLoanType->id ?? '') == 'adac93ac-951f-4f42-ab32-79f4faeabb50' &&
+            $permLoanTypeId == 'adac93ac-951f-4f42-ab32-79f4faeabb50' &&
             $item->status->name == 'Available' &&
             !Regex::ONLINE($this->getLocationData($locationId)['name'])
         ) {
@@ -567,9 +256,10 @@ class Folio extends \VuFind\ILS\Driver\Folio
             'reserve' => 'TODO',
             'addLink' => 'check',
             'bound_with_records' => $boundWithRecords,
+            'loan_type_id' => $loanTypeId,
+            'loan_type_name' => $loanTypeName,
             'issues' => $holdingDetails['holdingsStatements'], // MSU
             'electronic_access' => $item->electronicAccess, // MSU
-            'temporary_loan_type' => $tempLoanType, // MSU
             'material_type' => $item->materialType->name ?? '', // MSU PC-1426
         ];
     }
@@ -581,10 +271,11 @@ class Folio extends \VuFind\ILS\Driver\Folio
      * @param array  $holdingDetails   details for the holding
      * @param object $item             item to process
      * @param int    $dueDateItemCount number of times getCurrentLoan()/getDueDate() were called (passed by reference)
+     * @param int    $number           item number
      *
      * @return array An associative array
      */
-    protected function processItem($bibId, $holdingDetails, $item, &$dueDateItemCount)
+    protected function processItem($bibId, $holdingDetails, $item, &$dueDateItemCount, $number)
     {
         $copyNumber = $item->copyNumber ?? null; // MSU
         $showDueDate = $this->config['Availability']['showDueDate'] ?? true;
@@ -605,17 +296,14 @@ class Folio extends \VuFind\ILS\Driver\Folio
         if ($item->isBoundWith ?? false) {
             $boundWithRecords = $this->getBoundWithRecords($item);
         }
-        // MSU - PC-930: Add Loan Type to results
-        $tempLoanType = $this->getLoanType($item->temporaryLoanType->id ?? null);
         $nextItem = $this->formatHoldingItem(
             $bibId,
             $holdingDetails,
             $item,
-            $copyNumber,
+            $copyNumber, // MSU, use copyNumber instead of number
             $dueDateValue,
             $boundWithRecords ?? [],
-            $currentLoan,
-            $tempLoanType // MSU
+            $currentLoan
         );
         return $nextItem;
     }
@@ -649,7 +337,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     continue;
                 }
                 $number++;
-                $nextItem = $this->processItem($bibId, $holdingDetails, $item, $dueDateItemCount);
+                $nextItem = $this->processItem($bibId, $holdingDetails, $item, $dueDateItemCount, $number);
                 // MSU Start
                 // PC-872: Filter out LoM holdings
                 if (
@@ -709,71 +397,12 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
-     * Query the ILS for information about a single holdings.
-     *
-     * @param string $bibId   Bib-level id
-     * @param array  $patron  Patron login information from $this->patronLogin
-     * @param array  $options Extra options (not currently used)
-     *
-     * @return array An associative array with the keys: total, holdings, electronic_holdings
-     * @throws ILSException if there is an issue with a FOLIO response or the instance is not found
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
-    public function getHolding($bibId, array $patron = null, array $options = [])
-    {
-        // NOTE: getHoldings() always returns something for a bibId, unless the instance is not found.
-        // If the instance is not found, an ILSException is thrown.
-        return $this->getHoldings([$bibId])[0];
-    }
-
-    /**
-     * Query the ILS for holdings information.
-     *
-     * @param string[] $bibIds Bib-level ids
-     *
-     * @return array[] An array of associative arrays, one for each bibId
-     * @throws ILSException if there is an issue with a FOLIO response or an instance is not found
-     */
-    public function getHoldings($bibIds)
-    {
-        $idType = $this->getBibIdType();
-        $bibIdToInstanceId = [];
-        if ($idType === 'instance') {
-            // Do not retrieve the instances if we already have their ids
-            $instanceIds = $bibIds;
-            foreach ($bibIds as $bibId) {
-                $bibIdToInstanceId[$bibId] = $bibId;
-            }
-        } else {
-            $instances = $this->getInstancesByBibIds($bibIds);
-            $instanceIds = array_map(fn ($instance) => $instance->id, $instances);
-            foreach ($instances as $instance) {
-                $bibIdToInstanceId[$instance->$idType] = $instance->id;
-            }
-        }
-        $holdings = $this->getHoldingsByInstanceIds($instanceIds);
-        $holdingIds = array_map(fn ($holding) => $holding->id, $holdings);
-        if (count($holdings) == 0) {
-            $folioItems = [];
-        } else {
-            $folioItems = $this->getItemsByHoldingIds($holdingIds);
-        }
-        $results = [];
-        foreach ($bibIds as $bibId) {
-            $instanceId = $bibIdToInstanceId[$bibId];
-            $holdingsForInstance = array_filter($holdings, fn ($holding) => $holding->instanceId == $instanceId);
-            $results[] = $this->processInstanceHoldings($bibId, $holdingsForInstance, $folioItems);
-        }
-        return $results;
-    }
-
-    /**
      * This method queries the ILS for a patron's current checked out items
      *
      * Input: Patron array returned by patronLogin method
-     * Output: Returns an array of associative arrays.
-     *         Each associative array contains these keys:
+     * Output: Returns with a 'count' key (overall result set size) and a 'records'
+     *         key (current page of results) containing subarrays representing records
+     *         and containing these keys:
      *         duedate - The item's due date (a string).
      *         dueTime - The item's due time (a string, optional).
      *         dueStatus - A special status – may be 'due' (for items due very soon)
@@ -869,122 +498,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
-     * Find Reserves
-     *
-     * Obtain information on course reserves.
-     *
-     * @param string $course ID from getCourses (empty string to match all)
-     * @param string $inst   ID from getInstructors (empty string to match all)
-     * @param string $dept   ID from getDepartments (empty string to match all)
-     *
-     * @return mixed An array of associative arrays representing reserve items.
-     */
-    public function findReserves($course, $inst, $dept)
-    {
-        $retVal = [];
-        $query = [];
-        $legalCourses = $this->getCourses();
-
-        $includeSuppressed = $this->config['CourseReserves']['includeSuppressed'] ?? false;
-
-        if (!$includeSuppressed) {
-            $query = [
-                'query' => 'copiedItem.instanceDiscoverySuppress==false',
-            ];
-        }
-
-        // Results can be paginated, so let's loop until we've gotten everything:
-        foreach (
-            $this->getPagedResults(
-                'reserves',
-                '/coursereserves/reserves',
-                $query
-            ) as $item
-        ) {
-            // MSU customization to always use instanceId so that we can have getBibId lookup
-            // the correct prefix
-            $instanceId = $item->copiedItem->instanceId ?? null;
-            $bibId = $this->getBibId($instanceId);
-
-            // MSU customization - Get the electronic access links from the item record if possible
-            // electronicAccess will be an array with keys: uri, linkText, publicNote, relationshipId
-            $itemId = $item->itemId ?? null;
-            $electronicAccess = null;
-            $urlPattern = '/https?:\/\/catalog\.lib\.msu\.edu\/Record\/([.a-zA-Z0-9]+)/i';
-            if ($itemId !== null) {
-                $links = $this->getElectronicAccessLinks($itemId) ?? [];
-                foreach ($links as $link) {
-                    if ($link->uri !== null && preg_match($urlPattern, $link->uri, $matches) && count($matches) > 1) {
-                        $bibId = $matches[1]; // this gives us the VuFind ID with the prefix it has in the Biblio index
-                        break;
-                    }
-                }
-            }
-
-            if ($bibId !== null) {
-                $courseData = $this->getCourseDetails(
-                    $item->courseListingId ?? null
-                );
-                $instructorIds = $this->getInstructorIds(
-                    $item->courseListingId ?? null
-                );
-                foreach ($courseData as $courseId => $departmentId) {
-                    // If the present course ID is not in the legal course list, it is likely
-                    // expired data and should be skipped.
-                    if (!isset($legalCourses[$courseId])) {
-                        continue;
-                    }
-                    foreach ($instructorIds as $instructorId) {
-                        $retVal[] = [
-                            'BIB_ID' => $bibId,
-                            'COURSE_ID' => $courseId == '' ? null : $courseId,
-                            'DEPARTMENT_ID' => $departmentId == ''
-                                ? null : $departmentId,
-                            'INSTRUCTOR_ID' => $instructorId,
-                        ];
-                    }
-                }
-            }
-        }
-
-        // If the user has requested a filter, apply it now:
-        if (!empty($course) || !empty($inst) || !empty($dept)) {
-            $filter = function ($value) use ($course, $inst, $dept) {
-                return (empty($course) || $course == $value['COURSE_ID'])
-                    && (empty($inst) || $inst == $value['INSTRUCTOR_ID'])
-                    && (empty($dept) || $dept == $value['DEPARTMENT_ID']);
-            };
-            return array_filter($retVal, $filter);
-        }
-        return $retVal;
-    }
-
-    /**
-     * Retrieve the electronic access data from the item records
-     *
-     * @param string $itemId itemId from holdings data
-     *
-     * @return array associative array of the link data
-     */
-    protected function getElectronicAccessLinks($itemId)
-    {
-        try {
-            $response = $this->makeRequest(
-                'GET',
-                '/item-storage/items/' . $itemId,
-                allowedFailureCodes: [404]
-            );
-            if ($response && $response->getStatusCode() != 404) {
-                $item = json_decode($response->getBody());
-                return $item->electronicAccess;
-            }
-            return [];
-        } catch (ILSException $e) {
-            return [];
-        }
-    }
-
-    /**
      * Get Pick Up Locations
      *
      * This is responsible get a list of valid locations for holds / recall
@@ -1039,12 +552,10 @@ class Folio extends \VuFind\ILS\Driver\Folio
         // have to obtain a list of IDs to use as a filter below.
         $legalServicePoints = null;
         if ($holdInfo) {
-            // MSUL customization to add item_id param for PC-1405
             $allowed = $this->getAllowedServicePoints(
                 $this->getInstanceByBibId($holdInfo['id'])->id,
-                $patron['id'],
-                'create',
-                $holdInfo['item_id']
+                $holdInfo['item_id'] ?? null,
+                $patron['id']
             );
             if ($allowed !== null) {
                 $legalServicePoints = [];
@@ -1105,46 +616,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
         // MSU END
 
         return $finalLocations;
-    }
-
-    /**
-     * Determine if the provided pickup service point is excluded or not
-     * based on the configurations set.
-     *
-     * TODO -- This is nearly identical to isHoldable. Would it be a terrible
-     * idea to add an optional extra parameter to that function to be able to
-     * merge this in with that one?
-     *
-     * @param string $servicepoint servicepoint discover display name from
-     * getPickupLocations
-     *
-     * @return bool
-     */
-    public function isPickupable($servicepoint)
-    {
-        $mode = $this->config['Holds']['excludePickupLocationsCompareMode'] ?? 'exact';
-        $excludeLocs = (array)($this->config['Holds']['excludePickupLocations'] ?? []);
-
-        // Exclude checking by regex match
-        if (trim(strtolower($mode)) == 'regex') {
-            foreach ($excludeLocs as $pattern) {
-                $match = @preg_match($pattern, $servicepoint);
-                // Invalid regex, skip this pattern
-                if ($match === false) {
-                    $this->logWarning(
-                        'Invalid regex found in excludePickupLocations: ' .
-                        $pattern
-                    );
-                    continue;
-                }
-                if ($match === 1) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        // Otherwise exclude checking by exact match
-        return !in_array($servicepoint, $excludeLocs);
     }
 
     /**
@@ -1290,6 +761,139 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
+     * Find Reserves
+     *
+     * Obtain information on course reserves.
+     *
+     * @param string $course ID from getCourses (empty string to match all)
+     * @param string $inst   ID from getInstructors (empty string to match all)
+     * @param string $dept   ID from getDepartments (empty string to match all)
+     *
+     * @return mixed An array of associative arrays representing reserve items.
+     */
+    public function findReserves($course, $inst, $dept)
+    {
+        $retVal = [];
+        $query = [];
+        $legalCourses = $this->getCourses();
+
+        $includeSuppressed = $this->config['CourseReserves']['includeSuppressed'] ?? false;
+
+        if (!$includeSuppressed) {
+            $query = [
+                'query' => 'copiedItem.instanceDiscoverySuppress==false',
+            ];
+        }
+
+        // Results can be paginated, so let's loop until we've gotten everything:
+        foreach (
+            $this->getPagedResults(
+                'reserves',
+                '/coursereserves/reserves',
+                $query
+            ) as $item
+        ) {
+            // MSU customization to always use instanceId so that we can have getBibId lookup
+            // the correct prefix
+            $instanceId = $item->copiedItem->instanceId ?? null;
+            $bibId = $this->getBibId($instanceId);
+
+            // MSU customization - Get the electronic access links from the item record if possible
+            // electronicAccess will be an array with keys: uri, linkText, publicNote, relationshipId
+            $itemId = $item->itemId ?? null;
+            $electronicAccess = null;
+            $urlPattern = '/https?:\/\/catalog\.lib\.msu\.edu\/Record\/([.a-zA-Z0-9]+)/i';
+            if ($itemId !== null) {
+                $links = $this->getElectronicAccessLinks($itemId) ?? [];
+                foreach ($links as $link) {
+                    if ($link->uri !== null && preg_match($urlPattern, $link->uri, $matches) && count($matches) > 1) {
+                        $bibId = $matches[1]; // this gives us the VuFind ID with the prefix it has in the Biblio index
+                        break;
+                    }
+                }
+            }
+
+            if ($bibId !== null) {
+                $courseData = $this->getCourseDetails(
+                    $item->courseListingId ?? null
+                );
+                $instructorIds = $this->getInstructorIds(
+                    $item->courseListingId ?? null
+                );
+                foreach ($courseData as $courseId => $departmentId) {
+                    // If the present course ID is not in the legal course list, it is likely
+                    // expired data and should be skipped.
+                    if (!isset($legalCourses[$courseId])) {
+                        continue;
+                    }
+                    foreach ($instructorIds as $instructorId) {
+                        $retVal[] = [
+                            'BIB_ID' => $bibId,
+                            'COURSE_ID' => $courseId == '' ? null : $courseId,
+                            'DEPARTMENT_ID' => $departmentId == ''
+                                ? null : $departmentId,
+                            'INSTRUCTOR_ID' => $instructorId,
+                        ];
+                    }
+                }
+            }
+        }
+
+        // If the user has requested a filter, apply it now:
+        if (!empty($course) || !empty($inst) || !empty($dept)) {
+            $filter = function ($value) use ($course, $inst, $dept) {
+                return (empty($course) || $course == $value['COURSE_ID'])
+                    && (empty($inst) || $inst == $value['INSTRUCTOR_ID'])
+                    && (empty($dept) || $dept == $value['DEPARTMENT_ID']);
+            };
+            return array_filter($retVal, $filter);
+        }
+        return $retVal;
+    }
+
+    /**
+     * MSUL-only function
+     * Determine if the provided pickup service point is excluded or not
+     * based on the configurations set.
+     *
+     * TODO -- This is nearly identical to isHoldable. Would it be a terrible
+     * idea to add an optional extra parameter to that function to be able to
+     * merge this in with that one?
+     *
+     * @param string $servicepoint servicepoint discover display name from
+     * getPickupLocations
+     *
+     * @return bool
+     */
+    public function isPickupable($servicepoint)
+    {
+        $mode = $this->config['Holds']['excludePickupLocationsCompareMode'] ?? 'exact';
+        $excludeLocs = (array)($this->config['Holds']['excludePickupLocations'] ?? []);
+
+        // Exclude checking by regex match
+        if (trim(strtolower($mode)) == 'regex') {
+            foreach ($excludeLocs as $pattern) {
+                $match = @preg_match($pattern, $servicepoint);
+                // Invalid regex, skip this pattern
+                if ($match === false) {
+                    $this->logWarning(
+                        'Invalid regex found in excludePickupLocations: ' .
+                        $pattern
+                    );
+                    continue;
+                }
+                if ($match === 1) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        // Otherwise exclude checking by exact match
+        return !in_array($servicepoint, $excludeLocs);
+    }
+
+    /**
+     * MSUL-only function
      * Get the location record for the specified location
      *
      * @param string $locationId location identifier
@@ -1316,6 +920,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
+     * MSUL-only function
      * Get the license agreement data for the specific publisher
      *
      * @param string $publisherName Publisher name
@@ -1419,8 +1024,35 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
+     * MSUL-only function
+     * Retrieve the electronic access data from the item records
+     *
+     * @param string $itemId itemId from holdings data
+     *
+     * @return array associative array of the link data
+     */
+    protected function getElectronicAccessLinks($itemId)
+    {
+        try {
+            $response = $this->makeRequest(
+                'GET',
+                '/item-storage/items/' . $itemId,
+                allowedFailureCodes: [404]
+            );
+            if ($response && $response->getStatusCode() != 404) {
+                $item = json_decode($response->getBody());
+                return $item->electronicAccess;
+            }
+            return [];
+        } catch (ILSException $e) {
+            return [];
+        }
+    }
+
+    /**
      * Make requests
      * MSUL Override to update default headers instead of just add to them PC-606
+     * Overridden from AbstractAPI
      *
      * @param string            $method              GET/POST/PUT/DELETE/etc
      * @param string            $path                API path (with a leading /)

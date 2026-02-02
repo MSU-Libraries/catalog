@@ -18,14 +18,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * along with this program; if not, see
+ * <https://www.gnu.org/licenses/>.
  *
  * @category VuFind
  * @package  Ajax_Handler
  * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
- * @link     https://vufind.org/vufind/ Main page
+ * @link     https://vufind.org/wiki/development Wiki
  */
 
 namespace Catalog\AjaxHandler;
@@ -47,7 +47,7 @@ use function is_array;
  * @package  Ajax_Handler
  * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
- * @link     https://vufind.org/vufind/ Main page
+ * @link     https://vufind.org/wiki/development Wiki
  */
 class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
 {
@@ -74,7 +74,8 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
                 $results[] = [
                     [
                         'id' => $id,
-                        'error' => 'Holding data is currently unavailable.',// MSUL: Alternate message on failure
+                        // MSUL - alternate message on failure
+                        'error' => 'Holding data is currently unavailable.',
                     ],
                 ];
             }
@@ -148,7 +149,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
         foreach ($missingIds as $missingId => $recordNumber) {
             $availabilityStatus = $this->availabilityStatusManager->createAvailabilityStatus(false);
             $statuses[] = [
-                'id'                   => $missingId,
+                'id'                   => (string)$missingId, // array_flip may have converted to int
                 'availability'         => 'false',
                 'availability_message' => $this->getAvailabilityMessage($availabilityStatus),
                 'location'             => $this->translate('Unknown'),

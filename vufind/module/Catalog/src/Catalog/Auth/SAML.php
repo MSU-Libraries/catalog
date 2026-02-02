@@ -198,7 +198,10 @@ class SAML extends \VuFind\Auth\AbstractBase
                 } elseif ($attribute == 'cat_password') {
                     $catPassword = $value;
                 } else {
-                    $user->$attribute = $value;
+                    $method = 'set' . str_replace('_', '', ucwords($attribute, '_'));
+                    if (method_exists($user, $method)) {
+                        $user->$method($value);
+                    }
                 }
             }
         }
@@ -220,7 +223,8 @@ class SAML extends \VuFind\Auth\AbstractBase
         }
 
         // Save and return the user object:
-        $user->save();
+        $userService = $this->getUserService();
+        $userService->persistEntity($user);
         return $user;
     }
 
@@ -231,9 +235,11 @@ class SAML extends \VuFind\Auth\AbstractBase
      * @param string $target Full URL where external authentication method should
      * send user after login (some drivers may override this).
      *
-     * @return bool|string
+     * @return ?string
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function getSessionInitiator($target)
+    public function getSessionInitiator($target): ?string
     {
         $config = $this->config->SAML;
         $samlTarget = $config->target ?? $target;
@@ -269,7 +275,7 @@ class SAML extends \VuFind\Auth\AbstractBase
      * @return string     Redirect URL (usually same as $url, but modified in
      * some authentication modules).
      */
-    public function logout($url)
+    public function getLogoutRedirectUrl(string $url): string
     {
         // If single log-out is enabled, use a special URL:
         $config = $this->config->SAML;

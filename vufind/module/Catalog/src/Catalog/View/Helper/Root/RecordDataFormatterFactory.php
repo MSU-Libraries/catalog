@@ -17,8 +17,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * along with this program; if not, see
+ * <https://www.gnu.org/licenses/>.
  *
  * @category VuFind
  * @package  Record_Data_Formatter
@@ -64,7 +64,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $helper = parent::__invoke($container, $requestedName, $options);
-        $helper->setDefaults('toc', [$this, 'getDefaultTocSpecs']);
+        $helper->setDefaults('toc', [$this, 'getDefaultTocSpecs']); // MSUL
         return $helper;
     }
 
@@ -73,8 +73,10 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
      * Get the callback function for processing authors.
      *
      * @return callable
+     *
+     * @deprecated Use \VuFind\RecordDataFormatter\Specs\DefaultRecord instead of defining the specs in this factory
      */
-    protected function getAuthorFunction()
+    protected function getAuthorFunction(): callable
     {
         return function ($data, $options) {
             // Lookup array of singular/plural labels (note that Other is always
@@ -124,7 +126,7 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
     public function getDefaultTocSpecs()
     {
         $spec = new SpecBuilder();
-        $spec->setTemplateLine('Summary', true, 'data-notes.phtml');
+        $spec->setTemplateLine('Summary', true, 'data-notes.phtml');  // MSUL
         return $spec->getArray();
     }
 }

@@ -65,6 +65,7 @@ RUN \
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
 
+COPY composer.local.json /tmp/composer.local.json
 COPY install-composer.sh /install-composer.sh
 
 RUN \
@@ -81,7 +82,9 @@ RUN \
     tar -xzvf vufind-${VUFIND_VERSION}.tar.gz -C /usr/local && \
     mv /usr/local/vufind-${VUFIND_VERSION} /usr/local/vufind && \
     rm vufind-${VUFIND_VERSION}.tar.gz && \
+    mv /tmp/composer.local.json /usr/local/vufind/composer.local.json && \
     # Install VuFind dev dependencies, for the tests
+    composer --working-dir=/usr/local/vufind/ config audit.block-insecure false && \
     composer --working-dir=/usr/local/vufind/ update && \
     # Remove unused Solr dependencies after Vufind is installed
     mv /usr/local/vufind/solr /tmp && \
@@ -165,9 +168,6 @@ COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
 COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh backup.sh restore.sh /
 COPY msmtp/aliases msmtp/msmtprc /etc/
-# This could be removed once the mariadb connector is added to VuFind:
-RUN mv /usr/local/vufind/local/import/lib_local/mariadb-java-client-3.5.1.jar /usr/local/vufind/import/lib_local/ && \
-    sed -i "s/\\\\VuFind\\\\Db\\\\AdapterFactory/\\\\Catalog\\\\Db\\\\AdapterFactory/" /usr/local/vufind/module/VuFind/src/VuFindTest/Feature/LiveDatabaseTrait.php
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
@@ -207,7 +207,8 @@ RUN \
     mv /tests/* ${VUFIND_HOME}/tests/ && \
     # Install grunt
     npm install -g grunt-cli && \
-    grunt less
+    npm run install:scss-dependencies && \
+    grunt scss
 
 EXPOSE 80
 
@@ -222,4 +223,4 @@ HEALTHCHECK --interval=10s --timeout=12s --start-period=90s --retries=3 \
    CMD curl --fail -s http://localhost:80/ || exit 1
 
 ENTRYPOINT [ "/entrypoint.sh" ]
-CMD /startup.sh
+CMD [ "/startup.sh" ]

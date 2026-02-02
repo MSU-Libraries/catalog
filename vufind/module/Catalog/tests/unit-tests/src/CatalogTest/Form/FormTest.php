@@ -32,6 +32,7 @@ namespace CatalogTest\Form;
 
 use VuFind\Config\YamlReader;
 use VuFind\Form\Form;
+use VuFindTest\Feature\ConfigRelatedServicesTrait;
 
 use function get_class;
 
@@ -48,6 +49,7 @@ use function get_class;
 class FormTest extends \PHPUnit\Framework\TestCase
 {
     use \VuFindTest\Feature\FixtureTrait;
+    use ConfigRelatedServicesTrait;
 
     protected $mockTestFormYamlReader = null;
 
@@ -59,7 +61,7 @@ class FormTest extends \PHPUnit\Framework\TestCase
     public function testDefaultsWithoutConfiguration()
     {
         $form = new Form(
-            new YamlReader(),
+            new YamlReader($this->getPathResolver()),
             $this->createMock(\Laminas\View\HelperPluginManager::class),
             $this->createMock(\VuFind\Form\Handler\PluginManager::class)
         );

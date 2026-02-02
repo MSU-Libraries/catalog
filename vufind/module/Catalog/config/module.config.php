@@ -19,14 +19,9 @@ return [
     'factories' => [
       Catalog\Controller\RecordController::class => VuFind\Controller\AbstractBaseWithConfigFactory::class,
       Catalog\Controller\MyResearchController::class => VuFind\Controller\MyResearchControllerFactory::class,
-      Catalog\Controller\CombinedController::class => VuFind\Controller\AbstractBaseFactory::class,
     ],
     'aliases' => [
       VuFind\Controller\RecordController::class => Catalog\Controller\RecordController::class,
-      VuFind\Controller\MyResearchController::class => Catalog\Controller\MyResearchController::class,
-      VuFind\Controller\CombinedController::class => Catalog\Controller\CombinedController::class,
-      'Combined' => Catalog\Controller\CombinedController::class,
-      'combined' => Catalog\Controller\CombinedController::class,
     ],
   ],
   'vufind' => [
@@ -57,22 +52,6 @@ return [
         ],
         'aliases' => [
           'solr' => Catalog\Autocomplete\Solr::class,
-        ],
-      ],
-      'command' => [
-        'factories' => [
-          Catalog\Command\Util\IndexReservesCommand::class => VuFindConsole\Command\Util\AbstractSolrAndIlsCommandFactory::class,
-        ],
-        'aliases' => [
-          'util/index_reserves' => Catalog\Command\Util\IndexReservesCommand::class,
-        ],
-      ],
-      'content_covers' => [
-        'factories' => [
-          Catalog\Content\Covers\BrowZine::class => VuFind\Content\Covers\BrowZineFactory::class,
-        ],
-        'aliases' => [
-          'browzine' => Catalog\Content\Covers\BrowZine::class,
         ],
       ],
       'form_handler' => [
@@ -140,15 +119,13 @@ return [
           'eds' => Catalog\Search\EDS\Results::class,
         ],
       ],
-      'db_table' => [
+      'db_service' => [
         'factories' => [
-           Catalog\Db\Table\Session::class => Catalog\Db\Table\GatewayFactory::class,
-           //Catalog\Db\Table\Session::class => VuFind\Db\Table\GatewayFactory::class,
-          //Catalog\Db\Table\Session::class => Catalog\Db\Table\SessionFactory::class,
+           \Catalog\Db\Service\SessionService::class => \Catalog\Db\Service\AbstractDbServiceFactory::class,
         ],
         'aliases' => [
-          VuFind\Db\Table\Session::class => Catalog\Db\Table\Session::class,
-          'session' => Catalog\Db\Table\Session::class,
+          \VuFind\Db\Service\SessionService::class => \Catalog\Db\Service\SessionService::class,
+          'session' => \Catalog\Db\Service\SessionService::class,
         ],
       ],
     ],
@@ -156,14 +133,9 @@ return [
   'service_manager' => [
     'factories' => [
       Catalog\Form\Form::class => VuFind\Form\FormFactory::class,
-      Catalog\Session\SessionManager::class => Catalog\Session\ManagerFactory::class,
-      Catalog\Db\AdapterFactory::class => VuFind\Service\ServiceWithConfigIniFactory::class,
-      Laminas\Db\Adapter\Adapter::class => Catalog\Db\AdapterFactory::class,
     ],
     'aliases' => [
       VuFind\Form\Form::class => Catalog\Form\Form::class,
-      Laminas\Session\SessionManager::class => Catalog\Session\SessionManager::class,
-      VuFind\Session\ManagerFactory::class => Catalog\Session\ManagerFactory::class,
     ],
   ],
 ];

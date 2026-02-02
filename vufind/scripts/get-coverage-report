@@ -4,6 +4,5 @@
 set -e
 
 cd /usr/local/vufind
-mv module/Catalog/tests/vufind_phpunit.xml module/VuFind/tests/phpunit.xml
-XDEBUG_MODE=coverage vendor/bin/phing phpunitfaster -D "phpunit_extra_params=/usr/local/vufind/module/Catalog/tests/unit-tests/ --coverage-cobertura reports/coverage.xml" > /dev/null 2>&1
+XDEBUG_MODE=coverage vendor/bin/phpunit -c module/Catalog/tests/phpunit.xml /usr/local/vufind/module/Catalog/tests/unit-tests/ --coverage-cobertura reports/coverage.xml > /dev/null 2>&1
 cat reports/coverage.xml

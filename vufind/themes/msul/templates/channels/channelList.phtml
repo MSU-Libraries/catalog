@@ -1,0 +1,28 @@
+<!-- MSU -->
+<?php
+  $i = 1;
+  $plugins = $this->getHelperPluginManager();
+  $recordHelper = $plugins->get('record');
+  $loader = $plugins->getServiceLocator()->get(\VuFind\Record\Loader::class);
+?>
+<h2><?=$this->transEsc('Similar Items')?></h2>
+<?php if (empty($this->channels)) {
+return;
+} ?>
+<ol class="record-list" start="1">
+  <?php foreach ($this->channels[0]['contents'] as $current): ?>
+    <li class="result">
+      <div class="record-number">
+        <?=$i ?>
+      </div>
+      <?php
+        $driver = $loader->load($current['id'], $current['source'] ?? 'Solr');
+        $recordHelper($driver);
+        echo $recordHelper->getSearchResult('list', $this->tab);
+      ?>
+    </li>
+    <?php
+      $i++;
+    ?>
+  <?php endforeach; ?>
+</ol>
