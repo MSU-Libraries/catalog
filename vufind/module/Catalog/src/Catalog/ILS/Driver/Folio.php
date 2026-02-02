@@ -761,6 +761,56 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
+     * MSU can remove when PR 5001 is in a release
+     * Get latest major version of a $moduleName enabled for a tenant.
+     * Result is cached.
+     *
+     * @param string $moduleName module name
+     *
+     * @return int module version or 0 if no module found
+     */
+    protected function getModuleMajorVersion(string $moduleName): int
+    {
+        $cacheKey = 'module_version:' . $moduleName;
+        $version = $this->getCachedData($cacheKey);
+        if ($version === null) {
+            // Get latest version of a module enabled for a tenant.
+            // Allow errors to not trigger an exception because that means we need to try the
+            // next call that is compatible with pre-Sunflower.
+            $response = $this->makeRequest(
+                'GET',
+                '/modules/discovery?query=(name==' . $moduleName . ')',
+                allowedFailureCodes:[400, 403, 404, 500]
+            );
+
+            // If there was a failure with the first method, attempt the second
+            // endpoint to get the version.
+            $json = json_decode($response->getBody(), true);
+            if (empty($json) || isset($json['errors'])) {
+                $response = $this->makeRequest(
+                    'GET',
+                    '/_/proxy/tenants/' . $this->tenant . '/modules?filter=' . $moduleName . '&latest=1',
+                );
+                $json = json_decode($response->getBody(), true);
+                $latest = $json[0]['id'] ?? '0';
+            } else {
+                $latest = $json['discovery'][0]['id'] ?? '0';
+            }
+
+            // get version major from json result
+            preg_match_all('!\d+!', $latest, $matches);
+            $version = (int)($matches[0][0] ?? 0);
+            if ($version === 0) {
+                $this->debug('Unable to find version in ' . $response->getBody());
+            } else {
+                // Only cache non-zero values, so we don't persist an error condition:
+                $this->putCachedData($cacheKey, $version);
+            }
+        }
+        return $version;
+    }
+
+    /**
      * Find Reserves
      *
      * Obtain information on course reserves.
@@ -1050,6 +1100,121 @@ class Folio extends \VuFind\ILS\Driver\Folio
     }
 
     /**
+     * MSUL-only function
+     * Get the timeout for external API calls
+     * MSUL PC-1416 Added to support external API calls
+     * If this is ever added to VF core, likely just move
+     * this setting to config.ini.
+     *
+     * @return int
+     */
+    protected function getExternalTimeout()
+    {
+        $msulConfig = $this->configReader->get('msul');
+
+        if (isset($msulConfig)) {
+            return $msulConfig['Locations']['timeout'] ?? 2;
+        }
+
+        return 2;
+    }
+
+    /**
+     * MSUL-only function
+     * Make external API requests
+     * MSUL PC-1416 Added to support external API calls
+     * If ever made into a PR, likely have makeRequest call this function
+     * to avoid code duplication.
+     *
+     * @param string            $method              GET/POST/PUT/DELETE/etc
+     * @param string            $url                 API URL
+     * @param string|array      $params              Query parameters
+     * @param array             $headers             Additional headers
+     * @param true|int[]|string $allowedFailureCodes HTTP failure codes that should
+     * NOT cause an ILSException to be thrown. May be an array of integers, a regular
+     * expression, or boolean true to allow all codes.
+     * @param string|array      $debugParams         Value to use in place of $params
+     * in debug messages (useful for concealing sensitive data, etc.)
+     * @param int               $attemptNumber       Counter to keep track of attempts
+     * (starts at 1 for the first attempt)
+     *
+     * @return \Laminas\Http\Response
+     * @throws ILSException
+     */
+    public function makeExternalRequest(
+        $method = 'GET',
+        $url = '',
+        $params = [],
+        $headers = [],
+        $allowedFailureCodes = [],
+        $debugParams = null,
+        $attemptNumber = 1
+    ) {
+        $client = $this->httpService->createClient(
+            $url,
+            $method,
+            120
+        );
+
+        // MSUL -- Set timeout
+        $client->setOptions(['timeout' => $this->getExternalTimeout()]);
+
+        // Add default headers and parameters
+        $req_headers = $client->getRequest()->getHeaders();
+        $req_headers->addHeaders($headers);
+        [$req_headers, $params] = $this->preRequest($req_headers, $params);
+
+        if ($this->logger) {
+            $this->debugRequest($method, $url, $debugParams ?? $params, $req_headers);
+        }
+
+        // Add params
+        if ($method == 'GET') {
+            $client->setParameterGet($params);
+        } else {
+            if (is_string($params)) {
+                $client->getRequest()->setContent($params);
+            } else {
+                $client->setParameterPost($params);
+            }
+        }
+        $startTime = microtime(true);
+        try {
+            $response = $client->send();
+        } catch (\Exception $e) {
+            $this->logError('Unexpected ' . $e::class . ': ' . (string)$e);
+            throw new ILSException('Error during send operation.');
+        }
+        $endTime = microtime(true);
+        $responseTime = $endTime - $startTime;
+        $this->debug('Request Response Time --- ' . $responseTime . ' seconds. ' . $url);
+        $code = $response->getStatusCode();
+        if (
+            !$response->isSuccess()
+            && !$this->failureCodeIsAllowed($code, $allowedFailureCodes)
+        ) {
+            $this->logError(
+                "Unexpected error response (attempt #$attemptNumber"
+                . "); code: {$response->getStatusCode()}, body: {$response->getBody()}"
+            );
+            if ($this->shouldRetryAfterUnexpectedStatusCode($response, $attemptNumber)) {
+                return $this->makeExternalRequest(
+                    $method,
+                    $url,
+                    $params,
+                    $headers,
+                    $allowedFailureCodes,
+                    $debugParams,
+                    $attemptNumber + 1
+                );
+            } else {
+                throw new ILSException('Unexpected error code.');
+            }
+        }
+        return $response;
+    }
+
+    /**
      * Make requests
      * MSUL Override to update default headers instead of just add to them PC-606
      * Overridden from AbstractAPI
@@ -1173,391 +1338,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     'status' => $code,
                 ];
                 file_put_contents($jsonLog, json_encode($json));
-            }
-        }
-        return $response;
-    }
-
-    /**
-     * MSUL PC-1405 Use itemId or instanceId based on if title level holds is enabled
-     * Get allowed service points for a request. Returns null if data cannot be obtained.
-     *
-     * @param string $instanceId  Instance UUID being requested
-     * @param string $requesterId Patron UUID placing request
-     * @param string $operation   Operation type (default = create)
-     *
-     * @return ?array
-     */
-    public function getAllowedServicePoints(
-        string $instanceId,
-        string $requesterId,
-        string $operation = 'create'
-    ): ?array {
-        try {
-            // This won't be required in a PR -- doing it this way here
-            // since we can't change the function signature to add a new
-            // parameter directly
-            $itemId = null;
-            if (func_num_args() >= 4) {
-                $itemId = func_get_arg(3);
-            }
-            // circulation.requests.allowed-service-points.get
-            $response = $this->makeRequest(
-                'GET',
-                '/circulation/requests/allowed-service-points?'
-                . http_build_query(compact(empty($itemId) ? 'instanceId' : 'itemId', 'requesterId', 'operation'))
-            );
-            if (!$response->isSuccess()) {
-                $this->warning('Unexpected service point lookup response: ' . $response->getBody());
-                return null;
-            }
-        } catch (\Exception $e) {
-            $this->warning('Exception during allowed service point lookup: ' . (string)$e);
-            return null;
-        }
-        return json_decode($response->getBody(), true);
-    }
-
-    /**
-     * MSUL -- Can remove once PR 5001 is merged
-     * Get latest major version of a $moduleName enabled for a tenant.
-     * Result is cached.
-     *
-     * @param string $moduleName module name
-     *
-     * @return int module version or 0 if no module found
-     */
-    protected function getModuleMajorVersion(string $moduleName): int
-    {
-        $cacheKey = 'module_version:' . $moduleName;
-        $version = $this->getCachedData($cacheKey);
-        if ($version === null) {
-            // Get latest version of a module enabled for a tenant.
-            // Allow errors to not trigger an exception because that means we need to try the
-            // next call that is compatible with pre-Sunflower.
-            $response = $this->makeRequest(
-                'GET',
-                '/modules/discovery?query=(name==' . $moduleName . ')',
-                allowedFailureCodes:[400, 403, 404, 500]
-            );
-
-            // If there was a failure with the first method, attempt the second
-            // endpoint to get the version.
-            $json = json_decode($response->getBody(), true);
-            if (empty($json) || isset($json['errors'])) {
-                $response = $this->makeRequest(
-                    'GET',
-                    '/_/proxy/tenants/' . $this->tenant . '/modules?filter=' . $moduleName . '&latest=1',
-                );
-                $json = json_decode($response->getBody(), true);
-                $latest = $json[0]['id'] ?? '0';
-            } else {
-                $latest = $json['discovery'][0]['id'] ?? '0';
-            }
-
-            // get version major from json result
-            preg_match_all('!\d+!', $latest, $matches);
-            $version = (int)($matches[0][0] ?? 0);
-            if ($version === 0) {
-                $this->debug('Unable to find version in ' . $response->getBody());
-            } else {
-                // Only cache non-zero values, so we don't persist an error condition:
-                $this->putCachedData($cacheKey, $version);
-            }
-        }
-        return $version;
-    }
-
-    /**
-     * MSUL PC-1405 Pass item_id to getAllowedServicePoints
-     * Place Hold
-     *
-     * Attempts to place a hold or recall on a particular item and returns
-     * an array with result details.
-     *
-     * @param array $holdDetails An array of item and patron data
-     *
-     * @return mixed An array of data on the request including
-     * whether or not it was successful and a system message (if available)
-     */
-    public function placeHold($holdDetails)
-    {
-        if (
-            !empty($holdDetails['requiredByTS'])
-            && !is_int($holdDetails['requiredByTS'])
-        ) {
-            throw new ILSException('hold_date_invalid');
-        }
-        $requiredBy = !empty($holdDetails['requiredByTS'])
-            ? gmdate('Y-m-d', $holdDetails['requiredByTS']) : null;
-
-        $instance = $this->getInstanceByBibId($holdDetails['id']);
-        $isTitleLevel = ($holdDetails['level'] ?? '') === 'title';
-        if ($isTitleLevel) {
-            $baseParams = [
-                'instanceId' => $instance->id,
-                'requestLevel' => 'Title',
-            ];
-        } else {
-            // Note: early Lotus releases require instanceId and holdingsRecordId
-            // to be set here as well, but the requirement was lifted in a hotfix
-            // to allow backward compatibility. If you need compatibility with one
-            // of those versions, you can add additional identifiers here, but
-            // applying the latest hotfix is a better solution!
-            $baseParams = ['itemId' => $holdDetails['item_id']];
-        }
-        // Account for an API spelling change introduced in mod-circulation v24:
-        $fulfillmentKey = $this->getModuleMajorVersion('mod-circulation') >= 24
-            ? 'fulfillmentPreference' : 'fulfilmentPreference';
-        $fulfillmentValue = $holdDetails['requestGroupId'] ?? 'Hold Shelf';
-        $fulfillmentLocationKey = match ($fulfillmentValue) {
-            'Hold Shelf' => 'pickupServicePointId',
-            'Delivery' => 'deliveryAddressTypeId',
-        };
-        $requestBody = $baseParams + [
-            'requesterId' => $holdDetails['patron']['id'],
-            'requestDate' => date('c'),
-            $fulfillmentKey => $fulfillmentValue,
-            'requestExpirationDate' => $requiredBy,
-            $fulfillmentLocationKey => $holdDetails['pickUpLocation'],
-        ];
-        if (!empty($holdDetails['proxiedUser'])) {
-            $requestBody['requesterId'] = $holdDetails['proxiedUser'];
-            $requestBody['proxyUserId'] = $holdDetails['patron']['id'];
-        }
-        if (!empty($holdDetails['comment'])) {
-            $requestBody['patronComments'] = $holdDetails['comment'];
-        }
-        // MSU - add item_id parameter
-        $allowed = $this->getAllowedServicePoints(
-            $instance->id,
-            $holdDetails['patron']['id'],
-            'create',
-            $holdDetails['item_id']
-        );
-        $preferredRequestType = $this->getPreferredRequestType($holdDetails);
-        foreach ($this->getRequestTypeList($preferredRequestType) as $requestType) {
-            // Skip illegal request types, if we have validation data available:
-            if (null !== $allowed) {
-                if (
-                    // Unsupported request type:
-                    !isset($allowed[$requestType])
-                    // Unsupported pickup location:
-                    || !in_array($holdDetails['pickUpLocation'], array_column($allowed[$requestType] ?? [], 'id'))
-                ) {
-                    continue;
-                }
-            }
-            $requestBody['requestType'] = $requestType;
-            $result = $this->performHoldRequest($requestBody);
-            if ($result['success']) {
-                break;
-            }
-        }
-        return $result ?? ['success' => false, 'status' => 'Unexpected failure'];
-    }
-
-    /**
-     * MSUL PC-1405 Pass item_id to getAllowedServicePoints
-     * Check if request is valid
-     *
-     * This is responsible for determining if an item is requestable
-     *
-     * @param string $id     The record id
-     * @param array  $data   An array of item data
-     * @param array  $patron An array of patron data
-     *
-     * @return array Two entries: 'valid' (boolean) plus 'status' (message to display to user)
-     */
-    public function checkRequestIsValid($id, $data, $patron)
-    {
-        // First check outstanding loans:
-        $currentLoan = empty($data['item_id'])
-            ? null
-            : $this->getCurrentLoan($data['item_id']);
-        if ($currentLoan && !$this->isHoldableByCurrentLoan($currentLoan)) {
-            return [
-                'valid' => false,
-                'status' => 'hold_error_current_loan_patron_group',
-            ];
-        }
-
-        // MSU - add item_id parameter
-        $allowed = $this->getAllowedServicePoints(
-            $this->getInstanceByBibId($id)->id,
-            $patron['id'],
-            'create',
-            $data['item_id']
-        );
-        return [
-            // If we got this far, it's valid if we can't obtain allowed service point
-            // data, or if the allowed service point data is non-empty:
-            'valid' => null === $allowed || !empty($allowed),
-            'status' => 'request_place_text',
-        ];
-    }
-
-    /**
-     * Get request groups
-     * MSUL - customized to check if results come back before assuming.
-     * This is a good candidate for a PR, but we couldn't find a specific
-     * scenario/user that would trigger this.
-     *
-     * @param int   $bibId       BIB ID
-     * @param array $patron      Patron information returned by the patronLogin
-     * method.
-     * @param array $holdDetails Optional array, only passed in when getting a list
-     * in the context of placing a hold; contains most of the same values passed to
-     * placeHold, minus the patron data. May be used to limit the request group
-     * options or may be ignored.
-     *
-     * @return array  False if request groups not in use or an array of
-     * associative arrays with id and name keys
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
-    public function getRequestGroups(
-        $bibId = null,
-        $patron = null,
-        $holdDetails = null
-    ) {
-        // circulation-storage.request-preferences.collection.get
-        $response = $this->makeRequest(
-            'GET',
-            '/request-preference-storage/request-preference?query=userId==' . $patron['id']
-        );
-        // MSU Start -- Add null checks for $requestPreferences
-        $requestPreferencesResponse = json_decode($response->getBody());
-        $requestPreferences = $requestPreferencesResponse->requestPreferences[0] ?? null;
-        $allowHoldShelf = $requestPreferences?->holdShelf ?? null;
-        $allowDelivery = ($requestPreferences?->delivery ?? null) && ($this->config['Holds']['allowDelivery'] ?? true);
-        // MSU End
-        $locationsLabels = $this->config['Holds']['locationsLabelByRequestGroup'] ?? [];
-        if ($allowHoldShelf && $allowDelivery) {
-            return [
-                [
-                    'id' => 'Hold Shelf',
-                    'name' => 'fulfillment_method_hold_shelf',
-                    'locationsLabel' => $locationsLabels['Hold Shelf'] ?? null,
-                ],
-                [
-                    'id' => 'Delivery',
-                    'name' => 'fulfillment_method_delivery',
-                    'locationsLabel' => $locationsLabels['Delivery'] ?? null,
-                ],
-            ];
-        }
-        return false;
-    }
-
-    /**
-     * Get the timeout for external API calls
-     * MSUL PC-1416 Added to support external API calls
-     * If this is ever added to VF core, likely just move
-     * this setting to config.ini.
-     *
-     * @return int
-     */
-    protected function getExternalTimeout()
-    {
-        $msulConfig = $this->configReader->get('msul');
-
-        if (isset($msulConfig)) {
-            return $msulConfig['Locations']['timeout'] ?? 2;
-        }
-
-        return 2;
-    }
-
-    /**
-     * Make external API requests
-     * MSUL PC-1416 Added to support external API calls
-     * If ever made into a PR, likely have makeRequest call this function
-     * to avoid code duplication.
-     *
-     * @param string            $method              GET/POST/PUT/DELETE/etc
-     * @param string            $url                 API URL
-     * @param string|array      $params              Query parameters
-     * @param array             $headers             Additional headers
-     * @param true|int[]|string $allowedFailureCodes HTTP failure codes that should
-     * NOT cause an ILSException to be thrown. May be an array of integers, a regular
-     * expression, or boolean true to allow all codes.
-     * @param string|array      $debugParams         Value to use in place of $params
-     * in debug messages (useful for concealing sensitive data, etc.)
-     * @param int               $attemptNumber       Counter to keep track of attempts
-     * (starts at 1 for the first attempt)
-     *
-     * @return \Laminas\Http\Response
-     * @throws ILSException
-     */
-    public function makeExternalRequest(
-        $method = 'GET',
-        $url = '',
-        $params = [],
-        $headers = [],
-        $allowedFailureCodes = [],
-        $debugParams = null,
-        $attemptNumber = 1
-    ) {
-        $client = $this->httpService->createClient(
-            $url,
-            $method,
-            120
-        );
-
-        // MSUL -- Set timeout
-        $client->setOptions(['timeout' => $this->getExternalTimeout()]);
-
-        // Add default headers and parameters
-        $req_headers = $client->getRequest()->getHeaders();
-        $req_headers->addHeaders($headers);
-        [$req_headers, $params] = $this->preRequest($req_headers, $params);
-
-        if ($this->logger) {
-            $this->debugRequest($method, $url, $debugParams ?? $params, $req_headers);
-        }
-
-        // Add params
-        if ($method == 'GET') {
-            $client->setParameterGet($params);
-        } else {
-            if (is_string($params)) {
-                $client->getRequest()->setContent($params);
-            } else {
-                $client->setParameterPost($params);
-            }
-        }
-        $startTime = microtime(true);
-        try {
-            $response = $client->send();
-        } catch (\Exception $e) {
-            $this->logError('Unexpected ' . $e::class . ': ' . (string)$e);
-            throw new ILSException('Error during send operation.');
-        }
-        $endTime = microtime(true);
-        $responseTime = $endTime - $startTime;
-        $this->debug('Request Response Time --- ' . $responseTime . ' seconds. ' . $url);
-        $code = $response->getStatusCode();
-        if (
-            !$response->isSuccess()
-            && !$this->failureCodeIsAllowed($code, $allowedFailureCodes)
-        ) {
-            $this->logError(
-                "Unexpected error response (attempt #$attemptNumber"
-                . "); code: {$response->getStatusCode()}, body: {$response->getBody()}"
-            );
-            if ($this->shouldRetryAfterUnexpectedStatusCode($response, $attemptNumber)) {
-                return $this->makeExternalRequest(
-                    $method,
-                    $url,
-                    $params,
-                    $headers,
-                    $allowedFailureCodes,
-                    $debugParams,
-                    $attemptNumber + 1
-                );
-            } else {
-                throw new ILSException('Unexpected error code.');
             }
         }
         return $response;
