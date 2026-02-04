@@ -32,6 +32,7 @@ namespace Catalog\ILS\Driver;
 use ArrayIterator;
 use Catalog\Utils\RegexLookup as Regex;
 use Laminas\Http\Header\HeaderInterface;
+use Laminas\Http\Response;
 use VuFind\Exception\ILS as ILSException;
 use VuFind\ILS\Logic\AvailabilityStatus;
 
@@ -766,6 +767,99 @@ class Folio extends \VuFind\ILS\Driver\Folio
             $results[] = $this->processInstanceHoldings($bibId, $holdingsForInstance, $folioItems);
         }
         return $results;
+    }
+
+    /**
+     * MSU PC-1628 Use PIN authentication for patron login
+     * Support method for patronLogin(): authenticate the patron with an Okapi
+     * login attempt. Returns a CQL query for retrieving more information about
+     * the authenticated user.
+     *
+     * @param string $username The patron username
+     * @param string $password The patron password
+     *
+     * @return string
+     */
+    protected function patronLoginWithOkapi($username, $password)
+    {
+        $response = $this->performOkapiPINAuthentication($username, $password); // MSU
+        $debugMsg = 'User logged in. User: ' . $username . '.';
+        // We've authenticated the user with Okapi, but we only have their
+        // username; set up a query to retrieve full info below.
+        $query = 'username == ' . $username;
+        // Replace admin with user as tenant if configured to do so:
+        if ($this->config['User']['use_user_token'] ?? false) {
+            $this->setTokenValuesFromResponse($response);
+            $debugMsg .= ' Token: ' . substr($this->token, 0, 30) . '...';
+        }
+        $this->debug($debugMsg);
+        return $query;
+    }
+
+    /**
+     * MSU PC-1628 pass id to patron login function
+     * Patron Login
+     *
+     * This is responsible for authenticating a patron against the catalog.
+     *
+     * @param string $username The patron username
+     * @param string $password The patron password
+     *
+     * @return mixed Associative array of patron info on successful login,
+     * null on unsuccessful login.
+     */
+    public function patronLogin($username, $password)
+    {
+        $profile = null;
+        $doOkapiLogin = $this->config['User']['okapi_login'] ?? false;
+        $usernameField = $this->config['User']['username_field'] ?? 'username';
+
+        // If the username field is not the default 'username' we will need to
+        // do a lookup to find the correct username value for Okapi login. We also
+        // need to do this lookup if we're skipping Okapi login entirely.
+        if (!$doOkapiLogin || $usernameField !== 'username') {
+            $query = $this->getUserWithCql($username, $password);
+            $profile = $this->fetchUserWithCql($query);
+            if ($profile === null) {
+                return null;
+            }
+        }
+
+        // If we need to do an Okapi login, we have the information we need to do
+        // it at this point.
+        if ($doOkapiLogin) {
+            try {
+                // If we fetched the profile earlier, we want to use the username
+                // from there; otherwise, we'll use the passed-in version.
+                $query = $this->patronLoginWithOkapi(
+                    $profile->id ?? $username, // MSU pass id instead of username PC-1628
+                    $password
+                );
+            } catch (\Exception $e) {
+                return null;
+            }
+            // If we didn't load a profile earlier, we should do so now:
+            if (!isset($profile)) {
+                $profile = $this->fetchUserWithCql($query);
+                if ($profile === null) {
+                    return null;
+                }
+            }
+        }
+
+        return [
+            'id' => $profile->id,
+            'username' => $username,
+            'cat_username' => $username,
+            'cat_password' => $password,
+            'firstname' => $profile->personal->firstName ?? null,
+            'lastname' => $profile->personal->lastName ?? null,
+            'email' => $profile->personal->email ?? null,
+            'addressTypeIds' => array_map(
+                fn ($address) => $address->addressTypeId,
+                $profile->personal->addresses ?? []
+            ),
+        ];
     }
 
     /**
@@ -1929,5 +2023,30 @@ class Folio extends \VuFind\ILS\Driver\Folio
             }
         }
         return $response;
+    }
+
+    /**
+     * MSU-only method for PC-1628
+     * Support method to perform a PIN login to Okapi.
+     *
+     * @param string $id  The patron id
+     * @param string $pin The patron pin
+     *
+     * @return \Laminas\Http\Response
+     */
+    protected function performOkapiPINAuthentication(string $id, string $pin): \Laminas\Http\Response
+    {
+        $credentials = compact('id', 'pin');
+        $headers = [
+            'Accept: text/plain',
+        ];
+        // Get token
+        return $this->makeRequest(
+            method: 'POST',
+            path: '/patron-pin/verify',
+            params: json_encode($credentials),
+            debugParams: '{"id":"...","pin":"..."}',
+            headers: $headers
+        );
     }
 }
