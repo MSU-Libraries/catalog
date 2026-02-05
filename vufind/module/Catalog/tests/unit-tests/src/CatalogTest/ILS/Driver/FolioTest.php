@@ -16,6 +16,7 @@ namespace CatalogTest\ILS\Driver;
 
 use Catalog\ILS\Driver\Folio;
 use Laminas\Http\Response;
+use VuFind\Config\Config;
 
 /**
  * FOLIO ILS driver test
@@ -28,7 +29,6 @@ use Laminas\Http\Response;
  */
 class FolioTest extends \PHPUnit\Framework\TestCase
 {
-    use \VuFindTest\Feature\ConfigPluginManagerTrait;
     use \VuFindTest\Feature\FixtureTrait;
     use \VuFindTest\Feature\ReflectionTrait;
 
@@ -158,10 +158,10 @@ class FolioTest extends \PHPUnit\Framework\TestCase
             return new \Laminas\Session\Container("Folio_$namespace", $manager);
         };
         // Config reader for reading msul.ini
-        $mockConfigReader = $this->getMockConfigPluginManager($msulConfig ?? []);
+        $mockMsul = new Config($msulConfig ?? []);
         // Create a stub for the SomeClass class
         $this->driver = $this->getMockBuilder(Folio::class)
-            ->setConstructorArgs([new \VuFind\Date\Converter(), $factory, $mockConfigReader])
+            ->setConstructorArgs([new \VuFind\Date\Converter(), $factory, $mockMsul])
             ->onlyMethods(['makeRequest', 'makeExternalRequest'])
             ->getMock();
         // Configure the stub
@@ -169,14 +169,10 @@ class FolioTest extends \PHPUnit\Framework\TestCase
         $cache = new \Laminas\Cache\Storage\Adapter\Memory();
         $cache->setOptions(['memory_limit' => -1]);
         $this->driver->setCacheStorage($cache);
-        $this->driver->expects($this->any())
-            ->method('makeRequest')
-            ->will($this->returnCallback([$this, 'mockMakeRequest']));
+        $this->driver->method('makeRequest')->willReturnCallback([$this, 'mockMakeRequest']);
         // For simplicity (and since it's just mocking a request and not actually making one)
         // we'll have calls to makeExternalRequest go to the same mock for makeRequest
-        $this->driver->expects($this->any())
-            ->method('makeExternalRequest')
-            ->will($this->returnCallback([$this, 'mockMakeRequest']));
+        $this->driver->method('makeExternalRequest')->willReturnCallback([$this, 'mockMakeRequest']);
         $this->driver->init();
     }
 
@@ -227,8 +223,9 @@ class FolioTest extends \PHPUnit\Framework\TestCase
                     'folio_location_is_active' => true,
                     'issues' => ['foo', 'bar baz'],
                     'electronic_access' => [],
-                    'temporary_loan_type' => null,
+                    'loan_type_name' => '',
                     'material_type' => '',
+                    'loan_type_id' => '',
                 ],
             ],
             'electronic_holdings' => [],
@@ -238,10 +235,9 @@ class FolioTest extends \PHPUnit\Framework\TestCase
     /**
      * Test getHolding with a mnmn location code to add data from helm
      *
-     * @depends testTokens
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
     public function testGetHoldingWithMnmnLocationCode(): void
     {
         $driverConfig = $this->defaultDriverConfig;
@@ -262,10 +258,9 @@ class FolioTest extends \PHPUnit\Framework\TestCase
      * Test getHolding with a mnmn location code to add data from helm
      * that includes floor and location
      *
-     * @depends testTokens
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
     public function testGetHoldingWithMnmnLocationCodeFloorAndLocation(): void
     {
         // Make a test call number that includes the floor and location data
@@ -289,10 +284,9 @@ class FolioTest extends \PHPUnit\Framework\TestCase
     /**
      * Test getHolding with a mnmn location code, but no msul.ini config file
      *
-     * @depends testTokens
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
     public function testGetHoldingWithMnmnLocationCodeNoMsulConfig(): void
     {
         $driverConfig = $this->defaultDriverConfig;
@@ -306,10 +300,9 @@ class FolioTest extends \PHPUnit\Framework\TestCase
     /**
      * Test getHolding with a mnmn location code, but missing keys from the msul.ini
      *
-     * @depends testTokens
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
     public function testGetHoldingWithMnmnLocationCodeInvalidMsulConfig(): void
     {
         // Test missing API url
@@ -332,10 +325,9 @@ class FolioTest extends \PHPUnit\Framework\TestCase
     /**
      * Test getHolding with a mnmn location code, but API errors from helm
      *
-     * @depends testTokens
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
     public function testGetHoldingWithMnmnLocationCodeHelmErrors(): void
     {
         // Test a non-200 response code from helm
@@ -361,10 +353,9 @@ class FolioTest extends \PHPUnit\Framework\TestCase
     /**
      * Test getHolding with a mnmn location code, but missing data from helm
      *
-     * @depends testTokens
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
     public function testGetHoldingWithMnmnLocationCodeHelmMissingData(): void
     {
         // Test missing response keys
@@ -388,10 +379,9 @@ class FolioTest extends \PHPUnit\Framework\TestCase
     /**
      * Test getHolding with a non-mnmn location code
      *
-     * @depends testTokens
-     *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
     public function testGetHoldingWithNonMnmnLocationCode(): void
     {
         // Pass a non-mnmn location code to make sure the API is not called

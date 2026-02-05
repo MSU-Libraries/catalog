@@ -32,7 +32,6 @@ namespace Catalog\AjaxHandler;
 use Laminas\Config\Config;
 use Laminas\Mvc\Controller\Plugin\Params;
 use Laminas\View\Renderer\RendererInterface;
-use VuFind\Config\YamlReader;
 use VuFind\Exception\ILS as ILSException;
 use VuFind\ILS\Connection;
 use VuFind\Session\Settings as SessionSettings;
@@ -58,7 +57,7 @@ use function is_array;
 class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
     \VuFind\I18n\Translator\TranslatorAwareInterface,
     \VuFind\I18n\HasSorterInterface,
-    \Laminas\Log\LoggerAwareInterface
+    \Psr\Log\LoggerAwareInterface
 {
     use \VuFind\I18n\Translator\TranslatorAwareTrait;
     use \VuFind\I18n\HasSorterTrait;
@@ -137,21 +136,24 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
     /**
      * Constructor
      *
-     * @param SessionSettings   $ss       Session settings
-     * @param Config            $config   Top-level configuration
-     * @param Backend           $epf      EBSCO Publication finder backend
-     * @param Connection        $ils      ILS connection
-     * @param RendererInterface $renderer View renderer
+     * @param SessionSettings   $ss           Session settings
+     * @param Config            $config       Top-level configuration
+     * @param Config            $recordConfig record.yaml configuration
+     * @param Backend           $epf          EBSCO Publication finder backend
+     * @param Connection        $ils          ILS connection
+     * @param RendererInterface $renderer     View renderer
      */
     public function __construct(
         SessionSettings $ss,
         Config $config,
+        Config $recordConfig,
         \VuFindSearch\Backend\EDS\Backend $epf,
         Connection $ils,
         RendererInterface $renderer,
     ) {
         $this->sessionSettings = $ss;
         $this->config = $config;
+        $this->recordConfig = $recordConfig;
         $this->epf = $epf;
         $this->ils = $ils;
         $this->renderer = $renderer;
@@ -297,20 +299,6 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
     }
 
     /**
-     * Return recordConfig property and load it if not loaded
-     *
-     * @return array
-     */
-    protected function getRecordConfig(): array
-    {
-        if (!isset($this->recordConfig)) {
-            $yamlReader = new YamlReader();
-            $this->recordConfig = $yamlReader->get('record.yaml') ?? [];
-        }
-        return $this->recordConfig;
-    }
-
-    /**
      * Return concurrentUsersToHide property and load it if not loaded
      *
      * @return array
@@ -319,7 +307,7 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
     {
         if (!isset($this->concurrentUsersToHide)) {
             $this->concurrentUsersToHide =
-                $this->getRecordConfig()['licenseAgreement']['concurrent_users_to_hide'] ?? [];
+                $this->recordConfig['licenseAgreement']['concurrent_users_to_hide'] ?? [];
         }
         return $this->concurrentUsersToHide;
     }

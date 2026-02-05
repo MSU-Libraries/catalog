@@ -2,17 +2,17 @@
     // Set page title.
     $this->headTitle($this->translate('Description') . ': ' . $this->driver->getBreadcrumb());
 
-    $formatter = $this->recordDataFormatter($driver);
+    $formatter = $this->recordDataFormatter($this->driver);
     $mainFields = $formatter->getData($formatter->getDefaults('description'));
 ?>
+<table>
 <?php /** MSU: changed this block (no_description as a p, table attributes, th scope) */ ?>
-<?php if (empty($mainFields)): ?>
-  <p><?=$this->transEsc('no_description')?></p>
-<?php else: ?>
-  <table>
-    <caption class="sr-only"><?=$this->transEsc('Description')?></caption>
+  <caption class="visually-hidden"><?=$this->transEsc('Description')?></caption>
+  <?php if (!empty($mainFields)): ?>
     <?php foreach ($mainFields as $current): ?>
       <tr><th scope="row"><?=$this->transEsc($current['label'])?>:</th><td><?=$current['value']?></td></tr>
     <?php endforeach; ?>
-  </table>
-<?php endif; ?>
+  <?php else: ?>
+    <p><?=$this->transEsc('no_description')?></p>
+  <?php endif; ?>
+</table>

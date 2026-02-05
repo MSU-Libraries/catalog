@@ -7,13 +7,12 @@
     <div class="solr-facet-container">
       <?php foreach ($this->facetList as $field => $list): ?>
         <div class="solr-adv-facet">
-          <?php /** MSU START */ ?>
+          <?php /** MSU START - Expandable checkboxes */ ?>
           <?php $fieldname = $this->escapeHtmlAttr(str_replace(' ', '', $field)) ?>
-          <span id="label_<?=$fieldname?>" class="field-label">
-            <?=$this->transEsc($list['label'])?>:
-          </span>
-          <?php /** MSU Code removed */ ?>
             <?php if (is_array($this->hierarchicalFacets) && in_array($field, $this->hierarchicalFacets)): ?>
+              <span id="label_<?=$fieldname?>" class="field-label">
+                <?=$this->transEsc($list['label'])?>:
+              </span>
               <div class="form-control leveledCheckboxes" id="limit_<?=$fieldname?>" aria-labelledby="label_<?=$fieldname?>">
                 <?php foreach ($list['list'] as $value): ?>
                   <?php
@@ -41,10 +40,12 @@
                 <?php endforeach; ?>
               </div>
             <?php else: ?>
+              <label for="limit_<?=$fieldname?>" class="field-label">
+                <?=$this->transEsc($list['label'])?>:
+              </label>
               <select id="limit_<?=$fieldname?>" class="form-control"
-                      aria-labelledby="label_<?=$this->escapeHtmlAttr(str_replace(' ', '', $field))?>"
+                      aria-labelledby="label_<?=$fieldname?>"
                       name="filter[]" multiple="multiple" size="10">
-              <?php /** MSU END */ ?>
               <?php
               // Sort the current facet list alphabetically and filter items to
               // the top if they appear in the config; we'll use this data
@@ -83,7 +84,6 @@
               <?php endforeach; ?>
               </select><?php /** MSU */ ?>
             <?php endif; ?>
-          <?php /** MSU Code removed */ ?>
         </div>
       <?php endforeach; ?>
     </div>
