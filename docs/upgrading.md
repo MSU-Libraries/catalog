@@ -42,7 +42,6 @@ this environment setup.
   it into the new release environment. Now connect to the catalog
   container on your development environment and run:
 
-
 <!-- markdownlint-disable MD013 -->
 ```bash
 php public/index.php upgrade/database --interactive -vvv
