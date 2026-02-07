@@ -96,8 +96,8 @@
     ?>
     <?php if ($summary): ?>
     <?php /** MSU END */ ?>
-      <p><?=$this->truncate($summary, 300)?></p>
-
+      <?php $shortSummary = $this->truncate($summary, 300); ?>
+      <p><?=$this->escapeOrCleanHtml($shortSummary, 'summary', true)?></p>
       <?php if ($shortSummary !== $summary): ?>
         <p><a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getTabUrl($this->driver, 'TOC'))?>#tabnav"><?=$this->transEsc('Full description')?></a></p><?php /** MSU */ ?>
       <?php endif; ?>

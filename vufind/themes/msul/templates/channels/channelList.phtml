@@ -3,7 +3,16 @@
   $i = 1;
   $plugins = $this->getHelperPluginManager();
   $recordHelper = $plugins->get('record');
-  $loader = $plugins->getServiceLocator()->get(\VuFind\Record\Loader::class);
+
+  // TODO We used to use the below commented out line, but that line is deprecated,
+  // eventually we should find another way to do this besides just making the
+  // underlying variable it returns accessible.
+  // $loader = $plugins->getServiceLocator()->get(\VuFind\Record\Loader::class);
+  $reflector = new ReflectionObject($plugins);
+  $property = $reflector->getProperty('creationContext');
+  $property->setAccessible(true);
+  $serviceManager = $property->getValue($plugins);
+  $loader = $serviceManager->get(\VuFind\Record\Loader::class);
 ?>
 <h2><?=$this->transEsc('Similar Items')?></h2>
 <?php if (empty($this->channels)) {

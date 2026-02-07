@@ -441,12 +441,15 @@ Process can be monitored by seeing the remaining files in the
 `/usr/local/harvest/authority` directory and by re-attaching to the
 `screen` (by using `screen -r`) to see if the command has completed.
 
+One special note here is since the import script processes them in
+alphabetical order, if you simply copied all of the files in at once
+and imported them, the initial full import set would not happen first
+since it starts with `FULL_`, so below is a sample command to copy them in
+separately.
+
 <!-- markdownlint-disable MD013 MD031 -->
 ```bash
-mv /mnt/shared/authority/$STACK_NAME/harvest_authority/processed/*.[0-9][0-9][0-9].xml /mnt/shared/authority/$STACK_NAME/harvest_authority
-
-# You can either run the command manually in a screen, or let the cron pick it up
-/usr/local/bin/pc-import-authority -i -B
+cd local/harvest/authority && mv processed/FULL_AUTH_D250808_0* . && pc-import-authority -v -q -i -B &&  mv processed/EEM2_*.[0-9][0-9][0-9].xml . && pc-import-authority -v -q -i -B; done
 ```
 <!-- markdownlint-enable MD013 MD031 -->
 

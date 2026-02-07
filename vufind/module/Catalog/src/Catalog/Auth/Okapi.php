@@ -170,12 +170,15 @@ class Okapi extends \VuFind\Auth\AbstractBase
         }
 
         // No need to store the ILS password in VuFind's main password field:
-        $user->password = '';
+        $user->setRawPassword('');
 
         // Update user information based on ILS data:
         $fields = ['firstname', 'lastname', 'major', 'college'];
         foreach ($fields as $field) {
-            $user->$field = $info[$field] ?? ' ';
+            $method = 'set' . str_replace('_', '', ucwords($field, '_'));
+            if (method_exists($user, $method)) {
+                $user->$method($info[$field] ?? ' ');
+            }
         }
         $this->getUserService()->updateUserEmail($user, $info['email'] ?? '');
 
