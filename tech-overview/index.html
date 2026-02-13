@@ -1,0 +1,1703 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../first-time-setup/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Technical Overview - MSU Libraries Public Catalog Technical Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#technical-overview" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="MSU Libraries Public Catalog Technical Documentation" class="md-header__button md-logo" aria-label="MSU Libraries Public Catalog Technical Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            MSU Libraries Public Catalog Technical Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Technical Overview
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/MSU-Libraries/catalog" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    MSU-Libraries/catalog
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="MSU Libraries Public Catalog Technical Documentation" class="md-nav__button md-logo" aria-label="MSU Libraries Public Catalog Technical Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    MSU Libraries Public Catalog Technical Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/MSU-Libraries/catalog" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    MSU-Libraries/catalog
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Welcome
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Overview
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#high-level-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High Level Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detailed-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detailed Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Detailed Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infrastructure-as-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastructure as Code
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fully-redundant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fully Redundant
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automated-environment-creation-and-destruction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automated Environment Creation (and Destruction)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#equality-between-development-and-production-environments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Equality Between Development and Production Environments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#idempotency-for-both-infrastructure-and-environment-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Idempotency for both Infrastructure and Environment Deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#developer-friendly-interfaces-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Developer Friendly Interfaces &amp; Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integrations-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integrations Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technologies-used" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technologies Used
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker-swarm-stacks-and-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Swarm Stacks and Services
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../first-time-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    First Time Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../harvesting-and-importing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harvesting &amp; Importing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CICD/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Administration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../general/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    General
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../backup-and-restore/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backup &amp; Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vufind/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VuFind
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../solr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solr
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mariadb/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MariaDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../traefik/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring App
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../load-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helper-scripts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Helper Scripts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bots/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../job-schedules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Job Schedules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Writing &amp; Running Tests
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core-vufind/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using Core VuFind Only
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../alphabrowse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alphabrowse Internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Processes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Processes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../communication-processes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Communication Processes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#high-level-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High Level Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detailed-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detailed Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Detailed Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infrastructure-as-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastructure as Code
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fully-redundant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fully Redundant
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automated-environment-creation-and-destruction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automated Environment Creation (and Destruction)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#equality-between-development-and-production-environments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Equality Between Development and Production Environments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#idempotency-for-both-infrastructure-and-environment-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Idempotency for both Infrastructure and Environment Deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#developer-friendly-interfaces-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Developer Friendly Interfaces &amp; Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integrations-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integrations Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technologies-used" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technologies Used
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker-swarm-stacks-and-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Swarm Stacks and Services
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="technical-overview">Technical Overview</h1>
+<!-- markdownlint-disable MD007 -->
+
+<h2 id="high-level-overview">High Level Overview</h2>
+<p>If you’re looking for the answer for the quickest answer to “how do
+we deploy our site”, then you’re reading the right section! We use
+two separate code repositories, one for infrastructure and one for
+our application code (this repository). The infrastructure repository
+is internal and uses GitLab CI/CD to kick off Ansible playbooks that
+run terraform commands to manage the infrastructure in AWS for us.
+This repository however is public, and contains all our customization
+on top of VuFind (like our own custom module and theme) but much
+more beyond that – it has our own Docker swarm setup that runs all
+the services VuFind depends on.</p>
+<p>Just like our infrastructure repository, our application repository uses
+GitLab CI/CD to run jobs that deploy the code to our AWS EC2 instances.
+Based on the Git branch name, it will decide if it will spin up a new
+development environment, update an existing one, or update our production
+environment.</p>
+<p>To get a little more into the details, the CI/CD triggers a Docker build
+passing <code>--build-arg</code> parameters to the build command with multiple CI/CD
+variables stored in GitLab. Those variables are then used in the Dockerfile
+throughout the build (for example: the <code>config.ini</code> file is populated with
+data in the CI/CD variables with the use of the <code>envsubst</code> command in the
+Dockerfile after the <code>ARG</code> variables have been copied into <code>ENV</code> variables).</p>
+<h2 id="detailed-overview">Detailed Overview</h2>
+<h3 id="infrastructure-as-code">Infrastructure as Code</h3>
+<ul>
+<li>No reliance on manually provisioning hardware or waiting for humans to
+  accomplish any task. From nothing to a full production ready environment
+  can be accomplished via the CI tasks.</li>
+<li>Using Terraform to provision entire stack:<ul>
+<li>Virtual Networking &amp; Firewalling</li>
+<li>Shared services like mounted storage and email relay service</li>
+<li>Virtual Machines with Network Interfaces, IPs, &amp; Local Block Storage</li>
+<li>Initial user setup</li>
+</ul>
+</li>
+<li>Once provisioning is completed, all users and core services are ready
+  for use.</li>
+</ul>
+<h3 id="fully-redundant">Fully Redundant</h3>
+<ul>
+<li>Current infrastructure spans 3 availability zones (i.e. different data
+  centers) and could expand to allow for additional nodes.</li>
+<li>Each service is clustered with active load balancing; this includes
+  MariaDB, Solr, and VuFind (along with their supporting services, like
+  cron jobs). The public access point (Traefik) is a lightweight single
+  instance which Docker Swarm can redeploy onto another node in seconds,
+  should its current node go down.</li>
+</ul>
+<h3 id="automated-environment-creation-and-destruction">Automated Environment Creation (and Destruction)</h3>
+<ul>
+<li>With an appropriately named git branch, a fully functional environment
+  will be created for use or testing.<ul>
+<li>Creating a branch starting with <code>devel-</code> or <code>review-</code> will
+  automatically trigger CI stages to create a new deployment site.</li>
+<li>GitLab CI also has 1 click clean-up and removal of environments
+  (except production, to prevent mistakes); running the clean-up
+  will free the resources on the server, and will not remove the
+  source code files, nor delete the git branch.</li>
+</ul>
+</li>
+<li>Environments are completely disposable. We typically make one for a
+  ticket, then destroy it once we close it. The only ones we leave up
+  are the production deployments (currently, our "beta", "prod" and
+  "preview" sites).</li>
+</ul>
+<h3 id="equality-between-development-and-production-environments">Equality Between Development and Production Environments</h3>
+<p>Anything the production environment has, the development environments
+have as well. Full redundant services, TLS Certificates from Let's
+Encrypt, email support, and so on. The only thing we decided to limit
+was the automated data import. That was restricted to 10,000 records
+just because importing the full catalog would slow things down too much
+(approx 9 million bib records + 3 million authority records).</p>
+<h3 id="idempotency-for-both-infrastructure-and-environment-deployment">Idempotency for both Infrastructure and Environment Deployment</h3>
+<p>We run the same CI pipelines for both the creation &amp; modification of
+our infrastructure. Likewise for our deployment environments, one
+unified pipeline that can run to create or update things.</p>
+<h3 id="developer-friendly-interfaces-logs">Developer Friendly Interfaces &amp; Logs</h3>
+<ul>
+<li>Services with management or monitoring interfaces are automatically
+  enabled with permissions granted so developers can access them.<ul>
+<li>Solr Admin Web Interface</li>
+<li>Traefik Dashboard</li>
+<li>Locally developed service monitoring dashboard</li>
+</ul>
+</li>
+<li>Logs for services are set up to be output to Docker for ease of accessing.</li>
+</ul>
+<h2 id="integrations-diagram">Integrations Diagram</h2>
+<p>The below diagram describes the external systems the VuFind integrates with.
+This is not an exhaustive list of all the technologies used within this stack
+(see the section later in this page for that), but should represent the
+systems that VuFind gets and sends data to on a regular basis.</p>
+<pre class="mermaid"><code>graph LR
+
+Patron((Patron))
+FOLIO[FOLIO]
+BackStage["`BackStage FTP Server
+(authority records)`"]
+Monitoring[Monitoring App]
+Logs@{ shape: docs, label: "Logs"}
+MariaDB[(MariaDB)]
+Solr[Solr]
+Illiad["Illiad"]
+Matomo[Matomo]
+
+FOLIO --&gt; VuFindCron
+HLM --&gt; VuFindCron
+BackStage --&gt; VuFindCron
+
+Patron &lt;--&gt; VuFindWeb
+
+VuFindWeb &lt;--&gt; FOLIO
+VuFindWeb &lt;--&gt; EDSAPI
+VuFindWeb &lt;--&gt; CoverImages
+VuFindWeb --&gt; Illiad
+VuFindWeb --&gt; Matomo
+
+VuFind &lt;--&gt; MariaDB
+VuFind &lt;--&gt; Solr
+
+
+VuFind --&gt; Logs
+MariaDB --&gt; Logs
+Solr --&gt; Logs
+Logs --&gt; Monitoring
+
+subgraph VuFind["**VuFind**"]
+VuFindWeb[Web Application]
+VuFindCron[Cron]
+end
+
+subgraph EDS["**EDS**"]
+HLM["`FTP Server
+(holding link management records)`"]
+EDSAPI[API]
+end
+
+subgraph CoverImages["**Cover Images**"]
+Syndetics[Syndetics]
+BrowZine[BrowZine]
+Google[Google]
+end</code></pre>
+<h2 id="technologies-used">Technologies Used</h2>
+<ul>
+<li><strong>Ansible Playbooks</strong>: Automates the provisioning and configuration of the
+  setup of the EC2 nodes and the Docker Swarm stacks and provision DNS names
+  as needed for development and review environments (some of which are stored
+  in an internal repository)</li>
+<li><strong>AWS Cloud Services</strong>: AWS self-service resources are used to allow for full
+  infrastructure-as-code and automation of the provisioning</li>
+<li><strong>Docker</strong>: Used to create images for the various services (VuFind, Solr,
+  etc.) that containers are created from</li>
+<li><strong>Docker Swarm</strong>: Manages the server "nodes" and creates containers based
+  on our server definitions</li>
+<li><strong>GitHub Pages</strong>: The hosting service used for this documentation</li>
+<li><strong>GitLab CI/CD</strong>:  The key tool our tool belt that allows us to define highly
+  customized pipelines to provision and configure our application stack</li>
+<li><strong>GitLab Container Registry</strong>: Stores the Docker images built, which our EC2
+  instances have a read-only access key to the registry to pull from</li>
+<li><strong>LetsEncrypt</strong>: Provides automatically provisioned SSL certificates based on
+  settings in our Docker swarm configuration file</li>
+<li><strong><a href="https://github.com/banerjek/marc-utils/tree/main">marc-utils</a></strong>: For MARC
+  file manipulation</li>
+<li><strong>MariaDB Galera</strong>:  A synchronous database cluster providing higher
+  availability and more fault tolerance</li>
+<li><strong>MkDocs</strong>: The static site generator used to generate this documentation</li>
+<li><strong>Nginx</strong>: Handles proxying requests to <code>/solr</code> to the Solr container.
+  Allowing us to keep the Solr containers only on the internal network but
+  still being able to access the Solr interface via the web</li>
+<li><strong>SolrCloud</strong>: A more fault-tolerant and highly available search and indexing
+  service than just traditional Solr, distributing index data across multiple
+  nodes</li>
+<li><strong>Terraform</strong>: Handles the provisioning and state management of the AWS
+  cloud services used, such as EC2, IAM, Route53, and EFS (some of which
+  are stored in an internal repository)</li>
+<li><strong>Traefik</strong>: Use to route traffic externally to the appropriate VuFind
+  container; and also used for an internal network of the MariaDB service</li>
+<li><strong>VuFind</strong>: What we're all here for! VuFind is the core application all
+  of this infrastructure is all built trying to serve</li>
+<li><strong>ZooKeeper</strong>: Used by SolrCloud to manage configuration files for
+  the collections</li>
+</ul>
+<h2 id="docker-swarm-stacks-and-services">Docker Swarm Stacks and Services</h2>
+<ul>
+<li><strong>catalog</strong>:<ul>
+<li><strong>catalog</strong>: Runs VuFind with Apache in the foreground</li>
+<li><strong>cron</strong>: A single replica service using the <code>catalog</code> service's
+  image to run automated jobs
+  such as the periodic harvest and import of data from FOLIO</li>
+<li><strong>legacylinks</strong>: Redirects legacy Sierra formatted URLS to VuFind
+  record pages</li>
+<li><strong>croncache</strong>: Only on development environments, clearing local cache
+  files that are created</li>
+</ul>
+</li>
+<li><strong>solr</strong>:<ul>
+<li><strong>solr</strong>: Runs SolrCloud</li>
+<li><strong>zk</strong>: ZooKeeper in the foreground</li>
+<li><strong>cron</strong>: Runs automated jobs using the SolrCloud image (updating the
+  alphabetical browse databases)</li>
+<li><strong>proxysolr</strong>:  Runs Nginx to proxy requests from the public network to
+  the Solr container</li>
+</ul>
+</li>
+<li><strong>mariadb</strong>:<ul>
+<li><strong>galera</strong>: Runs MariaDB Galera</li>
+</ul>
+</li>
+<li><strong>internal</strong>:<ul>
+<li><strong>health</strong>: Creates only the internal network used by the <code>galera</code>
+  service</li>
+</ul>
+</li>
+<li><strong>traefik</strong>:<ul>
+<li><strong>traefik</strong>:  Runs Traefik and handles external traffic and routes it
+  to the appropriate <code>catalog</code> service depending on the host name of the
+  request (since multiple environments run in separate stacks on the same
+  Docker swarm)</li>
+</ul>
+</li>
+<li><strong>public</strong>:<ul>
+<li><strong>health</strong>: Creates only the public network used by the <code>catalog</code> service
+  and the <code>proxy</code>* services</li>
+</ul>
+</li>
+<li><strong>swarm-cleanup</strong>:<ul>
+<li><strong>prune-nodes</strong>: Runs a <code>docker system prune</code> with flags on each of the
+  nodes in the swarm</li>
+</ul>
+</li>
+<li><strong>monitoring</strong>:<ul>
+<li><strong>monitoring</strong>: Runs the locally developed Flask application in the
+  foreground to monitor the other stacks</li>
+<li><strong>proxymon</strong>: Exposes the <code>monitoring</code> service publicly since that service
+  is only on the internal network</li>
+</ul>
+</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.expand", "navigation.instant"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js"></script>
+      
+        <script src="../javascripts/tablesort.js"></script>
+      
+    
+  </body>
+</html>
