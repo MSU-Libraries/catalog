@@ -1,0 +1,1527 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../mariadb/">
+      
+      
+        <link rel="next" href="../monitoring/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Traefik - MSU Libraries Public Catalog Technical Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#traefik" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="MSU Libraries Public Catalog Technical Documentation" class="md-header__button md-logo" aria-label="MSU Libraries Public Catalog Technical Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            MSU Libraries Public Catalog Technical Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Traefik
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/MSU-Libraries/catalog" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    MSU-Libraries/catalog
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="MSU Libraries Public Catalog Technical Documentation" class="md-nav__button md-logo" aria-label="MSU Libraries Public Catalog Technical Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    MSU Libraries Public Catalog Technical Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/MSU-Libraries/catalog" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    MSU-Libraries/catalog
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Welcome
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tech-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../first-time-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    First Time Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../harvesting-and-importing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harvesting &amp; Importing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CICD/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Administration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../general/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    General
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../backup-and-restore/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backup &amp; Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vufind/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VuFind
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../solr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solr
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mariadb/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MariaDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traefik
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#re-deploying" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Re-deploying
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resetting-the-lets-encrypt-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resetting the Let's Encrypt Config
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Resetting the Let&#39;s Encrypt Config">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#on-the-development-nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On the development nodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on-the-production-nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On the production nodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring App
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../load-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helper-scripts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Helper Scripts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bots/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../job-schedules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Job Schedules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Writing &amp; Running Tests
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core-vufind/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using Core VuFind Only
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../alphabrowse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alphabrowse Internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Processes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Processes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../communication-processes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Communication Processes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#re-deploying" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Re-deploying
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resetting-the-lets-encrypt-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resetting the Let's Encrypt Config
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Resetting the Let&#39;s Encrypt Config">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#on-the-development-nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On the development nodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on-the-production-nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On the production nodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="traefik">Traefik</h1>
+<h2 id="re-deploying">Re-deploying</h2>
+<p>If you ever need to re-deploy the stack, you can use the
+<a href="../helper-scripts/#deploy-helper-pc-deploy">pc-deploy</a> script.</p>
+<p>Make sure you run it as the deploy user so that the proper Docker
+container registry credentials are passed.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>-Hu<span class="w"> </span>deploy<span class="w"> </span>pc-deploy<span class="w"> </span>core-stacks<span class="w"> </span>traefik
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<ul>
+<li>
+<p>Your first line of defense when debugging issues with Traefik is
+navigating to the Traefik dashboard at
+<a href="https://node-hostname/dashboard/">https://node-hostname/dashboard/</a>
+where you can see all the routers and services that have been defined.
+For instance <a href="https://catalog-1-dev.aws.lib.msu.edu/dashboard/">https://catalog-1-dev.aws.lib.msu.edu/dashboard/</a>.
+This is helpful when the issue is a configuration issue either in the
+Traefik command or labels.</p>
+</li>
+<li>
+<p>When you have basic authentication enabled, ensure that the
+password hash has an appropriate cost setting; 9 or less might make
+brute forcing easier, while 12 or higher will add significant amounts
+of CPU load to Traefik, causing page loads to be extremely slow. A setting
+of 10 is recommended.</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>htpasswd<span class="w"> </span>-n<span class="w"> </span>-B<span class="w"> </span>-C<span class="w"> </span><span class="m">10</span><span class="w"> </span>mylogin
+</code></pre></div>
+<ul>
+<li>To debug performance issues in Traefik, you can enable debug
+mode by adding to the traefik service: <code>--api.debug=true</code>.
+This enables all the <a href="https://doc.traefik.io/traefik/operations/api/#debug">debug endpoints</a>.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl<span class="w"> </span>-u<span class="w"> </span>user:passwd<span class="w"> </span>https://your-site/debug/pprof/heap<span class="w"> </span>-o<span class="w"> </span>heap.pprof
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>curl<span class="w"> </span>-u<span class="w"> </span>user:passwd<span class="w"> </span>https://your-site/debug/pprof/profile<span class="w"> </span>-o<span class="w"> </span>profile.pprof
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>curl<span class="w"> </span>-u<span class="w"> </span>user:passwd<span class="w"> </span>https://your-site/debug/pprof/block<span class="w"> </span>-o<span class="w"> </span>block.pprof
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>curl<span class="w"> </span>-u<span class="w"> </span>user:passwd<span class="w"> </span>https://your-site/debug/pprof/mutex<span class="w"> </span>-o<span class="w"> </span>mutex.pprof
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>curl<span class="w"> </span>-u<span class="w"> </span>user:passwd<span class="w"> </span>https://your-site/debug/pprof/goroutine<span class="w"> </span>-o<span class="w"> </span>goroutine.pprof
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Install Go</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>apt<span class="w"> </span>install<span class="w"> </span>golang
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="c1"># Install pprof</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>go<span class="w"> </span>install<span class="w"> </span>github.com/google/pprof@latest
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>go<span class="w"> </span>tool<span class="w"> </span>pprof<span class="w"> </span>-top<span class="w"> </span>heap.pprof
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>go<span class="w"> </span>tool<span class="w"> </span>pprof<span class="w"> </span>-top<span class="w"> </span>profile.pprof
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>go<span class="w"> </span>tool<span class="w"> </span>pprof<span class="w"> </span>-top<span class="w"> </span>block.pprof
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>go<span class="w"> </span>tool<span class="w"> </span>pprof<span class="w"> </span>-top<span class="w"> </span>mutex.pprof
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>go<span class="w"> </span>tool<span class="w"> </span>pprof<span class="w"> </span>-top<span class="w"> </span>goroutine.pprof
+</code></pre></div>
+<h2 id="resetting-the-lets-encrypt-config">Resetting the Let's Encrypt Config</h2>
+<p>Periodically you may want to reset the Let's Encrypt config to clear out
+old certificates for sites that no longer exist. This is the
+process you will want to use that will ensure there is limited downtime.</p>
+<h3 id="on-the-development-nodes">On the development nodes</h3>
+<ul>
+<li>Create temporary node labels to identify which node should be taken offline.
+  Start with taking the 3rd node offline.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-1-dev.aws.lib.msu.edu
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-2-dev.aws.lib.msu.edu
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span>catalog-3-dev.aws.lib.msu.edu
+</code></pre></div>
+<ul>
+<li>Create a temporary service constraint to only allow the nodes with the label
+  value of <code>true</code> to be online.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker<span class="w"> </span>service<span class="w"> </span>update<span class="w"> </span>--constraint-add<span class="w"> </span><span class="s1">&#39;node.labels.deployglobal == true&#39;</span><span class="w"> </span>traefik_traefik
+</code></pre></div>
+<ul>
+<li>On the 3rd node, clear out the Let's Encrypt config</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/tmp/acme_backup/
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>mv<span class="w"> </span>/var/lib/docker/volumes/traefik_traefik/_data/*.json<span class="w"> </span>/tmp/acme_backup
+</code></pre></div>
+<ul>
+<li>Swap the label values to take the 2nd node offline</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-1-dev.aws.lib.msu.edu
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span>catalog-2-dev.aws.lib.msu.edu
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-3-dev.aws.lib.msu.edu
+</code></pre></div>
+<ul>
+<li>On the 2nd node, clear out the Let's Encrypt config</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/tmp/acme_backup/
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>mv<span class="w"> </span>/var/lib/docker/volumes/traefik_traefik/_data/*.json<span class="w"> </span>/tmp/acme_backup
+</code></pre></div>
+<ul>
+<li>Swap the label values to take the 1st node offline</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span>catalog-1-dev.aws.lib.msu.edu
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-2-dev.aws.lib.msu.edu
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-3-dev.aws.lib.msu.edu
+</code></pre></div>
+<ul>
+<li>On the 1st node, clear out the Let's Encrypt config</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/tmp/acme_backup/
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>mv<span class="w"> </span>/var/lib/docker/volumes/traefik_traefik/_data/*.json<span class="w"> </span>/tmp/acme_backup
+</code></pre></div>
+<ul>
+<li>Remove the labels and temporary service constraint</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>docker<span class="w"> </span>service<span class="w"> </span>update<span class="w"> </span>--constraint-rm<span class="w"> </span><span class="s1">&#39;node.labels.deployglobal == true&#39;</span><span class="w"> </span>traefik_traefik
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-rm<span class="w">  </span>deployglobal<span class="w"> </span>catalog-1-dev.aws.lib.msu.edu
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-rm<span class="w">  </span>deployglobal<span class="w"> </span>catalog-2-dev.aws.lib.msu.edu
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-rm<span class="w">  </span>deployglobal<span class="w"> </span>catalog-3-dev.aws.lib.msu.edu
+</code></pre></div>
+<h3 id="on-the-production-nodes">On the production nodes</h3>
+<ul>
+<li>
+<p>Update the local DNS entries that are pointing to the <code>.aws.lib.msu.edu</code>
+  sites and have them point to the 1st node and wait for DNS to update</p>
+</li>
+<li>
+<p>On the 1st node, we will need to prevent traefik from running temporarily
+  while we quickly remove the certificate files. <em>DO THIS QUICKLY
+  TO LIMIT DOWNTIME</em>.</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span>catalog-1.aws.lib.msu.edu
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span>catalog-2.aws.lib.msu.edu
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-3.aws.lib.msu.edu
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>docker<span class="w"> </span>service<span class="w"> </span>update<span class="w"> </span>--constraint-add<span class="w"> </span><span class="s1">&#39;node.labels.deployglobal == true&#39;</span><span class="w"> </span>traefik_traefik
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="c1"># Wait for the traefik container to stop</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>watch<span class="w"> </span><span class="s1">&#39;docker ps | grep traefik&#39;</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/tmp/acme_backup/
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>mv<span class="w"> </span>/var/lib/docker/volumes/traefik_traefik/_data/*.json<span class="w"> </span>/tmp/acme_backup
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-1.aws.lib.msu.edu
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-2.aws.lib.msu.edu
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span>catalog-3.aws.lib.msu.edu
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>tail<span class="w"> </span>-f<span class="w"> </span>/var/lib/docker/volumes/traefik_logs/_data/traefik.log<span class="w"> </span>-n10
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="c1">## If logs are unhealthy or unable to create new certificates, restore previous ones</span>
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>cp<span class="w"> </span>/tmp/acme_backup/*<span class="w"> </span>/var/lib/docker/volumes/traefik_traefik/_data/
+</code></pre></div>
+<ul>
+<li>
+<p>Update local DNS to point now to the 2nd node and wait for DNS to update</p>
+</li>
+<li>
+<p>On the 2nd node, prevent traefik from running temporarily to remove the old
+  certificate files.</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-1.aws.lib.msu.edu
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span>catalog-2.aws.lib.msu.edu
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span>catalog-3.aws.lib.msu.edu
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># Wait for the traefik container to stop</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>watch<span class="w"> </span><span class="s1">&#39;docker ps | grep traefik&#39;</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/tmp/acme_backup/
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>mv<span class="w"> </span>/var/lib/docker/volumes/traefik_traefik/_data/*.json<span class="w"> </span>/tmp/acme_backup
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span>catalog-1.aws.lib.msu.edu
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-2.aws.lib.msu.edu
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-3.aws.lib.msu.edu
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>tail<span class="w"> </span>-f<span class="w"> </span>/var/lib/docker/volumes/traefik_logs/_data/traefik.log<span class="w"> </span>-n10
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="c1">## If logs are unhealthy or unable to create new certificates, restore previous ones</span>
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>cp<span class="w"> </span>/tmp/acme_backup/*<span class="w"> </span>/var/lib/docker/volumes/traefik_traefik/_data/
+</code></pre></div>
+<ul>
+<li>
+<p>Update local DNS to point now to the 3rd node and wait for DNS to update</p>
+</li>
+<li>
+<p>On the 3rd node, prevent traefik from running temporarily to remove the old
+  certificate files.</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-1.aws.lib.msu.edu
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span>catalog-2.aws.lib.msu.edu
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span>catalog-3.aws.lib.msu.edu
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1"># Wait for the traefik container to stop</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>watch<span class="w"> </span><span class="s1">&#39;docker ps | grep traefik&#39;</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/tmp/acme_backup/
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>mv<span class="w"> </span>/var/lib/docker/volumes/traefik_traefik/_data/*.json<span class="w"> </span>/tmp/acme_backup
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-1.aws.lib.msu.edu
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-2.aws.lib.msu.edu
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-add<span class="w"> </span><span class="nv">deployglobal</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>catalog-3.aws.lib.msu.edu
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>tail<span class="w"> </span>-f<span class="w"> </span>/var/lib/docker/volumes/traefik_logs/_data/traefik.log<span class="w"> </span>-n10
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="c1">## If logs are unhealthy or unable to create new certificates, restore previous ones</span>
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>cp<span class="w"> </span>/tmp/acme_backup/*<span class="w"> </span>/var/lib/docker/volumes/traefik_traefik/_data/
+</code></pre></div>
+<ul>
+<li>Remove the temporary constraint and labels</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>docker<span class="w"> </span>service<span class="w"> </span>update<span class="w"> </span>--constraint-rm<span class="w"> </span><span class="s1">&#39;node.labels.deployglobal == true&#39;</span><span class="w"> </span>traefik_traefik
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-rm<span class="w">  </span>deployglobal<span class="w"> </span>catalog-1.aws.lib.msu.edu
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-rm<span class="w">  </span>deployglobal<span class="w"> </span>catalog-2.aws.lib.msu.edu
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>docker<span class="w"> </span>node<span class="w"> </span>update<span class="w"> </span>--label-rm<span class="w">  </span>deployglobal<span class="w"> </span>catalog-3.aws.lib.msu.edu
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.expand", "navigation.instant"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js"></script>
+      
+        <script src="../javascripts/tablesort.js"></script>
+      
+    
+  </body>
+</html>
