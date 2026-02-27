@@ -8,6 +8,7 @@
 .DS_Store
 compiled.css
 vufind/themes/msul/css/less/
+vufind/themes/msul/vendor
 ._*
 .idea/
 .phpunit.result.cache

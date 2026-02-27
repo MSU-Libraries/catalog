@@ -1,0 +1,66 @@
+<?php
+# Usually this is displayed in a modal, but if it is not (coming back from login), we don't want the search box and
+# we want a link back to search results if possible.
+if (!$this->inLightbox) {
+    $title = $this->translate('Map this');
+    $this->headTitle($title);
+    $this->layout()->searchbox = false;
+    $this->layout()->showSearchBacklink = true;
+    echo "<h1>$title</h1>";
+}
+$item = $this->mapthis->getItem();
+$callnum = $this->mapthis->getCallNumber();
+$location = $this->mapthis->getLocation();
+$portalUrl = $this->mapthis->getPortalUrl() ?? '';
+$mapId = $this->mapthis->getMapId() ?? '';
+$buildingId = $this->mapthis->getBuildingId() ?? '';
+$floorId = $this->mapthis->getFloorId();
+$defaultFloorId = $this->mapthis->getDefaultFloorId();
+$activeFloorId = !empty($floorId) ? $floorId : $defaultFloorId;
+
+$this->assetManager()->clearScriptList()->appendStyleLink('/gis-assets/esri/themes/light/main.css');
+?>
+
+<script type="application/json" id="arc-gis-variables">
+    {
+        "portalUrl": "<?= $portalUrl ?>",
+        "mapId": "<?= $mapId ?>",
+        "buildingId": "<?= $buildingId ?>",
+        "floorId": "<?= $activeFloorId ?>"
+    }
+</script>
+<style>
+  /* MUST HAVE: Give the map a container height */
+  arcgis-map {
+    height: 600px;
+    width: 100%;
+    min-width: 800px;
+    display: block;
+  }
+</style>
+
+<div>
+  <p>
+    <b>Title:</b> <?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?>
+  </p>
+  <p>
+    <b>Call Number:</b>
+    <?php if ($callnum ?? false): ?>
+      <span><?=$this->escapeHtml($callnum) ?></span>
+    <?php endif; ?>
+  </p>
+  <?php if ($location ?? false): ?>
+    <p>
+      <b>Location:</b>
+        <span><?=$this->escapeHtml($location) ?></span>
+    </p>
+  <?php endif; ?>
+  <?php if (empty($floorId)): ?>
+    <b>The map for that location could not be found. Please go to the circulation desk for more specific directions.</b>
+  <?php endif; ?>
+  <?php if (!empty($item)): ?>
+    <?= $this->locationNotices($item) ?>
+  <?php endif; ?>
+  <hr/>
+  <div id="arcgis-result"></div>
+</div>

@@ -1,7 +1,7 @@
 <?php
 /** MSU - Except marked part, all code has been modified by MSU */
 /** MSU START */
-use Catalog\GetThis\GetThisLoader;
+use Catalog\Holdings\GetThisLoader;
 
 $selected = '';
 $selectedScore = -1;
@@ -74,7 +74,12 @@ foreach ($this->statusItems as $item) {
     <?php $getthis = new GetThisLoader($record, $this->statusItems, $item_id); ?>
     <?php if ($getthis && ! str_starts_with($id, 'hlm.') && ! $getthis->isOnlineResource()): ?>
       <a class="pl-1 placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
+        <?=$this->icon('book', 'icon-link__icon') ?>
         <?=$this->transEsc('Get this')?>
+      </a>
+      <a class="pl-1 placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/MapThis?item_id=$item_id") ?>" rel="nofollow">
+        <?=$this->icon('format-map', 'icon-link__icon') ?>
+        <?=$this->transEsc('Map this')?>
       </a>
     <?php endif; ?>
   </div>

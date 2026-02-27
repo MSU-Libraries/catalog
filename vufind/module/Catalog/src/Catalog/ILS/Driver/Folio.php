@@ -185,15 +185,15 @@ class Folio extends \VuFind\ILS\Driver\Folio
         ) {
             $item->status->name = 'Restricted';
         }
-        // PC-1416: If the location code is mnmn (the generic "Main library" code), then
-        // attempt to get the location data from helm if we have a callnumber
-        if ($locAndHoldings['location_code'] == 'mnmn' && !empty($callNumberData['callnumber'])) {
+        // PC-1416, PC-1636: Attempt to get the location data from helm if we have a callnumber
+        if (!empty($callNumberData['callnumber'])) {
             // Prase the config and get the required data
             $msulConfig = $this->configReader->get('msul');
             if (isset($msulConfig)) {
                 $apiUrl = $msulConfig['Locations']['api_url'] ?? '';
                 $topKey = $msulConfig['Locations']['response_top_key'] ?? 'callnumbers';
                 $floorKey = $msulConfig['Locations']['response_floor_key'] ?? '';
+                $gisFloorKey = $msulConfig['Locations']['response_gis_floor_key'] ?? '';
                 $locationKey = $msulConfig['Locations']['response_location_key'] ?? '';
 
                 if (!empty($apiUrl)) {
@@ -219,6 +219,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     // Parse the response and add to our location results
                     if (isset($data->$topKey) && count($data->$topKey) >= 1) {
                         $floor = $floorKey ? ($data->$topKey[0]->$floorKey ?? '') : '';
+                        $gisFloor = $gisFloorKey ? ($data->$topKey[0]->$gisFloorKey ?? '') : '';
                         $location = $locationKey ? ($data->$topKey[0]->$locationKey ?? '') : '';
 
                         $floorPart = !empty($floor) ? ' - ' . $floor : '';
@@ -231,6 +232,10 @@ class Folio extends \VuFind\ILS\Driver\Folio
                                 'Found additional location data for callnumber ' . $callNumberData['callnumber'] .
                                 ' (' . $bibId . ')' . '. Updating location to: ' . $locAndHoldings['location']
                             );
+                        }
+                        if (!empty(trim($gisFloor))) {
+                            $locAndHoldings['gisfloor'] = $gisFloor;
+                            $this->debug('Adding ' . $gisFloor . ' for callnumber ' . $callNumberData['callnumber']);
                         }
                     } else {
                         $this->debug(

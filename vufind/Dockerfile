@@ -162,12 +162,14 @@ COPY themes/msul /usr/local/vufind/themes/msul
 COPY module/Catalog /usr/local/vufind/module/Catalog
 COPY tests/ /tests
 COPY tests/.eslintrc.js /usr/local/vufind/.eslintrc.js
+COPY tests/.jshintignore /usr/local/vufind/.jshintignore
 COPY robots.txt /usr/local/vufind/public/robots.txt
 COPY public/index.php  /usr/local/vufind/public/index.php
 COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
 COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh backup.sh restore.sh /
 COPY msmtp/aliases msmtp/msmtprc /etc/
+COPY --from=registry.gitlab.msu.edu/msu-libraries/public/gis-middleware:latest /app/dist/ /usr/local/vufind/themes/msul/vendor/gis-middleware/
 
 # Setup cron and logging for cron
 COPY cron.d/ /etc/cron.d/
