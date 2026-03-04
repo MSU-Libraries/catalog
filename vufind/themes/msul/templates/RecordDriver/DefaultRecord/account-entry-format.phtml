@@ -1,0 +1,6 @@
+<?php // MSU removed from account-entry.phtml PC-1584 ?>
+<?php if (count($driver->getFormats()) > 0): ?>
+  <br>
+  <?=$this->record($driver)->getFormatList() ?>
+  <br>
+<?php endif; ?>

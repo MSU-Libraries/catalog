@@ -16,16 +16,13 @@
     }
     $listAuthors = $driver->getPrimaryAuthors();
   ?>
-  <?php if (!empty($listAuthors)): ?>
-    <span class="authors">
-      <?=$this->transEsc('by')?>:
-      <a href="<?=$this->record($driver)->getLink('author', $listAuthors[0])?>"><?=$this->escapeHtml($listAuthors[0])?></a><?php if (count($listAuthors) > 1): ?>, <?=$this->transEsc('more_authors_abbrev')?><?php endif; ?><br>
-    </span>
-  <?php endif; ?>
 </h2>
-<?php if (count($driver->getFormats()) > 0): ?>
-  <?=$this->record($driver)->getFormatList() ?>
-  <br>
+<?php // MSU move authors out of h2 PC-1584 ?>
+<?php if (!empty($listAuthors)): ?>
+  <span class="authors">
+    <strong><?=$this->transEsc('Authors')?>:</strong><?php // MSU change label and add bolding ?>
+    <a href="<?=$this->record($driver)->getLink('author', $listAuthors[0])?>"><?=$this->escapeHtml($listAuthors[0])?></a><?php if (count($listAuthors) > 1): ?>, <?=$this->transEsc('more_authors_abbrev')?><?php endif; ?><br>
+  </span>
 <?php endif; ?>
 <?php if (!empty($ilsDetails['callNumber'])): ?>
   <strong><?=$this->transEsc('Call Number')?>:</strong> <?=$this->escapeHtml($ilsDetails['callNumber'])?>
@@ -39,3 +36,4 @@
   <strong><?=$this->transEsc('Year of Publication')?>:</strong> <?=$this->escapeHtml($ilsDetails['publication_year'])?>
   <br>
 <?php endif; ?>
+<?php // MSU removed formats from this template ?>
