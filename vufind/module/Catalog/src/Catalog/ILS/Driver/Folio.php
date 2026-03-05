@@ -537,20 +537,13 @@ class Folio extends \VuFind\ILS\Driver\Folio
      */
     public function getMyTransactions($patron, $params = [])
     {
-        // MSUL -- overridden to add fields to response and add local sorting
+        // MSUL -- overridden to add fields to response
         $limit = $params['limit'] ?? 1000;
         $offset = isset($params['page']) ? ($params['page'] - 1) * $limit : 0;
-        // MSU start PC-1641 Add local sorting (PR-5109)
-        $vufindSortMap = $this->config['Loans']['vufind_sort'] ?? [];
-        $requestedSort = $params['sort'] ?? '';
-        $localSortField = $vufindSortMap[$requestedSort] ?? null;
-        // MSU end
 
         $query = 'userId==' . $patron['id'] . ' and status.name==Open';
-
-        // MSU PC-1641 - Only pass sort to API if it is NOT handled locally by VuFind (PR-5109)
-        if (!empty($requestedSort) && !$localSortField) {
-            $query .= ' sortby ' . $this->escapeCql($requestedSort);
+        if (isset($params['sort'])) {
+            $query .= ' sortby ' . $this->escapeCql($params['sort']);
         }
         $resultPage = $this->getResultPage('/circulation/loans', compact('query'), $offset, $limit);
         $transactions = [];
@@ -595,11 +588,6 @@ class Folio extends \VuFind\ILS\Driver\Folio
             // We could use the count in the result page, but that may be an estimate;
             // safer to do a separate lookup to be sure we have the right number!
             $count = $this->getResultCount('/circulation/loans', compact('query'));
-        }
-
-        // MSU PC-1641 Add in VF sort if the sort param was used in the VF sort config (PR-5109)
-        if ($localSortField) {
-            $transactions = $this->sortHoldings($transactions, $localSortField);
         }
         return ['count' => $count, 'records' => $transactions];
     }
