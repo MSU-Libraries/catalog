@@ -173,9 +173,9 @@ curl "http://solr1:8983/solr/admin/collections?action=RELOAD&name=biblio2"
 ```
 <!-- markdownlint-enable MD013 -->
 
-* Disable incremental FOLIO and DR harvests, since we don't want to have to worry about
-  the last harvest time getting out of sync between the two collections once we
-  swap back over.
+* Disable incremental FOLIO and DR harvests, since we don't want to have to
+  worry about the last harvest time getting out of sync between the two
+  collections once we swap back over.
 
 ```bash
 mv /mnt/shared/oai/${STACK_NAME}/enabled /mnt/shared/oai/${STACK_NAME}/disabled
