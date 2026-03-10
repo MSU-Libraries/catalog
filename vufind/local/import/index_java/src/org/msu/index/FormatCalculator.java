@@ -113,17 +113,18 @@ public class FormatCalculator extends org.vufind.index.FormatCalculator
      */
     @Override protected String getFormatFromRecordType(Record record, char recordType, ControlField marc008, List formatCodes007)
     {
-        // PC-1424 MSUL - Add logic to change 'Kit' and 'Collection' assignment
         String leader = record.getLeader().toString();
         char bibLevel = Character.toLowerCase(leader.charAt(7));
+        // Force "Collection" based on Bibliographic Level, ignoring Record Type
+        if (bibLevel == 'c' || bibLevel == 'd') {
+            return "Collection";
+        }
+        // PC-1424 MSUL - Add logic to change 'Kit' and 'Collection' assignment
         switch (recordType) {
             case 'o':
                 return "Kit";
             case 'p':
-                if (bibLevel == 'c') {
-                    return "Collection";
-                }
-                break;
+                return "Collection";
         }
 
         return super.getFormatFromRecordType(record, recordType, marc008, formatCodes007);

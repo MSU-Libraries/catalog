@@ -173,12 +173,13 @@ curl "http://solr1:8983/solr/admin/collections?action=RELOAD&name=biblio2"
 ```
 <!-- markdownlint-enable MD013 -->
 
-* Disable incremental FOLIO harvests, since we don't want to have to worry about
+* Disable incremental FOLIO and DR harvests, since we don't want to have to worry about
   the last harvest time getting out of sync between the two collections once we
   swap back over.
 
 ```bash
 mv /mnt/shared/oai/${STACK_NAME}/enabled /mnt/shared/oai/${STACK_NAME}/disabled
+mv /mnt/shared/dr/${STACK_NAME}/enabled /mnt/shared/dr/${STACK_NAME}/disabled
 ```
 
 * Re-index all the FOLIO records into biblio-build.
@@ -195,6 +196,23 @@ pc-connect ${STACK_NAME}-catalog_build
 # mv /mnt/shared/oai/${STACK_NAME}/enabled /mnt/shared/oai/${STACK_NAME}/disabled
 pc-import-folio -b -q -v
 rm -rf /mnt/shared/oai/${STACK_NAME}/harvest_folio_build/*
+```
+<!-- markdownlint-enable MD013 -->
+
+* Re-index all of the DR records into biblio-build.
+
+<!-- markdownlint-disable MD013 -->
+```bash
+screen
+rm -rf /mnt/shared/dr/${STACK_NAME}/harvest_dr_build/*
+cp /mnt/shared/dr/${STACK_NAME}/harvest_dr/processed/* /mnt/shared/dr/${STACK_NAME}/harvest_dr_build/
+pc-connect ${STACK_NAME}-catalog_build
+# Note: In another ssh window, you will need to temporarily re-enable the harvests for this
+# command to work. Disable it again as soon as it starts though.
+# mv /mnt/shared/dr/${STACK_NAME}/disabled /mnt/shared/dr/${STACK_NAME}/enabled
+# mv /mnt/shared/dr/${STACK_NAME}/enabled /mnt/shared/dr/${STACK_NAME}/disabled
+pc-import-dr -b -q -v
+rm -rf /mnt/shared/dr/${STACK_NAME}/harvest_dr_build/*
 ```
 <!-- markdownlint-enable MD013 -->
 

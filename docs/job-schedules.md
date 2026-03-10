@@ -17,6 +17,9 @@ basis.
 | prod                | VuFind Cron      | HLM harvest & Import       | 2:30AM every day                       |
 | beta                | VuFind Cron      | HLM harvest & Import       | 2:15AM every day                       |
 | preview             | VuFind Cron      | HLM harvest & Import       | 2:45AM every day                       |
+| prod                | VuFind Cron      | DR harvest & Import        | 3:30AM every day                       |
+| beta                | VuFind Cron      | DR harvest & Import        | 3:15AM every day                       |
+| preview             | VuFind Cron      | DR harvest & Import        | 3:45AM every day                       |
 | prod                | VuFind Cron      | Authority harvest & Import | 4:30AM every day                       |
 | beta                | VuFind Cron      | Authority harvest & Import | 4:15AM every day                       |
 | preview             | VuFind Cron      | Authority harvest & Import | 4:45AM every day                       |
