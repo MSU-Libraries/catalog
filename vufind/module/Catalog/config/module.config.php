@@ -128,6 +128,14 @@ return [
           'session' => \Catalog\Db\Service\SessionService::class,
         ],
       ],
+      'content_covers' => [
+        'factories' => [
+          \Catalog\Content\Covers\DigitalRepository::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
+        ],
+        'aliases' => [
+          'digitalrepository' => \Catalog\Content\Covers\DigitalRepository::class,
+        ],
+      ],
     ],
   ],
   'service_manager' => [
