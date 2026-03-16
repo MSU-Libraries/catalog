@@ -1964,13 +1964,42 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getCorporateAuthors()
     {
-        // MSUL PC-1105
-        return array_merge(
-            $this->getFieldArray('110', ['a', 'b']),
-            $this->getFieldArray('111', range('a', 'z')),
-            $this->getFieldArray('710', ['a', 'b']),
-            $this->getMarcFieldWithInd('711', ['a', 'b'], ['1' => ['', '0', '1', '2'], '2' => ['']])
-        );
+        // MSUL PC-1105, PC-1646
+        $authors = [];
+        $marc = $this->getMarcReader();
+        $fields = [
+            '110' => ['a','b','e'],
+            '111' => range('a', 'z'),
+            '710' => ['a','b','e'],
+            '711' => ['a','b','e', 'j'],
+        ];
+        foreach ($fields as $field => $subfields) {
+            $marcData = $marc->getFields($field, $subfields);
+            foreach ($marcData as $marcRec) {
+                // For 711, ind1 has to be '', '0', '1', or '2' OR ind2 must be ''
+                if (
+                    $field == '711' &&
+                        (
+                            !in_array(trim(($marcRec['i1'] ?? '')), ['', '0', '1', '2']) ||
+                            trim(($marcRec['i2'] ?? '') != '')
+                        )
+                ) {
+                    continue;
+                }
+                $sbfs = $marcRec['subfields'];
+                $tmpAuthor = ['note' => '', 'role' => []];
+                foreach ($sbfs as $subfield) {
+                    // subfield $e or $j is the role information
+                    if ($subfield['code'] == 'e' || $subfield['code'] == 'j') {
+                        $tmpAuthor['role'][] = str_replace([',','.'], '', $subfield['data']);
+                    } else {
+                        $tmpAuthor['note'] .= $subfield['data'];
+                    }
+                }
+                $authors[] = $tmpAuthor;
+            }
+        }
+        return $authors;
     }
 
     /**
@@ -2007,17 +2036,20 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         foreach ($authors as $i => $author) {
             // MSU
             $authorVal = is_array($author) ? $author['note'] : $author;
+            $authorRole = is_array($author) ? $author['role'] : [];
             if (!isset($data[$authorVal])) {
                 $data[$authorVal] = [];
             }
-
             foreach ($dataFieldValues as $field => $dataFieldValue) {
-                if (!empty($dataFieldValue[$i])) {
-                    $data[$authorVal][$field][] = $dataFieldValue[$i];
+                if ($field == 'link') {
+                    if (!empty($dataFieldValue[$i])) {
+                        $data[$authorVal][$field][] = $dataFieldValue[$i];
+                    }
+                } else {
+                    $data[$authorVal][$field] = $authorRole;
                 }
             }
         }
-
         return $data;
     }
 
@@ -2031,7 +2063,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         // PC-1105
         $authors = [];
         foreach (['110', '111', '710', '711'] as $field) {
-            $authors = array_merge($authors, $this->getMarcFieldLinked($field, range('a', 'z')));
+            $authors = array_merge($authors, $this->getMarcFieldLinked($field, range('a', 'b')));
         }
         return $authors;
     }
