@@ -5,7 +5,7 @@ $formatProperty = function ($datafield, $name, $label) {
     }
     $that = $this;
     $translate = function ($str) use ($that, $label) {
-        return $that->transEsc($label . $str);
+        return ucfirst($that->transEsc($label . $str)); // MSU PC-1646
     };
     return '<span class="author-property-' . $name . '">(' . implode(', ', array_unique(array_map($translate, $datafield))) . ')</span>';
 };
@@ -29,6 +29,7 @@ $formattedAuthors = [];
         <?=$this->escapeHtml(rtrim($author, ','))?>
       </a>
       <?php
+        $requiredDataFields[] = ['name' => 'link', 'prefix' => '']; // MSUL - PC-936 add 'link' to the author output
         if (!empty($requiredDataFields)) {
           foreach ($requiredDataFields as $field) {
               $name = $field['name'];
