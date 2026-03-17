@@ -3,7 +3,7 @@ $formatProperty = function ($datafield, $name, $label) {
     if (!is_array($datafield)) {
         $datafield = [$datafield];
     }
-    if (count($datafield) == 0) {
+    if (count($datafield) == 0 || empty(implode(', ', $datafield))) {
         return '';
     }
     $that = $this;
