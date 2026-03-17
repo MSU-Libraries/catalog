@@ -1,5 +1,8 @@
 <?php
 $formatProperty = function ($datafield, $name, $label) {
+    if (!is_array($datafield)) {
+        $datafield = [$datafield];
+    }
     if (count($datafield) == 0) {
         return '';
     }
