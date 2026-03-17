@@ -1968,6 +1968,47 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         $authors = [];
         $marc = $this->getMarcReader();
         $fields = [
+            '110' => ['a','b'],
+            '111' => range('a', 'z'),
+            '710' => ['a','b'],
+            '711' => ['a','b'],
+        ];
+        foreach ($fields as $field => $subfields) {
+            $marcData = $marc->getFields($field, $subfields);
+            foreach ($marcData as $marcRec) {
+                // For 711, ind1 has to be '', '0', '1', or '2' OR ind2 must be ''
+                if (
+                    $field == '711' &&
+                        (
+                            !in_array(trim(($marcRec['i1'] ?? '')), ['', '0', '1', '2']) ||
+                            trim(($marcRec['i2'] ?? '') != '')
+                        )
+                ) {
+                    $authors[] = '';
+                    continue;
+                }
+                $sbfs = $marcRec['subfields'];
+                $tmpAuthor = [];
+                foreach ($sbfs as $subfield) {
+                    $tmpAuthor[] = ucfirst(str_replace([',','.'], '', $subfield['data']));
+                }
+                $authors[] = implode(' ', $tmpAuthor);
+            }
+        }
+        return $authors;
+    }
+
+    /**
+     * Get an array of all corporate author roles (complementing getPrimaryAuthor()).
+     *
+     * @return array
+     */
+    public function getCorporateAuthorsRoles()
+    {
+        // MSUL PC-1105, PC-1646
+        $roles = [];
+        $marc = $this->getMarcReader();
+        $fields = [
             '110' => ['a','b','e'],
             '111' => range('a', 'z'),
             '710' => ['a','b','e'],
@@ -1984,22 +2025,21 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                             trim(($marcRec['i2'] ?? '') != '')
                         )
                 ) {
+                    $roles[] = '';
                     continue;
                 }
                 $sbfs = $marcRec['subfields'];
-                $tmpAuthor = ['note' => '', 'role' => []];
+                $tmpRole = [];
                 foreach ($sbfs as $subfield) {
                     // subfield $e or $j is the role information
                     if ($subfield['code'] == 'e' || $subfield['code'] == 'j') {
-                        $tmpAuthor['role'][] = str_replace([',','.'], '', $subfield['data']);
-                    } else {
-                        $tmpAuthor['note'] .= $subfield['data'];
+                        $tmpRole[] = ucfirst(str_replace([',','.'], '', $subfield['data']));
                     }
                 }
-                $authors[] = $tmpAuthor;
+                $roles[] = $tmpRole;
             }
         }
-        return $authors;
+        return $roles;
     }
 
     /**
@@ -2029,24 +2069,21 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             $fieldMethod = $authorMethod . ucfirst($field) . 's';
             $dataFieldValues[$field] = $this->tryMethod($fieldMethod, [], []);
         }
-
         // Match up author and attribute data (this assumes that the attribute
         // arrays have the same indices as the author array; i.e. $author[$i]
         // has $dataFieldValues[$attribute][$i].
         foreach ($authors as $i => $author) {
             // MSU
-            $authorVal = is_array($author) ? $author['note'] : $author;
-            $authorRole = is_array($author) ? $author['role'] : [];
-            if (!isset($data[$authorVal])) {
-                $data[$authorVal] = [];
+            if (!isset($data[$author])) {
+                $data[$author] = [];
             }
             foreach ($dataFieldValues as $field => $dataFieldValue) {
                 if ($field == 'link') {
                     if (!empty($dataFieldValue[$i])) {
-                        $data[$authorVal][$field][] = $dataFieldValue[$i];
+                        $data[$author][$field][] = $dataFieldValue[$i];
                     }
                 } else {
-                    $data[$authorVal][$field] = $authorRole;
+                    $data[$author][$field] = $dataFieldValue[$i];
                 }
             }
         }
