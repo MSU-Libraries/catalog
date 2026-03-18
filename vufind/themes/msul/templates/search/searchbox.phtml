@@ -163,8 +163,21 @@
               title="<?=$this->transEscAttr('searchform_reset_button')?>"
               aria-label="<?=$this->transEscAttr('searchform_reset_button')?>"
             ><?=$this->icon('ui-reset-search');?></button>
-            <?php /** MSU Start - add info icon for search bar at desktop */ ?>
-            <a href="/Help/Home?topic=search&amp;_=1716862211" data-lightbox="" class="search-tips-icon" title="Search Tips" aria-label="Search Tips"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-info"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <?php /** MSU Start - add info icon for search bar */ ?>
+            <a href="<?= $this->url('help', ['topic' => 'search']) ?>"
+              data-lightbox
+              class="search-tips-icon"
+              title="Search Tips"
+              aria-label="Search Tips"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="feather feather-info"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
             </a>
             <?php /** MSU End */ ?>
             <?php if (!empty($keyboardLayouts)): ?>
@@ -192,19 +205,51 @@
               </div>
             <?php endif; ?>
           </div>
+          <?php /** MSU START */ ?>
+          <button type="submit" class="btn btn-primary">
+            <?=$this->icon('search') ?>
+            <span class="text">
+              <?=$this->transEsc('Search')?>
+            </span>
+          </button>
+          <?php /** MSU END */ ?>
         </div>
       <?php elseif ($handlerCount == 1): ?>
         <input type="hidden" name="type" value="<?=$this->escapeHtmlAttr($handlers[0]['value'])?>">
       <?php endif; ?>
-      <button type="submit" class="btn btn-primary"><?=$this->icon('search') ?> <?=$this->transEsc('Search')?></button><?php /** MSU */ ?>
-      <?php if ($advSearch): ?>
-        <?php
-          $advSearchQuery = $results ? ['sid' => $results->getSearchId()] : $hiddenFilters;
-          $advSearchLink = $this->url($advSearch, [], ['query' => $advSearchQuery]);
-        ?>
-        <a href="<?=$advSearchLink?>" class="advanced-search-link btn btn-link" rel="nofollow"><?=$this->transEsc('Advanced')?></a>
-      <?php endif; ?>
-      <a class="search-tips-mobile" href="/Help/Home?topic=search&amp;_=1716862211">Search Tips</a><?php /** MSU - added search tips link for mobile */ ?>
+      <?php
+        /** MSU START */
+        $catalogPaths = [
+          '/',
+          '/search',
+          '/search/home',
+        ];
+        $currentPath = rtrim($this->currentPath(), '/') ?: '/';
+        if ($this->layout()->isHome && in_array(strtolower($currentPath), $catalogPaths)): ?>
+        <nav role="navigation" data-js-dropdown>
+          <div data-js-dropdown-header>
+            <a href="#" aria-expanded="false">
+              <span>More options</span>
+              <?=$this->icon('open-dropdown', 'fa-chevron-down') ?>
+              <?=$this->icon('close-dropdown', 'fa-chevron-up') ?>
+            </a>
+          </div>
+          <div class="dropdown" tabindex="-1">
+            <ul>
+              <?php if ($advSearch): ?>
+                <?php
+                $advSearchQuery = $results ? ['sid' => $results->getSearchId()] : $hiddenFilters;
+                $advSearchLink = $this->url($advSearch, [], ['query' => $advSearchQuery]);
+                ?>
+                <li><a href="<?=$advSearchLink?>" rel="nofollow"><?=$this->transEsc('Advanced')?></a></li>
+              <?php endif; ?>
+              <li><a href="<?=$this->url('search-reserves')?>" rel="nofollow"><?=$this->transEsc('Course Reserves')?></a></li>
+              <li><a href="<?=$this->url('alphabrowse-home')?>" rel="nofollow"><?=$this->transEsc('browse_alphabetically_footer')?></a></li>
+              <li><a href="<?=$this->url('browse-home')?>" rel="nofollow"><?=$this->transEsc('Browse by Categories')?></a></li>
+            </ul>
+          </div>
+        </nav>
+      <?php endif; /** MSU END */ ?>
       <?php if ($geoUrl = $this->geocoords()->getSearchUrl($options)) : ?>
           <a href="<?=$geoUrl ?>" class="btn btn-link"><?=$this->transEsc('Geographic Search')?></a>
       <?php endif; ?>

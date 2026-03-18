@@ -1,12 +1,13 @@
-<div class="search-home-facets">
-
+<section class="search-home-facets">
+  <h2>Other Catalog Search Options</h2>
+  <div class="content">
     <div class="home-facet">
-      <h2>Browse Alphabetically</h2>
+      <h3>Browse Alphabetically</h3>
       <div class="home-facet-container">
         <?php $alphaBrowseTypes = $this->config()->get('config')->AlphaBrowse_Types; ?>
         <form class="form-inline" method="get" action="<?=$this->url('alphabrowse-home')?>" name="alphaBrowseForm" id="alphaBrowseForm">
           <label for="alphaBrowseForm_source"><?=$this->transEsc('Browse by') ?></label>
-          <select id="alphaBrowseForm_source" name="source" class="form-control">
+          <select id="alphaBrowseForm_source" name="source" class="form-control form-select">
             <?php foreach ($alphaBrowseTypes as $key => $item): ?>
               <option value="<?=$this->escapeHtmlAttr($key) ?>"<?php if ($this->source == $key): ?> selected="selected"<?php endif; ?>><?=$this->transEsc($item) ?></option>
             <?php endforeach; ?>
@@ -34,35 +35,37 @@
       </div>
     </div>
 
-    <div class="home-facet">
-      <h2>Browse by Categories</h2>
-      <div class="home-facet-container">
-        <?php $browseConfigs = $this->config()->get('config')->Browse; ?>
-        <ul class="home-facet-list">
-        <?php foreach ($browseConfigs as $key => $item): ?>
-          <?php
-           // Browse configs contains other settings, we only need the ones where
-           // it is configured to display (i.e. the settings is true)
-          ?>
-          <?php
-          if ($item != '1') {
-            continue;
-          }
-          ?>
-          <li><a href="<?=$this->url('browse-' . $key) ?>">
+    <div class="home-facet home-facet-categories">
+      <div>
+        <h3>Browse by Categories</h3>
+        <div class="home-facet-container">
+          <?php $browseConfigs = $this->config()->get('config')->Browse; ?>
+          <ul class="home-facet-list">
+          <?php foreach ($browseConfigs as $key => $item): ?>
             <?php
-              // Using logic from buildBrowseOptions() in the BrowseController
-              $label = ($key == 'lcc') ? 'Call Number' : ucwords($key);
+             // Browse configs contains other settings, we only need the ones where
+             // it is configured to display (i.e. the settings is true)
             ?>
-            <?=$this->transEsc($label) ?>
-          </a></li>
-        <?php endforeach; ?>
-        </ul>
+            <?php
+            if ($item != '1') {
+              continue;
+            }
+            ?>
+            <li><a href="<?=$this->url('browse-' . $key) ?>">
+              <?php
+                // Using logic from buildBrowseOptions() in the BrowseController
+                $label = ($key == 'lcc') ? 'Call Number' : ucwords($key);
+              ?>
+              <?=$this->transEsc($label) ?>
+            </a></li>
+          <?php endforeach; ?>
+          </ul>
+        </div>
       </div>
     </div>
 
-    <div class="home-facet home-reserves">
-      <h2>Course Reserves</h2>
+    <div class="home-facet home-facet-reserves">
+      <h3>Course Reserves</h3>
       <div class="home-facet-container">
           <form class="form-inline" method="get" name="reservesSearchForm" action="Search/Reserves">
             <label class="mb-2" for="reservesSearchForm_lookfor">Search by <strong>Instructor</strong> or by <strong>Course</strong></label>
@@ -71,4 +74,5 @@
           </form>
       </div>
     </div>
-</div>
+  </div>
+</section>
