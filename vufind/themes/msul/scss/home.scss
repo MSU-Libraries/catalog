@@ -25,6 +25,10 @@
   border-radius: 1rem;
   background: white;
 
+  @media only screen and (min-width: 768px) {
+    padding-right: 2%;
+    padding-left: 2%;
+  }
 
   .content {
     display: flex;
@@ -33,17 +37,9 @@
     justify-content: space-between;
     gap: 5%;
 
-    @media only screen and (min-width: 768px) {
-      padding-right: 2%;
-      padding-left: 2%;
-    }
-
     .home-facet {
       flex: 1 1 auto;
-
-      @media only screen and (min-width: 768px) {
-        max-width: 40%;
-      }
+      min-width: 13rem;
 
       form, label, select, input:not([type="submit"]) {
         display: block;
@@ -81,18 +77,17 @@
 
     .home-facet.home-facet-categories {
       display: flex;
-      justify-content: center;
+      flex-basis: min-content;
+
+      @media only screen and (min-width: 640px) {
+        justify-content: center;
+      }
     }
   }
 }
 
 .template-name-home {
   background-color: $msugreen;
-  background-image: linear-gradient(
-                  rgba(24, 69, 59, 0.8),
-                  rgba(24, 69, 59, 0.8)
-  ),
-  url(/vufind/themes/msul/images/banner-image.jpg);
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: 50% 110%;
