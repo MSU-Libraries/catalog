@@ -136,17 +136,17 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
     /**
      * Constructor
      *
-     * @param SessionSettings   $ss           Session settings
-     * @param Config            $config       Top-level configuration
-     * @param Config            $recordConfig record.yaml configuration
-     * @param Backend           $epf          EBSCO Publication finder backend
-     * @param Connection        $ils          ILS connection
-     * @param RendererInterface $renderer     View renderer
+     * @param SessionSettings       $ss           Session settings
+     * @param \VuFind\Config\Config $config       Top-level configuration
+     * @param array                 $recordConfig record.yaml configuration
+     * @param Backend               $epf          EBSCO Publication finder backend
+     * @param Connection            $ils          ILS connection
+     * @param RendererInterface     $renderer     View renderer
      */
     public function __construct(
         SessionSettings $ss,
-        Config $config,
-        Config $recordConfig,
+        \VuFind\Config\Config $config,
+        array $recordConfig,
         \VuFindSearch\Backend\EDS\Backend $epf,
         Connection $ils,
         RendererInterface $renderer,
