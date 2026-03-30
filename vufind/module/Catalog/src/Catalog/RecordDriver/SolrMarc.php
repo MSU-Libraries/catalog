@@ -2310,7 +2310,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get ALL editions of the current record.
      *
-     * @return string
+     * @return array
      */
     public function getEditions()
     {
@@ -2323,7 +2323,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the former publication frequency
      *
-     * @return string
+     * @return array
      */
     public function getFormerPublicationFrequency()
     {
@@ -2347,7 +2347,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Produced field for the current record.
      *
-     * @return string
+     * @return array
      */
     public function getProduced()
     {
@@ -2358,7 +2358,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Abbreviated Title
      *
-     * @return string
+     * @return array
      */
     public function getAbbreviatedTitle()
     {
@@ -2368,7 +2368,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Key Title
      *
-     * @return string
+     * @return array
      */
     public function getKeyTitle()
     {
@@ -2378,7 +2378,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Former Title
      *
-     * @return string
+     * @return array
      */
     public function getFormerTitle()
     {
@@ -2388,7 +2388,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Collective Uniform Title
      *
-     * @return string
+     * @return array
      */
     public function getCollectiveUniformTitle()
     {
@@ -2398,7 +2398,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Organization and Arrangement of Materials
      *
-     * @return string
+     * @return array
      */
     public function getOrganizationAndArrangementOfMaterials()
     {
@@ -2647,5 +2647,51 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             return $replace260 ? $pubResults : array_merge($results, $pubResults);
         }
         return $results;
+    }
+
+    public function getNewTitle()
+    {
+        $marc = $this->getMarcReader();
+        $marcFields = $marc->getFields('785');
+        $return = [];
+        foreach ($marcFields as $marcData) {
+            if ($marcData['i1'] === '0') {
+                $tmp = [];
+                foreach ($marcData['subfields'] as $subfield) {
+                    if (str_contains('abdt', $subfield['code'])) {
+                        $tmp[] = $subfield['data'];
+                    }
+                }
+                $return[] = implode(' ', $tmp);
+            }
+        }
+        return $return;
+    }
+
+    /**
+     * @param $data array
+     * @param $driver \Catalog\RecordDriver\SolrMarc
+     *
+     * @return string[]
+     */
+    public static function getNewTitleLabel($data, $driver)
+    {
+        $marc = $driver->getMarcReader();
+        $marcFields = $marc->getFields('785');
+        $return = [];
+        foreach ($marcFields as $marcData) {
+            $return[] = match ($marcData['i2']) {
+                default => 'note_785_0',
+                '1' => 'note_785_1',
+                '2' => 'note_785_2',
+                '3' => 'note_785_3',
+                '4' => 'note_785_4',
+                '5' => 'note_785_5',
+                '6' => 'note_785_6',
+                '7' => 'note_785_7',
+                '8' => 'note_785_8',
+            };
+        }
+        return $return;
     }
 }
