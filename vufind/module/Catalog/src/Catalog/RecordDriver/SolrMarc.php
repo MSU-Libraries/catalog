@@ -2649,6 +2649,11 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         return $results;
     }
 
+    /**
+     * Get the "complementary" title from 785
+     *
+     * @return array
+     */
     public function getNewTitle()
     {
         $marc = $this->getMarcReader();
@@ -2669,7 +2674,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
-     * @param $data array
+     * Get the heading / title under which the title is displayed (Continues, Supersedes, ...) from 785
+     *
+     * @param $data   array
      * @param $driver \Catalog\RecordDriver\SolrMarc
      *
      * @return string[]
