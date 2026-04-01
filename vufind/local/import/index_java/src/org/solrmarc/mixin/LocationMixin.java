@@ -14,6 +14,12 @@ public class LocationMixin extends SolrIndexerMixin {
 
     public List<String> getLocations(final Record record) {
         List<String> result = new ArrayList<String>();
+
+        List<VariableField> idFields = record.getVariableFields("001");
+        if (idFields.stream().anyMatch(vf -> (((ControlField)vf).getData()).contains("_root"))) {
+            result.add("0/MSU Online Resource/");
+            return result;
+        }
         List<VariableField> cniFields = record.getVariableFields("003");
         if (cniFields.stream().anyMatch(vf -> "EBZ".equals(((ControlField)vf).getData()))) {
             result.add("0/MSU Online Resource/");
