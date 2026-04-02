@@ -1,19 +1,27 @@
-.template-dir-alphabrowse.template-name-home,
-.template-dir-browse.template-name-home {
-  .main {
-    padding: .1rem 0 1rem 0;
-    background: white;
+.template-dir-search.template-name-home,
+.template-dir-eds.template-name-home {
+  header .banner.container.navbar,
+  .main #content {
+    @media only screen and (min-width: 992px) {
+      margin: 0 calc(var(--bs-gutter-x) * .5 + 2rem);
+      padding: 0;
+      width: auto;
+    }
+  }
+
+  // hide filters on home page
+  .active-filters {
+    display: none !important;
   }
 }
 
-
-// hide filters on home page
-.template-dir-search.template-name-home,
-.template-dir-eds.template-name-home,
-.template-dir-combined.template-name-home
-{
-  .active-filters {
-    display:none !important;
+.template-dir-alphabrowse.template-name-home,
+.template-dir-browse.template-name-home,
+.template-name-reservessearch {
+  .main {
+    padding-bottom: 1rem;
+    overflow: auto;
+    background: white;
   }
 }
 
@@ -86,15 +94,9 @@
   }
 }
 
-.template-name-home {
+.template-dir-search.template-name-home,
+.template-dir-eds.template-name-home {
   background-color: $msugreen;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-position: 50% 110%;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
 
   footer {
     background: white;
@@ -107,6 +109,7 @@
     background: rgba(255,255,255,0.8);
     border-radius: 1rem;
 
+    /* TODO might be able to shift to search-form.scss when ux change is made on other pages */
     #searchForm {
       margin: 0;
       padding: 0;
@@ -133,12 +136,10 @@
 
           .nav-link {
             margin: 0;
-            padding: .5rem;
             border-width: 0;
             border-bottom: 0.3rem solid transparent;
             border-top: 0.3rem solid transparent;
 
-            font-weight: 520;
             color: $gray;
 
             &.active,
@@ -239,29 +240,6 @@
           background-color: $darkparakeetgreen !important;
           outline: inherit;
         }
-      }
-    }
-  }
-}
-
-@media only screen and (min-width: 992px) {
-  .template-name-home {
-    .searchHomeContent {
-      margin-left: 2rem;
-      margin-right: 2rem;
-    }
-    main {
-      margin-left: 2rem;
-      margin-right: 2rem;
-
-      .searchForm-inputs {
-        padding-left: 2.5rem;
-        padding-right: 2.5rem;
-      }
-
-      .search-home-facets {
-        margin-left: 2.5rem;
-        margin-right: 2.5rem;
       }
     }
   }
