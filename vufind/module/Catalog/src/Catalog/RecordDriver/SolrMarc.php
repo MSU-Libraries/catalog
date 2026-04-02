@@ -2652,9 +2652,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the "complementary" title from 785
      *
-     * @return array
+     * @return string[]
      */
-    public function getNewTitle()
+    public function getNewTitle(): array
     {
         $marc = $this->getMarcReader();
         $marcFields = $marc->getFields('785');
@@ -2676,12 +2676,12 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the heading / title under which the title is displayed (Continues, Supersedes, ...) from 785
      *
-     * @param $data   array
-     * @param $driver \Catalog\RecordDriver\SolrMarc
+     * @param $data   string[]
+     * @param $driver SolrMarc
      *
-     * @return string[]
+     * @return string
      */
-    public static function getNewTitleLabel($data, $driver)
+    public static function getNewTitleLabel(array $data, SolrMarc $driver): string
     {
         $marc = $driver->getMarcReader();
         $marcFields = $marc->getFields('785');
@@ -2699,6 +2699,6 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 '8' => 'note_785_8',
             };
         }
-        return $return;
+        return current($return); // Returning only one as templating display only strings
     }
 }
