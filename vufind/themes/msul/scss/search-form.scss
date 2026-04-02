@@ -104,3 +104,15 @@
     display: inline-block; // To prevent having the (i) tab to have the underling to high
   }
 }
+
+#searchForm {
+  .nav-tabs {
+    .nav-item {
+      .nav-link {
+        padding: .5rem .7rem;
+
+        font-weight: 520;
+      }
+    }
+  }
+}

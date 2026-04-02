@@ -19,7 +19,8 @@
 .template-dir-browse.template-name-home,
 .template-name-reservessearch {
   .main {
-    padding: .1rem 0 1rem 0;
+    padding-bottom: 1rem;
+    overflow: auto;
     background: white;
   }
 }
@@ -93,8 +94,8 @@
   }
 }
 
-.template-name-home,
-.template-name-reservessearch {
+.template-dir-search.template-name-home,
+.template-dir-eds.template-name-home {
   background-color: $msugreen;
 
   footer {
@@ -108,6 +109,7 @@
     background: rgba(255,255,255,0.8);
     border-radius: 1rem;
 
+    /* TODO might be able to shift to search-form.scss when ux change is made on other pages */
     #searchForm {
       margin: 0;
       padding: 0;
@@ -134,12 +136,10 @@
 
           .nav-link {
             margin: 0;
-            padding: .5rem;
             border-width: 0;
             border-bottom: 0.3rem solid transparent;
             border-top: 0.3rem solid transparent;
 
-            font-weight: 520;
             color: $gray;
 
             &.active,

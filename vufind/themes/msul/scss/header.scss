@@ -1,6 +1,8 @@
 header {
     background-color: $msugreen;
     padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    overflow: auto;
 
   nav {
     a, a:hover, a:active, a:visited {
@@ -92,10 +94,11 @@ header {
 
   .navbar-catalog {
     font-weight: 610;
+    margin-bottom: 0;
 
     &:not(h1) {
       font-size: 2.5rem;
-      margin: 1rem 0;
+      margin-top: 1rem;
     }
   }
 }
