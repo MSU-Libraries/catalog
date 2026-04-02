@@ -77,7 +77,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestGetISBNsWithType()
+    public function testGetISBNsWithType()
     {
         $this->assertEquals(
             [
@@ -100,7 +100,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestGetSummaryNotes()
+    public function testGetSummaryNotes()
     {
         $this->assertEquals(
             ['Summary. Expanded.',
@@ -115,7 +115,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestGetAllSubjectHeadings()
+    public function testGetAllSubjectHeadings()
     {
         $this->assertCount(3, $this->getDriver('linkedauthors.xml')->getAllSubjectHeadings()[0]);
         $this->assertEquals(
@@ -129,7 +129,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestGetAllSubjectHeadingsLinked()
+    public function testGetAllSubjectHeadingsLinked()
     {
         $subjects = $this->getDriver('linkedsubjects.xml')->getAllSubjectHeadings();
         // Verify total count of subjects
@@ -156,7 +156,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestSeries()
+    public function testSeries()
     {
         $this->assertCount(2, $this->getDriver('series.xml')->getSeries());
         $this->assertEquals(
@@ -174,7 +174,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestLinkedSeries()
+    public function testLinkedSeries()
     {
         $this->assertCount(1, $this->getDriver('linkedseries.xml')->getSeries());
         $this->assertEquals(
@@ -192,7 +192,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestGetMarcFieldLinkedNotFound()
+    public function testGetMarcFieldLinkedNotFound()
     {
         // Verifying the count since the values non-printable characters
         $this->assertEquals([], $this->getDriver('linkedauthors.xml')->getMarcFieldLinked('90', ['a']));
@@ -203,7 +203,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestGetMarcFieldLinked()
+    public function testGetMarcFieldLinked()
     {
         // Verifying the count since the values non-printable characters
         $this->assertCount(2, $this->getDriver('linkedauthors.xml')->getMarcFieldLinked('700', ['a']));
@@ -215,7 +215,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestGetPrimaryAuthorsLinks()
+    public function testGetPrimaryAuthorsLinks()
     {
         // Verifying the count since the values non-printable characters
         $this->assertCount(1, $this->getDriver('linkedauthors2.xml')->getPrimaryAuthorsLinks());
@@ -227,7 +227,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestGetSecondaryAuthorsLinks()
+    public function testGetSecondaryAuthorsLinks()
     {
         // Verifying the count since the values non-printable characters
         $this->assertCount(2, $this->getDriver('linkedauthors.xml')->getSecondaryAuthorsLinks());
@@ -239,7 +239,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestGetCorporateAuthorsLinks()
+    public function testGetCorporateAuthorsLinks()
     {
         // Verifying the count since the values non-printable characters
         $this->assertCount(1, $this->getDriver('linkedauthors2.xml')->getCorporateAuthorsLinks());
@@ -251,7 +251,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestGetUniformTitleWithLinks()
+    public function testGetUniformTitleWithLinks()
     {
         // Verifying the count since the values non-printable characters
         $this->assertCount(1, $this->getDriver('linkedtitle.xml')->getUniformTitle());
@@ -264,7 +264,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetContentsNotes()
+    public function testgetContentsNotes()
     {
         $this->assertEquals(
             [
@@ -280,7 +280,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetIncompleteContentsNotes()
+    public function testgetIncompleteContentsNotes()
     {
         $this->assertEquals(
             [
@@ -295,7 +295,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetPartialContentsNotes()
+    public function testgetPartialContentsNotes()
     {
         $this->assertEquals(
             [
@@ -311,7 +311,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetPublicationDetails()
+    public function testgetPublicationDetails()
     {
         $this->assertEquals(
             [
@@ -361,7 +361,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetAbbreviatedTitle()
+    public function testgetAbbreviatedTitle()
     {
         $this->assertEquals(
             [
@@ -376,7 +376,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetKetTitle()
+    public function testgetKetTitle()
     {
         $this->assertEquals(
             [
@@ -391,7 +391,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetCollectiveUniformTitle()
+    public function testgetCollectiveUniformTitle()
     {
         $this->assertEquals(
             [
@@ -410,7 +410,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetFormerTitle()
+    public function testgetFormerTitle()
     {
         $this->assertEquals(
             [
@@ -425,7 +425,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetOrganizationAndArrangementOfMaterials()
+    public function testgetOrganizationAndArrangementOfMaterials()
     {
         $this->assertEquals(
             [
@@ -440,7 +440,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetEditions()
+    public function testgetEditions()
     {
         $this->assertEquals(
             [
@@ -456,7 +456,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetContinues()
+    public function testgetContinues()
     {
         $this->assertEquals(
             [
@@ -471,7 +471,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetContinuesInPart()
+    public function testgetContinuesInPart()
     {
         $this->assertEquals(
             [
@@ -486,7 +486,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetSupersedes()
+    public function testgetSupersedes()
     {
         $this->assertEquals(
             [
@@ -501,7 +501,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetSupersedesInPartBy()
+    public function testgetSupersedesInPartBy()
     {
         $this->assertEquals(
             [
@@ -516,7 +516,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetFormedByTheUnionOf()
+    public function testgetFormedByTheUnionOf()
     {
         $this->assertEquals(
             [
@@ -531,7 +531,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetAbsorbed()
+    public function testgetAbsorbed()
     {
         $this->assertEquals(
             [
@@ -546,7 +546,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetAbsorbedInPart()
+    public function testgetAbsorbedInPart()
     {
         $this->assertEquals(
             [
@@ -561,7 +561,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function atestgetSeparatedFrom()
+    public function testgetSeparatedFrom()
     {
         $this->assertEquals(
             [
@@ -600,15 +600,11 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
     public function testgetNewTitleLabel()
     {
         $this->assertEquals(
-            [
-                'note_785_0',
-            ],
+            'note_785_0',
             SolrMarc::getNewTitleLabel([], $this->getDriver())
         );
         $this->assertEquals(
-            [
-                'note_785_3',
-            ],
+            'note_785_3',
             SolrMarc::getNewTitleLabel([], $this->getDriver('linkedtitle.xml'))
         );
     }
