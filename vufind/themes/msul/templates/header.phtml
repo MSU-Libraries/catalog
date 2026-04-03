@@ -1,140 +1,133 @@
 <?php $account = $this->auth()->getManager(); ?>
-<?= $this->Notices('BannerNotices.yaml')->renderNotices('custom-notices'); /** MSU */ ?>
-<nav class="banner container navbar <?php /* navbar-expand-md */ ?> align-items-start"><?php // MSU add container class ?>
-  <div class="navbar-header">
-    <?php /** MSU Start */ ?>
-    <div class="navbar-msubrand">
-      <a href="https://msu.edu/" rel="nofollow">
-        <img alt="Michigan State University" src="/themes/msul/images/masthead-helmet-white.png">
-      </a>
-    </div>
-    <div class="navbar-library-link">
-      <?php if ($this->layout()->isHome): ?>
-        <h2 class="navbar-msul"><a href="https://lib.msu.edu/">Libraries</a></h2>
-      <?php else: ?>
-        <div class="navbar-msul"><a href="https://lib.msu.edu/">Libraries</a></div>
-      <?php endif; ?>
-    </div>
-    <div>
-      <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#header-collapse" aria-label="<?=$this->transEscAttr('mobile_toggle_navigation_text')?>"> <!-- MSU bs float class -->
-        <?=$this->icon('ui-menu') ?>
-      </button>
-    </div>
-  <?php if (!isset($this->layout()->renderingError)): ?>
-    <div class="collapse navbar-collapse justify-content-end navbar-expand-md" id="header-collapse">
-      <ul class="nav navbar-nav">
-        <li class="nav-item">
-          <a class="icon-link" href="https://lib.msu.edu/contact/askalib" target="_blank">
-            <?=$this->icon('fa-external-link', 'fa-external-link') ?>
-            <span class="icon-link__label"><?=$this->transEsc('Ask a Librarian')?></span>
-          </a>
-        </li>
-        <?php if ($this->feedback()->tabEnabled()): ?>
-          <li class="nav-item">
-            <a class="nav-link icon-link" id="feedbackLink" data-lightbox href="<?=$this->url('feedback-home') ?>">
-              <?=$this->icon('feedback', 'icon-link__icon') ?>
-              <span class="icon-link__label"><?=$this->transEsc('Feedback')?></span>
-            </a>
-          </li>
-        <?php endif; ?>
-        <?php $cart = $this->cart(); ?>
-        <?php if ($cart->isActive()): ?>
-          <li class="nav-item" id="cartSummary" aria-live="polite" aria-atomic="true">
-            <a id="cartItems" class="nav-link icon-link" data-lightbox title="<?=$this->transEscAttr('View Book Bag')?>" href="<?=$this->url('cart-home')?>">
-              <?=$this->icon('cart', 'icon-link__icon') ?>
-              <span class="icon-link__label">
-                <?php /** MSU Code Removed */ ?>
-                <span role="status"><strong><?=count($cart->getItems())?></strong> <?=$this->transEsc('items')?></span>
-                <span class="full<?=!$cart->isFull() ? ' hidden' : '' ?>">(<?=$this->transEsc('bookbag_full') ?>)</span>
-              </span>
-            </a>
-          </li>
-        <?php endif; ?>
-        <?php if (is_object($account) && $account->loginEnabled()): // hide login/logout if unavailable ?>
-          <?php if ($account->getIdentity()): ?>
-            <li id="account-home-nav" class="nav-item logoutOptions<?php if ($account->dropdownEnabled()): ?> dropdown<?php endif ?>">
-              <a href="<?=$this->url('myresearch-home', [], ['query' => ['redirect' => 0]])?>" class="nav-link icon-link">
-                <span id="account-icon" class="icon-link__icon" role="link"><?=$this->icon('my-account') ?></span>
-                <span class="icon-link__label"><?=$this->transEsc('Your Account')?></span>
-              </a>
-            <?php if ($account->dropdownEnabled()): ?>
-                <a class="nav-link account-dropdown-toggle" href="#" data-bs-toggle="dropdown"><?=$this->icon('dropdown-caret') ?></a>
-                <div class="dropdown-menu">
-                  <?=$this->accountMenu()->render('', 'header_')?>
-                </div>
-            <?php endif; ?>
-            </li>
-            <li class="nav-item logoutOptions">
-              <a href="<?=$this->url('myresearch-logout')?>" class="nav-link logout icon-link">
-                <?=$this->icon('sign-out', 'icon-link__icon') ?>
-                <span class="icon-link__label"><?=$this->transEsc('Log Out')?></span>
-              </a>
-            </li>
-          <?php else: ?>
-            <li id="loginOptions">
-              <?php if ($account->getSessionInitiator($this->serverUrl($this->url('myresearch-home')))): ?>
-                <a href="<?=$this->url('myresearch-userlogin')?>" class="icon-link">
-                  <?=$this->icon('sign-in', 'icon-link__icon') ?>
-                  <span class="icon-link__label"><?=$this->transEsc('Institutional Login')?></span>
-                </a>
-              <?php else: ?>
-                <a href="<?=$this->url('myresearch-userlogin')?>" class="icon-link" data-lightbox>
-                  <?=$this->icon('sign-in', 'icon-link__icon') ?>
-                  <span class="icon-link__label"><?=$this->transEsc('Login')?></span>
-                </a>
-              <?php endif; ?>
-            </li>
-          <?php endif; ?>
-        <?php endif; ?>
-
-        <?php if (isset($this->layout()->themeOptions) && count($this->layout()->themeOptions) > 1): ?>
-          <?=$this->component('menu-button', [
-              'toggleLabel' => 'Theme',
-              'wrapperClass' => 'theme-selector',
-              'wrapperTag' => 'li',
-              'menuItems' => array_map(
-                  function ($item) {
-                      $item['label'] = $item['desc'];
-                      $item['url'] = $this->url()->addQueryParameters(['ui' => $item['name']]);
-
-                      return $item;
-                  },
-                  $this->layout()->themeOptions
-              ),
-          ]) ?>
-        <?php endif; ?>
-
-        <?php if (isset($this->layout()->allLangs) && count($this->layout()->allLangs) > 1): ?>
-          <?=$this->component('menu-button', [
-              'toggleLabel' => 'Language',
-              'wrapperClass' => 'language',
-              'wrapperTag' => 'li',
-              'menuItems' => array_map(
-                  function ($langCode, $langName) {
-                      return [
-                        'label' => $this->displayLanguageOption($langName),
-                        'url' => $this->url()->addQueryParameters(['lng' => $langCode]),
-                        'selected' => $this->layout()->userLang == $langCode,
-                      ];
-                  },
-                  array_keys($this->layout()->allLangs),
-                  array_values($this->layout()->allLangs),
-              ),
-          ]) ?>
-          <?php endif; ?>
-      </ul>
-    </div>
-  </div>
-  <?php endif; ?>
+<nav class="banner container navbar navbar-expand-md align-items-start"><?php // MSU add container class ?>
+    <div class="navbar-header">
+    <div class="navbar-msubrand"><a href="https://msu.edu/" rel="nofollow"><img alt="Michigan State University" src="/themes/msul/images/masthead-helmet-white.png"></a></div><?php /** MSU */ ?>
+    <button type="button" class="navbar-toggler float-end" data-bs-toggle="collapse" data-bs-target="#header-collapse" aria-label="<?=$this->transEscAttr('mobile_toggle_navigation_text')?>"> <!-- MSU bs float class -->
+      <?=$this->icon('ui-menu') ?>
+    </button>
   <?php /** MSU START */ ?>
-  <!--conditionally show header title as h1 based on url path -->
-  <?php if ($this->layout()->isHome): ?>
+  <!--conditionally show header title as h1 based on url path (use lower case) -->
+  <?php
+    $homePaths = ['/', '/search', '/search/home', '/eds', '/eds/home', '/combined', '/combined/home'];
+    $currentPath = rtrim($this->currentPath(), '/') ?: '/';
+  ?>
+  <?php if (in_array(strtolower($currentPath), $homePaths)): ?>
+    <h2 class="navbar-msul"><a href="https://lib.msu.edu/">MSU Libraries</a></h2>
     <h1 class="navbar-catalog"><a href="/Search">Catalog</a></h1>
   <?php else: ?>
+    <div class="navbar-msul"><a href="https://lib.msu.edu/">MSU Libraries</a></div>
     <div class="navbar-catalog"><a href="/Search">Catalog</a></div>
+  <?php endif; /** MSU END */ ?>
+  </div>
+  <?php if (!isset($this->layout()->renderingError)): ?>
+    <div class="collapse navbar-collapse justify-content-end navbar-expand-md" id="header-collapse">
+        <ul class="nav navbar-nav">
+            <li class="nav-item">
+              <a class="icon-link" href="https://lib.msu.edu/contact/askalib" target="_blank">
+                <?=$this->icon('fa-external-link', 'fa-external-link') ?>
+                <span class="icon-link__label"><?=$this->transEsc('Ask a Librarian')?></span>
+              </a>
+            </li>
+          <?php if ($this->feedback()->tabEnabled()): ?>
+            <li class="nav-item">
+              <a class="nav-link icon-link" id="feedbackLink" data-lightbox href="<?=$this->url('feedback-home') ?>">
+                <?=$this->icon('feedback', 'icon-link__icon') ?>
+                <span class="icon-link__label"><?=$this->transEsc('Feedback')?></span>
+              </a>
+            </li>
+          <?php endif; ?>
+          <?php $cart = $this->cart(); ?>
+          <?php if ($cart->isActive()): ?>
+            <li class="nav-item" id="cartSummary" aria-live="polite" aria-atomic="true">
+              <a id="cartItems" class="nav-link icon-link" data-lightbox title="<?=$this->transEscAttr('View Book Bag')?>" href="<?=$this->url('cart-home')?>">
+                <?=$this->icon('cart', 'icon-link__icon') ?>
+                <span class="icon-link__label">
+                  <?php /** MSU Code Removed */ ?>
+                  <span role="status"><strong><?=count($cart->getItems())?></strong> <?=$this->transEsc('items')?></span>
+                  <span class="full<?=!$cart->isFull() ? ' hidden' : '' ?>">(<?=$this->transEsc('bookbag_full') ?>)</span>
+                </span>
+              </a>
+            </li>
+          <?php endif; ?>
+          <?php if (is_object($account) && $account->loginEnabled()): // hide login/logout if unavailable ?>
+            <?php if ($account->getIdentity()): ?>
+              <li id="account-home-nav" class="nav-item logoutOptions<?php if ($account->dropdownEnabled()): ?> dropdown<?php endif ?>">
+                <a href="<?=$this->url('myresearch-home', [], ['query' => ['redirect' => 0]])?>" class="nav-link icon-link">
+                  <span id="account-icon" class="icon-link__icon" role="link"><?=$this->icon('my-account') ?></span>
+                  <span class="icon-link__label"><?=$this->transEsc('Your Account')?></span>
+                </a>
+              <?php if ($account->dropdownEnabled()): ?>
+                  <a class="nav-link account-dropdown-toggle" href="#" data-bs-toggle="dropdown"><?=$this->icon('dropdown-caret') ?></a>
+                  <div class="dropdown-menu">
+                    <?=$this->accountMenu()->render('', 'header_')?>
+                  </div>
+              <?php endif; ?>
+              </li>
+              <li class="nav-item logoutOptions">
+                <a href="<?=$this->url('myresearch-logout')?>" class="nav-link logout icon-link">
+                  <?=$this->icon('sign-out', 'icon-link__icon') ?>
+                  <span class="icon-link__label"><?=$this->transEsc('Log Out')?></span>
+                </a>
+              </li>
+            <?php else: ?>
+              <li id="loginOptions">
+                <?php if ($account->getSessionInitiator($this->serverUrl($this->url('myresearch-home')))): ?>
+                  <a href="<?=$this->url('myresearch-userlogin')?>" class="icon-link">
+                    <?=$this->icon('sign-in', 'icon-link__icon') ?>
+                    <span class="icon-link__label"><?=$this->transEsc('Institutional Login')?></span>
+                  </a>
+                <?php else: ?>
+                  <a href="<?=$this->url('myresearch-userlogin')?>" class="icon-link" data-lightbox>
+                    <?=$this->icon('sign-in', 'icon-link__icon') ?>
+                    <span class="icon-link__label"><?=$this->transEsc('Login')?></span>
+                  </a>
+                <?php endif; ?>
+              </li>
+            <?php endif; ?>
+          <?php endif; ?>
+
+          <?php if (isset($this->layout()->themeOptions) && count($this->layout()->themeOptions) > 1): ?>
+              <?=$this->component('menu-button', [
+                  'toggleLabel' => 'Theme',
+                  'wrapperClass' => 'theme-selector',
+                  'wrapperTag' => 'li',
+                  'menuItems' => array_map(
+                      function ($item) {
+                          $item['label'] = $item['desc'];
+                          $item['url'] = $this->url()->addQueryParameters(['ui' => $item['name']]);
+
+                          return $item;
+                      },
+                      $this->layout()->themeOptions
+                  ),
+              ]) ?>
+          <?php endif; ?>
+
+          <?php if (isset($this->layout()->allLangs) && count($this->layout()->allLangs) > 1): ?>
+              <?=$this->component('menu-button', [
+                  'toggleLabel' => 'Language',
+                  'wrapperClass' => 'language',
+                  'wrapperTag' => 'li',
+                  'menuItems' => array_map(
+                      function ($langCode, $langName) {
+                          return [
+                            'label' => $this->displayLanguageOption($langName),
+                            'url' => $this->url()->addQueryParameters(['lng' => $langCode]),
+                            'selected' => $this->layout()->userLang == $langCode,
+                          ];
+                      },
+                      array_keys($this->layout()->allLangs),
+                      array_values($this->layout()->allLangs),
+                  ),
+              ]) ?>
+          <?php endif; ?>
+        </ul>
+    </div>
   <?php endif; ?>
+<!--</div>-->
 </nav>
-<?php if ($this->layout()->searchbox !== false && !$this->layout()->isHome): ?>
+<?= $this->Notices('BannerNotices.yaml')->renderNotices('custom-notices'); /** MSU */ ?>
+<?php if ($this->layout()->searchbox !== false): ?>
   <div class="search container navbar">
     <div class="nav searchbox hidden-print" role="search">
       <?php $this->slot('search-home-hero')->start() /** MSU */ ?>
@@ -143,7 +136,8 @@
       <?=$this->slot('search-home-hero')->end() /** MSU */ ?>
     </div>
   </div>
-<?php elseif(!$this->layout()->isHome): ?>
+<?php /** MSU START */ ?>
+<?php else: ?>
   <?php
     // Adding the parameter in the URL because we can't extend some model in vufind to get the Search Origin
     // saved in the params and just have the sid
