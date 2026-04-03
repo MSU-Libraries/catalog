@@ -22,7 +22,7 @@ $(function pageLoad() {
     if (click.target.matches("*[data-js-dropdown], *[data-js-dropdown] *")) {
       return click.target.closest('*[data-js-dropdown]');
     }
-    return  false;
+    return false;
   }
 
   /**
@@ -34,7 +34,7 @@ $(function pageLoad() {
     if (click.target.matches("*[data-js-dropdown-header], *[data-js-dropdown-header] *")) {
       return click.target.closest('*[data-js-dropdown]');
     }
-    return  false;
+    return false;
   }
 
   /**
@@ -84,6 +84,7 @@ $(function pageLoad() {
 
   /**
    * Listener on events to close the dropdown
+   * @param {Event} e
    */
   function closeDropdownListener(e) {
     const dropdown = isDropdownTargeted(e);
