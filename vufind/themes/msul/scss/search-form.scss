@@ -1,0 +1,118 @@
+// Home search form is styled in home.scss
+// Search tabs are styled search-results.scss
+// search form appearance
+.template-dir-search.template-name-home form.searchForm,
+.template-dir-eds.template-name-home form.searchForm,
+.template-dir-combined.template-name-home form.searchForm {
+  padding: 2rem 2rem 3rem 2rem;
+  margin-top: 1.25rem;
+  margin-bottom: 3rem;
+}
+
+.searchForm .searchForm-inputs {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+
+  @media only screen and (min-width: 768px) {
+    gap: 1rem;
+  }
+
+  @media only screen and (max-width: 761px) {
+    gap: 0.5rem;
+  }
+
+  .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .searchForm-query {
+    display: flex;
+    flex: 4 3 auto;
+
+    @media only screen and (min-width: 768px) {
+      min-width: 30rem;
+    }
+  }
+
+  #searchForm_type {
+    flex: 2 2 auto;
+  }
+
+  .searchForm_lookfor {
+    width: 100%;
+    max-width: initial;
+    border-radius: 0.5rem 0 0 0.5rem;
+    padding-right: 0 !important;
+    border-right-width: 0;
+  }
+
+  #searchForm_controls:focus {
+    box-shadow: none;
+  }
+
+  .searchForm_lookfor:focus + #searchForm_controls {
+    // Prevents the box-shadow on focus to be on left and right sides
+    clip-path: inset(-5px 0px -5px 0px);
+  }
+
+  #searchForm_controls {
+    padding: 0 .5rem;
+    gap: 0.5rem;
+    position: initial;
+    height: initial;
+
+    background: white;
+    border: solid $input-border-color;
+    border-width: var(--bs-border-width) 0;
+
+    #searchForm-reset {
+      width: 1.75rem;
+      height: 1.75rem;
+      padding: 0;
+    }
+
+    .search-tips-icon {
+      color: $darkparakeetgreen;
+      display: flex;
+    }
+  }
+
+  button[type="submit"] {
+    .text {
+      display: none;
+    }
+
+    border: $input-border-width solid $parakeetgreen;
+    line-height: inherit;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: $input-border-radius;
+    border-bottom-right-radius: $input-border-radius;
+  }
+}
+
+// .searchForm is part of .searchbox when the searchbox is displayed via header.phtml
+.searchbox .searchForm,
+.searchbox .navbar-form // When no inputs (advanced search)
+{
+  margin: 0.2rem 0 0;
+
+  .nav-link {
+    display: inline-block; // To prevent having the (i) tab to have the underling to high
+  }
+}
+
+#searchForm {
+  .nav-tabs {
+    .nav-item {
+      .nav-link {
+        padding: .5rem .7rem;
+
+        font-weight: 520;
+      }
+    }
+  }
+}
