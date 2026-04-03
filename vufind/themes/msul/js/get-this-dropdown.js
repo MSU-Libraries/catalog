@@ -84,7 +84,7 @@ $(function pageLoad() {
 
   /**
    * Listener on events to close the dropdown
-   * @param {Event} e
+   * @param {Event} e Event triggered by the user
    */
   function closeDropdownListener(e) {
     const dropdown = isDropdownTargeted(e);
