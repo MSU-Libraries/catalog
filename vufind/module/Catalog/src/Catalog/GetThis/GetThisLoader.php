@@ -355,7 +355,6 @@ class GetThisLoader
         // If  the call number starts with 'Equipment' or material type is '2D/3D/Kit/Equipment'
         $startsWithEquipment = (stripos($item['callnumber'], 'equipment') === 0);
         $isEquipmentType = ($item['material_type'] == '2D/3D/Kit/Equipment');
-        #var_export(" -- callnum: " . $item['callnumber'] . " material type: " . $item['material_type'] . " startsWithEquipment: " . ($startsWithEquipment == true ? 'true' : 'false') . " isEquipmentType: " . ($isEquipmentType == true ? 'true' : 'false') . " --");
 
         if (($isEquipmentType || $startsWithEquipment) || ($loc_code == 'dmctl' && $isEquipmentType)) {
             return true;
@@ -562,7 +561,6 @@ class GetThisLoader
                 $this->msgTemplate = 'ask.phtml';
             }
         }
-        #var_export($this->msgTemplate);
         return $this->msgTemplate !== null;
     }
 
