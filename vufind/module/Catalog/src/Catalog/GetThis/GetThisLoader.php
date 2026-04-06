@@ -350,13 +350,17 @@ class GetThisLoader
     {
         $loc_code = $this->getLocationCode($item_id);
         $item = $this->getItem($item_id);
-        // If the location is (Kline DM or circulation)
-        // and the callnumber or material type is equipment
-        return ($loc_code == 'dmres' || $loc_code == 'mnres')
-            && (
-                stripos($item['callnumber'], 'equipment') === 0
-                || $item['material_type'] == '2D/3D/Kit/Equipment'
-            );
+        // If the location is DMCTL and material type is '2D/3D/Kit/Equipment'
+        // OR
+        // If  the call number starts with 'Equipment' or material type is '2D/3D/Kit/Equipment'
+        $startsWithEquipment = (stripos($item['callnumber'], 'equipment') === 0);
+        $isEquipmentType = ($item['material_type'] == '2D/3D/Kit/Equipment');
+        #var_export(" -- callnum: " . $item['callnumber'] . " material type: " . $item['material_type'] . " startsWithEquipment: " . ($startsWithEquipment == true ? 'true' : 'false') . " isEquipmentType: " . ($isEquipmentType == true ? 'true' : 'false') . " --");
+
+        if (($isEquipmentType || $startsWithEquipment) || ($loc_code == 'dmctl' && $isEquipmentType)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -517,7 +521,9 @@ class GetThisLoader
                 $this->msgTemplate = 'makercheckedout.phtml';
             }
         } else {
-            if (
+            if ($this->isEquipment($item_id)) {
+                $this->msgTemplate = 'equipment.phtml';
+            } elseif (
                 Regex::ART($loc) && Regex::PERM($loc)
                 || (!Regex::RESERVE_DIGITAL($loc) && Regex::RESERV($loc))
             ) {
@@ -542,8 +548,6 @@ class GetThisLoader
                 $this->msgTemplate = 'law.phtml';
             } elseif (Regex::MAKERSPACE($loc)) {
                 $this->msgTemplate = 'maker.phtml';
-            } elseif ($this->isEquipment($item_id)) {
-                $this->msgTemplate = 'equipment.phtml';
             } elseif (Regex::MAP($loc)) {
                 if (Regex::CIRCULATING($loc) && $this->isLibUseOnly()) {
                     $this->msgTemplate = 'ask.phtml';
@@ -558,6 +562,7 @@ class GetThisLoader
                 $this->msgTemplate = 'ask.phtml';
             }
         }
+        #var_export($this->msgTemplate);
         return $this->msgTemplate !== null;
     }
 

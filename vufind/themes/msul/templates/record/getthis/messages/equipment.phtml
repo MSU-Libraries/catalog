@@ -1,14 +1,29 @@
 <?php
-$location = $this->getthis->getLocation();
-$isCirc = stripos($location, 'circulation') !== false;
-$url = $isCirc ? 'circ' : 'dmc';
-$desk = $isCirc ? 'Circulation Desk' : 'Digital & Multimedia Center';
+$locationCode = $this->getthis->getLocationCode();
+$serviceDesks = [
+    "arres" => ["hours" => "art",          "desk" => "art", "label" => "Art Library's Service Desk"],
+    "bures" => ["hours" => "bus",          "desk" => "bus", "label" => "Business Library's Service Desk"],
+    "mnres" => ["hours" => "circ",         "desk" => "circ/borrowing-at-msu", "label" => "Circulation Desk"],
+    // DMC Codes
+    "dm"    => ["hours" => "dmc",          "desk" => "dmc", "label" => "DMC's Service Desk"],
+    "dmres" => ["hours" => "dmc",          "desk" => "dmc", "label" => "DMC's Service Desk"],
+    "rvgam" => ["hours" => "dmc",          "desk" => "dmc", "label" => "DMC's Service Desk"],
+    "dmctl" => ["hours" => "dmc",          "desk" => "dmc", "label" => "DMC's Service Desk"],
+    // DSL & MakerSpace
+    "mndsl" => ["hours" => "dsl",          "desk" => "dsl", "label" => "DSL's Service Desk"],
+    "mnmst" => ["hours" => "service-desk", "desk" => "makerspace", "label" => "MakerSpace's Service Desk"],
+    "mures" => ["hours" => "music",        "desk" => "music", "label" => "Music's Service Desk"],
+    "mnmct" => ["hours" => "service-desk", "desk" => "hollander-makecentral", "label" => "MakeCentral's Service Desk"]
+];
+$serviceDesk = isset($serviceDesks[$locationCode]) ? $serviceDesks[$locationCode] : null;
 ?>
+<?php if ($serviceDesk): ?>
 <div>
     <p>
         <b>Self Service:</b>
-        You may pick up the equipment from the <?= $desk ?>
-        during the Desk's <a href='https://lib.msu.edu/hours/calendar/<?= $url ?>' target='_blank'>open hours</a>.
+        You may pick up the equipment from the <a href='https://lib.msu.edu/<?= $serviceDesk["desk"] ?>'><?= $serviceDesk["label"] ?></a>
+        during the Desk's <a href='https://lib.msu.edu/hours/calendar/<?= $serviceDesk["hours"] ?>' target='_blank'>open hours</a>.
         Material is subject to availability.
     </p>
 </div>
+<?php endif; ?>
