@@ -12,7 +12,7 @@ challenges:
       js-loader: load.mjs
       wasm-runtime: runtime.wasm
       wasm-runtime-settings:
-        difficulty: 16
+        difficulty: 17
       verify-probability: 0.02
 
 conditions:
@@ -85,7 +85,7 @@ conditions:
     - 'userAgent == ""'
     # Detected sus agents
     - 'userAgent.matches("Firefox/[0-9]{1,2}\\.")'
-    - 'userAgent.matches("Firefox/1[0-1][0-9]\\.")'
+    - 'userAgent.matches("Firefox/1[0-2][0-9]\\.")'
     - 'userAgent.matches("Opera/[0-9]\\.")'
     - 'userAgent.matches("iPhone OS [0-9]_")'
     - 'userAgent.matches("Gecko/1[0-9][0-9][0-9]-")'
@@ -95,8 +95,8 @@ conditions:
     - 'userAgent.matches("MSIE [0-9]\\.")'
     - 'userAgent.matches("Windows 9[5-8x]")'
     - 'userAgent.matches("Chrome/[0-9]{1,2}\\.")'
-    - 'userAgent.matches("Chrome/11[0-9]\\.")'
-    - 'userAgent.matches("Chrome/12[0-4]\\.")'
+    - 'userAgent.matches("Chrome/1[1-2][0-9]\\.")'
+    - 'userAgent.matches("Chrome/13[0-6]\\.")'
     - 'userAgent.matches("Android [1-6]\\.")'
     - 'userAgent.matches("Version/[0-9]\\.[0-9](\\.[0-9])? Safari")'
     - 'userAgent.matches("FxiOS/[0-9]{1,2}\\.")'
