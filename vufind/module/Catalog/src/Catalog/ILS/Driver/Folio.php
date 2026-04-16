@@ -1110,7 +1110,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             if (!isset($packageId)) {
                 if (isset($tmpPackageId)) {
                     $packageId = $tmpPackageId;
-                    $this->warning('Could not identify the correct package among several publishers, ' .
+                    $this->debug('Could not identify the correct package among several publishers, ' .
                         'selected the first found (' . $publisherName . ')');
                 } else {
                     throw new ILSException('Could not identify single package for publisher');
