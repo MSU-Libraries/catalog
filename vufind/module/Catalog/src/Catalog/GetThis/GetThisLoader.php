@@ -354,9 +354,10 @@ class GetThisLoader
         // OR
         // If  the call number starts with 'Equipment' or material type is '2D/3D/Kit/Equipment'
         $startsWithEquipment = (stripos($item['callnumber'], 'equipment') === 0);
+        $isEquipmentLoc = ($loc_code == 'dmctl' || $loc_code == 'dxres');
         $isEquipmentType = ($item['material_type'] == '2D/3D/Kit/Equipment');
 
-        if (($isEquipmentType || $startsWithEquipment) || (($loc_code == 'dmctl' || $loc_code == 'dxres') && $isEquipmentType)) {
+        if (($isEquipmentType || $startsWithEquipment) || ($isEquipmentLoc && $isEquipmentType)) {
             return true;
         }
         return false;
