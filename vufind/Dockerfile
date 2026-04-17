@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ubuntu:24.04 AS vf-core
 
 ENV TZ=America/Detroit \
     DEBIAN_FRONTEND=noninteractive \
@@ -65,7 +65,6 @@ RUN \
 ARG VUFIND_VERSION
 ENV VUFIND_VERSION=$VUFIND_VERSION
 
-COPY composer.local.json /tmp/composer.local.json
 COPY install-composer.sh /install-composer.sh
 
 RUN \
@@ -76,14 +75,9 @@ RUN \
     /install-composer.sh && \
     mv /composer.phar /usr/local/bin/composer && \
     rm /install-composer.sh && \
-    # Get the VuFind tar
-    wget https://github.com/vufind-org/vufind/releases/download/v${VUFIND_VERSION}/vufind-${VUFIND_VERSION}.tar.gz && \
-    # Install VuFind
-    tar -xzvf vufind-${VUFIND_VERSION}.tar.gz -C /usr/local && \
-    mv /usr/local/vufind-${VUFIND_VERSION} /usr/local/vufind && \
-    rm vufind-${VUFIND_VERSION}.tar.gz && \
-    mv /tmp/composer.local.json /usr/local/vufind/composer.local.json && \
-    # Install VuFind dev dependencies, for the tests
+    # Clone VuFind
+    git clone --branch "v${VUFIND_VERSION}" --depth 1 https://github.com/vufind-org/vufind.git /usr/local/vufind && \
+    # Install VuFind dependencies
     composer --working-dir=/usr/local/vufind/ config audit.block-insecure false && \
     composer --working-dir=/usr/local/vufind/ update && \
     # Remove unused Solr dependencies after Vufind is installed
@@ -99,9 +93,7 @@ RUN \
     touch /usr/local/vufind/package-lock.json && \
     chown -R 1000:1000 /usr/local/vufind/node_modules /usr/local/vufind/package-lock.json && \
     # Enable bash completion for all users
-    echo ". /usr/share/bash-completion/bash_completion" >> /etc/bash.bashrc && \
-    # Remove allfields field (PC-1393)
-    sed -i '/^allfields =/d' /usr/local/vufind/import/marc.properties
+    echo ". /usr/share/bash-completion/bash_completion" >> /etc/bash.bashrc
 
 # TEMP(PART3):
 # - Patch and replace marc4j due to linked field bug https://github.com/marc4j/marc4j/pull/100
@@ -125,6 +117,8 @@ RUN cd /usr/local/vufind && \
     npm install
 
 USER 0
+
+FROM vf-core AS msul
 
 # Install SimpleSAMLphp
 ARG SIMPLESAMLPHP_VERSION
@@ -161,6 +155,7 @@ COPY local/ /usr/local/vufind/local
 COPY themes/msul /usr/local/vufind/themes/msul
 COPY module/Catalog /usr/local/vufind/module/Catalog
 COPY tests/ /tests
+COPY composer.local.json /tmp/composer.local.json
 COPY tests/.eslintrc.js /usr/local/vufind/.eslintrc.js
 COPY robots.txt /usr/local/vufind/public/robots.txt
 COPY public/index.php  /usr/local/vufind/public/index.php
@@ -187,6 +182,12 @@ RUN \
     mkdir -p ${VUFIND_CACHE_DIR} && \
     chown -R 33:33 ${VUFIND_CACHE_DIR} && \
     install -d -o 1000 -g 1000 ${VUFIND_CACHE_DIR}/cli && \
+    # Install local composer dependencies
+    mv /tmp/composer.local.json /usr/local/vufind/composer.local.json && \
+    composer --working-dir=/usr/local/vufind/ config audit.block-insecure false && \
+    composer --working-dir=/usr/local/vufind/ update && \
+    # Remove allfields field (PC-1393)
+    sed -i '/^allfields =/d' /usr/local/vufind/import/marc.properties && \
     # Set permissions on local, theme, and Catalog
     chown -R 1000:1000 ${VUFIND_LOCAL_DIR} && \
     chown -R 33:1000 ${VUFIND_HOME}/themes/msul && \
