@@ -1619,7 +1619,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getPlatform()
     {
-        return $this->getSolrField('platform_str_mv') ?? [];
+        return $this->getMarcFieldWithInd('753', ['a', 'b', 'c']);
     }
 
     /**
