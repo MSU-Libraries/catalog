@@ -22,7 +22,7 @@ challenges:
       js-loader: load.mjs
       wasm-runtime: runtime.wasm
       wasm-runtime-settings:
-        difficulty: 20
+        difficulty: 21
       verify-probability: 0.02
 
 conditions:
