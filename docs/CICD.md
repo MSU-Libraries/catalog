@@ -186,7 +186,8 @@ want to match it to followed by a wildcard (`*`). For example: `devel-mytest*`.
   analytics sent to
 * `MATOMO_URL`: Matomo URL to send the analytics to
 * `OAI_URL`: URL for making OAI calls to FOLIO when harvesting (can include
-  API Token)
+* `DR_OAI_URL`: URL for making OAI calls to the digital repository when
+  harvesting (can include API Token)
 * `RECAPTCHA_SECRET_KEY`: Secret key for reCaptcha form validation
 * `RECAPTCHA_SITE_KEY`: Site key for reCaptcha form validation
 * `REGISTRY_ACCESS_TOKEN`: Read-only registry access token used by deploy user

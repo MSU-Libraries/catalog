@@ -45,3 +45,38 @@ body.template-dir-myresearch.template-name-profile {
   flex: 0 2rem;
   text-align: center;
 }
+
+/* The format badges on the page should have a background */
+/* color and consistent height */
+.result .format {
+  background-color: $lavendernew;
+  line-height:1rem !important;
+}
+
+// Overriding from bs5 theme to prevent colors from being overridden
+// PR worthy: confirmed this is an issue in core VF
+.myresearch-menu {
+  .status {
+    .badge {
+      border-radius: var(--bs-badge-border-radius);
+      border: inherit;
+      height: inherit;
+      &.account-none {
+        color: $gray-dark !important;
+        background-color: $gray-lighter !important;
+      }
+      &.account-info {
+        color: var(--#{$prefix}success) !important;
+        background-color: var(--#{$prefix}success-bg-subtle) !important;
+      }
+      &.account-warning {
+        color: var(--#{$prefix}warning) !important;
+        background-color: var(--#{$prefix}warning-bg-subtle) !important;
+      }
+      &.account-alert {
+        color: var(--#{$prefix}danger) !important;
+        background-color: var(--#{$prefix}danger-bg-subtle) !important;
+      }
+    }
+  }
+}

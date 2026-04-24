@@ -133,6 +133,7 @@
               <?=$thumbnail ?>
             <?php endif ?>
             <div class="media-body">
+              <?php // MSU Change to render only the h2 here PC-1584 ?>
               <?=$this->record($resource)->renderTemplate('account-entry.phtml')?>
               <?php if ($this->displayItemBarcode && !empty($ilsDetails['barcode'])): ?>
                 <strong><?=$this->transEsc('Barcode')?>:</strong> <?=$this->escapeHtml($ilsDetails['barcode'])?>
@@ -164,21 +165,24 @@
                 <?php if (isset($renewDetails['success']) && $renewDetails['success']): ?>
                   <?php $showStatus = false; ?>
                   <strong><?=$this->transEsc('Due Date')?>:</strong> <?=$this->escapeHtml($renewDetails['new_date'])?> <?php if (isset($renewDetails['new_time'])): ?><?=$this->escapeHtml($renewDetails['new_time'])?><?php endif; /** MSU */ ?>
-                  <div class="alert alert-success"><?=$this->transEsc('renew_success')?></div>
+                  <div class="alert alert-success d-inline-block py-0 px-2 my-0 ms-1"><?=$this->transEsc('renew_success')?></div><?php // MSU add classes to reduce size of alert ?>
                 <?php else: ?>
                   <strong><?=$this->transEsc('Due Date')?>:</strong> <?=$this->escapeHtml($ilsDetails['duedate'])?><?php if (isset($ilsDetails['dueTime'])): ?> <?=$this->escapeHtml($ilsDetails['dueTime'])?><?php endif; /** MSU */ ?>
-                  <div class="alert alert-danger"><?=$this->transEsc('renew_fail')?><?php if (isset($renewDetails['sysMessage'])): ?>: <?=$this->transEsc($renewDetails['sysMessage'])?><?php endif; ?></div>
+                  <div class="alert alert-danger d-inline-block py-0 px-2 my-0 ms-1"><?=$this->transEsc('renew_fail')?><?php if (isset($renewDetails['sysMessage'])): ?>: <?=$this->transEsc($renewDetails['sysMessage'])?><?php endif; ?></div><?php // MSU add classes to reduce size of alert ?>
                 <?php endif; ?>
               <?php else: ?>
                 <strong><?=$this->transEsc('Due Date')?>:</strong> <?=$this->escapeHtml($ilsDetails['duedate'])?><?php if (isset($ilsDetails['dueTime'])): ?> <?=$this->escapeHtml($ilsDetails['dueTime'])?><?php endif; /** MSU */ ?>
                 <?php if ($showStatus): ?>
                   <?php if (isset($ilsDetails['dueStatus']) && $ilsDetails['dueStatus'] == 'overdue'): ?>
-                    <div class="alert alert-danger"><?=$this->transEsc('renew_item_overdue')?></div>
+                    <div class="alert alert-danger d-inline-block py-0 px-2 my-0 ms-1"><?=$this->transEsc('renew_item_overdue')?></div><?php // MSU add classes to reduce size of alert ?>
                   <?php elseif (isset($ilsDetails['dueStatus']) && $ilsDetails['dueStatus'] == 'due'): ?>
-                    <div class="alert alert-info"><?=$this->transEsc('renew_item_due')?></div>
+                    <div class="alert alert-warning d-inline-block py-0 px-2 my-0 ms-1"><?=$this->transEsc('renew_item_due')?></div><?php // MSU add classes to reduce size of alert and change -info to -warning ?>
                   <?php endif; ?>
                 <?php endif; ?>
               <?php endif; ?>
+
+              <?php // MSU move format to end PC-1584 ?>
+              <?=$this->record($resource)->renderTemplate('account-entry-format.phtml')?>
 
               <?php if ($showStatus && isset($ilsDetails['message']) && !empty($ilsDetails['message'])): ?>
                 <div class="alert alert-info"><?=$this->transEsc($ilsDetails['message'])?></div>

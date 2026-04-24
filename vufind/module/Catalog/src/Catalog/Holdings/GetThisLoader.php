@@ -68,13 +68,17 @@ class GetThisLoader extends AbstractItemLoader
     {
         $loc_code = $this->getLocationCode($item_id);
         $item = $this->getItem($item_id);
-        // If the location is (Kline DM or circulation)
-        // and the callnumber or material type is equipment
-        return ($loc_code == 'dmres' || $loc_code == 'mnres')
-            && (
-                stripos($item['callnumber'], 'equipment') === 0
-                || $item['material_type'] == '2D/3D/Kit/Equipment'
-            );
+        // If the location is (DMCTL or DXRES) and material type is '2D/3D/Kit/Equipment'
+        // OR
+        // If  the call number starts with 'Equipment' or material type is '2D/3D/Kit/Equipment'
+        $startsWithEquipment = (stripos($item['callnumber'], 'equipment') === 0);
+        $isEquipmentLoc = ($loc_code == 'dmctl' || $loc_code == 'dxres');
+        $isEquipmentType = ($item['material_type'] == '2D/3D/Kit/Equipment');
+
+        if (($isEquipmentType || $startsWithEquipment) || ($isEquipmentLoc && $isEquipmentType)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -205,7 +209,9 @@ class GetThisLoader extends AbstractItemLoader
                 $this->msgTemplate = 'makercheckedout.phtml';
             }
         } else {
-            if (
+            if ($this->isEquipment($item_id)) {
+                $this->msgTemplate = 'equipment.phtml';
+            } elseif (
                 Regex::ART($loc) && Regex::PERM($loc)
                 || (!Regex::RESERVE_DIGITAL($loc) && Regex::RESERV($loc))
             ) {
@@ -230,8 +236,6 @@ class GetThisLoader extends AbstractItemLoader
                 $this->msgTemplate = 'law.phtml';
             } elseif (Regex::MAKERSPACE($loc)) {
                 $this->msgTemplate = 'maker.phtml';
-            } elseif ($this->isEquipment($item_id)) {
-                $this->msgTemplate = 'equipment.phtml';
             } elseif (Regex::MAP($loc)) {
                 if (Regex::CIRCULATING($loc) && $this->isLibUseOnly()) {
                     $this->msgTemplate = 'ask.phtml';

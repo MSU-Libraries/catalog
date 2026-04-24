@@ -575,7 +575,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
                         $dueDateTimestamp
                     ),
                 'dueStatus' => $dueStatus,
-                'id' => $this->getBibId($trans->item->instanceId),
+                // MSU remove prefix so ilsDetails in templates populates
+                'id' => $this->getBibIdWithoutPrefix($trans->item->instanceId),
                 'item_id' => $trans->item->id,
                 'barcode' => $trans->item->barcode,
                 'renew' => $trans->renewalCount ?? 0,
@@ -1114,7 +1115,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
             if (!isset($packageId)) {
                 if (isset($tmpPackageId)) {
                     $packageId = $tmpPackageId;
-                    $this->warning('Could not identify the correct package among several publishers, ' .
+                    $this->debug('Could not identify the correct package among several publishers, ' .
                         'selected the first found (' . $publisherName . ')');
                 } else {
                     throw new ILSException('Could not identify single package for publisher');
@@ -1465,5 +1466,24 @@ class Folio extends \VuFind\ILS\Driver\Folio
             debugParams: '{"id":"...","pin":"..."}',
             headers: $headers
         );
+    }
+
+    /**
+     * MSU-only method for PC-1584 to return the bibId without the mutli-backend prefix.
+     *
+     * @param string $instanceOrInstanceId Instance object or ID (will be looked up
+     * using holding or item ID if not provided)
+     * @param string $holdingId            Holding-level id (optional)
+     * @param string $itemId               Item-level id (optional)
+     *
+     * @return string Appropriate bib id retrieved from FOLIO identifiers
+     */
+    protected function getBibIdWithoutPrefix(
+        $instanceOrInstanceId = null,
+        $holdingId = null,
+        $itemId = null
+    ) {
+        $fullBibId = $this->getBibId($instanceOrInstanceId, $holdingId, $itemId);
+        return substr($fullBibId, strpos($fullBibId, '.') + 1);
     }
 }

@@ -11,8 +11,8 @@ default_args() {
     ARGS[BATCH_IMPORT]=0
     ARGS[LIMIT]=
     ARGS[LIMIT_BY_DELETE]=
-    ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/folio
-    ARGS[SHARED_DIR]=/mnt/oai
+    ARGS[VUFIND_HARVEST_DIR]=/usr/local/vufind/local/harvest/dr
+    ARGS[SHARED_DIR]=/mnt/dr
     ARGS[SOLR_URL]="http://solr:8983/solr"
     ARGS[SOLR_COLLECTION]="biblio"
     ARGS[RESET_SOLR]=0
@@ -27,7 +27,7 @@ default_args
 # Script help text
 run_help() {
     echo ""
-    echo "Usage: Harvest data from FOLIO via OAI-PMH"
+    echo "Usage: Harvest data from the Digital Repository via OAI-PMH"
     echo "       and import that data into VuFind's Solr."
     echo ""
     echo "Examples: "
@@ -420,7 +420,7 @@ oai_harvest() {
         countdown 5
         MAX_FAILURES=10
         CUR_FAILURES=0
-        while ! php /usr/local/vufind/harvest/harvest_oai.php folio && [[ "$CUR_FAILURES" -lt "$MAX_FAILURES" ]]; do
+        while ! php /usr/local/vufind/harvest/harvest_oai.php dr && [[ "$CUR_FAILURES" -lt "$MAX_FAILURES" ]]; do
             (( CUR_FAILURES += 1))
             verbose "Failure from harvest_oai.php (#${CUR_FAILURES})."
             if [[ "$CUR_FAILURES" -lt "$MAX_FAILURES" ]]; then
@@ -497,7 +497,7 @@ update_processed_delete_files() {
         verbose "No delete file in processed directory, skipping."
         return
     fi
-    IDS=$(grep -o '001">[^<]*<' "${ARGS[VUFIND_HARVEST_DIR]}"/combined_*.xml | sed -e 's/.*001">\([^<]*\)</folio.\1/' | sort)
+    IDS=$(grep -o '001">[^<]*<' "${ARGS[VUFIND_HARVEST_DIR]}"/combined_*.xml | sed -e 's/.*001">\([^<]*\)</dr.\1/' | sort)
     for DFILE in "${DELETE_FILES[@]}"; do
         if comm -2 -3 <(sort "$DFILE") <(echo "$IDS") >"${DFILE}_2"; then
             mv "${DFILE}_2" "$DFILE"
@@ -541,7 +541,7 @@ batch_import() {
 
     update_processed_delete_files
 
-    if ! /usr/local/vufind/harvest/batch-import-marc.sh -x 40 folio; then
+    if ! /usr/local/vufind/harvest/batch-import-marc.sh -x 40 dr; then
         echo "ERROR: Batch import failed with code: $?"
         exit 1
     fi
@@ -549,7 +549,7 @@ batch_import() {
 
     verbose "Processing delete records from harvest."
     # No countdown here to avoid slowing down the Solr cache warmup after the commit that happened in the previous step
-    if ! /usr/local/vufind/harvest/batch-delete.sh folio -vv --id-prefix=folio; then
+    if ! /usr/local/vufind/harvest/batch-delete.sh dr -vv --id-prefix=dr; then
         echo "ERROR: Batch delete script failed."
         exit 1
     fi

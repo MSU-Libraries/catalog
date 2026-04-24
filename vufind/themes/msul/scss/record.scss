@@ -92,17 +92,6 @@
   }
 }
 
-// Prevent wrapping long field names on tabs
-// ex: in00005965624 Special Audience Characteristics
-// but wrap text for short width for accessibility (to avoid scrollbars)
-@media only screen and (min-width : 600px) {
-  .tab-content {
-    th {
-      white-space: nowrap;
-    }
-  }
-}
-
 // Show the icon next to the export button on the record page
 .dropdown-toggle .icon:last-child {
   display: inherit;

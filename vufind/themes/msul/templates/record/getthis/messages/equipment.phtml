@@ -1,14 +1,76 @@
 <?php
-$location = $this->getthis->getLocation();
-$isCirc = stripos($location, 'circulation') !== false;
-$url = $isCirc ? 'circ' : 'dmc';
-$desk = $isCirc ? 'Circulation Desk' : 'Digital & Multimedia Center';
+$locationCode = $this->getthis->getLocationCode();
+$serviceDesks = [
+    'arres' => [
+        'hours' => 'https://lib.msu.edu/hours/calendar/art',
+        'desk' => 'https://lib.msu.edu/art',
+        'label' => "Art Library's Service Desk",
+    ],
+    'bures' => [
+        'hours' => 'https://lib.msu.edu/hours/calendar/bus',
+        'desk' => 'https://lib.msu.edu/bus',
+        'label' => "Business Library's Service Desk",
+    ],
+    'mnres' => [
+        'hours' => 'https://lib.msu.edu/hours/calendar/circ',
+        'desk' => 'https://lib.msu.edu/circ/borrowing-at-msu',
+        'label' => 'Circulation Desk',
+    ],
+    'dxres' => [
+        'hours' => 'https://law.msu.edu/current-students/library/hours',
+        'desk' => 'https://law.msu.edu/current-students/library',
+        'label' => "Law Library's Service Desk",
+    ],
+    'dm' => [
+        'hours' => 'https://lib.msu.edu/hours/calendar/dmc',
+        'desk' => 'https://lib.msu.edu/dmc',
+        'label' => "DMC's Service Desk",
+    ],
+    'dmres' => [
+        'hours' => 'https://lib.msu.edu/hours/calendar/dmc',
+        'desk' => 'https://lib.msu.edu/dmc',
+        'label' => "DMC's Service Desk",
+    ],
+    'rvgam' => [
+        'hours' => 'https://lib.msu.edu/hours/calendar/dmc',
+        'desk' => 'https://lib.msu.edu/dmc',
+        'label' => "DMC's Service Desk",
+    ],
+    'dmctl' => [
+        'hours' => 'https://lib.msu.edu/hours/calendar/dmc',
+        'desk' => 'https://lib.msu.edu/dmc',
+        'label' => "DMC's Service Desk",
+    ],
+    'mndsl' => [
+        'hours' => 'https://lib.msu.edu/hours/calendar/dsl',
+        'desk' => 'https://lib.msu.edu/dsl',
+        'label' => "DSL's Service Desk",
+    ],
+    'mnmst' => [
+        'hours' => 'https://lib.msu.edu/hours/calendar/service-desk',
+        'desk' => 'https://lib.msu.edu/makerspace',
+        'label' => "MakerSpace's Service Desk",
+    ],
+    'mures' => [
+        'hours' => 'https://lib.msu.edu/hours/calendar/music',
+        'desk' => 'https://lib.msu.edu/music',
+        'label' => "Music's Service Desk",
+    ],
+    'mnmct' => [
+        'hours' => 'https://lib.msu.edu/hours/calendar/service-desk',
+        'desk' => 'https://lib.msu.edu/hollander-makecentral',
+        'label' => "MakeCentral's Service Desk",
+    ],
+];
+$serviceDesk = $serviceDesks[$locationCode] ?? null;
 ?>
+<?php if ($serviceDesk): ?>
 <div>
     <p>
         <b>Self Service:</b>
-        You may pick up the equipment from the <?= $desk ?>
-        during the Desk's <a href='https://lib.msu.edu/hours/calendar/<?= $url ?>' target='_blank'>open hours</a>.
+        You may pick up the equipment from the <a href='<?= $serviceDesk['desk'] ?>'><?= $serviceDesk['label'] ?></a>
+        during the Desk's <a href='<?= $serviceDesk['hours'] ?>' target='_blank'>open hours</a>.
         Material is subject to availability.
     </p>
 </div>
+<?php endif; ?>
