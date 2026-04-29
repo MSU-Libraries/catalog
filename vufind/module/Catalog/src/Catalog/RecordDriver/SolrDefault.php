@@ -19,11 +19,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * along with this program; if not, see
+ * <https://www.gnu.org/licenses/>.
  *
  * @category VuFind
- * @package  Record_Drivers
+ * @package  RecordDrivers
+ * @author   Demian Katz <demian.katz@villanova.edu>
+ * @author   Ere Maijala <ere.maijala@helsinki.fi>
  * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:record_drivers Wiki
@@ -38,10 +40,14 @@ namespace Catalog\RecordDriver;
  * This should be used as the base class for all Solr-based record models.
  *
  * @category VuFind
- * @package  Record_Drivers
+ * @package  RecordDrivers
+ * @author   Demian Katz <demian.katz@villanova.edu>
+ * @author   Ere Maijala <ere.maijala@helsinki.fi>
  * @author   Megan Schanz <schanzme@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:record_drivers Wiki
+ *
+ * @SuppressWarnings(PHPMD.ExcessivePublicCount)
  */
 class SolrDefault extends \VuFind\RecordDriver\SolrDefault
 {

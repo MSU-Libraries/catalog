@@ -420,7 +420,7 @@ oai_harvest() {
         countdown 5
         MAX_FAILURES=10
         CUR_FAILURES=0
-        while ! php /usr/local/vufind/harvest/harvest_oai.php && [[ "$CUR_FAILURES" -lt "$MAX_FAILURES" ]]; do
+        while ! php /usr/local/vufind/harvest/harvest_oai.php folio && [[ "$CUR_FAILURES" -lt "$MAX_FAILURES" ]]; do
             (( CUR_FAILURES += 1))
             verbose "Failure from harvest_oai.php (#${CUR_FAILURES})."
             if [[ "$CUR_FAILURES" -lt "$MAX_FAILURES" ]]; then

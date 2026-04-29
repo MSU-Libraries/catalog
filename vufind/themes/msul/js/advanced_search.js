@@ -5,6 +5,13 @@ var nextGroup = 0;
 var groupLength = [];
 var deleteGroup, deleteSearch;
 
+/**
+ * Add a new search field to a specified group in the advanced search form
+ * @param {number}  group          The ID of the group to add the search field to.
+ * @param {object}  [_fieldValues] Optional object with preset values for the search field.
+ * @param {boolean} [isUser]       Check whether the action was triggered by the user (default = false)
+ * @returns {boolean} Always return false to prevent default link behavior.
+ */
 function addSearch(group, _fieldValues, isUser = false) {
   var fieldValues = _fieldValues || {};
   // Build the new search
@@ -63,6 +70,12 @@ function addSearch(group, _fieldValues, isUser = false) {
   return false;
 }
 
+/**
+ * Delete a specific search field from a group.
+ * @param {number} group The ID of the group containing the search field.
+ * @param {number} sindex The index of the search field to delete.
+ * @returns {boolean} Always return false to prevent default link behavior.
+ */
 deleteSearch = function _deleteSearch(group, sindex) {
   for (var i = sindex; i < groupLength[group] - 1; i++) {
     var $search0 = $('#search' + group + '_' + i);
@@ -87,6 +100,9 @@ deleteSearch = function _deleteSearch(group, sindex) {
   return false;
 };
 
+/**
+ * Renumber the labels for the group delete links.
+ */
 function _renumberGroupLinkLabels() {
   $('.adv-group-close').each(function deleteGroupLinkLabel(i, link) {
     $(link).attr(
@@ -96,6 +112,14 @@ function _renumberGroupLinkLabels() {
   });
 }
 
+/**
+ * Add a new search group to the advanced search form.
+ * @param {string}  [_firstTerm]  Initial search term for the first field in the new group.
+ * @param {string}  [_firstField] Initial search field for the first field in the new group.
+ * @param {string}  [_join]       Initial join operator for the new group.
+ * @param {boolean} [isUser]      Whether the action was triggered by a user (default = false).
+ * @returns {number} The ID of the newly created group.
+ */
 function addGroup(_firstTerm, _firstField, _join, isUser = false) {
   var firstTerm = _firstTerm || '';
   var firstField = _firstField || '';
@@ -120,7 +144,7 @@ function addGroup(_firstTerm, _firstField, _join, isUser = false) {
     .on("click", function deleteGroupHandler() {
       return deleteGroup($(this).data('nextGroup'));
     });
-  $newGroup.find('select.form-control')
+  $newGroup.find('.adv-group-match select')
     .attr('id', 'search_bool' + nextGroup)
     .attr('name', 'bool' + nextGroup + '[]');
   $newGroup.find('.search_bool')
@@ -163,6 +187,10 @@ deleteGroup = function _deleteGroup(group) {
   return false;
 };
 
+/**
+ * Toggle the expansion of the given item.
+ * @param {string}  [item]  Item to expand/collapse.
+ */
 function toggleExpansion(item) {
   // There is a bug with firefox 122, it jumps higher on the page when toggling for the fist time
   // To reproduce the bug, load the page, scroll down to the list, refresh the page, try to toggle an element without doing anything before
@@ -176,6 +204,12 @@ function toggleExpansion(item) {
   }
 }
 
+/**
+ * Toggle the expansion of the children of the given item.
+ * @param {boolean}    [check] Value of the checked attribute.
+ * @param {string}     [item]  Item to expand/collapse childen items of.
+ * @returns {string}   Next item after the given item.
+ */
 function toggleChildren(check, item) {
   let itemLevel = parseInt($(item).attr('data-level'));
   let nextItem = item.next();
@@ -187,6 +221,10 @@ function toggleChildren(check, item) {
   return nextItem;
 }
 
+/**
+ * Check all the children of the leveledCheckboxes elements and toggle
+ * their expansion to match the parent item.
+ */
 function checkChildrenIfParentCheckedRoutine() {
   $('.leveledCheckboxes').each(function checkChildren() {
     let item = $(this).find('.leveledCheckbox').first();
@@ -204,8 +242,8 @@ function checkChildrenIfParentCheckedRoutine() {
 
 /**
  * Recursive function
- * @param parentItem
- * @return item last handled item
+ * @param {string} parentItem Top level item to check.
+ * @returns {string} item last handled item.
  */
 function uncheckChildrenIfParentChecked(parentItem) {
   let itemChecked = $(parentItem).find('input[type="checkbox"]').prop('checked');
@@ -231,8 +269,8 @@ function uncheckChildrenIfParentChecked(parentItem) {
 }
 
 /**
- * Routine using the recursive function
- * @param item
+ * Routine using the recursive function.
+ * @param {string} item The item to uncheck children items if needed.
  */
 function uncheckChildrenIfParentCheckedRoutine(item) {
   let tmp = item;
@@ -243,9 +281,9 @@ function uncheckChildrenIfParentCheckedRoutine(item) {
 
 /**
  * Check the state of previous elements in the list and for parents, toggling to adapt the checkmark
- * @param currentItem
- * @param indeterminate if we know at this point that the parent will be in indeterminate state
- * @param runAllTheList if we stop at a root parent or go through the entire list (when starting at the last element)
+ * @param {string}  currentItem   The current item.
+ * @param {boolean} indeterminate if we know at this point that the parent will be in indeterminate state
+ * @param {boolean} runAllTheList if we stop at a root parent or go through the entire list (when starting at the last element)
  */
 function checkAndUpdatePreviousLeveledCheckboxes(currentItem, indeterminate = undefined, runAllTheList = false) {
   let belowItemLevel, currentItemLevel, currentItemChecked, belowItemChecked;
@@ -284,12 +322,19 @@ function checkAndUpdatePreviousLeveledCheckboxes(currentItem, indeterminate = un
   }
 }
 
+/**
+ * Calls the function to update previous checkboxes for all leveledCheckboxes items.
+ */
 function runCheckAndUpdatePreviousLeveledCheckboxesOnWholeList() {
   $('.leveledCheckboxes').each(function updatePreviousLevel() {
     checkAndUpdatePreviousLeveledCheckboxes($(this).find('.leveledCheckbox').last(), undefined, true);
   });
 }
 
+/**
+ * Toggle the check property of the given item.
+ * @param {string} item The item to toggle the check.
+ */
 function toggleCheck(item) {
   if ($(item.originalEvent.originalTarget).closest('.expander').length > 0) return;
   var parents = $(item.target).parents('.leveledCheckbox');
@@ -318,6 +363,9 @@ function toggleCheck(item) {
   checkAndUpdatePreviousLeveledCheckboxes(parents, indeterminate, false);
 }
 
+/**
+ * Prepare the leveled checkboxes on the page.
+ */
 function JSifyLeveledSelect() {
   // Leveling part
   $('.leveledCheckbox').closest('.leveledCheckboxes').addClass('expandableLeveledCheckboxes');
@@ -357,19 +405,30 @@ function JSifyLeveledSelect() {
 }
 
 $(function advSearchReady() {
-  $('.clear-btn').on("click", function clearBtnClick() {
+  document.querySelectorAll('.clear-btn').forEach(clearBtn => clearBtn.addEventListener('click', (event) => {
+    event.preventDefault();
     //MSUL a11y announces All Fields Cleared on click
     let span = $(this).children('span').first();
     setTimeout(() => span.text('All Fields'), 10);
     setTimeout(() => span.empty(), 5000);
     //MSUL end a11y fix
-    $('input[type="text"]').val('');
-    $('input[type="checkbox"],input[type="radio"]').each(function onEachCheckbox() {
-      var checked = $(this).data('checked-by-default');
-      checked = (checked == null) ? false : checked;
-      $(this).prop("checked", checked);
+    document.querySelectorAll('input[type="text"],input[type="number"]').forEach(input => {
+      input.value = '';
+      input.dispatchEvent(new Event('input'));
     });
-    $("option:selected").prop("selected", false);
-  });
+    document.querySelectorAll('input[type="checkbox"],input[type="radio"]').forEach((input) => {
+      input.checked = input.dataset.checkedByDefault === "true";
+      input.dispatchEvent(new Event('input'));
+    });
+    document.querySelectorAll('select').forEach(select => {
+      let selectedOptions = Array.from(select.selectedOptions);
+      if (selectedOptions.length > 0) {
+        selectedOptions.forEach(option => {
+          option.selected = false;
+        });
+        select.dispatchEvent(new Event('change'));
+      }
+    });
+  }));
   JSifyLeveledSelect();
 });

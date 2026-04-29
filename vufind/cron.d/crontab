@@ -31,6 +31,7 @@ MARIADB_VUFIND_PASSWORD_FILE=$MARIADB_VUFIND_PASSWORD_FILE
 
 # Harvest updates
 ${FOLIO_CRON_MINS} 3-23 * * *	root    cron-folio.sh
+${HARV_CRON_MINS} 3    * * *	root    cron-dr.sh
 ${HARV_CRON_MINS} 2    * * *	root    cron-hlm.sh
 ${HARV_CRON_MINS} 4    * * *	root    cron-authority.sh
 

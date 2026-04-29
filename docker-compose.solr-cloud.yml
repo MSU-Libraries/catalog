@@ -52,6 +52,7 @@ services:
       replicas: 3
       resources:
         limits:
+          # Update this value when changing SOLR_JAVA_MEM
           memory: 1536M
       restart_policy:
         window: 15s

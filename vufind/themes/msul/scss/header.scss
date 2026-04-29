@@ -137,13 +137,13 @@ header {
       line-height:2.5rem;
     }
   }
-  .navbar-toggle {
+  .navbar-toggler {
     margin-top:3.5rem;
+    background-color: transparent;
   }
 }
 
 .navbar-collapse {
-  margin-top:-6rem;
   a, a:visited {
     color:#fff;
   }

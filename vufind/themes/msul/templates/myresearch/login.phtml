@@ -3,7 +3,8 @@
   $this->headTitle($this->translate('Login'));
 
   // Set up breadcrumbs:
-  $this->layout()->breadcrumbs = '<li><a href="' . $this->url('myresearch-home') . '">' . $this->transEsc('Your Account') . '</a></li> <li class="active">' . $this->transEsc('Login') . '</li>';
+  $this->breadcrumbs()->set($this->translate('Your Account'), $this->url('myresearch-home'))
+    ->add($this->translate('Login'), active: true);
 
   // Convenience variables:
   $account = $this->auth()->getManager();
@@ -14,7 +15,7 @@
 <?php if ($offlineMode == 'ils-offline'): ?>
   <?=$this->render('Helpers/ils-offline.phtml', ['offlineModeMsg' => 'ils_offline_login_message'])?>
 <?php endif; ?>
-
+<?php // MSU change from h2 to h1 ?>
 <h1 class="lightbox-header"><?=$this->transEsc('Login')?></h1>
 <?=$this->flashmessages()?>
 
@@ -24,4 +25,5 @@
   <?=$this->auth()->getLogin()?>
 <?php endif; ?>
 <?php
+// MSU remove search box
 $this->layout()->searchbox = false;

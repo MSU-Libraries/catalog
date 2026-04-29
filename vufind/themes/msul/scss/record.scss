@@ -11,16 +11,6 @@
   }
 }
 
-// dispay media-left on left for desktop width after reversing order on template for a11y
-.record.sourceEDS .media {
-    @media only screen and (max-width : 767px) {
-      display:block;
-    }
-    @media only screen and (min-width : 768px) {
-      flex-direction:row-reverse;
-    }
-}
-
 // spacing around full text finder link in EDS
 .record.sourceEDS {
   .resultItemLine4 {
@@ -65,6 +55,7 @@
   .action-toolbar li a {
     background-color:revert;
     color:$darkparakeetgreen;
+    border: none;
   }
 }
 
@@ -93,19 +84,11 @@
         border-top:1px solid $medgray;
         padding-top:1rem;
       }
-      .copy-number > span {
-        display: inline-block;
-        margin-top: calc(0.3rem + 1px);
-      }
     }
-  }
-}
 
-// Prevent wrapping long field names on tabs
-// ex: in00005965624 Special Audience Characteristics
-.tab-content {
-  th {
-    white-space: nowrap;
+    .notes-line:not(:last-child) {
+      margin-bottom: 1rem;
+    }
   }
 }
 

@@ -17,11 +17,11 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * along with this program; if not, see
+ * <https://www.gnu.org/licenses/>.
  *
  * @category VuFind
- * @package  View_Helper
+ * @package  View_Helpers
  * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:record_drivers Wiki
@@ -29,8 +29,7 @@
 
 namespace Catalog\View\Helper\Root;
 
-use Laminas\Config\Config;
-use VuFind\Config\YamlReader;
+use VuFind\Config\Config;
 use VuFind\ILS\Logic\AvailabilityStatus;
 use VuFind\ILS\Logic\AvailabilityStatusInterface;
 use VuFind\Tags\TagsService;
@@ -47,7 +46,7 @@ use function in_array;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:record_drivers Wiki
  */
-class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\LoggerAwareInterface
+class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerAwareInterface
 {
     use \VuFind\Log\LoggerAwareTrait;
 
@@ -90,22 +89,25 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
     /**
      * Constructor
      *
-     * @param TagsService            $tagsService    Tags service
-     * @param Config                 $config         Configuration from config.ini
-     * @param \Laminas\Config\Config $browzineConfig config object for the BrowZine.ini file // MSU
+     * @param TagsService            $tagsService       Tags service
+     * @param Config                 $config            Configuration from config.ini
+     * @param \Laminas\Config\Config $browzineConfig    config object for the BrowZine.ini file // MSU
+     * @param \Laminas\Config\Config $accessLinksConfig config object for the accesslinks.yaml file // MSU
      */
     public function __construct(
         protected TagsService $tagsService,
         protected ?Config $config = null,
-        $browzineConfig = null // MSU
+        $browzineConfig = [], // MSU
+        $accessLinksConfig = [] // MSU
     ) {
         parent::__construct($tagsService, $config);
-        $yamlReader = new YamlReader();
-        $this->accessLinksConfig = $yamlReader->get('accesslinks.yaml');
+        // MSU START
+        $this->browzineConfig = $browzineConfig;
+        $this->accessLinksConfig = $accessLinksConfig;
         if (array_key_exists('labels', $this->accessLinksConfig)) {
             $this->linkLabels = $this->accessLinksConfig['labels'];
         }
-        $this->browzineConfig = $browzineConfig;
+        // MSU END
     }
 
     /**
@@ -302,8 +304,8 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Laminas\Log\Log
             $due = isset($transEsc) ? $transEsc('Due') : 'Due';
             $suffix .= ' - ' . $due . ': ' . $holding['duedate'];
         }
-        if ($holding['temporary_loan_type'] ?? false) {
-            $suffix .= ' (' . $holding['temporary_loan_type'] . ')';
+        if ($holding['loan_type_name'] ?? false) {
+            $suffix .= ' (' . $holding['loan_type_name'] . ')';
         }
         return $suffix;
     }

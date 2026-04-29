@@ -105,6 +105,7 @@ Patron((Patron))
 FOLIO[FOLIO]
 BackStage["`BackStage FTP Server
 (authority records)`"]
+DigitalRepository["`MSUL Digital Repository`"]
 Monitoring[Monitoring App]
 Logs@{ shape: docs, label: "Logs"}
 MariaDB[(MariaDB)]
@@ -114,6 +115,7 @@ Matomo[Matomo]
 
 FOLIO --> VuFindCron
 HLM --> VuFindCron
+DigitalRepository --> VuFindCron
 BackStage --> VuFindCron
 
 Patron <--> VuFindWeb

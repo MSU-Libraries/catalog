@@ -14,6 +14,7 @@
         <li>Vufind: <span class="text-{{services['vufind']['color']}}">{{services['vufind']['status']}}</span></li>
         <li>FOLIO harvest: <span class="text-{{services['folio_harvest']['color']}}">{{services['folio_harvest']['status']}}</span></li>
         <li>HLM harvest: <span class="text-{{services['hlm_harvest']['color']}}">{{services['hlm_harvest']['status']}}</span></li>
+        <li>DR (Digital Repository) harvest: <span class="text-{{services['dr_harvest']['color']}}">{{services['dr_harvest']['status']}}</span></li>
         <li>Authority harvest: <span class="text-{{services['authority_harvest']['color']}}">{{services['authority_harvest']['status']}}</span></li>
         <li>Reserves update: <span class="text-{{services['reserves_update']['color']}}">{{services['reserves_update']['status']}}</span></li>
         <li>Alphabetical browse update: <span class="text-{{services['alphabrowse']['color']}}">{{services['alphabrowse']['status']}}</span></li>
@@ -55,6 +56,7 @@
         <li><a href="/monitoring/logs/traefik/access">Traefik access</a></li>
         <li><a href="/monitoring/logs/harvests/folio">FOLIO harvest</a> (<a href="https://msu-libraries.github.io/catalog/harvesting-and-importing/">docs</a>)</li>
         <li><a href="/monitoring/logs/harvests/hlm">HLM harvest</a> (<a href="https://msu-libraries.github.io/catalog/harvesting-and-importing/">docs</a>)</li>
+        <li><a href="/monitoring/logs/harvests/dr">DR harvest</a> (<a href="https://msu-libraries.github.io/catalog/harvesting-and-importing/">docs</a>)</li>
         <li><a href="/monitoring/logs/harvests/authority">Authority harvest</a> (<a href="https://msu-libraries.github.io/catalog/harvesting-and-importing/">docs</a>)</li>
         <li><a href="/monitoring/logs/vufind/reserves_update">Reserve update</a> (<a href="https://msu-libraries.github.io/catalog/harvesting-and-importing/">docs</a>)</li>
         <li><a href="/monitoring/logs/alphabrowse">Alphabetical Browse update</a> (<a href="https://msu-libraries.github.io/catalog/solr/#running-the-alphabetical-indexing-manually">docs</a>)</li>
@@ -68,7 +70,7 @@
     </ul>
     <h2>Other admin apps</h2>
     <ul>
-        <li><a href="/dashboard/">Traefik</a> (<a href="https://doc.traefik.io/traefik/operations/dashboard/">docs</a>)</li>
+        <li>Traefik - <a href="https://catalog-1{% if is_dev %}-dev{% endif %}.aws.lib.msu.edu/dashboard/">node 1</a> <a href="https://catalog-2{% if is_dev %}-dev{% endif %}.aws.lib.msu.edu/dashboard/">node 2</a> <a href="https://catalog-3{% if is_dev %}-dev{% endif %}.aws.lib.msu.edu/dashboard/">node 3</a> (<a href="https://doc.traefik.io/traefik/operations/dashboard/">docs</a>)</li>
         <li><a href="/solr/">Solr</a> (<a href="https://solr.apache.org/guide/solr/9_3/getting-started/solr-admin-ui.html">docs</a>)</li>
         <li><a href="/simplesamlphp/">SimpleSAMLphp</a> (<a href="https://simplesamlphp.org/docs/stable/index.html">docs</a>)</li>
         <li><a href="/Admin/Home">Vufind</a></li>

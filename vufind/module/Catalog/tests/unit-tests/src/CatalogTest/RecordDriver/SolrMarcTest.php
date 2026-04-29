@@ -17,8 +17,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * along with this program; if not, see
+ * <https://www.gnu.org/licenses/>.
  *
  * @category VuFind
  * @package  Tests
@@ -55,14 +55,14 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
      * @param string $solrFixture Name of the fixture file containing a Solr record.
      * @param Config $mainConfig  Main configuration (optional).
      *
-     * @return SolrDefault
+     * @return SolrMarc
      */
     protected function getDriver(
         $marcFixture = 'marctraits.xml',
         $solrFixture = 'record.json',
         Config $mainConfig = null
     ) {
-        $fixture = $this->getJsonFixture('misc/' . $solrFixture, $module = 'Catalog');
+        $fixture = $this->getJsonFixture('misc/' . $solrFixture, 'Catalog');
         $record = new SolrMarc($mainConfig);
         $marc = [];
         if (!empty($marcFixture)) {
@@ -243,7 +243,7 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
     {
         // Verifying the count since the values non-printable characters
         $this->assertCount(1, $this->getDriver('linkedauthors2.xml')->getCorporateAuthorsLinks());
-        $this->assertEquals(108, strlen($this->getDriver('linkedauthors2.xml')->getCorporateAuthorsLinks()[0]));
+        $this->assertEquals(94, strlen($this->getDriver('linkedauthors2.xml')->getCorporateAuthorsLinks()[0]));
     }
 
     /**
@@ -568,6 +568,44 @@ class SolrMarcTest extends \PHPUnit\Framework\TestCase
                 'ind2 = 7',
             ],
             $this->getDriver()->getSeparatedFrom()
+        );
+    }
+
+    /**
+     * Test getNewTitle
+     *
+     * @return void
+     */
+    public function testgetNewTitle()
+    {
+        $this->assertEquals(
+            [
+                'New Journal',
+            ],
+            $this->getDriver()->getNewTitle()
+        );
+        $this->assertEquals(
+            [
+                'A really good book',
+            ],
+            $this->getDriver('linkedtitle.xml')->getNewTitle()
+        );
+    }
+
+    /**
+     * Test getNewTitleLabel
+     *
+     * @return void
+     */
+    public function testgetNewTitleLabel()
+    {
+        $this->assertEquals(
+            'note_785_0',
+            SolrMarc::getNewTitleLabel([], $this->getDriver())
+        );
+        $this->assertEquals(
+            'note_785_3',
+            SolrMarc::getNewTitleLabel([], $this->getDriver('linkedtitle.xml'))
         );
     }
 }

@@ -1,5 +1,9 @@
 /* global bootstrap */
 
+/**
+ * Get the license agreement information for the given title
+ * @param {string} title The title of the item
+ */
 async function getLicenseAgreement(title) {
   // Make the AJAX call to get the data
   const agreements = await fetch("/AJAX/JSON?method=getLicenseAgreement&title=" + encodeURIComponent(title));

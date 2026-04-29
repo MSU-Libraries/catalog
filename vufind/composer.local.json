@@ -1,0 +1,7 @@
+{
+    "autoload": {
+        "psr-4": {
+            "Catalog\\": ["module/Catalog", "module/Catalog/src/Catalog"]
+        }
+    }
+}

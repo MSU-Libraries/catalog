@@ -25,6 +25,7 @@ $lavendernew:			#3b53a9;
 
 //## Gray and brand colors for use across Bootstrap.
 
+$primary:               $darkparakeetgreen;
 $brand-primary:         $darkparakeetgreen;
 $brand-success:         $parakeetgreen;
 $brand-info:            $lavendernew;
@@ -115,3 +116,4 @@ $badge-bg:                    #fff;
 
 //** Background color of active list items
 $list-group-active-bg:          $brand-primary;
+$list-group-border:             black;

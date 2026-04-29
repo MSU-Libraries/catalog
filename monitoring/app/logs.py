@@ -76,6 +76,7 @@ def node_logs(service: str) -> str:
         'traefik/access':          '/mnt/traefik_logs/access.log',
         'harvests/folio':          '/mnt/logs/harvests/folio.log',
         'harvests/hlm':            '/mnt/logs/harvests/hlm.log',
+        'harvests/dr':             '/mnt/logs/harvests/dr.log',
         'harvests/authority':      '/mnt/logs/harvests/authority.log',
         'vufind/reserves_update':  '/mnt/logs/vufind/reserves_update.log',
         'vufind/optimize':         '/mnt/logs/vufind/optimize_cleanup.log',

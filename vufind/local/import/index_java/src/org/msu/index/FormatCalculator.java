@@ -1,12 +1,33 @@
 package org.msu.index;
+/**
+ * Format determination logic.
+ *
+ * Copyright (C) Villanova University 2017.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see
+ * <https://www.gnu.org/licenses/>.
+ */
 
-import org.marc4j.marc.ControlField;
 import org.marc4j.marc.Record;
+import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.VariableField;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Format determination logic.
+ */
 public class FormatCalculator extends org.vufind.index.FormatCalculator
 {
     /**
@@ -19,9 +40,6 @@ public class FormatCalculator extends org.vufind.index.FormatCalculator
      */
     @Override protected String getFormatFrom007(char formatCode, String formatString) {
         char formatCode2 = formatString.length() > 1 ? formatString.charAt(1) : ' ';
-        if (formatCode == 'v' && formatString.length() > 4 && formatString.charAt(1) == 'd' && formatString.charAt(4) == 'g') {
-            return "LaserDisc";
-        }
         // PC-1409
         if (formatCode == 's' && formatCode2 == 'd' && formatString.length() > 10 && formatString.charAt(10) == 'p') {
             return "VinylRecord";
@@ -65,6 +83,9 @@ public class FormatCalculator extends org.vufind.index.FormatCalculator
             String desc = getSubfieldOrDefault(typeField, 'a', "");
             String code = getSubfieldOrDefault(typeField, 'b', "");
             String source = getSubfieldOrDefault(typeField, '2', "");
+            if (desc.equals("computer program")) {
+                return List.of(); // rely on getFormatFromRecordType(), 008/26 is more precise
+            }
             if ((desc.equals("two-dimensional moving image") || code.equals("tdi")) && source.equals("rdacontent")) {
                 formats.add("Video");
                 if (isOnline) {
@@ -92,17 +113,18 @@ public class FormatCalculator extends org.vufind.index.FormatCalculator
      */
     @Override protected String getFormatFromRecordType(Record record, char recordType, ControlField marc008, List formatCodes007)
     {
-        // PC-1424 MSUL - Add logic to change 'Kit' and 'Collection' assignment
         String leader = record.getLeader().toString();
         char bibLevel = Character.toLowerCase(leader.charAt(7));
+        // Force "Collection" based on Bibliographic Level, ignoring Record Type
+        if (bibLevel == 'c' || bibLevel == 'd') {
+            return "Collection";
+        }
+        // PC-1424 MSUL - Add logic to change 'Kit' and 'Collection' assignment
         switch (recordType) {
             case 'o':
                 return "Kit";
             case 'p':
-                if (bibLevel == 'c') {
-                    return "Collection";
-                }
-                break;
+                return "Collection";
         }
 
         return super.getFormatFromRecordType(record, recordType, marc008, formatCodes007);
@@ -220,6 +242,8 @@ public class FormatCalculator extends org.vufind.index.FormatCalculator
         if (bibLevel == 'c' || bibLevel == 'd') {
             return "Collection";
         } else if (recordType == 'a') {
+            // If LDR/06 indicates "Language material," map to "Text";
+            // this helps cut down on the number of unknowns.
             return"Text";
         }
         return "Unknown";

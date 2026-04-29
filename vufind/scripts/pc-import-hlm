@@ -451,95 +451,113 @@ import() {
 
     verbose "Extracting zip files..."
     countdown 5
-    while read -r FILE; do
-      verbose "Unzipping \"${FILE}\""
-      if unzip -n "${FILE}" -d "${ARGS[VUFIND_HARVEST_DIR]}"; then
-        verbose "Extracting process complete"
-        mv "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/processed" # Eventually delete them?
-      else
-        verbose "ERROR during extracting process"
-      fi
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.zip')
+    if [ "${ARGS[DRY_RUN]}" -eq "0" ]; then
+        while read -r FILE; do
+          verbose "Unzipping \"${FILE}\""
+          if unzip -n "${FILE}" -d "${ARGS[VUFIND_HARVEST_DIR]}"; then
+            verbose "Extracting process complete"
+            mv "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/processed" # Eventually delete them?
+          else
+            verbose "ERROR during extracting process"
+          fi
+        done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.zip')
+    fi
     verbose "Zip extraction completed"
 
     verbose "Cleaning up filenames of extracted files"
     countdown 5
-    while read -r FILE; do
-        CLEAN_NAME="$(echo "${FILE}" | sed -e "s/.marc$//" -e "s/.mrc$//" -e "s/ /_/g")".marc
-        if [ "${FILE}" != "${CLEAN_NAME}" ]; then
-            verbose "Renaming ${FILE} -> ${CLEAN_NAME}"
-            mv "${FILE}" "${CLEAN_NAME}"
-        fi
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -iname '*.m*c')
+    if [ "${ARGS[DRY_RUN]}" -eq "0" ]; then
+        while read -r FILE; do
+            CLEAN_NAME="$(echo "${FILE}" | sed -e "s/.marc$//" -e "s/.mrc$//" -e "s/ /_/g")".marc
+            if [ "${FILE}" != "${CLEAN_NAME}" ]; then
+                verbose "Renaming ${FILE} -> ${CLEAN_NAME}"
+                mv "${FILE}" "${CLEAN_NAME}"
+            fi
+        done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -iname '*.m*c')
+    fi
 
     verbose "Cleaning up extra .csv files"
-    find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -iname '*.csv' -delete
+    if [ "${ARGS[DRY_RUN]}" -eq "0" ]; then
+        find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -iname '*.csv' -delete
+    fi
 
     if [[ -n "${ARGS[LIMIT_BY_DELETE]}" ]]; then
         verbose "Will only import ${ARGS[LIMIT_BY_DELETE]} MARC files; others will be deleted."
         countdown 5
-        # Delete excess files beyond the provided limit from the VUFIND_HARVEST_DIR prior to import
-        FOUND_COUNT=0
-        while read -r FILE; do
-            (( FOUND_COUNT += 1 ))
-            if [[ "${FOUND_COUNT}" -gt "${ARGS[LIMIT_BY_DELETE]}" ]]; then
-                rm "$FILE"
-            fi
-        done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.marc')
+        if [ "${ARGS[DRY_RUN]}" -eq "0" ]; then
+            # Delete excess files beyond the provided limit from the VUFIND_HARVEST_DIR prior to import
+            FOUND_COUNT=0
+            while read -r FILE; do
+                (( FOUND_COUNT += 1 ))
+                if [[ "${FOUND_COUNT}" -gt "${ARGS[LIMIT_BY_DELETE]}" ]]; then
+                    rm "$FILE"
+                fi
+            done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -name '*.marc')
+        fi
     else
         countdown 5
     fi
 
     verbose "Pre-processing deletion files to extract IDs from EBSCO MARC records"
-    while read -r FILE; do
-        DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/"$(basename "${FILE}")"
-        TARGET_DEL_FILE="${DEL_FILE%.marc}".delete
-        # If the target .delete file already exists, then skip this step
-        # so that we avoid overwritting what might be an edittined .delete file from the
-        # update_processed_delete_files step run next
-        if [ -f "${TARGET_DEL_FILE}" ]; then
-            verbose "Skipping processing of ${FILE} since ${TARGET_DEL_FILE} already exists"
-        else
-            LANG=C grep -oUaP "(?<=\x1e)ebs[0-9]+e(?=\x1e)" "${FILE}" | sed -e 's/^/hlm./' > "${DEL_FILE%.marc}".delete
-        fi
-        # Cleanup the other files that the batch-delete.sh script won't move to the processed dir
-        mv "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/processed"
-    done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -iname '*-Del*.marc')
+    if [ "${ARGS[DRY_RUN]}" -eq "0" ]; then
+        while read -r FILE; do
+            DEL_FILE=${ARGS[VUFIND_HARVEST_DIR]}/"$(basename "${FILE}")"
+            TARGET_DEL_FILE="${DEL_FILE%.marc}".delete
+            # If the target .delete file already exists, then skip this step
+            # so that we avoid overwritting what might be an edittined .delete file from the
+            # update_processed_delete_files step run next
+            if [ -f "${TARGET_DEL_FILE}" ]; then
+                verbose "Skipping processing of ${FILE} since ${TARGET_DEL_FILE} already exists"
+            else
+                LANG=C grep -oUaP "(?<=\x1e)ebs[0-9]+e(?=\x1e)" "${FILE}" | sed -e 's/^/hlm./' > "${DEL_FILE%.marc}".delete
+            fi
+            # Cleanup the other files that the batch-delete.sh script won't move to the processed dir
+            mv "${FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/processed"
+        done < <(find "${ARGS[VUFIND_HARVEST_DIR]}/" -mindepth 1 -maxdepth 1 -iname '*-Del*.marc')
+    fi
 
-    update_processed_delete_files
+    if [ "${ARGS[DRY_RUN]}" -eq "0" ]; then
+        update_processed_delete_files
+    fi
 
     verbose "Running batch import"
-    if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
-        if ! /usr/local/vufind/harvest/batch-import-marc.sh -x 40 hlm | tee "$LOG_FILE"; then
-            verbose "ERROR: Batch import failed with code: $?" 1
-            exit 1
-        fi
-    else
-        if ! /usr/local/vufind/harvest/batch-import-marc.sh -x 40 hlm >> "$LOG_FILE"; then
-            verbose "ERROR: Batch import failed with code: $?" 1
-            exit 1
+    if [ "${ARGS[DRY_RUN]}" -eq "0" ]; then
+        if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
+            if ! /usr/local/vufind/harvest/batch-import-marc.sh -x 40 hlm | tee "$LOG_FILE"; then
+                verbose "ERROR: Batch import failed with code: $?" 1
+                exit 1
+            fi
+        else
+            if ! /usr/local/vufind/harvest/batch-import-marc.sh -x 40 hlm >> "$LOG_FILE"; then
+                verbose "ERROR: Batch import failed with code: $?" 1
+                exit 1
+            fi
         fi
     fi
     verbose "Completed batch import"
 
     verbose "Processing delete records from harvest."
     countdown 5
-    if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
-        if ! /usr/local/vufind/harvest/batch-delete.sh hlm -vv --id-prefix=hlm | tee "$LOG_FILE"; then
-            verbose "ERROR: Batch delete script failed with code: $?" 1
-            exit 1
-        fi
-    else
-        if ! /usr/local/vufind/harvest/batch-delete.sh hlm -vv --id-prefix=hlm >> "$LOG_FILE"; then
-            verbose "ERROR: Batch delete script failed with code: $?" 1
-            exit 1
+    if [ "${ARGS[DRY_RUN]}" -eq "0" ]; then
+        if [[ "${ARGS[VERBOSE]}" -eq 1 ]]; then
+            if ! /usr/local/vufind/harvest/batch-delete.sh hlm -vv --id-prefix=hlm | tee "$LOG_FILE"; then
+                verbose "ERROR: Batch delete script failed with code: $?" 1
+                exit 1
+            fi
+        else
+            if ! /usr/local/vufind/harvest/batch-delete.sh hlm -vv --id-prefix=hlm >> "$LOG_FILE"; then
+                verbose "ERROR: Batch delete script failed with code: $?" 1
+                exit 1
+            fi
         fi
     fi
+    verbose "Completed processing records to be deleted."
 
     verbose "Solr optimization"
-    php "${VUFIND_HOME}/public/index.php" util/optimize
+    if [ "${ARGS[DRY_RUN]}" -eq "0" ]; then
+        php "${VUFIND_HOME}/public/index.php" util/optimize
+    fi
 
-    verbose "Completed processing records to be deleted."
 }
 
 # Main logic for the script

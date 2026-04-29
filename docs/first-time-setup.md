@@ -136,6 +136,15 @@ as a permission set with the FOLIO API, with a `POST` request to
 * `kb-ebsco.packages.collection.get` (For MSUL customization to add license
   agreement information to record pages)
 * `proxiesfor.collection.get`
+* `patron-pin.validate` (For MSUL barcode login)
+
+### Sunflower Capabilities
+
+#### Procedural
+
+| Application          | Resource            | Execute |
+| -------------------- | ------------------- | ------- |
+| app-platform-minimal | Patron-Pin Validate | Yes     |
 
 ## For GitLab users
 

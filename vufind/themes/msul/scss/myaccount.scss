@@ -46,13 +46,37 @@ body.template-dir-myresearch.template-name-profile {
   text-align: center;
 }
 
-// Following block can be removed when upgrading to version containing PR-4595 (maybe VF11?)
+/* The format badges on the page should have a background */
+/* color and consistent height */
+.result .format {
+  background-color: $lavendernew;
+  line-height:1rem !important;
+}
+
+// Overriding from bs5 theme to prevent colors from being overridden
+// PR worthy: confirmed this is an issue in core VF
 .myresearch-menu {
-  .icon-link {
-    .icon-link__icon,
-    .icon-link__label {
-      flex-grow: 1;
-      width: auto;
+  .status {
+    .badge {
+      border-radius: var(--bs-badge-border-radius);
+      border: inherit;
+      height: inherit;
+      &.account-none {
+        color: $gray-dark !important;
+        background-color: $gray-lighter !important;
+      }
+      &.account-info {
+        color: var(--#{$prefix}success) !important;
+        background-color: var(--#{$prefix}success-bg-subtle) !important;
+      }
+      &.account-warning {
+        color: var(--#{$prefix}warning) !important;
+        background-color: var(--#{$prefix}warning-bg-subtle) !important;
+      }
+      &.account-alert {
+        color: var(--#{$prefix}danger) !important;
+        background-color: var(--#{$prefix}danger-bg-subtle) !important;
+      }
     }
   }
 }

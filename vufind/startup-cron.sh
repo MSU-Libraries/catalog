@@ -16,6 +16,11 @@ mkdir -p "/mnt/shared/authority/${STACK_NAME}/harvest_authority/" "/mnt/shared/a
 mv /usr/local/vufind/local/harvest/authority/ /tmp/
 ln -s "/mnt/shared/authority/${STACK_NAME}/harvest_authority/" /usr/local/vufind/local/harvest/authority
 ln -s "/mnt/shared/authority/${STACK_NAME}"/ /mnt/authority
+# DR (Digital Repository
+mkdir -p "/mnt/shared/dr/${STACK_NAME}/harvest_dr/" "/mnt/shared/dr/${STACK_NAME}/archives/"
+mv /usr/local/vufind/local/harvest/dr/ /tmp/
+ln -s "/mnt/shared/dr/${STACK_NAME}/harvest_dr/" /usr/local/vufind/local/harvest/dr
+ln -s "/mnt/shared/dr/${STACK_NAME}"/ /mnt/dr
 
 # Save the logs in the logs docker volume
 mkdir -p /mnt/logs/vufind /mnt/logs/harvests
@@ -26,14 +31,14 @@ touch /mnt/logs/vufind/vufind.log
 ln -s "/mnt/shared/backups/${STACK_NAME}/" /mnt/backups
 
 # Set custom cron minute offsets for OAI harvesting
-FOLIO_CRON_MINS="0,15,30,45"  # catalog-prod
+FOLIO_CRON_MINS="0,15,30,45"  # -prod
 HARV_CRON_MINS="30"
 RESRV_CRON_MINS="10"
-if [[ "${STACK_NAME}" == "catalog-beta" ]]; then
+if [[ "${STACK_NAME}" == *"-beta" ]]; then
     FOLIO_CRON_MINS="15"
     HARV_CRON_MINS="15"
     RESRV_CRON_MINS="20"
-elif [[ "${STACK_NAME}" == "catalog-preview" ]]; then
+elif [[ "${STACK_NAME}" == *"-preview" ]]; then
     FOLIO_CRON_MINS="45"
     HARV_CRON_MINS="45"
     RESRV_CRON_MINS="50"
@@ -50,8 +55,8 @@ echo "MARIADB_ROOT_PASSWORD=\"${MARIADB_ROOT_PASSWORD}\"" >> /etc/environment
 # Change to using file sessions
 sed -i 's/type\s*=\s*Database/type=File/' /usr/local/vufind/local/config/vufind/config.ini
 
-# If not catalog-prod remove the backup jobs
-if [[ "${STACK_NAME}" != catalog-prod ]]; then
+# If not -prod remove the backup jobs
+if [[ "${STACK_NAME}" != *"-prod" ]]; then
     rm /etc/cron.d/backups
 fi
 

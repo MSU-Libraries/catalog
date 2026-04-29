@@ -212,8 +212,8 @@ class GetThisLoader
         if ($item['duedate'] ?? false) {
             $suffix .= ' - Due: ' . $item['duedate'];
         }
-        if ($item['temporary_loan_type'] ?? false) {
-            $suffix .= ' (' . $item['temporary_loan_type'] . ')';
+        if ($item['loan_type_name'] ?? false) {
+            $suffix .= ' (' . $item['loan_type_name'] . ')';
         }
         return $suffix;
     }
@@ -350,13 +350,17 @@ class GetThisLoader
     {
         $loc_code = $this->getLocationCode($item_id);
         $item = $this->getItem($item_id);
-        // If the location is (Kline DM or circulation)
-        // and the callnumber or material type is equipment
-        return ($loc_code == 'dmres' || $loc_code == 'mnres')
-            && (
-                stripos($item['callnumber'], 'equipment') === 0
-                || $item['material_type'] == '2D/3D/Kit/Equipment'
-            );
+        // If the location is (DMCTL or DXRES) and material type is '2D/3D/Kit/Equipment'
+        // OR
+        // If  the call number starts with 'Equipment' or material type is '2D/3D/Kit/Equipment'
+        $startsWithEquipment = (stripos($item['callnumber'], 'equipment') === 0);
+        $isEquipmentLoc = ($loc_code == 'dmctl' || $loc_code == 'dxres');
+        $isEquipmentType = ($item['material_type'] == '2D/3D/Kit/Equipment');
+
+        if (($isEquipmentType || $startsWithEquipment) || ($isEquipmentLoc && $isEquipmentType)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -517,7 +521,9 @@ class GetThisLoader
                 $this->msgTemplate = 'makercheckedout.phtml';
             }
         } else {
-            if (
+            if ($this->isEquipment($item_id)) {
+                $this->msgTemplate = 'equipment.phtml';
+            } elseif (
                 Regex::ART($loc) && Regex::PERM($loc)
                 || (!Regex::RESERVE_DIGITAL($loc) && Regex::RESERV($loc))
             ) {
@@ -542,8 +548,6 @@ class GetThisLoader
                 $this->msgTemplate = 'law.phtml';
             } elseif (Regex::MAKERSPACE($loc)) {
                 $this->msgTemplate = 'maker.phtml';
-            } elseif ($this->isEquipment($item_id)) {
-                $this->msgTemplate = 'equipment.phtml';
             } elseif (Regex::MAP($loc)) {
                 if (Regex::CIRCULATING($loc) && $this->isLibUseOnly()) {
                     $this->msgTemplate = 'ask.phtml';
@@ -670,40 +674,6 @@ class GetThisLoader
     public function showGetRovi($item_id = null)
     {
         //XXX Not implementing for now
-        return false;
-    }
-
-    /**
-     * Determine if the get locker pickup template should display
-     *
-     * @param string $item_id Item ID to filter for
-     *
-     * @return bool  If the template should display
-     */
-    public function showLockerPick($item_id = null)
-    {
-        $item_id = $this->getItemId($item_id);
-        $stat = $this->getStatus($item_id);
-        $loc = $this->getLocation($item_id);
-
-        if (
-            (Regex::ART($loc) && !Regex::PERM($loc) && !$this->isLibUseOnly()) ||
-             (Regex::BROWSING($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::CAREER($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::CESAR_CHAVEZ($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::KLINE_DMC($loc) && !Regex::RESERV($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::FACULTY_BOOK($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::GOV($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::MAKERSPACE($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::MAP($loc) && Regex::CIRCULATING($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::MUSIC($loc) && !(Regex::REF($loc) || Regex::RESERV($loc))) ||
-             (Regex::ROVI($loc)) ||
-             (Regex::TRAVEL($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::MAIN($loc) && Regex::AVAILABLE($stat)) ||
-             (Regex::AVAILABLE($stat))
-        ) {
-            return true;
-        }
         return false;
     }
 

@@ -7,7 +7,7 @@ within the container (without having to pass the ZK hosts)
 simply use the `solr-zk-shell` command.
 
 ```bash
-docker exec -it $(docker ps -q -f name=catalog-prod-solr_solr) solr-zk-shell
+docker exec -it $(docker ps -q -f name=catprod-prod-solr_solr) solr-zk-shell
 
 ```
 
@@ -20,7 +20,7 @@ Make sure you run it as the deploy user so that the proper Docker
 container registry credentials are passed.
 
 ```bash
-sudo -Hu deploy pc-deploy catalog-prod solr
+sudo -Hu deploy pc-deploy catprod-prod solr
 ```
 
 ## Collection Structure
@@ -78,12 +78,15 @@ one of the Solr containers and running the `zk` commands.
 
 ```bash
 # Copy the file(s) you need from Zookeeper
-solr zk cp zk:/solr/configs/biblio/solrconfig.xml /tmp/solrconfig.xml -z zk1:2181
+solr zk cp zk:/solr/configs/biblio1/solrconfig.xml /tmp/solrconfig.xml -z zk1:2181
 
 # Now make your updates at the location you updated them
 
-# Finally, copy those updated files back onto Zookeeper
-solr zk cp /tmp/solrconfig.xml zk:/solr/configs/biblio/solrconfig.xml -z zk1:2181
+# Next, copy those updated files back onto Zookeeper
+solr zk cp /tmp/solrconfig.xml zk:/solr/configs/biblio1/solrconfig.xml -z zk1:2181
+
+# Now reload the collection (does not work consistently via the Solr Admin UI)
+curl "http://solr1:8983/solr/admin/collections?action=RELOAD&name=biblio1"
 ```
 
 ## Deleting documents from the Solr index
@@ -122,7 +125,7 @@ docker exec $(docker ps -q -f name=${STACK_NAME}-solr_solr) /clusterhealth.sh
   will also run many of these health checks.
 
 ```bash
-sudo /usr/local/ncpa/plugins/check_galera.sh catalog-prod
+sudo /usr/local/ncpa/plugins/check_galera.sh catprod-prod
 ```
 
 * To view the Docker healthcheck logs from a particular container you can:
@@ -275,7 +278,7 @@ remaining) become the leader once the timeout happens, and it stops waiting
 for its peers to return. Then scale back up to 2, and then 3. You can tell
 when they are ready to be scaled back up once they show as green in
 /solr -> Cloud -> Graph. The command to scale the nodes is:
-`docker service scale catalog-prod-solr_solr=3`, changing the stack name
+`docker service scale catprod-prod-solr_solr=3`, changing the stack name
 and replica count as appropriate.
 
 For example if `solr2` complains after all 3 nodes are restarted that

@@ -189,15 +189,15 @@ async def _check_vufind_browse_by_subject_page(node: str, aiohttp_session: Clien
     )
 
 async def _check_vufind_browse_by_author_page(node: str, aiohttp_session: ClientSession) -> str:
-    url = f'http://vufind{node}/Alphabrowse/Home?source=author&from=Hoek%2C+M'
+    url = f'http://vufind{node}/Alphabrowse/Home?source=author&from=Yuille'
     return await _check_vufind_search_base(
-        aiohttp_session, url, '>Hoek, Marga</a>', 'browse by author'
+        aiohttp_session, url, '>Yuille, Martin</a>', 'browse by author'
     )
 
 async def _check_vufind_browse_by_title_page(node: str, aiohttp_session: ClientSession) -> str:
-    url = f'http://vufind{node}/Alphabrowse/Home?source=title&from=Artificial+Intelligence+and+the+City' # pylint: disable=line-too-long
+    url = f'http://vufind{node}/Alphabrowse/Home?source=title&from=Yukiki'
     return await _check_vufind_search_base(
-        aiohttp_session, url, 'Urbanistic Perspectives on AI', 'browse by title'
+        aiohttp_session, url, '>Yukiko</a>', 'browse by title'
     )
 
 async def _check_vufind_browse_by_call_number_page(node: str, aiohttp_session: ClientSession) -> str: # pylint: disable=line-too-long
@@ -360,6 +360,7 @@ def _node_cron_exit_codes() -> dict[str, str]:
     paths = {
         'folio': '/mnt/logs/harvests/folio_exit_code',
         'hlm': '/mnt/logs/harvests/hlm_exit_code',
+        'dr': '/mnt/logs/harvests/dr_exit_code',
         'authority': '/mnt/logs/harvests/authority_exit_code',
         'reserves': '/mnt/logs/vufind/reserves_exit_code',
         'searches': '/mnt/logs/vufind/searches_exit_code',
@@ -373,6 +374,9 @@ def _node_cron_exit_codes() -> dict[str, str]:
     exit_codes = {}
     for name, path in paths.items():
         path = pathlib.Path(path)
+        path_previous = pathlib.Path(f"{path}_previous")
+        if path_previous.is_file():
+            path = path_previous
         if path.is_file():
             date = datetime.fromtimestamp(path.stat().st_mtime)
             check_date = datetime.now() - _harvest_delta(name)

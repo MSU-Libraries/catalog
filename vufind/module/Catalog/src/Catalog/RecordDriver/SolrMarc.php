@@ -1,12 +1,30 @@
 <?php
 
 /**
- * Retrieves data from Solr for a given record
+ * Model for MARC records in Solr.
  *
- * PHP version 7
+ * PHP version 8
+ *
+ * Copyright (C) Villanova University 2010.
+ * Copyright (C) The National Library of Finland 2015.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see
+ * <https://www.gnu.org/licenses/>.
  *
  * @category VuFind
- * @package  Record_Drivers
+ * @package  RecordDrivers
+ * @author   Demian Katz <demian.katz@villanova.edu>
+ * @author   Ere Maijala <ere.maijala@helsinki.fi>
  * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:record_drivers Wiki
@@ -24,7 +42,7 @@ use function sprintf;
  * Extends the record driver with additional data from Solr
  *
  * @category VuFind
- * @package  Record_Drivers
+ * @package  RecordDrivers
  * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:record_drivers Wiki
@@ -33,6 +51,9 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 {
     public const LINKSUBF = '6'; // subfield code that has field link information
     public const UNLINKPOS = '00'; // occurance position in the linked subfield that represents unlinked 880s
+    // SOURCE_WHITELIST should match the list used for topic and other fields in marc_local.properties
+    private const SOURCE_WHITELIST = '/^aat|discogsgenre|discogsstyle|homoit|homoit\/eng|lcgft|' .
+        'local|olacvggt|rbbin|rbgenr|rbmscv|rbpap|rbpri|rbprov|rbpub|rbtyp|tgm|tgn|vgmsgg$/';
 
     /**
      * Fields that may contain subject headings, and their descriptions
@@ -44,7 +65,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         '610' => 'corporate name',
         '611' => 'meeting name',
         '630' => 'uniform title',
-        '648' => 'chronological',
+//        '648' => 'chronological', // MSU commented
         '650' => 'topic',
         '651' => 'geographic',
         '653' => '',
@@ -279,7 +300,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             return array_key_exists('code', $subf) && $subf['code'] == self::LINKSUBF;
         });
         if ($subf6) {
-            $subf6Parts = explode('-', $subf6[0]['data']);
+            $subf6Parts = explode('-', $subf6[array_key_first($subf6)]['data']);
             if (count($subf6Parts) > 1 && $subf6Parts[0] == '880') {
                 $index = $subf6Parts[1];
                 $linked = $marc->getLinkedField('880', $field, $index, $subfieldFilters);
@@ -1709,6 +1730,142 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     }
 
     /**
+     * Utility function for getAllSubjectHeadings()
+     * Check if subject should be skipped
+     *
+     * @param array $field the subject field, as returned by the MARC reader
+     *
+     * @return bool true if the subject should be skipped
+     */
+    private function skipSubject($field)
+    {
+        // Skip if ind2 = 5 (except for 653), ind2 = 6, or ind2 = 7 and $2 does not match SOURCE_WHITELIST
+        if (($field['tag'] != '653' && $field['i2'] == '5') || $field['i2'] == '6') {
+            return true;
+        }
+        if ($field['i2'] == '7') {
+            foreach ($field['subfields'] as $sf) {
+                if ($sf['code'] == '2' && !preg_match(self::SOURCE_WHITELIST, $sf['data'])) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Utility function for getAllSubjectHeadings()
+     * Get the transliterated 880 values for each result if it has a subfield 6
+     *
+     * @param array $field the subject field, as returned by the MARC reader
+     *
+     * @return array the transliterated 880 values
+     */
+    private function getLinked($field)
+    {
+        $linked = [];
+        foreach ($field['subfields'] as $subfield) {
+            if ($subfield['code'] == '6') {
+                $explodedSubfield = explode('-', $subfield['data']);
+                if (count($explodedSubfield) > 1) {
+                    $index = $explodedSubfield[1];
+                    $linked = $this->getMarcReader()->getLinkedField(
+                        '880',
+                        $field['tag'],
+                        $index,
+                        range('a', 'z')
+                    );
+                    break;
+                }
+            }
+        }
+        return $linked;
+    }
+
+    /**
+     * Utility function for getAllSubjectHeadings()
+     * Get all the chunks and collect them together:
+     * Track the previous subfield code and index so we can get the correct linked one.
+     *
+     * @param array $field  the subject field, as returned by the MARC reader
+     * @param array $linked the transliterated 880 values
+     *
+     * @return array chunks of the current heading
+     */
+    private function getChunks($field, $linked)
+    {
+        $current = [];
+        $prevCode = '';
+        $codeIndex = 0;
+        foreach ($field['subfields'] as $subfield) {
+            if ($prevCode == $subfield['code']) {
+                $codeIndex = $codeIndex + 1;
+            }
+            // Numeric subfields are for control purposes and should not
+            // be displayed:
+            if (!is_numeric($subfield['code'])) {
+                $linkedVal = '';
+                if (array_key_exists('subfields', $linked)) {
+                    $linkedPrevCode = '';
+                    $linkedCodeIndex = 0;
+                    foreach ($linked['subfields'] as $linkedSubfield) {
+                        if ($linkedPrevCode == $linkedSubfield['code']) {
+                            $linkedCodeIndex = $linkedCodeIndex + 1;
+                        }
+                        // Use if we found the matching subfield code
+                        // and it is not the same value as the original
+                        if (
+                            $linkedSubfield['code'] == $subfield['code'] &&
+                            $linkedCodeIndex == $codeIndex &&
+                            $linkedSubfield['data'] != $subfield['data']
+                        ) {
+                            $linkedVal = $linkedSubfield['data'];
+                            break;
+                        }
+                        $linkedPrevCode = $linkedSubfield['code'];
+                    }
+                }
+                $current[] = ['subject' => $subfield['data'], 'linked' => $linkedVal];
+                $prevCode = $subfield['code'];
+            }
+        }
+        return $current;
+    }
+
+    /**
+     * Utility function for getAllSubjectHeadings()
+     * Add unmatched 880 fields to the results
+     *
+     * @param array $subjectFieldsKeys subject fields keys
+     * @param array $retval            results, passed by reference
+     *
+     * @return void
+     */
+    private function addUnmatched($subjectFieldsKeys, &$retval)
+    {
+        foreach ($subjectFieldsKeys as $subjectFieldKey) {
+            $linkedFields = $this->getMarcReader()->getLinkedFields('880', $subjectFieldKey, []);
+            foreach ($linkedFields as $linkedField) {
+                // Anytime there is a link with an occurrence of '00' it means it is unlinked
+                if ($linkedField['link']['occurrence'] != self::UNLINKPOS) {
+                    continue;
+                }
+                // Skip in some cases
+                if ($this->skipSubject($linkedField)) {
+                    continue;
+                }
+                $current = [];
+                foreach ($linkedField['subfields'] as $subfield) {
+                    if ($subfield['code'] != '6') {
+                        $current[] = ['subject' => $subfield['data'], 'linked' => ''];
+                    }
+                }
+                $retval[] = $current;
+            }
+        }
+    }
+
+    /**
      * Modification of the original function in MarcAdvancedTrait.php to display subjects in same order ad marc records
      * Get all subject headings associated with this record. Each heading is
      * returned as an array of chunks, increasing from least specific to most
@@ -1726,94 +1883,28 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getAllSubjectHeadings($extended = false)
     {
+        /* START MSU */
+        /* This function is heavily modified */
         // This is all the collected data:
         $retval = [];
 
-        /* START MSU */
-        /* This modification replaces the two foreach from the trait */
         $allFields = $this->getMarcReader()->getAllFields();
         $subjectFieldsKeys = array_keys($this->subjectFields);
         // Go through all the fields and handle them if they are part of what we want
-        // and does NOT have ind2 = 6
         foreach ($allFields as $result) {
-            if (isset($result['tag']) && in_array($result['tag'], $subjectFieldsKeys) && $result['i2'] != '6') {
-                // MSU:  Skip if $2 == fast (PC-1216)
-                $skip = false;
-                foreach ($result['subfields'] as $sf) {
-                    if ($sf['code'] == '2' && $sf['data'] == 'fast') {
-                        $skip = true;
-                        break;
-                    }
-                }
-                if ($skip) {
-                    continue;
-                }
-
+            if (
+                isset($result['tag'])
+                && in_array($result['tag'], $subjectFieldsKeys)
+                && !$this->skipSubject($result)
+            ) {
                 $fieldType = $this->subjectFields[$result['tag']];
 
-                // Start an array for holding the chunks of the current heading:
-                $current = [];
+                $linked = $this->getLinked($result);
 
-                /* START MSU */
-                // Get the transliterated 880 values for each result
-                // if it has a subfield 6
-                $linked = [];
-                foreach ($result['subfields'] as $subfield) {
-                    if ($subfield['code'] == '6') {
-                        $explodedSubfield = explode('-', $subfield['data']);
-                        if (count($explodedSubfield) > 1) {
-                            $index = $explodedSubfield[1];
-                            $linked = $this->getMarcReader()->getLinkedField(
-                                '880',
-                                $result['tag'],
-                                $index,
-                                range('a', 'z')
-                            );
-                            break;
-                        }
-                    }
-                }
+                $current = $this->getChunks($result, $linked);
 
-                // Get all the chunks and collect them together:
-                // Track the previous subfield code and index so we can get the
-                // correct linked one.
-                $prevCode = '';
-                $codeIndex = 0;
-                foreach ($result['subfields'] as $subfield) {
-                    if ($prevCode == $subfield['code']) {
-                        $codeIndex = $codeIndex + 1;
-                    }
-                    // Numeric subfields are for control purposes and should not
-                    // be displayed:
-                    if (!is_numeric($subfield['code'])) {
-                        $linkedVal = '';
-                        if (array_key_exists('subfields', $linked)) {
-                            $linkedPrevCode = '';
-                            $linkedCodeIndex = 0;
-                            foreach ($linked['subfields'] as $linkedSubfield) {
-                                if ($linkedPrevCode == $linkedSubfield['code']) {
-                                    $linkedCodeIndex = $linkedCodeIndex + 1;
-                                }
-                                // Use if we found the matching subfield code
-                                // and it is not the same value as the original
-                                if (
-                                    $linkedSubfield['code'] == $subfield['code'] &&
-                                    $linkedCodeIndex == $codeIndex &&
-                                    $linkedSubfield['data'] != $subfield['data']
-                                ) {
-                                    $linkedVal = $linkedSubfield['data'];
-                                    break;
-                                }
-                                $linkedPrevCode = $linkedSubfield['code'];
-                            }
-                        }
-                        $current[] = ['subject' => $subfield['data'], 'linked' => $linkedVal];
-                        $prevCode = $subfield['code'];
-                    }
-                }
-                /* MSU END */
-
-                // If we found at least one chunk, add a heading to our result:
+                // NOT MSU: If we found at least one chunk, add a heading to our result:
+                // (in Vufind this code is part of MarcAdvancedTrait - processSubjectHeadings())
                 if (!empty($current)) {
                     if ($extended) {
                         $sourceIndicator = $result['i2'];
@@ -1836,42 +1927,14 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             }
         }
 
-        // MSU Get unmatched 880 fields
-        foreach ($subjectFieldsKeys as $subjectFieldKey) {
-            $linkedFields = $this->getMarcReader()->getLinkedFields('880', $subjectFieldKey, []);
-            foreach ($linkedFields as $linkedField) {
-                // Anytime there is a link with an occurrence of '00' it means it is unlinked
-                if ($linkedField['link']['occurrence'] != self::UNLINKPOS) {
-                    continue;
-                }
-                $fieldVals = [];
-                // MSU:  Skip if $2 == fast (PC-1216)
-                $skip = false;
-                foreach ($linkedField['subfields'] as $sf) {
-                    if ($sf['code'] == '2' && $sf['data'] == 'fast') {
-                        $skip = true;
-                        break;
-                    }
-                }
-                if ($skip) {
-                    continue;
-                }
-                $current = [];
-                foreach ($linkedField['subfields'] as $subfield) {
-                    if ($subfield['code'] != '6') {
-                        //$fieldVals[] = $subfield['data'];
-                        $current[] = ['subject' => $subfield['data'], 'linked' => ''];
-                    }
-                }
-                $retval[] = $current;
-            }
-        }
+        $this->addUnmatched($subjectFieldsKeys, $retval);
 
         // Remove duplicates and then send back everything we collected:
         return array_map(
             'unserialize',
             array_unique(array_map('serialize', $retval))
         );
+        /* MSU END */
     }
 
     /**
@@ -1901,13 +1964,82 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getCorporateAuthors()
     {
-        // MSUL PC-1105
-        return array_merge(
-            $this->getFieldArray('110', ['a', 'b']),
-            $this->getFieldArray('111', range('a', 'z')),
-            $this->getFieldArray('710', ['a', 'b']),
-            $this->getMarcFieldWithInd('711', ['a', 'b'], ['1' => ['', '0', '1', '2'], '2' => ['']])
-        );
+        // MSUL PC-1105, PC-1646
+        $authors = [];
+        $marc = $this->getMarcReader();
+        $fields = [
+            '110' => ['a','b'],
+            '111' => range('a', 'z'),
+            '710' => ['a','b'],
+            '711' => ['a','b'],
+        ];
+        foreach ($fields as $field => $subfields) {
+            $marcData = $marc->getFields($field, $subfields);
+            foreach ($marcData as $marcRec) {
+                // For 711, ind1 has to be '', '0', '1', or '2' OR ind2 must be ''
+                if (
+                    $field == '711' &&
+                        (
+                            !in_array(trim(($marcRec['i1'] ?? '')), ['', '0', '1', '2']) ||
+                            trim(($marcRec['i2'] ?? '') != '')
+                        )
+                ) {
+                    $authors[] = '';
+                    continue;
+                }
+                $sbfs = $marcRec['subfields'];
+                $tmpAuthor = [];
+                foreach ($sbfs as $subfield) {
+                    $tmpAuthor[] = ucfirst(str_replace([',','.'], '', $subfield['data']));
+                }
+                $authors[] = implode(' ', $tmpAuthor);
+            }
+        }
+        return $authors;
+    }
+
+    /**
+     * Get an array of all corporate author roles (complementing getPrimaryAuthor()).
+     *
+     * @return array
+     */
+    public function getCorporateAuthorsRoles()
+    {
+        // MSUL PC-1105, PC-1646
+        $roles = [];
+        $marc = $this->getMarcReader();
+        $fields = [
+            '110' => ['a','b','e'],
+            '111' => range('a', 'z'),
+            '710' => ['a','b','e'],
+            '711' => ['a','b','e', 'j'],
+        ];
+        foreach ($fields as $field => $subfields) {
+            $marcData = $marc->getFields($field, $subfields);
+            foreach ($marcData as $marcRec) {
+                // For 711, ind1 has to be '', '0', '1', or '2' OR ind2 must be ''
+                if (
+                    $field == '711' &&
+                        (
+                            !in_array(trim(($marcRec['i1'] ?? '')), ['', '0', '1', '2']) ||
+                            trim(($marcRec['i2'] ?? '') != '')
+                        )
+                ) {
+                    $roles[] = '';
+                    continue;
+                }
+                $sbfs = $marcRec['subfields'];
+                $tmpRole = [];
+                foreach ($sbfs as $subfield) {
+                    // subfield $e or $j is the role information
+                    if ($subfield['code'] == 'e' || $subfield['code'] == 'j') {
+                        $tmpRole[] = ucfirst(str_replace([',','.'], '', $subfield['data']));
+                    }
+                }
+                $roles[] = $tmpRole;
+            }
+        }
+        return $roles;
     }
 
     /**
@@ -1937,24 +2069,24 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             $fieldMethod = $authorMethod . ucfirst($field) . 's';
             $dataFieldValues[$field] = $this->tryMethod($fieldMethod, [], []);
         }
-
         // Match up author and attribute data (this assumes that the attribute
         // arrays have the same indices as the author array; i.e. $author[$i]
         // has $dataFieldValues[$attribute][$i].
         foreach ($authors as $i => $author) {
             // MSU
-            $authorVal = is_array($author) ? $author['note'] : $author;
-            if (!isset($data[$authorVal])) {
-                $data[$authorVal] = [];
+            if (!isset($data[$author])) {
+                $data[$author] = [];
             }
-
             foreach ($dataFieldValues as $field => $dataFieldValue) {
-                if (!empty($dataFieldValue[$i])) {
-                    $data[$authorVal][$field][] = $dataFieldValue[$i];
+                if ($field == 'link') {
+                    if (!empty($dataFieldValue[$i])) {
+                        $data[$author][$field][] = $dataFieldValue[$i];
+                    }
+                } else {
+                    $data[$author][$field] = $dataFieldValue[$i];
                 }
             }
         }
-
         return $data;
     }
 
@@ -1968,7 +2100,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         // PC-1105
         $authors = [];
         foreach (['110', '111', '710', '711'] as $field) {
-            $authors = array_merge($authors, $this->getMarcFieldLinked($field, range('a', 'z')));
+            $authors = array_merge($authors, $this->getMarcFieldLinked($field, range('a', 'b')));
         }
         return $authors;
     }
@@ -2178,7 +2310,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get ALL editions of the current record.
      *
-     * @return string
+     * @return array
      */
     public function getEditions()
     {
@@ -2191,7 +2323,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the former publication frequency
      *
-     * @return string
+     * @return array
      */
     public function getFormerPublicationFrequency()
     {
@@ -2215,7 +2347,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Produced field for the current record.
      *
-     * @return string
+     * @return array
      */
     public function getProduced()
     {
@@ -2226,7 +2358,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Abbreviated Title
      *
-     * @return string
+     * @return array
      */
     public function getAbbreviatedTitle()
     {
@@ -2236,7 +2368,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Key Title
      *
-     * @return string
+     * @return array
      */
     public function getKeyTitle()
     {
@@ -2246,7 +2378,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Former Title
      *
-     * @return string
+     * @return array
      */
     public function getFormerTitle()
     {
@@ -2256,7 +2388,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Collective Uniform Title
      *
-     * @return string
+     * @return array
      */
     public function getCollectiveUniformTitle()
     {
@@ -2266,7 +2398,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Organization and Arrangement of Materials
      *
-     * @return string
+     * @return array
      */
     public function getOrganizationAndArrangementOfMaterials()
     {
@@ -2515,5 +2647,58 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             return $replace260 ? $pubResults : array_merge($results, $pubResults);
         }
         return $results;
+    }
+
+    /**
+     * Get the "complementary" title from 785
+     *
+     * @return string[]
+     */
+    public function getNewTitle(): array
+    {
+        $marc = $this->getMarcReader();
+        $marcFields = $marc->getFields('785');
+        $return = [];
+        foreach ($marcFields as $marcData) {
+            if ($marcData['i1'] === '0') {
+                $tmp = [];
+                foreach ($marcData['subfields'] as $subfield) {
+                    if (str_contains('abdt', $subfield['code'])) {
+                        $tmp[] = $subfield['data'];
+                    }
+                }
+                $return[] = implode(' ', $tmp);
+            }
+        }
+        return $return;
+    }
+
+    /**
+     * Get the heading / title under which the title is displayed (Continues, Supersedes, ...) from 785
+     *
+     * @param $data   string[]
+     * @param $driver SolrMarc
+     *
+     * @return string
+     */
+    public static function getNewTitleLabel(array $data, SolrMarc $driver): string
+    {
+        $marc = $driver->getMarcReader();
+        $marcFields = $marc->getFields('785');
+        $return = [];
+        foreach ($marcFields as $marcData) {
+            $return[] = match ($marcData['i2']) {
+                default => 'note_785_0',
+                '1' => 'note_785_1',
+                '2' => 'note_785_2',
+                '3' => 'note_785_3',
+                '4' => 'note_785_4',
+                '5' => 'note_785_5',
+                '6' => 'note_785_6',
+                '7' => 'note_785_7',
+                '8' => 'note_785_8',
+            };
+        }
+        return current($return); // Returning only one as templating display only strings
     }
 }

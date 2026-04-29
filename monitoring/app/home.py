@@ -9,9 +9,9 @@ def homepage() -> str:
     '''
     Gets the contents for the home page and renders the template
     '''
-    stack_name = os.getenv('STACK_NAME')
-    is_prod = stack_name == 'catalog-prod'
-    is_dev = stack_name.startswith('devel-')
+    stack_name = os.getenv('STACK_NAME', '')
+    is_prod = stack_name.endswith('-prod')
+    is_dev = stack_name.startswith('devel-') or stack_name.startswith('review-')
     statuses = status.get_node_statuses()
 
     if isinstance(statuses, str):
@@ -25,6 +25,7 @@ def homepage() -> str:
     status_list['vufind'] = status.get_vufind_status(statuses)
     status_list['folio_harvest'] = status.get_cron_status('folio', statuses)
     status_list['hlm_harvest'] = status.get_cron_status('hlm', statuses)
+    status_list['dr_harvest'] = status.get_cron_status('dr', statuses)
     status_list['authority_harvest'] = status.get_cron_status('authority', statuses)
     status_list['reserves_update'] = status.get_cron_status('reserves', statuses)
     status_list['optimize'] = status.get_cron_status('optimize', statuses)

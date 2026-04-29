@@ -71,9 +71,21 @@ class GetLicenseAgreementFactory implements \Laminas\ServiceManager\Factory\Fact
             throw new \Exception('Unexpected options passed to factory.');
         }
 
+        // Get the record.yaml
+        try {
+            $yamlReader = $container->get(\VuFind\Config\YamlReader::class);
+            $recordConfig = $yamlReader->get('record.yaml');
+        } catch (\Exception $e) {
+            $logger = $container->get(\VuFind\Log\Logger::class);
+            $logger->err(
+                'Could not parse record.yaml: ' . $e->getMessage()
+            );
+        }
+
         $handler = new $requestedName(
             $container->get(\VuFind\Session\Settings::class),
             $container->get(\VuFind\Config\PluginManager::class)->get('config'),
+            $recordConfig ?? [],
             (new EPFBackendFactory())($container, 'EPF'),
             $container->get(\VuFind\ILS\Connection::class),
             $container->get('ViewRenderer'),

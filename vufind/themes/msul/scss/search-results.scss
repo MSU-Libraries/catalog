@@ -23,7 +23,7 @@
     font-weight: 700;
     margin-left: 0;
   }
-  /* The format bades on the search results page should have a background */
+  /* The format badges on the search results page should have a background */
   /* color and consistent height */
   .format {
     background-color: $lavendernew;
@@ -223,7 +223,7 @@ form.searchForm, .record-tabs, .navbar-form {
       border-left:0;
       border-top:0;
     }
-    .active a {
+    .active a, a.active {
       border-bottom: 0.4rem solid $eggplant;
       border-right: 0.4rem solid transparent;
       border-left:0;
@@ -304,7 +304,12 @@ a.sr-only:focus {
 }
 
 @media only screen and (max-width : 767px) {
-  .result .checkbox {
-    display:block;
+  .result {
+    .result-body {
+      overflow-wrap: anywhere;
+    }
+    .checkbox {
+      display:block;
+    }
   }
 }

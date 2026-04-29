@@ -40,7 +40,7 @@ use Laminas\View\Helper\AbstractHelper;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development Wiki
  */
-class LocationNotices extends AbstractHelper implements \Laminas\Log\LoggerAwareInterface
+class LocationNotices extends AbstractHelper implements \Psr\Log\LoggerAwareInterface
 {
     use \VuFind\Log\LoggerAwareTrait;
 

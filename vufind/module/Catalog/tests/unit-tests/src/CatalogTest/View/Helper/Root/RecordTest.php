@@ -276,7 +276,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
         $record = $this->getRecord($this->loadRecordFixture('record1.json'));
         $holding = [
             'availability' => new AvailabilityStatus(0, 'Paged'),
-            'temporary_loan_type' => 'LoanType',
+            'loan_type_name' => 'LoanType',
         ];
         $this->assertEquals('Checked Out (Paged) (LoanType)', $record->getStatus($holding, false));
     }
@@ -417,7 +417,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
         $view->setHelperPluginManager($container);
         $view->expects($this->any())->method('resolver')
             ->willReturn($this->getMockResolver());
-        $config = is_array($config) ? new \Laminas\Config\Config($config) : $config;
+        $config = is_array($config) ? new \VuFind\Config\Config($config) : $config;
         $browzineConfig = is_array($browzineConfig) ? new \Laminas\Config\Config($browzineConfig) : $browzineConfig;
         $record = new Record($this->createMock(TagsService::class), $config, $browzineConfig);
         $record->setCoverRouter(new \VuFind\Cover\Router('http://foo/bar', $this->getCoverLoader()));

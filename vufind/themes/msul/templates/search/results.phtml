@@ -48,11 +48,11 @@
       ]
   );
   $recommendations = $this->results->getRecommendations('side');
+  $this->assetManager()->appendScriptString('var multiFacetsSelection = "' . $this->multiFacetsSelection . '";');
   $multiFacetsSelection = $this->multiFacetsSelection ? 'true' : 'false';
-  $this->assetManager()->appendScriptString('var multiFacetsSelectionEnabled = ' . $multiFacetsSelection . ';');
 ?>
 
-<h1 class="sr-only"><?=$this->escapeHtml($headTitle)?></h1>
+<h1 class="visually-hidden"><?=$this->escapeHtml($headTitle)?></h1>
 
 <div class="<?=$this->layoutClass('mainbody', (bool)$recommendations)?>">
   <?php /** MSU Start */ ?>
@@ -83,7 +83,7 @@
     <div class="search-stats" data-record-total="<?=$this->escapeHtmlAttr($recordTotal)?>">
       <?php if ($recordTotal > 0): ?>
         <?php if ($this->results->getOptions()->getTopPaginatorStyle() === 'simple'): ?>
-          <?=$this->paginationControl($this->results->getPaginator(), 'Sliding', 'search/pagination_simple.phtml', ['results' => $this->results])?>
+          <?=$this->paginationControl($this->results->getPaginator(), 'Sliding', 'Helpers/pagination-simple.phtml', ['params' => ['results' => $this->results]])?>
         <?php else: ?>
           <?=$this->context()->renderInContext('search/controls/showing.phtml', ['lookfor' => $lookfor, 'recordTotal' => $recordTotal]) ?>
         <?php endif; ?>
@@ -108,6 +108,10 @@
   <?php endif; /* MSU end */ ?>
   <?php /* End Listing Options */ ?>
 
+  <?php if ($options->showRestrictedViewWarning() && $this->results->isRestrictedView()): ?>
+    <?=$this->render('error/restrictedViewWarning.phtml')?>
+  <?php endif; ?>
+
   <?php if ($recordTotal < 1): ?>
     <?php /** MSU Code removed */ ?>
     <?php if (isset($this->parseError)): ?>
@@ -123,15 +127,15 @@
     <?php endforeach; ?>
   <?php else: ?>
     <?php if ($this->results->getOptions()->getTopPaginatorStyle() === 'full'): ?>
-      <?=$this->paginationControl($this->results->getPaginator(), 'Sliding', 'search/pagination-top.phtml', ['results' => $this->results, 'options' => $this->paginationOptions ?? []])?>
+      <?=$this->paginationControl($this->results->getPaginator(), 'Sliding', 'Helpers/pagination-top.phtml', ['params' => ['results' => $this->results], 'options' => $this->paginationOptions ?? []])?>
     <?php endif; ?>
     <form id="search-cart-form" method="post" name="bulkActionForm" action="<?=$this->url('cart-searchresultsbulk')?>" data-lightbox data-lightbox-onsubmit="bulkFormHandler">
       <?=$this->context($this)->renderInContext('search/bulk-action-buttons.phtml', ['idPrefix' => ''])?>
     </form>
-    <?=$this->paginationControl($this->results->getPaginator(), 'Sliding', 'search/pagination.phtml', ['results' => $this->results, 'options' => $this->paginationOptions ?? []]) /** MSU */ ?>
+    <?=$this->paginationControl($this->results->getPaginator(), 'Sliding', 'Helpers/pagination.phtml', ['params' => ['results' => $this->results], 'options' => $this->paginationOptions ?? []])?> <?php // MSU add additional pagination ?>
     <?=$this->render('search/results-list.phtml')?>
     <?=$this->context($this)->renderInContext('search/bulk-action-buttons.phtml', ['idPrefix' => 'bottom_', 'formAttr' => 'search-cart-form'])?>
-    <?=$this->paginationControl($this->results->getPaginator(), 'Sliding', 'search/pagination.phtml', ['results' => $this->results, 'options' => $this->paginationOptions ?? []])?>
+    <?=$this->paginationControl($this->results->getPaginator(), 'Sliding', 'Helpers/pagination.phtml', ['params' => ['results' => $this->results], 'options' => $this->paginationOptions ?? []])?>
     <?php /** MSU Code removed */ ?>
   <?php endif; ?>
 </div>

@@ -8,7 +8,7 @@ stages:
   - Release
 
 variables:
-  VUFIND_VERSION: "10.2.1"
+  VUFIND_VERSION: "11.0.1"
   SIMPLESAMLPHP_VERSION: "2.1.1"
   COMPOSE_PATH: /home/deploy/$STACK_NAME
   SSH_USER: "deploy"
@@ -26,7 +26,7 @@ Set Stack Name:
   tags:
     - msul-shared
   rules:
-    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH ||  $CI_COMMIT_BRANCH == "catalog-preview" || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $PROD == "false"'
+    - if: '($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH ||  $CI_COMMIT_BRANCH == "catprod-preview" || $CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $PROD == "false"'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $PROD == "true"'
       when: manual
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -64,7 +64,7 @@ Deploy Compose Files:
     auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -119,7 +119,7 @@ Deploy ZK:
     auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -138,7 +138,7 @@ Deploy Solr:
     auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -175,7 +175,7 @@ Deploy DB:
     auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -195,7 +195,7 @@ Deploy Vufind:
   timeout: 60m
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -219,7 +219,7 @@ Deploy Vufind Build Env:
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
       when: manual
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
       when: manual
   needs:
     - job: Set Stack Name
@@ -239,7 +239,7 @@ Deploy Monitoring:
     auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -336,7 +336,7 @@ Run Functional Tests:
     auto_stop_in: 2 weeks
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH == "catalog-preview"'
+    - if: '$CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -357,7 +357,6 @@ Remove Environment:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Deploy Vufind
   script:
     - ./cicd/remove-environment
 
@@ -392,7 +391,7 @@ Cleanup Files:
     RUNNER_SCRIPT_TIMEOUT: 60m # Prevent job timeout when deploy script takes longer than the 5m default
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true

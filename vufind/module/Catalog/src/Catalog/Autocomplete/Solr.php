@@ -17,8 +17,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * along with this program; if not, see
+ * <https://www.gnu.org/licenses/>.
  *
  * @category VuFind
  * @package  Autocomplete
@@ -55,6 +55,7 @@ class Solr extends \VuFind\Autocomplete\Solr
      */
     protected function mungeQuery(string $query, array $options = []): string
     {
+        // MSUL customization
         // Modify the query so it uses a wildcard at the end if the last character is alphanumeric:
         if (preg_match('/[\p{L}\p{N}_]$/u', $query)) {
             // When the query ends with a word with a hyphen or date range,
@@ -103,6 +104,7 @@ class Solr extends \VuFind\Autocomplete\Solr
     }
 
     /**
+     * MSUL Customization
      * Try to turn an array of record drivers into an array of suggestions.
      * Return exact matches first.
      *

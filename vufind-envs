@@ -7,6 +7,7 @@ x-vufind-envs: &vufind_envs
   FOLIO_REC_ID: "${FOLIO_REC_ID}"
   FOLIO_CANCEL_ID: "${FOLIO_CANCEL_ID}"
   OAI_URL: "${OAI_URL}"
+  DR_OAI_URL: "${DR_OAI_URL}"
   EMAIL: "${EMAIL}"
   MAIL_HOST: "${MAIL_HOST}"
   MAIL_PORT: "${MAIL_PORT}"
