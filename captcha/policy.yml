@@ -25,6 +25,16 @@ challenges:
         difficulty: 21
       verify-probability: 0.02
 
+  js-pow-sha256-harder:
+    runtime: js
+    parameters:
+      path: "js-pow-sha256"
+      js-loader: load.mjs
+      wasm-runtime: runtime.wasm
+      wasm-runtime-settings:
+        difficulty: 22
+      verify-probability: 0.02
+
 conditions:
   # Conditions will get replaced on rules AST when found as ($condition-name)
   # Conditions will get included from snippets
@@ -78,6 +88,10 @@ conditions:
   is-allowed-agent:
     - 'userAgent.contains("Silktide")'
 
+  is-suspicious-chrome-crawler:
+    - 'userAgent.matches("Chrome/[0-9]{1,2}\\.")'
+    - 'userAgent.matches("Chrome/1[1-3][0-9]\\.")'
+
   is-suspicious-crawler:
     - 'userAgent.contains("Presto/") || userAgent.contains("Trident/")'
     # Old IE browsers
@@ -104,8 +118,6 @@ conditions:
     - 'userAgent.matches("Gecko/[03-9][0-9][0-9][0-9]-")'
     - 'userAgent.matches("MSIE [0-9]\\.")'
     - 'userAgent.matches("Windows 9[5-8x]")'
-    - 'userAgent.matches("Chrome/[0-9]{1,2}\\.")'
-    - 'userAgent.matches("Chrome/1[1-3][0-9]\\.")'
     - 'userAgent.matches("Android [1-6]\\.")'
     - 'userAgent.matches("Version/[0-9]\\.[0-9](\\.[0-9])? Safari")'
     - 'userAgent.matches("FxiOS/[0-9]{1,2}\\.")'
@@ -202,6 +214,13 @@ rules:
       challenges: [js-pow-sha256-hard]
     conditions:
       - '($is-suspicious-crawler)'
+
+  - name: suspicious-chrome-crawlers
+    action: check
+    settings:
+      challenges: [js-pow-sha256-harder]
+    conditions:
+      - '($is-suspicious-chrome-crawler)'
 
   - name: suspicious-fetchers
     action: check
