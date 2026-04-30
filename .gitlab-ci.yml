@@ -108,7 +108,6 @@ Bootstrap Stacks:
     - Deploy Internal Network
     - Build DB Image
     - Build ZK Image
-    - Build Solr Image
   script:
     - bash ./cicd/bootstrap-stacks
 
@@ -123,7 +122,6 @@ Deploy ZK:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Build ZK Image
     - Bootstrap Stacks
     - Deploy Compose Files
     - Deploy Internal Network
