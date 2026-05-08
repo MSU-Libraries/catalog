@@ -208,6 +208,12 @@ rules:
       - '($is-lightbox-path)'
     action: pass
 
+  - name: protect-holdings-api
+    conditions:
+      - '($is-suspicious-crawler) && path == "/AJAX/JSON" && "method" in query && query["method"] == "getLicenseAgreement"'
+      - '($is-suspicious-chrome-crawler) && path == "/AJAX/JSON" && "method" in query && query["method"] == "getLicenseAgreement"'
+    action: drop
+
   - name: suspicious-crawlers
     action: check
     settings:
