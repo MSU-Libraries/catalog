@@ -123,6 +123,7 @@ conditions:
     - 'userAgent.matches("FxiOS/[0-9]{1,2}\\.")'
     - 'userAgent.matches("CriOS/[0-9]{1,2}\\.")'
     - 'userAgent.matches("PPC Mac OS X")'
+    - 'userAgent.matches("Intel Mac OS X")'
     - 'userAgent.matches("Windows NT [0-9]\\.[0-9]")'
     - 'userAgent.matches("Trident [0-9]\\.[0-9]")'
 
