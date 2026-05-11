@@ -29,11 +29,13 @@ return [
       'ajaxhandler' => [
         'factories' => [
           Catalog\AjaxHandler\GetItemStatuses::class => VuFind\AjaxHandler\GetItemStatusesFactory::class,
-          Catalog\AjaxHandler\GetLicenseAgreement::class => Catalog\AjaxHandler\GetLicenseAgreementFactory::class,
+          # Disabled while we find a better way to limit HoldingsIQ calls
+          # Catalog\AjaxHandler\GetLicenseAgreement::class => Catalog\AjaxHandler\GetLicenseAgreementFactory::class,
         ],
         'aliases' => [
           'getItemStatuses' => Catalog\AjaxHandler\GetItemStatuses::class,
-          'getLicenseAgreement' => Catalog\AjaxHandler\GetLicenseAgreement::class,
+          # Disabled while we find a better way to limit HoldingsIQ calls
+          # 'getLicenseAgreement' => Catalog\AjaxHandler\GetLicenseAgreement::class,
         ],
       ],
       'auth' => [
