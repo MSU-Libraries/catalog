@@ -185,6 +185,22 @@ Deploy DB:
   script:
     - bash ./cicd/deploy-db
 
+Deploy Redis:
+  extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/deploy-redis
+    auto_stop_in: 2 weeks
+  timeout: 60m
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Deploy Internal Network
+  script:
+    - bash ./cicd/deploy-redis
+
 Deploy Vufind:
   extends: .stack_template
   environment:
