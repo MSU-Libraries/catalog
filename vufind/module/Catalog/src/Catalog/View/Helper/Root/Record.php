@@ -273,7 +273,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
         if (!empty($statusSecondPart)) {
             $status .= ' (' . (isset($transEsc) ? $transEsc($statusSecondPart) : $statusSecondPart) . ')';
         }
-        $status .= $this->getStatusSuffix($holding, $translate);
+        $status .= $this->getStatusSuffix($holding, ($statusFirstPart !== 'Unavailable'), $translate);
         $holding['availability'] = new AvailabilityStatus(
             $availability,
             $status
@@ -291,7 +291,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
      *
      * @return string
      */
-    public function getStatusSuffix($holding, $translate = true)
+    public function getStatusSuffix($holding, $showLoanType = true, $translate = true)
     {
         if ($translate === true) {
             $transEsc = $this->getView()->plugin('transEsc');
@@ -304,7 +304,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
             $due = isset($transEsc) ? $transEsc('Due') : 'Due';
             $suffix .= ' - ' . $due . ': ' . $holding['duedate'];
         }
-        if ($holding['loan_type_name'] ?? false) {
+        if ($showLoanType && ($holding['loan_type_name'] ?? false)) {
             $suffix .= ' (' . $holding['loan_type_name'] . ')';
         }
         return $suffix;
