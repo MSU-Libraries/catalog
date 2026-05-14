@@ -193,7 +193,7 @@ class GetThisLoader
         $item = $this->getItem($item_id);
         [$partOne, $partTwo] = $this->getStatusParts($item);
         $partTwo = empty($partTwo) ? '' : " ({$partTwo})";
-        return $partOne . $partTwo . $this->getStatusSuffix($item);
+        return $partOne . $partTwo . $this->getStatusSuffix($item, ($partOne !== 'Unavailable'));
     }
 
     /**
@@ -203,7 +203,7 @@ class GetThisLoader
      *
      * @return string
      */
-    public function getStatusSuffix($item)
+    public function getStatusSuffix($item, $showLoanType = true)
     {
         $suffix = '';
         if ($item['returnDate'] ?? false) {
@@ -212,7 +212,7 @@ class GetThisLoader
         if ($item['duedate'] ?? false) {
             $suffix .= ' - Due: ' . $item['duedate'];
         }
-        if ($item['loan_type_name'] ?? false) {
+        if ($showLoanType && ($item['loan_type_name'] ?? false)) {
             $suffix .= ' (' . $item['loan_type_name'] . ')';
         }
         return $suffix;
@@ -521,7 +521,10 @@ class GetThisLoader
                 $this->msgTemplate = 'makercheckedout.phtml';
             }
         } else {
-            if ($this->isEquipment($item_id)) {
+            if (Regex::IN_PROCESS($stat)) {
+                $this->msgTemplate = 'inprocess.phtml';
+            }
+            elseif ($this->isEquipment($item_id)) {
                 $this->msgTemplate = 'equipment.phtml';
             } elseif (
                 Regex::ART($loc) && Regex::PERM($loc)
