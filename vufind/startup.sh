@@ -30,7 +30,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     verbose "  Update the repo (repo is initially cloned during first CI run for branch)..."
     (umask 0002; git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch)
 
-    if [[ ${VUFIND_CORE_INSTALLATION} == 1 ]]; then
+    if [[ ${VUFIND_CORE_INSTALLATION} -eq 1 ]]; then
         verbose "  VuFind core install: set up the symlink to be able to access code from host machine..."
         rm -r /usr/local/vufind/module/Catalog /usr/local/vufind/themes/msul
         # Changing theme in config

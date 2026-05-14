@@ -1,0 +1,31 @@
+---
+services:
+  redis:
+    # When updating image, update cicd/deploy-redis script as well
+    image: redis:8.6-trixie
+    ports:
+      - "6379:6379"
+    networks:
+      - internal
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          memory: 1024M
+      restart_policy:
+        window: 15s
+      update_config:
+        parallelism: 1
+        failure_action: rollback
+        delay: 10s
+
+networks:
+  internal:
+    name: ${STACK_NAME}-internal
+    external: true

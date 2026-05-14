@@ -121,6 +121,18 @@ Deploy Prod DB:
     - Bootstrap Prod Stacks
     - Initialize Prod Log Dirs
 
+Deploy Prod Redis:
+  stage: Deploy Prod
+  extends: Deploy Redis
+  environment:
+    name: $CI_COMMIT_BRANCH-prod/deploy-redis
+    auto_stop_in: 2 weeks
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+  needs:
+    - job: Begin Prod Deploy
+      artifacts: true
+
 Deploy Prod Vufind:
   stage: Deploy Prod
   extends: Deploy Vufind
