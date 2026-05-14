@@ -3,8 +3,6 @@ services:
   redis:
     # When updating image, update cicd/deploy-redis script as well
     image: redis:8.6-trixie
-    ports:
-      - "6379:6379"
     networks:
       - internal
     logging:
