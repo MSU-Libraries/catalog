@@ -50,6 +50,7 @@ $( function pageLoad() {
 
   // Make AJAX request to get the license agreement information if this is an HLM record
   if (title && recordId.substring(0, 3) === "hlm") {
-    getLicenseAgreement(title);
+    // Disabled due to HoldingsIQ API limit
+    // getLicenseAgreement(title);
   }
 });

@@ -123,7 +123,7 @@ EXPOSE 80
 # --retries=3: will have 3*10s to recover before killed after healthy
 # checking the search results page to make sure solr connection is working and kill
 # container if we have a stale solr connection from previous deploy.
-HEALTHCHECK --interval=10s --timeout=12s --start-period=90s --retries=3 \
+HEALTHCHECK --interval=15s --timeout=20s --start-period=120s --retries=3 \
    CMD curl --fail -s http://localhost:80/ || exit 1
 
 ENTRYPOINT [ "/entrypoint.sh" ]

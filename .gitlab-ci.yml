@@ -108,7 +108,6 @@ Bootstrap Stacks:
     - Deploy Internal Network
     - Build DB Image
     - Build ZK Image
-    - Build Solr Image
   script:
     - bash ./cicd/bootstrap-stacks
 
@@ -123,7 +122,6 @@ Deploy ZK:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Build ZK Image
     - Bootstrap Stacks
     - Deploy Compose Files
     - Deploy Internal Network
@@ -151,6 +149,23 @@ Deploy Solr:
   script:
     - bash ./cicd/deploy-solr
 
+Create Solr Collections:
+  extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/create-solr-colls
+    auto_stop_in: 2 weeks
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - job: Deploy Compose Files
+      artifacts: true
+    - Deploy Solr
+  script:
+    - bash ./cicd/create-solr-collections
+
 Deploy DB:
   extends: .stack_template
   environment:
@@ -170,6 +185,22 @@ Deploy DB:
   script:
     - bash ./cicd/deploy-db
 
+Deploy Redis:
+  extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/deploy-redis
+    auto_stop_in: 2 weeks
+  timeout: 60m
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Deploy Internal Network
+  script:
+    - bash ./cicd/deploy-redis
+
 Deploy Vufind:
   extends: .stack_template
   environment:
@@ -182,12 +213,10 @@ Deploy Vufind:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Deploy Internal Network
     - Build Captcha Image
     - Build Vufind Image
-    - Deploy DB
-    - Deploy Solr
-    - Deploy Compose Files
+    - Verify DB Health
+    - Verify Solr Health
   script:
     - bash ./cicd/deploy-vufind
   artifacts:
@@ -234,7 +263,7 @@ Deploy Monitoring:
   script:
     - bash ./cicd/deploy-monitoring
 
-Verify Stack Health:
+Verify Docker Health:
   extends: .stack_template
   environment:
     name: $CI_COMMIT_BRANCH/verify
@@ -248,7 +277,37 @@ Verify Stack Health:
     - Deploy Monitoring
     - Deploy Vufind
   script:
-    - bash ./cicd/verify-stack-health
+    - bash ./cicd/verify-docker-health
+
+Verify Solr Health:
+  extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/verify
+    auto_stop_in: 2 weeks
+  timeout: 40m
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - job: Deploy Compose Files
+      artifacts: true
+    - Create Solr Collections
+  script:
+    - bash ./cicd/verify-solr-health
+
+Verify DB Health:
+  extends: .stack_template
+  environment:
+    name: $CI_COMMIT_BRANCH/verify
+    auto_stop_in: 2 weeks
+  timeout: 40m
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - job: Deploy Compose Files
+      artifacts: true
+    - Deploy DB
+  script:
+    - bash ./cicd/verify-db-health
 
 Populate Vufind Environment:
   extends: .stack_template
@@ -261,7 +320,7 @@ Populate Vufind Environment:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Verify Stack Health
+    - Verify Docker Health
   script:
     - bash ./cicd/populate-vufind-environment
 
@@ -280,7 +339,7 @@ Populate Course Reserves:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Verify Stack Health
+    - Verify Docker Health
   script:
     - bash ./cicd/populate-coursereserves
 
@@ -295,7 +354,7 @@ Run Functional Tests:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Verify Stack Health
+    - Verify Docker Health
   script:
     - bash ./cicd/run-functional-tests
 
