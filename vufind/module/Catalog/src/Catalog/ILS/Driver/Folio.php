@@ -197,8 +197,9 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 $locationKey = $msulConfig['Locations']['response_location_key'] ?? '';
 
                 if (!empty($apiUrl)) {
-                    // Replace %%callnumber%% with the real callnumber
+                    // Replace %%callnumber%% and %%loc%% with the real callnumber and location code
                     $apiUrl = str_replace('%%callnumber%%', urlencode($callNumberData['callnumber']), $apiUrl);
+                    $apiUrl = str_replace('%%loc%%', urlencode($locAndHoldings['location_code']), $apiUrl);
 
                     // Get the API data
                     $data = $this->getCachedData($apiUrl);
@@ -212,6 +213,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                             $this->logWarning(
                                 'Could not get location data for callnumber '
                                 . $callNumberData['callnumber'] . ' (' . $bibId . ')'
+                                . ' and location code ' . $locAndHoldings['location_code']
                             );
                         }
                     }
