@@ -285,8 +285,9 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
     /**
      * Determine the holding status suffix (if any)
      *
-     * @param array $holding   the holding data
-     * @param bool  $translate if the transEsc function should
+     * @param array $holding      the holding data
+     * @param bool  $showLoanType if loan type should be displayed
+     * @param bool  $translate    if the transEsc function should
      *              be used on the status values
      *
      * @return string

@@ -211,8 +211,7 @@ class GetThisLoader extends AbstractItemLoader
         } else {
             if (Regex::IN_PROCESS($stat)) {
                 $this->msgTemplate = 'inprocess.phtml';
-            }
-            elseif ($this->isEquipment($item_id)) {
+            } elseif ($this->isEquipment($item_id)) {
                 $this->msgTemplate = 'equipment.phtml';
             } elseif (
                 Regex::ART($loc) && Regex::PERM($loc)

@@ -279,7 +279,8 @@ abstract class AbstractItemLoader
     /**
      * Determine the holding status suffix (if any)
      *
-     * @param array $item the holding data
+     * @param array $item         the holding data
+     * @param bool  $showLoanType if loan type should be displayed
      *
      * @return string
      */
