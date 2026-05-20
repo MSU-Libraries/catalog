@@ -40,7 +40,274 @@ class GetThisLoader extends AbstractItemLoader
     public function __construct($record, $items, $item_id = null, $configReader = null)
     {
         $this->msgTemplate = null;
-        parent::__construct($record, $items, $item_id, $configReader);
+        if (null !== $this->item_id) {
+            $this->item = $this->getItem($this->item_id);
+        }
+    }
+
+    /**
+     * Instantiate class pulling driver and record from current view
+     *
+     * @param object $view The view to retrieve the driver from
+     *
+     * @return GetThisLoader|null
+     */
+    public static function fromView($view)
+    {
+        $getthis = null;
+        try {
+            $record = $view->record($view->driver);
+            $holdings = $view->driver->getRealTimeHoldings()['holdings'];
+            $items = [];
+            foreach ($holdings as $key => $item_arr) {
+                $items = array_merge($items, $item_arr['items']);
+            }
+            $getthis = new \Catalog\GetThis\GetThisLoader($record, $items);
+        } catch (\Throwable $e) {
+            // Allow empty getthis when ILS is unavailable
+        }
+        return $getthis;
+    }
+
+    /**
+     * Returns if the current record is an HLM record or not
+     *
+     * @return bool  Depending on if the current record has the hlm prefix or not
+     */
+    public function isHLM()
+    {
+        return str_starts_with($this->record->getUniqueId(), 'hlm.');
+    }
+
+    /**
+     * Logic used to determine which item id to use
+     *
+     * @param string $item_id The holding item UUID.
+     *
+     * @return string $item_id for the selected item
+     */
+    private function getItemId($item_id = null)
+    {
+        if (null !== $item_id) {
+            return $item_id; // use the one passed as a parameter first
+        } elseif (null !== $this->item_id) {
+            return $this->item_id; // get the one set by the loader
+        } elseif (count($this->items) > 0) {
+            return $this->items[0]['item_id']; // grab the first holding record
+        } else {
+            return null; // This shouldn't happen, but we have no item id!
+        }
+    }
+
+    /**
+     * Get the holding record for the given item id. If none is provided, the first holding
+     * record will be returned.
+     *
+     * @param string $item_id The holding item UUID. If null (default) will return for what
+     *                        is set in the class if available, else the first item
+     *
+     * @return array The data for with the holding information of the given item
+     */
+    public function getItem($item_id = null)
+    {
+        $item_id = $this->getItemId($item_id);
+        foreach ($this->items as $item) {
+            if ($item_id === null || $item['item_id'] == $item_id) {
+                return $item;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the general and specfic status for a holding item
+     *
+     * @param array $item The holding item data, as retrieved from getItem()
+     *
+     * @return array The item status as two parts (both string):
+     *               - General status ("Checked out", "Unavailable", etc)
+     *               - Specific status ("Awaiting pickup", "Declared lost", etc; default blank string)
+     */
+    public function getStatusParts($item)
+    {
+        $status = isset($item['availability']) ? $item['availability']->getStatusDescription() : 'Unknown';
+        $statusSecondPart = '';
+        if (
+            in_array($status, [
+                'Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
+                'In process (non-requestable)', 'Long missing', 'Lost and paid',
+                'Missing', 'On order', 'Order closed', 'Unknown', 'Withdrawn',
+            ])
+        ) {
+            $statusFirstPart = 'Unavailable';
+            $statusSecondPart = $status;
+        } elseif (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged'])) {
+            $statusFirstPart = 'Checked Out';
+            $statusSecondPart = $status;
+        } elseif ($status === 'Checked out') {
+            $statusFirstPart = 'Checked Out';
+        } elseif ($status === 'Restricted') {
+            $statusFirstPart = 'Library Use Only';
+        } elseif ($status === 'Unavailable') {
+            $statusFirstPart = 'Unavailable';
+        } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
+            $statusFirstPart = 'Unknown status';
+            $statusSecondPart = $status;
+        } elseif (isset($item['reserve']) && $item['reserve'] === 'Y') {
+            $statusFirstPart = 'On Reserve';
+        } elseif ($status === 'Available') {
+            $statusFirstPart = 'Available';
+        } else {
+            $statusFirstPart = 'Unknown status';
+        }
+        return [$statusFirstPart, $statusSecondPart];
+    }
+
+    /**
+     * Get the status for a holding item
+     *
+     * @param string $item_id The holding item UUID. If null (default) will return status for first item
+     *
+     * @return string The status string
+     */
+    public function getStatus($item_id = null)
+    {
+        // NOTE: Make sure this logic matches with getStatus in the Record view helper
+
+        $item_id = $this->getItemId($item_id);
+        $item = $this->getItem($item_id);
+        [$partOne, $partTwo] = $this->getStatusParts($item);
+        $partTwo = empty($partTwo) ? '' : " ({$partTwo})";
+        return $partOne . $partTwo . $this->getStatusSuffix($item, ($partOne !== 'Unavailable'));
+    }
+
+    /**
+     * Determine the holding status suffix (if any)
+     *
+     * @param array $item the holding data
+     *
+     * @return string
+     */
+    public function getStatusSuffix($item, $showLoanType = true)
+    {
+        $suffix = '';
+        if ($item['returnDate'] ?? false) {
+            $suffix = ' - ' . $item['returnDate'];
+        }
+        if ($item['duedate'] ?? false) {
+            $suffix .= ' - Due: ' . $item['duedate'];
+        }
+        if ($showLoanType && ($item['loan_type_name'] ?? false)) {
+            $suffix .= ' (' . $item['loan_type_name'] . ')';
+        }
+        return $suffix;
+    }
+
+    /**
+     * Get the location for a holding item
+     *
+     * @param string $item_id The holding item UUID. If null (default) will return status for first item
+     *
+     * @return string The location string
+     */
+    public function getLocation($item_id = null)
+    {
+        return $this->getItem($item_id)['location'] ?? '';
+    }
+
+    /**
+     * Get the location code for a holding item
+     *
+     * @param string $item_id The holding item UUID. If null (default) will return status for first item
+     *
+     * @return string The location code
+     */
+    public function getLocationCode($item_id = null)
+    {
+        return $this->getItem($item_id)['location_code'] ?? '';
+    }
+
+    /**
+     * Get the link data for requesting the item
+     *
+     * @param string $item_id The holding item UUID. If null (default) will return status for first item
+     *
+     * @return array|string The data required to build a request URL for the item
+     */
+    public function getLink($item_id = null)
+    {
+        $item_id = $this->getItemId($item_id);
+        $linkdata = ['link' => ''];
+
+        // If $item_id is null, call getItem just in case $items returns the items in a different order
+        // than the real time holdings information
+        $item_id = $this->getItem($item_id)['item_id'] ?? null;
+
+        $holdings = $this->record->getRealTimeHoldings();
+        if (array_key_exists('holdings', $holdings)) {
+            foreach ($holdings['holdings'] as $location) {
+                if (array_key_exists('items', $location)) {
+                    foreach ((array)$location['items'] as $item) {
+                        if ($item_id === null || (array_key_exists('item_id', $item) && $item['item_id'] == $item_id)) {
+                            $linkdata = $item;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return array_key_exists('link', $linkdata) ? $linkdata['link'] : '';
+    }
+
+    /**
+     * Get the call number for the record
+     *
+     * @param string $item_id Item to filter the result for
+     *
+     * @return string The description string
+     */
+    public function getCallNumber($item_id = null)
+    {
+        $item_id = $this->getItemId($item_id);
+        $item = $this->getItem($item_id);
+
+        $callnum = '';
+        if ($item['callnumber'] ?? false) {
+            $callnum .= ($item['callnumber_prefix'] ? $item['callnumber_prefix'] . ' ' : '') .
+                        $item['callnumber'];
+        }
+
+        if ($item['enumchron'] ?? false) {
+            $callnum .= ' ' . $item['enumchron'];
+        }
+
+        if ($item != null && isset($item['number']) && $item['number'] > 1) {
+            $callnum .= ' (Copy #' . ($item['number']) . ')';
+        }
+
+        if ($this->isOnlineResource($item_id)) {
+            $callnum = 'Online';
+        }
+
+        if (empty($callnum)) {
+            $callnum = 'Access';
+        }
+
+        return $callnum;
+    }
+
+    /**
+     * Determine if the given item is an online resource
+     *
+     * @param string $item_id Item ID to filter for
+     *
+     * @return bool  If the item is an online resource
+     */
+    public function isOnlineResource($item_id = null)
+    {
+        $item_id = $this->getItemId($item_id);
+        $loc = $this->getLocation($item_id);
+        return Regex::ONLINE($loc);
     }
 
     /**
@@ -209,7 +476,10 @@ class GetThisLoader extends AbstractItemLoader
                 $this->msgTemplate = 'makercheckedout.phtml';
             }
         } else {
-            if ($this->isEquipment($item_id)) {
+            if (Regex::IN_PROCESS($stat)) {
+                $this->msgTemplate = 'inprocess.phtml';
+            }
+            elseif ($this->isEquipment($item_id)) {
                 $this->msgTemplate = 'equipment.phtml';
             } elseif (
                 Regex::ART($loc) && Regex::PERM($loc)

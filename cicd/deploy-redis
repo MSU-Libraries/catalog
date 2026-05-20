@@ -1,0 +1,34 @@
+#!/bin/bash
+
+source "${CI_PROJECT_DIR}"/cicd/before-script
+
+runhelp() {
+    echo ""
+    echo "Purpose: Deploy the Redis application stack"
+    echo ""
+    echo "Expected User-defined Variables:"
+    echo "  - STACK_NAME: Stack name"
+    echo ""
+    echo "Failure Scenarios:"
+    echo "  - Deploying the stack fails"
+    echo ""
+}
+
+if [[ -n "$1" || $1 == "-h" || $1 == "--help" || $1 == "help" ]]; then
+    runhelp
+    exit 0
+fi
+
+declare REDIS_IMAGE=redis:8.6-trixie
+# shellcheck disable=SC2034
+declare SSH_USER=deploy
+
+main() {
+    # Pull images now to save time with stack deploy
+    run_on_all_nodes "docker pull $REDIS_IMAGE"
+
+    run_on_node 1 "docker stack deploy -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.redis.yml) ${STACK_NAME}-redis";
+}
+
+before_script
+main

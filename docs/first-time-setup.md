@@ -74,6 +74,9 @@ docker stack deploy -c <(source .env; envsubst <docker-compose.mariadb-cloud.yml
 # The rest of the Solr cloud stack
 docker stack deploy -c <(source .env; envsubst <docker-compose.solr-cloud.yml) solr
 
+# The Redis stack
+docker stack deploy -c <(source .env; envsubst <docker-compose.redis.yml) redis
+
 # The VuFind stack
 docker stack deploy -c <(source .env; envsubst <docker-compose.catalog.yml) catalog
 
