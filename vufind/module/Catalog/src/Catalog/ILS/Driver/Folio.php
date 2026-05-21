@@ -213,6 +213,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
     }
 
     /**
+     * MSUL - PC-1659: Add support for async calls
      * Helper function to retrieve a single page of results from FOLIO API
      *
      * @param string $interface FOLIO api interface to call
@@ -244,6 +245,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
     }
 
     /**
+     * MSUL - PC-1659: Add support for async calls
      * Helper function to retrieve paged results from FOLIO API
      *
      * @param string $responseKey Key containing values to collect in response
