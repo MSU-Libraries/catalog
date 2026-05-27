@@ -853,7 +853,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
         if (isset($params['sort'])) {
             $query .= ' sortby ' . $this->escapeCql($params['sort']);
         }
-        $resultPage = $this->getResultPage('/circulation/loans', compact('query'), $offset, $limit);
+        $resultPage = $this->getResultPage('/circulation/loans', compact('query'), $offset, $limit)->wait();
         $transactions = [];
         foreach ($resultPage->loans ?? [] as $trans) {
             $dueStatus = false;
