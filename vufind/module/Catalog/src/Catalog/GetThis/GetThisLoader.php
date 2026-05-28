@@ -199,7 +199,8 @@ class GetThisLoader
     /**
      * Determine the holding status suffix (if any)
      *
-     * @param array $item the holding data
+     * @param array $item         the holding data
+     * @param bool  $showLoanType if the loan type should be displayed
      *
      * @return string
      */
@@ -523,8 +524,7 @@ class GetThisLoader
         } else {
             if (Regex::IN_PROCESS($stat)) {
                 $this->msgTemplate = 'inprocess.phtml';
-            }
-            elseif ($this->isEquipment($item_id)) {
+            } elseif ($this->isEquipment($item_id)) {
                 $this->msgTemplate = 'equipment.phtml';
             } elseif (
                 Regex::ART($loc) && Regex::PERM($loc)

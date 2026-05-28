@@ -162,8 +162,14 @@ class FolioTest extends \PHPUnit\Framework\TestCase
         // Create a stub for the SomeClass class
         $this->driver = $this->getMockBuilder(Folio::class)
             ->setConstructorArgs([new \VuFind\Date\Converter(), $factory, $mockMsul])
-            ->onlyMethods(['makeRequest', 'makeExternalRequest'])
+            ->onlyMethods(['makeRequest', 'makeExternalRequest', 'makeRequestAsync'])
             ->getMock();
+        // Mock the Guzzle Service
+        $mockGuzzleService = $this->createMock(\VuFind\Http\GuzzleService::class);
+        $mockGuzzleService->expects($this->any())
+            ->method('createClient')
+            ->willReturn(new \GuzzleHttp\Client());
+        $this->driver->setGuzzleService($mockGuzzleService);
         // Configure the stub
         $this->driver->setConfig($config ?? $this->defaultDriverConfig);
         $cache = new \Laminas\Cache\Storage\Adapter\Memory();
@@ -173,6 +179,19 @@ class FolioTest extends \PHPUnit\Framework\TestCase
         // For simplicity (and since it's just mocking a request and not actually making one)
         // we'll have calls to makeExternalRequest go to the same mock for makeRequest
         $this->driver->method('makeExternalRequest')->willReturnCallback([$this, 'mockMakeRequest']);
+        // The Async request function is almost identical to make request, but it returns
+        // a Guzzle promise instead
+        $this->driver->method('makeRequestAsync')->willReturnCallback(function (...$args) {
+            $laminasResponse = $this->mockMakeRequest('GET', ...$args);
+
+            $guzzleResponse = new \GuzzleHttp\Psr7\Response(
+                $laminasResponse->getStatusCode(),
+                $laminasResponse->getHeaders()->toArray(),
+                $laminasResponse->getContent()
+            );
+
+            return new \GuzzleHttp\Promise\FulfilledPromise($guzzleResponse);
+        });
         $this->driver->init();
     }
 

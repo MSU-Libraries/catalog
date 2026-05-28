@@ -31,15 +31,15 @@ namespace Catalog\ILS\Driver;
 
 use ArrayIterator;
 use Catalog\Utils\RegexLookup as Regex;
+use GuzzleHttp\Promise;
+use GuzzleHttp\Psr7;
 use Laminas\Http\Header\HeaderInterface;
 use Laminas\Http\Headers;
 use Laminas\Http\Response;
-use GuzzleHttp\Psr7;
-use GuzzleHttp\Promise;
 use VuFind\Exception\ILS as ILSException;
-use VuFind\ILS\Logic\AvailabilityStatus;
 use VuFind\Http\GuzzleServiceAwareInterface;
 use VuFind\Http\GuzzleServiceAwareTrait;
+use VuFind\ILS\Logic\AvailabilityStatus;
 
 use function count;
 use function in_array;
@@ -65,6 +65,13 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * @var \VuFind\Config\PluginManager
      */
     protected $configReader = null;
+
+    /**
+     * Guzzle client
+     *
+     * @var \GuzzleHttp\Client
+     */
+    protected $client;
 
     /**
      * Constructor
@@ -188,7 +195,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             'synchronous' => false,
         ]);
         return $promise->then(
-            function (Psr7\Response $response) use ($attemptNumber, $startTime, $path) {
+            function (Psr7\Response $response) use ($attemptNumber, $startTime, $path, $allowedFailureCodes) {
                 $endTime = microtime(true);
                 $responseTime = $endTime - $startTime;
                 $this->debug('Request ASYNC Response Time --- ' . $responseTime . ' seconds. ' . $path);
@@ -232,7 +239,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             $combinedQuery
         );
         return $promise->then(
-            function (Psr7\Response $response) {
+            function (Psr7\Response $response) use ($interface) {
                 $json = json_decode($response->getBody());
                 $code = $response->getStatusCode();
                 if (!($code >= 200 && $code < 300) || !$json) {
@@ -267,8 +274,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
                 // Enqueue page requests
                 $promises[] = $this->getResultPage($interface, $query, $offset, $limit);
                 $offset += $limit;
-            }
-            elseif ($promises) {
+            } elseif ($promises) {
                 // Unwrap current promises until we get a greater estimate
                 $json = array_shift($promises)->wait();
                 $totalEstimate = $json->totalRecords ?? 0;

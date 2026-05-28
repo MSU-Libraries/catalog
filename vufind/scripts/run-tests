@@ -7,6 +7,9 @@ cd /usr/local/vufind
 echo "Running unit tests"
 php vendor/bin/phpunit -c module/Catalog/tests/phpunit.xml /usr/local/vufind/module/Catalog/tests/unit-tests/ --stop-on-defect
 
+echo "Running VuFind unit tests"
+for d in /usr/local/vufind/module/*/tests/unit-tests; do [ -f "$d/phpunit.xml" ] && php /usr/local/vufind/vendor/bin/phpunit -c "$d/phpunit.xml" "$d" --stop-on-defect --exclude-filter HarvestOaiCommandTest || continue; done
+
 if [[ -n "${1}" ]] && [[ "${1}" == "--unit" ]]; then
     echo "Skipping code quality tests"
 else
