@@ -23,8 +23,8 @@ indicate that is the user with the proper credentials to the
 container registry.
 
 ```bash
-# Deploy the catalog stack for the catalog-prod environment
-sudo -Hu deploy pc-deploy catalog-prod catalog
+# Deploy the catalog stack for the catprod-prod environment
+sudo -Hu deploy pc-deploy catprod-prod catalog
 
 # Do a dry-run of the traefik stack, which is a core-stack
 sudo -Hu deploy pc-deploy core-stacks traefik -n
@@ -45,7 +45,7 @@ available on the host machines as well as within the `catalog`, `cron` and
 `build` containers in the `catalog` stack.
 
 ```bash
-# Locate the file that contains data for in01234 in catalog-prod's OAI files
+# Locate the file that contains data for in01234 in catprod-prod's OAI files
 # that have previously been imported to that environment
 pc-locate-oai in01234
 # or
@@ -54,8 +54,8 @@ pc-locate-oai in01234
 # Give verbose output to show you the grep command being run
 pc-locate-oai in01234 --debug
 
-# Locate the file that contains data for in01234 in catalog-beta's OAI files
-pc-locate-oai in01234 catalog-beta
+# Locate the file that contains data for in01234 in catprod-beta's OAI files
+pc-locate-oai in01234 catprod-beta
 
 # Locate the files that contain data for in00005342798 and in00001442723
 # then extract the data for those specific records into a temp file
@@ -69,11 +69,11 @@ and display the files that the match is found in.
 The script is available on the host machines.
 
 ```bash
-# Locate the file that contains '123456789' in catalog-prod's HLM files
-pc-locate-hlm catalog-prod -p 123456789
+# Locate the file that contains '123456789' in catprod-prod's HLM files
+pc-locate-hlm catprod-prod -p 123456789
 
 # Give verbose output to show you the grep command being run
-pc-locate-hlm catalog-prod -p 123456789 --debug
+pc-locate-hlm catprod-prod -p 123456789 --debug
 ```
 
 ## Record manipulation ([pc-record](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-record?ref_type=heads))
@@ -87,15 +87,15 @@ Currently available:
   `build` containers in the `catalog` stack.
 
 ```bash
-# delete the record with id hlm.in01234 on catalog-beta
-pc-record delete catalog-beta hlm.in01234
+# delete the record with id hlm.in01234 on catprod-beta
+pc-record delete catprod-beta hlm.in01234
 
 # delete records with ids in input file on devel-robby being verbose
 pc-record delete devel-robby --input file_containing_ids.txt --debug
 
 # show the command to delete the record with id in01234
-# (folio.in01234 with prefix) on catalog-beta being verbose 
-pc-record delete catalog-beta in01234 --dry-run --vvv --prefix folio
+# (folio.in01234 with prefix) on catprod-beta being verbose 
+pc-record delete catprod-beta in01234 --dry-run --vvv --prefix folio
 ```
 
 ## Connect to container ([pc-connect](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-connect?ref_type=heads))
@@ -106,13 +106,13 @@ anything else, or with helpers to run the `mysql` or `zh-shell` commands.
 
 ```bash
 # Connect to the catalog instance with verbose logging
-pc-connect catalog-prod-catalog_cron -v
+pc-connect catprod-prod-catalog_cron -v
 
 # Connect to the database on node 3
-pc-connect catalog-prod-mariadb_galera 3
+pc-connect catprod-prod-mariadb_galera 3
 
 # Connect to zk-shell
-pc-connect catalog-prod-solr_solr --zk
+pc-connect catprod-prod-solr_solr --zk
 
 # Dry-run to locate an instance
 pc-connect devel-test-catalog_catalog -n
@@ -129,15 +129,15 @@ in a `screen` since it will likely run for a day and needs to be run with
 screen # run in a screen, this isn't required, but highly recommended
 
 # List all of the steps the script will run
-sudo pc-full-import catalog-prod --list
+sudo pc-full-import catprod-prod --list
 
 # Run a full import with debug output saving to a file
-sudo pc-full-import catalog-prod --debug 2>&1 | tee catalog-prod-import_$(date -I).log
+sudo pc-full-import catprod-prod --debug 2>&1 | tee catprod-prod-import_$(date -I).log
 
 # Run only a few steps from script bypassing user confirmation
 # (if that step asks for it)
-sudo pc-full-import catalog-prod --first-step 3 --last-step 5 --debug --yes
+sudo pc-full-import catprod-prod --first-step 3 --last-step 5 --debug --yes
 
 # Do a dry run of the full import to show what steps it would perform
-sudo pc-full-import catalog-prod --dry-run
+sudo pc-full-import catprod-prod --dry-run
 ```

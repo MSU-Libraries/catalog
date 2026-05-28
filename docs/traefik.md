@@ -135,18 +135,18 @@ docker node update --label-rm  deployglobal catalog-3-dev.aws.lib.msu.edu
   TO LIMIT DOWNTIME*.
 
 ```bash
-docker node update --label-add deployglobal=false catalog-1.aws.lib.msu.edu
-docker node update --label-add deployglobal=false catalog-2.aws.lib.msu.edu
-docker node update --label-add deployglobal=true catalog-3.aws.lib.msu.edu
+docker node update --label-add deployglobal=false catprod-1.aws.lib.msu.edu
+docker node update --label-add deployglobal=false catprod-2.aws.lib.msu.edu
+docker node update --label-add deployglobal=true catprod-3.aws.lib.msu.edu
 docker service update --constraint-add 'node.labels.deployglobal == true' traefik_traefik
 # Wait for the traefik container to stop
 watch 'docker ps | grep traefik'
 
 mkdir -p /tmp/acme_backup/
 mv /var/lib/docker/volumes/traefik_traefik/_data/*.json /tmp/acme_backup
-docker node update --label-add deployglobal=true catalog-1.aws.lib.msu.edu
-docker node update --label-add deployglobal=true catalog-2.aws.lib.msu.edu
-docker node update --label-add deployglobal=false catalog-3.aws.lib.msu.edu
+docker node update --label-add deployglobal=true catprod-1.aws.lib.msu.edu
+docker node update --label-add deployglobal=true catprod-2.aws.lib.msu.edu
+docker node update --label-add deployglobal=false catprod-3.aws.lib.msu.edu
 tail -f /var/lib/docker/volumes/traefik_logs/_data/traefik.log -n10
 
 ## If logs are unhealthy or unable to create new certificates, restore previous ones
@@ -159,17 +159,17 @@ cp /tmp/acme_backup/* /var/lib/docker/volumes/traefik_traefik/_data/
   certificate files.
 
 ```bash
-docker node update --label-add deployglobal=true catalog-1.aws.lib.msu.edu
-docker node update --label-add deployglobal=false catalog-2.aws.lib.msu.edu
-docker node update --label-add deployglobal=false catalog-3.aws.lib.msu.edu
+docker node update --label-add deployglobal=true catprod-1.aws.lib.msu.edu
+docker node update --label-add deployglobal=false catprod-2.aws.lib.msu.edu
+docker node update --label-add deployglobal=false catprod-3.aws.lib.msu.edu
 # Wait for the traefik container to stop
 watch 'docker ps | grep traefik'
 
 mkdir -p /tmp/acme_backup/
 mv /var/lib/docker/volumes/traefik_traefik/_data/*.json /tmp/acme_backup
-docker node update --label-add deployglobal=false catalog-1.aws.lib.msu.edu
-docker node update --label-add deployglobal=true catalog-2.aws.lib.msu.edu
-docker node update --label-add deployglobal=true catalog-3.aws.lib.msu.edu
+docker node update --label-add deployglobal=false catprod-1.aws.lib.msu.edu
+docker node update --label-add deployglobal=true catprod-2.aws.lib.msu.edu
+docker node update --label-add deployglobal=true catprod-3.aws.lib.msu.edu
 tail -f /var/lib/docker/volumes/traefik_logs/_data/traefik.log -n10
 
 ## If logs are unhealthy or unable to create new certificates, restore previous ones
@@ -182,17 +182,17 @@ cp /tmp/acme_backup/* /var/lib/docker/volumes/traefik_traefik/_data/
   certificate files.
 
 ```bash
-docker node update --label-add deployglobal=true catalog-1.aws.lib.msu.edu
-docker node update --label-add deployglobal=false catalog-2.aws.lib.msu.edu
-docker node update --label-add deployglobal=false catalog-3.aws.lib.msu.edu
+docker node update --label-add deployglobal=true catprod-1.aws.lib.msu.edu
+docker node update --label-add deployglobal=false catprod-2.aws.lib.msu.edu
+docker node update --label-add deployglobal=false catprod-3.aws.lib.msu.edu
 # Wait for the traefik container to stop
 watch 'docker ps | grep traefik'
 
 mkdir -p /tmp/acme_backup/
 mv /var/lib/docker/volumes/traefik_traefik/_data/*.json /tmp/acme_backup
-docker node update --label-add deployglobal=true catalog-1.aws.lib.msu.edu
-docker node update --label-add deployglobal=true catalog-2.aws.lib.msu.edu
-docker node update --label-add deployglobal=true catalog-3.aws.lib.msu.edu
+docker node update --label-add deployglobal=true catprod-1.aws.lib.msu.edu
+docker node update --label-add deployglobal=true catprod-2.aws.lib.msu.edu
+docker node update --label-add deployglobal=true catprod-3.aws.lib.msu.edu
 tail -f /var/lib/docker/volumes/traefik_logs/_data/traefik.log -n10
 
 ## If logs are unhealthy or unable to create new certificates, restore previous ones
@@ -203,7 +203,7 @@ cp /tmp/acme_backup/* /var/lib/docker/volumes/traefik_traefik/_data/
 
 ```bash
 docker service update --constraint-rm 'node.labels.deployglobal == true' traefik_traefik
-docker node update --label-rm  deployglobal catalog-1.aws.lib.msu.edu
-docker node update --label-rm  deployglobal catalog-2.aws.lib.msu.edu
-docker node update --label-rm  deployglobal catalog-3.aws.lib.msu.edu
+docker node update --label-rm  deployglobal catprod-1.aws.lib.msu.edu
+docker node update --label-rm  deployglobal catprod-2.aws.lib.msu.edu
+docker node update --label-rm  deployglobal catprod-3.aws.lib.msu.edu
 ```
