@@ -17,20 +17,24 @@ namespace CatalogTest\ILS\Driver;
 use Catalog\ILS\Driver\Folio;
 use Laminas\Http\Response;
 use VuFind\Config\Config;
+use VuFindTest\ILS\Driver\FolioTest as CoreFolioTest;
+
+use function is_array;
 
 /**
  * FOLIO ILS driver test
  *
  * @category VuFind
- * @package  Tests
- * @author   Demian Katz <demian.katz@villanova.edu>
+ * @package  Catalog
+ * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
- * @link     https://vufind.org Main Page
+ * @link     https://vufind.org/wiki/development:testing:unit_tests Wiki
  */
-class FolioTest extends \PHPUnit\Framework\TestCase
+class FolioTest extends CoreFolioTest
 {
-    use \VuFindTest\Feature\FixtureTrait;
-    use \VuFindTest\Feature\ReflectionTrait;
+    protected $driverClass = \Catalog\ILS\Driver\Folio::class;
+
+    protected $forceCatalogPath = null;
 
     /**
      * Default test configuration
@@ -74,6 +78,77 @@ class FolioTest extends \PHPUnit\Framework\TestCase
      * @var Folio
      */
     protected $driver = null;
+
+    /**
+     * The absolute path to the vufind root directory.
+     *
+     * @return string
+     */
+    protected function getVufindRoot(): string
+    {
+        return '/usr/local/vufind';
+    }
+
+    /**
+     * Override the main entry point for fixtures.
+     *
+     * @param string $file   Partial path to the requested fixture
+     * @param string $module Name of the module the fixture file is in
+     *
+     * @return string
+     */
+    public function getFixture($file, $module = 'VuFind'): string
+    {
+        $root = $this->getVufindRoot();
+
+        // Define search locations
+        $locations = [
+            $root . '/module/Catalog/tests/fixtures/' . $file,
+            $root . '/module/' . $module . '/tests/fixtures/' . $file,
+            $root . '/module/VuFind/tests/fixtures/' . $file,
+        ];
+
+        foreach ($locations as $location) {
+            if (file_exists($location)) {
+                return file_get_contents($location);
+            }
+        }
+
+        throw new \Exception(
+            "Could not find fixture '$file'. Checked: " . implode(', ', $locations)
+        );
+    }
+
+    /**
+     * We must override these because the parent createConnector()
+     * uses them to build paths for Guzzle mocks.
+     *
+     * @param string $module Name of the module the fixture file is in
+     *
+     * @return string
+     */
+    protected function getFixtureDir($module = 'VuFind'): string
+    {
+        return $this->getVufindRoot() . '/module/' . $module . '/tests/fixtures';
+    }
+
+    /**
+     * Define the search path for fixtures prioritizing Catalog module first
+     *
+     * @param string $file   Partial path to the requested fixture
+     * @param string $module Name of the module the fixture file is in
+     *
+     * @return string
+     */
+    protected function getFixturePath($file, $module = 'VuFind'): string
+    {
+        // Check our Catalog override first
+        $catalogPath = $this->getVufindRoot() . '/module/Catalog/tests/fixtures/' . $file;
+        if (file_exists($catalogPath)) {
+            return $catalogPath;
+        }
+        return $file;
+    }
 
     /**
      * Replace makeRequest to inject test returns
@@ -184,26 +259,19 @@ class FolioTest extends \PHPUnit\Framework\TestCase
         $this->driver->method('makeRequestAsync')->willReturnCallback(function (...$args) {
             $laminasResponse = $this->mockMakeRequest('GET', ...$args);
 
+            $content = $laminasResponse->getContent();
+            if (is_array($content)) {
+                $content = json_encode($content);
+            }
             $guzzleResponse = new \GuzzleHttp\Psr7\Response(
                 $laminasResponse->getStatusCode(),
                 $laminasResponse->getHeaders()->toArray(),
-                $laminasResponse->getContent()
+                $content
             );
 
             return new \GuzzleHttp\Promise\FulfilledPromise($guzzleResponse);
         });
         $this->driver->init();
-    }
-
-    /**
-     * Request a token where one does not exist (RTR authentication)
-     *
-     * @return void
-     */
-    public function testTokens(): void
-    {
-        $this->createConnector('get-tokens');
-        $this->driver->getMyProfile(['id' => 'whatever']);
     }
 
     /**
@@ -250,6 +318,607 @@ class FolioTest extends \PHPUnit\Framework\TestCase
             'electronic_holdings' => [],
         ];
     }
+
+    /**
+     * Make sure at least one loan gets returned
+     *
+     * @return void
+     */
+    public function testCheckValidToken(): void
+    {
+        $this->createConnector('check-valid-token');
+        $result = $this->driver->getMyTransactions(['id' => 'whatever']);
+        $this->assertCount(1, $result['records'], 'Expected 1 loan from fixture');
+    }
+
+    /**
+     * Test patron login with Okapi (Legacy authentication)
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokensWithLegacyAuth')]
+    public function testSuccessfulPatronLoginWithOkapiLegacyAuth(): void
+    {
+        $config = $this->defaultDriverConfig;
+        $config['API']['tenant'] = 'legacy_tenant';
+        $config['API']['legacy_authentication'] = 1;
+        $this->createConnector(
+            'successful-patron-login-with-okapi-legacy',
+            $config + ['User' => ['okapi_login' => true]]
+        );
+        $result = $this->driver->patronLogin('foo', 'bar');
+        $expected = [
+            'id' => 'fake-id',
+            'username' => 'foo',
+            'cat_username' => 'foo',
+            'cat_password' => 'bar',
+            'firstname' => 'first',
+            'lastname' => 'last',
+            'email' => 'fake@fake.com',
+            'addressTypeIds' => [],
+        ];
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Test patron login with Okapi (RTR authentication)
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
+    public function testSuccessfulPatronLoginWithOkapi(): void
+    {
+        $this->createConnector(
+            'successful-patron-login-with-okapi',
+            $this->defaultDriverConfig + ['User' => ['okapi_login' => true]]
+        );
+        $result = $this->driver->patronLogin('foo', 'bar');
+        $expected = [
+            'id' => 'fake-id',
+            'username' => 'foo',
+            'cat_username' => 'foo',
+            'cat_password' => 'bar',
+            'firstname' => 'first',
+            'lastname' => 'last',
+            'email' => 'fake@fake.com',
+            'addressTypeIds' => [],
+        ];
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Test getHolding with HRID-based lookup
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
+    public function testGetHoldingWithHridLookup(): void
+    {
+        $driverConfig = $this->defaultDriverConfig;
+        $driverConfig['IDs']['type'] = 'hrid';
+        $msulConfig = [
+            'msul' => [
+                'Locations' => [
+                    'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
+                    'response_floor_key' => 'floor',
+                ],
+            ],
+        ];
+        $this->createConnector('get-holding', $driverConfig, $msulConfig);
+        $this->assertEquals($this->getExpectedGetHoldingResult(), $this->driver->getHolding('foo'));
+    }
+
+    /**
+     * Get expected result of getHoldings(), used by testGetHoldingsWithMultipleIds().
+     *
+     * @return array
+     */
+    protected function getExpectedGetHoldingsWithMultipleIdsResult(): array
+    {
+        return [
+            [
+                'total' => 1,
+                'holdings' => [
+                    0 => [
+                        'callnumber_prefix' => '',
+                        'callnumber' => 'PS2394 .M643 1883',
+                        'id' => 'foo',
+                        'item_id' => 'itemid',
+                        'holdings_id' => 'abbd2c2b-b2a1-4324-bd24-10f990cfc594',
+                        'number' => '1',
+                        'enumchron' => '',
+                        'barcode' => 'barcode-test',
+                        'status' => 'Available',
+                        'duedate' => '',
+                        'availability' => true,
+                        'is_holdable' => true,
+                        'holdings_notes' => null,
+                        'item_notes' => null,
+                        'summary' => ['foo', 'bar baz'],
+                        'supplements' => [],
+                        'indexes' => [],
+                        'location' => 'Special Collections',
+                        'location_code' => 'DCOC',
+                        'reserve' => 'TODO',
+                        'addLink' => 'check',
+                        'bound_with_records' => [],
+                        'folio_location_is_active' => true,
+                        'loan_type_id' => '',
+                        'loan_type_name' => '',
+                        'issues' => [0 => 'foo', 1 => 'bar baz'],
+                        'electronic_access' => [],
+                        'material_type' => '',
+                    ],
+                ],
+                'electronic_holdings' => [],
+            ],
+            [
+                'total' => 2,
+                'holdings' => [
+                    0 => [
+                        'callnumber_prefix' => '',
+                        'callnumber' => 'PS3551.S5 R6 1983',
+                        'id' => 'bar',
+                        'item_id' => '3258389f-ed1a-406f-8627-97a78d832003',
+                        'holdings_id' => '2216df84-b841-490c-8bde-b83076c5c4f4',
+                        'number' => '2',
+                        'enumchron' => '',
+                        'barcode' => '12345678901234',
+                        'status' => 'Available',
+                        'duedate' => '',
+                        'availability' => true,
+                        'is_holdable' => true,
+                        'holdings_notes' => null,
+                        'item_notes' => null,
+                        'summary' => [],
+                        'supplements' => [],
+                        'indexes' => [],
+                        'location' => 'Main Library',
+                        'location_code' => 'mnmn',
+                        'reserve' => 'TODO',
+                        'addLink' => 'check',
+                        'bound_with_records' => [],
+                        'folio_location_is_active' => true,
+                        'loan_type_id' => 'd012791f-4e26-4dc2-a279-b6a42b1df315',
+                        'loan_type_name' => 'Can Circulate',
+                        'issues' => [],
+                        'electronic_access' => [],
+                        'material_type' => 'Printed Material',
+                    ],
+                    1 => [
+                        'callnumber_prefix' => '',
+                        'callnumber' => 'PS3551.S5 R6 1983b',
+                        'id' => 'bar',
+                        'item_id' => '393c1119-d9b8-4f69-bb44-4a44dbe16c3e',
+                        'holdings_id' => '2216df84-b841-490c-8bde-b83076c5c4f4',
+                        'number' => '1',
+                        'enumchron' => '',
+                        'barcode' => '',
+                        'status' => 'Available',
+                        'duedate' => '',
+                        'availability' => true,
+                        'is_holdable' => true,
+                        'holdings_notes' => null,
+                        'item_notes' => null,
+                        'summary' => [],
+                        'supplements' => [],
+                        'indexes' => [],
+                        'location' => 'Main Library',
+                        'location_code' => 'mnmn',
+                        'reserve' => 'TODO',
+                        'addLink' => 'check',
+                        'bound_with_records' => [],
+                        'folio_location_is_active' => true,
+                        'loan_type_id' => 'd012791f-4e26-4dc2-a279-b6a42b1df315',
+                        'loan_type_name' => 'Can Circulate',
+                        'issues' => [],
+                        'electronic_access' => [],
+                        'material_type' => 'Printed Material',
+                    ],
+                ],
+                'electronic_holdings' => [],
+            ],
+        ];
+    }
+
+    /**
+     * Test getStatuses.
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
+    public function testGetStatuses(): void
+    {
+        // getStatuses is just a wrapper around getHolding, so we can test it with
+        // a minor variation of the test above.
+        $driverConfig = $this->defaultDriverConfig;
+        $driverConfig['IDs']['type'] = 'hrid';
+        $msulConfig = [
+            'msul' => [
+                'Locations' => [
+                    'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
+                    'response_floor_key' => 'floor',
+                ],
+            ],
+        ];
+        $this->createConnector('get-holding', $driverConfig, $msulConfig);
+        $this->assertEquals(
+            [$this->getExpectedGetHoldingResult()['holdings']],
+            $this->driver->getStatuses(['foo'])
+        );
+    }
+
+    /**
+     * Test getHolding with FOLIO-based sorting.
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
+    public function testGetHoldingWithFolioSorting(): void
+    {
+        $driverConfig = $this->defaultDriverConfig;
+        $driverConfig['Holdings']['folio_sort'] = 'volume';
+        $this->createConnector('get-holding-sorted', $driverConfig);
+        $expected = [
+            'total' => 1,
+            'holdings' => [
+                0 => [
+                    'callnumber_prefix' => '',
+                    'callnumber' => 'PS2394 .M643 1883',
+                    'id' => 'instanceid',
+                    'item_id' => 'itemid',
+                    'holdings_id' => 'holdingid',
+                    'number' => '1',
+                    'enumchron' => '',
+                    'barcode' => 'barcode-test',
+                    'status' => 'Available',
+                    'duedate' => '',
+                    'availability' => true,
+                    'is_holdable' => true,
+                    'holdings_notes' => ['Fake note'],
+                    'item_notes' => null,
+                    'summary' => [],
+                    'supplements' => ['Fake supplement statement With a note!'],
+                    'indexes' => [],
+                    'location' => 'Special Collections',
+                    'location_code' => 'DCOC',
+                    'reserve' => 'TODO',
+                    'addLink' => 'check',
+                    'bound_with_records' => [],
+                    'folio_location_is_active' => true,
+                    'loan_type_id' => '',
+                    'loan_type_name' => '',
+                    'issues' => [],
+                    'electronic_access' => [],
+                    'material_type' => '',
+                ],
+            ],
+            'electronic_holdings' => [],
+        ];
+        $this->assertEquals($expected, $this->driver->getHolding('instanceid'));
+    }
+
+    /**
+     * Test getHolding filters empty holding statements appropriately.
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
+    public function testGetHoldingFilteringOfEmptyHoldingStatements(): void
+    {
+        $driverConfig = $this->defaultDriverConfig;
+        $driverConfig['Holdings']['folio_sort'] = 'volume';
+        $this->createConnector('get-holding-empty-statements', $driverConfig);
+        $expected = [
+            'total' => 1,
+            'holdings' => [
+                0 => [
+                    'callnumber_prefix' => '',
+                    'callnumber' => 'PS2394 .M643 1883',
+                    'id' => 'instanceid',
+                    'item_id' => 'itemid',
+                    'holdings_id' => 'holdingid',
+                    'number' => '1',
+                    'enumchron' => '',
+                    'barcode' => 'barcode-test',
+                    'status' => 'Available',
+                    'duedate' => '',
+                    'availability' => true,
+                    'is_holdable' => true,
+                    'holdings_notes' => ['Fake note'],
+                    'item_notes' => null,
+                    'summary' => ['summ1', 'summ2'],
+                    'supplements' => ['supp1', 'supp2'],
+                    'indexes' => ['ind1', 'ind2'],
+                    'location' => 'Special Collections',
+                    'location_code' => 'DCOC',
+                    'reserve' => 'TODO',
+                    'addLink' => 'check',
+                    'bound_with_records' => [],
+                    'folio_location_is_active' => true,
+                    'loan_type_id' => '',
+                    'loan_type_name' => '',
+                    'issues' => [0 => 'summ1', 1 => 'summ2'],
+                    'electronic_access' => [],
+                    'material_type' => '',
+                ],
+            ],
+            'electronic_holdings' => [],
+        ];
+        $this->assertEquals($expected, $this->driver->getHolding('instanceid'));
+    }
+
+    /**
+     * Test getHolding with checked out item.
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
+    public function testGetHoldingWithDueDate(): void
+    {
+        $this->createConnector('get-holding-checkedout');
+        $expected = [
+            'total' => 1,
+            'holdings' => [
+                0 => [
+                    'callnumber_prefix' => '',
+                    'callnumber' => 'PS2394 .M643 1883',
+                    'id' => 'instanceid',
+                    'item_id' => 'itemid',
+                    'holdings_id' => 'holdingid',
+                    'number' => '1',
+                    'enumchron' => '',
+                    'barcode' => 'barcode-test',
+                    'status' => 'Checked out',
+                    'duedate' => '06-01-2023',
+                    'availability' => false,
+                    'is_holdable' => true,
+                    'holdings_notes' => ['Fake note'],
+                    'item_notes' => null,
+                    'summary' => [],
+                    'supplements' => ['Fake supplement statement With a note!'],
+                    'indexes' => [],
+                    'location' => 'Special Collections',
+                    'location_code' => 'DCOC',
+                    'reserve' => 'TODO',
+                    'addLink' => 'check',
+                    'bound_with_records' => [],
+                    'folio_location_is_active' => true,
+                    'loan_type_id' => '',
+                    'loan_type_name' => '',
+                    'issues' => [],
+                    'electronic_access' => [],
+                    'material_type' => '',
+                ],
+            ],
+            'electronic_holdings' => [],
+        ];
+        $this->assertEquals($expected, $this->driver->getHolding('instanceid'));
+    }
+
+    /**
+     * Test getHolding with VuFind-based sorting.
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
+    public function testGetHoldingMultiVolumeWithVuFindSorting(): void
+    {
+        $driverConfig = $this->defaultDriverConfig;
+        $driverConfig['Holdings']['vufind_sort'] = 'enumchron';
+        $this->createConnector('get-holding-multi-volume', $driverConfig);
+        $expected = [
+            'total' => 2,
+            'holdings' => [
+                0 => [
+                    'callnumber_prefix' => '',
+                    'callnumber' => 'PS2394 .M643 1883',
+                    'id' => 'instanceid',
+                    'item_id' => 'itemid2',
+                    'holdings_id' => 'holdingid',
+                    'number' => '1',
+                    'enumchron' => 'v.2',
+                    'barcode' => 'barcode-test2',
+                    'status' => 'Available',
+                    'duedate' => '',
+                    'availability' => true,
+                    'is_holdable' => true,
+                    'holdings_notes' => ['Fake note'],
+                    'item_notes' => null,
+                    'summary' => [],
+                    'supplements' => ['Fake supplement statement With a note!'],
+                    'indexes' => [],
+                    'location' => 'Special Collections',
+                    'location_code' => 'DCOC',
+                    'reserve' => 'TODO',
+                    'addLink' => 'check',
+                    'bound_with_records' => [],
+                    'folio_location_is_active' => true,
+                    'loan_type_id' => '',
+                    'loan_type_name' => '',
+                    'issues' => [],
+                    'electronic_access' => [],
+                    'material_type' => '',
+                ],
+                1 => [
+                    'callnumber_prefix' => '',
+                    'callnumber' => 'PS2394 .M643 1883',
+                    'id' => 'instanceid',
+                    'item_id' => 'itemid',
+                    'holdings_id' => 'holdingid',
+                    'number' => '2',
+                    'enumchron' => 'v.100',
+                    'barcode' => 'barcode-test',
+                    'status' => 'Available',
+                    'duedate' => '',
+                    'availability' => true,
+                    'is_holdable' => true,
+                    'holdings_notes' => ['Fake note'],
+                    'item_notes' => null,
+                    'summary' => [],
+                    'supplements' => ['Fake supplement statement With a note!'],
+                    'indexes' => [],
+                    'location' => 'Special Collections',
+                    'location_code' => 'DCOC',
+                    'reserve' => 'TODO',
+                    'addLink' => 'check',
+                    'bound_with_records' => [],
+                    'folio_location_is_active' => true,
+                    'loan_type_id' => '',
+                    'loan_type_name' => '',
+                    'issues' => [],
+                    'electronic_access' => [],
+                    'material_type' => '',
+                ],
+            ],
+            'electronic_holdings' => [],
+        ];
+        $this->assertEquals($expected, $this->driver->getHolding('instanceid'));
+    }
+
+    /**
+     * Test successful call to holds, one available item
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
+    public function testAvailableItemGetMyHolds(): void
+    {
+        $this->createConnector('get-my-holds-available');
+        $patron = ['id' => 'foo'];
+
+        $result = $this->driver->getMyHolds($patron);
+
+        $expected[0] = [
+            'type' => 'Page',
+            'create' => '12-20-2022',
+            'expire' => '',
+            'id' => 'fake-instance-id',
+            'item_id' => 'fake-item-id',
+            'reqnum' => 'fake-request-num',
+            'title' => 'Presentation secrets : do what you never thought possible with your presentations ',
+            'available' => true,
+            'in_transit' => false,
+            'last_pickup_date' => '12-29-2022',
+            'position' => 1,
+            // --- MSUL Customizations ---
+            'processed' => true,
+            'location' => 'Item',
+            'updateDetails' => 'fake-instance-id',
+            'status' => 'Open - Awaiting pickup',
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Test successful call to holds, one available item placed for a proxy
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
+    public function testAvailableProxyItemGetMyHolds(): void
+    {
+        $this->createConnector('get-my-holds-available-proxy');
+        $patron = [
+            'id' => 'bar',
+        ];
+        $result = $this->driver->getMyHolds($patron);
+        $expected[0] = [
+            'type' => 'Page',
+            'create' => '12-20-2022',
+            'expire' => '',
+            'id' => 'fake-instance-id',
+            'item_id' => 'fake-item-id',
+            'reqnum' => 'fake-request-num',
+            'title' => 'Presentation secrets : do what you never thought possible with your presentations ',
+            'available' => true,
+            'in_transit' => false,
+            'last_pickup_date' => '12-29-2022',
+            'position' => 1,
+            'proxiedFor' => 'TestuserJohn, John',
+            // --- MSUL Customizations ---
+            'processed' => true,
+            'location' => 'Item',
+            'updateDetails' => 'fake-instance-id',
+            'status' => 'Open - Awaiting pickup',
+        ];
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Test successful call to holds, one in_transit item
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
+    public function testInTransitItemGetMyHolds(): void
+    {
+        $this->createConnector('get-my-holds-in_transit');
+        $patron = [
+            'id' => 'foo',
+        ];
+        $result = $this->driver->getMyHolds($patron);
+        $expected[0] = [
+            'type' => 'Page',
+            'create' => '11-07-2022',
+            'expire' => '',
+            'id' => 'fake-instance-id',
+            'item_id' => 'fake-item-id',
+            'reqnum' => 'fake-request-num',
+            'title' => 'Basic economics : a common sense guide to the economy ',
+            'available' => false,
+            'in_transit' => true,
+            'last_pickup_date' => null,
+            'position' => 1,
+            // --- MSUL Customizations ---
+            'processed' => true,
+            'location' => 'Item',
+            'updateDetails' => 'fake-instance-id',
+            'status' => 'Open - In transit',
+        ];
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * Test successful call to holds, item in queue, position x
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
+    public function testSingleItemGetMyHolds(): void
+    {
+        $this->createConnector('get-my-holds-single');
+        $patron = [
+            'id' => 'foo',
+        ];
+        $result = $this->driver->getMyHolds($patron);
+        $expected[0] = [
+            'type' => 'Hold',
+            'create' => '12-20-2022',
+            'expire' => '12-28-2022',
+            'id' => 'fake-instance-id',
+            'item_id' => 'fake-item-id',
+            'reqnum' => 'fake-request-num',
+            'title' => 'Organic farming : everything you need to know ',
+            'available' => false,
+            'in_transit' => false,
+            'last_pickup_date' => null,
+            'position' => 3,
+            // --- MSUL Customizations ---
+            'processed' => false,
+            'location' => 'Item',
+            'updateDetails' => 'fake-instance-id',
+            'status' => 'Open - Not yet filled',
+        ];
+        $this->assertEquals($expected, $result);
+    }
+
+    /*
+     * ========================================================================
+     * START OF MSUL CUSTOM TESTS
+     * ========================================================================
+     */
 
     /**
      * Test getHolding with a mnmn location code to add data from helm
@@ -365,8 +1034,6 @@ class FolioTest extends \PHPUnit\Framework\TestCase
         $expectedResults = $this->getExpectedGetHoldingResult();
         $expectedResults['holdings'][0]['location'] = 'MSU Main Library';
         $this->assertEquals($expectedResults, $this->driver->getHolding('foo'));
-
-        // TODO -- Test invalid json response from helm (need to find out how to do this)
     }
 
     /**
