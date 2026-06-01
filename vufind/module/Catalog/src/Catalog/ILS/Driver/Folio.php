@@ -712,7 +712,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * the authenticated user.
      *
      * @param string $username The patron username
-     * @param string $password The patron password
+     * @param ?string $password The patron password
      *
      * @return string
      */
