@@ -1,4 +1,4 @@
-ARG VUFIND_VERSION=11.0.1
+ARG VUFIND_VERSION=11.0.4
 
 FROM msulibraries/vufind-extended:$VUFIND_VERSION
 
@@ -60,7 +60,6 @@ COPY composer.local.json /tmp/composer.local.json
 COPY tests/.eslintrc.js /usr/local/vufind/.eslintrc.js
 COPY robots.txt /usr/local/vufind/public/robots.txt
 COPY public/index.php  /usr/local/vufind/public/index.php
-COPY build.xml /usr/local/vufind/build.xml
 COPY scripts /usr/local/bin
 COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh backup.sh restore.sh /
 COPY msmtp/aliases msmtp/msmtprc /etc/
@@ -100,9 +99,6 @@ RUN \
     # Set permissions on Robots.txt
     chown 1000:1000 ${VUFIND_HOME}/public/robots.txt && \
     chmod 664 ${VUFIND_HOME}/public/robots.txt && \
-    # Set permissions on build.xml
-    chown 1000:1000 ${VUFIND_HOME}/build.xml && \
-    chmod 664 ${VUFIND_HOME}/build.xml && \
     # Set permissions on tests dir
     chown -R 1000:1000 /tests && \
     chmod -R 664 /tests && \
