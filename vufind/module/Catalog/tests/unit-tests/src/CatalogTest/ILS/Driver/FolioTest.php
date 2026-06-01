@@ -17,7 +17,6 @@ namespace CatalogTest\ILS\Driver;
 use Catalog\ILS\Driver\Folio;
 use Laminas\Http\Response;
 use VuFind\Config\Config;
-use VuFindTest\ILS\Driver\FolioTest as CoreFolioTest;
 
 use function is_array;
 
@@ -30,7 +29,7 @@ use function is_array;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:testing:unit_tests Wiki
  */
-class FolioTest extends CoreFolioTest
+class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
 {
     protected $driverClass = \Catalog\ILS\Driver\Folio::class;
 
