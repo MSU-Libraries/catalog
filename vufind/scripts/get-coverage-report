@@ -4,5 +4,5 @@
 set -e
 
 cd /usr/local/vufind
-XDEBUG_MODE=coverage vendor/bin/phpunit -c module/Catalog/tests/phpunit.xml /usr/local/vufind/module/Catalog/tests/unit-tests/ --coverage-cobertura reports/coverage.xml
+VUFIND_LOCAL_DIR=/tmp XDEBUG_MODE=coverage vendor/bin/phpunit -c module/Catalog/tests/phpunit.xml /usr/local/vufind/module/Catalog/tests/unit-tests/ --coverage-cobertura reports/coverage.xml
 cat reports/coverage.xml

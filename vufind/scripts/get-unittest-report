@@ -1,15 +1,8 @@
 #!/bin/bash
 
-
-echo "Starting script"
 # Fail if any of these steps fail
 set -e
 
-echo "Changing directory"
-
 cd /usr/local/vufind
-echo "Running phpunit"
-vendor/bin/phpunit -c module/Catalog/tests/phpunit.xml /usr/local/vufind/module/Catalog/tests/unit-tests/ --log-junit reports/report.xml
-echo "Catting file"
+VUFIND_LOCAL_DIR=/tmp vendor/bin/phpunit -c module/Catalog/tests/phpunit.xml /usr/local/vufind/module/Catalog/tests/unit-tests/ --log-junit reports/report.xml
 cat reports/report.xml
-echo "Script complete"
