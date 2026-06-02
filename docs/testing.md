@@ -23,6 +23,22 @@ module's test if we need to alter any steps or asserts. And we can
 also copy in and modify any of the fixture files used in those
 tests to our fixture directory.
 
+If you are overriding fixture files, you will need to use our local
+trait to force the loading of our fixture files over the core
+module ones. This can be done by adding the `PathFixerTrait` like:
+
+```php
+namespace CatalogTest\ILS\Driver;
+
+use CatalogTest\Feature\PathFixerTrait;
+...
+
+class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
+{
+    use PathFixerTrait;
+    ...
+```
+
 ## Running Tests
 
 We have included in this repository [a script](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/run-tests)

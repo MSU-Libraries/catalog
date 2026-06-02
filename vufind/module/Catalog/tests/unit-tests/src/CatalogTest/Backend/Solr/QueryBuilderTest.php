@@ -39,7 +39,7 @@ use VuFindSearch\Query\Query;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org
  */
-class QueryBuilderTest extends \PHPUnit\Framework\TestCase
+class QueryBuilderTest extends \VuFindTest\Backend\Solr\QueryBuilderTest
 {
     /**
      * Test queries with mixed exact and non-exact parts.
