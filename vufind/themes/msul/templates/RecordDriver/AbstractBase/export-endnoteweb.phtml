@@ -124,10 +124,12 @@ if (is_array($physical)) {
     }
 }
 
+// MSUL -- flatten notes array
 $notes = $this->driver->tryMethod('getGeneralNotes');
 if (is_array($notes)) {
     foreach ($notes as $note) {
-        echo "NO  - $note\n";
+        $content = is_array($note) ? ($note['note'] ?? '') : $note;
+        echo "NO  - $content\n";
     }
 }
 
