@@ -717,7 +717,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * login attempt. Returns a CQL query for retrieving more information about
      * the authenticated user.
      *
-     * @param string $username The patron username
+     * @param string  $username The patron username
      * @param ?string $password The patron password
      *
      * @return string
