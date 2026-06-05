@@ -193,6 +193,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                 $apiUrl = $msulConfig['Locations']['api_url'] ?? '';
                 $topKey = $msulConfig['Locations']['response_top_key'] ?? 'callnumbers';
                 $floorKey = $msulConfig['Locations']['response_floor_key'] ?? '';
+                $notMappableFloor = $msulConfig['Locations']['not_mappable_floor_value'] ?? '';
                 $gisFloorKey = $msulConfig['Locations']['response_gis_floor_key'] ?? '';
                 $locationKey = $msulConfig['Locations']['response_location_key'] ?? '';
 
@@ -224,6 +225,12 @@ class Folio extends \VuFind\ILS\Driver\Folio
                         $gisFloor = $gisFloorKey ? ($data->$topKey[0]->$gisFloorKey ?? '') : '';
                         $location = $locationKey ? ($data->$topKey[0]->$locationKey ?? '') : '';
 
+                        // Handle when 'Not Mappable' floor is set
+                        if ($floor == $notMappableFloor) {
+                            $floor = '';
+                            $gisFloor = '';
+                        }
+
                         $floorPart = !empty($floor) ? ' - ' . $floor : '';
                         $locationPart = !empty($location) ? '(' . $location . ')' : '';
                         $combinedPart = $floorPart . ' ' . $locationPart;
@@ -235,9 +242,19 @@ class Folio extends \VuFind\ILS\Driver\Folio
                                 ' (' . $bibId . ')' . '. Updating location to: ' . $locAndHoldings['location']
                             );
                         }
+                        if (!empty(trim($location))) {
+                            $locAndHoldings['msulLocation'] = $location;
+                            $this->debug(
+                                'Adding ' . $location . ' to msulLocation for callnumber ' .
+                                $callNumberData['callnumber']
+                            );
+                        }
                         if (!empty(trim($gisFloor))) {
                             $locAndHoldings['gisfloor'] = $gisFloor;
-                            $this->debug('Adding ' . $gisFloor . ' for callnumber ' . $callNumberData['callnumber']);
+                            $this->debug(
+                                'Adding ' . $gisFloor . ' to gisfloor for callnumber ' .
+                                $callNumberData['callnumber']
+                            );
                         }
                     } else {
                         $this->debug(

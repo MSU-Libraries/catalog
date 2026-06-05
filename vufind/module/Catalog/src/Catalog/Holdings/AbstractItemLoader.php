@@ -379,6 +379,18 @@ abstract class AbstractItemLoader
     }
 
     /**
+     * Get the MSUL location note for a holding item
+     *
+     * @param string $item_id The holding item UUID. If null (default) will return status for first item
+     *
+     * @return string The Arc GIS floor ID string
+     */
+    public function getMsulLocation($item_id = null)
+    {
+        return $this->getItem($item_id)['msulLocation'] ?? '';
+    }
+
+    /**
      * Determine if the given item is an online resource
      *
      * @param string $item_id Item ID to filter for
