@@ -24,16 +24,16 @@ For example, to redeploy just `proxysolr` (since we don't want to remove
 the whole Solr stack):
 
 ```bash
-docker service rm catalog-preview-solr_proxysolr
-sudo pc-deploy catalog-preview solr-cloud
+docker service rm catprod-preview-solr_proxysolr
+sudo pc-deploy catprod-preview solr-cloud
 ```
 
 But if it was the Monitoring application having issues, we'd be ok temporarily removing
 all those services and could just do this:
 
 ```bash
-docker stack rm catalog-preview-monitoring
-sudo pc-deploy catalog-preview monitoring
+docker stack rm catprod-preview-monitoring
+sudo pc-deploy catprod-preview monitoring
 ```
 
 ### Upgrade errors

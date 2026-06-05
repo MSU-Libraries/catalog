@@ -145,6 +145,9 @@ class SessionService extends \VuFind\Db\Service\SessionService implements
         while ($retryCount < $maxRetries && !$updated) {
             try {
                 $session = $this->getSessionById($sid);
+                if (!$session) {
+                    break;
+                }
                 $session->setLastUsed(time())->setData($data);
                 $this->persistEntity($session);
                 $updated = true;

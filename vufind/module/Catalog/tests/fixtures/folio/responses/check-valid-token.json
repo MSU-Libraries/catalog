@@ -1,0 +1,44 @@
+[
+  {
+    "comment": "We're checking that the token was correctly cached from get-tokens.json.",
+    "expectedPath": "/circulation/loans",
+    "expectedHeaders": { "X-Okapi-Token": "x-okapi-token-config-tenant" },
+    "expectedParams": {
+      "query": "userId==whatever and status.name==Open",
+      "offset": 0,
+      "limit": 1000
+    },
+    "body": {
+        "loans": [
+            {
+                "id": "loanid",
+                "userId": "userid",
+                "itemId": "itemid",
+                "itemEffectiveLocationIdAtCheckOut": "location-id",
+                "status": {
+                    "name": "Open"
+                },
+                "loanDate": "2022-11-03T04:01:00+00:00",
+                "dueDate": "2023-06-02T03:59:59.000+00:00",
+                "action": "renewed",
+                "renewalCount": 1,
+                "loanPolicyId": "lpid",
+                "checkoutServicePointId": "cspid",
+                "overdueFinePolicyId": "ofpid",
+                "lostItemPolicyId": "lipid",
+                "patronGroupAtCheckout": {
+                    "id": "pgid",
+                    "name": "FAKEGROUP"
+                },
+                "item": {
+                    "instanceId": "0000-0000-0000-0000",
+                    "id": "1",
+                    "barcode": "1234",
+                    "title": "Title"
+                }
+            }
+        ],
+        "totalRecords": 1
+    }
+  }
+]
