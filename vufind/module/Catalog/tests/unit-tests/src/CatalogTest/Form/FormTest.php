@@ -46,7 +46,7 @@ use function get_class;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:testing:unit_tests Wiki
  */
-class FormTest extends \PHPUnit\Framework\TestCase
+class FormTest extends \VuFindTest\Form\FormTest
 {
     use \VuFindTest\Feature\FixtureTrait;
     use ConfigRelatedServicesTrait;

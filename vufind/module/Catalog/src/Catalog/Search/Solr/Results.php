@@ -58,6 +58,7 @@ class Results extends \VuFind\Search\Solr\Results implements
     protected function performSearch()
     {
         $query  = $this->getParams()->getQuery();
+        // MSUL remove $allTerms check that would disallow empty search
         $limit  = $this->getParams()->getLimit();
         $offset = $this->getStartRecord() - 1;
         $params = $this->getParams()->getBackendParameters();

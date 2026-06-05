@@ -97,6 +97,7 @@ main() {
     run_on_node 1 "docker stack rm ${STACK_NAME}-solr;
                 docker stack rm ${STACK_NAME}-mariadb;
                 docker stack rm ${STACK_NAME}-catalog;
+                docker stack rm ${STACK_NAME}-redis;
                 docker stack rm ${STACK_NAME}-monitoring;
                 docker stack rm ${STACK_NAME}-internal;
                 rm -rf $COMPOSE_PATH;"

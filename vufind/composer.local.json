@@ -3,5 +3,14 @@
         "psr-4": {
             "Catalog\\": ["module/Catalog", "module/Catalog/src/Catalog"]
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CatalogTest\\": "module/Catalog/tests/unit-tests/src/CatalogTest/",
+            "VuFindTest\\": [
+                "module/VuFind/tests/unit-tests/src/VuFindTest/",
+                "module/VuFindSearch/tests/unit-tests/src/VuFindTest/"
+            ]
+        }
     }
 }

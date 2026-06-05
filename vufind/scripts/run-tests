@@ -5,7 +5,14 @@ set -e
 
 cd /usr/local/vufind
 echo "Running unit tests"
-php vendor/bin/phpunit -c module/Catalog/tests/phpunit.xml /usr/local/vufind/module/Catalog/tests/unit-tests/ --stop-on-defect
+
+FAILED=0; for d in /usr/local/vufind/module/*/tests; do
+    [ -d "$d/unit-tests" ] || continue;
+    [ -f "$d/unit-tests/phpunit.xml" ] && conf="$d/unit-tests/phpunit.xml" || conf="$d/phpunit.xml";
+    [ -f "$conf" ] && VUFIND_LOCAL_DIR=/tmp XDEBUG_MODE=off php /usr/local/vufind/vendor/bin/phpunit \
+    -c "$conf" "$d/unit-tests" --stop-on-defect \
+    || { FAILED=1; break; };
+done; (exit $FAILED)
 
 if [[ -n "${1}" ]] && [[ "${1}" == "--unit" ]]; then
     echo "Skipping code quality tests"

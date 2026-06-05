@@ -60,7 +60,7 @@ php public/index.php upgrade/database --interactive -vvv
 <!-- markdownlint-disable MD013 -->
 ```bash
 sudo screen
-pc-full-import catalog-prod --yes --debug 2>&1 | tee /mnt/shared/logs/catalog-prod-import_$(date -I).log
+pc-full-import catprod-prod --yes --debug 2>&1 | tee /mnt/shared/logs/catprod-prod-import_$(date -I).log
 ```
 <!-- markdownlint-enable MD013 -->
 

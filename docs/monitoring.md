@@ -26,7 +26,7 @@ Make sure you run it as the deploy user so that the proper Docker
 container registry credentials are passed.
 
 ```bash
-sudo -Hu deploy pc-deploy catalog-prod monitoring
+sudo -Hu deploy pc-deploy catprod-prod monitoring
 ```
 
 ## UI Sections
