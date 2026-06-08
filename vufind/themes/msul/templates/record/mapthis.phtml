@@ -39,8 +39,13 @@ if (!empty($floorId)) {
     arcgis-map {
       height: 600px;
       width: 100%;
-      min-width: 800px;
       display: block;
+    }
+    /* Apply the min-width only on screens 1024px wide or larger */
+    @media (min-width: 1024px) {
+      arcgis-map {
+        min-width: 800px;
+      }
     }
   </style>
 <?php endif; ?>
