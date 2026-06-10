@@ -1,107 +1,246 @@
-.searchHomeContent form .active-filters {
-  display:none;
-}
-
-@media only screen and (min-width : 768px) {
-  .home-facet {
-    padding-right:5%;
-    padding-left:5%;
-    border-right:1px solid $medgray;
-
-    &.home-reserves {
-      border-right:none;
+.template-dir-search.template-name-home,
+.template-dir-eds.template-name-home {
+  header .banner.container.navbar,
+  .main #content {
+    @media only screen and (min-width: 992px) {
+      margin: 0 calc(var(--bs-gutter-x) * .5 + 2rem);
+      padding: 0;
+      width: auto;
     }
   }
-  form.searchForm {
-    width:100%;
+
+  // hide filters on home page
+  .active-filters {
+    display: none !important;
+  }
+}
+
+.template-dir-alphabrowse.template-name-home,
+.template-dir-browse.template-name-home,
+.template-name-reservessearch {
+  .main {
+    padding-bottom: 1rem;
+    overflow: auto;
+    background: white;
   }
 }
 
 .search-home-facets {
-  .home-facet {
-    form, label, select, input {
-      display:block;
-    }
-    label {
-      margin-bottom:0.5rem;
-      font-weight:normal;
-    }
-    input, select {
-      margin-bottom:1.5rem;
-    }
-    #reservesSearchForm_lookfor,
-    #alphaBrowseForm_from,
-    #alphaBrowseForm_source
-    {
-      width:100%;
-    }
-    h2 {
-      margin-bottom:2rem;
-    }
+  display: block;
+  padding: 2rem 1rem 0 1rem;
+  margin: 1.5rem 1rem 0 1rem;
+
+  border-radius: 1rem;
+  background: white;
+
+  @media only screen and (min-width: 768px) {
+    padding-right: 2%;
+    padding-left: 2%;
   }
 
-  .home-facet.home-reserves {
-    input {
-      display:inline-block;
+  .content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 5%;
+
+    .home-facet {
+      flex: 1 1 auto;
+      min-width: 13rem;
+
+      form, label, select, input:not([type="submit"]) {
+        display: block;
+        width: 100%;
+      }
+
+      label {
+        margin-bottom: 0.5rem;
+        font-weight: normal;
+      }
+
+      input, select {
+        margin-bottom: 1.5rem;
+      }
+
+      #reservesSearchForm_lookfor,
+      #alphaBrowseForm_from,
+      #alphaBrowseForm_source {
+        width: 100%;
+      }
+
+      h2 {
+        margin-bottom: 2rem;
+        padding-top: 2rem;
+        padding-left: 5%;
+        font-weight: 520;
+      }
     }
-  }
 
-.home-facet.home-askalib::after {
-      position:absolute; width:0; height:0; overflow:hidden; z-index:-1; /* hide images */
-      content:url("/themes/msul/images/Icons_Ask_Us_World_Default.png") url("/themes/msul/images/Icons_Ask_Us_World_Hover_dark.png"); /* load images */
+    .home-facet.home-facet-reserves {
+      input {
+        display: inline-block;
       }
-  .home-facet.home-askalib {
-      padding-top:3rem;
-      a, a:active, a:hover, a:visited {
-      text-decoration:none;
-      color:#fff;
-      width:100%;
-      padding:1.5rem;
     }
 
-    .home-facet-container {
-      margin:0 auto;
-      background-color:$parakeetgreen;
-      -webkit-border-radius: 0.5rem;
-      -moz-border-radius: 0.5rem;
-      border-radius: 0.5rem;
-      &:hover {
-        background-color:$darkparakeetgreen;
-      }
-      &:active {
-        background-color:$msugreen;
-      }
+    .home-facet.home-facet-categories {
+      display: flex;
+      flex-basis: min-content;
 
-      .ask-icon {
-        content:url("/themes/msul/images/Icons_Ask_Us_World_Default.png");
-        height:8rem;
-        margin-left:auto;
-        margin-right:auto;
-        margin-bottom:0.5rem;
-      }
-      &:hover .ask-icon {
-        content:url("/themes/msul/images/Icons_Ask_Us_World_Hover_dark.png");
-        height:8rem;
-      }
-
-      .need-help, .askalibrarian {
-        font-size:1.3rem;
-        font-weight:600;
+      @media only screen and (min-width: 640px) {
+        justify-content: center;
       }
     }
   }
 }
 
-// hide filters on home page
 .template-dir-search.template-name-home,
-.template-dir-eds.template-name-home,
-.template-dir-combined.template-name-home
-{
-  .active-filters {
-    display:none !important;
-  }
-}
+.template-dir-eds.template-name-home {
+  background-color: $msugreen;
 
-.mainbody .container .searchbox, .mainbody .search.navbar {
-  margin-bottom:0;
+  footer {
+    background: white;
+  }
+
+  main {
+    margin-bottom: 5rem;
+    padding-bottom: 1.5rem;
+
+    background: rgba(255,255,255,0.8);
+    border-radius: 1rem;
+
+    /* TODO might be able to shift to search-form.scss when ux change is made on other pages */
+    #searchForm {
+      margin: 0;
+      padding: 0;
+
+      .nav-tabs {
+        border-bottom: .2rem $gray solid;
+
+        .nav-item {
+          display: inline-flex;
+
+          &:hover {
+            background: none;
+          }
+
+          &:not(:first-child) .nav-link {
+            border-radius: 0;
+          }
+
+          &:first-child .nav-link {
+            border-top-right-radius: 0;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+          }
+
+          .nav-link {
+            margin: 0;
+            border-width: 0;
+            border-bottom: 0.3rem solid transparent;
+            border-top: 0.3rem solid transparent;
+
+            color: $gray;
+
+            &.active,
+            &:hover, &:active, &:hover, &:focus,
+            {
+              border-bottom: .3rem solid $eggplant;
+
+              color: $eggplant;
+              background: white;
+            }
+          }
+        }
+      }
+    }
+
+    .searchForm-inputs {
+      margin: 2rem 1rem;
+      padding-bottom: .7rem;
+      border-bottom: 1px solid $lightgray;
+      row-gap: 1rem;
+      justify-content: center;
+
+      label {
+        margin: auto 1.5rem;
+      }
+
+      .form-select {
+        max-width: 15rem; // Override vufind default
+        flex: 3 2 auto;
+      }
+
+      .searchForm-query {
+        flex: 12 12 auto;
+        width: auto;
+
+        .form-control {
+          // Override vufind default
+          width: 100%;
+          max-width: inherit;
+        }
+      }
+
+      // More options dropdown
+      nav {
+        flex: 3 2 auto;
+        margin: auto 1.5rem;
+        padding: var(--bs-border-width) 0 var(--bs-border-width) .2rem; // To compensate for the border width of other elements
+        max-width: 15rem;
+
+        background: $parakeetgreen;
+        font-family: var(--bs-body-font-family), serif;
+        // Start - Rounded corners where it needs
+        border-radius: $input-border-radius;
+
+        &:has(.active.dropdown) {
+          border-bottom-left-radius: 0;
+          border-bottom-right-radius: 0;
+
+          *[data-js-dropdown-header] a {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+          }
+        }
+
+        *[data-js-dropdown-header] a {
+          border-radius: $input-border-radius;
+        }
+
+        .dropdown {
+          border-radius: initial;
+
+          &, ul, li:last-child a {
+            border-bottom-left-radius: $input-border-radius;
+            border-bottom-right-radius: $input-border-radius;
+          }
+        }
+        // End - Rounded corners where it needs
+
+        div {
+          border: 0;
+        }
+
+        .dropdown {
+          left: 0;
+
+          ul {
+            background: $parakeetgreen !important;
+          }
+        }
+
+        a, a:visited {
+          color: white !important;
+          font-size: var(--bs-body-font-size);
+          padding: .375rem;
+        }
+
+        a:hover, a:focus {
+          background-color: $darkparakeetgreen !important;
+          outline: inherit;
+        }
+      }
+    }
+  }
 }

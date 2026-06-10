@@ -118,7 +118,7 @@ $(function pageLoad() {
       return true;
     }
     return false;
-  });
+  };
   $(".modal").on("focusout", ".get-this-dropdown", function getThisDropDownFocus() {
     var dropdown = $(this).get(0);
     // Need delay to let new focus to happen

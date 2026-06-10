@@ -3,8 +3,7 @@
   $this->headTitle($this->translate('Search Home'));
 
   // Disable top search box -- this page has a special layout.
-  // MSU - Setting this to false removes header search from EDS,combined
-  //$this->layout()->searchbox = false;
+  $this->layout()->searchbox = false;
 
   // Set default value if necessary:
   if (!isset($this->searchClassId)) {
@@ -12,12 +11,29 @@
     $this->searchClassId = $config->Site->defaultSearchBackend ?? 'Solr';
   }
 
-  $this->layout()->breadcrumbs = false;
-  // MSU -- render searchbox right away, otherwise tab underlining will fail
-  $this->layout()->searchbox = $this->context($this)->renderInContext('search/searchbox.phtml', []);
+  $this->breadcrumbs()->disable();
+
+  /** MSU Start */
+  $homePaths = [
+      '/',
+      '/search',
+      '/search/home',
+      '/eds',
+      '/eds/home',
+      '/combined',
+      '/combined/home',
+      '/browse/home',
+      '/alphabrowse/home',
+  ];
+  $currentPath = rtrim($this->currentPath(), '/') ?: '/';
+  $this->layout()->isHome = in_array(strtolower($currentPath), $homePaths);
+  /** MSU End */
 ?>
 
 <?php // this div might be updated dynamically to contain the ILS offline message ?>
 <div class="searchHomeContent"></div>
 
-<?=implode('', array_map([$this, 'contentBlock'], $blocks ?? []))?>
+<main>
+  <?= $this->context($this)->renderInContext('search/searchbox.phtml', []) ?>
+  <?= implode('', array_map([$this, 'contentBlock'], $blocks ?? [])) ?>
+</main>
