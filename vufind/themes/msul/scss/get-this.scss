@@ -7,10 +7,14 @@
   -moz-border-radius: 7rem;
   border-radius: 7rem;
   padding: 0.2rem 0.75rem 0.2rem 0.65rem;
-  margin: 0 1rem 0 1rem;
+  margin: 0 0 0 1rem;
   transition:box-shadow .3s linear;
   -moz-transition:-moz-box-shadow .3s linear;
   -webkit-transition:-webkit-box-shadow .3s linear;
+  // Add a left margin ONLY if there is another .placehold before it.
+  & + .placehold {
+    margin-left: 1rem;
+  }
   &:hover {
     text-decoration:none;
     color:$darkparakeetgreen !important;
