@@ -7,6 +7,38 @@ on writing unit tests for your custom code. Particularly note the
 `Related Video` links at the bottom, which are very helpful in
 getting started.
 
+In all new test classes, it is important to extend the corresponding
+core module's test so that their tests are run against our customized
+code. For example in order to run all
+of the tests in [\VuFindTest\ILS\Driver\FolioTest](https://github.com/vufind-org/vufind/blob/dev/module/VuFind/tests/unit-tests/src/VuFindTest/ILS/Driver/FolioTest.php)
+against the customizations we have in [\Catalog\ILS\Driver\Folio](https://github.com/MSU-Libraries/catalog/blob/main/vufind/module/Catalog/src/Catalog/ILS/Driver/Folio.php)
+then at the top of *our* test file, we need to extend the core module like so:
+
+```php
+class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
+```
+
+Within that class, we can then override tests that were in the core
+module's test if we need to alter any steps or asserts. And we can
+also copy in and modify any of the fixture files used in those
+tests to our fixture directory.
+
+If you are overriding fixture files, you will need to use our local
+trait to force the loading of our fixture files over the core
+module ones. This can be done by adding the `PathFixerTrait` like:
+
+```php
+namespace CatalogTest\ILS\Driver;
+
+use CatalogTest\Feature\PathFixerTrait;
+...
+
+class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
+{
+    use PathFixerTrait;
+    ...
+```
+
 ## Running Tests
 
 We have included in this repository [a script](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/run-tests)

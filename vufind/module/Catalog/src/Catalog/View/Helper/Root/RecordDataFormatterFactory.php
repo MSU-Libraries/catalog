@@ -32,8 +32,6 @@ namespace Catalog\View\Helper\Root;
 use Psr\Container\ContainerInterface;
 use VuFind\View\Helper\Root\RecordDataFormatter\SpecBuilder;
 
-use function count;
-
 /**
  * Extends the default display of the record page display
  *
@@ -66,56 +64,6 @@ class RecordDataFormatterFactory extends \VuFind\View\Helper\Root\RecordDataForm
         $helper = parent::__invoke($container, $requestedName, $options);
         $helper->setDefaults('toc', [$this, 'getDefaultTocSpecs']); // MSUL
         return $helper;
-    }
-
-    /**
-     * MSUL - PC-936 add 'link' to the author output
-     * Get the callback function for processing authors.
-     *
-     * @return callable
-     *
-     * @deprecated Use \VuFind\RecordDataFormatter\Specs\DefaultRecord instead of defining the specs in this factory
-     */
-    protected function getAuthorFunction(): callable
-    {
-        return function ($data, $options) {
-            // Lookup array of singular/plural labels (note that Other is always
-            // plural right now due to lack of translation strings).
-            $labels = [
-                'primary' => ['Main Author', 'Main Authors'],
-                'corporate' => ['Corporate Author', 'Corporate Authors'],
-                'secondary' => ['Other Authors', 'Other Authors'],
-            ];
-            // Lookup array of schema labels.
-            $schemaLabels = [
-                'primary' => 'author',
-                'corporate' => 'creator',
-                'secondary' => 'contributor',
-            ];
-
-            // Sort the data:
-            $final = [];
-            foreach ($data as $type => $values) {
-                $final[] = [
-                    'label' => $labels[$type][count($values) == 1 ? 0 : 1],
-                    'values' => [$type => $values],
-                    'options' => [
-                        'pos' => $options['pos'] + $this->authorOrder[$type],
-                        'renderType' => 'RecordDriverTemplate',
-                        'template' => 'data-authors.phtml',
-                        'context' => [
-                            'type' => $type,
-                            'schemaLabel' => $schemaLabels[$type],
-                            'requiredDataFields' => [
-                                ['name' => 'role', 'prefix' => 'CreatorRoles::'],
-                                ['name' => 'link', 'prefix' => ''], // MSUL - PC-936 add 'link' to the author output
-                            ],
-                        ],
-                    ],
-                ];
-            }
-            return $final;
-        };
     }
 
     /**

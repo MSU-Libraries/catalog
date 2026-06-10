@@ -16,6 +16,11 @@ mkdir -p "/mnt/shared/authority/${STACK_NAME}/harvest_authority_build/" "/mnt/sh
 mv /usr/local/vufind/local/harvest/authority/ /tmp/
 ln -s "/mnt/shared/authority/${STACK_NAME}/harvest_authority_build/" /usr/local/vufind/local/harvest/authority
 ln -s "/mnt/shared/authority/${STACK_NAME}"/ /mnt/authority
+# DR (Digital Repository
+mkdir -p "/mnt/shared/dr/${STACK_NAME}/harvest_dr_build/" "/mnt/shared/dr/${STACK_NAME}/archives/"
+mv /usr/local/vufind/local/harvest/dr/ /tmp/
+ln -s "/mnt/shared/dr/${STACK_NAME}/harvest_dr_build/" /usr/local/vufind/local/harvest/dr
+ln -s "/mnt/shared/dr/${STACK_NAME}"/ /mnt/dr
 
 # Save the logs in the logs docker volume
 mkdir -p /mnt/logs/vufind /mnt/logs/harvests

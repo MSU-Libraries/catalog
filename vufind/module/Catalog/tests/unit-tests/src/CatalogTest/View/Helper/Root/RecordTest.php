@@ -32,6 +32,7 @@ use function is_array;
 
 /**
  * Record view helper Test Class
+ * TODO change to extends \VuFindTest\View\Helper\Root\RecordTest
  *
  * @category VuFind
  * @package  Tests
@@ -385,23 +386,23 @@ class RecordTest extends \PHPUnit\Framework\TestCase
      *
      * @param RecordDriver $driver                   Record driver
      * @param array|Config $config                   Configuration
-     * @param array|Config $browzineConfig           Configuration for BrowZine
      * @param Context      $context                  Context helper
      * @param bool|string  $url                      Should we add a URL helper? False if no, expected route if yes.
      * @param bool         $serverurl                Should we add a ServerURL helper?
      * @param bool         $setSearchTabExpectations Should we set default search tab expectations?
+     * @param array|Config $browzineConfig           Configuration for BrowZine
      *
      * @return Record
      */
     protected function getRecord(
         RecordDriver $driver,
-        array|Config $config = [],
-        $browzineConfig = [],
-        Context $context = null,
+        array|\VuFind\Config\Config $config = [],
+        ?Context $context = null,
         bool|string $url = false,
         bool $serverurl = false,
-        bool $setSearchTabExpectations = true
-    ) {
+        bool $setSearchTabExpectations = true,
+        array|\VuFind\Config\Config $browzineConfig = [],
+    ): \VuFind\View\Helper\Root\Record {
         if (null === $context) {
             $context = $this->getMockContext();
         }
@@ -483,7 +484,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
      *
      * @return MockObject&SearchTabs
      */
-    protected function getMockSearchTabs($setDefaultExpectations = true)
+    protected function getMockSearchTabs(bool $setDefaultExpectations = true): MockObject&SearchTabs
     {
         $searchTabs = $this->getMockBuilder(SearchTabs::class)
             ->disableOriginalConstructor()->getMock();

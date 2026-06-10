@@ -13,11 +13,21 @@ return [
           ],
         ],
       ],
+      'record-mapthis' => [
+        'type' => Laminas\Router\Http\Segment::class,
+        'options' => [
+          'route' => '/Record/:id/MapThis',
+          'defaults' => [
+            'controller' => 'Record',
+            'action' => 'MapThis',
+          ],
+        ],
+      ],
     ],
   ],
   'controllers' => [
     'factories' => [
-      Catalog\Controller\RecordController::class => VuFind\Controller\AbstractBaseWithConfigFactory::class,
+      Catalog\Controller\RecordController::class => Catalog\Controller\RecordControllerFactory::class,
       Catalog\Controller\MyResearchController::class => VuFind\Controller\MyResearchControllerFactory::class,
     ],
     'aliases' => [
@@ -29,11 +39,13 @@ return [
       'ajaxhandler' => [
         'factories' => [
           Catalog\AjaxHandler\GetItemStatuses::class => VuFind\AjaxHandler\GetItemStatusesFactory::class,
-          Catalog\AjaxHandler\GetLicenseAgreement::class => Catalog\AjaxHandler\GetLicenseAgreementFactory::class,
+          # Disabled while we find a better way to limit HoldingsIQ calls
+          # Catalog\AjaxHandler\GetLicenseAgreement::class => Catalog\AjaxHandler\GetLicenseAgreementFactory::class,
         ],
         'aliases' => [
           'getItemStatuses' => Catalog\AjaxHandler\GetItemStatuses::class,
-          'getLicenseAgreement' => Catalog\AjaxHandler\GetLicenseAgreement::class,
+          # Disabled while we find a better way to limit HoldingsIQ calls
+          # 'getLicenseAgreement' => Catalog\AjaxHandler\GetLicenseAgreement::class,
         ],
       ],
       'auth' => [
@@ -126,6 +138,14 @@ return [
         'aliases' => [
           \VuFind\Db\Service\SessionService::class => \Catalog\Db\Service\SessionService::class,
           'session' => \Catalog\Db\Service\SessionService::class,
+        ],
+      ],
+      'content_covers' => [
+        'factories' => [
+          \Catalog\Content\Covers\DigitalRepository::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
+        ],
+        'aliases' => [
+          'digitalrepository' => \Catalog\Content\Covers\DigitalRepository::class,
         ],
       ],
     ],

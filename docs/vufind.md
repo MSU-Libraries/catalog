@@ -19,7 +19,7 @@ Make sure you run it as the deploy user so that the proper Docker
 container registry credentials are passed.
 
 ```bash
-sudo -Hu deploy pc-deploy catalog-prod catalog
+sudo -Hu deploy pc-deploy catprod-prod catalog
 ```
 
 ## Troubleshooting

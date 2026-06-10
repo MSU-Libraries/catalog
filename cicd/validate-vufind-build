@@ -39,19 +39,19 @@ main() {
 
     echo "Getting the unit test report"
     mkdir -p reports/
-    get-unittest-report > reports/report.xml
+    bash -x get-unittest-report > reports/report.xml
     # Remove first line of the output (entrypoint prints)
     sed -i '1d' reports/report.xml
 
     echo "Getting the coverage report"
-    get-coverage-report > reports/coverage.xml
+    bash -x get-coverage-report > reports/coverage.xml
     # Remove first line of the output (entrypoint prints)
     sed -i '1d' reports/coverage.xml
     # Replace the path with the correct relative path
     sed -i 's/\/usr\/local\/vufind/vufind/g' reports/coverage.xml
 
     echo "Getting the coverage summary"
-    get-coverage-summary
+    bash -x get-coverage-summary
 
     echo "All validations have passed";
 

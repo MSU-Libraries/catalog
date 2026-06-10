@@ -1,16 +1,5 @@
 <nav class="record-nav" aria-label="<?=$this->transEscAttr('ajaxview_label_tools'); ?>">
   <ul class="action-toolbar">
-    <?php /** MSU START */
-      if (method_exists($this->driver, 'getLocation') && !empty($this->driver->getLocation()) && !str_contains(strtolower($this->driver->getLocation()), 'remote storage')): ?>
-      <li>
-        <a class="map-record toolbar-btn icon-link" data-lightbox href="<?= $this->record($this->driver)->getLink('mapit', null) ?>" rel="nofollow" target="_blank" aria-hidden="true"> <!--msul added aria-hidden="true"-->
-          <?=$this->icon('format-map', 'icon-link__icon') ?>
-          <?=$this->transEsc('Map this')?>
-        </a>
-      </li>
-
-    <?php endif; /** MSU END */ ?>
-
     <?php if (count($this->driver->getCitationFormats()) > 0): ?>
       <li>
         <a class="cite-record toolbar-btn icon-link" data-lightbox href="<?=$this->escapeHtmlAttr($this->recordLinker()->getActionUrl($this->driver, 'Cite'))?>" rel="nofollow">
@@ -45,7 +34,9 @@
     <?php endif; ?>
 
     <li>
-      <a class="print-record toolbar-btn icon-link" href="<?=$this->url()->addQueryParameters(['print' => true])?>" rel="nofollow">
+      <a class="print-record toolbar-btn icon-link" href="<?=$this->url()->addQueryParameters(['print' => true])?>" rel="nofollow"
+        data-click-set-query-params="print=1"
+      >
         <?=$this->icon('print', 'icon-link__icon') ?>
         <span class="icon-link__label">
           <?=$this->transEsc('Print')?>

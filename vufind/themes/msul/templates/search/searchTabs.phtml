@@ -31,26 +31,14 @@
         <?=$block?>
       <?php endif; ?>
     <?php endforeach; ?>
-    <?php /** MSU START */ ?>
-    <li class="nav-item">
-      <a
-        href="<?=$this->url('help', ['topic' => 'searchTabInformation'])?>"
-        data-lightbox
-        class="nav-link search-tips-icon"
-        title="Different search types information"
-        aria-label="Different search types information"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          class="feather feather-info"
-        >
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="16" x2="12" y2="12"></line>
-          <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
+    <?php /** MSU Start - Add DR link */ ?>
+    <li class="navtab-digrepo">
+      <a target="_blank" href="https://d.lib.msu.edu/">
+        <span class="icon icon--font fa fa-sign-in" role="img" aria-hidden="true"></span>
+        Digital Repository
       </a>
     </li>
-    <?php /** MSU END */ ?>
+    <?php /** MSU End */ ?>
     <?php if (!$hasSelectedTab && !$this->translationEmpty('temporary_search_tab_title')): ?>
       <li class="nav-item">
         <a class="nav-link active" aria-current="page"><?=$this->transEsc('temporary_search_tab_title')?></a>

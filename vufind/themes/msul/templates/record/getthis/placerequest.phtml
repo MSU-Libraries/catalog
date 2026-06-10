@@ -12,7 +12,8 @@ $notices = $this->Notices('RequestNotices.yaml');
     !$this->getthis->isMakerspace() &&
     $item['is_holdable'] &&
     ($link ?? false) &&
-    !$this->getthis->isROVIVinyl()
+    !$this->getthis->isROVIVinyl() &&
+    !$this->getthis->isEquipment()
   ) { ?>
   <div>
     <p><b><a href='https://lib.msu.edu/circ/borrowing-at-msu' target='_blank'>On-Campus Pickup:</a></b>

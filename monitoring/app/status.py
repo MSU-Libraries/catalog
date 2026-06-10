@@ -360,6 +360,7 @@ def _node_cron_exit_codes() -> dict[str, str]:
     paths = {
         'folio': '/mnt/logs/harvests/folio_exit_code',
         'hlm': '/mnt/logs/harvests/hlm_exit_code',
+        'dr': '/mnt/logs/harvests/dr_exit_code',
         'authority': '/mnt/logs/harvests/authority_exit_code',
         'reserves': '/mnt/logs/vufind/reserves_exit_code',
         'searches': '/mnt/logs/vufind/searches_exit_code',

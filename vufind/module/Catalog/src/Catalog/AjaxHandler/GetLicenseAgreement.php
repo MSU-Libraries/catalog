@@ -189,7 +189,7 @@ class GetLicenseAgreement extends \VuFind\AjaxHandler\AbstractBase implements
 
             // Parse the publisher data to get the names
             if (!isset($resp->getRecords()[0])) {
-                $this->logWarning('No FullTextHoldings XML element for ' . $title);
+                $this->debug('No FullTextHoldings XML element for ' . $title);
                 return $publishers;
             }
             $fullTextHoldings = $resp->getRecords()[0]->getFullTextHoldings();

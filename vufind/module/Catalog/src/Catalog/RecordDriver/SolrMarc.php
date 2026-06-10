@@ -1964,13 +1964,82 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getCorporateAuthors()
     {
-        // MSUL PC-1105
-        return array_merge(
-            $this->getFieldArray('110', ['a', 'b']),
-            $this->getFieldArray('111', range('a', 'z')),
-            $this->getFieldArray('710', ['a', 'b']),
-            $this->getMarcFieldWithInd('711', ['a', 'b'], ['1' => ['', '0', '1', '2'], '2' => ['']])
-        );
+        // MSUL PC-1105, PC-1646
+        $authors = [];
+        $marc = $this->getMarcReader();
+        $fields = [
+            '110' => ['a','b'],
+            '111' => range('a', 'z'),
+            '710' => ['a','b'],
+            '711' => ['a','b'],
+        ];
+        foreach ($fields as $field => $subfields) {
+            $marcData = $marc->getFields($field, $subfields);
+            foreach ($marcData as $marcRec) {
+                // For 711, ind1 has to be '', '0', '1', or '2' OR ind2 must be ''
+                if (
+                    $field == '711' &&
+                        (
+                            !in_array(trim(($marcRec['i1'] ?? '')), ['', '0', '1', '2']) ||
+                            trim(($marcRec['i2'] ?? '') != '')
+                        )
+                ) {
+                    $authors[] = '';
+                    continue;
+                }
+                $sbfs = $marcRec['subfields'];
+                $tmpAuthor = [];
+                foreach ($sbfs as $subfield) {
+                    $tmpAuthor[] = ucfirst(str_replace([',','.'], '', $subfield['data']));
+                }
+                $authors[] = implode(' ', $tmpAuthor);
+            }
+        }
+        return $authors;
+    }
+
+    /**
+     * Get an array of all corporate author roles (complementing getPrimaryAuthor()).
+     *
+     * @return array
+     */
+    public function getCorporateAuthorsRoles()
+    {
+        // MSUL PC-1105, PC-1646
+        $roles = [];
+        $marc = $this->getMarcReader();
+        $fields = [
+            '110' => ['a','b','e'],
+            '111' => range('a', 'z'),
+            '710' => ['a','b','e'],
+            '711' => ['a','b','e', 'j'],
+        ];
+        foreach ($fields as $field => $subfields) {
+            $marcData = $marc->getFields($field, $subfields);
+            foreach ($marcData as $marcRec) {
+                // For 711, ind1 has to be '', '0', '1', or '2' OR ind2 must be ''
+                if (
+                    $field == '711' &&
+                        (
+                            !in_array(trim(($marcRec['i1'] ?? '')), ['', '0', '1', '2']) ||
+                            trim(($marcRec['i2'] ?? '') != '')
+                        )
+                ) {
+                    $roles[] = '';
+                    continue;
+                }
+                $sbfs = $marcRec['subfields'];
+                $tmpRole = [];
+                foreach ($sbfs as $subfield) {
+                    // subfield $e or $j is the role information
+                    if ($subfield['code'] == 'e' || $subfield['code'] == 'j') {
+                        $tmpRole[] = ucfirst(str_replace([',','.'], '', $subfield['data']));
+                    }
+                }
+                $roles[] = $tmpRole;
+            }
+        }
+        return $roles;
     }
 
     /**
@@ -2000,24 +2069,24 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             $fieldMethod = $authorMethod . ucfirst($field) . 's';
             $dataFieldValues[$field] = $this->tryMethod($fieldMethod, [], []);
         }
-
         // Match up author and attribute data (this assumes that the attribute
         // arrays have the same indices as the author array; i.e. $author[$i]
         // has $dataFieldValues[$attribute][$i].
         foreach ($authors as $i => $author) {
             // MSU
-            $authorVal = is_array($author) ? $author['note'] : $author;
-            if (!isset($data[$authorVal])) {
-                $data[$authorVal] = [];
+            if (!isset($data[$author])) {
+                $data[$author] = [];
             }
-
             foreach ($dataFieldValues as $field => $dataFieldValue) {
-                if (!empty($dataFieldValue[$i])) {
-                    $data[$authorVal][$field][] = $dataFieldValue[$i];
+                if ($field == 'link') {
+                    if (!empty($dataFieldValue[$i])) {
+                        $data[$author][$field][] = $dataFieldValue[$i];
+                    }
+                } else {
+                    $data[$author][$field] = $dataFieldValue[$i];
                 }
             }
         }
-
         return $data;
     }
 
@@ -2031,7 +2100,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         // PC-1105
         $authors = [];
         foreach (['110', '111', '710', '711'] as $field) {
-            $authors = array_merge($authors, $this->getMarcFieldLinked($field, range('a', 'z')));
+            $authors = array_merge($authors, $this->getMarcFieldLinked($field, range('a', 'b')));
         }
         return $authors;
     }
@@ -2241,7 +2310,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get ALL editions of the current record.
      *
-     * @return string
+     * @return array
      */
     public function getEditions()
     {
@@ -2254,7 +2323,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the former publication frequency
      *
-     * @return string
+     * @return array
      */
     public function getFormerPublicationFrequency()
     {
@@ -2278,7 +2347,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Produced field for the current record.
      *
-     * @return string
+     * @return array
      */
     public function getProduced()
     {
@@ -2289,7 +2358,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Abbreviated Title
      *
-     * @return string
+     * @return array
      */
     public function getAbbreviatedTitle()
     {
@@ -2299,7 +2368,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Key Title
      *
-     * @return string
+     * @return array
      */
     public function getKeyTitle()
     {
@@ -2309,7 +2378,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Former Title
      *
-     * @return string
+     * @return array
      */
     public function getFormerTitle()
     {
@@ -2319,7 +2388,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Collective Uniform Title
      *
-     * @return string
+     * @return array
      */
     public function getCollectiveUniformTitle()
     {
@@ -2329,7 +2398,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     /**
      * Get the Organization and Arrangement of Materials
      *
-     * @return string
+     * @return array
      */
     public function getOrganizationAndArrangementOfMaterials()
     {
@@ -2578,5 +2647,58 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             return $replace260 ? $pubResults : array_merge($results, $pubResults);
         }
         return $results;
+    }
+
+    /**
+     * Get the "complementary" title from 785
+     *
+     * @return string[]
+     */
+    public function getNewTitle(): array
+    {
+        $marc = $this->getMarcReader();
+        $marcFields = $marc->getFields('785');
+        $return = [];
+        foreach ($marcFields as $marcData) {
+            if ($marcData['i1'] === '0') {
+                $tmp = [];
+                foreach ($marcData['subfields'] as $subfield) {
+                    if (str_contains('abdt', $subfield['code'])) {
+                        $tmp[] = $subfield['data'];
+                    }
+                }
+                $return[] = implode(' ', $tmp);
+            }
+        }
+        return $return;
+    }
+
+    /**
+     * Get the heading / title under which the title is displayed (Continues, Supersedes, ...) from 785
+     *
+     * @param $data   string[]
+     * @param $driver SolrMarc
+     *
+     * @return string
+     */
+    public static function getNewTitleLabel(array $data, SolrMarc $driver): string
+    {
+        $marc = $driver->getMarcReader();
+        $marcFields = $marc->getFields('785');
+        $return = [];
+        foreach ($marcFields as $marcData) {
+            $return[] = match ($marcData['i2']) {
+                default => 'note_785_0',
+                '1' => 'note_785_1',
+                '2' => 'note_785_2',
+                '3' => 'note_785_3',
+                '4' => 'note_785_4',
+                '5' => 'note_785_5',
+                '6' => 'note_785_6',
+                '7' => 'note_785_7',
+                '8' => 'note_785_8',
+            };
+        }
+        return current($return); // Returning only one as templating display only strings
     }
 }

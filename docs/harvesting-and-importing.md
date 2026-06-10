@@ -13,6 +13,9 @@
   Used to harvest and import EBSCO MARC data into the `biblio` collection
   of Solr from the FTP location given access to by EBSCO. The records
   contain the HLM dataset that is missing from FOLIO's database.
+* [pc-import-dr](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-dr):
+  Used to harvest and import MSUL Digital Repository data into the `biblio`
+  collection of Solr.
 * [pc-import-authority](https://github.com/MSU-Libraries/catalog/blob/main/vufind/scripts/pc-import-authority):
   Used to harvest and import MARC data from Backstage into the `authority`
   collection in Solr from the FTP location provided by Backstage.
@@ -70,7 +73,7 @@ each source.
    (they technically can have files in them, you just will not want
    them to have files since they will get mixed in with your new harvest).
    ```bash
-   STACK_NAME=catalog-preview
+   STACK_NAME=catprod-preview
    cd /mnt/shared/oai/${STACK_NAME}/harvest_folio/
 
    # Option 1: Preserving the last harvest set
@@ -98,8 +101,8 @@ newly harvested set over to the other environments you can follow these steps:
 1. Disable the FOLIO cron for the source and target environment
    ```bash
    # Define the source and target
-   SOURCE_STACK=catalog-preview
-   TARGET_STACK=catalog-beta
+   SOURCE_STACK=catprod-preview
+   TARGET_STACK=catprod-beta
 
    sudo mv /mnt/shared/oai/${SOURCE_STACK}/enabled /mnt/shared/oai/${SOURCE_STACK}/disabled
    sudo mv /mnt/shared/oai/${TARGET_STACK}/enabled /mnt/shared/oai/${TARGET_STACK}/disabled
@@ -175,6 +178,26 @@ the environment.
    in the log file on the container or volume (`/mnt/logs/harvests/`).
 <!-- markdownlint-enable MD013 MD031 -->
 
+### Digital Repository
+
+This can be done with the script's `--full` `--harvest` flags in a one-off
+run, but if you prefer to have it run via the cron job here is how you
+would need to prepare the environment.
+
+<!-- markdownlint-disable MD013 MD031 -->
+1. Remove all files from the `/mnt/shared/dr/[STACK_NAME]/harvest_dr/`
+   directory. You can also just move them somewhere else if you want to preserve a copy of them.
+   ```bash
+   cd /mnt/shared/dr/[STACK_NAME]/harvest_dr/
+   mv processed processed_old
+   mv log log_old
+   mv last_harvest.txt last_harvest_old.txt
+   ```
+
+2. Monitor progress after it starts via the cron job in the monitoring app or
+   in the log file on the container or volume (`/mnt/logs/harvests/`).
+<!-- markdownlint-enable MD013 MD031 -->
+
 ### Backstage (Authority records)
 
 This can just be done with the script's `--full` `--harvest` flags in a
@@ -211,9 +234,9 @@ in the log file on the container or volume (`/mnt/logs/harvests/`).
     ```bash
     sudo screen
     # Prompting for confirmation
-    pc-full-import catalog-prod --debug 2>&1 | tee /mnt/shared/logs/catalog-prod-import_$(date -I).log
+    pc-full-import catprod-prod --debug 2>&1 | tee /mnt/shared/logs/catprod-prod-import_$(date -I).log
     # Bypassing user confirmation and notifying pubcat on completion
-    pc-full-import catalog-prod --email LIB.DL.pubcat@msu.edu --yes --debug 2>&1 | tee /mnt/shared/logs/catalog-prod-import_$(date -I).log
+    pc-full-import catprod-prod --email LIB.DL.pubcat@msu.edu --yes --debug 2>&1 | tee /mnt/shared/logs/catprod-prod-import_$(date -I).log
     ```
 
     Should you choose to do the steps manually, this section will describe
@@ -252,6 +275,14 @@ This will import the tests records. In the `catalog` container:
 
 ```bash
 ./pc-import-folio -c /mnt/shared/oai/devel-batch -l 1 -b -v -r
+```
+
+#### Importing DR (Digital Repository) records using the cron container
+
+```bash
+pc-connect ${STACK_NAME}-catalog_cron
+mv /mnt/shared/dr/${STACK_NAME}/harvest_dr/processed/* /mnt/shared/dr/${STACK_NAME}/harvest_dr/
+pc-import-dr -b -q -v
 ```
 
 #### Importing HLM records using the cron container
@@ -313,7 +344,7 @@ curl -s "http://solr:8983/solr/admin/collections?action=LISTALIASES" | grep bibl
 ```bash
 # On Host
 screen
-docker exec -it $(docker ps -q -f name=catalog-prod-catalog_build) bash
+docker exec -it $(docker ps -q -f name=catprod-prod-catalog_build) bash
 
 # Inside container
 rm local/harvest/folio/processed/*
@@ -323,7 +354,7 @@ cp /mnt/shared/oai/${STACK_NAME}/harvest_folio/processed/* local/harvest/folio/
 
 # On Host
 screen
-docker exec -it $(docker ps -q -f name=catalog-prod-catalog_build) bash
+docker exec -it $(docker ps -q -f name=catprod-prod-catalog_build) bash
 
 # Inside container
 cp /mnt/shared/hlm/${STACK_NAME}/current/* local/harvest/hlm/

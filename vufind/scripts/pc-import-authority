@@ -425,23 +425,40 @@ harvest() {
             if ! wget "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}/${AUTH_FILE}" > /dev/null 2>&1; then
                 error "Failed to retrieve ${AUTH_FILE} from FTP server"
             fi
-
-            # Extract the files if it is a zip
-            if [[ "${AUTH_FILE}" == *.zip ]]; then
-                mkdir -p "${ARGS[VUFIND_HARVEST_DIR]}/tmp"
-                unzip -qq "${AUTH_FILE}" -d "${ARGS[VUFIND_HARVEST_DIR]}/tmp"
-                for F in tmp/* ; do if [[ ${F} == *.MRC ]]; then mv "${F}" "${AUTH_FILE%.zip}"_"${F#tmp/}"; fi done
-                rm -rf "${ARGS[VUFIND_HARVEST_DIR]}/tmp"
-                # Move the zip file to the processed directory since we don't need it for anything else
-                mv "${AUTH_FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/processed/"
-            fi
-
-            # Remove the files we don't currently import
-            find "${ARGS[VUFIND_HARVEST_DIR]}" -maxdepth 1 \( -name "*FAST*" -o -name "*MESH.GENRE*" -o -name "*MESH.NAME*" \
-                -o -name "*_NAME.CHG*" -o -name "*_NAME.NEW*" \) -delete
         fi
     done < <(curl "ftp://${ARGS[FTP_SERVER]}/${ARGS[FTP_DIR]}" --netrc -l -s)
+
+    while IFS= read -r ZIP_FILE; do
+        verbose "Processing: ${ZIP_FILE}"
+
+        TMP_DIR="${ARGS[VUFIND_HARVEST_DIR]}/tmp"
+        mkdir -p "${TMP_DIR}"
+
+        if unzip -qq "${ZIP_FILE}" -d "${TMP_DIR}"; then
+            # Move and rename MRC files
+            for F in "${TMP_DIR}"/*; do
+                if [[ "${F}" == *.MRC ]]; then
+                    BASE_F=$(basename "${F}")
+                    mv "${F}" "${ZIP_FILE%.zip}_${BASE_F}"
+                fi
+            done
+
+            # Cleanup
+            rm -rf "${TMP_DIR}"
+            mv "${ZIP_FILE}" "${ARGS[VUFIND_HARVEST_DIR]}/processed/"
+        else
+            error "Failed to unzip ${ZIP_FILE}. Keeping file in work directory for inspection."
+        fi
+
+    done < <(find . -maxdepth 1 -name "*.zip")
     cd - || error "Failed to cd to previous dir"
+
+    # Remove the files we don't currently import
+    find "${ARGS[VUFIND_HARVEST_DIR]}/" -maxdepth 1 \( -name "*FAST*" -o -name "*MESH.GENRE*" -o -name "*MESH.NAME*" \
+        -o -name "*_NAME.CHG*" -o -name "*_NAME.NEW*" \) -delete
+    # Remove any empty files
+    verbose "Removing empty files"
+    find "${ARGS[VUFIND_HARVEST_DIR]}/" -maxdepth 1 -type f -empty -delete
 }
 
 # Perform VuFind batch import of HLM records
