@@ -1,4 +1,7 @@
-
+const KEY_CODE = {
+  DOWN_ARROW: 40,
+  UP_ARROW: 38,
+};
 $(function pageLoad() {
   /**
    * Whether the dropdown is open
@@ -118,7 +121,7 @@ $(function pageLoad() {
       return true;
     }
     return false;
-  };
+  }
   $(".modal").on("focusout", ".get-this-dropdown", function getThisDropDownFocus() {
     var dropdown = $(this).get(0);
     // Need delay to let new focus to happen
