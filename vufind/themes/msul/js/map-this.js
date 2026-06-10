@@ -38,6 +38,36 @@ function renderArcGisMap() {
       arcGisMiddleware.setBuildingById(data.buildingId);
       arcGisMiddleware.setFloorById(data.floorId);
 
+      // Sets the constriants to MSU, East Lansing, MI
+      const constraints = {
+        geometry: {
+          type: "extent",
+          xmin: -84.51,
+          ymin: 42.67,
+          xmax: -84.46,
+          ymax: 42.74
+        },
+        minScale: 5000,
+        maxScale: 0
+      };
+      arcGisMiddleware.setConstraints(constraints);
+
+      // Set the center the zoom level for the map on load
+      // this is also the default for the home button
+      const additionalAttributes = {
+        'center': "-84.48323542024565, 42.7308616988147",
+        'zoom': "18",
+        'popup-disabled': true
+      };
+      arcGisMiddleware.setAdditionalAttributes(additionalAttributes);
+
+      // Add the legend to the map
+      arcGisMiddleware.setLegend({
+        legendHeadingLevel: 2,
+        legendHeadingText: "Legend",
+        headingLevel: 3
+      });
+
       const result = arcGisMiddleware.generate();
       if (result.errors.length > 0) {
         throw new Error(result.errors.join(", "));
