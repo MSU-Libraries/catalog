@@ -43,9 +43,7 @@
               <label for="limit_<?=$fieldname?>" class="field-label">
                 <?=$this->transEsc($list['label'])?>:
               </label>
-              <select id="limit_<?=$fieldname?>" class="form-control"
-                      aria-labelledby="label_<?=$fieldname?>"
-                      name="filter[]" multiple="multiple" size="10">
+              <select id="limit_<?=$fieldname?>" class="form-control" name="filter[]" multiple="multiple" size="10">
               <?php
               // Sort the current facet list alphabetically and filter items to
               // the top if they appear in the config; we'll use this data
