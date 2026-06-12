@@ -1,5 +1,5 @@
 <?php
-use Catalog\GetThis\GetThisLoader; /** MSU */
+use Catalog\Holdings\GetThisLoader; /** MSU */
 
 ?>
 <?php if ($this->holdings()->holdingIsVisible($holding)): ?>
@@ -44,7 +44,12 @@ use Catalog\GetThis\GetThisLoader; /** MSU */
         <?php /** MSU START */ ?>
         <?php if (! $this->driver instanceof VuFind\RecordDriver\EDS && ! $getthis->isOnlineResource($item_id)): ?>
           <a class="<?=$check ? 'checkRequest request-check ' : ''?>placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
+            <?=$this->icon('book', 'icon-link__icon') ?>
             <?=$this->transEsc('Get this')?>
+          </a>
+          <a class="<?=$check ? 'checkRequest request-check ' : ''?>placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/MapThis?item_id=$item_id") ?>" rel="nofollow">
+            <?=$this->icon('format-map', 'icon-link__icon') ?>
+            <?=$this->transEsc('Map this')?>
           </a>
         <?php endif; /** MSU END */ ?>
         <?php if ($holding['storageRetrievalRequestLink'] ?? false): ?>
@@ -68,7 +73,12 @@ use Catalog\GetThis\GetThisLoader; /** MSU */
           <?php /** MSU START */ ?>
           <?php if (! $this->driver instanceof VuFind\RecordDriver\EDS && ! $getthis->isOnlineResource($item_id)): ?>
             <a class="<?=$check ? 'checkRequest request-check ' : ''?>placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
+              <?=$this->icon('book', 'icon-link__icon') ?>
               <?=$this->transEsc('Get this') ?>
+            </a>
+            <a class="<?=$check ? 'checkRequest request-check ' : ''?>placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/MapThis?item_id=$item_id") ?>" rel="nofollow">
+              <?=$this->icon('format-map', 'icon-link__icon') ?>
+              <?=$this->transEsc('Map this')?>
             </a>
           <?php endif; /** MSU END */ ?>
           <?=$this->relais()->renderButtonIfActive($this->driver ?? null)?>
