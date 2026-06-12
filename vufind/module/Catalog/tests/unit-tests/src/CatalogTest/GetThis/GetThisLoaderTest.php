@@ -14,7 +14,7 @@
 
 namespace CatalogTest\GetThis;
 
-use Catalog\GetThis\GetThisLoader;
+use Catalog\Holdings\GetThisLoader;
 use VuFind\ILS\Logic\AvailabilityStatus;
 use VuFind\RecordDriver\AbstractBase as RecordDriver;
 

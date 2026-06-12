@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Helper for the GetThis Loader containing
- * The action for when the button is clicked
+ * Helper for the Holdings components containing
+ * The action for when the buttons are clicked
  *
  * PHP version 8
  *
@@ -22,7 +22,7 @@
  * <https://www.gnu.org/licenses/>.
  *
  * @category VuFind
- * @package  GetThis_Loader
+ * @package  Controller
  * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:controllers Wiki
@@ -30,22 +30,44 @@
 
 namespace Catalog\Controller;
 
-use Catalog\GetThis\GetThisLoader;
+use Catalog\Holdings\GetThisLoader;
+use Catalog\Holdings\MapThisLoader;
 use Catalog\Search\SearchOrigin\SearchOriginFactory;
 use Exception;
 
 /**
- * Helper class for the GetThis Loader containing
- * The action for when the button is clicked
+ * Helper class for the Holdings components containing
+ * The actions for when the buttons are clicked
  *
  * @category VuFind
- * @package  GetThis_Loader
+ * @package  Controller
  * @author   MSUL Public Catalog Team <LIB.DL.pubcat@msu.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:controllers Wiki
  */
 class RecordController extends \VuFind\Controller\RecordController
 {
+    protected $configLoader;
+
+    /**
+     * Initialise the controller passing in the config loader so we
+     * can load other configs other than the main config.ini
+     *
+     * @param ServiceLocatorInterface $sm           Service location
+     * @param Config                  $config       The main config.ini
+     * @param PluginManager           $configLoader Plugin manager to load other config files
+     *
+     * @return \Laminas\View\Model\ViewModel
+     */
+    public function __construct(
+        \Laminas\ServiceManager\ServiceLocatorInterface $sm,
+        \VuFind\Config\Config $config,
+        \VuFind\Config\PluginManager $configLoader
+    ) {
+        parent::__construct($sm, $config);
+        $this->configLoader = $configLoader;
+    }
+
     /**
      * Display the "Get this" dialog content.
      *
@@ -57,10 +79,32 @@ class RecordController extends \VuFind\Controller\RecordController
         $items = $this->getILS()->getHolding($this->params()->fromRoute('id'));
         $item_id = $this->params()->fromQuery('item_id');
         $view = $this->createViewModel();
-        $view->setVariable('getthis', new GetThisLoader($view->driver, $items['holdings'], $item_id));
+        $view->setVariable(
+            'getthis',
+            new GetThisLoader($view->driver, $items['holdings'], $item_id, $this->configLoader)
+        );
         // TODO what to about $item['electronic_holdings']
         // TODO what to about $item['page']; do we need multiple calls for this?
         $view->setTemplate('record/getthis');
+        return $view;
+    }
+
+    /**
+     * Display the "Map this" dialog content.
+     *
+     * @return \Laminas\View\Model\ViewModel
+     */
+    public function mapthisAction()
+    {
+        //TODO check hasILS(), otherwise HLM?
+        $items = $this->getILS()->getHolding($this->params()->fromRoute('id'));
+        $item_id = $this->params()->fromQuery('item_id');
+        $view = $this->createViewModel();
+        $view->setVariable(
+            'mapthis',
+            new MapThisLoader($view->driver, $items['holdings'], $item_id, $this->configLoader)
+        );
+        $view->setTemplate('record/mapthis');
         return $view;
     }
 

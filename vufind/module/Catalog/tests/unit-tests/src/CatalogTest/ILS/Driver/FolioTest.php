@@ -897,6 +897,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
         $this->createConnector('get-holding', $driverConfig, $msulConfig);
         $expectedResults = $this->getExpectedGetHoldingResult();
         $expectedResults['holdings'][0]['location'] = 'MSU Main Library - 4 East (That Room)';
+        $expectedResults['holdings'][0]['msulLocation'] = 'That Room';
         $this->assertEquals($expectedResults, $this->driver->getHolding('foo'));
     }
 
