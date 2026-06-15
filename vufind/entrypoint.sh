@@ -7,7 +7,6 @@ verbose() {
 
 verbose "Entrypoint script..."
 
-ls /usr/local/vufind/themes/msul/ || true # TODO -- remove after debugging
 verbose "Replace environment variables in template ini files..."
 envsubst < local/config/vufind/config.ini | sponge local/config/vufind/config.ini
 envsubst < local/config/vufind/contentsecuritypolicy.ini | sponge local/config/vufind/contentsecuritypolicy.ini

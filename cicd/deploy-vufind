@@ -76,7 +76,6 @@ main() {
     run_on_all_nodes "docker pull $CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}"
 
     if [[ $STACK_NAME == devel-* ]]; then
-        run_on_node "1" "ls $LIVE_DIR/themes/msul/ || true" # TODO -- remove after debugging
         # Generate an archive of existing content (if it exists)
         make_archive
 
@@ -89,19 +88,14 @@ main() {
         run_on_node "1" "pc-install $STACK_NAME -v -o 1000 -g 1000 -m g+ws -d -t \"$LIVE_DIR\""
         run_on_node "1" "docker exec \"$TEMP_CTR_ID\" rsync -a /usr/local/vufind/ /media/live/"
 
-        run_on_node "1" "ls $LIVE_DIR/themes/msul/ || true" # TODO -- remove after debugging
-
         sync_git_repo
 
         add_bind_mount "${LOCAL_DIR}/repo/vufind/module/Catalog" "${LIVE_DIR}/module/Catalog"
         add_bind_mount "${LOCAL_DIR}/repo/vufind/themes/msul" "${LIVE_DIR}/themes/msul"
         add_config_symlinks
 
-        run_on_node "1" "ls $LIVE_DIR/themes/msul/ || true" # TODO -- remove after debugging
         # Sync back the vendor dir again since the bind mount would have removed it (TODO is there a better way to do this?)
         run_on_node "1" "docker exec \"$TEMP_CTR_ID\" rsync -a /usr/local/vufind/themes/msul/vendor/ /media/local/repo/vufind/themes/msul/vendor/"
-
-        run_on_node "1" "ls $LIVE_DIR/themes/msul/ || true" # TODO -- remove after debugging
 
         run_on_node "1" "docker rm -f \"$TEMP_CTR_ID\""
     fi

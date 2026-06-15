@@ -25,7 +25,6 @@ fi
 main() {
     echo "Run checks using the NCPA scripts"
     check docker
-    run_on_node "1" "ls $LIVE_DIR/themes/msul/ || true" # TODO -- remove after debugging
 
     # Get metrics for stage runtime
     STAGE_END=$(date +%s);
