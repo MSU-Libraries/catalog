@@ -18,6 +18,7 @@ fi
 # Create symlinks to the shared storage for non-production environments
 # Populating the shared storage if empty
 if [[ "${STACK_NAME}" == devel-* ]]; then
+    ls /usr/local/vufind/themes/msul/ || true # TODO -- remove after debugging
     verbose "Devel environment detected."
     verbose "Setting up links for module/Catalog, and themes/msul directories to ${SHARED_STORAGE}"
     verbose "  Set up deploy key..."
@@ -29,6 +30,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     git config --system --add safe.directory \*
     verbose "  Update the repo (repo is initially cloned during first CI run for branch)..."
     (umask 0002; git -C "${SHARED_STORAGE}/${STACK_NAME}"/repo fetch)
+    ls /usr/local/vufind/themes/msul/ || true # TODO -- remove after debugging
 
     if [[ ${VUFIND_CORE_INSTALLATION} -eq 1 ]]; then
         verbose "  VuFind core install: set up the symlink to be able to access code from host machine..."
@@ -45,6 +47,7 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     verbose "  Update permissions...  "
     chown 1000:1000 -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/
     chown www-data -R "${SHARED_STORAGE}/${STACK_NAME}"/repo/vufind/themes/msul/
+    ls /usr/local/vufind/themes/msul/ || true # TODO -- remove after debugging
 fi
 
 verbose "Save the logs in the logs docker volume...  "
@@ -87,6 +90,7 @@ fi
 # Unset environment variables that are no longer necessary before starting Apache
 unset DEPLOY_KEY_FILE VUFIND_CORE_INSTALLATION
 
+ls /usr/local/vufind/themes/msul/ || true # TODO -- remove after debugging
 verbose "Starting Apache..."
 verbose "  setting apache envvars..."
 # shellcheck disable=SC1091
