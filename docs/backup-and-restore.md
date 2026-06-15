@@ -44,7 +44,7 @@ you want to restore using. You can restore one or more Solr collections
 at a time as well as the database.
 
 Make sure the `MARIADB_ROOT_PASSWORD` env variable is defined (it will
-be in `catalog-cron`).
+be in `catprod-cron`).
 
 The code for the backup script can be found at:
 [restore.sh](https://github.com/MSU-Libraries/catalog/blob/main/vufind/restore.sh)

@@ -14,6 +14,10 @@
       <?=$this->record($current)->getSearchResult('list', $this->results)?>
       <?php if ($showCheckboxes): ?> <!-- MSUL moved checkboxes to after record in li -->
         <?=$this->record($current)->getCheckbox('', 'search-cart-form', $recordNumber)?>
+      <?php else: ?>
+        <div class="record-number">
+          <?=$recordNumber ?>
+        </div>
       <?php endif; ?>
     </li>
     <?php

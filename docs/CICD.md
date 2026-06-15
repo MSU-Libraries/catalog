@@ -4,7 +4,7 @@ This page describes the GitLab CI/CD pipeline that is used by
 the MSU Libraries team to deploy the Docker services as multiple stacks
 in a multi-node Docker swarm cluster.
 
-The `catalog-preview` branch represents the staging environment for
+The `catprod-preview` branch represents the staging environment for
 changes before they will be deployed to the production environments.
 
 The `main` branch represents the stable production environment. Branches
@@ -12,28 +12,28 @@ with the prefix of `review-` or `devel-` will create separate stacks on
 the cluster, auto-provisioning DNS CNAMES as part of the pipeline.
 
 The workflow for developers will be to make code changes on `devel-`
-environments, then merge them in to the `catalog-preview` branch,
+environments, then merge them in to the `catprod-preview` branch,
 and once a semester (approximately), we will merge that branch
 into the `main` branch to deploy to production. Occasionally there
 may be changes that need to go to production sooner, in that case they
-will be merged to from the `devel-` branches to *BOTH* the `catalog-preview` and
+will be merged to from the `devel-` branches to *BOTH* the `catprod-preview` and
 the `main` branch.
 
 ## Environment based on branch name
 
 * **branch:** `main`,  
-  **stack prefix:** `catalog-beta` (`catalog-beta-catalog`,
-  `catalog-beta-solr`, `catalog-beta-mariadb`, etc.),  
+  **stack prefix:** `catprod-beta` (`catprod-beta-catalog`,
+  `catprod-beta-solr`, `catprod-beta-mariadb`, etc.),  
   **URL:** [https://catalog-beta.lib.msu.edu](https://catalog-beta.lib.msu.edu)
   (local DNS C-Record to catalog.aws.lib.msu.edu)  
-  **stack prefix:** `catalog-prod` (`catalog-prod-catalog`,
-  `catalog-prod-solr`, `catalog-prod-mariadb`, etc.),  
+  **stack prefix:** `catprod-prod` (`catprod-prod-catalog`,
+  `catprod-prod-solr`, `catprod-prod-mariadb`, etc.),  
   **URL:** [https://catalog.lib.msu.edu](https://catalog.lib.msu.edu)
   (local DNS C-Record to catalog.aws.lib.msu.edu)
 
-* **branch:** `catalog-preview`,  
-  **stack prefix:** `catalog-preview` (`catalog-preview-catalog`,
-  `catalog-preview-solr`, `catalog-preview-mariadb`, etc.),  
+* **branch:** `catprod-preview`,  
+  **stack prefix:** `catprod-preview` (`catprod-preview-catalog`,
+  `catprod-preview-solr`, `catprod-preview-mariadb`, etc.),  
   **URL:** [https://catalog-preview.lib.msu.edu](https://catalog-preview.lib.msu.edu)
   (local DNS C-Record to catalog.aws.lib.msu.edu)
 
@@ -68,7 +68,7 @@ characteristics:
 
 ## test
 
-**branches**: `main`, `catalog-preview`, `devel-`\*, and `review-`\*
+**branches**: `main`, `catprod-preview`, `devel-`\*, and `review-`\*
 
 * Runs templates included with GitLab CI/CD to scan for secrets used
   in committed code
@@ -76,7 +76,7 @@ characteristics:
 
 ### Build
 
-**branches**: `main`, `catalog-preview`, `devel-`\*, and `review-`\*
+**branches**: `main`, `catprod-preview`, `devel-`\*, and `review-`\*
 
 * Builds all the images in this repository, tagging them with `latest`
   only if it is the `main` branch
@@ -85,7 +85,7 @@ characteristics:
 
 ### Deploy
 
-**branches**: `main`, `catalog-preview`, `devel-`\*, and `review-`\*
+**branches**: `main`, `catprod-preview`, `devel-`\*, and `review-`\*
 
 * Will set the `STACK_NAME` variable that is used throughout the pipeline,
   which is essentially the branch name unless the branch does not start with

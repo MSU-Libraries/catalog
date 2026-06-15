@@ -38,16 +38,16 @@ Documentation on how to configure `go-away` is available on their [wiki](https:/
    the site aggressively
    ```bash
    # Checking container stats for CPU usage
-   docker stats $(docker ps -q -f name=catalog-prod-catalog_catalog)
+   docker stats $(docker ps -q -f name=catprod-prod-catalog_catalog)
    ```
 
 2. Find a time when you suspect the bots are causing excess load and grab the
    Apache access logs for the stack to identify the IP(s) or user agent(s):
    ```bash
    # Watching current logs in the docker logs volume on a host machine
-   tail -f -n10 /var/lib/docker/volumes/catalog-prod_logs/_data/apache/access.log
+   tail -f -n10 /var/lib/docker/volumes/catprod-prod_logs/_data/apache/access.log
    # Getting logs for a specific time from an older access log
-   zgrep -F "29/Jul/2025:16:42:" /var/lib/docker/volumes/catalog-prod_logs/_data/apache/access.log.2.gz
+   zgrep -F "29/Jul/2025:16:42:" /var/lib/docker/volumes/catprod-prod_logs/_data/apache/access.log.2.gz
    ```
 
 3. If there is a distinct bot user-agent, just use that for the block. But
@@ -75,7 +75,7 @@ Documentation on how to configure `go-away` is available on their [wiki](https:/
    `undesired-crawlers` rule.
 
 5. Deploying the change will apply the bot change to the specific environment
-   only (e.g.  `devel-mysite` or `catalog-preview`); you will need to merge into
+   only (e.g.  `devel-mysite` or `catprod-preview`); you will need to merge into
    `main` and deploy to production for the change to take effect.
 
 ## Emergency Live Changes
@@ -86,13 +86,13 @@ environment is deployed. To make the change, either scale the `captcha` service
 down to a single container, or you can make the change individually in all 3
 `captcha` containers.
 
-For example, to make live changes to `catalog-prod` deployment:
+For example, to make live changes to `catprod-prod` deployment:
 
 ```bash
 # Scale down to 1 container
-docker service scale catalog-prod-catalog-captcha=1
+docker service scale catprod-prod-catprod-captcha=1
 # Connect to that captcha container
-pc-connect catalog-prod-catalog-captcha -c bash
+pc-connect catprod-prod-catalog_captcha -c bash
 
 # Inside the container, edit the policy.yml file as desired
 vim /policy.yml

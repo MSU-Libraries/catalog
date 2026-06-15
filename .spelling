@@ -9,6 +9,7 @@ CacheCron
 Dockerfile
 EndNoteWeb
 Env
+FolioTest
 GitLab
 Javascript
 Jinja
@@ -37,6 +38,7 @@ Timeframe
 Traefik
 VUFIND-1630
 VuFind
+VuFindTest
 ZK
 ZooKeeper
 afterward

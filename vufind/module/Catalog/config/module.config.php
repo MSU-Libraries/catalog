@@ -13,11 +13,21 @@ return [
           ],
         ],
       ],
+      'record-mapthis' => [
+        'type' => Laminas\Router\Http\Segment::class,
+        'options' => [
+          'route' => '/Record/:id/MapThis',
+          'defaults' => [
+            'controller' => 'Record',
+            'action' => 'MapThis',
+          ],
+        ],
+      ],
     ],
   ],
   'controllers' => [
     'factories' => [
-      Catalog\Controller\RecordController::class => VuFind\Controller\AbstractBaseWithConfigFactory::class,
+      Catalog\Controller\RecordController::class => Catalog\Controller\RecordControllerFactory::class,
       Catalog\Controller\MyResearchController::class => VuFind\Controller\MyResearchControllerFactory::class,
     ],
     'aliases' => [

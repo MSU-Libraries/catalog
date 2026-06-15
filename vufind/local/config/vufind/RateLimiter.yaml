@@ -139,8 +139,7 @@ Storage:
 # The policies below are are just examples, and the limits and rates chosen do not
 # represent meaningful choices for any particular instance.
 Policies:
-  # A policy that allows 200 searches initially and increases the limit by 100 every
-  # 15 minutes:
+  # Restrict clients from search or record pages being crawled too fast
   search:
     loggedIn: false
     ipRangesExcept:

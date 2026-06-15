@@ -1,0 +1,84 @@
+<?php
+# Usually this is displayed in a modal, but if it is not (coming back from login), we don't want the search box and
+# we want a link back to search results if possible.
+if (!$this->inLightbox) {
+    $title = $this->translate('Map this');
+    $this->headTitle($title);
+    $this->layout()->searchbox = false;
+    $this->layout()->showSearchBacklink = true;
+    echo "<h1>$title</h1>";
+}
+$item = $this->mapthis->getItem();
+$callnum = $this->mapthis->getCallNumber();
+$location = $this->mapthis->getLocation();
+$msulLocation = $this->mapthis->getMsulLocation();
+$portalUrl = $this->mapthis->getPortalUrl() ?? '';
+$mapId = $this->mapthis->getMapId() ?? '';
+$buildingId = $this->mapthis->getBuildingId() ?? '';
+$floorId = $this->mapthis->getFloorId();
+$floorId = $this->mapthis->getFloorId();
+$defaultFloorId = $this->mapthis->getDefaultFloorId();
+$activeFloorId = !empty($floorId) ? $floorId : $defaultFloorId;
+
+if (!empty($floorId)) {
+  $this->assetManager()->clearScriptList()->appendStyleLink('/gis-assets/esri/themes/light/main.css');
+}
+?>
+
+<?php if (!empty($floorId)): ?>
+  <script type="application/json" id="arc-gis-variables">
+      {
+          "portalUrl": "<?= $portalUrl ?>",
+          "mapId": "<?= $mapId ?>",
+          "buildingId": "<?= $buildingId ?>",
+          "floorId": "<?= $activeFloorId ?>"
+      }
+  </script>
+  <style>
+    /* MUST HAVE: Give the map a container height */
+    arcgis-map {
+      height: 600px;
+      width: 100%;
+      display: block;
+    }
+    /* Apply the min-width only on screens 1024px wide or larger */
+    @media (min-width: 1024px) {
+      arcgis-map {
+        min-width: 800px;
+      }
+    }
+  </style>
+<?php endif; ?>
+
+<div>
+  <p>
+    <b>Title:</b> <?=$this->escapeHtml($this->driver->getRawData()['title_full'] ?? '') ?>
+  </p>
+  <p>
+    <b>Call Number:</b>
+    <?php if ($callnum ?? false): ?>
+      <span><?=$this->escapeHtml($callnum) ?></span>
+    <?php endif; ?>
+  </p>
+  <?php if ($location ?? false): ?>
+    <p>
+      <b>Location:</b>
+        <span><?=$this->escapeHtml($location) ?></span>
+    </p>
+  <?php endif; ?>
+  <?php if (empty($floorId)): ?>
+    <?php if (!empty($msulLocation)): ?>
+      <b><?=$this->escapeHtml($msulLocation) ?></b>
+    <?php else: ?>
+      <b>The map for that location could not be found. Please go to the circulation desk for more specific directions.</b>
+    <?php endif; ?>
+  <?php endif; ?>
+  <?php if (!empty($item)): ?>
+    <?= $this->locationNotices($item) ?>
+  <?php endif; ?>
+  <hr/>
+  <?php # Not rendering the map if there is no map to show ?>
+  <?php if (!empty($floorId)): ?>
+    <div id="arcgis-result"></div>
+  <?php endif; ?>
+</div>

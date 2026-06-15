@@ -31,9 +31,14 @@ namespace Catalog\ILS\Driver;
 
 use ArrayIterator;
 use Catalog\Utils\RegexLookup as Regex;
+use GuzzleHttp\Promise;
+use GuzzleHttp\Psr7;
 use Laminas\Http\Header\HeaderInterface;
+use Laminas\Http\Headers;
 use Laminas\Http\Response;
 use VuFind\Exception\ILS as ILSException;
+use VuFind\Http\GuzzleServiceAwareInterface;
+use VuFind\Http\GuzzleServiceAwareTrait;
 use VuFind\ILS\Logic\AvailabilityStatus;
 
 use function count;
@@ -50,14 +55,23 @@ use function is_string;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:ils_drivers Wiki
  */
-class Folio extends \VuFind\ILS\Driver\Folio
+class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterface
 {
+    use GuzzleServiceAwareTrait;
+
     /**
      * Configuration file reader object (PluginManager)
      *
      * @var \VuFind\Config\PluginManager
      */
     protected $configReader = null;
+
+    /**
+     * Guzzle client
+     *
+     * @var \GuzzleHttp\Client
+     */
+    protected $client;
 
     /**
      * Constructor
@@ -114,6 +128,306 @@ class Folio extends \VuFind\ILS\Driver\Folio
         }
 
         throw new \Exception('Unsupported ID type: ' . $idType);
+    }
+
+    /**
+     * Make GET request async
+     *
+     * @param string            $path                API path (with a leading /)
+     * @param string|array      $params              Query parameters
+     * @param array             $headers             Additional headers
+     * @param true|int[]|string $allowedFailureCodes HTTP failure codes that should
+     * NOT cause an ILSException to be thrown. May be an array of integers, a regular
+     * expression, or boolean true to allow all codes.
+     * @param string|array      $debugParams         Value to use in place of $params
+     * in debug messages (useful for concealing sensitive data, etc.)
+     * @param int               $attemptNumber       Counter to keep track of attempts
+     * (starts at 1 for the first attempt)
+     *
+     * @return \Laminas\Http\Response
+     * @throws ILSException
+     */
+    public function makeRequestAsync(
+        $path = '/',
+        $params = [],
+        $headers = [],
+        $allowedFailureCodes = [],
+        $debugParams = null,
+        $attemptNumber = 1
+    ) {
+        if (!isset($this->client)) {
+            $this->client = $this->guzzleService->createClient(
+                $this->config['API']['base_url'] . $path,
+                120
+            );
+        }
+        $client = $this->client;
+
+        $req_headers = new Headers();
+        $req_headers->addHeaders($headers);
+        [$req_headers, $params] = $this->preRequest($req_headers, $params);
+        if (!empty($headers)) {
+            foreach ($headers as $header) {
+                $matches = $req_headers->get(explode(':', $header)[0]);
+
+                if ($matches instanceof ArrayIterator) {
+                    foreach ($req_headers as $req_header) {
+                        $req_headers->removeHeader($req_header);
+                    }
+                } elseif ($matches instanceof HeaderInterface) {
+                    $req_headers->removeHeader($matches);
+                }
+                if ($matches != false) {
+                    $req_headers->addHeaderLine($header);
+                }
+            }
+        }
+        $request = new Psr7\Request('GET', $this->config['API']['base_url'] . $path);
+
+        if ($this->logger) {
+            $this->debugRequest('GET', $path, $debugParams ?? $params, $headers);
+        }
+
+        $startTime = microtime(true);
+        $promise = $client->sendAsync($request, [
+            'headers' => $req_headers->toArray(),
+            'query' => $params,
+            'synchronous' => false,
+        ]);
+        return $promise->then(
+            function (Psr7\Response $response) use ($attemptNumber, $startTime, $path, $allowedFailureCodes) {
+                $endTime = microtime(true);
+                $responseTime = $endTime - $startTime;
+                $this->debug('Request ASYNC Response Time --- ' . $responseTime . ' seconds. ' . $path);
+                $code = $response->getStatusCode();
+                if (
+                    !($code >= 200 && $code < 300)
+                    && !$this->failureCodeIsAllowed($code, $allowedFailureCodes)
+                ) {
+                    $this->logError(
+                        "Unexpected error response (attempt #$attemptNumber"
+                        . "); code: {$code}, body: {$response->getBody()}"
+                    );
+                    throw new ILSException('Unexpected error code.');
+                }
+                return $response;
+            },
+            function (\Exception $e) {
+                $this->logError('Unexpected ' . $e::class . ': ' . (string)$e);
+                throw new ILSException('Error during send operation.');
+            }
+        );
+    }
+
+    /**
+     * MSUL - PC-1659: Add support for async calls
+     * Helper function to retrieve a single page of results from FOLIO API
+     *
+     * @param string $interface FOLIO api interface to call
+     * @param array  $query     Extra GET parameters (e.g. ['query' => 'your cql here'])
+     * @param int    $offset    Starting record index
+     * @param int    $limit     Max number of records to retrieve
+     *
+     * @return array|Promise
+     * @throws ILSException if the response code is not a success or the response is not JSON
+     */
+    protected function getResultPage($interface, $query = [], $offset = 0, $limit = 100)
+    {
+        $combinedQuery = array_merge($query, compact('offset', 'limit'));
+        $promise = $this->makeRequestAsync(
+            $interface,
+            $combinedQuery
+        );
+        return $promise->then(
+            function (Psr7\Response $response) use ($interface) {
+                $json = json_decode($response->getBody());
+                $code = $response->getStatusCode();
+                if (!($code >= 200 && $code < 300) || !$json) {
+                    $msg = $json->errors[0]->message ?? json_last_error_msg();
+                    throw new ILSException("Error: '$msg' fetching from '$interface'");
+                }
+                return $json;
+            }
+        );
+    }
+
+    /**
+     * MSUL - PC-1659: Add support for async calls
+     * Helper function to retrieve paged results from FOLIO API
+     *
+     * @param string $responseKey Key containing values to collect in response
+     * @param string $interface   FOLIO api interface to call
+     * @param array  $query       Extra GET parameters (e.g. ['query' => 'your cql here'])
+     * @param int    $limit       How many results to retrieve from FOLIO per call
+     *
+     * @return array
+     * @throws ILSException if there is an issue with the response
+     */
+    protected function getPagedResults($responseKey, $interface, $query = [], $limit = 1000)
+    {
+        $maxAsyncCalls = 10;
+        $offset = 0;
+        $promises = [];
+        $totalEstimate = 1;
+        while ($promises || ($offset <= $totalEstimate)) {
+            if ($offset <= $totalEstimate && count($promises) < $maxAsyncCalls) {
+                // Enqueue page requests
+                $promises[] = $this->getResultPage($interface, $query, $offset, $limit);
+                $offset += $limit;
+            } elseif ($promises) {
+                // Unwrap current promises until we get a greater estimate
+                $json = array_shift($promises)->wait();
+                $totalEstimate = $json->totalRecords ?? 0;
+                foreach ($json->$responseKey ?? [] as $item) {
+                    yield $item ?? '';
+                }
+            }
+        }
+    }
+
+    /**
+     * Get FOLIO records by batches of ids.
+     * When using a unique field for $idField (such as 'id'), this function does not check
+     * if all records are found, and returned records are not guaranteed to be in the order of the given ids.
+     *
+     * @param string[] $ids         ids to look for in the records
+     * @param string   $idField     field to compare to given ids
+     * @param string   $responseKey response key with the records to retrieve
+     * @param string   $endpoint    FOLIO API endpoint
+     * @param string   $querySuffix optional string to append to the queries
+     *
+     * @return \Generator<object>
+     * @throws ILSException if there is an issue with the FOLIO response
+     */
+    protected function getByBatch($ids, $idField, $responseKey, $endpoint, $querySuffix = '')
+    {
+        if (count($ids) == 0) {
+            return;
+        }
+        $idToKey = fn ($id) => $endpoint . '[' . $idField . '=' . $id . ']';
+        $idsToLookFor = [];
+        foreach ($ids as $id) {
+            $items = $this->getCachedData($idToKey($id));
+            if ($items == null) {
+                $idsToLookFor[] = $id;
+            } else {
+                foreach ($items as $item) {
+                    yield $item;
+                }
+            }
+        }
+        $resultsToCache = [];
+        foreach (array_chunk($idsToLookFor, self::QUERY_BY_IDS_BATCH_SIZE) as $idsInBatch) {
+            $idsWithQuotes = array_map(fn ($id) => '"' . $this->escapeCql($id) . '"', $idsInBatch);
+            $query = [
+                'query' => $idField . ' == (' . implode(' OR ', $idsWithQuotes) . ')' . $querySuffix,
+            ];
+            foreach (
+                $this->getPagedResults(
+                    $responseKey,
+                    $endpoint,
+                    $query
+                ) as $item
+            ) {
+                $key = $idToKey($item->$idField);
+                if (isset($resultsToCache[$key])) {
+                    $resultsToCache[$key][] = $item;
+                } else {
+                    $resultsToCache[$key] = [$item];
+                }
+                yield $item;
+            }
+        }
+        foreach ($resultsToCache as $key => $items) {
+            $this->putCachedData($key, $items);
+        }
+    }
+
+    /**
+     * Support method for getHoldings() -- retrieve items by holding ids (including bound-with items)
+     *
+     * @param string[] $holdingsIds the FOLIO holdings ids
+     *
+     * @return object[] The items, with an additional queryHoldingsRecordId property with the matching holdings id
+     * @throws ILSException if there is an issue with the FOLIO response
+     */
+    protected function getItemsByHoldingIds(array $holdingsIds)
+    {
+        if (count($holdingsIds) == 0) {
+            return [];
+        }
+        $items = [];
+        $folioItemSort = $this->config['Holdings']['folio_sort'] ?? '';
+        $querySuffix = empty($folioItemSort) ? '' : ' sortby ' . $folioItemSort;
+        if (count($holdingsIds) == 1) {
+            // /inventory/items-by-holdings-id returns bound-with items too (but it only takes one holdingsRecordId)
+            foreach (
+                $this->getByBatch(
+                    $holdingsIds,
+                    'holdingsRecordId',
+                    'items',
+                    '/inventory/items-by-holdings-id',
+                    $querySuffix
+                ) as $item
+            ) {
+                $item->queryHoldingsRecordId = $holdingsIds[0];
+                $items[] = $item;
+            }
+            return $items;
+        }
+        // Retrieve the item records
+        $holdingsItemIds = [];
+        foreach ($holdingsIds as $holdingsId) {
+            $holdingsItemIds[$holdingsId] = [];
+        }
+        foreach (
+            $this->getByBatch(
+                $holdingsIds,
+                'holdingsRecordId',
+                'items',
+                '/inventory/items',
+                $querySuffix
+            ) as $item
+        ) {
+            $holdingsId = $item->holdingsRecordId;
+            $item->queryHoldingsRecordId = $holdingsId;
+            $holdingsItemIds[$holdingsId][] = $item->id;
+            $items[] = $item;
+        }
+        // Retrieve the related bound-with items
+        // Duplicate items are avoided for each holdings
+        $boundWithItemIds = [];
+        $itemIdToHoldingsRecordId = [];
+        foreach (
+            $this->getByBatch(
+                $holdingsIds,
+                'holdingsRecordId',
+                'boundWithParts',
+                '/inventory-storage/bound-with-parts',
+                $querySuffix
+            ) as $boundWithPart
+        ) {
+            $itemId = $boundWithPart->itemId;
+            $holdingsId = $boundWithPart->holdingsRecordId;
+            if (in_array($itemId, $holdingsItemIds[$holdingsId])) {
+                continue;
+            }
+            $holdingsItemIds[$holdingsId][] = $itemId;
+            $boundWithItemIds[] = $itemId;
+            $itemIdToHoldingsRecordId[$itemId] = $holdingsId;
+        }
+        foreach (
+            $this->getByBatch(
+                $boundWithItemIds,
+                'id',
+                'items',
+                '/inventory/items'
+            ) as $item
+        ) {
+            $item->queryHoldingsRecordId = $itemIdToHoldingsRecordId[$item->id];
+            $items[] = $item;
+        }
+        return $items;
     }
 
     /**
@@ -185,20 +499,22 @@ class Folio extends \VuFind\ILS\Driver\Folio
         ) {
             $item->status->name = 'Restricted';
         }
-        // PC-1416: If the location code is mnmn (the generic "Main library" code), then
-        // attempt to get the location data from helm if we have a callnumber
-        if ($locAndHoldings['location_code'] == 'mnmn' && !empty($callNumberData['callnumber'])) {
+        // PC-1416, PC-1636: Attempt to get the location data from helm if we have a callnumber
+        if (!empty($callNumberData['callnumber'])) {
             // Prase the config and get the required data
             $msulConfig = $this->configReader->get('msul');
             if (isset($msulConfig)) {
                 $apiUrl = $msulConfig['Locations']['api_url'] ?? '';
                 $topKey = $msulConfig['Locations']['response_top_key'] ?? 'callnumbers';
                 $floorKey = $msulConfig['Locations']['response_floor_key'] ?? '';
+                $notMappableFloor = $msulConfig['Locations']['not_mappable_floor_value'] ?? '';
+                $gisFloorKey = $msulConfig['Locations']['response_gis_floor_key'] ?? '';
                 $locationKey = $msulConfig['Locations']['response_location_key'] ?? '';
 
                 if (!empty($apiUrl)) {
-                    // Replace %%callnumber%% with the real callnumber
+                    // Replace %%callnumber%% and %%loc%% with the real callnumber and location code
                     $apiUrl = str_replace('%%callnumber%%', urlencode($callNumberData['callnumber']), $apiUrl);
+                    $apiUrl = str_replace('%%loc%%', urlencode($locAndHoldings['location_code']), $apiUrl);
 
                     // Get the API data
                     $data = $this->getCachedData($apiUrl);
@@ -212,6 +528,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
                             $this->logWarning(
                                 'Could not get location data for callnumber '
                                 . $callNumberData['callnumber'] . ' (' . $bibId . ')'
+                                . ' and location code ' . $locAndHoldings['location_code']
                             );
                         }
                     }
@@ -219,7 +536,14 @@ class Folio extends \VuFind\ILS\Driver\Folio
                     // Parse the response and add to our location results
                     if (isset($data->$topKey) && count($data->$topKey) >= 1) {
                         $floor = $floorKey ? ($data->$topKey[0]->$floorKey ?? '') : '';
+                        $gisFloor = $gisFloorKey ? ($data->$topKey[0]->$gisFloorKey ?? '') : '';
                         $location = $locationKey ? ($data->$topKey[0]->$locationKey ?? '') : '';
+
+                        // Handle when 'Not Mappable' floor is set
+                        if ($floor == $notMappableFloor) {
+                            $floor = '';
+                            $gisFloor = '';
+                        }
 
                         $floorPart = !empty($floor) ? ' - ' . $floor : '';
                         $locationPart = !empty($location) ? '(' . $location . ')' : '';
@@ -230,6 +554,20 @@ class Folio extends \VuFind\ILS\Driver\Folio
                             $this->debug(
                                 'Found additional location data for callnumber ' . $callNumberData['callnumber'] .
                                 ' (' . $bibId . ')' . '. Updating location to: ' . $locAndHoldings['location']
+                            );
+                        }
+                        if (!empty(trim($location))) {
+                            $locAndHoldings['msulLocation'] = $location;
+                            $this->debug(
+                                'Adding ' . $location . ' to msulLocation for callnumber ' .
+                                $callNumberData['callnumber']
+                            );
+                        }
+                        if (!empty(trim($gisFloor))) {
+                            $locAndHoldings['gisfloor'] = $gisFloor;
+                            $this->debug(
+                                'Adding ' . $gisFloor . ' to gisfloor for callnumber ' .
+                                $callNumberData['callnumber']
                             );
                         }
                     } else {
@@ -403,8 +741,8 @@ class Folio extends \VuFind\ILS\Driver\Folio
      * login attempt. Returns a CQL query for retrieving more information about
      * the authenticated user.
      *
-     * @param string $username The patron username
-     * @param string $password The patron password
+     * @param string  $username The patron username
+     * @param ?string $password The patron password
      *
      * @return string
      */
@@ -545,7 +883,7 @@ class Folio extends \VuFind\ILS\Driver\Folio
         if (isset($params['sort'])) {
             $query .= ' sortby ' . $this->escapeCql($params['sort']);
         }
-        $resultPage = $this->getResultPage('/circulation/loans', compact('query'), $offset, $limit);
+        $resultPage = $this->getResultPage('/circulation/loans', compact('query'), $offset, $limit)->wait();
         $transactions = [];
         foreach ($resultPage->loans ?? [] as $trans) {
             $dueStatus = false;
