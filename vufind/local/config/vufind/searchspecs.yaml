@@ -390,7 +390,7 @@ AllFields:
     - description
     - long_lat_display
     - invalid_isn
-    - callnumber-raw
+    - callnumber-raw_txt_mv
   DismaxHandler: edismax
   ExactSettings:
     DismaxFields:
@@ -403,7 +403,7 @@ AllFields:
       - issn^10
       - ismn^10
       - invalid_isn
-      - callnumber-raw
+      - callnumber-raw_txt_mv
     DismaxHandler: edismax
 
 # These are advanced searches that never use Dismax:
