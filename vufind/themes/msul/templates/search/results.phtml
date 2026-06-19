@@ -49,8 +49,7 @@
   );
   $recommendations = $this->results->getRecommendations('side');
   $this->assetManager()->appendScriptString('var multiFacetsSelection = "' . $this->multiFacetsSelection . '";');
-  $multiFacetsSelection = $this->multiFacetsSelection ? 'true' : 'false';
-  $this->assetManager()->clearScriptList()->appendStyleLink('/gis-assets/esri/themes/light/main.css'); // MSU Arc GIS CSS
+  $this->assetManager()->appendStyleLink('/gis-assets/esri/themes/light/main.css'); // MSU Arc GIS CSS
 ?>
 
 <h1 class="visually-hidden"><?=$this->escapeHtml($headTitle)?></h1>
