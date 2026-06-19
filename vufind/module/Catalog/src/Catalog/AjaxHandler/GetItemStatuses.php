@@ -55,7 +55,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
      * MSUL - 1639 Show available holdings first
      * Sort statuses according to given config (by default it come from config.ini)
      *
-     * @param array[] $holdings The holdings to sort
+     * @param array[] $holdings      The holdings to sort
      * @param array[] $sortingFields Config on how to sort the fields (first values are prioritized for sorting)
      *
      * @return void
@@ -71,7 +71,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
                 if ($result === 0) {
                     continue;
                 }
-                return $order !== "reversed" ? $result : -$result;
+                return $order !== 'reversed' ? $result : -$result;
             }
             return 0;
         });
@@ -132,7 +132,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
 
             // Skip empty records:
             if (count($record)) {
-                if (($this->config->Record->getStatusesSorting ?? "false") !== "false") {
+                if (($this->config->Record->getStatusesSorting ?? 'false') !== 'false') {
                     $this->sortStatuses($record, current($this->config->Record->getStatusesSorting));
                 }
                 // Check for errors
