@@ -87,6 +87,7 @@ conditions:
 
   is-allowed-agent:
     - 'userAgent.contains("Silktide")'
+    - 'userAgent.contains("archive.org_bot")'
 
   is-suspicious-chrome-crawler:
     - 'userAgent.matches("Chrome/[0-9]{1,2}\\.")'
