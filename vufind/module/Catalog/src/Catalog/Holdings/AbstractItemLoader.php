@@ -15,10 +15,11 @@
 namespace Catalog\Holdings;
 
 use Catalog\Utils\RegexLookup as Regex;
+use Catalog\View\Helper\Root\Record as Record;
+use VuFind\RecordDriver\AbstractBase as RecordDriver;
 
 use function array_key_exists;
 use function count;
-use function in_array;
 use function is_array;
 
 /**
@@ -36,7 +37,9 @@ use function is_array;
  */
 abstract class AbstractItemLoader
 {
-    public $record;  // record driver
+    public $driver;  // record driver
+
+    public $record;  // record view helper
 
     public $items;   // holding items
 
@@ -49,13 +52,15 @@ abstract class AbstractItemLoader
     /**
      * Initializes the loader with the given record and item data
      *
-     * @param object        $record       Record driver object
+     * @param RecordDriver  $driver       Record driver
+     * @param Record        $record       Record view helper
      * @param object|array  $items        array of holding items
      * @param string        $item_id      holding record data for the current holding item
      * @param PluginManager $configReader Config reader object
      */
-    public function __construct($record, $items, $item_id = null, $configReader = null)
+    public function __construct($driver, $record, $items, $item_id = null, $configReader = null)
     {
+        $this->driver = $driver;
         $this->record = $record;
         $this->items = $items;
         $this->configReader = $configReader;
@@ -63,6 +68,9 @@ abstract class AbstractItemLoader
 
         if (null !== $this->item_id) {
             $this->item = $this->getItem($this->item_id);
+        }
+        foreach ($this->items as &$item) {
+            $this->record->updateAvailabilityStatus($item);
         }
     }
 
@@ -115,7 +123,7 @@ abstract class AbstractItemLoader
      */
     public function isHLM()
     {
-        return str_starts_with($this->record->getUniqueId(), 'hlm.');
+        return str_starts_with($this->driver->getUniqueId(), 'hlm.');
     }
 
     /**
@@ -198,7 +206,7 @@ abstract class AbstractItemLoader
         // than the real time holdings information
         $item_id = $this->getItem($item_id)['item_id'] ?? null;
 
-        $holdings = $this->record->getRealTimeHoldings();
+        $holdings = $this->driver->getRealTimeHoldings();
         if (array_key_exists('holdings', $holdings)) {
             foreach ($holdings['holdings'] as $location) {
                 if (array_key_exists('items', $location)) {
@@ -215,88 +223,31 @@ abstract class AbstractItemLoader
     }
 
     /**
-     * Get the general and specfic status for a holding item
+     * Get the FOLIO status for a holding or item
      *
-     * @param array $item The holding item data, as retrieved from getItem()
+     * @param string $item_id The item UUID. If null (default) will return status for first item
      *
-     * @return array The item status as two parts (both string):
-     *               - General status ("Checked out", "Unavailable", etc)
-     *               - Specific status ("Awaiting pickup", "Declared lost", etc; default blank string)
-     */
-    public function getStatusParts($item)
-    {
-        $status = isset($item['availability']) ? $item['availability']->getStatusDescription() : 'Unknown';
-        $statusSecondPart = '';
-        if (
-            in_array($status, [
-                'Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
-                'In process (non-requestable)', 'Long missing', 'Lost and paid',
-                'Missing', 'On order', 'Order closed', 'Unknown', 'Withdrawn',
-            ])
-        ) {
-            $statusFirstPart = 'Unavailable';
-            $statusSecondPart = $status;
-        } elseif (in_array($status, ['Awaiting pickup', 'Awaiting delivery', 'In transit', 'Paged'])) {
-            $statusFirstPart = 'Checked Out';
-            $statusSecondPart = $status;
-        } elseif ($status === 'Checked out') {
-            $statusFirstPart = 'Checked Out';
-        } elseif ($status === 'Restricted') {
-            $statusFirstPart = 'Library Use Only';
-        } elseif ($status === 'Unavailable') {
-            $statusFirstPart = 'Unavailable';
-        } elseif (!in_array($status, ['Available', 'Unavailable', 'Checked out'])) {
-            $statusFirstPart = 'Unknown status';
-            $statusSecondPart = $status;
-        } elseif (isset($item['reserve']) && $item['reserve'] === 'Y') {
-            $statusFirstPart = 'On Reserve';
-        } elseif ($status === 'Available') {
-            $statusFirstPart = 'Available';
-        } else {
-            $statusFirstPart = 'Unknown status';
-        }
-        return [$statusFirstPart, $statusSecondPart];
-    }
-
-    /**
-     * Get the status for a holding item
-     *
-     * @param string $item_id The holding item UUID. If null (default) will return status for first item
-     *
-     * @return string The status string
+     * @return string The FOLIO status string
      */
     public function getStatus($item_id = null)
     {
-        // NOTE: Make sure this logic matches with getStatus in the Record view helper
-
         $item_id = $this->getItemId($item_id);
         $item = $this->getItem($item_id);
-        [$partOne, $partTwo] = $this->getStatusParts($item);
-        $partTwo = empty($partTwo) ? '' : " ({$partTwo})";
-        return $partOne . $partTwo . $this->getStatusSuffix($item, ($partOne !== 'Unavailable'));
+        return $item['status'];
     }
 
     /**
-     * Determine the holding status suffix (if any)
+     * Get the status description for a holding or item, for display only
      *
-     * @param array $item         the holding data
-     * @param bool  $showLoanType if loan type should be displayed
+     * @param string $item_id The holding item UUID. If null (default) will return status for first item
      *
-     * @return string
+     * @return string The status description string
      */
-    public function getStatusSuffix($item, $showLoanType = true)
+    public function getStatusDescription($item_id = null)
     {
-        $suffix = '';
-        if ($item['returnDate'] ?? false) {
-            $suffix = ' - ' . $item['returnDate'];
-        }
-        if ($item['duedate'] ?? false) {
-            $suffix .= ' - Due: ' . $item['duedate'];
-        }
-        if ($showLoanType && ($item['loan_type_name'] ?? false)) {
-            $suffix .= ' (' . $item['loan_type_name'] . ')';
-        }
-        return $suffix;
+        $item_id = $this->getItemId($item_id);
+        $item = $this->getItem($item_id);
+        return $item['availability']->getStatusDescription();
     }
 
     /**
@@ -348,7 +299,7 @@ abstract class AbstractItemLoader
         // Does appear to work on items that show a description on record page:
         // https://devel-getthis.aws.lib.msu.edu/Record/folio.in00006771086
         // (then var_dump this desc and the value matches)
-        $data = $this->record->getSummary();
+        $data = $this->driver->getSummary();
 
         // If there is linked data in the description, it will need to
         // be parsed out with an '=' separating it

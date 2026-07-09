@@ -66,15 +66,13 @@ class RegexLookup
     // Status
     public const AVAILABLE             = ['/^AVAILABLE/i'];
     public const IN_PROCESS            = ['/IN PROCESS/i'];
-    public const LIB_USE_ONLY          = ['/LIB USE ONLY/i', '/LIBRARY USE ONLY/i'];
+    public const LIB_USE_ONLY          = ['/LIB USE ONLY/i', '/LIBRARY USE ONLY/i', '/RESTRICTED/i'];
     public const ON_DISPLAY            = ['/ON DISPLAY/i'];
-    public const CHECKED               = ['/CHECKED/i'];
+    public const CHECKED               = ['/CHECKED/i', '/AWAITING/i', '/TRANSIT/i', '/PAGED/i'];
     public const BILLED                = ['/BILLED/i'];
     public const ON_SEARCH             = ['/ON SEARCH/i'];
     public const LOST                  = ['/LOST/i'];
     public const HOLD                  = ['/HOLD/i'];
-    // Format
-    public const SERIAL                = ['/SERIAL/i'];
     // Description / Call Number
     public const VINYL                 = ['/VINYL/i'];
     // Call Number

@@ -22,7 +22,7 @@ $notices = $this->Notices('RequestNotices.yaml');
     </p>
   <?php endif; ?>
   <p>
-    <b>Status:</b> <?= $this->getthis->getStatus() ?>
+    <b>Status:</b> <?= $this->escapeHtml($this->getthis->getStatusDescription()) ?>
   </p>
   <?php if (!empty($item)): ?>
     <?= $this->locationNotices($item) ?>

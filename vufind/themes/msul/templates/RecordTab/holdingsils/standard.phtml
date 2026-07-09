@@ -12,7 +12,7 @@ use Catalog\Holdings\GetThisLoader; /** MSU */
     # TODO is $holding actually an item record? possibly!
     $id = $holding['id'];
     $item_id = $holding['item_id'];
-    $getthis = new GetThisLoader($record, [$holding]);
+    $getthis = new GetThisLoader($this->driver, $record, [$holding]);
     $callnum = $getthis->getCallNumber($item_id);
     /** MSU END */
   ?>
@@ -29,12 +29,11 @@ use Catalog\Holdings\GetThisLoader; /** MSU */
       <?php endif; ?>
       <?php
         $statusClass = $this->availabilityStatus()->getClass($availabilityStatus);
-        $statusDescription = $getthis->getStatus($item_id); /** MSU */
-        $statusDescriptionTokens = $availabilityStatus->getStatusDescriptionTokens();
+        $statusDescription = $getthis->getStatusDescription($item_id); /** MSU */
         $schemaAvailabilityUri = $availabilityStatus->getSchemaAvailabilityUri();
       ?>
       <span class="<?=$this->escapeHtmlAttr($statusClass)?>">
-        <?=$this->transEsc($statusDescription, $statusDescriptionTokens)?>
+        <?=$this->escapeHtml($statusDescription)?><?php /** MSU */ ?>
         <?php if ($schemaAvailabilityUri): ?>
           <?=$this->schemaOrg()->getLink($schemaAvailabilityUri, 'availability')?>
         <?php endif; ?>

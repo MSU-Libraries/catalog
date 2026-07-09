@@ -38,7 +38,6 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function isOnlineResource($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $loc = $this->getLocation($item_id);
         return Regex::ONLINE($loc);
     }
@@ -52,7 +51,6 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function isMakerspace($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $loc_code = $this->getLocationCode($item_id);
         return $loc_code == 'mnmst';
     }
@@ -82,24 +80,6 @@ class GetThisLoader extends AbstractItemLoader
     }
 
     /**
-     * Determine if the given item is a serial or not
-     *
-     * @param string $item_id Item ID to filter for
-     *
-     * @return bool  If the item is a serial or not
-     */
-    public function isSerial($item_id = null)
-    {
-        $item_id = $this->getItemId($item_id);
-        foreach ($this->record->getFormats() as $format) {
-            if (Regex::SERIAL($format)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Determine if the given item is checked or not
      *
      * @param string $item_id Item ID to filter for
@@ -108,7 +88,6 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function isOut($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $status = $this->getStatus($item_id);
         return
             Regex::CHECKED($status) ||
@@ -128,7 +107,6 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function isAudioVideoMedia($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $callNum = $this->getItem($item_id)['callnumber'] ?? '';
         return Regex::AV_MEDIA($callNum);
     }
@@ -142,7 +120,6 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function isMedia($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $callNum = $this->getItem($item_id)['callnumber'] ?? '';
         return Regex::MICROPRINT($callNum) || Regex::AV_MEDIA($callNum);
     }
@@ -156,7 +133,6 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function isLibUseOnly($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         return Regex::LIB_USE_ONLY($stat);
     }
@@ -170,10 +146,8 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function isUnavailable($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $item = $this->getItem($item_id);
-        [$stat, $_] = $this->getStatusParts($item);
-        return $stat == 'Unavailable';
+        return !$item['availability']->isAvailable();
     }
 
     /**
@@ -200,7 +174,6 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function showServMsg($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
 
@@ -264,7 +237,6 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function showReqItem($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $loc = $this->getLocation($item_id);
         if (Regex::BUSINESS($loc) && !Regex::RESERV($loc)) {
             return true;
@@ -281,7 +253,6 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function showReqScanMSU($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
         $callNum = $this->getItem($item_id)['callnumber'] ?? '';
@@ -315,7 +286,6 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function showReqScanOther($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
         $callNum = $this->getItem($item_id)['callnumber'] ?? '';
@@ -346,7 +316,6 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function showReqBusiness($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $loc = $this->getLocation($item_id);
         if (Regex::BUSINESS($loc) && !Regex::RESERV($loc)) {
             return true;
@@ -389,7 +358,6 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function showFacDel($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
         $desc = $this->getDescription();
@@ -440,7 +408,6 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function showRemotePat($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
         $desc = $this->getDescription();
@@ -494,7 +461,6 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function showSpcAeon($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $stat = $this->getStatus($item_id);
         $loc = $this->getLocation($item_id);
 
@@ -516,7 +482,6 @@ class GetThisLoader extends AbstractItemLoader
      */
     public function showOtherLib($item_id = null)
     {
-        $item_id = $this->getItemId($item_id);
         $loc = $this->getLocation($item_id);
 
         if (
