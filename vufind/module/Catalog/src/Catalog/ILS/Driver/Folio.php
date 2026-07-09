@@ -590,7 +590,10 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             'barcode' => $item->barcode ?? '',
             'status' => $item->status->name,
             'duedate' => $dueDateValue,
-            'availability' => $item->status->name == 'Available',
+            'availability' => new AvailabilityStatus(
+                $item->status->name == 'Available',
+                $item->status->name,
+            ),
             'item_notes' => !empty(implode($itemNotes)) ? $itemNotes : null,
             'reserve' => 'TODO',
             'addLink' => 'check',
