@@ -31,9 +31,19 @@
 namespace Catalog\AjaxHandler;
 
 use Laminas\Mvc\Controller\Plugin\Params;
+use Laminas\View\Renderer\RendererInterface;
+use Psr\Log\LoggerAwareInterface;
+use Throwable;
+use VuFind\Config\Config;
 use VuFind\Exception\ILS as ILSException;
+use VuFind\ILS\Connection;
 use VuFind\ILS\Logic\AvailabilityStatusInterface;
 
+use VuFind\ILS\Logic\AvailabilityStatusManager;
+use VuFind\ILS\Logic\Holds;
+use VuFind\Log\LoggerAwareTrait;
+use VuFind\Search\Memory;
+use VuFind\Session\Settings as SessionSettings;
 use function count;
 use function is_array;
 
@@ -49,10 +59,60 @@ use function is_array;
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development Wiki
  */
-class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
+class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /**
-     * MSUL - 1639 Show available holdings first
+     * Constructor
+     *
+     * @param SessionSettings           $ss                        Session settings
+     * @param Config                    $config                    Top-level configuration
+     * @param Connection                $ils                       ILS connection
+     * @param RendererInterface         $renderer                  View renderer
+     * @param Holds                     $holdLogic                 Holds logic
+     * @param AvailabilityStatusManager $availabilityStatusManager Availability status manager
+     */
+    public function __construct(
+        SessionSettings $ss,
+        protected Config $config,
+        protected Connection $ils,
+        protected RendererInterface $renderer,
+        protected Holds $holdLogic,
+        protected AvailabilityStatusManager $availabilityStatusManager,
+        protected Memory $searchMemory
+    ) {
+        parent::__construct(
+            $ss,
+            $this->config,
+            $this->ils,
+            $this->renderer,
+            $this->holdLogic,
+            $this->availabilityStatusManager
+        );
+    }
+
+    protected function compareLocationFilters(array $a, array $b, array $extras): int
+    {
+        foreach ($extras['filters']['Location'] as $locationFilter) {
+            $locations = explode('/', $locationFilter['displayText']);
+            $aLocation = true;
+            $bLocation = true;
+            foreach ($locations as $location) {
+                $aLocation = $aLocation && str_contains($a['location'], $location);
+                $bLocation = $bLocation && str_contains($b['location'], $location);
+            }
+            if ($aLocation && !$bLocation) {
+                return -1;
+            } elseif (!$aLocation && $bLocation) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * MSUL - 1639 + 1261 Show available holdings first + show location from filters first
      * Sort statuses according to given config (by default it come from config.ini)
      *
      * @param array[] $holdings      The holdings to sort
@@ -60,14 +120,26 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
      *
      * @return void
      */
-    protected function sortStatuses(array &$holdings, array $sortingFields): void
+    protected function sortStatuses(array &$holdings, array $sortingFields, array $filters): void
     {
-        usort($holdings, function ($a, $b) use ($sortingFields) {
+        usort($holdings, function ($a, $b) use ($sortingFields, $filters) {
             foreach ($sortingFields as $field => $order) {
-                if (!isset($a[$field], $b[$field])) {
+                if (isset($a[$field], $b[$field])) {
+                    $result = $a[$field] <=> $b[$field];
+                } elseif (method_exists($this, $field)) {
+                    try {
+                        $result = call_user_func([$this, $field], $a, $b, ['filters' => $filters]);
+                    } catch (Throwable $e) {
+                        $this->logError(
+                            'An error happened during call to function "' . $field . '" : '
+                            . $e->getMessage() . ' line ' . $e->getLine() . ' of file ' . $e->getFile(),
+                            $e->getTrace()
+                        );
+                        continue;
+                    }
+                } else {
                     continue;
                 }
-                $result = $a[$field] <=> $b[$field];
                 if ($result === 0) {
                     continue;
                 }
@@ -133,7 +205,8 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses
             // Skip empty records:
             if (count($record)) {
                 if (($this->config->Record->getStatusesSorting ?? 'false') !== 'false') {
-                    $this->sortStatuses($record, current($this->config->Record->getStatusesSorting));
+                    $filters = $this->searchMemory->getCurrentSearch()->getParams()->getFilterList() ?? [];
+                    $this->sortStatuses($record, current($this->config->Record->getStatusesSorting), $filters);
                 }
                 // Check for errors
                 if (!empty($record[0]['error'])) {
