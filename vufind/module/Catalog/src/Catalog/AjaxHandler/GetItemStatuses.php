@@ -38,12 +38,12 @@ use VuFind\Config\Config;
 use VuFind\Exception\ILS as ILSException;
 use VuFind\ILS\Connection;
 use VuFind\ILS\Logic\AvailabilityStatusInterface;
-
 use VuFind\ILS\Logic\AvailabilityStatusManager;
 use VuFind\ILS\Logic\Holds;
 use VuFind\Log\LoggerAwareTrait;
 use VuFind\Search\Memory;
 use VuFind\Session\Settings as SessionSettings;
+
 use function count;
 use function is_array;
 
@@ -72,6 +72,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Log
      * @param RendererInterface         $renderer                  View renderer
      * @param Holds                     $holdLogic                 Holds logic
      * @param AvailabilityStatusManager $availabilityStatusManager Availability status manager
+     * @param Memory                    $searchMemory              Search memory for user search filters
      */
     public function __construct(
         SessionSettings $ss,
@@ -92,6 +93,15 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Log
         );
     }
 
+    /**
+     * MSUL - 1261 Show location from filters first
+     * Sort statuses comparing against user search filters
+     *
+     * @param array[] $a      First param
+     * @param array[] $b      Second param
+     * @param array[] $extras Extras data to use in the comparison; in this function: filters from the user search
+     *
+     * @return void
     protected function compareLocationFilters(array $a, array $b, array $extras): int
     {
         foreach ($extras['filters']['Location'] ?? [] as $locationFilter) {
@@ -117,6 +127,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Log
      *
      * @param array[] $holdings      The holdings to sort
      * @param array[] $sortingFields Config on how to sort the fields (first values are prioritized for sorting)
+     * @param array[] $filters       Filters from the user search
      *
      * @return void
      */
