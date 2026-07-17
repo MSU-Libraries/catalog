@@ -101,7 +101,8 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Log
      * @param array[] $b      Second param
      * @param array[] $extras Extras data to use in the comparison; in this function: filters from the user search
      *
-     * @return void
+     * @return int
+     */
     protected function compareLocationFilters(array $a, array $b, array $extras): int
     {
         foreach ($extras['filters']['Location'] ?? [] as $locationFilter) {
