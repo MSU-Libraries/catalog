@@ -113,7 +113,7 @@ abstract class AbstractItemLoader
      */
     protected function getMsulConfig()
     {
-        return $this->configReader->get('msul');
+        return $this->configReader?->get('msul') ?? [];
     }
 
     /**
