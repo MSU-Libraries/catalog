@@ -94,7 +94,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Log
 
     protected function compareLocationFilters(array $a, array $b, array $extras): int
     {
-        foreach ($extras['filters']['Location'] as $locationFilter) {
+        foreach ($extras['filters']['Location'] ?? [] as $locationFilter) {
             $locations = explode('/', $locationFilter['displayText']);
             $aLocation = true;
             $bLocation = true;
