@@ -101,9 +101,10 @@ class RecordController extends \VuFind\Controller\RecordController
         $items = $this->getILS()->getHolding($this->params()->fromRoute('id'));
         $item_id = $this->params()->fromQuery('item_id');
         $view = $this->createViewModel();
+        $record = $this->getViewRenderer()->record($view->driver);
         $view->setVariable(
             'mapthis',
-            new MapThisLoader($view->driver, $items['holdings'], $item_id, $this->configLoader)
+            new MapThisLoader($view->driver, $record, $items['holdings'], $item_id, $this->configLoader)
         );
         $view->setTemplate('record/mapthis');
         return $view;
