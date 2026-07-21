@@ -53,7 +53,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public const UNLINKPOS = '00'; // occurance position in the linked subfield that represents unlinked 880s
     // SOURCE_WHITELIST should match the list used for topic and other fields in marc_local.properties
     private const SOURCE_WHITELIST = '/^aat|discogsgenre|discogsstyle|homoit|homoit\/eng|lcgft|' .
-        'local|olacvggt|rbbin|rbgenr|rbmscv|rbpap|rbpri|rbprov|rbpub|rbtyp|tgm|tgn|vgmsgg|wikidata/eng$/';
+        'local|olacvggt|rbbin|rbgenr|rbmscv|rbpap|rbpri|rbprov|rbpub|rbtyp|tgm|tgn|vgmsgg|wikidata\/eng$/';
 
     /**
      * Fields that may contain subject headings, and their descriptions
