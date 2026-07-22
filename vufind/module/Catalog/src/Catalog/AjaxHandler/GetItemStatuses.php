@@ -44,6 +44,7 @@ use VuFind\Log\LoggerAwareTrait;
 use VuFind\Search\Memory;
 use VuFind\Session\Settings as SessionSettings;
 
+use function call_user_func;
 use function count;
 use function is_array;
 
@@ -97,8 +98,8 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Log
      * MSUL - 1261 Show location from filters first
      * Sort statuses comparing against user search filters
      *
-     * @param array[] $a      First param
-     * @param array[] $b      Second param
+     * @param array $a        First param
+     * @param array $b        Second param
      * @param array[] $extras Extras data to use in the comparison; in this function: filters from the user search
      *
      * @return int
