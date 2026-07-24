@@ -43,6 +43,7 @@ RUN envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apac
     apt-get install -y /tmp/libapache2-mod-log-ipmask_1.0.0_amd64.deb && \
     a2enmod security2 && \
     a2enconf catalog.conf && \
+    sed -i -e 's/^max_execution_time = .*\$/max_execution_time = 120/' /etc/php/8.3/apache2/php.ini && \
     apachectl configtest
 
 # Build Arguments
