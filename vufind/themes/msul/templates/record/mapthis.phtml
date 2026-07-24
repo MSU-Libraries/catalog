@@ -21,7 +21,7 @@ $defaultFloorId = $this->mapthis->getDefaultFloorId();
 $activeFloorId = !empty($floorId) ? $floorId : $defaultFloorId;
 
 if (!empty($floorId)) {
-  $this->assetManager()->clearScriptList()->appendStyleLink('/gis-assets/esri/themes/light/main.css');
+  $this->assetManager()->appendStyleLink('/gis-assets/esri/themes/light/main.css');
 }
 ?>
 
