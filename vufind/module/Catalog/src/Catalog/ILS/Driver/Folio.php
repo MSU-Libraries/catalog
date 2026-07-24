@@ -30,6 +30,7 @@
 namespace Catalog\ILS\Driver;
 
 use ArrayIterator;
+use Catalog\Http\GuzzleLivePool;
 use Catalog\Utils\RegexLookup as Regex;
 use GuzzleHttp\Client;
 use GuzzleHttp\Promise\Promise;
@@ -37,12 +38,11 @@ use GuzzleHttp\Psr7;
 use Laminas\Http\Header\HeaderInterface;
 use Laminas\Http\Headers;
 use Laminas\Http\Response;
+use Throwable;
 use VuFind\Exception\ILS as ILSException;
 use VuFind\Http\GuzzleServiceAwareInterface;
 use VuFind\Http\GuzzleServiceAwareTrait;
 use VuFind\ILS\Logic\AvailabilityStatus;
-use Catalog\Http\GuzzleLivePool;
-use Throwable;
 
 use function count;
 use function in_array;
@@ -215,8 +215,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             ['headers' => $req_headers->toArray(), 'query' => $params]
         );
         return $promise->then(
-            function (Psr7\Response $response)
-            use (
+            function (Psr7\Response $response) use (
                 $startTime,
                 $path,
                 $params,
@@ -249,8 +248,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
                             $attemptNumber + 1,
                             $baseUrl
                         );
-                    }
-                    else {
+                    } else {
                         throw new ILSException('Unexpected error code.');
                     }
                 }
@@ -304,15 +302,15 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * @param array  $query       Extra GET parameters (e.g. ['query' => 'your cql here'])
      * @param int    $limit       How many results to retrieve from FOLIO per call
      *
-     * @return array
+     * @return \Generator<object>
      * @throws ILSException if there is an issue with the response
      */
     protected function getPagedResults($responseKey, $interface, $query = [], $limit = 1000)
     {
-        # Make a promise immediately, so the call beings even prior to generator iteration
+        // Make a promise immediately, so the call beings even prior to generator iteration
         $promises = [$this->getResultPage($interface, $query, 0, $limit)];
 
-        $gen = function($responseKey, $interface, $query, $limit) use ($promises) {
+        $gen = function ($responseKey, $interface, $query, $limit) use ($promises) {
             $offset = $limit;
             $totalEstimate = 1;
             while ($promises || ($offset <= $totalEstimate)) {
@@ -359,7 +357,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
                 $cachedItems = array_merge($cachedItems, $items);
             }
         }
-        $fnSafeQuery = function($idField, $idsInBatch, $querySuffix) {
+        $fnSafeQuery = function ($idField, $idsInBatch, $querySuffix) {
             $idsWithQuotes = array_map(fn ($id) => '"' . $this->escapeCql($id) . '"', $idsInBatch);
             return [
                 'query' => $idField . ' == (' . implode(' OR ', $idsWithQuotes) . ')' . $querySuffix,
@@ -367,7 +365,9 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
         };
         $idChunks = array_chunk($idsToLookFor, static::QUERY_BY_IDS_BATCH_SIZE);
         if (count($idChunks) == 0) {
-            $gen = function() use ($cachedItems) { yield from $cachedItems; };
+            $gen = function () use ($cachedItems) {
+                yield from $cachedItems;
+            };
             return $gen();
         }
 
@@ -376,11 +376,21 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             $endpoint,
             $fnSafeQuery($idField, array_shift($idChunks), $querySuffix)
         );
-        $gen = function($idField, $responseKey, $endpoint, $querySuffix)
-            use ($cachedItems, $idChunks, $pagedResults, $fnSafeQuery, $idToKey) {
+        $gen = function (
+            $idField,
+            $responseKey,
+            $endpoint,
+            $querySuffix
+        ) use (
+            $cachedItems,
+            $idChunks,
+            $pagedResults,
+            $fnSafeQuery,
+            $idToKey
+        ) {
             yield from $cachedItems;
             $resultsToCache = [];
-            while (True) {
+            while (true) {
                 foreach ($pagedResults as $item) {
                     $key = $idToKey($item->$idField);
                     if (isset($resultsToCache[$key])) {
@@ -434,7 +444,8 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      *
      * @param string[] $holdingsIds the FOLIO holdings ids
      *
-     * @return Generator The items, with an additional queryHoldingsRecordId property with the matching holdings id
+     * @return \Generator<object> The items, with an additional queryHoldingsRecordId property with the
+     *                            matching holdings id
      * @throws ILSException if there is an issue with the FOLIO response
      */
     protected function getItemsByHoldingIds(array $holdingsIds)
@@ -526,10 +537,11 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * @param string     $dueDateValue     The due date to display to the user
      * @param array      $boundWithRecords Any bib records this holding is bound with
      * @param ?\stdClass $currentLoan      Any current loan on this item
+     * @param ?array     $customLocData    Additional data to process into the returned array
      *
      * @return array
      */
-    protected function formatHoldingItem(
+    protected function msulFormatHoldingItem(
         string $bibId,
         array $holdingDetails,
         $item,
@@ -675,12 +687,13 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * @param string $bibId            Bib-level id
      * @param array  $holdingDetails   details for the holding
      * @param object $item             item to process
+     * @param array  $itemPromises     An associative array with Promises contained within
      * @param int    $dueDateItemCount number of times getCurrentLoan()/getDueDate() were called (passed by reference)
      * @param int    $number           item number
      *
      * @return array An associative array
      */
-    protected function processItem(
+    protected function msulProcessItem(
         $bibId,
         $holdingDetails,
         $item,
@@ -706,7 +719,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             $dueDateValue = $currentLoan ? $this->getDueDate($currentLoan, $showTime) : '';
             $dueDateItemCount++;
         }
-        $nextItem = $this->formatHoldingItem(
+        $nextItem = $this->msulFormatHoldingItem(
             $bibId,
             $holdingDetails,
             $item,
@@ -788,7 +801,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             foreach ($holdingPromises['itemsPromises'] as $itemPromises) {
                 $item = $itemPromises['item'];
                 $number++;
-                $nextItem = $this->processItem(
+                $nextItem = $this->msulProcessItem(
                     $bibId,
                     $holdingDetails,
                     $item,
@@ -933,7 +946,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             '/circulation/loans',
             compact('query')
         );
-        $gen = function() use ($pagedResults) {
+        $gen = function () use ($pagedResults) {
             yield from $pagedResults;
         };
         return $gen();
@@ -943,9 +956,9 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * Support method for getHoldings(): obtaining any current loan from OKAPI
      * by calling /circulation/loans with the item->id
      *
-     * @param string             $itemId   ID for the item to query
-     * @param ?iterable<Promise> $promises An iterable of Promises for loans;
-     *                                     If null, will generate Promises itself
+     * @param string             $itemId       ID for the item to query
+     * @param ?iterable<Promise> $loanPromises An iterable of Promises for loans;
+     *                                         If null, will generate Promises itself
      *
      * @return \stdClass|void
      */
@@ -1998,8 +2011,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
                 return $promise;
             }
             $promise = $this->makeRequestAsync($path, $params, baseUrl: $baseUrl)->then(
-                function (Psr7\Response $response) use ($apiUrl)
-                {
+                function (Psr7\Response $response) use ($apiUrl) {
                     $data = json_decode($response->getBody());
                     if ($data === null) {
                         return null;
@@ -2024,8 +2036,8 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * MSU-only for processing API promise into custom location data for use with location mapping.
      *
      * @param string $bibId        Current bibliographic ID
+     * @param string $locationName The location name
      * @param string $callNumber   The call number
-     * @param string $locationCode The location code
      * @param object $data         Decoded JSON from the API call to HELM
      *
      * @return array An array of customized location data
@@ -2073,13 +2085,13 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             if (!empty(trim($location))) {
                 $customizedLoc['msulLocation'] = $location;
                 $this->debug(
-                    'Adding ' . $location . ' to msulLocation for callnumber ' .  $callNumber
+                    'Adding ' . $location . ' to msulLocation for callnumber ' . $callNumber
                 );
             }
             if (!empty(trim($gisFloor))) {
                 $customizedLoc['gisfloor'] = $gisFloor;
                 $this->debug(
-                    'Adding ' . $gisFloor . ' to gisfloor for callnumber ' .  $callNumber
+                    'Adding ' . $gisFloor . ' to gisfloor for callnumber ' . $callNumber
                 );
             }
         } else {

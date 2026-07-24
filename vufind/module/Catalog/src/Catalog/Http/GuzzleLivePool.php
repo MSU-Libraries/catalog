@@ -88,7 +88,8 @@ class GuzzleLivePool
     /**
      * Constructor
      *
-     * @param ClientInterface $client The GuzzleHTTP client for the pool to use
+     * @param ClientInterface $client      The GuzzleHTTP client for the pool to use
+     * @param int             $concurrency Max number of concurrent API calls
      */
     public function __construct(ClientInterface $client, int $concurrency = 20)
     {
@@ -130,6 +131,8 @@ class GuzzleLivePool
 
     /**
      * Check if there is available capacity to run a queued request and dispatch it if there is
+     *
+     * @return void
      */
     protected function advance(): void
     {
@@ -142,9 +145,12 @@ class GuzzleLivePool
     /**
      * Add a request to the queue, returning a promise for that request.
      *
-     * @param RequestInterface $request A request to create a promise for
-     * @param array            $options Options for the request. If 'synchronous' is not
-     *                                  specified, it will default to false (recommended).
+     * @param RequestInterface $request  A request to create a promise for
+     * @param array            $options  Options for the request. If 'synchronous' is not
+     *                                   specified, it will default to false (recommended).
+     * @param Promise          $deferred The issued Promise to resolve with the API response
+     *
+     * @return void
      */
     protected function dispatch(RequestInterface $request, array $options, Promise $deferred): void
     {
@@ -169,6 +175,8 @@ class GuzzleLivePool
 
     /**
      * Blocks until all active and queued requests within the pool are resolved
+     *
+     * @return void
      */
     public function wait(): void
     {
@@ -181,6 +189,8 @@ class GuzzleLivePool
     /**
      * Get the oldest active promise and wait on it. If there are no active
      * promises, then this method does nothing.
+     *
+     * @return void
      */
     private function waitOnNextPromise(): void
     {
