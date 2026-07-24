@@ -153,8 +153,13 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * in debug messages (useful for concealing sensitive data, etc.)
      * @param int               $attemptNumber       Counter to keep track of attempts
      * (starts at 1 for the first attempt)
+     * @param ?string           $baseUrl             Provide an alternate schema, host,
+     * and optionally port to submit the request to (http://alt.example.edu:8080)
+     * For async API to work propery, even across different hosts, they need to make
+     * use of the same GuzzleHTTP client instance, so API calls to other endpoints
+     * should use this function instead of instantiating their own client instnace.
      *
-     * @return \Laminas\Http\Response
+     * @return Promise for a Psr7\Response
      * @throws ILSException
      */
     public function makeRequestAsync(
@@ -304,15 +309,14 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      */
     protected function getPagedResults($responseKey, $interface, $query = [], $limit = 1000)
     {
-        # Initial promise
+        # Make a promise immediately, so the call beings even prior to generator iteration
         $promises = [$this->getResultPage($interface, $query, 0, $limit)];
 
         $gen = function($responseKey, $interface, $query, $limit) use ($promises) {
-            $maxAsyncCalls = 10;
             $offset = $limit;
             $totalEstimate = 1;
             while ($promises || ($offset <= $totalEstimate)) {
-                if ($offset <= $totalEstimate && count($promises) < $maxAsyncCalls) {
+                if ($offset <= $totalEstimate) {
                     $promises[] = $this->getResultPage($interface, $query, $offset, $limit);
                     $offset += $limit;
                 } elseif ($promises) {
@@ -430,15 +434,14 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      *
      * @param string[] $holdingsIds the FOLIO holdings ids
      *
-     * @return object[] The items, with an additional queryHoldingsRecordId property with the matching holdings id
+     * @return Generator The items, with an additional queryHoldingsRecordId property with the matching holdings id
      * @throws ILSException if there is an issue with the FOLIO response
      */
     protected function getItemsByHoldingIds(array $holdingsIds)
     {
         if (count($holdingsIds) == 0) {
-            return [];
+            return;
         }
-        $items = [];
         $folioItemSort = $this->config['Holdings']['folio_sort'] ?? '';
         $querySuffix = empty($folioItemSort) ? '' : ' sortby ' . $folioItemSort;
         if (count($holdingsIds) == 1) {
@@ -453,9 +456,8 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
                 ) as $item
             ) {
                 $item->queryHoldingsRecordId = $holdingsIds[0];
-                $items[] = $item;
+                yield $item;
             }
-            return $items;
         }
         // Retrieve the item records
         $holdingsItemIds = [];
@@ -474,7 +476,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             $holdingsId = $item->holdingsRecordId;
             $item->queryHoldingsRecordId = $holdingsId;
             $holdingsItemIds[$holdingsId][] = $item->id;
-            $items[] = $item;
+            yield $item;
         }
         // Retrieve the related bound-with items
         // Duplicate items are avoided for each holdings
@@ -507,9 +509,8 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             ) as $item
         ) {
             $item->queryHoldingsRecordId = $itemIdToHoldingsRecordId[$item->id];
-            $items[] = $item;
+            yield $item;
         }
-        return $items;
     }
 
     /**
@@ -733,7 +734,11 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
         $dueDateItemCount = 0;
         $items = [];
         $vufindItemSort = $this->config['Holdings']['vufind_sort'] ?? '';
-        $this->getLocations();   // Ensure locations API is cached
+        // Ensure locations API is cached to avoid potential delay when unwrapping promises
+        $this->getLocations();
+        /**
+         * Pass 1: Queue up API call promises
+         */
         $holdingsPromises = [];
         foreach ($holdings as $holding) {
             $folioItemsForHolding = array_filter(
@@ -771,6 +776,9 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
                 'itemsPromises' => $itemsPromises,
             ];
         }
+        /**
+         * Pass 2: Unwrap API calls and process them
+         */
         foreach ($holdingsPromises as $holdingPromises) {
             $number = 0;
             $nextBatch = [];
@@ -867,32 +875,21 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             }
         } else {
             $instances = $this->getInstancesByBibIds($bibIds);
-            $instanceIds = array_map(fn ($instance) => $instance->id, $instances);
+            $instanceIds = [];
             foreach ($instances as $instance) {
+                $instanceIds[] = $instance->id;
                 $bibIdToInstanceId[$instance->$idType] = $instance->id;
             }
         }
-        $holdingsGen = $this->getHoldingsByInstanceIds($instanceIds);
+
         $holdings = [];
         $holdingIds = [];
-        $folioItems = [];
-        foreach ($holdingsGen as $holding) {
+        foreach ($this->getHoldingsByInstanceIds($instanceIds) as $holding) {
             $holdings[] = $holding;
             $holdingIds[] = $holding->id;
-            if (count($holdingIds) == static::QUERY_BY_IDS_BATCH_SIZE) {
-                $folioItems = array_merge(
-                    $folioItems,
-                    $this->getItemsByHoldingIds($holdingIds)
-                );
-                $holdingsIds = [];
-            }
         }
-        if (count($holdingIds) > 0) {
-            $folioItems = array_merge(
-                $folioItems,
-                $this->getItemsByHoldingIds($holdingIds)
-            );
-        }
+
+        $folioItems = [...$this->getItemsByHoldingIds($holdingIds)];
         $results = [];
         foreach ($bibIds as $bibId) {
             $instanceId = $bibIdToInstanceId[$bibId];
