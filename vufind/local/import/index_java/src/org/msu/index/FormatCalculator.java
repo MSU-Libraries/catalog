@@ -127,6 +127,15 @@ public class FormatCalculator extends org.vufind.index.FormatCalculator
                 return "Collection";
         }
 
+        // PC-1669 MSUL - Add logic to change 'Slide' assignment
+        for (VariableField variableField : record.getVariableFields("655")) {
+            DataField typeField = (DataField) variableField;
+            String historyReference = getSubfieldOrDefault(typeField, 'a', "");
+            if (historyReference.toLowerCase().startsWith("streaming video")) {
+                return "Video";
+            }
+        }
+
         return super.getFormatFromRecordType(record, recordType, marc008, formatCodes007);
     }
 
