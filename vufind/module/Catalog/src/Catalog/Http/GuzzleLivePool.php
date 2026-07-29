@@ -115,7 +115,7 @@ class GuzzleLivePool
             /* This code handles if a developer calls wait() on a promise which
              * exists solely in the queue. The promise hasn't begun yet, so
              * there is nothing to "wait" for. Instead, we start waiting on
-             * active promises until ourd queue promise become active. */
+             * active promises until our queue promise become active. */
             while ($deferred->getState() === PromiseInterface::PENDING) {
                 $this->waitOnNextPromise();
             }
