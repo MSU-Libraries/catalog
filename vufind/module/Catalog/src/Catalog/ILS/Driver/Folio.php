@@ -33,7 +33,7 @@ use ArrayIterator;
 use Catalog\Http\GuzzleLivePool;
 use Catalog\Utils\RegexLookup as Regex;
 use GuzzleHttp\Client;
-use GuzzleHttp\Promise\Promise;
+use GuzzleHttp\Promise;
 use GuzzleHttp\Psr7;
 use Laminas\Http\Header\HeaderInterface;
 use Laminas\Http\Headers;
@@ -159,7 +159,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * use of the same GuzzleHTTP client instance, so API calls to other endpoints
      * should use this function instead of instantiating their own client instnace.
      *
-     * @return Promise for a Psr7\Response
+     * @return Promise\Promise for a Psr7\Response
      * @throws ILSException
      */
     public function makeRequestAsync(
@@ -270,7 +270,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * @param int    $offset    Starting record index
      * @param int    $limit     Max number of records to retrieve
      *
-     * @return array|Promise
+     * @return Promise\Promise for array
      * @throws ILSException if the response code is not a success or the response is not JSON
      */
     protected function getResultPage($interface, $query = [], $offset = 0, $limit = 1000)
@@ -469,6 +469,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
                 $item->queryHoldingsRecordId = $holdingsIds[0];
                 yield $item;
             }
+            return;
         }
         // Retrieve the item records
         $holdingsItemIds = [];
@@ -634,7 +635,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      *
      * @param object $item The item record
      *
-     * @return Promise  which unwraps an array of key metadata for each bib record
+     * @return Promise\Promise which unwraps an array of key metadata for each bib record
      */
     protected function getBoundWithRecordsPromise($item)
     {
@@ -645,8 +646,8 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
                 $item = json_decode($response->getBody());
                 $code = $response->getStatusCode();
                 if (!($code >= 200 && $code < 300) || !$item) {
-                    $msg = $json->errors[0]->message ?? json_last_error_msg();
-                    throw new ILSException("Error: '$msg' fetching from '$interface'");
+                    $msg = $item->errors[0]->message ?? json_last_error_msg();
+                    throw new ILSException("Error: '$msg' fetching from '$path'");
                 }
                 foreach ($item->boundWithTitles ?? [] as $boundWithTitle) {
                     $boundWithRecords[] = [
@@ -664,18 +665,37 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * are GuzzleHTTP promises for API data which will be needed later. By queuing
      * promises for data, we can reduce the amount of API wait time later.
      *
-     * @param object $item         The item record
-     * @param string $bibId        Current bibliographic ID
-     * @param string $callNumber   The call number
-     * @param string $locationCode The location code
+     * @param object $item             The item record
+     * @param string $bibId            Current bibliographic ID
+     * @param string $callNumber       The call number
+     * @param string $locationCode     The location code
+     * @param int    $dueDateItemCount Number of times getCurrentLoan()/getDueDate() were called
+     *                                 (passed by reference)
      *
      * @return array An array of data containing promises
      */
-    protected function gatherItemPromises($item, $bibId, $callNumber, $locationCode)
+    protected function gatherItemPromises($item, $bibId, $callNumber, $locationCode, &$dueDateItemCount)
     {
+        $boundWithPromise = new Promise\FulfilledPromise([]);
+        if ($item->isBoundWith ?? false) {
+            $boundWithPromise = $this->getBoundWithRecordsPromise($item);
+        }
+
+        $currentLoanPromise = new Promise\FulfilledPromise([]);
+        $showDueDate = $this->config['Availability']['showDueDate'] ?? true;
+        $maxNumDueDateItems = $this->config['Availability']['maxNumberItems'] ?? 5;
+        if (
+            $item->status->name == 'Checked out'
+            && $showDueDate
+            && $dueDateItemCount < $maxNumDueDateItems
+        ) {
+            $currentLoanPromise = $this->getCurrentLoanPromises($item->id);
+            $dueDateItemCount++;
+        }
+
         $promises = [
-            'boundWith' => $this->getBoundWithRecordsPromise($item),
-            'currentLoan' => $this->getCurrentLoanPromises($item->id),
+            'boundWith' => $boundWithPromise,
+            'currentLoan' => $currentLoanPromise,
             'customLocData' => $this->customLocDataPromise($bibId, $callNumber, $locationCode),
         ];
         return $promises;
@@ -684,12 +704,11 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
     /**
      * Support method for getHoldings() -- processes a FOLIO item
      *
-     * @param string $bibId            Bib-level id
-     * @param array  $holdingDetails   details for the holding
-     * @param object $item             item to process
-     * @param array  $itemPromises     An associative array with Promises contained within
-     * @param int    $dueDateItemCount number of times getCurrentLoan()/getDueDate() were called (passed by reference)
-     * @param int    $number           item number
+     * @param string $bibId          Bib-level id
+     * @param array  $holdingDetails details for the holding
+     * @param object $item           item to process
+     * @param array  $itemPromises   An associative array with Promises contained within
+     * @param int    $number         item number
      *
      * @return array An associative array
      */
@@ -698,27 +717,17 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
         $holdingDetails,
         $item,
         $itemPromises,
-        &$dueDateItemCount,
         $number
     ): array {
         $copyNumber = $item->copyNumber ?? null; // MSU
-        $showDueDate = $this->config['Availability']['showDueDate'] ?? true;
         $showTime = $this->config['Availability']['showTime'] ?? false;
-        $maxNumDueDateItems = $this->config['Availability']['maxNumberItems'] ?? 5;
         $currentLoan = null;
         $dueDateValue = '';
         $boundWithPromise = $itemPromises['boundWith'];
         $currentLoanPromise = $itemPromises['currentLoan'];
         $customLocDataPromise = $itemPromises['customLocData'];
-        if (
-            $item->status->name == 'Checked out'
-            && $showDueDate
-            && $dueDateItemCount < $maxNumDueDateItems
-        ) {
-            $currentLoan = $this->getCurrentLoan($item->id, $currentLoanPromise);
-            $dueDateValue = $currentLoan ? $this->getDueDate($currentLoan, $showTime) : '';
-            $dueDateItemCount++;
-        }
+        $currentLoan = $this->getCurrentLoan($item->id, $currentLoanPromise);
+        $dueDateValue = $currentLoan ? $this->getDueDate($currentLoan, $showTime) : '';
         $nextItem = $this->msulFormatHoldingItem(
             $bibId,
             $holdingDetails,
@@ -727,7 +736,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             $dueDateValue,
             $boundWithPromise->wait(),
             $currentLoan,
-            $customLocDataPromise != null ? $customLocDataPromise->wait() : null
+            $customLocDataPromise->wait()
         );
         return $nextItem;
     }
@@ -779,7 +788,8 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
                         $item,
                         $bibId,
                         $callNumberData['callnumber'],
-                        $locationCode
+                        $locationCode,
+                        $dueDateItemCount
                     ),
                 ];
             }
@@ -806,7 +816,6 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
                     $holdingDetails,
                     $item,
                     $itemPromises['promises'],
-                    $dueDateItemCount,
                     $number
                 );
 
@@ -956,9 +965,9 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * Support method for getHoldings(): obtaining any current loan from OKAPI
      * by calling /circulation/loans with the item->id
      *
-     * @param string             $itemId       ID for the item to query
-     * @param ?iterable<Promise> $loanPromises An iterable of Promises for loans;
-     *                                         If null, will generate Promises itself
+     * @param string                     $itemId       ID for the item to query
+     * @param ?iterable<Promise\Promise> $loanPromises An iterable of Promises for loans;
+     *                                                 If null, will generate Promises itself
      *
      * @return \stdClass|void
      */
@@ -967,8 +976,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
         if ($loanPromises === null) {
             $loanPromises = $this->getCurrentLoanPromises($itemId);
         }
-        foreach ($loanPromises as $loanPromise) {
-            $loan = $loanPromise->wait();
+        foreach ($loanPromises as $loan) {
             // many loans are returned for an item, the one we want
             // is the one without a returnDate
             if (!isset($loan->returnDate) && isset($loan->dueDate)) {
@@ -1976,16 +1984,19 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * @param string $callNumber   The call number
      * @param string $locationCode The location code
      *
-     * @return ?Promise A promise for location data, or null if no config found or callnumber empty
+     * @return Promise\Promise A promise for location data; may contain null if no config found
+     *                         or callnumber empty
      */
     protected function customLocDataPromise(
         $bibId,
         $callNumber,
         $locationCode
     ) {
+        $promise = new Promise\FulfilledPromise(null);
+
         $msulConfig = $this->configReader->get('msul');
         if (empty($callNumber) || !isset($msulConfig)) {
-            return null;
+            return $promise;
         }
 
         $apiUrl = $msulConfig['Locations']['api_url'] ?? '';
@@ -2006,29 +2017,29 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
 
             $data = $this->getCachedData($apiUrl);
             if ($data !== null) {
-                $promise = new Promise();
-                $promise->resolve($data);
-                return $promise;
-            }
-            $promise = $this->makeRequestAsync($path, $params, baseUrl: $baseUrl)->then(
-                function (Psr7\Response $response) use ($apiUrl) {
-                    $data = json_decode($response->getBody());
-                    if ($data === null) {
+                $promise = new Promise\FulfilledPromise($data);
+            } else {
+                $promise = $this->makeRequestAsync($path, $params, baseUrl: $baseUrl)->then(
+                    function (Psr7\Response $response) use ($apiUrl) {
+                        $data = json_decode($response->getBody());
+                        if ($data === null) {
+                            return null;
+                        }
+                        $this->putCachedData($apiUrl, $data);
+                        return $data;
+                    },
+                    function (Throwable $e) use ($bibId, $callNumber, $locationCode) {
+                        $this->logWarning(
+                            'Could not get location data for callnumber '
+                            . $callNumber . ' (' . $bibId . ')'
+                            . ' and location code ' . $locationCode
+                        );
                         return null;
                     }
-                    $this->putCachedData($apiUrl, $data);
-                    return $data;
-                },
-                function (Throwable $e) use ($bibId, $callNumber, $locationCode) {
-                    $this->logWarning(
-                        'Could not get location data for callnumber '
-                        . $callNumber . ' (' . $bibId . ')'
-                        . ' and location code ' . $locationCode
-                    );
-                    return null;
-                }
-            );
+                );
+            }
         }
+        return $promise;
     }
 
     // MSUL PC-1416, PC-1636: Attempt to get the location data from helm if we have a callnumber

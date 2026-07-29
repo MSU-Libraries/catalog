@@ -11,65 +11,82 @@
             "instances": [
                 {
                     "id": "instanceid",
-                    "_version": 1,
+                    "_version": 2,
                     "hrid": "foo",
                     "source": "MARC",
-                    "title": "The bride of the tomb; or, Lancelot Darling's betrothed \/ By Mrs. Alex. McVeigh Miller.",
-                    "indexTitle": "Bride of the tomb; or, lancelot darling's betrothed",
-                    "editions": [],
-                    "series": [
-                        "Munro's library ; v. 1, no. 2"
+                    "title": "The robots of dawn / Isaac Asimov.",
+                    "indexTitle": "Robots of dawn",
+                    "alternativeTitles": [],
+                    "editions": [
+                        "First edition"
                     ],
-                    "identifiers": [],
-                    "contributors": [
+                    "series": [],
+                    "identifiers": [
                         {
-                            "name": "Miller, Alex. McVeigh, Mrs",
-                            "contributorTypeId": "contypeID",
-                            "contributorTypeText": "Contributor",
-                            "contributorNameTypeId": "conNameTypeID",
-                            "primary": true
+                        "value": "83008960",
+                        "identifierTypeId": "cdd8efb7-10fb-4b95-9677-9119a96f8fdd"
                         }
                     ],
-                    "subjects": [
-                        "Dime novels Specimens",
-                        "Genre: Popular literature Specimens",
-                        "Genre: Mystery and detective fiction"
+                    "contributors": [
+                        {
+                        "name": "Asimov, Isaac, 1920-1992",
+                        "contributorTypeId": "5432c72d-cc8f-4549-95b5-9dcb4e3895d6",
+                        "contributorTypeText": "Contributor",
+                        "contributorNameTypeId": "faa2386c-7d3b-4a81-9573-9e43ece4388e",
+                        "primary": true
+                        }
                     ],
+                    "subjects": [],
                     "classifications": [
                         {
-                            "classificationNumber": "PS2394 .M643 1883",
-                            "classificationTypeId": "ctypeId"
+                        "classificationNumber": "PS3551.S5 R6 1983",
+                        "classificationTypeId": "c698eb52-9c18-4b3c-b578-38ea1fccb064"
+                        },
+                        {
+                        "classificationNumber": "813.54",
+                        "classificationTypeId": "765a3445-f0c3-4fba-aef4-b492aae3755c"
                         }
                     ],
                     "publication": [
                         {
-                            "publisher": "Norman L. Munro",
-                            "place": "New York",
-                            "dateOfPublication": "1883"
+                        "publisher": "Doubleday",
+                        "place": "Garden City, N.Y",
+                        "dateOfPublication": "1983"
                         }
                     ],
                     "publicationFrequency": [],
                     "publicationRange": [],
-                    "publicationPeriod": {
-                        "start": 1883
-                    },
                     "electronicAccess": [],
-                    "instanceTypeId": "insttypeID",
-                    "instanceFormatIds": [],
+                    "dates": {
+                        "dateTypeId": "ed3822dd-e448-40e3-a8b2-2b0f231373cc",
+                        "date1": "1983"
+                    },
+                    "instanceTypeId": "f7e6cb2b-4628-40f6-9b72-5e81befeca87",
+                    "instanceFormatIds": [
+                        "22c022ab-837c-49ab-b010-0971e89a22eb"
+                    ],
                     "instanceFormats": [],
                     "physicalDescriptions": [
-                        "144 p.  ; 19 cm."
+                        "419 pages ; 22 cm"
                     ],
                     "languages": [
                         "eng"
                     ],
                     "notes": [],
-                    "modeOfIssuanceId": "moiid",
+                    "administrativeNotes": [],
+                    "modeOfIssuanceId": "e5257f9a-fea9-45b9-badb-a628fd28773b",
+                    "catalogedDate": "980604",
                     "previouslyHeld": false,
                     "staffSuppress": false,
                     "discoverySuppress": false,
                     "statisticalCodeIds": [],
-                    "statusUpdatedDate": "2022-12-22T23:34:26.209+0000",
+                    "statusUpdatedDate": "2022-06-22T15:47:43.736+0000",
+                    "metadata": {
+                        "createdDate": "2022-06-22T15:47:43.000+00:00",
+                        "createdByUserId": "02af31a0-ffbb-4138-9e36-d94c4e985628",
+                        "updatedDate": "2022-06-22T15:47:43.000+00:00",
+                        "updatedByUserId": "16f84c58-64b3-4ac9-bc05-4248a04481a1"
+                    },
                     "holdingsRecords2": [],
                     "natureOfContentTermIds": []
                 }
@@ -210,7 +227,7 @@
     },
     {
         "expectedMethod": "GET",
-        "expectedPath": "https://helm.lib.msu.edu/api/callnumbers/PS2394+.M643+1883",
+        "expectedPath": "/api/callnumbers/%%callnumber%%",
         "expectedParams": {},
         "body": {
             "callnumbers": [
@@ -222,6 +239,52 @@
                     "range_start": "P"
                 }
             ]
+        }
+    },
+    {
+        "expectedMethod": "GET",
+        "expectedPath": "\/circulation\/loans",
+        "expectedParams": {
+            "query": "itemId==itemid AND status.name==Open",
+            "offset": 0,
+            "limit": 1000
+        },
+        "body": {
+            "loantypes": [
+                {
+                    "id": "d012791f-4e26-4dc2-a279-b6a42b1df315",
+                    "name": "Can Circulate",
+                    "metadata": {
+                        "createdDate": "2022-04-19T13:51:21.880+00:00",
+                        "createdByUserId": "549180bd-7810-4879-aecb-31001236e501",
+                        "updatedDate": "2022-04-19T13:51:21.880+00:00",
+                        "updatedByUserId": "549180bd-7810-4879-aecb-31001236e501"
+                    }
+                }
+           ],
+            "totalRecords": 1
+        },
+        "bodyType": "json",
+        "status": 200
+    },
+    {
+        "expectedMethod": "GET",
+        "expectedPath": "\/inventory\/items\/itemid",
+        "expectedParams": {},
+        "body": {
+            "loantypes": [
+                {
+                    "id": "d012791f-4e26-4dc2-a279-b6a42b1df315",
+                    "name": "Can Circulate",
+                    "metadata": {
+                        "createdDate": "2022-04-19T13:51:21.880+00:00",
+                        "createdByUserId": "549180bd-7810-4879-aecb-31001236e501",
+                        "updatedDate": "2022-04-19T13:51:21.880+00:00",
+                        "updatedByUserId": "549180bd-7810-4879-aecb-31001236e501"
+                    }
+                }
+            ],
+            "totalRecords": 1
         },
         "bodyType": "json",
         "status": 200
