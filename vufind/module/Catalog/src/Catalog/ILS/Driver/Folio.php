@@ -32,6 +32,7 @@ namespace Catalog\ILS\Driver;
 use ArrayIterator;
 use Catalog\Http\GuzzleLivePool;
 use Catalog\Utils\RegexLookup as Regex;
+use Generator;
 use GuzzleHttp\Client;
 use GuzzleHttp\Promise;
 use GuzzleHttp\Psr7;
@@ -178,8 +179,6 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             );
             $this->pool = new GuzzleLivePool($this->client);
         }
-        $client = $this->client;
-
         $req_headers = new Headers();
         $req_headers->addHeaders($headers);
         [$req_headers, $params] = $this->preRequest($req_headers, $params);
@@ -302,7 +301,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * @param array  $query       Extra GET parameters (e.g. ['query' => 'your cql here'])
      * @param int    $limit       How many results to retrieve from FOLIO per call
      *
-     * @return \Generator<object>
+     * @return Generator<int,mixed>
      * @throws ILSException if there is an issue with the response
      */
     protected function getPagedResults($responseKey, $interface, $query = [], $limit = 1000)
@@ -341,7 +340,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * @param string   $endpoint    FOLIO API endpoint
      * @param string   $querySuffix optional string to append to the queries
      *
-     * @return \Generator<object>
+     * @return Generator<int,mixed>
      * @throws ILSException if there is an issue with the FOLIO response
      */
     protected function getByBatch($ids, $idField, $responseKey, $endpoint, $querySuffix = '')
@@ -444,8 +443,8 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      *
      * @param string[] $holdingsIds the FOLIO holdings ids
      *
-     * @return \Generator<object> The items, with an additional queryHoldingsRecordId property with the
-     *                            matching holdings id
+     * @return Generator<int,mixed> The items, with an additional queryHoldingsRecordId property with
+     *                              the matching holdings id
      * @throws ILSException if there is an issue with the FOLIO response
      */
     protected function getItemsByHoldingIds(array $holdingsIds)
@@ -600,7 +599,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
         $locationName = $this->getLocationData($locationId)['name'];
         $locAndHoldings = array_merge(
             $locAndHoldings,
-            $this->processCustomLocData(
+            $this->processCustomData(
                 $bibId,
                 $locationName,
                 $callNumberData['callnumber'],
@@ -631,13 +630,13 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
 
     /**
      * Get all bib records bound-with this item, including
-     * the directly-linked bib record.
+     * the directly-linked bib record and its title.
      *
      * @param object $item The item record
      *
-     * @return Promise\Promise which unwraps an array of key metadata for each bib record
+     * @return Promise\Promise which unwraps to an array of arrays with 'title' and 'bibId'
      */
-    protected function getBoundWithRecordsPromise($item)
+    protected function getBoundWithRecordsPromise($item): Promise\Promise
     {
         $path = '/inventory/items/' . $item->id;
         return $this->makeRequestAsync($path)->then(
@@ -672,10 +671,16 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * @param int    $dueDateItemCount Number of times getCurrentLoan()/getDueDate() were called
      *                                 (passed by reference)
      *
-     * @return array An array of data containing promises
+     * @return array An array of data containing promises in keys:
+     *               'boundWith', 'currentLoan', 'customLocData'
      */
-    protected function gatherItemPromises($item, $bibId, $callNumber, $locationCode, &$dueDateItemCount)
-    {
+    protected function gatherItemPromises(
+        $item,
+        $bibId,
+        $callNumber,
+        $locationCode,
+        &$dueDateItemCount
+    ): array {
         $boundWithPromise = new Promise\FulfilledPromise([]);
         if ($item->isBoundWith ?? false) {
             $boundWithPromise = $this->getBoundWithRecordsPromise($item);
@@ -945,9 +950,9 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      *
      * @param string $itemId ID for the item to query
      *
-     * @return \stdClass|void
+     * @return Generator<int,mixed>
      */
-    protected function getCurrentLoanPromises($itemId)
+    protected function getCurrentLoanPromises(string $itemId): Generator
     {
         $query = 'itemId==' . $itemId . ' AND status.name==Open';
         $pagedResults = $this->getPagedResults(
@@ -2044,21 +2049,21 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
 
     // MSUL PC-1416, PC-1636: Attempt to get the location data from helm if we have a callnumber
     /**
-     * MSU-only for processing API promise into custom location data for use with location mapping.
+     * MSU-only for processing API promise into custom data for use with location mapping.
      *
-     * @param string $bibId        Current bibliographic ID
-     * @param string $locationName The location name
-     * @param string $callNumber   The call number
-     * @param object $data         Decoded JSON from the API call to HELM
+     * @param string  $bibId        Current bibliographic ID
+     * @param string  $locationName The location name
+     * @param string  $callNumber   The call number
+     * @param ?object $data         Decoded JSON from the API call to HELM
      *
      * @return array An array of customized location data
      */
-    protected function processCustomLocData(
-        $bibId,
-        $locationName,
-        $callNumber,
-        $data
-    ) {
+    protected function processCustomData(
+        string $bibId,
+        string $locationName,
+        string $callNumber,
+        ?object $data
+    ): array {
         if ($data === null) {
             return [];
         }
@@ -2109,7 +2114,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             $this->debug(
                 'No data found for callnumber ' . $callNumber . ' (' . $bibId . ')'
             );
-            $this->debug(var_export($data, 1));
+            $this->debug(var_export($data, true));
         }
         return $customizedLoc;
     }
