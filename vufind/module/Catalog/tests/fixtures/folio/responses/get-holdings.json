@@ -87,35 +87,35 @@
                     "series": [],
                     "identifiers": [
                         {
-                        "value": "83008960",
-                        "identifierTypeId": "cdd8efb7-10fb-4b95-9677-9119a96f8fdd"
+                            "value": "83008960",
+                            "identifierTypeId": "cdd8efb7-10fb-4b95-9677-9119a96f8fdd"
                         }
                     ],
                     "contributors": [
                         {
-                        "name": "Asimov, Isaac, 1920-1992",
-                        "contributorTypeId": "5432c72d-cc8f-4549-95b5-9dcb4e3895d6",
-                        "contributorTypeText": "Contributor",
-                        "contributorNameTypeId": "faa2386c-7d3b-4a81-9573-9e43ece4388e",
-                        "primary": true
+                            "name": "Asimov, Isaac, 1920-1992",
+                            "contributorTypeId": "5432c72d-cc8f-4549-95b5-9dcb4e3895d6",
+                            "contributorTypeText": "Contributor",
+                            "contributorNameTypeId": "faa2386c-7d3b-4a81-9573-9e43ece4388e",
+                            "primary": true
                         }
                     ],
                     "subjects": [],
                     "classifications": [
                         {
-                        "classificationNumber": "PS3551.S5 R6 1983",
-                        "classificationTypeId": "c698eb52-9c18-4b3c-b578-38ea1fccb064"
+                            "classificationNumber": "PS3551.S5 R6 1983",
+                            "classificationTypeId": "c698eb52-9c18-4b3c-b578-38ea1fccb064"
                         },
                         {
-                        "classificationNumber": "813.54",
-                        "classificationTypeId": "765a3445-f0c3-4fba-aef4-b492aae3755c"
+                            "classificationNumber": "813.54",
+                            "classificationTypeId": "765a3445-f0c3-4fba-aef4-b492aae3755c"
                         }
                     ],
                     "publication": [
                         {
-                        "publisher": "Doubleday",
-                        "place": "Garden City, N.Y",
-                        "dateOfPublication": "1983"
+                            "publisher": "Doubleday",
+                            "place": "Garden City, N.Y",
+                            "dateOfPublication": "1983"
                         }
                     ],
                     "publicationFrequency": [],
