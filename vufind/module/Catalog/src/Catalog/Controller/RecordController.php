@@ -62,7 +62,7 @@ class RecordController extends \VuFind\Controller\RecordController
     public function __construct(
         \Laminas\ServiceManager\ServiceLocatorInterface $sm,
         \VuFind\Config\Config $config,
-        \VuFind\Config\PluginManager $configLoader
+        \VuFind\Config\PluginManager $configLoader = null
     ) {
         parent::__construct($sm, $config);
         $this->configLoader = $configLoader;

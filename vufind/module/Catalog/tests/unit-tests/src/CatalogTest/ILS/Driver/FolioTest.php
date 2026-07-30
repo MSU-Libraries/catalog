@@ -111,7 +111,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
         if (!empty($testData)) {
             $msg = "Error in step {$this->currentFixtureStep} of fixture: "
                 . $this->currentFixture . '. Requested Path: '
-                . $path . 'Expected Path: ' . $testData['expectedPath'];
+                . $path . ' Expected Path: ' . $testData['expectedPath'];
             $this->assertEquals($testData['expectedMethod'] ?? 'GET', $method, $msg);
             $this->assertEquals($testData['expectedPath'] ?? '/', $path, $msg);
             if (isset($testData['expectedParamsRegEx'])) {
@@ -169,7 +169,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
         // Create a stub for the SomeClass class
         $this->driver = $this->getMockBuilder(Folio::class)
             ->setConstructorArgs([new \VuFind\Date\Converter(), $factory, $mockMsul])
-            ->onlyMethods(['makeRequest', 'makeExternalRequest', 'makeRequestAsync'])
+            ->onlyMethods(['makeRequest', 'makeRequestAsync'])
             ->getMock();
         // Mock the Guzzle Service
         $mockGuzzleService = $this->createMock(\VuFind\Http\GuzzleService::class);
@@ -184,13 +184,10 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
         $this->driver->setCacheStorage($cache);
         $this->driver->method('makeRequest')->willReturnCallback([$this, 'mockMakeRequest']);
         // For simplicity (and since it's just mocking a request and not actually making one)
-        // we'll have calls to makeExternalRequest go to the same mock for makeRequest
-        $this->driver->method('makeExternalRequest')->willReturnCallback([$this, 'mockMakeRequest']);
         // The Async request function is almost identical to make request, but it returns
         // a Guzzle promise instead
         $this->driver->method('makeRequestAsync')->willReturnCallback(function (...$args) {
             $laminasResponse = $this->mockMakeRequest('GET', ...$args);
-
             $content = $laminasResponse->getContent();
             if (is_array($content)) {
                 $content = json_encode($content);
