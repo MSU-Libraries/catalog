@@ -38,7 +38,6 @@ use GuzzleHttp\Promise;
 use GuzzleHttp\Psr7;
 use Laminas\Http\Header\HeaderInterface;
 use Laminas\Http\Headers;
-use Laminas\Http\Response;
 use Throwable;
 use VuFind\Exception\ILS as ILSException;
 use VuFind\Http\GuzzleServiceAwareInterface;
@@ -101,6 +100,30 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
         $this->dateConverter = $dateConverter;
         $this->sessionFactory = $sessionFactory;
         $this->configReader = $configReader; // MSUL PC-1416 New param to read msul.ini
+    }
+
+    /**
+     * Get the class' Guzzle client, instantiating it if needed
+     *
+     * @return Client
+     */
+    protected function getClient(): Client
+    {
+        return $this->client ??= $this->getGuzzleService()->createClient(
+            $this->config['API']['base_url'],
+            120
+        );
+
+    }
+
+    /**
+     * Get the class' Guzzle pool, instantiating it if needed
+     *
+     * @return GuzzleLivePool
+     */
+    protected function getPool(): GuzzleLivePool
+    {
+        return $this->pool ??= new GuzzleLivePool($this->getClient());
     }
 
     /**
@@ -172,13 +195,6 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
         $attemptNumber = 1,
         $baseUrl = null
     ) {
-        if (!isset($this->client)) {
-            $this->client = $this->getGuzzleService()->createClient(
-                $this->config['API']['base_url'],
-                120
-            );
-            $this->pool = new GuzzleLivePool($this->client);
-        }
         $req_headers = new Headers();
         $req_headers->addHeaders($headers);
         [$req_headers, $params] = $this->preRequest($req_headers, $params);
@@ -209,7 +225,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
 
         $this->debug('Request ASYNC start for path ' . $logPath);
         $startTime = microtime(true);
-        $promise = $this->pool->add(
+        $promise = $this->getPool()->add(
             $request,
             ['headers' => $req_headers->toArray(), 'query' => $params]
         );
@@ -537,7 +553,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * @param string     $dueDateValue     The due date to display to the user
      * @param array      $boundWithRecords Any bib records this holding is bound with
      * @param ?\stdClass $currentLoan      Any current loan on this item
-     * @param ?array     $customLocData    Additional data to process into the returned array
+     * @param ?array     $customData       Additional data to process into the returned array
      *
      * @return array
      */
@@ -549,7 +565,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
         string $dueDateValue,
         $boundWithRecords,
         $currentLoan,
-        $customLocData = null
+        $customData = null
     ): array {
         $itemNotes = array_filter(
             array_map([$this, 'formatNote'], $item->notes ?? [])
@@ -603,7 +619,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
                 $bibId,
                 $locationName,
                 $callNumberData['callnumber'],
-                $customLocData
+                $customData
             )
         );
         return $callNumberData + $locAndHoldings + [
@@ -672,7 +688,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      *                                 (passed by reference)
      *
      * @return array An array of data containing promises in keys:
-     *               'boundWith', 'currentLoan', 'customLocData'
+     *               'boundWith', 'currentLoan', 'customData'
      */
     protected function gatherItemPromises(
         $item,
@@ -701,7 +717,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
         $promises = [
             'boundWith' => $boundWithPromise,
             'currentLoan' => $currentLoanPromise,
-            'customLocData' => $this->customLocDataPromise($bibId, $callNumber, $locationCode),
+            'customData' => $this->customDataPromise($bibId, $callNumber, $locationCode),
         ];
         return $promises;
     }
@@ -730,7 +746,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
         $dueDateValue = '';
         $boundWithPromise = $itemPromises['boundWith'];
         $currentLoanPromise = $itemPromises['currentLoan'];
-        $customLocDataPromise = $itemPromises['customLocData'];
+        $customDataPromise = $itemPromises['customData'];
         $currentLoan = $this->getCurrentLoan($item->id, $currentLoanPromise);
         $dueDateValue = $currentLoan ? $this->getDueDate($currentLoan, $showTime) : '';
         $nextItem = $this->msulFormatHoldingItem(
@@ -741,7 +757,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             $dueDateValue,
             $boundWithPromise->wait(),
             $currentLoan,
-            $customLocDataPromise->wait()
+            $customDataPromise->wait()
         );
         return $nextItem;
     }
@@ -1992,7 +2008,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      * @return Promise\Promise A promise for location data; may contain null if no config found
      *                         or callnumber empty
      */
-    protected function customLocDataPromise(
+    protected function customDataPromise(
         $bibId,
         $callNumber,
         $locationCode
@@ -2067,7 +2083,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
         if ($data === null) {
             return [];
         }
-        $msulConfig = $this->configReader->get('msul');  // Known safe from customLocDataPromise()
+        $msulConfig = $this->configReader->get('msul');  // Known safe from customDataPromise()
         $topKey = $msulConfig['Locations']['response_top_key'] ?? 'callnumbers';
         $floorKey = $msulConfig['Locations']['response_floor_key'] ?? '';
         $notMappableFloor = $msulConfig['Locations']['not_mappable_floor_value'] ?? '';
