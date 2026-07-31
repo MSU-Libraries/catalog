@@ -113,7 +113,6 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             $this->config['API']['base_url'],
             120
         );
-
     }
 
     /**
