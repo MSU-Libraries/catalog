@@ -218,7 +218,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Log
             // Skip empty records:
             if (count($record)) {
                 if (($this->config->Record->getStatusesSorting ?? 'false') !== 'false') {
-                    $filters = $this->searchMemory->getCurrentSearch()->getParams()->getFilterList() ?? [];
+                    $filters = $this->searchMemory->getCurrentSearch()?->getParams()->getFilterList() ?? [];
                     $this->sortStatuses($record, current($this->config->Record->getStatusesSorting), $filters);
                 }
                 // Check for errors
