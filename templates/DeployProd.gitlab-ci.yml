@@ -10,17 +10,17 @@ Begin Prod Deploy:
   variables:
     PROD: "true"
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $PROD == "true" && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $PROD == "true" && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
       when: manual
 
 Deploy Prod Compose Files:
   stage: Deploy Prod
   environment:
-    name: $CI_COMMIT_BRANCH-prod/deploy-compose
+    name: $ENV_BRANCH_NAME-prod/deploy-compose
     auto_stop_in: 2 weeks
   extends: Deploy Compose Files
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Begin Prod Deploy
       artifacts: true
@@ -29,10 +29,10 @@ Deploy Prod Internal Network:
   stage: Deploy Prod
   extends: Deploy Internal Network
   environment:
-    name: $CI_COMMIT_BRANCH-prod/deploy-network
+    name: $ENV_BRANCH_NAME-prod/deploy-network
     auto_stop_in: 2 weeks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Begin Prod Deploy
       artifacts: true
@@ -42,10 +42,10 @@ Initialize Prod Log Dirs:
   stage: Deploy Prod
   extends: Initialize Log Dirs
   environment:
-    name: $CI_COMMIT_BRANCH-prod/deploy-network
+    name: $ENV_BRANCH_NAME-prod/deploy-network
     auto_stop_in: 2 weeks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Begin Prod Deploy
       artifacts: true
@@ -54,11 +54,11 @@ Initialize Prod Log Dirs:
 Bootstrap Prod Stacks:
   stage: Deploy Prod
   environment:
-    name: $CI_COMMIT_BRANCH-prod/bootstrap
+    name: $ENV_BRANCH_NAME-prod/bootstrap
     auto_stop_in: 2 weeks
   extends: Bootstrap Stacks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Begin Prod Deploy
       artifacts: true
@@ -69,10 +69,10 @@ Deploy Prod ZK:
   stage: Deploy Prod
   extends: Deploy ZK
   environment:
-    name: $CI_COMMIT_BRANCH-prod/deploy-zk
+    name: $ENV_BRANCH_NAME-prod/deploy-zk
     auto_stop_in: 2 weeks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Begin Prod Deploy
       artifacts: true
@@ -82,10 +82,10 @@ Deploy Prod Solr:
   stage: Deploy Prod
   extends: Deploy Solr
   environment:
-    name: $CI_COMMIT_BRANCH-prod/deploy-solr
+    name: $ENV_BRANCH_NAME-prod/deploy-solr
     auto_stop_in: 2 weeks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Begin Prod Deploy
       artifacts: true
@@ -96,10 +96,10 @@ Create Prod Solr Collections:
   stage: Deploy Prod
   extends: Create Solr Collections
   environment:
-    name: $CI_COMMIT_BRANCH-prod/create-solr-colls
+    name: $ENV_BRANCH_NAME-prod/create-solr-colls
     auto_stop_in: 2 weeks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -111,10 +111,10 @@ Deploy Prod DB:
   stage: Deploy Prod
   extends: Deploy DB
   environment:
-    name: $CI_COMMIT_BRANCH-prod/deploy-db
+    name: $ENV_BRANCH_NAME-prod/deploy-db
     auto_stop_in: 2 weeks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Begin Prod Deploy
       artifacts: true
@@ -125,10 +125,10 @@ Deploy Prod Redis:
   stage: Deploy Prod
   extends: Deploy Redis
   environment:
-    name: $CI_COMMIT_BRANCH-prod/deploy-redis
+    name: $ENV_BRANCH_NAME-prod/deploy-redis
     auto_stop_in: 2 weeks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Begin Prod Deploy
       artifacts: true
@@ -137,10 +137,10 @@ Deploy Prod Vufind:
   stage: Deploy Prod
   extends: Deploy Vufind
   environment:
-    name: $CI_COMMIT_BRANCH-prod/deploy-vufind
+    name: $ENV_BRANCH_NAME-prod/deploy-vufind
     auto_stop_in: 2 weeks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Begin Prod Deploy
       artifacts: true
@@ -150,10 +150,10 @@ Deploy Prod Vufind:
 Deploy Prod Vufind Build Env:
   extends: Deploy Vufind Build Env
   environment:
-    name: $CI_COMMIT_BRANCH-prod/deploy-buildenv
+    name: $ENV_BRANCH_NAME-prod/deploy-buildenv
     auto_stop_in: 2 weeks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
       when: manual
   needs:
     - job: Begin Prod Deploy
@@ -164,10 +164,10 @@ Deploy Prod Monitoring:
   stage: Deploy Prod
   extends: Deploy Monitoring
   environment:
-    name: $CI_COMMIT_BRANCH-prod/deploy-monitoring
+    name: $ENV_BRANCH_NAME-prod/deploy-monitoring
     auto_stop_in: 2 weeks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Begin Prod Deploy
       artifacts: true
@@ -177,10 +177,10 @@ Verify Prod Docker Health:
   stage: Deploy Prod
   extends: Verify Docker Health
   environment:
-    name: $CI_COMMIT_BRANCH-prod/verify
+    name: $ENV_BRANCH_NAME-prod/verify
     auto_stop_in: 2 weeks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Begin Prod Deploy
       artifacts: true
@@ -193,10 +193,10 @@ Verify Prod Solr Health:
   stage: Deploy Prod
   extends: Verify Solr Health
   environment:
-    name: $CI_COMMIT_BRANCH-prod/verify
+    name: $ENV_BRANCH_NAME-prod/verify
     auto_stop_in: 2 weeks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -208,10 +208,10 @@ Verify Prod DB Health:
   stage: Deploy Prod
   extends: Verify DB Health
   environment:
-    name: $CI_COMMIT_BRANCH-prod/verify
+    name: $ENV_BRANCH_NAME-prod/verify
     auto_stop_in: 2 weeks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -223,10 +223,10 @@ Prod Run Cache Clear:
   stage: Deploy Prod
   extends: Run Cache Clear
   environment:
-    name: $CI_COMMIT_BRANCH-prod/run-cache-clear
+    name: $ENV_BRANCH_NAME-prod/run-cache-clear
     auto_stop_in: 2 weeks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Begin Prod Deploy
       artifacts: true
@@ -236,10 +236,10 @@ Prod Run Functional Tests:
   stage: Deploy Prod
   extends: Run Functional Tests
   environment:
-    name: $CI_COMMIT_BRANCH-prod/run-tests
+    name: $ENV_BRANCH_NAME-prod/run-tests
     auto_stop_in: 2 weeks
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Begin Prod Deploy
       artifacts: true

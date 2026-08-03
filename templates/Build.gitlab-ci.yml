@@ -4,7 +4,7 @@ Build DB Image:
      COMPONENT: db
   extends: .build_template
   environment:
-    name: $CI_COMMIT_BRANCH/build-db
+    name: $ENV_BRANCH_NAME/build-db
     auto_stop_in: 2 weeks
 
 Build Solr Image:
@@ -12,7 +12,7 @@ Build Solr Image:
      COMPONENT: solr
   extends: .build_template
   environment:
-    name: $CI_COMMIT_BRANCH/build-solr
+    name: $ENV_BRANCH_NAME/build-solr
     auto_stop_in: 2 weeks
 
 Build ZK Image:
@@ -20,7 +20,7 @@ Build ZK Image:
      COMPONENT: zk
   extends: .build_template
   environment:
-    name: $CI_COMMIT_BRANCH/build-zk
+    name: $ENV_BRANCH_NAME/build-zk
     auto_stop_in: 2 weeks
 
 Build Ansible Image:
@@ -30,7 +30,7 @@ Build Ansible Image:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
   environment:
-    name: $CI_COMMIT_BRANCH/build-ansible
+    name: $ENV_BRANCH_NAME/build-ansible
     auto_stop_in: 2 weeks
 
 Build Monitoring Image:
@@ -38,7 +38,7 @@ Build Monitoring Image:
      COMPONENT: monitoring
   extends: .build_template
   environment:
-    name: $CI_COMMIT_BRANCH/build-monitoring
+    name: $ENV_BRANCH_NAME/build-monitoring
     auto_stop_in: 2 weeks
 
 Build LegacyLinks Image:
@@ -46,7 +46,7 @@ Build LegacyLinks Image:
      COMPONENT: legacylinks
   extends: .build_template
   environment:
-    name: $CI_COMMIT_BRANCH/build-legacylinks
+    name: $ENV_BRANCH_NAME/build-legacylinks
     auto_stop_in: 2 weeks
 
 Build Captcha Image:
@@ -54,7 +54,7 @@ Build Captcha Image:
      COMPONENT: captcha
   extends: .build_template
   environment:
-    name: $CI_COMMIT_BRANCH/build-captcha
+    name: $ENV_BRANCH_NAME/build-captcha
     auto_stop_in: 2 weeks
 
 Build Vufind Image:
@@ -97,8 +97,8 @@ Build Vufind Image:
   timeout: 10m
   interruptible: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == "catprod-preview"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/ || $ENV_BRANCH_NAME == "catprod-preview"'
   variables:
     LATEST: $CI_REGISTRY_IMAGE/$COMPONENT:latest
     CURR: $CI_REGISTRY_IMAGE/$COMPONENT:$CI_COMMIT_SHORT_SHA
