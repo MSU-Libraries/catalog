@@ -62,13 +62,11 @@ Build Vufind Image:
   environment:
     name: $ENV_BRANCH_NAME/build-vufind
     auto_stop_in: 2 weeks
+    action: prepare
   tags:
     - msul-shared
   retry: 2
   timeout: 10m
-  environment:
-    name: $CI_COMMIT_BRANCH
-    action: prepare
   interruptible: true
   rules:
     # Run only if NOT a tag AND NOT a schedule
