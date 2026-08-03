@@ -4,7 +4,7 @@ Begin Prod Deploy:
   extends: Set Stack Name
   environment:
     # This can't be part of -prod env because we would need a coresponding Remove Environment job
-    name: $CI_COMMIT_BRANCH
+    name: $ENV_BRANCH_NAME
   needs:
     - Verify Docker Health
   variables:
