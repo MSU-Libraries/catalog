@@ -71,13 +71,9 @@ Build Vufind Image:
     action: prepare
   interruptible: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == "catprod-preview"'
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      when: never
-    - if: $CI_COMMIT_TAG
-      when: never
-    - when: manual
+    # Run only if NOT a tag AND NOT a schedule
+    - if: '$CI_COMMIT_TAG == null && $CI_PIPELINE_SOURCE != "schedule"'
+      when: on_success
   variables:
     LATEST: $CI_REGISTRY_IMAGE/vufind:latest
     CURR: $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA
