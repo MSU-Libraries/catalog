@@ -60,7 +60,7 @@ Build Captcha Image:
 Build Vufind Image:
   stage: Build
   environment:
-    name: $CI_COMMIT_BRANCH/build-vufind
+    name: $ENV_BRANCH_NAME/build-vufind
     auto_stop_in: 2 weeks
   tags:
     - msul-shared

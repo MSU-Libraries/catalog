@@ -12,11 +12,12 @@ variables:
   SIMPLESAMLPHP_VERSION: "2.1.1"
   COMPOSE_PATH: /home/deploy/$STACK_NAME
   SSH_USER: "deploy"
+  ENV_BRANCH_NAME: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}${CI_COMMIT_BRANCH}
 
 Set Stack Name:
   stage: test
   environment:
-    name: $CI_COMMIT_BRANCH
+    name: $ENV_BRANCH_NAME
     url: $URL
     on_stop: Remove Environment
   interruptible: true
