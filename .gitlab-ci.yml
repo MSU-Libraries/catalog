@@ -377,7 +377,7 @@ Remove Environment:
   extends: .stack_template
   image: $CI_REGISTRY_IMAGE/ansible:latest
   environment:
-    name: $CI_COMMIT_BRANCH
+    name: $ENV_BRANCH_NAME
     action: stop
   rules:
     - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
