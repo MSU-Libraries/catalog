@@ -56,6 +56,19 @@
   }
 }
 
+// Style for links
+.icon-link {
+  color: $darkparakeetgreen;
+  &:hover {
+    color: black;
+  }
+}
+.icon-link__label {
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 90%;
+}
+
 // Fix the hover text color on selected items on
 // the browse page
 .browse-item {
@@ -70,6 +83,9 @@
 // ----------------------
 a {
   color:$darkparakeetgreen;
+  &:hover {
+    color: black;
+  }
 }
 
 body, button, select, input {
@@ -98,28 +114,23 @@ label, .field-label {
   font-weight: 700;
 }
 
+
+// Focus indicators
+a.sr-only:focus {
+  background-color:#ffffff !important;
+}
+*, a, a.btn, a.nav-link, a.page-link, a.toolbar-btn, input, input.btn, button.btn, select.form-select, .form-control, .active-filters .filters .filter-value, .slider-container .slider-handle {
+  .searchForm_lookfor:focus + #searchForm_controls, &:focus, &:focus-visible {
+    outline-color: transparent !important; // shows on Windows high contrast, box shadow doesn't
+    outline-width: 2px !important;
+    outline-style: solid !important;
+    box-shadow: 0 0 2px 2px rgba(0, 122, 255, .7), 0 0 2px 2px rgba(255, 255, 255, .9);
+  }
+}
+
+
 // Import local customizations
 // ---------------------------
-@import "header";
-
-@import "footer";
-
-@import "home"; 
-
-@import "get-this";
-
-@import "facets.scss";
-
-@import "pagination.scss";
-
-@import "tables.scss";
-
-@import "myaccount.scss";
-
-@import "record.scss";
-
-@import "search-results.scss";
-
 @import "advanced-search.scss";
 
 @import "alphabrowse.scss";
@@ -128,10 +139,36 @@ label, .field-label {
 
 @import "custom-notices.scss";
 
+@import "facets.scss";
+
+@import "feedback.scss";
+
+@import "footer";
+
+@import "get-this";
+
+@import "header";
+
+@import "home"; 
+
+@import "layout";
+
 @import "login.scss";
+
+@import "myaccount.scss";
+
+@import "pagination.scss";
 
 @import "popover.scss";
 
+@import "record.scss";
+
 @import "reserves.scss";
 
-@import "feedback.scss";
+@import "search-form.scss";
+
+@import "search-results.scss";
+
+@import "tables.scss";
+
+@import "tabs.scss";

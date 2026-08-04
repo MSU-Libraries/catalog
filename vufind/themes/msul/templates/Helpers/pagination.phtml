@@ -50,7 +50,7 @@
                 'page' => $this->previous,
                 'liClasses' => ['page-prev'],
                 'label' => $this->translate('page_prev'),
-                'contentHtml' => $this->transEsc('Prev') . ' ' . $this->icon('page-prev'), /** MSU */
+                'contentHtml' => '<span class="visually-hidden">' . $this->transEsc('Prev') . '</span> ' . $this->icon('page-prev'), /** MSU */
             ]
           )
         ?>
@@ -84,7 +84,7 @@
                 'page' => $this->next,
                 'liClasses' => ['page-next'],
                 'label' => $this->translate('page_next'),
-                'contentHtml' => $this->icon('page-next') . ' ' . $this->transEsc('Next'), /** MSU */
+                'contentHtml' => $this->icon('page-next') . ' ' . '<span class="visually-hidden">' . $this->transEsc('Next') . '</span>', /** MSU */
             ]
           )
         ?>

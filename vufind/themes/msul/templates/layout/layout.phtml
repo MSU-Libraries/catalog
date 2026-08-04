@@ -156,13 +156,44 @@
       <?=$this->render('header.phtml')?>
     </header>
     <?=$this->breadcrumbs()->render()?>
-    <div role="main" class="main">
+    <main role="main" class="main">
       <div id="content" class="container">
+        <?php /** MSU START */ ?>
+        <?php if (!$this->isHome): ?>
+          <?php
+            // Adding the parameter in the URL because we can't extend some model in vufind to get the Search Origin
+            // saved in the params and just have the sid
+            // TODO PC-895 To adapt after PR
+            /** @var \Catalog\Search\SearchOrigin\AbstractSearchOrigin|null $searchOrigin */
+            $searchOrigin = $this->get('searchOrigin');
+            $arrow = $this->icon('fa-long-arrow-left', 'fa-long-arrow-left') . ' ';
+            if ($this->showSearchBacklink ?? false) {
+              $backlink = $this->searchMemory()->getLastSearchLink($this->transEsc('Back to Search Results'));
+              if (!empty($backlink)) {
+                  $backlink = $arrow . $backlink;
+              }
+              if (isset($searchOrigin)) {
+                $backlink = preg_replace(
+                    '/href="(.*)"/',
+                    'href="$1&' . http_build_query($searchOrigin->getSearchUrlParamsArray()) . '"',
+                    $backlink
+                );
+              }
+            } else {
+              $backlink = $arrow . '<a href="/Search">Back to the catalog</a>';
+            }
+          ?>
+          <div class="backtocat container">
+            <p><?= $backlink ?></p>
+          </div>
+          <?= $this->render('search/back-to-origin.phtml', ['searchOrigin' => $searchOrigin]); ?>
+        <?php endif; ?>
+        <?php /** MSU END */ ?>
         <?=$this->layout()->content ?>
       </div>
-    </div>
+    </main>
     <?=$this->render('footer.phtml')?>
-    <!-- MODAL IN CASE WE NEED ONE -->
+    <?php /** MODAL IN CASE WE NEED ONE */ ?>
     <div id="modal" class="modal fade hidden-print" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">

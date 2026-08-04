@@ -16,10 +16,10 @@
   $thumbnail = false;
   $thumbnailAlignment = $this->record($this->driver)->getThumbnailAlignment('list');
 ?>
-<li id="record-<?=$safeId?>" class="result<?php if ($this->driver->supportsAjaxStatus()): ?> ajaxItem<?php endif ?> d-flex"> <!--MSUL add 'd-flex' class for a11y reordering checkbox and add a unique id for lightbox rendering-->
+<li id="record-<?=$safeId?>" class="result<?php if ($this->driver->supportsAjaxStatus()): ?> ajaxItem<?php endif ?> d-flex"><?php // MSUL add 'd-flex' class for a11y reordering checkbox and add a unique id for lightbox rendering ?>
   <?php if ($cover):
     ob_start(); ?>
-    <div class="media-<?=$thumbnailAlignment ?> <?=$this->escapeHtmlAttr($coverDetails['size'])?> order-2 ms-3"> <!-- MSUL added classes 'order-2 ms-3' -->
+    <div class="media-<?=$thumbnailAlignment ?> <?=$this->escapeHtmlAttr($coverDetails['size'])?> order-2 ms-3"><?php // MSUL added classes 'order-2 ms-3' ?>
       <?=$cover ?>
     </div>
     <?php $thumbnail = ob_get_contents(); ?>
@@ -37,7 +37,7 @@
     <?php if ($thumbnail && $thumbnailAlignment == 'left'): ?>
       <?=$thumbnail ?>
     <?php endif; ?>
-    <div class="media-body order-3"> <!-- MSUL added 'order-3' -->
+    <div class="media-body order-3"><?php /** MSU added 'order-3' */ ?>
       <div class="result-body">
         <div class="resultItemLine1">
           <h2>
@@ -50,22 +50,24 @@
                 <?=$this->escapeOrCleanHtml($altTitle, 'title')?>
               </div>
             <?php endforeach; ?>
-
-            <?php if (!$this->driver->isCollection()): ?>
-              <?php $summAuthors = $this->driver->getPrimaryAuthors(); ?>
-              <?php if (!empty($summAuthors)): ?>
-                <span class="authors">
-                  <?=$this->transEsc('Authors')?><?php // MSU ?>
+        <?php /** Many MSU changes below */ ?>
+          </h2>
+        </div>
+        <table><tbody>
+          <?php if (!$this->driver->isCollection()): ?>
+            <?php $summAuthors = $this->driver->getPrimaryAuthors(); ?>
+            <?php if (!empty($summAuthors)): ?>
+              <tr class="authors">
+                <th><?=$this->transEsc('Authors')?></th>
+                <td>
                   <?php $authorCount = count($summAuthors); ?>
                   <?php foreach ($summAuthors as $i => $summAuthor): ?>
                     <a href="<?=$this->record($this->driver)->getLink('author', $summAuthor)?>"><?=$this->escapeHtml($summAuthor)?></a><?=($i + 1 < $authorCount ? ';' : '') ?>
                   <?php endforeach; ?>
-                </span>
-              <?php endif; ?>
+                </td>
+              </tr>
             <?php endif; ?>
-          </h2>
-        </div>
-        <div class="resultItemLine2">
+          <?php endif; ?>
           <?php if ($this->driver->isCollection()): ?>
             <?=implode(' ', array_map([$this, 'escapeHtml'], $this->driver->getSummary())); /** MSU */ ?><
           <?php else: ?>
@@ -73,40 +75,37 @@
               $journalTitle = $this->driver->getContainerTitle();
               $summDate = $this->driver->getPublicationDates();
             ?>
-            <?php if (!empty($journalTitle)): ?>
-              <?=/* TODO: handle highlighting more elegantly here */ $this->transEsc('Published in') . ' <a href="' . $this->record($this->driver)->getLink('journaltitle', str_replace(['{{{{START_HILITE}}}}', '{{{{END_HILITE}}}}'], '', $journalTitle)) . '">' . $this->highlight($journalTitle) . '</a>';?>
-              <?=!empty($summDate) ? ' (' . $this->escapeHtml($summDate[0]) . ')' : ''?>
-            <?php elseif (!empty($summDate)): ?>
-              <?=$this->transEsc('Published') . ' ' . $this->escapeHtml($summDate[0])?>
-            <?php endif; ?>
+            <tr>
+              <?php if (!empty($journalTitle)): ?>
+                <th><?=$this->transEsc('Published in')?></th>
+                <td>
+                  <?=/* TODO: handle highlighting more elegantly here */' <a href="' . $this->record($this->driver)->getLink('journaltitle', str_replace(['{{{{START_HILITE}}}}', '{{{{END_HILITE}}}}'], '', $journalTitle)) . '">' . $this->highlight($journalTitle) . '</a>';?>
+                  <?=!empty($summDate) ? ' (' . $this->escapeHtml($summDate[0]) . ')' : ''?>
+                </td>
+              <?php elseif (!empty($summDate)): ?>
+                <th><?=$this->transEsc('Published')?></th>
+                <td><?=$this->escapeHtml($summDate[0])?></td>
+              <?php endif; ?>
+            </tr>
             <?php $summInCollection = $this->driver->getContainingCollections(); ?>
-            <?php if (false && !empty($summInCollection)): ?><?php /** MSU */ ?>
-              <?php foreach ($summInCollection as $collId => $collText): ?>
-                <div>
-                  <b><?=$this->transEsc('in_collection_label')?></b>
-                  <a class="collectionLinkText" href="<?=$this->record($this->driver)->getLink('collection', $collId)?>">
-                    <?=$this->escapeHtml($collText)?>
-                  </a>
-                </div>
-              <?php endforeach; ?>
-            <?php endif; ?>
+            <?php /** MSU: removed code */ ?>
           <?php endif; ?>
-        </div>
 
-        <div class="last">
           <?php if (!$this->driver->isCollection()) {
-              if ($snippet = $this->driver->getHighlightedSnippet()) {
-                if (!empty($snippet['caption'])) {
-                  echo '<strong>' . $this->transEsc($snippet['caption']) . ':</strong> ';
-                }
-                if (!empty($snippet['snippet'])) {
-                  echo $this->translate(
-                      'highlight_snippet_html',
-                      ['%%snippet%%' => $this->highlight($snippet['snippet'])]
-                  ) . '<br>';
-                }
+            if ($snippet = $this->driver->getHighlightedSnippet()) {
+              echo '<tr>';
+              if (!empty($snippet['caption'])) {
+                echo '<th>' . $this->transEsc($snippet['caption']) . '</th> ';
               }
-            } ?>
+              if (!empty($snippet['snippet'])) {
+                echo '<td>' . $this->translate(
+                    'highlight_snippet_html',
+                    ['%%snippet%%' => $this->highlight($snippet['snippet'])]
+                ) . '</td>';
+              }
+              echo '</tr>';
+            }
+          } ?>
 
           <?php
             $listTags = ($this->usertags()->getMode() !== 'disabled') ? $this->record($this->driver)->getTagsFromFavorites(
@@ -116,48 +115,64 @@
             ) : [];
           ?>
           <?php if (count($listTags) > 0): ?>
-            <strong><?=$this->transEsc('Your Tags')?>:</strong>
-            <?php foreach ($listTags as $tag): ?>
-              <a href="<?=$this->currentPath() . $results->getUrlQuery()->addFacet('tags', $tag['tag'])?>"><?=$this->escapeHtml($tag['tag'])?></a>
-            <?php endforeach; ?>
-            <br>
+            <tr>
+              <th><?=$this->transEsc('Your Tags')?></th>
+              <td>
+                <?php foreach ($listTags as $tag): ?>
+                  <a href="<?=$this->currentPath() . $results->getUrlQuery()->addFacet('tags', $tag['tag'])?>"><?=$this->escapeHtml($tag['tag'])?></a>
+                <?php endforeach; ?>
+              </td>
+            </tr>
           <?php endif; ?>
           <?php $listNotes = $this->record($this->driver)->getListNotes($list_id, $user_id); ?>
           <?php if (count($listNotes) > 0): ?>
-            <strong><?=$this->transEsc('Notes')?>:</strong>
-            <?php if (count($listNotes) > 1): ?><br><?php endif; ?>
-            <?php foreach ($listNotes as $note): ?>
-              <?=$this->escapeHtml($note)?><br>
-            <?php endforeach; ?>
+            <tr>
+              <th><?=$this->transEsc('Notes')?></th>
+              <td>
+                <?php foreach ($listNotes as $note): ?>
+                  <?=$this->escapeHtml($note)?><br>
+                <?php endforeach; ?>
+              </td>
+            </tr>
           <?php endif; ?>
 
           <?php if (count($this->lists ?? []) > 0): ?>
-              <strong><?=$this->transEsc('Saved in')?>:</strong>
+            <tr>
+              <th><?=$this->transEsc('Saved in')?></th>
               <?php $i = 0; ?>
-              <?php foreach ($this->lists as $current): ?>
-                <a href="<?=$this->url('userList', ['id' => $current->getId()])?>"><?=$this->escapeHtml($current->getTitle())?></a><?php if ($i++ < count($this->lists) - 1): ?>,<?php endif; ?>
-              <?php endforeach; ?>
-              <br>
+              <td>
+                <?php foreach ($this->lists as $current): ?>
+                  <a href="<?=$this->url('userList', ['id' => $current->getId()])?>"><?=$this->escapeHtml($current->getTitle())?></a><?php if ($i++ < count($this->lists) - 1): ?>,<?php endif; ?>
+                <?php endforeach; ?>
+              </td>
+            </tr>
           <?php endif; ?>
-
-          <div class="callnumAndLocation ajax-availability hidden">
-            <?php if ($this->driver->supportsAjaxStatus()): ?>
-              <strong class="hideIfDetailed"><?=$this->transEsc('Call Number')?>:</strong>
-              <span class="callnumber ajax-availability hidden">
-                <?=$this->transEsc('loading_ellipsis')?><br>
-              </span>
-              <strong><?=$this->transEsc('Located')?>:</strong>
-              <span class="location ajax-availability hidden">
+        </tbody><tbody class="callnumAndLocation ajax-availability hidden">
+          <?php if ($this->driver->supportsAjaxStatus()): ?>
+            <tr>
+              <th class="hideIfDetailed"><?=$this->transEsc('Call Number')?></th>
+              <td class="callnumber ajax-availability hidden">
                 <?=$this->transEsc('loading_ellipsis')?>
-              </span>
-              <div class="locationDetails"></div>
-            <?php else: ?>
-              <?php $summCallNo = $this->driver->getCallNumber(); ?>
-              <?php if (!empty($summCallNo)): ?>
-                <strong><?=$this->transEsc('Call Number')?>:</strong> <?=$this->escapeHtml($summCallNo)?>
-              <?php endif; ?>
+            </td>
+            </tr><tr>
+              <th><?=$this->transEsc('Located')?>:</th>
+              <td class="location ajax-availability hidden">
+                <?=$this->transEsc('loading_ellipsis')?>
+              </td>
+              <tr>
+                <td class="locationDetails" colspan="2"></td>
+              </tr>
+            </tr>
+          <?php else: ?>
+            <?php $summCallNo = $this->driver->getCallNumber(); ?>
+            <?php if (!empty($summCallNo)): ?>
+              <tr>
+                <th><?=$this->transEsc('Call Number')?></th>
+                <td><?=$this->escapeHtml($summCallNo)?></td>
+              </tr>
             <?php endif; ?>
-          </div>
+          <?php endif; ?>
+        </tbody><tbody>
 
           <?php
             /* We need to find out if we're supposed to display an OpenURL link ($openUrlActive),
@@ -172,44 +187,43 @@
           ?>
           <?php if ($openUrlActive || $identifierLinksHtml || !empty($urls)): ?>
             <?php if ($openUrlActive): ?>
-              <br>
-              <?=$openUrl->renderTemplate()?>
+              <tr><td colspan="2"><?=$openUrl->renderTemplate()?></td></tr>
             <?php endif;?>
 
             <?php if ($identifierLinksHtml): ?>
-              <br>
-              <?=$identifierLinksHtml?>
+              <tr><td colspan="2"><?=$identifierLinksHtml?></td></tr>
             <?php endif; ?>
 
             <?php $urls = is_array($urls) ? $urls : []; ?>
             <?php if (!$this->driver->isCollection()): ?>
               <?php foreach ($urls as $current): ?>
-                <a href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url']))?>" class="fulltext icon-link" target="new">
-                  <?=$this->icon('external-link', 'icon-link__icon') ?>
-                  <span class="icon-link__label"><?=($current['url'] == $current['desc']) ? $this->transEsc('Get full text') : $this->escapeHtml($current['desc'])?></span>
-                </a>
+                <tr><td colspan="2">
+                  <a href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url']))?>" class="fulltext icon-link" target="new">
+                    <?=$this->icon('external-link', 'icon-link__icon') ?>
+                    <span class="icon-link__label"><?=($current['url'] == $current['desc']) ? $this->transEsc('Get full text') : $this->escapeHtml($current['desc'])?></span>
+                  </a>
+                </td></tr>
               <?php endforeach; ?>
             <?php endif; ?>
           <?php endif; ?>
-          <br>
 
           <?php if (
             $this->searchOptions($this->driver->getSourceIdentifier())->displayCitationLinksInResults()
             && $links = $driver->tryMethod('getCitations')
           ): ?>
-            <div class="result-citation-links">
+            <tr><td class="result-citation-links" colspan="2">
               <?=$this->record($this->driver)->renderTemplate('data-citations.phtml', ['data' => $links])?>
-            </div>
+            </td></tr>
           <?php endif; ?>
+        </tbody></table>
 
-          <?=$this->record($this->driver)->getFormatList() ?>
+        <?=$this->record($this->driver)->getFormatList() ?>
 
-          <?php if (!$openUrlActive && empty($urls) && $this->driver->supportsAjaxStatus()): ?>
-            <span class="status ajax-availability hidden"><?=$this->transEsc('loading_ellipsis')?></span>
-            <br><br>
-          <?php endif; ?>
-          <?=$this->record($this->driver)->getPreviews()?>
-        </div>
+        <?php if (!$openUrlActive && empty($urls) && $this->driver->supportsAjaxStatus()): ?>
+          <span class="status ajax-availability hidden"><?=$this->transEsc('loading_ellipsis')?></span>
+          <br><br>
+        <?php endif; ?>
+        <?=$this->record($this->driver)->getPreviews()?>
       </div>
 
       <div class="result-links hidden-print">
@@ -263,6 +277,6 @@
     <?php if ($thumbnail && $thumbnailAlignment == 'right'): ?>
       <?=$thumbnail ?>
     <?php endif; ?>
-    <?=$this->record($this->driver)->getCheckbox()?> <!--MSUL moved from line 29 to recorder checkboxes a11y -->
+    <?=$this->record($this->driver)->getCheckbox()?><?php /** MSUL moved from line 29 to recorder checkboxes a11y */ ?>
   </div>
 </li>

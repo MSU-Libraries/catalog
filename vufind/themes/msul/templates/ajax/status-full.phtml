@@ -24,13 +24,6 @@ foreach ($this->statusItems as $item) {
     $selected = $item;
     $selectedScore = $score;
   }
-  $itemHasAdditionalHoldingsFields = false;
-  foreach ($this->holdingsTextFieldNames as $holdingsTextField) {
-    if (!empty($item[$holdingsTextField])) {
-      $itemHasAdditionalHoldingsFields = true;
-      break;
-    }
-  }
   if ($selected != '') {
     $location = $selected['location'];
     $callnumber = $selected['callnumber'];
@@ -40,68 +33,71 @@ foreach ($this->statusItems as $item) {
 /** MSU END */
 ?>
 <?php if ($selected != ''): ?>
-  <div<?=$itemHasAdditionalHoldingsFields ? $this->htmlAttributes(['class' => 'itemWithAdditionalHoldingFields']) : ''?>>
-    <strong>Holdings:</strong>
-    <span class="fullAvailability">
-        <?php /** @var $availabilityStatus VuFind\ILS\Logic\AvailabilityStatus */ ?>
-        <?php $availabilityStatus = $selected['availability']; ?>
-        <?php /** NOT MSU START */ ?>
-          <?php
-            $statusClass = $this->availabilityStatus()->getClass($availabilityStatus);
-            if ($availabilityStatus->isAvailable() && $item['reserve'] === 'Y') {
-              $statusDescription = 'On Reserve';
-            } else {
-              $statusDescription = $availabilityStatus->getStatusDescription();
-            }
-            /** NOT MSU END */
-          ?>
-          <strong class="<?=$this->escapeHtmlAttr($statusClass)?>"><?=$this->escapeHtml($statusDescription)?></strong>
-    </span>
-    <?php if ($location != ''): ?>
-      at
-      <span class="fullLocation">
+  <?php $id = $selected['id']; ?>
+  <?php $item_id = $selected['item_id']; ?>
+  <?php $getthis = new GetThisLoader($this->driver, $record, $this->statusItems, $item_id); ?>
+  <tr>
+    <th>Status</th>
+    <td class="fullAvailability">
+      <?php /** @var $availabilityStatus VuFind\ILS\Logic\AvailabilityStatus */ ?>
+      <?php $availabilityStatus = $selected['availability']; ?>
+      <?php /** NOT MSU START */ ?>
+      <?php
+        $statusClass = $this->availabilityStatus()->getClass($availabilityStatus);
+        if ($availabilityStatus->isAvailable() && $item['reserve'] === 'Y') {
+          $statusDescription = 'On Reserve';
+        } else {
+          $statusDescription = $availabilityStatus->getStatusDescription();
+        }
+        /** NOT MSU END */
+      ?>
+      <strong class="<?=$this->escapeHtmlAttr($statusClass)?>"><?=$this->escapeHtml($statusDescription)?></strong>
+      <?php if ($getthis && ! str_starts_with($id, 'hlm.') && ! $getthis->isOnlineResource()): ?>
+        <a class="pl-1 placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
+          <?=$this->icon('book', 'icon-link__icon') ?>
+          <?=$this->transEsc('Get this')?>
+        </a>
+      <?php endif; ?>
+    </td>
+  </tr>
+  <?php if ($location != ''): ?>
+    <tr>
+      <th>Location</th>
+      <td class="fullLocation">
         <?php $locationText = $this->transEsc($location); ?>
         <?php if (count($this->statusItems) > 1): ?>
           <?=$locationText?>&nbsp;&nbsp;<a href="<?=$this->escapeHtmlAttr($this->recordLinker()->getUrl($selected['id']))?>/Holdings#tabnav" target="_blank">more holdings</a>
         <?php else: ?>
           <?=$locationText?>
         <?php endif; ?>
-      </span>
-    <?php endif; ?>
-    <?php $id = $selected['id']; ?>
-    <?php $item_id = $selected['item_id']; ?>
-    <?php $getthis = new GetThisLoader($this->driver, $record, $this->statusItems, $item_id); ?>
-    <?php if ($getthis && ! str_starts_with($id, 'hlm.') && ! $getthis->isOnlineResource()): ?>
-      <a class="pl-1 placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
-        <?=$this->icon('book', 'icon-link__icon') ?>
-        <?=$this->transEsc('Get this')?>
-      </a>
-      <a class="pl-1 placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/MapThis?item_id=$item_id") ?>" rel="nofollow">
-        <?=$this->icon('format-map', 'icon-link__icon') ?>
-        <?=$this->transEsc('Map this')?>
-      </a>
-    <?php endif; ?>
-  </div>
+        <?php if ($getthis && ! str_starts_with($id, 'hlm.') && ! $getthis->isOnlineResource()): ?>
+          <a class="pl-1 placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/MapThis?item_id=$item_id") ?>" rel="nofollow">
+            <?=$this->icon('format-map', 'icon-link__icon') ?>
+            <?=$this->transEsc('Map this')?>
+          </a>
+        <?php endif; ?>
+      </td>
+    </tr>
+  <?php endif; ?>
   <?php if ($callnumber != ''): ?>
-    <div>
-      <strong>Call Number:</strong>
-      <span class="fullCallnumber">
-          <?=$this->escapeHtml($callNumPrefix)?><?=$this->escapeHtml($callnumber)?>
-      </span>
-    </div>
+    <tr>
+      <th>Call Number</th>
+      <td class="fullCallnumber">
+        <?=$this->escapeHtml($callNumPrefix)?><?=$this->escapeHtml($callnumber)?>
+      </td>
+    </tr>
   <?php endif; ?>
   <?php if (!empty($selected)): ?>
     <?= $this->locationNotices($selected) ?>
   <?php endif; ?>
   <?php foreach ($this->holdingsTextFieldNames as $holdingsTextField): ?>
     <?php if (!empty($item[$holdingsTextField])): ?>
-      <div>
-        <span class="statusItemsHoldingsTextFields">
-          <strong><?= $this->transEsc(ucfirst($holdingsTextField)) ?>: </strong><span><?= $this->escapeHtml(implode('; ', ((array)$item[$holdingsTextField]))); ?></span>
-        </span>
-      </div>
+      <tr class="statusItemsHoldingsTextFields">
+        <th><?= $this->transEsc(ucfirst($holdingsTextField)) ?>: </th>
+        <td><?= $this->escapeHtml(implode('; ', ((array)$item[$holdingsTextField]))); ?></td>
+      </tr>
     <?php endif; ?>
   <?php endforeach; ?>
 <?php else: ?>
-  <span class="fullAvailability"><strong class="text-danger">Unavailable</strong></span>
+  <tr class="fullAvailability"><th class="text-danger">Unavailable</th><td></td></tr>
 <?php endif; ?>
