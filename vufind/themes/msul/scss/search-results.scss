@@ -1,8 +1,18 @@
+#content nav ul.pager {
+  margin-top: 0;
+}
+
 // LibKey and EDS link styling
 .result-body {
   .custom-link {
     display: inline-block;
     padding-right: 1rem;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 90%;
+    &:hover {
+      color: black;
+    }
   }
   .libkey-link {
     display: inline-block;
@@ -37,11 +47,11 @@
     margin-bottom:0.2rem;
   }
   h2 a {
-    color: $msugreen;
+    color: $halfdarkparakeetgreen;
     &:hover {
-      color: black;
+      color: $darkparakeetgreen;
+      text-decoration: underline;
     }
-    text-decoration: underline;
   }
 }
 
@@ -56,9 +66,25 @@
   }
 }
 
+.search-results-container {
+  background-color: #EEE;
+  h1.search-term {
+    margin-top: 0;
+    padding-top: 1rem;
+  }
+}
+
 // Searchtools spacing
 .searchtools {
-  margin-bottom:1rem;
+  padding-bottom: 1rem;
+  margin-left: 0.5rem;
+  margin-bottom: 0;
+  ul li:not(:first-child) {
+    &:before {
+      content: none;
+    }
+    padding-left: 1rem;
+  }
 }
 
 .view-buttons {
@@ -67,13 +93,8 @@
 }
 
 .search-term {
-  background-color:$lightgray;
-  padding:0.5rem 1rem;
-  border-radius:0.5rem;
-  color:$darkgray;
-  font-size:18px;
-  margin-bottom:1rem;
-  margin-top:1rem;
+  margin: 1rem 1rem 0.5rem 1rem;
+  font-size: 2rem;
 }
 
 // move sort dropdown left
@@ -109,27 +130,36 @@
     .icon-link__label {
       text-decoration: none;
     }
+
+    > .icon-link:hover {
+      color:#ffffff;
+    }
   }
 
   div.search-header {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
-    column-gap: 2.5rem;
+    column-gap: 2rem;
+    margin-right: 0.5rem;
 
     .search-stats {
-      padding-bottom: 0.8rem;
       display: flex;
       align-items: center;
       column-gap: 2rem;
+    }
+
+    nav {
+      padding-top: 0.5rem;
+      flex-grow: 1;
+      justify-content: center;
     }
 
     .search-controls {
       display: flex;
       flex-wrap: nowrap;
       align-items: center;
-      padding-top: 0.5rem;
-      padding-bottom: 0.5rem;
+      margin: .5rem 0 .5rem 0;
 
       .search-result-limit {
         margin-right:2rem;
@@ -156,7 +186,7 @@ mark {
     height:1.25rem;
     width:1.25rem;
   }
-  .result-body {
+  .media-body .result-body {
     font-size: 1.1rem;
     h2 {
       font-size: 1.15rem;
@@ -166,140 +196,75 @@ mark {
     }
     & :not(:first-child) {
       line-height:1.7rem;
-   }
-
+    }
+    th {
+      padding-right: 1rem;
+      vertical-align: top;
+      width: 15%;
+    }
   }
   .media {
     .media-left {
-      font-size:14px;
+      max-width: min(20%, 100px);
+      font-size: 14px;
+    }
+    @media only screen and (min-width : 768px) {
+      .result-body {
+        width: calc(100% - 11rem);
       }
-  @media only screen and (min-width : 768px) {
-    .result-links {
-      padding-left:1rem;
+      .result-links {
+        width: 10rem;
+        padding-left: 1rem;
+      }
     }
   }
 }
-}
-form.searchForm, .record-tabs, .navbar-form {
-  ul.nav-tabs {
-    border-bottom:0;
-    margin-bottom:2rem;
 
-    li {
-      height:3rem;
-      @media only screen and (min-width : 992px) {
-        font-size:larger;
-        height:2rem;
+.media-body .result-body table tbody tr {
+  td, th {
+    padding: 0 0 .2rem 0;
+  }
+}
+
+@media only screen and (max-width : 750px) {
+  .result .media-body .result-body {
+    table, tbody, tr, th, td {
+      display: block;
+    }
+    th {
+      width: 100%;
+      &:after {
+        content: ":";
       }
     }
-    a, &:active a, &:hover a {
-      border-left:0;
-      border-top:0;
-      border-right:0.4rem solid transparent;
-      border-bottom:0.4rem solid transparent;
-      outline:0;
-      background:none;
-      text-decoration:none;
-      color: $eggplant !important;
-      padding:0;
-      margin:0 0.7rem;
-    }
-    a.nav-link.active {
-      background:none;
-    }
-    li:first-child a {
-      margin-left:0;
-    }
-    .navtab-digrepo {
-      @media only screen and (min-width : 998px) {
-        border-left:0.2rem solid $eggplant;
-        padding-left:0.5rem;
-        margin-left:0.5rem;
-        }
-    }
-    a:hover {
-      border-bottom: 0.4rem solid #ACB3C9;
-      border-right: 0.4rem solid transparent;
-      border-left:0;
-      border-top:0;
-    }
-    .active a, a.active {
-      border-bottom: 0.4rem solid $eggplant;
-      border-right: 0.4rem solid transparent;
-      border-left:0;
-      border-top:0;
-    }
+  }
+}
+
+@media only screen and (min-width : 1024px) {
+  .result .result-body th {
+    white-space: nowrap;
   }
 }
 
 .mainbody.right {
-  .searchbox {
-    @media only screen and (max-width : 1235px) {
-      label, input, select, button {
-        display:block;
-        margin-bottom:0.3rem;
-      }
-      select {
-        width: 100%;
-      }
-      input {
-        margin-bottom:1rem;
-      }
-    }
-    @media only screen and (min-width : 992px) {
-      .searchForm_lookfor {
-        border-radius:0.5rem;
-      }
-      button[type=submit].btn-primary {
-        border-radius: 2rem;
-        margin-left:0;
-      }
-
-    }
-    @media only screen and (min-width : 1236px) {
-      .searchForm_lookfor {
-        border-radius:0.5rem 0 0 0.5rem;
-      }
-      button[type=submit].btn-primary {
-        border-radius: 0 0.5rem 0.5rem 0;
-        margin-left: -0.4rem;
-        margin-top: -0.1rem;
-      }
-
-    }
-  }
   @media only screen and (min-width : 768px) {
-      .container {
-        padding-left:0;
-      }
-      #search-cart-form {
-        margin-top: -1rem;
-    }
-  }
-  @media only screen and (min-width : 1315px) {
-      .searchForm-query {
-        width:33%;
-    }
-  }
-  @media only screen and (min-width : 1445px) {
-      .searchForm-query {
-        width:100%;
-        max-width: 500px;
+    .container {
+      padding-left:0;
     }
   }
 }
 
-//Focus indicators
-a.sr-only:focus {
-  background-color:#ffffff !important;
+// Facet sidebar
+#search-sidebar {
+  padding: 0.7rem;
+  margin-top: 0;
 }
 
-*, .form-control, .active-filters .filters .filter-value, .slider-container .slider-handle {
-  &:focus {
-    outline-color: transparent !important; // shows on Windows high contrast, box shadow doesn't
-    outline-width: 2px !important;
-    outline-style: solid !important;
-    box-shadow: 0px 0px 2px 2px rgba(0, 122, 255, .7), 0 0 2px 2px rgba(255, 255, 255, .9);
+.navbar-form {
+  width: 100%;
+  &> .tab-content, &> .active-filters {
+    margin-left: 1rem;
+    margin-bottom: 1rem;
   }
 }
 
@@ -311,5 +276,13 @@ a.sr-only:focus {
     .checkbox {
       display:block;
     }
+  }
+}
+
+.search-footer {
+  display: flex;
+  flex-wrap: wrap;
+  nav {
+    margin: .5rem auto 0 auto;
   }
 }

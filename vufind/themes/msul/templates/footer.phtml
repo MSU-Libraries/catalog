@@ -5,7 +5,7 @@
         <h2><?=$this->transEsc('footer_header_search_options')?></h2>
         <ul>
           <li><a href="<?=$this->url('search-history')?>"><?=$this->transEsc('Search History')?></a></li>
-          <li><a href="<?=$this->url('search-advanced')?>"><?=$this->transEsc('Advanced Search')?></a></li>
+          <li><a href="<?=$this->url('search-advanced')?>"><?=$this->transEsc('Catalog Advanced Search')?></a></li>
           <li><a href="https://eds.lib.msu.edu" target="_blank"><?=$this->transEsc('EDS catalog interface')?><?= $this->icon('fa-external-link', 'fa-external-link') ?></a></li>
         </ul>
       <?=$this->slot('footer-left')->end(); ?>
@@ -20,6 +20,7 @@
           <li><a href="<?=$this->url('browse-home')?>"><?=$this->transEsc('Browse by Categories')?></a></li>
           <li><a href="<?=$this->url('search-newitem')?>"><?=$this->transEsc('New Items')?></a></li>
           <li><a href="https://lib.msu.edu/ils" target="_blank"><?=$this->transEsc('Search Other Libraries')?><?= $this->icon('fa-external-link', 'fa-external-link') ?></a></li>
+          <li><a href="https://d.lib.msu.edu/" target="_blank"><?=$this->transEsc('Digital Repository')?><?= $this->icon('fa-external-link', 'fa-external-link') ?></a></li>
         </ul>
       <?=$this->slot('footer-center')->end(); ?>
     </div>

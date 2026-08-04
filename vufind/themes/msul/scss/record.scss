@@ -54,26 +54,14 @@
 .record-nav {
   .action-toolbar li a {
     background-color:revert;
-    color:$darkparakeetgreen;
     border: none;
   }
 }
 
 .record-tabs {
+  padding-left: 1rem;
   ul.nav-tabs {
-    // Override search-results.scss nav-tabs
-    border-bottom: 1px solid $medgray !important;
     margin-top:3rem;
-    margin-bottom:2rem;
-
-    li.record-tab {
-      border-right:1px solid $eggplant;
-      margin-bottom:1rem;
-      height:2rem;
-    }
-    li.record-tab:last-child {
-      border-right:none;
-    }
   }
   .tab-content {
     .tab-pane {
@@ -92,16 +80,79 @@
   }
 }
 
-// Show the icon next to the export button on the record page
-.dropdown-toggle .icon:last-child {
-  display: inherit;
-}
-// hide the arrow next to the dropdown of the export options
-.dropdown-toggle::after {
- display: none;
+// Prevent wrapping long field names on tabs
+// ex: in00005965624 Special Audience Characteristics
+// but wrap text for short width for accessibility (to avoid scrollbars)
+@media only screen and (min-width : 600px) {
+  .tab-content {
+    th {
+      white-space: nowrap;
+    }
+  }
 }
 
-//Fix display of export options
-#export-options li {
-    display:block;
+.template-dir-record {
+  // Show the icon next to the export button on the record page
+  .dropdown-toggle .icon:last-child {
+    display: inherit;
+  }
+  // hide the arrow next to the dropdown of the export options
+  .dropdown-toggle::after {
+  display: none;
+  }
+
+  //Fix display of export options
+  #export-options li {
+      display:block;
+  }
+
+  // padding on top of record area, above record-nav or pager navigation
+  #content>nav:first-child {
+    padding-top: 0.5rem;
+    ul {
+      margin-top: 0;
+    }
+  }
+}
+
+.tab-content .holdings-tab table tr {
+  th, td {
+    padding: .5rem;
+  }
+}
+
+// Source Record table
+.record {
+  // Separate th for mobile
+  @media (max-width: 600px) {
+    .table.staff-view > tbody {
+      > tr {
+        display: block;
+        > th {
+          display: block;
+          padding-bottom: 0;
+          border-bottom: 0;
+          text-align: left;
+          &:after {
+            content: ":";
+          }
+        }
+        > td {
+          display: block;
+          border-top: none;
+          padding-top: 0;
+        }
+      }
+    }
+  }
+  // Reduce minimum th width
+  .table.staff-view th {
+    min-width: 20%;
+  }
+  // Undo VuFind's default of no wrapping in large windows
+  .table.staff-view {
+    td, th {
+      word-wrap: anywhere;
+    }
+  }
 }

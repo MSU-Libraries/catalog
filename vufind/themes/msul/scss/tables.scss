@@ -3,7 +3,7 @@
 .table, .tab-content table {
   width: auto;
   max-width: 100%;
-  margin-bottom: calc($font-size-base * $line-height-base);
+  margin-bottom: 0;
   // Cells
   > thead,
   > tbody,
@@ -12,14 +12,15 @@
       vertical-align:text-top;
 
       > th {
-        border:0;
-        width:auto;
+        border: 0;
+        padding: $table-cell-padding-y $table-cell-padding-x $table-cell-padding-y $table-cell-padding-x;
+        width: auto;
       }
 
       > td {
         padding: $table-cell-padding-y $table-cell-padding-x $table-cell-padding-y $table-cell-padding-x;
         line-height: $line-height-base;
-        width:auto;
+        width: auto;
         border-top: 0 solid $table-border-color;
         overflow-wrap: anywhere;
       }

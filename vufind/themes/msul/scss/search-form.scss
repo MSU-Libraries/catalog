@@ -1,0 +1,89 @@
+.searchForm .searchForm-inputs {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin: 2rem 1rem;
+  gap: 0.5rem;
+
+  .form-select {
+    max-width: 15rem; // Override vufind default
+  }
+  
+  .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .searchForm-query {
+    display: flex;
+    flex: 4 3 auto;
+
+    @media only screen and (min-width: 768px) {
+      min-width: 30rem;
+    }
+  }
+
+  #searchForm_type {
+    flex: 2 2 auto;
+  }
+
+  .searchForm_lookfor {
+    width: 100%;
+    max-width: initial;
+    border-radius: 0.5rem 0 0 0.5rem;
+    padding-right: 0 !important;
+    border-right-width: 0;
+  }
+
+  #searchForm_controls:focus {
+    box-shadow: none;
+  }
+
+  .searchForm_lookfor:focus + #searchForm_controls {
+    // Prevents the box-shadow on focus to be on left and right sides
+    clip-path: inset(-5px 0px -5px 0px);
+  }
+
+  #searchForm_controls {
+    padding: 0 .5rem;
+    gap: 0.5rem;
+    position: initial;
+    height: initial;
+
+    background: white;
+    border: solid $input-border-color;
+    border-width: var(--bs-border-width) 0;
+
+    #searchForm-reset {
+      width: 1.75rem;
+      height: 1.75rem;
+      padding: 0;
+    }
+
+    .search-tips-icon {
+      color: $darkparakeetgreen;
+      display: flex;
+    }
+  }
+
+  button[type="submit"] {
+    .text {
+      display: none;
+    }
+
+    border: $input-border-width solid $parakeetgreen;
+    line-height: inherit;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: $input-border-radius;
+    border-bottom-right-radius: $input-border-radius;
+  }
+
+  .more-options {
+    margin-left: auto;
+  }
+}
+
+#searchForm {
+  margin: 0;
+}

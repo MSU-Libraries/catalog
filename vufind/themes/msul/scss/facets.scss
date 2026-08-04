@@ -1,4 +1,7 @@
 .sidebar {
+  background-color: #EEE;
+  padding: 0 .5rem 0 .5rem;
+  margin-top: .5rem;
   ul.list-group li.list-group-item {
     border-top:0;
     border-right:0;
@@ -7,6 +10,9 @@
     margin-bottom:0;
     border-bottom-right-radius:0;
     border-bottom-left-radius:0;
+  }
+  .facet-group {
+    background-color: white;
   }
   .facet-group .collapse, .facet-group .collapsing, .facet-group.full-facet-list .facet {
     border-left: 0;
@@ -24,15 +30,18 @@
       text-decoration:none;
     }
   }
+  h2 {
+    margin-top: .5rem;
+  }
   h3 {
     color: black;
   }
 
-@keyframes buttonAnimation {
-  from {box-shadow: 0;background-color:$parakeetgreen;}
-  to {box-shadow: 0 0 2px 2px rgba(255, 255, 255, 1), 0px 0px 5px 5px rgba(0, 122, 255, .9);
-  background-color:$darkparakeetgreen;}
-}
+  @keyframes buttonAnimation {
+    from {box-shadow: 0;background-color:$parakeetgreen;}
+    to {box-shadow: 0 0 2px 2px rgba(255, 255, 255, 1), 0px 0px 5px 5px rgba(0, 122, 255, .9);
+    background-color:$darkparakeetgreen;}
+  }
 
   #apply-filters {
     height: 3.5em;
@@ -58,9 +67,6 @@
 }
 
 @media only screen and (min-width : 768px) {
-  .sidebar.left {
-    border-right: 1px solid $medgray;
-  }
   .template-name-advanced .sidebar.left {
     border-right:0 !important;
       .facet-group {
@@ -180,10 +186,6 @@
 }
 
 // MSU Start
-.facet-group:not(:first-child) {
-  border-top:1px solid $medgray;
-}
-
 .facet-group a, .facet a {
   text-decoration:none;
 }
@@ -317,10 +319,6 @@ body.rtl .full-facet-list .active .fa.fa-times { float: left; }
   padding: 0.5rem 0;
 }
 
-.sidebar h2 {
-  margin-top:0;
-}
-
 .narrow-toggle { text-align: center; }
 
 .sidebar .format {
@@ -383,11 +381,11 @@ h3.facet-title {
     display: flex;
   }
 }
-
 // MSU END
+
 .multi-filters-selection {
   padding: 1em 0;
-  background: white;
+  background: #EEE; // MSU
 
   label {
     font-weight: bold;
@@ -410,10 +408,9 @@ h3.facet-title {
 .sidebar .multi-filters-selection {
   position: sticky;
   top: 0;
-  padding: 1em;
+  padding: 0 1em 1em 0.6em;
   z-index: 40;
-  border-bottom: 1px solid $list-group-border;
-  box-shadow: 0 5px 5px -4px #000;
+  box-shadow: none;
 }
 
 .multi-facet-selection-active {

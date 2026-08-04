@@ -12,6 +12,7 @@
 // MSUL Design System colors https://mainweb9.lib.msu.edu/designsystem
 $eggplant:				#592646;
 $parakeetgreen:			#0A875F;
+$halfdarkparakeetgreen:	#0E7357;
 $darkparakeetgreen:		#105E4F;
 $violet:				#780a80;
 $msugreen:				#18453B;
@@ -43,10 +44,10 @@ $font-family-serif:       Georgia, "Times New Roman", Times, serif;
 
 $font-size-base:          1.2rem;
 
-$font-size-h1:            math.floor(($font-size-base * 2)); // ~36px
-$font-size-h2:            math.floor(($font-size-base * 1.75)); // ~30px
-$font-size-h3:            math.ceil(($font-size-base * 1.5)); // ~24px
-$font-size-h4:            math.ceil(($font-size-base * 1.25)); // ~18px
+$font-size-h1:            math.floor(($font-size-base * 1.75));
+$font-size-h2:            math.floor(($font-size-base * 1.6));
+$font-size-h3:            math.ceil(($font-size-base * 1.4));
+$font-size-h4:            math.ceil(($font-size-base * 1.2));
 
 //** By default, this inherits from the `<body>`.
 $headings-font-weight:    600;
@@ -91,10 +92,6 @@ $btn-primary-border:             $parakeetgreen; // darken($btn-primary-bg, 5%);
 
 // Allows for customizing button radius independently from global border radius
 $btn-border-radius-base:         2rem;
-
-//== Alphabrowse
-// MSUL -- borrowed from sandal theme for PC-448
-$pager-margin-top:                     -2.8rem;
 
 //== Form states and alerts
 //
