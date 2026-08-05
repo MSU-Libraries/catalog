@@ -1,6 +1,7 @@
 '''General utilities'''
 import os
 from contextlib import asynccontextmanager
+from datetime import datetime
 import json
 import asyncio
 import aiohttp
@@ -16,6 +17,14 @@ class ExecException(Exception):
     Custom exception class
     '''
 
+
+def cur_time():
+    '''
+    Return the current time in a printable string
+    Returns:
+        (str): Current time
+    '''
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 async def async_exec(program: str, *args, timeout: int=DEFAULT_TIMEOUT) -> str:
     '''

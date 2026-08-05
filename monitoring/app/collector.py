@@ -9,7 +9,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import mariadb as db
 
 import status # pylint: disable=import-error
-from util import get_eventloop, DBConnection # pylint: disable=import-error
+from util import get_eventloop, DBConnection, cur_time # pylint: disable=import-error
 
 
 ACCESS_LOG_PATH = '/mnt/logs/apache/access.log'
@@ -63,7 +63,7 @@ def _analyse_log() -> dict[str, int | None]:
                         response_time_count += 1
                         response_time_total += time_nano // 1000
     except OSError as err:
-        print(f"Error reading the apache log file: {err}", file=sys.stderr)
+        print(f"[{cur_time()}] Error reading the apache log file: {err}", file=sys.stderr)
         return {
             'request_count': 0,
             'response_time': None,
@@ -122,4 +122,4 @@ def main():
             cur.execute(statement, data)
             conn.commit()
     except db.Error as err:
-        print(f"Error adding entry to database: {err}", file=sys.stderr)
+        print(f"[{cur_time()}] Error adding entry to database: {err}", file=sys.stderr)

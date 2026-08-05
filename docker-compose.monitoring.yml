@@ -24,6 +24,7 @@ services:
       # secrets are prefixed with stack name in deploy-compose
       MARIADB_MONITORING_PASSWORD_FILE: /run/secrets/MARIADB_MONITORING_PASSWORD
       MARIADB_VUFIND_PASSWORD_FILE: /run/secrets/MARIADB_VUFIND_PASSWORD
+      MARIADB_TLS_DISABLE_PEER_VERIFICATION: 1
     secrets: # secrets are prefixed with stack name in deploy-compose
       - MARIADB_MONITORING_PASSWORD
       - MARIADB_VUFIND_PASSWORD
