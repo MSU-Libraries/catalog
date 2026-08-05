@@ -104,16 +104,6 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test isSerial
-     *
-     * @return null
-     */
-    public function testIsSerial()
-    {
-        $this->assertTrue($this->getHandler()->isSerial());
-    }
-
-    /**
      * Test isOut
      *
      * @return null
@@ -218,47 +208,56 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Get getting an item status with null item passed
+     * Get getting an item status description with null item passed
      *
      * @return null
      */
     public function testGetStatusNullPassed()
     {
-        $this->assertEquals('Available (test)', $this->callMethod($this->getHandler(), 'getStatus', []));
+        $this->assertEquals('Available (test)', $this->callMethod($this->getHandler(), 'getStatusDescription', []));
     }
 
     /**
-     * Get getting an item status with first item passed
+     * Get getting an item status description with first item passed
      *
      * @return null
      */
     public function testGetStatusAvailable()
     {
-        $this->assertEquals('Available (test)', $this->callMethod($this->getHandler(), 'getStatus', ['123']));
+        $this->assertEquals(
+            'Available (test)',
+            $this->callMethod($this->getHandler(), 'getStatusDescription', ['123'])
+        );
     }
 
     /**
-     * Get getting an item status with a missing item
+     * Get getting an item status description with a missing item
      *
      * @return null
      */
     public function testGetStatusUnavailable()
     {
-        $this->assertEquals('Unavailable (Missing)', $this->callMethod($this->getHandler(), 'getStatus', ['456']));
+        $this->assertEquals(
+            'Unavailable (Missing)',
+            $this->callMethod($this->getHandler(), 'getStatusDescription', ['456'])
+        );
     }
 
     /**
-     * Test getStatus with unknown status
+     * Test getStatusDescription with unknown status
      *
      * @return null
      */
     public function testGetStatusUnknown()
     {
-        $this->assertEquals('Unknown status (test)', $this->callMethod($this->getHandler(), 'getStatus', ['999']));
+        $this->assertEquals(
+            'Unknown status (test)',
+            $this->callMethod($this->getHandler(), 'getStatusDescription', ['999'])
+        );
     }
 
     /**
-     * Get getting an item status with a checked out item
+     * Get getting an item status description with a checked out item
      *
      * @return null
      */
@@ -266,32 +265,35 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
     {
         $this->assertEquals(
             'Checked Out (In transit) - 1/1/2000',
-            $this->callMethod($this->getHandler(), 'getStatus', ['789'])
+            $this->callMethod($this->getHandler(), 'getStatusDescription', ['789'])
         );
     }
 
     /**
-     * Get getting an item status with a restricted item
+     * Get getting an item status description with a restricted item
      *
      * @return null
      */
     public function testGetStatusRestricted()
     {
-        $this->assertEquals('Library Use Only', $this->callMethod($this->getHandler(), 'getStatus', ['321']));
+        $this->assertEquals(
+            'Library Use Only',
+            $this->callMethod($this->getHandler(), 'getStatusDescription', ['321'])
+        );
     }
 
     /**
-     * Get getting an item status with a reserve item
+     * Get getting an item status description with a reserve item
      *
      * @return null
      */
     public function testGetStatusReserve()
     {
-        $this->assertEquals('On Reserve', $this->callMethod($this->getHandler(), 'getStatus', ['654']));
+        $this->assertEquals('On Reserve', $this->callMethod($this->getHandler(), 'getStatusDescription', ['654']));
     }
 
     /**
-     * Get getting status of a checked out item
+     * Get getting status description of a checked out item
      *
      * @return null
      */
@@ -299,7 +301,7 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
     {
         $this->assertEquals(
             'Checked Out (In transit) - Due: 12/12/2000',
-            $this->callMethod($this->getHandler(), 'getStatus', ['012'])
+            $this->callMethod($this->getHandler(), 'getStatusDescription', ['012'])
         );
     }
 
@@ -312,7 +314,7 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
      */
     protected function getHandler($itemId = '123')
     {
-        return new GetThisLoader($this->getDriver(), $this->getItems(), $itemId);
+        return new GetThisLoader($this->getDriver(), $this->getRecordViewHelper(), $this->getItems(), $itemId);
     }
 
     /**
@@ -325,37 +327,44 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
         return [
             [
                 'item_id' => '123',
-                'availability' => new AvailabilityStatus(true, 'Available'),
+                'availability' => new AvailabilityStatus(true, 'Available (test)'),
+                'status' => 'Available',
                 'reserve' => 'N',
                 'loan_type_name' => 'test',
             ],
             [
                 'item_id' => '456',
-                'availability' => new AvailabilityStatus(false, 'Missing'),
+                'availability' => new AvailabilityStatus(false, 'Unavailable (Missing)'),
+                'status' => 'Missing',
                 'location' => 'Main Library',
                 'location_code' => 'ML',
             ],
             [
                 'item_id' => '789',
-                'availability' => new AvailabilityStatus(false, 'In transit'),
+                'availability' => new AvailabilityStatus(false, 'Checked Out (In transit) - 1/1/2000'),
+                'status' => 'In transit',
                 'returnDate' => '1/1/2000',
             ],
             [
                 'item_id' => '321',
-                'availability' => new AvailabilityStatus(false, 'Restricted'),
+                'availability' => new AvailabilityStatus(false, 'Library Use Only'),
+                'status' => 'Restricted',
             ],
             [
                 'item_id' => '654',
-                'availability' => new AvailabilityStatus(false, 'Available'),
+                'availability' => new AvailabilityStatus(false, 'On Reserve'),
+                'status' => 'Available',
                 'reserve' => 'Y',
             ],
             [
                 'item_id' => '999',
-                'availability' => new AvailabilityStatus(false, 'test'),
+                'availability' => new AvailabilityStatus(false, 'Unknown status (test)'),
+                'status' => 'test',
             ],
             [
                 'item_id' => '012',
-                'availability' => new AvailabilityStatus(false, 'In transit'),
+                'availability' => new AvailabilityStatus(false, 'Checked Out (In transit) - Due: 12/12/2000'),
+                'status' => 'In transit',
                 'duedate' => '12/12/2000',
             ],
         ];
@@ -382,5 +391,17 @@ class GetThisLoaderTest extends \PHPUnit\Framework\TestCase
         $driver->expects($this->any())->method('getFormats')
             ->willReturn(['Serial', 'Book']);
         return $driver;
+    }
+
+    /**
+     * Get test record view helper
+     *
+     * @return \Catalog\View\Helper\Root\Record
+     */
+    protected function getRecordViewHelper()
+    {
+        $record = $this->createMock(\Catalog\View\Helper\Root\Record::class);
+        $record->expects($this->any())->method('updateAvailabilityStatus');
+        return $record;
     }
 }

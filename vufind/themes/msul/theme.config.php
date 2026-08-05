@@ -8,7 +8,6 @@ return [
         ['file' => 'check_item_statuses.js', 'priority' => 450],
         ['file' => 'get_license_agreement.js', 'priority' => 450],
         ['file' => 'combined-handler.js', 'priority' => 450],
-        ['file' => '/gis-middleware/arcgis-middleware.iife.js', 'priority' => 450],
     ],
     'favicon' => 'msul-favicon.ico',
     'helpers' => [

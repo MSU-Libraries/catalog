@@ -38,7 +38,7 @@ return [
     'plugin_managers' => [
       'ajaxhandler' => [
         'factories' => [
-          Catalog\AjaxHandler\GetItemStatuses::class => VuFind\AjaxHandler\GetItemStatusesFactory::class,
+          Catalog\AjaxHandler\GetItemStatuses::class => Catalog\AjaxHandler\GetItemStatusesFactory::class,
           # Disabled while we find a better way to limit HoldingsIQ calls
           # Catalog\AjaxHandler\GetLicenseAgreement::class => Catalog\AjaxHandler\GetLicenseAgreementFactory::class,
         ],

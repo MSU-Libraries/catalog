@@ -33,6 +33,7 @@ use VuFind\Config\Config;
 use VuFind\ILS\Logic\AvailabilityStatus;
 use VuFind\ILS\Logic\AvailabilityStatusInterface;
 use VuFind\Tags\TagsService;
+use VuFind\View\Helper\Root\Translate;
 
 use function array_key_exists;
 use function in_array;
@@ -213,23 +214,17 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
     }
 
     /**
-     * Determine the holding status
+     * Update the item's AvailabilityStatus. This is used for display only.
+     * The status parts are translated but not escaped.
      *
-     * @param array $holding   the holding data
-     * @param bool  $translate if the transEsc function should
-     *              be used on the status values
+     * @param array $item the item data
      *
-     * @return string
+     * @return void
      */
-    public function getStatus(&$holding, $translate = true)
+    public function updateAvailabilityStatus(&$item)
     {
-        // NOTE: Make sure this logic matches with getStatus in the GetThisLoader
-
-        if ($translate === true) {
-            $transEsc = $this->getView()->plugin('transEsc');
-        }
-
-        $status = isset($holding['availability']) ? $holding['availability']->getStatusDescription() : 'Unknown';
+        $translate = $this->getView()->plugin('translate');
+        $status = $item['status'] ?? 'Unknown';
         $statusSecondPart = '';
         if (
             in_array($status, [
@@ -258,7 +253,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
             $statusFirstPart = 'Unknown status';
             $statusSecondPart = $status;
             $availability = AvailabilityStatusInterface::STATUS_UNKNOWN;
-        } elseif (isset($holding['reserve']) && $holding['reserve'] === 'Y') {
+        } elseif (isset($item['reserve']) && $item['reserve'] === 'Y') {
             $statusFirstPart = 'On Reserve';
             $availability = true;
         } elseif ($status === 'Available') {
@@ -268,47 +263,60 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
             $statusFirstPart = 'Unknown status';
             $availability = AvailabilityStatusInterface::STATUS_UNKNOWN;
         }
-
-        $status = isset($transEsc) ? $transEsc($statusFirstPart) : $statusFirstPart;
+        $status = $translate($statusFirstPart);
         if (!empty($statusSecondPart)) {
-            $status .= ' (' . (isset($transEsc) ? $transEsc($statusSecondPart) : $statusSecondPart) . ')';
+            $status .= ' (' . $translate($statusSecondPart) . ')';
         }
-        $status .= $this->getStatusSuffix($holding, ($statusFirstPart !== 'Unavailable'), $translate);
-        $holding['availability'] = new AvailabilityStatus(
+        $showLoanType = $statusFirstPart !== 'Unavailable';
+        $status .= $this->getStatusSuffix($translate, $statusFirstPart, $statusSecondPart, $item, $showLoanType);
+        $item['availability'] = new AvailabilityStatus(
             $availability,
             $status
         );
-
-        return $status;
     }
 
     /**
-     * Determine the holding status suffix (if any)
+     * Determine the item status suffix (if any)
      *
-     * @param array $holding      the holding data
-     * @param bool  $showLoanType if the loan type should be displayed
-     * @param bool  $translate    if the transEsc function should
-     *              be used on the status values
+     * @param Translate $translate        Translate helper
+     * @param string    $statusFirstPart  status first part
+     * @param string    $statusSecondPart status second part
+     * @param array     $item             the item data
+     * @param bool      $showLoanType     if the loan type should be displayed
      *
      * @return string
      */
-    public function getStatusSuffix($holding, $showLoanType = true, $translate = true)
+    public function getStatusSuffix($translate, $statusFirstPart, $statusSecondPart, $item, $showLoanType = true)
     {
-        if ($translate === true) {
-            $transEsc = $this->getView()->plugin('transEsc');
-        }
         $suffix = '';
-        if ($holding['returnDate'] ?? false) {
-            $suffix = ' - ' . $holding['returnDate'];
+        if ($item['returnDate'] ?? false) {
+            $suffix = ' - ' . $item['returnDate'];
         }
-        if ($holding['duedate'] ?? false) {
-            $due = isset($transEsc) ? $transEsc('Due') : 'Due';
-            $suffix .= ' - ' . $due . ': ' . $holding['duedate'];
+        if ($item['duedate'] ?? false) {
+            $due = $translate('Due');
+            $suffix .= ' - ' . $due . ': ' . $item['duedate'];
         }
-        if ($showLoanType && ($holding['loan_type_name'] ?? false)) {
-            $suffix .= ' (' . $holding['loan_type_name'] . ')';
+        if (
+            $showLoanType
+            && ($item['loan_type_name'] ?? false)
+            && $item['loan_type_name'] != $statusFirstPart
+            && $item['loan_type_name'] != $statusSecondPart
+        ) {
+            $suffix .= ' (' . $translate($item['loan_type_name']) . ')';
         }
         return $suffix;
+    }
+
+    /**
+     * Get the item status description, for display only
+     *
+     * @param array $item the item data
+     *
+     * @return string
+     */
+    public function getStatusDescription($item)
+    {
+        return isset($item['availability']) ? $item['availability']->getStatusDescription() : 'Unknown';
     }
 
     /**

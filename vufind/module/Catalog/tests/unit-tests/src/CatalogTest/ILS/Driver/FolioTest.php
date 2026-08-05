@@ -18,6 +18,7 @@ use Catalog\ILS\Driver\Folio;
 use CatalogTest\Feature\PathFixerTrait;
 use Laminas\Http\Response;
 use VuFind\Config\Config;
+use VuFind\ILS\Logic\AvailabilityStatus;
 
 use function is_array;
 
@@ -226,7 +227,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
                     'barcode' => 'barcode-test',
                     'status' => 'Available',
                     'duedate' => '',
-                    'availability' => true,
+                    'availability' => new AvailabilityStatus(true, 'Available'),
                     'is_holdable' => true,
                     'holdings_notes' => null,
                     'item_notes' => null,
@@ -361,7 +362,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
                         'barcode' => 'barcode-test',
                         'status' => 'Available',
                         'duedate' => '',
-                        'availability' => true,
+                        'availability' => new AvailabilityStatus(true, 'Available'),
                         'is_holdable' => true,
                         'holdings_notes' => null,
                         'item_notes' => null,
@@ -397,7 +398,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
                         'barcode' => '12345678901234',
                         'status' => 'Available',
                         'duedate' => '',
-                        'availability' => true,
+                        'availability' => new AvailabilityStatus(true, 'Available'),
                         'is_holdable' => true,
                         'holdings_notes' => null,
                         'item_notes' => null,
@@ -427,7 +428,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
                         'barcode' => '',
                         'status' => 'Available',
                         'duedate' => '',
-                        'availability' => true,
+                        'availability' => new AvailabilityStatus(true, 'Available'),
                         'is_holdable' => true,
                         'holdings_notes' => null,
                         'item_notes' => null,
@@ -504,7 +505,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
                     'barcode' => 'barcode-test',
                     'status' => 'Available',
                     'duedate' => '',
-                    'availability' => true,
+                    'availability' => new AvailabilityStatus(true, 'Available'),
                     'is_holdable' => true,
                     'holdings_notes' => ['Fake note'],
                     'item_notes' => null,
@@ -554,7 +555,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
                     'barcode' => 'barcode-test',
                     'status' => 'Available',
                     'duedate' => '',
-                    'availability' => true,
+                    'availability' => new AvailabilityStatus(true, 'Available'),
                     'is_holdable' => true,
                     'holdings_notes' => ['Fake note'],
                     'item_notes' => null,
@@ -602,7 +603,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
                     'barcode' => 'barcode-test',
                     'status' => 'Checked out',
                     'duedate' => '06-01-2023',
-                    'availability' => false,
+                    'availability' => new AvailabilityStatus(false, 'Checked out'),
                     'is_holdable' => true,
                     'holdings_notes' => ['Fake note'],
                     'item_notes' => null,
@@ -652,7 +653,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
                     'barcode' => 'barcode-test2',
                     'status' => 'Available',
                     'duedate' => '',
-                    'availability' => true,
+                    'availability' => new AvailabilityStatus(true, 'Available'),
                     'is_holdable' => true,
                     'holdings_notes' => ['Fake note'],
                     'item_notes' => null,
@@ -682,7 +683,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
                     'barcode' => 'barcode-test',
                     'status' => 'Available',
                     'duedate' => '',
-                    'availability' => true,
+                    'availability' => new AvailabilityStatus(true, 'Available'),
                     'is_holdable' => true,
                     'holdings_notes' => ['Fake note'],
                     'item_notes' => null,

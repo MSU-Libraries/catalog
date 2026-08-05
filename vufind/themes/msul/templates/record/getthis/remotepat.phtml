@@ -1,15 +1,4 @@
 <!-- Getthis: remotepat -->
-<?php
-$item = $this->getthis->getItem();
-$loc = $this->getthis->getLocation();
-$title = $this->driver->getTitle();
-$author = $this->driver->getPrimaryAuthor();
-$status = $this->getthis->getStatus();
-$isbn = $this->driver->getCleanISBN();
-$callnum = $this->getthis->getCallNumber();
-$pubname = $this->driver->getPublisher();
-if (is_array($pubname)): $pubname = implode(', ', $pubname); endif;
-?>
 <div>
     <p>
         <b><a href="https://lib.msu.edu/ils/distance" target="_blank">Distance Delivery Services</a>:</b>
