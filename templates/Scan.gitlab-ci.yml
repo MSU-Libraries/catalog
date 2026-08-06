@@ -92,7 +92,7 @@ Shellcheck:
       metrics: metrics.txt
 
 VuFind Tests:
-  stage: Optional Steps
+  stage: Scans
   image: $CI_REGISTRY_IMAGE/vufind:$CI_COMMIT_SHORT_SHA
   allow_failure: true
   tags:
@@ -120,7 +120,7 @@ VuFind Tests:
       metrics: metrics.txt
 
 Pylint Monitoring:
-  stage: Optional Steps
+  stage: Scans
   image: $CI_REGISTRY_IMAGE/monitoring:$CI_COMMIT_SHORT_SHA
   allow_failure: true
   tags:

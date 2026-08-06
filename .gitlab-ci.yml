@@ -3,6 +3,7 @@ stages:
   - Build
   - Deploy
   - Deploy Prod
+  - Scans
   - Optional Steps
   - Cleanup
   - Release
