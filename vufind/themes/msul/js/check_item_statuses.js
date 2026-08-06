@@ -33,7 +33,7 @@ VuFind.register('itemStatuses', function ItemStatuses() {
     ) {
       // Full status mode is on -- display the HTML and hide extraneous junk:
       callnumAndLocations.forEach((callnumAndLocation) => {
-        VuFind.setInnerHtml(callnumAndLocation, VuFind.updateCspNonce(result.full_status));
+        callnumAndLocation.innerHTML = result.full_status; // MSU
       });
       el.querySelectorAll('.callnumber,.hideIfDetailed,.location,.status').forEach((e) => { e.classList.add('hidden'); });
     } else if (typeof(result.missing_data) !== 'undefined'
@@ -52,7 +52,7 @@ VuFind.register('itemStatuses', function ItemStatuses() {
       // Default case -- load call number and location into appropriate containers:
       el.querySelectorAll('.callnumber').forEach((callnumber) => {
         if (result.callnumberHtml) {
-          VuFind.setInnerHtml(callnumber, result.callnumberHtml + '<br>');
+          VuFind.setInnerHtml(callnumber, result.callnumberHtml); // MSU
         } else {
           callnumber.textContent = '';
         }

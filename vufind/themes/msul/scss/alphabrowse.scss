@@ -30,17 +30,3 @@
     border-radius:0.5rem;
   }
 }
-
-// MSUL -- borrowed from sandal theme for PC-448
-@media only screen and (min-width : 790px) {
-  .template-dir-record {
-    nav:has(.pager) {
-      margin-top: $pager-margin-top;
-      margin-bottom: 0;
-    }
-
-    nav .pager {
-      margin: 0;
-    }
-  }
-}

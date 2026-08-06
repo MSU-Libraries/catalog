@@ -1,24 +1,26 @@
-// Button btn-primary
+// Primary and secondary buttons
 .btn-primary {
   border-radius: 2rem;
-  line-height:1.4;
+  line-height: 1.4;
   padding: 0.375rem 0.75rem;
-  background-color:$parakeetgreen;
-  border-color:$parakeetgreen;
-    &:hover {
-      background-color:$darkparakeetgreen;
-      border-color:$darkparakeetgreen;
-      color:#fff;
+}
+.btn-primary, .btn-secondary {
+  background-color: $parakeetgreen;
+  border-color: $parakeetgreen;
+  &:hover {
+    background-color: $darkparakeetgreen;
+    border-color: $darkparakeetgreen;
+    color: #fff;
   }
-    &:active {
-      background-color:$msugreen !important;
-      border-color:$msugreen !important;
-      color:#fff;
+  &:active {
+    background-color: $msugreen !important;
+    border-color: $msugreen !important;
+    color: #fff;
   }
-    &:focus {
-      background-color:$parakeetgreen !important;
-      border-color:$parakeetgreen;
-      color:#fff;
+  &:focus {
+    background-color: $parakeetgreen !important;
+    border-color: $parakeetgreen;
+    color: #fff;
   }
 }
 
@@ -99,6 +101,12 @@
   display: flex;
   flex-wrap: wrap;
   width: 100%;
+  background-color: #EEE;
+  padding-left: 1rem;
+  margin-block: 0;
+  .selection-label {
+    padding-right: 1rem;
+  }
   .selection-controls-bar {
     order: 10;
   }
@@ -106,14 +114,17 @@
     order: 20;
   }
   .bulk-checkbox input {
-    height:1.25rem;
-    width:1.25rem;
-    vertical-align:text-bottom;
+    height: 1.25rem;
+    width: 1.25rem;
+    vertical-align: text-bottom;
   }
   .action-toolbar li button {
-    background-color:transparent;
-    color:$darkparakeetgreen;
+    background-color: transparent;
+    color: $halfdarkparakeetgreen;
     border: none;
+    &:hover {
+      color: black;
+    }
   }
 }
 

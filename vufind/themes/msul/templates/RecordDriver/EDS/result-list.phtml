@@ -27,7 +27,7 @@
 <?php endif; ?>
 <input type="hidden" value="<?=$this->escapeHtmlAttr($this->driver->getUniqueID())?>" class="hiddenId">
 <input type="hidden" value="<?=$this->escapeHtmlAttr($this->driver->getSourceIdentifier())?>" class="hiddenSource">
-<div class="media<?=$this->driver->supportsAjaxStatus() ? ' ajaxItem' : ''?> order-3"> <!-- MSUL added classes 'col' 'order-3' to reorder checkboxes for A11Y -->
+<div class="media<?=$this->driver->supportsAjaxStatus() ? ' ajaxItem' : ''?> order-3"><?php // MSUL added classes 'col' 'order-3' to reorder checkboxes for A11Y ?>
   <?php if ($thumbnail && $thumbnailAlignment == 'left'): ?>
     <?=$thumbnail ?>
   <?php endif; ?>
@@ -68,16 +68,16 @@
           </h2>
         </div>
       <?php endif; ?>
-      <?php foreach ($items as $item): ?>
-        <div class="resultItemLine1">
+      <table><?php /** MSU table layout*/ ?>
+        <?php foreach ($items as $item): ?>
           <?php if ('Title' != $item['label']): ?>
-            <p>
-              <b><?=$this->transEsc($item['label'])?>:</b>
-              <?=$item['value']?>
-            </p>
+            <tr class="resultItemLine1">
+                <th><?=$this->transEsc($item['label'])?></th>
+                <td><?=$item['value']?></td>
+            </tr>
           <?php endif;?>
-        </div>
-      <?php endforeach; ?>
+        <?php endforeach; ?>
+      </table>
 
       <div class="resultItemLine4 custom-links">
         <?php $customLinks = array_merge($this->driver->getFTCustomLinks(), $this->driver->getCustomLinks());

@@ -17,7 +17,7 @@
 <?php endif; ?>
 <input type="hidden" value="<?=$this->escapeHtmlAttr($this->driver->getUniqueID())?>" class="hiddenId">
 <input type="hidden" value="<?=$this->escapeHtmlAttr($this->driver->getSourceIdentifier())?>" class="hiddenSource">
-<div class="media order-3"> <!-- MSUL added classes 'col' 'order-3' to reorder checkboxes for A11Y -->
+<div class="media order-3"><?php /** MSUL added classes 'col' 'order-3' to reorder checkboxes for A11Y */ ?>
   <?php if ($thumbnail && $thumbnailAlignment == 'left'): ?>
     <?=$thumbnail ?>
   <?php endif; ?>
@@ -38,23 +38,25 @@
           <?php /** MSU END */ ?>
           <?=$this->record($this->driver)->getTitleHtml()?>
         </a>
-      </h2><!-- msul moved authors out of h2 into div below -->
-        <?php foreach ($this->driver->tryMethod('getFullTitlesAltScript', [], []) as $altTitle): /** MSU */ ?>
-          <div class="title-alt">
-            <?=$this->escapeOrCleanHtml($altTitle, 'title')?>
-          </div>
-        <?php endforeach; ?>
-      <div>
+      </h2><?php /** msul moved authors out of h2 into div below */ ?>
+      <?php foreach ($this->driver->tryMethod('getFullTitlesAltScript', [], []) as $altTitle): /** MSU */ ?>
+        <div class="title-alt">
+          <?=$this->escapeOrCleanHtml($altTitle, 'title')?>
+        </div>
+      <?php endforeach; ?>
+      <table><tbody><?php /** MSU table layout*/ ?>
         <?php if (!$this->driver->isCollection()): ?>
           <?php $summAuthors = $this->driver->getPrimaryAuthorsWithHighlighting(); ?>
           <?php if (!empty($summAuthors)): ?>
-            <span class="authors">
-              <strong><?=$this->transEsc('Authors')?>:</strong><?php /** MSU */ ?>
-              <?php $authorCount = count($summAuthors); ?>
-              <?php foreach ($summAuthors as $i => $summAuthor): ?>
-                <a href="<?=$this->record($this->driver)->getLink('author', $this->highlight($summAuthor, null, true, false))?>" class="result-author"><?=$this->highlight(rtrim($summAuthor, ','))?></a><?=$i + 1 < $authorCount ? ',' : ''?>
-              <?php endforeach; ?>
-            </span><br><?php /** MSU */ ?>
+            <tr class="authors">
+              <th><?=$this->transEsc('Authors')?></th><?php /** MSU */ ?>
+              <td>
+                <?php $authorCount = count($summAuthors); ?>
+                <?php foreach ($summAuthors as $i => $summAuthor): ?>
+                  <a href="<?=$this->record($this->driver)->getLink('author', $this->highlight($summAuthor, null, true, false))?>" class="result-author"><?=$this->highlight(rtrim($summAuthor, ','))?></a><?=$i + 1 < $authorCount ? ',' : ''?>
+                <?php endforeach; ?>
+              </td>
+            </tr>
           <?php endif; ?>
         <?php endif; ?>
         <?php /** MSU - Code removed (h2 + div) */ ?>
@@ -68,145 +70,172 @@
           ?>
           <?php if (is_array($publisherName)): $publisherName = implode(', ', $publisherName); endif; /** MSU */ ?>
           <?php if (!empty($journalTitle)): ?>
-            <strong><?=$this->transEsc('Published:')?></strong><?php /** MSU */ ?>
-            <?=$this->escapeOrCleanHtml($publisherName, 'publisher')?><?php /** MSU */ ?>
-            <?php $containerSource = $this->driver->getSourceIdentifier(); ?>
-            <?php $containerID = $this->driver->getContainerRecordID(); ?>
-            <?php /* TODO: handle highlighting more elegantly here: */?>
-            <a class="container-link" href="<?=($containerID ? $this->escapeHtmlAttr($recordLinker->getUrl("$containerSource|$containerID")) : $this->record($this->driver)->getLink('journaltitle', str_replace(['{{{{START_HILITE}}}}', '{{{{END_HILITE}}}}'], '', $journalTitle)))?>"><?=$this->highlight($journalTitle) ?></a>
-            <?=!empty($summDate) ? ' (' . $this->escapeHtml($summDate[0]) . ')' : ''?>
+            <tr>
+              <th><?=$this->transEsc('Published')?></th><?php /** MSU */ ?>
+              <td>
+                <?=$this->escapeOrCleanHtml($publisherName, 'publisher')?><?php /** MSU */ ?>
+                <?php $containerSource = $this->driver->getSourceIdentifier(); ?>
+                <?php $containerID = $this->driver->getContainerRecordID(); ?>
+                <?php /* TODO: handle highlighting more elegantly here: */?>
+                <a class="container-link" href="<?=($containerID ? $this->escapeHtmlAttr($recordLinker->getUrl("$containerSource|$containerID")) : $this->record($this->driver)->getLink('journaltitle', str_replace(['{{{{START_HILITE}}}}', '{{{{END_HILITE}}}}'], '', $journalTitle)))?>"><?=$this->highlight($journalTitle) ?></a>
+                <?=!empty($summDate) ? ' (' . $this->escapeHtml($summDate[0]) . ')' : ''?>
+              </td>
+            </tr>
           <?php elseif (!empty($summDate)): ?>
-            <strong><?=$this->transEsc('Published:')?></strong><?php /** MSU */ ?>
-            <?=$this->escapeHtml($publisherName) . ' ' . $this->escapeHtml($summDate[0])?><?php /** MSU */ ?>
+            <tr>
+              <th><?=$this->transEsc('Published')?></th><?php /** MSU */ ?>
+              <td><?=$this->escapeHtml($publisherName) . ' ' . $this->escapeHtml($summDate[0])?></td><?php /** MSU */ ?>
+            </tr>
           <?php endif; ?>
           <?php $summInCollection = $this->driver->getContainingCollections(); ?>
           <?php if (!empty($summInCollection)): ?>
             <?php foreach ($summInCollection as $collId => $collText): ?>
-              <div>
-                <b><?=$this->transEsc('in_collection_label')?></b>
-                <a class="collectionLinkText" href="<?=$this->record($this->driver)->getLink('collection', $collId)?>">
-                  <?=$this->escapeHtml($collText)?>
-                </a>
-              </div>
+              <tr>
+                <th><?=$this->transEsc('in_collection_label')?></th>
+                <td>
+                  <a class="collectionLinkText" href="<?=$this->record($this->driver)->getLink('collection', $collId)?>">
+                    <?=$this->escapeHtml($collText)?>
+                  </a>
+                </td>
+              </tr>
             <?php endforeach; ?>
           <?php endif; ?>
         <?php endif; ?>
-      </div>
 
-      <?php if (!$this->driver->isCollection()): ?>
-        <?php if ($snippet = $this->driver->getHighlightedSnippet()): ?>
-          <?php if (!empty($snippet['caption'])): ?>
-            <strong><?=$this->transEsc($snippet['caption']) ?>:</strong>
-          <?php endif; ?>
-          <?php if (!empty($snippet['snippet'])): ?>
-            <?=$this->translate('highlight_snippet_html', ['%%snippet%%' => $this->highlight($snippet['snippet'])]) ?><br>
+        <?php if (!$this->driver->isCollection()): ?>
+          <?php if ($snippet = $this->driver->getHighlightedSnippet()): ?>
+            <tr>
+              <th>
+                <?php if (!empty($snippet['caption'])): ?>
+                  <?=$this->transEsc($snippet['caption']) ?>
+                <?php endif; ?>
+              </th>
+              <td>
+                <?php if (!empty($snippet['snippet'])): ?>
+                  <?=$this->translate('highlight_snippet_html', ['%%snippet%%' => $this->highlight($snippet['snippet'])]) ?><br>
+                <?php endif; ?>
+              </td>
+            </tr>
           <?php endif; ?>
         <?php endif; ?>
-      <?php endif; ?>
 
-      <?php
-      /* Display information on duplicate records if available */
-      if ($dedupData = $this->driver->getDedupData()): ?>
-        <div class="dedupInformation">
         <?php
-          $i = 0;
-          foreach ($dedupData as $source => $current) {
-            if (++$i == 1) {
-              ?><span class="currentSource"><a href="<?=$this->escapeHtmlAttr($recordLinker->getUrl($this->driver))?>"><?=$this->transEsc("source_$source", [], $source)?></a></span><?php
-            } else {
-              if ($i == 2) {
-                ?> <span class="otherSources">(<?=$this->transEsc('Other Sources')?>: <?php
+        /* Display information on duplicate records if available */
+        if ($dedupData = $this->driver->getDedupData()): ?>
+          <tr><td class="dedupInformation" colspan="2">
+          <?php
+            $i = 0;
+            foreach ($dedupData as $source => $current) {
+              if (++$i == 1) {
+                ?><span class="currentSource"><a href="<?=$this->escapeHtmlAttr($recordLinker->getUrl($this->driver))?>"><?=$this->transEsc("source_$source", [], $source)?></a></span><?php
               } else {
-                ?>, <?php
+                if ($i == 2) {
+                  ?> <span class="otherSources">(<?=$this->transEsc('Other Sources')?>: <?php
+                } else {
+                  ?>, <?php
+                }
+                ?><a href="<?=$this->escapeHtmlAttr($recordLinker->getUrl($current['id']))?>"><?=$this->transEsc("source_$source", [], $source)?></a><?php
               }
-              ?><a href="<?=$this->escapeHtmlAttr($recordLinker->getUrl($current['id']))?>"><?=$this->transEsc("source_$source", [], $source)?></a><?php
             }
-          }
-          if ($i > 1) {
-            ?>)</span><?php
-          }?>
-        </div>
-      <?php endif; ?>
+            if ($i > 1) {
+              ?>)</span><?php
+            }?>
+          </td></tr>
+        <?php endif; ?>
 
-      <?php /** MSU START */ ?>
-      <?php $physical = $this->driver->getPhysical();
-      if (!empty($physical)): ?>
-        <?php if (is_array($physical)): $physical = implode(', ', $physical); endif; ?>
-        <div>
-          <b><?=$this->transEsc('Physical Description')?>:</b>
-          <?=$this->escapeHtml($physical)?>
-        </div>
-      <?php endif; ?>
-      <?php /** MSU END */ ?>
+        <?php /** MSU START */ ?>
+        <?php $physical = $this->driver->getPhysical();
+        if (!empty($physical)): ?>
+          <?php if (is_array($physical)): $physical = implode(', ', $physical); endif; ?>
+          <tr>
+            <th><?=$this->transEsc('Physical Description')?></th>
+            <td><?=$this->escapeHtml($physical)?></td>
+          </tr>
+        <?php endif; ?>
+        <?php /** MSU END */ ?>
 
-      <?php if ($this->driver->tryMethod('getWorkKeys') && $this->searchOptions($this->driver->getSourceIdentifier())->getVersionsAction()): ?>
-        <div class="record-versions ajax hidden-print"></div>
-      <?php endif; ?>
+        <?php /** MSU: removed record versions, causing unnecessary scrolling with "Loading…" */ ?>
 
-      <div class="callnumAndLocation ajax-availability hidden">
-        <?php if ($this->driver->supportsAjaxStatus()): ?>
-          <?php /** MSU START */ ?>
-          <strong><?=$this->transEsc('Holdings')?>:</strong>
-          <span class="location ajax-availability hidden">
-            <?=$this->transEsc('loading_ellipsis')?>
-          </span>
-          <div class="locationDetails">
-          </div>
-          <?php /** MSU END */ ?>
-          <strong class="hideIfDetailed"><?=$this->transEsc('Call Number')?>:</strong>
-          <span class="callnumber ajax-availability hidden">
-            <?=$this->transEsc('loading_ellipsis')?><br>
-          </span>
+        </tbody>
+        <tbody class="callnumAndLocation ajax-availability hidden">
+        <?php if ($this->driver->supportsAjaxStatus() && !str_starts_with($this->driver->getUniqueId(), 'hlm.')): ?>
+          <tr>
+            <th><?=$this->transEsc('Status')?></th>
+            <td class="location ajax-availability hidden">
+              <?=$this->transEsc('loading_ellipsis')?>
+            </td>
+          </tr>
+          <tr>
+            <th><?=$this->transEsc('Location')?></th>
+            <td class="location ajax-availability hidden">
+              <?=$this->transEsc('loading_ellipsis')?>
+            </td>
+          </tr>
+          <tr>
+            <td class="locationDetails" colspan="2"></td>
+          </tr>
+          <tr>
+            <th class="hideIfDetailed"><?=$this->transEsc('Call Number')?></th>
+            <td class="callnumber ajax-availability hidden">
+              <?=$this->transEsc('loading_ellipsis')?><br>
+            </td>
+          </tr>
           <?php /** MSU - Code removed */ ?>
         <?php else: ?>
           <?php $summCallNo = $this->driver->getCallNumber(); ?>
           <?php if (!empty($summCallNo)): ?>
-            <strong><?=$this->transEsc('Call Number')?>:</strong> <?=$this->escapeHtml($summCallNo)?>
+            <tr>
+              <th><?=$this->transEsc('Call Number')?></th>
+              <td><?=$this->escapeHtml($summCallNo)?></td>
+            </tr>
           <?php endif; ?>
         <?php endif; ?>
-      </div>
+        </tbody><tbody>
 
-      <?php
-        // Display an OpenURL link if configured to do so:
-        $openUrl = $this->openUrl($this->driver, 'results');
-        $openUrlActive = $openUrl->isActive();
-        $identifierLinksHtml = $this->identifierLinker($this->driver, 'results');
-        // Account for replace_other_urls setting
-        $urls = $this->record($this->driver)->getLinkDetails($openUrlActive);
-      ?>
-      <?php if ($openUrlActive || $identifierLinksHtml || !empty($urls)): ?>
-        <?php if ($openUrlActive): ?>
-          <br>
-          <?=$openUrl->renderTemplate()?>
+        <?php
+          // Display an OpenURL link if configured to do so:
+          $openUrl = $this->openUrl($this->driver, 'results');
+          $openUrlActive = $openUrl->isActive();
+          $identifierLinksHtml = $this->identifierLinker($this->driver, 'results');
+          // Account for replace_other_urls setting
+          $urls = $this->record($this->driver)->getLinkDetails($openUrlActive);
+        ?>
+        <?php if ($openUrlActive || $identifierLinksHtml || !empty($urls)): ?>
+          <?php if ($openUrlActive): ?>
+            <tr><td colspan="2"><?=$openUrl->renderTemplate()?></td></tr>
+          <?php endif; ?>
+          <?php if ($identifierLinksHtml): ?>
+            <tr><td colspan="2"><?=$identifierLinksHtml?></td></tr>
+          <?php endif; ?>
+          <?php $urls = is_array($urls) ? $urls : []; ?>
+          <?php if (!$this->driver->isCollection()): ?>
+            <?php foreach ($urls as $current): ?>
+              <?php  /** MSU START */
+                $current['url'] ??= null;
+                $current['desc'] ??= '';
+              ?>
+              <tr>
+                <td colspan="2">
+                  <?=$this->icon('external-link', 'icon-link__icon') ?>
+                  <a class="fulltext icon-link" href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url']))?>" target="new">
+                    <span class="icon-link__label"><?=($current['url'] == $current['desc']) ? $this->transEsc('Get full text') : $this->escapeHtml($current['desc'])?></span>
+                  </a>
+                </td>
+              </tr>
+              <?php /** MSU END */ ?>
+            <?php endforeach; ?>
+          <?php endif; ?>
         <?php endif; ?>
-        <?php if ($identifierLinksHtml): ?>
-          <br>
-          <?=$identifierLinksHtml?>
-        <?php endif; ?>
-        <?php $urls = is_array($urls) ? $urls : []; ?>
-        <?php if (!$this->driver->isCollection()): ?>
-          <?php foreach ($urls as $current): ?>
-          <?php  /** MSU START */
-              $current['url'] ??= null;
-              $current['desc'] ??= '';
-          ?>
-            <?=$this->icon('external-link', 'icon-link__icon') ?>
-            <a class="fulltext icon-link" href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url']))?>" target="new">
-              <span class="icon-link__label"><?=($current['url'] == $current['desc']) ? $this->transEsc('Get full text') : $this->escapeHtml($current['desc'])?></span>
-            </a><br>
-            <?php /** MSU END */ ?>
-          <?php endforeach; ?>
-        <?php endif; ?>
-      <?php endif; ?>
 
-      <?php if (
-        $this->searchOptions($this->driver->getSourceIdentifier())->displayCitationLinksInResults()
-        && $links = $driver->tryMethod('getCitations')
-      ): ?>
-        <div class="result-citation-links">
-          <?=$this->record($this->driver)->renderTemplate('data-citations.phtml', ['data' => $links])?>
-        </div>
-      <?php endif; ?>
+        <?php if (
+          $this->searchOptions($this->driver->getSourceIdentifier())->displayCitationLinksInResults()
+          && $links = $driver->tryMethod('getCitations')
+        ): ?>
+          <tr><td class="result-citation-links" colspan="2">
+            <?=$this->record($this->driver)->renderTemplate('data-citations.phtml', ['data' => $links])?>
+          </td></tr>
+        <?php endif; ?>
+      </tbody></table>
 
       <div class="result-formats">
         <?=$this->record($this->driver)->getFormatList() ?>

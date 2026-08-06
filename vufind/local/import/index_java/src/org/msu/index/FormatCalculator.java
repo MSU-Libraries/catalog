@@ -135,6 +135,15 @@ public class FormatCalculator extends org.vufind.index.FormatCalculator
                 return "Video";
             }
         }
+        for (VariableField variableField : record.getVariableFields("955")) {
+            DataField typeField = (DataField) variableField;
+            String subA = getSubfieldOrDefault(typeField, 'a', "");
+            String sub2 = getSubfieldOrDefault(typeField, '2', "");
+            if (sub2.toLowerCase().startsWith("ebsco-resource-type")
+                && subA.toLowerCase().startsWith("streaming video")) {
+                return "Video";
+            }
+        }
 
         return super.getFormatFromRecordType(record, recordType, marc008, formatCodes007);
     }

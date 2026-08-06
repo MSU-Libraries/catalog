@@ -1,0 +1,44 @@
+ul.nav.nav-tabs {
+  margin-bottom: 1rem;
+  border-bottom: 1px #555 solid;
+
+  .nav-link {
+    padding: .5rem .7rem .3rem .7rem;
+    font-weight: 520;
+    &.active {
+      background: none;
+    }
+  }
+
+  a, &:active a, &:hover a {
+    margin: 0 0.7rem;
+    border-left: 0;
+    border-top: 0;
+    border-right: 0.4rem solid transparent;
+    border-bottom: 0.4rem solid transparent;
+    outline: 0;
+
+    background: none;
+    text-decoration: none;
+    color: $eggplant !important;
+  }
+
+  li:first-child a {
+    margin-left: 0;
+    padding-left: 1rem;
+  }
+
+  a:hover {
+    border-bottom: 0.4rem solid #ACB3C9;
+    border-right: 0.4rem solid transparent;
+    border-left: 0;
+    border-top: 0;
+  }
+
+  .active a, a.active {
+    border-bottom: 0.4rem solid $eggplant;
+    border-right: 0.4rem solid transparent;
+    border-left: 0;
+    border-top: 0;
+  }
+}
