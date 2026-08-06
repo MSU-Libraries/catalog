@@ -2,16 +2,10 @@
 Begin Prod Deploy:
   stage: Deploy Prod
   extends: Set Stack Name
-  environment:
-    # This can't be part of -prod env because we would need a coresponding Remove Environment job
-    name: $ENV_BRANCH_NAME
   needs:
     - Verify Docker Health
   variables:
     PROD: "true"
-  rules:
-    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $PROD == "true" && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-      when: manual
 
 Deploy Prod Compose Files:
   stage: Deploy Prod
