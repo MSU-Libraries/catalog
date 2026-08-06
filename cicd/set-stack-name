@@ -29,6 +29,11 @@ main() {
     MAIL_PORT=25
     MAX_LENGTH=21 # Max length of STACK_NAME due to limitations of docker service name lengths
 
+    echo "======= TODO: DEBUG ====== "
+    echo "CI_MERGE_REQUEST_SOURCE_BRANCH_NAME: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
+    echo "CI_COMMIT_BRANCH: ${CI_COMMIT_BRANCH}"
+    echo "ENV_BRANCH_NAME: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}${CI_COMMIT_BRANCH}"
+
     if [[ "${CI_COMMIT_BRANCH}" == "catprod-preview" ]]; then
         STACK_NAME="catprod-preview"
         SITE_HOSTNAME="catalog-preview.lib.msu.edu"
