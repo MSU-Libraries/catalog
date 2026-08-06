@@ -87,12 +87,20 @@
 
     <?php if ($this->config()->get('config')->Record->permanent_link ?? true): ?>
       <li>
-        <a class="permalink-record toolbar-btn icon-link" data-lightbox href="<?=$this->escapeHtmlAttr($this->recordLinker()->getActionUrl($this->driver, 'Permalink'))?>" rel="nofollow">
-          <?=$this->icon('external-link', 'icon-link__icon') ?>
-          <span class="icon-link__label">
-            <?=$this->transEsc('permanent_link')?>
+        <?php // MSU start ?>
+        <span>
+          <a class="copy-url toolbar-btn icon-link" data-url="<?=$this->serverUrl() . $this->recordLinker()->getUrl($this->driver, ['excludeSearchId' => true])?>">
+            <?=$this->icon('external-link', 'icon-link__icon') ?>
+            <span class="icon-link__label"><?=$this->transEsc('Copy Link')?></span>
+          </a>
+          <span id="copyUrlSuccess" class="hidden">
+            <span class="copyMessage text-success"><small><?=$this->translate('copy_to_clipboard_success_message')?></small></span>
           </span>
-        </a>
+          <span id="copyUrlFailure" class="hidden">
+            <span class="copyMessage text-danger"><small><?=$this->translate('copy_to_clipboard_failure_message')?></small></span>
+          </span>
+        </span>
+        <?php // MSU end ?>
       </li>
     <?php endif ?>
   </ul>
