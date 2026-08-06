@@ -27,8 +27,7 @@ Set Stack Name:
   tags:
     - msul-shared
   rules:
-    - if: '($ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH ||  $ENV_BRANCH_NAME == "catprod-preview" || $ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/) && $PROD == "false"'
-    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $PROD == "true"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $PROD == "true"'
       when: manual
     - if: $CI_COMMIT_TAG
       when: never
@@ -49,7 +48,7 @@ Create DNS:
     auto_stop_in: 2 weeks
   image: $CI_REGISTRY_IMAGE/ansible:latest
   rules:
-    - if: '($ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -62,8 +61,8 @@ Deploy Compose Files:
     name: $ENV_BRANCH_NAME/deploy-compose
     auto_stop_in: 2 weeks
   rules:
-    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/ ||  $ENV_BRANCH_NAME == "catprod-preview"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -116,8 +115,8 @@ Deploy ZK:
     name: $ENV_BRANCH_NAME/deploy-zk
     auto_stop_in: 2 weeks
   rules:
-    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/ ||  $ENV_BRANCH_NAME == "catprod-preview"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -134,8 +133,8 @@ Deploy Solr:
     name: $ENV_BRANCH_NAME/deploy-solr
     auto_stop_in: 2 weeks
   rules:
-    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/ ||  $ENV_BRANCH_NAME == "catprod-preview"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -154,8 +153,8 @@ Create Solr Collections:
     name: $ENV_BRANCH_NAME/create-solr-colls
     auto_stop_in: 2 weeks
   rules:
-    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/ ||  $ENV_BRANCH_NAME == "catalog-preview"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catalog-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -171,8 +170,8 @@ Deploy DB:
     name: $ENV_BRANCH_NAME/deploy-db
     auto_stop_in: 2 weeks
   rules:
-    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/ ||  $ENV_BRANCH_NAME == "catprod-preview"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -191,8 +190,8 @@ Deploy Redis:
     auto_stop_in: 2 weeks
   timeout: 60m
   rules:
-    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/ ||  $ENV_BRANCH_NAME == "catprod-preview"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -207,8 +206,8 @@ Deploy Vufind:
     auto_stop_in: 2 weeks
   timeout: 60m
   rules:
-    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/ ||  $ENV_BRANCH_NAME == "catprod-preview"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -230,9 +229,9 @@ Deploy Vufind Build Env:
     name: $ENV_BRANCH_NAME/deploy-buildenv
     auto_stop_in: 2 weeks
   rules:
-    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
       when: manual
-    - if: '$ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/ ||  $ENV_BRANCH_NAME == "catprod-preview"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
       when: manual
   needs:
     - job: Set Stack Name
@@ -251,8 +250,8 @@ Deploy Monitoring:
     name: $ENV_BRANCH_NAME/deploy-monitoring
     auto_stop_in: 2 weeks
   rules:
-    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/ ||  $ENV_BRANCH_NAME == "catprod-preview"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -315,7 +314,7 @@ Populate Vufind Environment:
     auto_stop_in: 2 weeks
   timeout: 10m
   rules:
-    - if: '($ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -333,7 +332,7 @@ Populate Course Reserves:
     RUNNER_SCRIPT_TIMEOUT: 90m
   timeout: 90m
   rules:
-    - if: '($ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
       when: manual
   needs:
     - job: Set Stack Name
@@ -348,8 +347,8 @@ Run Cache Clear:
     name: $ENV_BRANCH_NAME/run-cache-clear
     auto_stop_in: 2 weeks
   rules:
-    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$ENV_BRANCH_NAME == "catprod-preview"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -363,8 +362,8 @@ Run Functional Tests:
     name: $ENV_BRANCH_NAME/run-tests
     auto_stop_in: 2 weeks
   rules:
-    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$ENV_BRANCH_NAME == "catprod-preview"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
@@ -380,7 +379,7 @@ Remove Environment:
     name: $ENV_BRANCH_NAME
     action: stop
   rules:
-    - if: '($ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
       when: manual
   needs:
     - job: Set Stack Name
@@ -395,7 +394,7 @@ Cleanup Files:
   environment:
     name: $ENV_BRANCH_NAME/cleanup-files
   rules:
-    - if: '($ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '($CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/) && $CI_PIPELINE_SOURCE != "schedule"'
       when: manual
   needs:
     - job: Set Stack Name
@@ -418,8 +417,8 @@ Cleanup Files:
     SERVER: $DEPLOY_HOST_1
     RUNNER_SCRIPT_TIMEOUT: 60m # Prevent job timeout when deploy script takes longer than the 5m default
   rules:
-    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/ ||  $ENV_BRANCH_NAME == "catprod-preview"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ ||  $CI_COMMIT_BRANCH == "catprod-preview"'
   needs:
     - job: Set Stack Name
       artifacts: true
