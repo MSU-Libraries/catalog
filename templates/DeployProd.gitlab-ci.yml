@@ -4,6 +4,9 @@ Begin Prod Deploy:
   extends: Set Stack Name
   needs:
     - Verify Docker Health
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $PROD == "true" && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+      when: manual
   variables:
     PROD: "true"
 
