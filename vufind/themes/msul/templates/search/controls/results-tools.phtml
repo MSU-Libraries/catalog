@@ -30,20 +30,36 @@
           </li>
         <?php endif; ?>
       <?php endif; ?>
-     <?php if ($this->accountCapabilities()->isEmailActionAvailable()): ?>
-       <li>
-         <a class="icon-link mailSearch" href="<?=$this->url('search-email') . '?url=' . urlencode($this->serverUrl(true)) ?>" data-lightbox id="mailSearch<?=$this->escapeHtmlAttr($this->results->getSearchId())?>" rel="nofollow">
-           <?=$this->icon('send-email', 'icon-link__icon') ?>
-           <span class="icon-link__label"><?=$this->transEsc('Email this Search')?></span>
-         </a>
-       </li>
-     <?php endif; ?>
+      <?php if ($this->accountCapabilities()->isEmailActionAvailable()): ?>
+        <li>
+          <a class="icon-link mailSearch" href="<?=$this->url('search-email') . '?url=' . urlencode($this->serverUrl(true)) ?>" data-lightbox id="mailSearch<?=$this->escapeHtmlAttr($this->results->getSearchId())?>" rel="nofollow">
+            <?=$this->icon('send-email', 'icon-link__icon') ?>
+            <span class="icon-link__label"><?=$this->transEsc('Email this Search')?></span>
+          </a>
+        </li>
+      <?php endif; ?>
       <li>
         <a class="icon-link" href="<?=$this->results->getUrlQuery()->setViewParam('rss')?>">
           <?=$this->icon('search-rss', 'icon-link__icon') ?>
           <span class="icon-link__label"><?=$this->transEsc('Get RSS Feed')?></span>
         </a>
       </li>
+      <?php // MSU start ?>
+      <li>
+        <span>
+          <a class="icon-link copy-url" data-url="<?=$this->escapeHtmlAttr($this->serverUrl(true))?>">
+            <?=$this->icon('external-link', 'icon-link__icon') ?>
+            <span class="icon-link__label"><?=$this->transEsc('Copy Link')?></span>
+          </a>
+          <span id="copyUrlSuccess" class="hidden">
+            <span class="copyMessage text-success"><small><?=$this->translate('copy_to_clipboard_success_message')?></small></span>
+          </span>
+          <span id="copyUrlFailure" class="hidden">
+            <span class="copyMessage text-danger"><small><?=$this->translate('copy_to_clipboard_failure_message')?></small></span>
+          </span>
+        </span>
+      </li>
+      <?php // MSU end ?>
     </ul>
   </div>
 <?php endif; ?>
