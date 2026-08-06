@@ -4,7 +4,7 @@
 secret_detection:
   interruptible: true
   environment:
-    name: $CI_COMMIT_BRANCH/secret-scan
+    name: $ENV_BRANCH_NAME/secret-scan
     auto_stop_in: 2 weeks
   tags:
     - msul-shared
@@ -15,7 +15,7 @@ gemnasium-python-dependency_scanning:
     DS_MAX_DEPTH: -1
     SECURE_LOG_LEVEL: debug
   environment:
-    name: $CI_COMMIT_BRANCH/dependency-scan
+    name: $ENV_BRANCH_NAME/dependency-scan
     auto_stop_in: 2 weeks
   tags:
     - msul-shared
@@ -25,10 +25,6 @@ gemnasium-python-dependency_scanning:
     - apt install -y libmariadb-dev
     - /analyzer run
 
-# Does not have the environment tag due to this being run on merge requests
-# and the $CI_COMMIT_BRANCH variable may not exist yet and could cause this error:
-# "This job could not be executed because it would create an environment with an invalid parameter."
-# See: https://gitlab.msu.edu/help/ci/environments/index#a-deployment-job-failed-with-this-job-could-not-be-executed-because-it-would-create-an-environment-with-an-invalid-parameter-error
 markdownlint-cli2:
   stage: test
   interruptible: true
@@ -43,10 +39,6 @@ markdownlint-cli2:
   script:
     - markdownlint-cli2 "**/**.md"
 
-# Does not have the environment tag due to this being run on merge requests
-# and the $CI_COMMIT_BRANCH variable may not exist yet and could cause this error:
-# "This job could not be executed because it would create an environment with an invalid parameter."
-# See: https://gitlab.msu.edu/help/ci/environments/index#a-deployment-job-failed-with-this-job-could-not-be-executed-because-it-would-create-an-environment-with-an-invalid-parameter-error
 markdown-spellcheck:
   stage: test
   interruptible: true
@@ -61,10 +53,6 @@ markdown-spellcheck:
   script:
     - mdspell --report '**/*.md' --ignore-numbers --ignore-acronyms
 
-# Does not have the environment tag due to this being run on merge requests
-# and the $CI_COMMIT_BRANCH variable may not exist yet and could cause this error:
-# "This job could not be executed because it would create an environment with an invalid parameter."
-# See: https://gitlab.msu.edu/help/ci/environments/index#a-deployment-job-failed-with-this-job-could-not-be-executed-because-it-would-create-an-environment-with-an-invalid-parameter-error
 Shellcheck CI:
   stage: test
   image: alpine:latest
@@ -115,13 +103,9 @@ VuFind Tests:
   needs:
     - Build Vufind Image
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == "catprod-preview"'
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      when: never
-    - if: $CI_COMMIT_TAG
-      when: never
-    - when: manual
+    # Run only if NOT a tag AND NOT a schedule
+    - if: '$CI_COMMIT_TAG == null && $CI_PIPELINE_SOURCE != "schedule"'
+      when: on_success
   script:
     - bash ./cicd/validate-vufind-build
   coverage: '/^\s*Lines:\s*\d+.\d+\%/'
@@ -147,8 +131,8 @@ Pylint Monitoring:
   needs:
     - Build Monitoring Image
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH =~ /^devel-/ || $CI_COMMIT_BRANCH =~ /^review-/ || $CI_COMMIT_BRANCH == "catprod-preview"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME =~ /^devel-/ || $ENV_BRANCH_NAME =~ /^review-/ || $ENV_BRANCH_NAME == "catprod-preview"'
   script:
     - pylint --fail-under=10.00 monitoring/app/
 
@@ -199,7 +183,7 @@ Pylint Monitoring:
 #.scan_template:
 #  extends: container_scanning
 #  rules:
-#    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH'
+#    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_DEFAULT_BRANCH == $ENV_BRANCH_NAME'
 #  variables:
 #    DOCKER_IMAGE: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/$COMPONENT:latest
 #    GIT_STRATEGY: fetch

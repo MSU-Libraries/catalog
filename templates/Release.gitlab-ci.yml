@@ -3,7 +3,7 @@
 Tag Release:
   stage: Release
   environment:
-    name: $CI_COMMIT_BRANCH/tag
+    name: $ENV_BRANCH_NAME/tag
     auto_stop_in: 2 weeks
   needs:
     - Build DB Image
@@ -17,7 +17,7 @@ Tag Release:
   interruptible: true
   timeout: 5m
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
       when: manual
   before_script:
     - apk add git
@@ -41,14 +41,14 @@ Tag Release:
 GitHub Release:
   stage: Release
   environment:
-    name: $CI_COMMIT_BRANCH/release
+    name: $ENV_BRANCH_NAME/release
     auto_stop_in: 2 weeks
   tags:
     - msul-shared
   timeout: 5m
   interruptible: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$ENV_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Tag Release
       artifacts: true

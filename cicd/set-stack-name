@@ -43,7 +43,7 @@ main() {
         SITE_HOSTNAME="${STACK_NAME}.aws.lib.msu.edu"
         MAIL_HOST="mail-${STACK_NAME}"
     else
-        STACK_NAME="${CI_COMMIT_BRANCH}"
+        STACK_NAME="${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}${CI_COMMIT_BRANCH}"
     fi
 
     {
