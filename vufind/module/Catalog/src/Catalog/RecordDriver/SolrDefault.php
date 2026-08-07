@@ -51,6 +51,8 @@ namespace Catalog\RecordDriver;
  */
 class SolrDefault extends \VuFind\RecordDriver\SolrDefault
 {
+    use GetOpenUrlFormatTrait; // PC-1652 - Overwrite the function from DefaultRecord
+
     /**
      * Get electronic journal links
      *

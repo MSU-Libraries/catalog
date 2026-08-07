@@ -39,7 +39,7 @@ public class MaterialTypeMixin extends SolrIndexerMixin {
             "CDROM", "FloppyDisk", "TapeCartridge", "TapeCassette", "TapeReel"
         );
         Set<String> journalFormats = Set.of(
-            "Serial", "Article", "SerialComponentPart", "Journal", "Newspaper"
+            "Serial", "Article", "SerialComponentPart", "Journal", "Newspaper", "Periodical"
         );
         Set<String> physicalMaterialFormats = Set.of(
             "PhysicalIntegratingResource", "ProjectedMedium", "Slide", "Transparency",
@@ -130,12 +130,12 @@ public class MaterialTypeMixin extends SolrIndexerMixin {
         if (!Collections.disjoint(formats, journalFormats) &&
                 formats.contains("Electronic")
             )
-            result.add("1/Available Online/Journals and Newspapers/");
+            result.add("1/Available Online/Periodicals and Newspapers/");
 
         if (!Collections.disjoint(formats, journalFormats) &&
                 !formats.contains("Electronic")
             )
-            result.add("1/At the Libraries/Journals and Newspapers/");
+            result.add("1/At the Libraries/Periodicals and Newspapers/");
 
         if (formats.contains("MusicalScore") && !formats.contains("Electronic"))
             result.add("1/At the Libraries/Musical Scores/");

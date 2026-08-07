@@ -49,6 +49,8 @@ use function sprintf;
  */
 class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 {
+    use GetOpenUrlFormatTrait; // PC-1652 - Overwrite the function from DefaultRecord
+
     public const LINKSUBF = '6'; // subfield code that has field link information
     public const UNLINKPOS = '00'; // occurance position in the linked subfield that represents unlinked 880s
     // SOURCE_WHITELIST should match the list used for topic and other fields in marc_local.properties

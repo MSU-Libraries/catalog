@@ -15,7 +15,7 @@ if ($marcProceedingsField) {
     $format = 'THES';
 } elseif (!empty($journalTitle) || (is_array($formats) && in_array('Article', $formats))) {
     $format = 'JOUR';
-} elseif (is_array($formats) && in_array('Journal', $formats)) {
+} elseif (is_array($formats) && in_array('Periodical', $formats)) {
     $format = 'JFULL';
 } else {
     $format = 'BOOK';

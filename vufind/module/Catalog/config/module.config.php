@@ -88,10 +88,12 @@ return [
         'factories' => [
           Catalog\RecordDriver\SolrMarc::class => VuFind\RecordDriver\SolrDefaultFactory::class,
           Catalog\RecordDriver\SolrDefault::class => VuFind\RecordDriver\SolrDefaultFactory::class,
+          Catalog\RecordDriver\EDS::class => VuFind\RecordDriver\AbstractBaseFactory::class,
         ],
         'aliases' => [
           VuFind\RecordDriver\SolrMarc::class => Catalog\RecordDriver\SolrMarc::class,
           VuFind\RecordDriver\SolrDefault::class => Catalog\RecordDriver\SolrDefault::class,
+          VuFind\RecordDriver\EDS::class => Catalog\RecordDriver\EDS::class,
         ],
         'delegators' => [
           Catalog\RecordDriver\SolrMarc::class => [

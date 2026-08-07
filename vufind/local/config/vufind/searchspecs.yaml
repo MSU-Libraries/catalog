@@ -307,14 +307,14 @@ JournalTitle:
     - series2
   DismaxHandler: edismax
 #  FilterQuery: "format:Journal OR format:Article"
-  FilterQuery: "format:Journal"
+  FilterQuery: "format:Periodical OR format:Newspaper"
   ExactSettings:
     DismaxFields:
       - title_exactish^500
       - title_full_unstemmed^100
     DismaxHandler: edismax
 #    FilterQuery: "format:Journal OR format:Article"
-    FilterQuery: "format:Journal"
+    FilterQuery: "format:Periodical OR format:Newspaper"
 
 NewspaperTitle:
   DismaxFields:
