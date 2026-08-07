@@ -126,6 +126,10 @@ public class FormatCalculator extends org.vufind.index.FormatCalculator
             case 'p':
                 return "Collection";
         }
+        // PC-1652 MSUL - Merge "Serial" and "Journal" formats
+        if (bibLevel == 's' && get008Value(marc008, 21) == 'p') {
+            return "Periodical";
+        }
 
         // PC-1669 MSUL - Add logic to change 'Slide' assignment
         for (VariableField variableField : record.getVariableFields("655")) {
@@ -229,6 +233,14 @@ public class FormatCalculator extends org.vufind.index.FormatCalculator
             record, recordType, bibLevel, marc008, couldBeBook, formatCodes007
         );
         if (formatFromBibLevel.length() > 0) {
+            // PC-1652 MSUL - Merge "Serial" and "Journal" formats
+            if (
+                formatFromBibLevel.equals("Journal")
+                || formatFromBibLevel.equals("eJournal")
+                || formatFromBibLevel.equals("Serial")
+            ) {
+                formatFromBibLevel = "Periodical";
+            }
             result.add(formatFromBibLevel);
         }
 
