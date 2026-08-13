@@ -61,6 +61,7 @@ def send_by_batch(docs, conn, headers):
         n = n + 1
         print(f"Batch number {n}", end='\r')
         send_batch_to_solr(conn, headers, batch)
+        time.sleep(10) # let Solr recover a little bit before the next batch
     print("\n")
 
 
