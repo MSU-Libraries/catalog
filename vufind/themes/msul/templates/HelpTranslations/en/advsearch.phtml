@@ -1,0 +1,106 @@
+<?php
+$isEDSAvdancedPage = (
+    str_contains($_SERVER['REQUEST_URI'], urlencode('/EDS/Advanced'))
+);
+?>
+<h1>Advanced Searching Tips</h1>
+
+<?php
+if ($isEDSAvdancedPage): ?>
+    <ul class="HelpMenu">
+      <li><a href="#search_fields">Search Fields</a></li>
+      <li><a href="#other_search_options">Other Search Options</a></li>
+    </ul>
+
+    <dl class="Content">
+      <dt><a id="search_fields"></a>Search Fields</dt>
+      <dd>
+        <p>The Advanced Search page allows you to construct complex queries using
+           multiple search fields, each with its own search <i>term</i> (the text
+           to be searched) and search <i>scope</i> (how widely to search).</p>
+        <p>Setting the search scope to <b>“All Fields”</b> returns matches for all
+           titles (including source publication title), authors, subjects,
+           publishers, abstracts, DOIs, ISBNs and more.</p>
+        <p>Setting the search scope to <b>“All Text”</b> also searches the full
+           text of resources (if available). Setting this scope is close to
+           equivalent to selecting the search expander <b>“Also search within the full
+           text of the articles.”</b></p>
+        <p>A range of
+           <a href="<?=$this->url('help', ['topic' => 'search'])?>">Search operators</a>
+           such as “AND”, “OR”, and “NOT” are allowed within each search term
+           (e.g. “Albania” AND “History”). You may also select whether separate
+           search fields themselves should be joined logically with “AND” or
+           “OR”.</p>
+        <p>The <b>"Add Search Field"</b> button can be used to add additional search
+           fields to the query. You may use as many search fields as you wish.</p>
+      </dd>
+      <dt><a id="other_search_options"></a>Other Search Options</dt>
+      <dd>
+        <p>Using the <b>“Apply related words”</b> search expander helps return
+           results for multiple spellings of words (“harbor” / “harbour”) or
+           for synonymous terms (“neoplasm” / “tumor”).</p>
+        <p><b>“Apply equivalent subjects”</b> translates your search term into
+           the official version of the concept used in available thesauri. In
+           a search for “workplace injury”, for instance, records containing the
+           official term “Word-related injuries" would also be returned.</p>
+        <p><b>“SmartText Searching”</b> allows you to enter full sentences or
+           paragraphs as search terms, which are then summarized and used to
+           generate new search terms.</p>
+      </dd>
+    </dl>
+<?php else: ?>
+    <ul class="HelpMenu">
+      <li><a href="#search_fields">Search Fields</a></li>
+      <li><a href="#search_groups">Search Groups</a></li>
+    </ul>
+
+    <dl class="Content">
+      <dt><a id="search_fields"></a>Search Fields</dt>
+      <dd>
+        <p>The Advanced Search page allows you to construct complex queries using
+           multiple search fields, each with its own search <i>term</i> (the text
+           to be searched) and search <i>scope</i> (how widely to search).</p>
+        <p>Setting the search scope to <b>“All Fields”</b> returns matches for
+           all titles (including source publication title), authors, subjects,
+           publishers, abstracts, ISBNs, series, genres, table of contents,
+           and more.</p>
+        <p>A range of
+           <a href="<?=$this->url('help', ['topic' => 'search'])?>">Search operators</a>
+           such as “AND”, “OR”, and “NOT” are allowed within each search term
+           (e.g. “Albania” AND “History”). You may also select whether separate
+           search fields themselves should be joined logically with “AND” or
+           “OR”.</p>
+        <p>The <b>"Add Search Field"</b> button can be used to add additional
+           search fields to the query. You may use as many search fields as you
+           wish.</p>
+        <p>The <b>"Match"</b> setting lets you specify how multiple search
+           fields should be handled.</p>
+        <ul>
+          <li>ALL Terms - Return only records that match every search field.</li>
+          <li>ANY Terms - Return any records that match at least one search field.</li>
+          <li>NO Terms -- Return all records EXCEPT those that match search fields.</li>
+        </ul>
+      <dt><a id="search_groups"></a>Search Groups</dt>
+      <dd>
+        <p>For certain complex searches, a single set of search fields may not be
+           enough.</p>
+        <p>Search Groups provide a way to build searches from multiple groups of
+           search fields.  Every time you click the "Add Search Group" button, a new
+           group of fields is added.  Once you have multiple search groups, you can
+           remove unwanted groups with the "Remove Search Group" button, and you can
+           specify whether you want to match on ANY or ALL search groups.</p>
+        <p>Suppose you want to find books about the history of China or India. If
+           you did an ALL Terms search for China, India, and History, you would
+           only get books about China AND India. If you did an ANY Terms search,
+           you would get books about history that had nothing to do with China or
+           India.</p>
+        <ul>
+          <li>In the first search group, enter "India" and "China" and make sure that
+              the "Match" setting is "ANY Terms."</li>
+          <li>Add a second search group and enter "history."</li>
+          <li>Make sure the match setting next to the Search Groups header is set to
+              "ALL Groups."</li>
+        </ul>
+      </dd>
+    </dl>
+<?php endif; ?>
