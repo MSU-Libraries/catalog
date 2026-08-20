@@ -1,4 +1,4 @@
-FROM registry.gitlab.msu.edu/msu-libraries/catalog/galera:11.4.7
+FROM registry.gitlab.msu.edu/msu-libraries/catalog/galera:11.4.12
 
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
