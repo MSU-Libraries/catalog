@@ -8,7 +8,7 @@ galera_node_query() {
     while read -r -a ROW_$ROW_CNT; do
         (( ROW_CNT+=1 ))
         declare -g -a ROW_$ROW_CNT
-    done < <( mysql -h "$NODE" -u root -p"$(cat "${MARIADB_ROOT_PASSWORD_FILE}")" --silent -e "$QUERY" )
+    done < <( mariadb --skip-ssl -h "$NODE" -u root -p"$(cat "${MARIADB_ROOT_PASSWORD_FILE}")" --silent -e "$QUERY" )
     return $ROW_CNT
 }
 
@@ -18,13 +18,13 @@ if [[ -f "/bitnami/mariadb/data/sst_in_progress" ]]; then
     exit 0
 fi
 
-if ! mysqladmin -u root -p"$(cat "${MARIADB_ROOT_PASSWORD_FILE}")" ping; then
-    echo "Failed mysqladmin ping."
+if ! mariadb-admin --skip-ssl -u root -p"$(cat "${MARIADB_ROOT_PASSWORD_FILE}")" ping; then
+    echo "Failed mariadb-admin ping."
     exit 1
 fi
 
-if ! mysqladmin -u root -p"$(cat "${MARIADB_ROOT_PASSWORD_FILE}")" status; then
-    echo "Failed mysqladmin status."
+if ! mariadb-admin --skip-ssl -u root -p"$(cat "${MARIADB_ROOT_PASSWORD_FILE}")" status; then
+    echo "Failed mariadb-admin status."
     exit 1
 fi
 
