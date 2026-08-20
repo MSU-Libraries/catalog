@@ -22,8 +22,17 @@ gemnasium-python-dependency_scanning:
   script:
     # Overriding to allow mariadb pip package install to work for analyzer
     - apt update
-    - apt install -y libmariadb-dev
+    - apt install -y libmariadb-dev jq
     - /analyzer run
+    # Parse report artifact and fail if any vulnerability is found
+    - |
+      if [ -f gl-dependency-scanning-report.json ]; then
+        COUNT=$(jq '.vulnerabilities | length' gl-dependency-scanning-report.json)
+        if [ "$COUNT" -gt 0 ]; then
+          echo "Error: $COUNT dependency vulnerabilities detected!"
+          exit 1
+        fi
+      fi
 
 markdownlint-cli2:
   stage: test

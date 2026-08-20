@@ -80,7 +80,8 @@ async def get_aiohttp_session(timeout: int=DEFAULT_TIMEOUT) -> aiohttp.ClientSes
         (ClientSession): Yields the session and then closes it
     '''
     try:
-        conn = aiohttp.TCPConnector(limit_per_host=100, limit=0, ttl_dns_cache=300)
+        conn = aiohttp.TCPConnector(limit_per_host=100, limit=0, ttl_dns_cache=300,
+            loop=get_eventloop())
         aiohttp_timeout = aiohttp.ClientTimeout(total=timeout)
         session = aiohttp.ClientSession(
             connector=conn, timeout=aiohttp_timeout, raise_for_status=True
@@ -139,7 +140,8 @@ def multiple_get(urls: list[str], convert_to_json: bool=False, timeout: int=DEFA
         await session.close()
 
     loop = get_eventloop()
-    conn = aiohttp.TCPConnector(limit_per_host=100, limit=0, ttl_dns_cache=300)
+    conn = aiohttp.TCPConnector(limit_per_host=100, limit=0, ttl_dns_cache=300,
+        loop=get_eventloop())
     results = {}
     loop.run_until_complete(gather_with_concurrency())
     conn.close()
