@@ -11,8 +11,7 @@ x-mariadb-envs: &mariadb_envs # secrets are prefixed with stack name in deploy-c
   MARIADB_SKIP_TEST_DB: "yes"
   MARIADB_CHARACTER_SET: utf8mb4
   MARIADB_COLLATE: utf8mb4_unicode_ci
-  MARIADB_EXTRA_FLAGS: --old_passwords=OFF --default-authentication-plugin=mysql_native_password --secure_auth=ON --skip-ssl
-  MARIADB_UPGRADE: "yes"
+  MARIADB_EXTRA_FLAGS: --default-authentication-plugin=mysql_native_password --skip-ssl
 
 ######### WARNING ########
 # Before force bootstrapping a node, ensure it was the last node to be stopped.
