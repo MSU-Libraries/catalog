@@ -280,6 +280,21 @@ async def node_available_disk_space() -> str:
     except asyncio.TimeoutError:
         return "Timeout when getting available disk space"
 
+async def node_load_average() -> str:
+    '''
+    Get the server load average
+    Returns:
+        (str): The load average, or the error retrieving it
+    '''
+    try:
+        return await async_exec(
+            "/bin/sh", "-c", "cat /proc/loadavg | awk '{print $1}'"
+        )
+    except ExecException as ex:
+        return f"Error getting load average: {ex}"
+    except asyncio.TimeoutError:
+        return "Timeout when getting load average"
+
 def get_memory_status(statuses: list[dict]) -> str:
     '''
     Get the memory available on each node
@@ -333,6 +348,33 @@ def get_disk_space_status(statuses: list[dict]) -> str:
     if lowest < 20.:
         return f"Low available disk space on node {lowest_node}: {lowest}%"
     return f"OK - lowest available disk space: {lowest}%"
+
+def get_load_average_status(statuses: list[dict]) -> str:
+    '''
+    Get the load average on each node
+    Args:
+        statuses (list): Status data
+    Returns:
+        (str): Message with information on the load average
+    '''
+    for node in range(1, 4):
+        load_average = statuses[node-1]['load_average']
+        try:
+            float(load_average)
+        except ValueError:
+            return f'Returned value for load average is not a number on node {node}:' \
+            f'{load_average}'
+    highest = 0.0
+    highest_node = 0
+    for node in range(1, 4):
+        load_average = statuses[node-1]['load_average']
+        if float(load_average) > highest:
+            highest_node = node
+            highest = float(load_average)
+    highest = round(highest, 2)
+    if highest > 7.0:
+        return f"High load average on node {highest_node}: {highest}"
+    return f"OK - highest load average: {highest}"
 
 
 # Harvests
@@ -438,7 +480,8 @@ def get_node_status() -> dict:
                 _node_solr_status(aiohttp_session),
                 _node_vufind_status(aiohttp_session),
                 node_available_memory(),
-                node_available_disk_space()
+                node_available_disk_space(),
+                node_load_average()
             ]
             return await asyncio.gather(*commands)
     results = asyncio.run(async_inner())
@@ -448,6 +491,7 @@ def get_node_status() -> dict:
     status['vufind'] = results[2]
     status['available_memory'] = results[3]
     status['available_disk_space'] = results[4]
+    status['load_average'] = results[5]
     status['harvests'] = _node_cron_exit_codes()
     return status
 

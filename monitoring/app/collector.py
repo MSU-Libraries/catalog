@@ -95,10 +95,12 @@ def main():
     time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     results = get_eventloop().run_until_complete(asyncio.gather(
         status.node_available_memory(),
-        status.node_available_disk_space()
+        status.node_available_disk_space(),
+        status.node_load_average()
     ))
     memory = results[0]
     disk = results[1]
+    load_avg = results[2]
     stats = _read_docker_stats()
     log_results = _analyse_log()
     nb_requests = log_results['request_count']
@@ -108,12 +110,12 @@ def main():
         with DBConnection() as conn:
             cur = conn.cursor()
             statement = "INSERT INTO data (node, time, available_memory, available_disk_space, " \
-                "apache_requests, response_time, solr_solr_cpu, solr_solr_mem, solr_cron_cpu, " \
+                "load_average, apache_requests, response_time, solr_solr_cpu, solr_solr_mem, solr_cron_cpu, " \
                 "solr_cron_mem, solr_zk_cpu, solr_zk_mem, catalog_catalog_cpu, " \
                 "catalog_catalog_mem, mariadb_galera_cpu, mariadb_galera_mem) " \
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
             data = (
-                os.getenv('NODE'), time, memory, disk, nb_requests, response_time,
+                os.getenv('NODE'), time, memory, disk, load_avg, nb_requests, response_time,
                 stats.get('solr_solr_cpu'), stats.get('solr_solr_mem'), stats.get('solr_cron_cpu'),
                 stats.get('solr_cron_mem'), stats.get('solr_zk_cpu'), stats.get('solr_zk_mem'),
                 stats.get('catalog_catalog_cpu'), stats.get('catalog_catalog_mem'),

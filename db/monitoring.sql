@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS `data` (
     `time` DATETIME NOT NULL,
     `available_memory` FLOAT NOT NULL,
     `available_disk_space` FLOAT NOT NULL,
+    `load_average` FLOAT NOT NULL DEFAULT 0.0,
     `apache_requests` INT NOT NULL,
     `response_time` INT,
     `solr_solr_cpu` FLOAT,
