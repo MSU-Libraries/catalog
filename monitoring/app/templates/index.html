@@ -9,6 +9,7 @@
     <ul>
         <li>Memory: <span class="text-{{services['memory']['color']}}">{{services['memory']['status']}}</span></li>
         <li>Disk space: <span class="text-{{services['disk_space']['color']}}">{{services['disk_space']['status']}}</span></li>
+        <li>Load average: <span class="text-{{services['load_avg']['color']}}">{{services['load_avg']['status']}}</span></li>
         <li>Galera: <span class="text-{{services['galera']['color']}}">{{services['galera']['status']}}</span></li>
         <li>Solr: <span class="text-{{services['solr']['color']}}">{{services['solr']['status']}}</span></li>
         <li>Vufind: <span class="text-{{services['vufind']['color']}}">{{services['vufind']['status']}}</span></li>
@@ -31,6 +32,7 @@
     <ul>
         <li><a href="/monitoring/graphs/available_memory/hour">Available memory</a></li>
         <li><a href="/monitoring/graphs/available_disk_space/hour">Available disk space</a></li>
+        <li><a href="/monitoring/graphs/load_average/hour">Load average</a></li>
         <li><a href="/monitoring/graphs/apache_requests/hour">Apache requests</a></li>
         <li><a href="/monitoring/graphs/response_time/hour">VuFind response time</a></li>
         <li><a href="/monitoring/graphs/solr_solr_cpu/hour">Solr container CPU</a></li>

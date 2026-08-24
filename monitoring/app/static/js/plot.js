@@ -9,6 +9,8 @@ function plot(variable, period, data) {
         ytitle = 'Average ' + variable_with_spaces + ' (%)';
     else if (variable.endsWith('_mem'))
         ytitle = 'Maximum ' + variable_with_spaces + ' (%)';
+    else if (variable.startsWith('load_'))
+        ytitle = 'Maximum ' + variable_with_spaces;
     else
         ytitle = 'Minimum ' + variable_with_spaces + ' (%)';
     var title = variable_with_spaces.charAt(0).toUpperCase() + variable_with_spaces.slice(1) +
