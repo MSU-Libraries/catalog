@@ -110,8 +110,8 @@ def main():
         with DBConnection() as conn:
             cur = conn.cursor()
             statement = "INSERT INTO data (node, time, available_memory, available_disk_space, " \
-                "load_average, apache_requests, response_time, solr_solr_cpu, solr_solr_mem, solr_cron_cpu, " \
-                "solr_cron_mem, solr_zk_cpu, solr_zk_mem, catalog_catalog_cpu, " \
+                "load_average, apache_requests, response_time, solr_solr_cpu, solr_solr_mem, " \
+                "solr_cron_cpu, solr_cron_mem, solr_zk_cpu, solr_zk_mem, catalog_catalog_cpu, " \
                 "catalog_catalog_mem, mariadb_galera_cpu, mariadb_galera_mem) " \
                 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
             data = (
