@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS `data` (
 
 CREATE INDEX IF NOT EXISTS idx_time ON data(time);
 
+ALTER TABLE `data` ADD COLUMN IF NOT EXISTS `load_average` FLOAT NOT NULL DEFAULT 0.0 AFTER `available_disk_space`;
+
 GRANT ALL PRIVILEGES ON monitoring.* TO 'monitoring'@'%' identified by '${MARIADB_MONITORING_PASSWORD}';
 
 FLUSH PRIVILEGES;
