@@ -98,7 +98,7 @@
   }
   // hide the arrow next to the dropdown of the export options
   .dropdown-toggle::after {
-  display: none;
+    display: none;
   }
 
   //Fix display of export options
@@ -155,4 +155,9 @@
       word-wrap: anywhere;
     }
   }
+}
+
+// Fix clicking on "Login for full access" link in EDS record
+.record .media-left.img-col {
+  max-width: none;
 }

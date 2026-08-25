@@ -244,6 +244,9 @@ mark {
   .result .result-body th {
     white-space: nowrap;
   }
+  .template-dir-author.template-name-search .mainbody.left {
+    padding-left: 1rem;
+  }
 }
 
 .mainbody.right {
@@ -256,7 +259,7 @@ mark {
 
 // Facet sidebar
 #search-sidebar {
-  padding: 0.7rem;
+  padding: 0 .7rem 0 .7rem;
   margin-top: 0;
 }
 
@@ -285,4 +288,9 @@ mark {
   nav {
     margin: .5rem auto 0 auto;
   }
+}
+
+// Align search results with wide screen (assuming headers are the same for all records)
+.record-list .result-body table {
+  width: 100%;
 }

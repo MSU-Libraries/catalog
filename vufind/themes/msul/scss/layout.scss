@@ -33,9 +33,9 @@ footer {
   background: white;
 }
 
-.template-name-newitem, .template-name-advanced, .template-name-cataloglogin, .template-name- {
+.template-name-newitem, .template-name-advanced, .template-name-login, .template-name-404, .template-name- {
   #content {
-    padding: 1rem;
+    padding: 0 1rem 1rem 1rem;
   }
 }
 
@@ -44,8 +44,8 @@ footer {
   width: auto;
 
   p {
-    margin-top: 0.5rem;
-    margin-bottom: 0;
+    padding-top: 0.5rem;
+    margin: 0;
   }
 
   & > p > a {
