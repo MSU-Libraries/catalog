@@ -77,7 +77,7 @@ grastate_stp() {
     echo "$GRA"
 }
 
-if [[ "$1" = "/cloud-startup.sh" ]]; then
+if [[ "$1" == *"/cloud-startup.sh" ]]; then
     PRE_GRA=$( grastate_stp )
     info "** Starting MariaDB setup **"
     info "MARIADB_GALERA_CLUSTER_BOOTSTRAP=$MARIADB_GALERA_CLUSTER_BOOTSTRAP"
