@@ -1518,6 +1518,25 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
     }
 
     /**
+     * Return all data for all courses, from /coursereserves/courses.
+     *
+     * @return array all data for all courses
+     */
+    public function getAllCourses()
+    {
+        $retVal = [];
+        foreach (
+            $this->getPagedResults(
+                'courses',
+                '/coursereserves/courses'
+            ) as $item
+        ) {
+            $retVal[] = $item;
+        }
+        return $retVal;
+    }
+
+    /**
      * Find Reserves
      *
      * Obtain information on course reserves.
@@ -1532,7 +1551,8 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
     {
         $retVal = [];
         $query = [];
-        $legalCourses = $this->getCourses();
+        // MSU optimizations
+        $allCourses = $this->getAllCourses();
 
         $includeSuppressed = $this->config['CourseReserves']['includeSuppressed'] ?? false;
 
@@ -1550,15 +1570,18 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
                 $query
             ) as $item
         ) {
-            // MSU customization to always use instanceId so that we can have getBibId lookup
-            // the correct prefix
-            $instanceId = $item->copiedItem->instanceId ?? null;
-            $bibId = $this->getBibId($instanceId);
+            $idProperty = $this->getBibIdType() === 'hrid'
+                ? 'instanceHrid' : 'instanceId';
+            // MSU customization: hrid prefix
+            if (property_exists($item->copiedItem, $idProperty)) {
+                $bibId = 'folio.' . $item->copiedItem->$idProperty;
+            } else {
+                $bibId = null;
+            }
 
             // MSU customization - Get the electronic access links from the item record if possible
             // electronicAccess will be an array with keys: uri, linkText, publicNote, relationshipId
             $itemId = $item->itemId ?? null;
-            $electronicAccess = null;
             $urlPattern = '/https?:\/\/catalog\.lib\.msu\.edu\/Record\/([.a-zA-Z0-9]+)/i';
             if ($itemId !== null) {
                 $links = $this->getElectronicAccessLinks($itemId) ?? [];
@@ -1569,29 +1592,27 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
                     }
                 }
             }
-
-            if ($bibId !== null) {
-                $courseData = $this->getCourseDetails(
-                    $item->courseListingId ?? null
-                );
-                $instructorIds = $this->getInstructorIds(
-                    $item->courseListingId ?? null
-                );
-                foreach ($courseData as $courseId => $departmentId) {
-                    // If the present course ID is not in the legal course list, it is likely
-                    // expired data and should be skipped.
-                    if (!isset($legalCourses[$courseId])) {
-                        continue;
-                    }
-                    foreach ($instructorIds as $instructorId) {
-                        $retVal[] = [
-                            'BIB_ID' => $bibId,
-                            'COURSE_ID' => $courseId == '' ? null : $courseId,
-                            'DEPARTMENT_ID' => $departmentId == ''
-                                ? null : $departmentId,
-                            'INSTRUCTOR_ID' => $instructorId,
-                        ];
-                    }
+            if ($bibId == null) {
+                continue;
+            }
+            // MSU optimizations
+            $coursesForReserve = array_filter(
+                $allCourses,
+                fn ($courseObj) => $courseObj->courseListingId == $item->courseListingId
+            );
+            foreach ($coursesForReserve as $courseForReserve) {
+                $courseId = $courseForReserve->id;
+                $departmentId = $courseForReserve->departmentId;
+                $instructorObjects = $courseForReserve->courseListingObject->instructorObjects;
+                foreach ($instructorObjects as $instructor) {
+                    $instructorId = $instructor->id;
+                    $retVal[] = [
+                        'BIB_ID' => $bibId,
+                        'COURSE_ID' => $courseId == '' ? null : $courseId,
+                        'DEPARTMENT_ID' => $departmentId == ''
+                            ? null : $departmentId,
+                        'INSTRUCTOR_ID' => $instructorId,
+                    ];
                 }
             }
         }
