@@ -19,9 +19,16 @@
 }
 
 // Make See also (.authoritybox) display inline
-.authoritybox {display:inline-flex;}
-.authoritybox div {
-  margin-right:1rem;
+.authoritybox {
+  @media (min-width: 640px) {
+    display: inline-flex;
+    div:first-child {
+      white-space: nowrap;
+    }
+  }
+  div {
+    margin-right: 1rem;
+  }
 }
 
 .pager li {
