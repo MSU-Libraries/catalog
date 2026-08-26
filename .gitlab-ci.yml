@@ -255,8 +255,7 @@ Deploy Monitoring:
     - job: Set Stack Name
       artifacts: true
     - Build Monitoring Image
-    - Deploy Compose Files
-    - Deploy Internal Network
+    - Verify DB Health
   script:
     - bash ./cicd/deploy-monitoring
 
