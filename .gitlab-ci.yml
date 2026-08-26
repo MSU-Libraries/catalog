@@ -305,6 +305,19 @@ Verify DB Health:
   script:
     - bash ./cicd/verify-db-health
 
+Upgrade DB Tables:
+  extends: .stack_template
+  environment:
+    name: $ENV_BRANCH_NAME/dbupgrade
+    auto_stop_in: 2 weeks
+  timeout: 40m
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Verify DB Health
+  script:
+    - bash ./cicd/upgrade-db-tables
+
 Populate Vufind Environment:
   extends: .stack_template
   environment:
