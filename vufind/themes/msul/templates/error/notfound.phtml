@@ -1,0 +1,6 @@
+<?php
+    // Grabs the path part (e.g., /Record/hlm.ebs11168201e) and takes the last segment (e.g. hlm.ebs11168201e)
+    $path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+    $recordId = basename(trim($path, '/'));
+?>
+<p>This record with ID <b><?= $this->escapeHtml($recordId) ?></b> is not available.</p>
