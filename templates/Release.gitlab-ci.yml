@@ -61,7 +61,7 @@ GitHub Release:
     - cd catalog.git
     # Push the tags and branches
     - git push -v --tags https://$GITHUB_USER_TOKEN@github.com/MSU-Libraries/catalog.git
-    - git push -v  https://$GITHUB_USER_TOKEN@github.com/MSU-Libraries/catalog.git "refs/heads/*:refs/heads/*"
+    - git push -v --force  https://$GITHUB_USER_TOKEN@github.com/MSU-Libraries/catalog.git main
     # Create the release in GitHUb
     - echo "{\"tag_name\":\"${TAG}\", \"target_commitish\":\"${CI_COMMIT_SHA}\"}" > data.json
     - "curl -X POST -H 'Accept: application/vnd.github.v3+json' -u $GITHUB_USER_TOKEN https://api.github.com/repos/MSU-Libraries/catalog/releases -d '@data.json'"
