@@ -1604,8 +1604,12 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
                 $courseId = $courseForReserve->id;
                 $departmentId = $courseForReserve->departmentId;
                 $instructorObjects = $courseForReserve->courseListingObject->instructorObjects;
-                foreach ($instructorObjects as $instructor) {
-                    $instructorId = $instructor->id;
+                $instructorIds = array_map(fn ($instructor) => $instructor->id, $instructorObjects);
+                if (empty($instructorIds)) {
+                    // make sure at least one record is returned even when there is no related instructor
+                    $instructorIds = [ null ];
+                }
+                foreach ($instructorIds as $instructorId) {
                     $retVal[] = [
                         'BIB_ID' => $bibId,
                         'COURSE_ID' => $courseId == '' ? null : $courseId,
