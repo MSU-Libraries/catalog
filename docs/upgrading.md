@@ -134,7 +134,7 @@ time when they are empty.
 <!-- markdownlint-disable MD013 -->
 ```bash
 # This sample is doing it for catprod-prod
-sudo -Hu deploy bash -c 'docker stack deploy --with-registry-auth --detach=false -c <(source "/home/deploy/catprod-prod/.env"; envsubst < "/home/deploy/catprod-prod/docker-compose.build.yml") "catprod-prod-catalog"'
+sudo -Hu deploy bash -c 'docker stack deploy --with-registry-auth --detach=false -c <(source "/home/deploy/catprod-prod/.env"; envsubst < "/home/deploy/catprod-prod/docker-compose.catalog-build.yml") "catprod-prod-catalog"'
 ```
 <!-- markdownlint-enable MD013 -->
 
