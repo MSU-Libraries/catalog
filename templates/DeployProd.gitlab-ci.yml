@@ -241,3 +241,16 @@ Prod Run Functional Tests:
     - job: Begin Prod Deploy
       artifacts: true
     - Prod Run Cache Clear
+
+Prod Upgrade DB Tables:
+  extends: Upgrade DB Tables
+  environment:
+    name: $ENV_BRANCH_NAME-prod/dbupgrade
+    auto_stop_in: 2 weeks
+  timeout: 40m
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Verify Prod DB Health
+  script:
+    - bash ./cicd/upgrade-db-tables
