@@ -243,11 +243,14 @@ Prod Run Functional Tests:
     - Prod Run Cache Clear
 
 Prod Upgrade DB Tables:
+  stage: Deploy Prod
   extends: Upgrade DB Tables
   environment:
     name: $ENV_BRANCH_NAME-prod/dbupgrade
     auto_stop_in: 2 weeks
   timeout: 40m
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
     - job: Set Stack Name
       artifacts: true
