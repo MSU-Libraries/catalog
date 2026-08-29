@@ -39,16 +39,15 @@ sudo -Hu deploy pc-deploy devel-test docker-compose.solr-bootstrap.yml
 
 Locates the OAI harvest file that contains the given FOLIO instance ID,
 which can be then used for importing a specific record into your stack
-(or re-importing it). Additionally, it has the option to extract the single
-record from an OAI file and put it in a temporary file. The script is
-available on the host machines as well as within the `catalog`, `cron` and
-`build` containers in the `catalog` stack.
+(or re-importing it), exactly as it was harvested. Additionally, it has
+the option to extract the single record from an OAI file and put it in
+a temporary file. The script is available on the host machines as well
+as within the `catalog`, `cron` and `build` containers in the `catalog`
+stack.
 
 ```bash
 # Locate the file that contains data for in01234 in catprod-prod's OAI files
 # that have previously been imported to that environment
-pc-locate-oai in01234
-# or
 pc-locate-oai in01234
 
 # Give verbose output to show you the grep command being run
@@ -60,6 +59,9 @@ pc-locate-oai in01234 catprod-beta
 # Locate the files that contain data for in00005342798 and in00001442723
 # then extract the data for those specific records into a temp file
 pc-locate-oai in00005342798,in00001442723 --extract
+
+# See full help on the command along with other options
+pc-locate-oai -h
 ```
 
 ## HLM File Locator ([pc-locate-hlm](https://gitlab.msu.edu/msu-libraries/catalog/catalog-infrastructure/-/blob/main/configure-playbook/roles/deploy-helper-scripts/files/pc-locate-hlm?ref_type=heads))
