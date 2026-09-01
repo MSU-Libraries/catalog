@@ -187,13 +187,13 @@ apply_prod_changes() {
         if [[ "${STACK_NAME}" == *"-beta" ]]; then
             # Set cron/build placement constraint
             ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_2}\"]" docker-compose.catalog.yml;
-            ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_2}\"]" docker-compose.build.yml;
+            ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_2}\"]" docker-compose.catalog-build.yml;
         fi;
         ## Only catprod-preview
         if [[ "${STACK_NAME}" == *"-preview" ]]; then
             # Set cron/build placement constraint
             ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_3}\"]" docker-compose.catalog.yml;
-            ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_3}\"]" docker-compose.build.yml;
+            ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_3}\"]" docker-compose.catalog-build.yml;
         fi;
     fi
 
@@ -201,7 +201,7 @@ apply_prod_changes() {
     if [[ "${STACK_NAME}" == *"-prod" ]]; then
         # Set cron/build placement constraint
         ./yq -i ".services.cron.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.catalog.yml;
-        ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.build.yml;
+        ./yq -i ".services.build.deploy.placement.constraints += [\"node.hostname==${DEPLOY_HOST_1}\"]" docker-compose.catalog-build.yml;
         # Increase Solr RAM to 16+8GB (prod is granted more than non-prod envs)
         ./yq -i \
         ".x-solr-envs.SOLR_JAVA_MEM = \"-Xms16384m -Xmx16384m -XX:MaxDirectMemorySize=8192m\"" \
