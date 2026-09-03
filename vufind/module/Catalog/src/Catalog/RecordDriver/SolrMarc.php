@@ -2703,4 +2703,70 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         }
         return current($return); // Returning only one as templating display only strings
     }
+
+    /**
+     * Return an XML representation of the record using the specified format.
+     * Return false if the format is unsupported.
+     *
+     * @param string       $format  Name of format to use (corresponds with
+     * OAI-PMH metadataPrefix parameter).
+     * @param string       $baseUrl Base URL of host containing VuFind (optional;
+     * may be used to inject record URLs into XML when appropriate).
+     * @param RecordLinker $linker  Record linker helper (optional; may be used to
+     * inject record URLs into XML when appropriate).
+     *
+     * @return mixed XML, or false if format unsupported.
+     */
+    public function getXML($format, $baseUrl = null, $linker = null)
+    {
+        // For OAI-PMH Dublin Core, produce the necessary XML:
+        if ($format == 'oai_dc') {
+            $dc = 'http://purl.org/dc/elements/1.1/';
+            $xml = new \SimpleXMLElement(
+                '<oai_dc:dc '
+                . 'xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" '
+                . 'xmlns:dc="' . $dc . '" '
+                . 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+                . 'xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ '
+                . 'http://www.openarchives.org/OAI/2.0/oai_dc.xsd" />'
+            );
+            $xml->addChild('title', htmlspecialchars($this->getTitle()), $dc);
+            $authors = $this->getDeduplicatedAuthors();
+            foreach ($authors as $list) {
+                foreach (array_keys($list) as $author) {
+                    $xml->addChild('creator', htmlspecialchars($author), $dc);
+                }
+            }
+            foreach ($this->getLanguages() as $lang) {
+                $xml->addChild('language', htmlspecialchars($lang), $dc);
+            }
+            foreach ($this->getPublishers() as $pub) {
+                $xml->addChild('publisher', htmlspecialchars($pub), $dc);
+            }
+            foreach ($this->getPublicationDates() as $date) {
+                $xml->addChild('date', htmlspecialchars($date), $dc);
+            }
+            foreach ($this->getAllSubjectHeadings() as $subj) {
+                // MSUL PC-1231
+                if (isset($subj[0]['subject'])) {
+                    $subj = array_column($subj, 'subject');
+                }
+                // END MSUL
+                $xml->addChild(
+                    'subject',
+                    htmlspecialchars(implode(' -- ', $subj)),
+                    $dc
+                );
+            }
+            if (null !== $baseUrl && null !== $linker) {
+                $url = $baseUrl . $linker->getUrl($this);
+                $xml->addChild('identifier', $url, $dc);
+            }
+
+            return $xml->asXml();
+        }
+
+        // Unsupported format:
+        return false;
+    }
 }
