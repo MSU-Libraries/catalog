@@ -1,4 +1,4 @@
-FROM solr:9.8
+FROM solr:9.10
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Detroit
