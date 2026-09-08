@@ -1,9 +1,0 @@
-User-agent: *
-Crawl-delay: 1
-Disallow: /
-Allow: /$
-Allow: /Alphabrowse/Home$
-Allow: /Browse/Home$
-Allow: /EDS/Home$
-Allow: /Search/Advanced$
-Allow: /Search/Reserves$
