@@ -11,7 +11,7 @@ over-utilize resources and slow down the site significantly for other users.
 The catalog comes with a built-in configurable `captcha` service based on the
 `go-away` bot detection tool, which we've modified to add a custom theme to.
 ([original source repo](https://git.gammaspectra.live/git/go-away),
-[modified source repo](https://gitlab.msu.edu/msu-libraries/public/go-away))
+[modified source repo](https://www.gitlab.msu.edu/msu-libraries/public/go-away))
 
 This captcha service proxies all traffic between Traefik and VuFind containers
 so that it can identify and provide "challenges" for visitors. These challenges
