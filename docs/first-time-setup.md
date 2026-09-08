@@ -153,7 +153,7 @@ as a permission set with the FOLIO API, with a `POST` request to
 
 ### Creating a CI/CD Token
 
-Create a new [access token](https://gitlab.msu.edu/help/user/project/settings/project_access_tokens)
+Create a new [access token](https://www.gitlab.msu.edu/help/user/project/settings/project_access_tokens)
 that has `read_registry` privileges to the repository and create a new
 CI/CD variable with the resulting key value (`REGISTRY_ACCESS_TOKEN`).
 
