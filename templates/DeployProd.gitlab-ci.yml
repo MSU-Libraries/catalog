@@ -252,7 +252,7 @@ Prod Upgrade DB Tables:
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
   needs:
-    - job: Set Stack Name
+    - job: Begin Prod Deploy
       artifacts: true
     - Verify Prod DB Health
   script:
