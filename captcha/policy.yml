@@ -39,7 +39,12 @@ conditions:
   # Conditions will get replaced on rules AST when found as ($condition-name)
   # Conditions will get included from snippets
 
+  is-crawl-asset:
+    - 'path.matches("^/sitemap")'
+    - 'path == "/robots.txt"'
+
   is-static-asset:
+    - 'path == "/favicon.ico"'
     - 'path == "/apple-touch-icon.png"'
     - 'path == "/apple-touch-icon-precomposed.png"'
     - 'path.matches("^/themes/")'
@@ -150,6 +155,11 @@ rules:
     action: proxy
     settings:
       proxy-backend: "access-limited"
+
+  - name: allow-crawlers
+    conditions:
+      - '($is-crawl-asset)'
+    action: pass
 
   - name: undesired-crawlers
     conditions:
