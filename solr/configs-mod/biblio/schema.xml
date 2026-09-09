@@ -31,6 +31,6 @@
     <copyField source="allfields" dest="allfields_unstemmed" deleteElement="true"/>
     <copyField source="allfields_unstemmed" dest="spelling"/>
     <copyField source="format" dest="allfields" deleteElement="true"/>
-    <copyField source="title" dest="title_exactish"/>
+    <copyField source="title_auth" dest="title_exactish"/>
     <copyField source="title_full" dest="title_fullStr" deleteElement="true"/>
 </schema>

@@ -394,7 +394,7 @@ AllFields:
   DismaxHandler: edismax
   ExactSettings:
     DismaxFields:
-      - title_exactish^1000
+      - title_exactish^2000
       - title_full_unstemmed^500
       - topic_unstemmed^400
       - allfields_unstemmed^10
