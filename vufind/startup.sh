@@ -33,8 +33,10 @@ if [[ "${STACK_NAME}" == devel-* ]]; then
     if [[ ${VUFIND_CORE_INSTALLATION} -eq 1 ]]; then
         verbose "  VuFind core install: set up the symlink to be able to access code from host machine..."
         rm -r /usr/local/vufind/module/Catalog /usr/local/vufind/themes/msul
-        # Changing theme in config
-        sed -i -r 's/^(theme\s+= )msul/\1bootstrap5/' /usr/local/vufind/local/config/vufind/config.ini
+        # Changing theme in config & remove DigitalRepo for cover images
+        sed -i -r -e 's/^(theme\s+= )msul/\1bootstrap5/' \
+            -e 's/^(coverimages\s+= .*?),DigitalRepository/\1/' \
+            /usr/local/vufind/local/config/vufind/config.ini
     fi
 
     verbose "  Enable detailed error reporting for devel"
