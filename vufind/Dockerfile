@@ -60,8 +60,7 @@ COPY tests/ /tests
 COPY composer.local.json /tmp/composer.local.json
 COPY tests/.eslintrc.js /usr/local/vufind/.eslintrc.js
 COPY tests/.jshintignore /usr/local/vufind/.jshintignore
-COPY robots.txt /usr/local/vufind/public/robots.txt
-COPY public/index.php  /usr/local/vufind/public/index.php
+COPY public/  /usr/local/vufind/public
 COPY scripts /usr/local/bin
 COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh backup.sh restore.sh /
 COPY msmtp/aliases msmtp/msmtprc /etc/

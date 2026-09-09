@@ -1,0 +1,12 @@
+User-agent: *
+Crawl-delay: 2
+Allow: /$
+Allow: /Search/Advanced$
+Allow: /Search/Reserves$
+Allow: /EDS/Home$
+Allow: /EDS/Advanced$
+Allow: /Browse/Home$
+Allow: /Alphabrowse/Home$
+Disallow: /
+
+Sitemap: https://catalog.lib.msu.edu/sitemapIndex.xml
