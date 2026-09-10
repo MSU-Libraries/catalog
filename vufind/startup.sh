@@ -89,9 +89,6 @@ fi
 # Unset environment variables that are no longer necessary before starting Apache
 unset DEPLOY_KEY_FILE VUFIND_CORE_INSTALLATION
 
-verbose "Generating sitemap in background..."
-php /usr/local/vufind/util/sitemap.php &
-
 verbose "Starting Apache..."
 verbose "  setting apache envvars..."
 # shellcheck disable=SC1091
