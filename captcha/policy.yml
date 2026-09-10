@@ -149,17 +149,27 @@ rules:
       - '($is-network-gov)'
     action: pass
 
+  - name: allow-crawlers
+    conditions:
+      - '($is-crawl-asset)'
+    action: pass
+
+  - name: desired-crawlers
+    conditions:
+      - *is-bot-googlebot
+      - *is-bot-bingbot
+      - *is-bot-duckduckbot
+      - *is-bot-kagibot
+      - *is-bot-qwantbot
+      - *is-bot-yandexbot
+    action: pass
+
   - name: known-bad-ranges
     conditions:
       - '($is-network-malicious)'
     action: proxy
     settings:
       proxy-backend: "access-limited"
-
-  - name: allow-crawlers
-    conditions:
-      - '($is-crawl-asset)'
-    action: pass
 
   - name: undesired-crawlers
     conditions:
@@ -199,16 +209,6 @@ rules:
   - name: allow-static-resources
     conditions:
       - '($is-static-asset)'
-    action: pass
-
-  - name: desired-crawlers
-    conditions:
-      - *is-bot-googlebot
-      - *is-bot-bingbot
-      - *is-bot-duckduckbot
-      - *is-bot-kagibot
-      - *is-bot-qwantbot
-      - *is-bot-yandexbot
     action: pass
 
   - name: allow-allowed-agents
