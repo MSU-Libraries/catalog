@@ -32,6 +32,8 @@
 
 namespace Catalog\RecordDriver;
 
+use VuFind\RecordDriver\Feature\MarcAdvancedTrait;
+
 use function array_key_exists;
 use function count;
 use function in_array;
@@ -50,6 +52,9 @@ use function sprintf;
 class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 {
     use GetOpenUrlFormatTrait; // PC-1652 - Overwrite the function from DefaultRecord
+    use MarcAdvancedTrait { // PC-1231 - Support for marc21 OAI metadata format
+        MarcAdvancedTrait::getXML as getMarcXML;
+    }
 
     public const LINKSUBF = '6'; // subfield code that has field link information
     public const UNLINKPOS = '00'; // occurance position in the linked subfield that represents unlinked 880s
@@ -58,22 +63,25 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         'local|olacvggt|rbbin|rbgenr|rbmscv|rbpap|rbpri|rbprov|rbpub|rbtyp|tgm|tgn|vgmsgg|wikidata\/eng$/';
 
     /**
-     * Fields that may contain subject headings, and their descriptions
+     * Constructor
      *
-     * @var array
+     * @param \VuFind\Config\Config $mainConfig     VuFind main configuration (omit
+     * for built-in defaults)
+     * @param \VuFind\Config\Config $recordConfig   Record-specific configuration
+     * file (omit to use $mainConfig as $recordConfig)
+     * @param \VuFind\Config\Config $searchSettings Search-specific configuration
+     * file
      */
-    protected $subjectFields = [
-        '600' => 'personal name',
-        '610' => 'corporate name',
-        '611' => 'meeting name',
-        '630' => 'uniform title',
-//        '648' => 'chronological', // MSU commented
-        '650' => 'topic',
-        '651' => 'geographic',
-        '653' => '',
-//        '655' => 'genre/form', // MSU commented
-        '656' => 'occupation',
-    ];
+    public function __construct(
+        $mainConfig = null,
+        $recordConfig = null,
+        $searchSettings = null
+    ) {
+        unset($this->subjectFields['648']); // MSU removed PC-1569
+        unset($this->subjectFields['655']); // MSU removed PC-1120
+
+        parent::__construct($mainConfig, $recordConfig, $searchSettings);
+    }
 
     /**
      * Takes a Marc field that notes are stored in (ex: 950) and a list of
@@ -2764,6 +2772,8 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             }
 
             return $xml->asXml();
+        } elseif ($format == 'marc21') { // MSUL support for marc21 in OAI
+            return $this->getMarcXML($format, $baseUrl, $linker);
         }
 
         // Unsupported format:
