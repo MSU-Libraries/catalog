@@ -1,5 +1,5 @@
 ---
-#include vufind-envs
+#include envs-vufind
 
 version: "3.8"
 

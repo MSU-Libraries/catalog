@@ -1,6 +1,6 @@
 ---
 # The below comment is matched in cicd/deploy-compose-files to insert envs
-#include vufind-envs
+#include envs-vufind
 
 version: "3.8"
 

@@ -245,7 +245,7 @@ main() {
 
     for f in *.yml; do
         # Replace custom includes with related files
-        sed -i -e "/#include vufind-envs/r vufind-envs" -e "/#include vufind-envs/d" "$f"
+        sed -i -e "/#include envs-vufind/r envs-vufind" -e "/#include envs-vufind/d" "$f"
 
         # Secrets prefixing with ${STACK_NAME}-
         if [[ $(./yq '.secrets' "$f") != null ]]; then
