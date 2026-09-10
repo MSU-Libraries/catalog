@@ -9,4 +9,4 @@ Allow: /Browse/Home$
 Allow: /Alphabrowse/Home$
 Disallow: /
 
-Sitemap: https://catalog.lib.msu.edu/sitemapIndex.xml
+Sitemap: https://catalog.lib.msu.edu/sitemap.xml
