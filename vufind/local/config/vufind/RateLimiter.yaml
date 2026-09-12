@@ -145,6 +145,7 @@ Policies:
     ipRangesExcept:
       - "35.8.0.0-35.15.255.255"
       - "35.20.0.0-35.23.255.255"
+      - "10.0.0.0-10.255.255.255"
     filters:
       - controller: Search
       - controller: EDS
@@ -167,6 +168,7 @@ Policies:
     ipRangesExcept:
       - "35.8.0.0-35.15.255.255"
       - "35.20.0.0-35.23.255.255"
+      - "10.0.0.0-10.255.255.255"
     preferIPAddress: true
     rateLimiterSettings:
       policy: token_bucket
