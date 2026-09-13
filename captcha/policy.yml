@@ -22,7 +22,7 @@ challenges:
       js-loader: load.mjs
       wasm-runtime: runtime.wasm
       wasm-runtime-settings:
-        difficulty: 21
+        difficulty: 20
       verify-probability: 0.02
 
   js-pow-sha256-harder:
@@ -32,7 +32,7 @@ challenges:
       js-loader: load.mjs
       wasm-runtime: runtime.wasm
       wasm-runtime-settings:
-        difficulty: 22
+        difficulty: 21
       verify-probability: 0.02
 
 conditions:
@@ -196,7 +196,7 @@ rules:
       # Previously detected badly behaved bots; (?i) = case insensitive match
       - 'userAgent.matches("(?i)(AcademicBotRTU|GoogleOther|FriendlyCrawler|SemrushBot|Diffbot|HawaiiBot|DataForSeoBot)")'
       # The "Intel Mac OS X" bot network
-      - 'userAgent.matches("Intel Mac OS X") && !(userAgent.matches("OS X 10_12_7") || userAgent.matches("OS X 12_7_6") || userAgent.matches("OS X 13_7_8") || userAgent.matches("OS X 10_13_7")|| userAgent.matches("OS X 10_14_[8-9]") || userAgent.matches("OS X 14_[8-9]_") || userAgent.matches("OS X 15_[6-9]_") || userAgent.matches("OS X 10_15_[689]") || userAgent.matches("OS X 26_[2-9]") || userAgent.matches("OS X 10_26_[2-9]"))'
+      - 'userAgent.matches("Intel Mac OS X") && !(userAgent.matches("OS X 10_12_7") || userAgent.matches("OS X 12_7_6") || userAgent.matches("OS X 13_7_8") || userAgent.matches("OS X 10_13_7")|| userAgent.matches("OS X 10_14_[8-9]") || userAgent.matches("OS X 14_[8-9]_") || userAgent.matches("OS X 15_[6-9]_") || userAgent.matches("OS X 10_15_[6-9]") || userAgent.matches("OS X 26_[2-9]") || userAgent.matches("OS X 10_26_[2-9]"))'
     action: proxy
     settings:
       proxy-backend: "access-limited"
