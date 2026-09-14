@@ -12,28 +12,28 @@ challenges:
       js-loader: load.mjs
       wasm-runtime: runtime.wasm
       wasm-runtime-settings:
-        difficulty: 16
+        difficulty: 18
       verify-probability: 0.02
 
-  js-pow-sha256-hard:
-    runtime: js
-    parameters:
-      path: "js-pow-sha256"
-      js-loader: load.mjs
-      wasm-runtime: runtime.wasm
-      wasm-runtime-settings:
-        difficulty: 20
-      verify-probability: 0.02
+  #js-pow-sha256-hard:
+  #  runtime: js
+  #  parameters:
+  #    path: "js-pow-sha256"
+  #    js-loader: load.mjs
+  #    wasm-runtime: runtime.wasm
+  #    wasm-runtime-settings:
+  #      difficulty: 20
+  #    verify-probability: 0.02
 
-  js-pow-sha256-harder:
-    runtime: js
-    parameters:
-      path: "js-pow-sha256"
-      js-loader: load.mjs
-      wasm-runtime: runtime.wasm
-      wasm-runtime-settings:
-        difficulty: 21
-      verify-probability: 0.02
+  #js-pow-sha256-harder:
+  #  runtime: js
+  #  parameters:
+  #    path: "js-pow-sha256"
+  #    js-loader: load.mjs
+  #    wasm-runtime: runtime.wasm
+  #    wasm-runtime-settings:
+  #      difficulty: 21
+  #    verify-probability: 0.02
 
 conditions:
   # Conditions will get replaced on rules AST when found as ($condition-name)
@@ -295,22 +295,29 @@ rules:
       - name: 1
         action: check
         settings:
-          challenges: [js-pow-sha256]
+          challenges: [cookie]
       - name: 2
         action: check
         settings:
-          challenges: [cookie]
+          challenges: [meta-refresh]
       - name: 3
         action: check
         settings:
-          challenges: [preload-link, resource-load]
-      - name: 4
-        action: check
-        settings:
-          challenges: [meta-refresh]
-      - name: 5
-        action: check
-        settings:
           challenges: [header-refresh]
+
+  # recent versions of safari are failing checks
+  - name: non-safari
+    action: none
+    children:
+      - name: 0
+        action: check
+        settings:
+          challenges: [js-pow-sha256]
+      - name: 1
+        action: check
+        settings:
+          challenges: [preload-link, resource-load]
+    conditions:
+      - '! userAgent.matches("Version/[0-9]+\\.[0-9]+(\\.[0-9])? Safari")'
 
 # If end of rules is reached, default is PASS
