@@ -15,25 +15,25 @@ challenges:
         difficulty: 18
       verify-probability: 0.02
 
-  #js-pow-sha256-hard:
-  #  runtime: js
-  #  parameters:
-  #    path: "js-pow-sha256"
-  #    js-loader: load.mjs
-  #    wasm-runtime: runtime.wasm
-  #    wasm-runtime-settings:
-  #      difficulty: 20
-  #    verify-probability: 0.02
+  js-pow-sha256-hard:
+    runtime: js
+    parameters:
+      path: "js-pow-sha256"
+      js-loader: load.mjs
+      wasm-runtime: runtime.wasm
+      wasm-runtime-settings:
+        difficulty: 20
+      verify-probability: 0.02
 
-  #js-pow-sha256-harder:
-  #  runtime: js
-  #  parameters:
-  #    path: "js-pow-sha256"
-  #    js-loader: load.mjs
-  #    wasm-runtime: runtime.wasm
-  #    wasm-runtime-settings:
-  #      difficulty: 21
-  #    verify-probability: 0.02
+  js-pow-sha256-harder:
+    runtime: js
+    parameters:
+      path: "js-pow-sha256"
+      js-loader: load.mjs
+      wasm-runtime: runtime.wasm
+      wasm-runtime-settings:
+        difficulty: 21
+      verify-probability: 0.02
 
 conditions:
   # Conditions will get replaced on rules AST when found as ($condition-name)
