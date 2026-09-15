@@ -1,7 +1,7 @@
 ARG VUFIND_VERSION=11.0.4
 
 # -----------------------------------
-FROM msulibraries/vufind-extended:$VUFIND_VERSION AS comile
+FROM msulibraries/vufind-extended:$VUFIND_VERSION AS compile
 
 COPY cpp/ /tmp/
 WORKDIR /tmp
