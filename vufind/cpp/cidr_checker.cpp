@@ -120,7 +120,8 @@ std::vector<Interval> load_and_merge_cidrs(const char* filepath) {
 
     size_t filesize = sb.st_size;
     if (filesize == 0) {
-        if (verbose) std::cerr << "[WARN] File is empty." << std::endl;
+        if (verbose) std::cerr << "[WARN] File is empty: " << filepath << std::endl;
+        close(fd);
         return {};
     }
 
@@ -186,8 +187,7 @@ std::vector<Interval> load_and_merge_cidrs(const char* filepath) {
 
     if (verbose) {
         std::cerr << "[INFO] Merged into " << merged.size() << " disjoint intervals." << std::endl;
-        std::cerr << "[INFO] Total startup time: " << diff.count() << " seconds." << std::endl;
-        std::cerr << "[INFO] Ready and waiting for input on stdin..." << std::endl;
+        std::cerr << "[INFO] Processing time for " << filepath << ": " << diff.count() << " seconds." << std::endl;
     }
 
     return merged;
@@ -195,6 +195,7 @@ std::vector<Interval> load_and_merge_cidrs(const char* filepath) {
 
 // Binary search through sorted intervals
 inline bool contains_ip(const std::vector<Interval>& intervals, uint32_t ip) {
+    if (intervals.empty()) return false;
     auto it = std::lower_bound(intervals.begin(), intervals.end(), ip,
         [](const Interval& inv, uint32_t target) {
             return inv.end < target;
@@ -203,15 +204,17 @@ inline bool contains_ip(const std::vector<Interval>& intervals, uint32_t ip) {
 }
 
 void print_help(const char* prog_name) {
-    std::cout << "Usage: " << prog_name << " [-h] [-v] <cidr_file>\n\n"
+    std::cout << "Usage: " << prog_name << " [-h] [-v] [-a <allow_file>] <cidr_file>\n\n"
               << "Arguments:\n"
-              << "  -h           Show this help message and exit\n"
-              << "  -v           Enable verbose logging (outputs to stderr)\n"
-              << "  <cidr_file>  Path to the text file containing IPs and CIDRs (one per line)\n";
+              << "  -h                Show this help message and exit\n"
+              << "  -v                Enable verbose logging (outputs to stderr)\n"
+              << "  -a <allow_file>   Optional path to a file containing IPs/CIDRs to never proxy\n"
+              << "  <cidr_file>       Path to the text file containing IPs and CIDRs to proxy\n";
 }
 
 int main(int argc, char* argv[]) {
-    const char* filepath = nullptr;
+    const char* proxy_filepath = nullptr;
+    const char* allow_filepath = nullptr;
 
     // Parse command line arguments
     for (int i = 1; i < argc; ++i) {
@@ -220,28 +223,47 @@ int main(int argc, char* argv[]) {
             return 0;
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose = true;
+        } else if (strcmp(argv[i], "-a") == 0) {
+            if (i + 1 < argc) {
+                allow_filepath = argv[++i];
+            } else {
+                std::cerr << "[ERROR] Missing file path after -a flag.\n\n";
+                print_help(argv[0]);
+                return 1;
+            }
         } else if (argv[i][0] == '-') {
-            std::cerr << "[ERROR] Unknown flag: " << argv[i] << "\n";
+            std::cerr << "[ERROR] Unknown flag: " << argv[i] << "\n\n";
             print_help(argv[0]);
             return 1;
         } else {
-            if (filepath == nullptr) {
-                filepath = argv[i];
+            if (proxy_filepath == nullptr) {
+                proxy_filepath = argv[i];
             } else {
-                std::cerr << "[ERROR] Multiple file paths provided.\n";
+                std::cerr << "[ERROR] Multiple main file paths provided.\n\n";
+                print_help(argv[0]);
                 return 1;
             }
         }
     }
 
-    if (filepath == nullptr) {
+    if (proxy_filepath == nullptr) {
         std::cerr << "[ERROR] Missing CIDR file path.\n\n";
         print_help(argv[0]);
         return 1;
     }
 
-    // Load and build interval tree
-    auto intervals = load_and_merge_cidrs(filepath);
+    // Load allow (never proxy) list if provided
+    std::vector<Interval> allow_intervals;
+    if (allow_filepath != nullptr) {
+        allow_intervals = load_and_merge_cidrs(allow_filepath);
+    }
+
+    // Load proxy list
+    auto proxy_intervals = load_and_merge_cidrs(proxy_filepath);
+
+    if (verbose) {
+        std::cerr << "[INFO] All files loaded. Ready and waiting for input on stdin..." << std::endl;
+    }
 
     // Apache IPC Loop
     char buf[256];
@@ -261,8 +283,14 @@ int main(int argc, char* argv[]) {
         uint32_t ip;
         bool match = false;
 
-        if (parse_ip(buf, ip) && contains_ip(intervals, ip)) {
-            match = true;
+        if (parse_ip(buf, ip)) {
+            if (contains_ip(allow_intervals, ip)) {
+                // If it's in the allowlist, definitively do NOT proxy
+                match = false;
+            } else if (contains_ip(proxy_intervals, ip)) {
+                // If it's not in the allowlist but IS in the proxylist, PROXY
+                match = true;
+            }
         }
 
         if (verbose) {
