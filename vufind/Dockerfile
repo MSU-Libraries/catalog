@@ -1,5 +1,20 @@
 ARG VUFIND_VERSION=11.0.4
 
+# -----------------------------------
+FROM debian:trixie AS compile
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+    apt-get install -y g++
+
+COPY cpp/ /tmp/
+
+WORKDIR /tmp
+
+RUN g++ -O3 -std=c++17 cidr_checker.cpp -o cidr_checker
+
+# -----------------------------------
 FROM msulibraries/vufind-extended:$VUFIND_VERSION
 
 ARG VUFIND_VERSION
@@ -62,6 +77,7 @@ COPY tests/.eslintrc.js /usr/local/vufind/.eslintrc.js
 COPY tests/.jshintignore /usr/local/vufind/.jshintignore
 COPY public/  /usr/local/vufind/public
 COPY scripts /usr/local/bin
+COPY --from=compile /tmp/cidr_checker /usr/local/bin
 COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh backup.sh restore.sh /
 COPY msmtp/aliases msmtp/msmtprc /etc/
 COPY --from=registry.gitlab.msu.edu/msu-libraries/public/gis-middleware:latest /app/dist/ /usr/local/vufind/themes/msul/vendor/gis-middleware/
@@ -109,6 +125,8 @@ RUN \
     npm install -g grunt-cli && \
     npm run install:scss-dependencies && \
     grunt scss
+
+RUN curl -s "https://raw.githubusercontent.com/bitwire-it/ipblocklist/main/inbound.txt" -o "/etc/apache2/blocklist.txt"
 
 EXPOSE 80
 
