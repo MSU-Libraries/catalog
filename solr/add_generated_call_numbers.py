@@ -5,7 +5,7 @@ import http.client
 import json
 import time
 
-BATCH_SIZE = 65536
+BATCH_SIZE = 32768
 
 
 class StatusException(Exception):
