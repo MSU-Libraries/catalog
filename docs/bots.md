@@ -17,9 +17,9 @@ This list is automatically built into the catalog image, and IPs within the list
 will be given a "limited access" response.
 
 We have also added an override to the block list; a custom allow list located
-in the catalog repository at `apache2/ipallowlist.txt`. An IP or CIDR listed
-in this file (one per line) is always permitted regardless if they are also
-listed in the community block list.
+in the catalog repository at `vufind/apache2/ipallowlist.txt`. An IP or CIDR
+listed in this file (one per line) is always permitted regardless if they are
+also listed in the community block list.
 
 ## Generalized bot protection service: go-away
 
