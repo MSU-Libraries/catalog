@@ -37,7 +37,7 @@ COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
 COPY simplesamlphp/local/ ${SIMPLESAMLPHP_CUSTOM_DIR}/
 COPY --from=compile /tmp/cidr_checker /usr/local/bin
 RUN git clone --depth 1 --filter=blob:none --sparse "https://github.com/bitwire-it/ipblocklist.git" "/etc/apache2/ipblocklist" && \
-    git sparse-checkout set --no-cone "/inbound.txt"
+    git -C "/etc/apache2/ipblocklist" sparse-checkout set --no-cone "/inbound.txt"
 RUN envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \
     a2enmod remoteip && \
     a2enmod proxy_http && \
