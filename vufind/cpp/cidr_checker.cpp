@@ -95,64 +95,74 @@ inline bool parse_ip(const char* str, uint32_t& ip) {
     return true;
 }
 
-// Memory-map file, parse intervals, sort, and merge overlapping/adjacent ranges
-std::vector<Interval> load_and_merge_cidrs(const char* filepath) {
+// Memory-map multiple files, parse intervals, ignore comments, sort, and merge
+std::vector<Interval> load_and_merge_cidrs(const std::vector<const char*>& filepaths, const char* list_name) {
+    if (filepaths.empty()) return {};
+
     auto start_time = std::chrono::high_resolution_clock::now();
-
-    if (verbose) {
-        std::cerr << "[INFO] Opening CIDR file: " << filepath << std::endl;
-    }
-
     std::vector<Interval> raw;
-    raw.reserve(5500000);
 
-    int fd = open(filepath, O_RDONLY);
-    if (fd == -1) {
-        std::cerr << "[ERROR] Could not open file: " << filepath << std::endl;
-        exit(1);
-    }
+    // Pre-allocate memory assuming large files to prevent expensive reallocations
+    raw.reserve(5500000 * filepaths.size());
 
-    struct stat sb;
-    if (fstat(fd, &sb) == -1) {
-        std::cerr << "[ERROR] Could not stat file." << std::endl;
-        exit(1);
-    }
-
-    size_t filesize = sb.st_size;
-    if (filesize == 0) {
-        if (verbose) std::cerr << "[WARN] File is empty: " << filepath << std::endl;
-        close(fd);
-        return {};
-    }
-
-    if (verbose) {
-        std::cerr << "[INFO] File size: " << filesize << " bytes. Mapping to memory..." << std::endl;
-    }
-
-    char* data = static_cast<char*>(mmap(NULL, filesize, PROT_READ, MAP_PRIVATE, fd, 0));
-    if (data == MAP_FAILED) {
-        std::cerr << "[ERROR] Memory mapping failed." << std::endl;
-        exit(1);
-    }
-
-    size_t start_pos = 0;
-    for (size_t i = 0; i <= filesize; ++i) {
-        if (i == filesize || data[i] == '\n') {
-            if (i > start_pos) {
-                uint32_t s, e;
-                if (parse_line(data + start_pos, i - start_pos, s, e)) {
-                    raw.push_back({s, e});
-                }
-            }
-            start_pos = i + 1;
+    for (const char* filepath : filepaths) {
+        if (verbose) {
+            std::cerr << "[INFO] Opening " << list_name << " file: " << filepath << std::endl;
         }
+
+        int fd = open(filepath, O_RDONLY);
+        if (fd == -1) {
+            std::cerr << "[ERROR] Could not open file: " << filepath << std::endl;
+            exit(1);
+        }
+
+        struct stat sb;
+        if (fstat(fd, &sb) == -1) {
+            std::cerr << "[ERROR] Could not stat file: " << filepath << std::endl;
+            exit(1);
+        }
+
+        size_t filesize = sb.st_size;
+        if (filesize == 0) {
+            if (verbose) std::cerr << "[WARN] File is empty: " << filepath << std::endl;
+            close(fd);
+            continue;
+        }
+
+        char* data = static_cast<char*>(mmap(NULL, filesize, PROT_READ, MAP_PRIVATE, fd, 0));
+        if (data == MAP_FAILED) {
+            std::cerr << "[ERROR] Memory mapping failed for: " << filepath << std::endl;
+            exit(1);
+        }
+
+        size_t start_pos = 0;
+        for (size_t i = 0; i <= filesize; ++i) {
+            if (i == filesize || data[i] == '\n') {
+                if (i > start_pos) {
+                    // Skip any leading whitespace to accurately find comments
+                    size_t line_start = start_pos;
+                    while (line_start < i && (data[line_start] == ' ' || data[line_start] == '\t')) {
+                        line_start++;
+                    }
+
+                    // Process if the line isn't empty and doesn't start with '#'
+                    if (line_start < i && data[line_start] != '#') {
+                        uint32_t s, e;
+                        if (parse_line(data + line_start, i - line_start, s, e)) {
+                            raw.push_back({s, e});
+                        }
+                    }
+                }
+                start_pos = i + 1;
+            }
+        }
+
+        munmap(data, filesize);
+        close(fd);
     }
 
-    munmap(data, filesize);
-    close(fd);
-
     if (verbose) {
-        std::cerr << "[INFO] Parsed " << raw.size() << " raw entries. Sorting..." << std::endl;
+        std::cerr << "[INFO] Parsed " << raw.size() << " total raw entries for " << list_name << ". Sorting..." << std::endl;
     }
 
     // Sort by start address
@@ -162,7 +172,7 @@ std::vector<Interval> load_and_merge_cidrs(const char* filepath) {
     });
 
     if (verbose) {
-        std::cerr << "[INFO] Merging overlapping ranges..." << std::endl;
+        std::cerr << "[INFO] Merging overlapping ranges for " << list_name << "..." << std::endl;
     }
 
     // Merge overlapping and adjacent ranges
@@ -186,8 +196,8 @@ std::vector<Interval> load_and_merge_cidrs(const char* filepath) {
     std::chrono::duration<double> diff = end_time - start_time;
 
     if (verbose) {
-        std::cerr << "[INFO] Merged into " << merged.size() << " disjoint intervals." << std::endl;
-        std::cerr << "[INFO] Processing time for " << filepath << ": " << diff.count() << " seconds." << std::endl;
+        std::cerr << "[INFO] " << list_name << " list merged into " << merged.size() << " disjoint intervals." << std::endl;
+        std::cerr << "[INFO] Processing time for " << list_name << ": " << diff.count() << " seconds." << std::endl;
     }
 
     return merged;
@@ -204,16 +214,17 @@ inline bool contains_ip(const std::vector<Interval>& intervals, uint32_t ip) {
 }
 
 void print_help(const char* prog_name) {
-    std::cout << "Usage: " << prog_name << " [-h] [-v] [-a <allow_file>] <cidr_file>\n\n"
+    std::cout << "Usage: " << prog_name << " [-h] [-v] [-a <allow_file>] <cidr_file1> [cidr_file2 ...]\n\n"
               << "Arguments:\n"
-              << "  -h                Show this help message and exit\n"
-              << "  -v                Enable verbose logging (outputs to stderr)\n"
-              << "  -a <allow_file>   Optional path to a file containing IPs/CIDRs to never proxy\n"
-              << "  <cidr_file>       Path to the text file containing IPs and CIDRs to proxy\n";
+              << "  -h                  Show this help message and exit\n"
+              << "  -v                  Enable verbose logging (outputs to stderr)\n"
+              << "  -a <allow_file>     Optional path to a file containing IPs/CIDRs to never proxy\n"
+              << "  <cidr_file>         One or more paths to text files containing IPs/CIDRs to proxy\n\n"
+              << "Note: Files can contain comments starting with '#'.\n";
 }
 
 int main(int argc, char* argv[]) {
-    const char* proxy_filepath = nullptr;
+    std::vector<const char*> proxy_filepaths;
     const char* allow_filepath = nullptr;
 
     // Parse command line arguments
@@ -236,18 +247,12 @@ int main(int argc, char* argv[]) {
             print_help(argv[0]);
             return 1;
         } else {
-            if (proxy_filepath == nullptr) {
-                proxy_filepath = argv[i];
-            } else {
-                std::cerr << "[ERROR] Multiple main file paths provided.\n\n";
-                print_help(argv[0]);
-                return 1;
-            }
+            proxy_filepaths.push_back(argv[i]);
         }
     }
 
-    if (proxy_filepath == nullptr) {
-        std::cerr << "[ERROR] Missing CIDR file path.\n\n";
+    if (proxy_filepaths.empty()) {
+        std::cerr << "[ERROR] Missing CIDR file path. At least one proxy file is required.\n\n";
         print_help(argv[0]);
         return 1;
     }
@@ -255,11 +260,12 @@ int main(int argc, char* argv[]) {
     // Load allow (never proxy) list if provided
     std::vector<Interval> allow_intervals;
     if (allow_filepath != nullptr) {
-        allow_intervals = load_and_merge_cidrs(allow_filepath);
+        std::vector<const char*> allow_files = {allow_filepath};
+        allow_intervals = load_and_merge_cidrs(allow_files, "ALLOW");
     }
 
-    // Load proxy list
-    auto proxy_intervals = load_and_merge_cidrs(proxy_filepath);
+    // Load proxy lists
+    auto proxy_intervals = load_and_merge_cidrs(proxy_filepaths, "PROXY");
 
     if (verbose) {
         std::cerr << "[INFO] All files loaded. Ready and waiting for input on stdin..." << std::endl;
