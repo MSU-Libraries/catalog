@@ -245,6 +245,7 @@ int main(int argc, char* argv[]) {
 
     // Apache IPC Loop
     char buf[256];
+    std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
     while (fgets(buf, sizeof(buf), stdin)) {
         // Strip newline for clean logging
         size_t len = strlen(buf);
@@ -252,6 +253,10 @@ int main(int argc, char* argv[]) {
         if (len > 1 && buf[len-2] == '\r') buf[len-2] = '\0';
 
         if (buf[0] == '\0') continue; // Skip empty lines
+
+        if (verbose) {
+            start_time = std::chrono::high_resolution_clock::now();
+        }
 
         uint32_t ip;
         bool match = false;
@@ -261,7 +266,9 @@ int main(int argc, char* argv[]) {
         }
 
         if (verbose) {
-            std::cerr << "[DEBUG] Query: " << buf << " -> " << (match ? "PROXY" : "NULL") << std::endl;
+            auto end_time = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> diff = end_time - start_time;
+            std::cerr << "[DEBUG] Query: " << buf << " -> " << (match ? "PROXY" : "NULL") << " (" << diff.count() << " seconds)" << std::endl;
         }
 
         if (match) {
