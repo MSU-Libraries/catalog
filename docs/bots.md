@@ -6,6 +6,21 @@ bots out there that make as many requests as they can without following the
 configured bot settings. In these cases we want to block them since they can
 over-utilize resources and slow down the site significantly for other users.
 
+## Community IP blocklist
+
+The catalog makes use of a [community maintained IP](https://github.com/bitwire-it/ipblocklist)
+blocklist with millions of IP and CIDR IP ranges. This list is updated
+continually throughout the day and the catalog will attempt to keep up to date
+with this list.
+
+This list is automatically built into the catalog image, and IPs within the list
+will be given a "limited access" response.
+
+We have also added an override to the block list; a custom allow list located
+in the catalog repository at `apache2/ipallowlist.txt`. An IP or CIDR listed
+in this file (one per line) is always permitted regardless if they are also
+listed in the community block list.
+
 ## Generalized bot protection service: go-away
 
 The catalog comes with a built-in configurable `captcha` service based on the
