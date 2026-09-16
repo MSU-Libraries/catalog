@@ -10,6 +10,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+const int MAX_BLOCK_SIZE = 8'000'000;
+const int MAX_ALLOW_SIZE = 1'000'000;
+
 struct Interval {
     uint32_t start;
     uint32_t end;
@@ -17,6 +20,7 @@ struct Interval {
 
 // Global flags
 bool verbose = false;
+bool debug = false;
 
 // Fast custom parser for CIDR lines (IP or IP/CIDR)
 inline bool parse_line(const char* str, size_t len, uint32_t& start, uint32_t& end) {
@@ -96,14 +100,14 @@ inline bool parse_ip(const char* str, uint32_t& ip) {
 }
 
 // Memory-map multiple files, parse intervals, ignore comments, sort, and merge
-std::vector<Interval> load_and_merge_cidrs(const std::vector<const char*>& filepaths, const char* list_name) {
+std::vector<Interval> load_and_merge_cidrs(const std::vector<const char*>& filepaths, const char* list_name, const int max_size) {
     if (filepaths.empty()) return {};
 
     auto start_time = std::chrono::high_resolution_clock::now();
     std::vector<Interval> raw;
 
     // Pre-allocate memory assuming large files to prevent expensive reallocations
-    raw.reserve(5500000 * filepaths.size());
+    raw.reserve(max_size * filepaths.size());
 
     for (const char* filepath : filepaths) {
         if (verbose) {
@@ -149,6 +153,10 @@ std::vector<Interval> load_and_merge_cidrs(const std::vector<const char*>& filep
                     if (line_start < i && data[line_start] != '#') {
                         uint32_t s, e;
                         if (parse_line(data + line_start, i - line_start, s, e)) {
+                            if (raw.size() == max_size) {
+                                std::cerr << "[WARN] Exceeded max entries (" << max_size << ") for " << list_name << "; skipping remainder of " << filepath << std::endl;
+                                break;
+                            }
                             raw.push_back({s, e});
                         }
                     }
@@ -218,6 +226,7 @@ void print_help(const char* prog_name) {
               << "Arguments:\n"
               << "  -h                  Show this help message and exit\n"
               << "  -v                  Enable verbose logging (outputs to stderr)\n"
+              << "  --debug             Enable debug logging (outputs to stderr)\n"
               << "  -a <allow_file>     Optional path to a file containing IPs/CIDRs to never proxy\n"
               << "  <cidr_file>         One or more paths to text files containing IPs/CIDRs to proxy\n\n"
               << "Note: Files can contain comments starting with '#'.\n";
@@ -234,6 +243,9 @@ int main(int argc, char* argv[]) {
             return 0;
         } else if (strcmp(argv[i], "-v") == 0) {
             verbose = true;
+        } else if (strcmp(argv[i], "--debug") == 0) {
+            verbose = true;
+            debug = true;
         } else if (strcmp(argv[i], "-a") == 0) {
             if (i + 1 < argc) {
                 allow_filepath = argv[++i];
@@ -261,11 +273,11 @@ int main(int argc, char* argv[]) {
     std::vector<Interval> allow_intervals;
     if (allow_filepath != nullptr) {
         std::vector<const char*> allow_files = {allow_filepath};
-        allow_intervals = load_and_merge_cidrs(allow_files, "ALLOW");
+        allow_intervals = load_and_merge_cidrs(allow_files, "ALLOW", MAX_ALLOW_SIZE);
     }
 
     // Load proxy lists
-    auto proxy_intervals = load_and_merge_cidrs(proxy_filepaths, "PROXY");
+    auto proxy_intervals = load_and_merge_cidrs(proxy_filepaths, "PROXY", MAX_BLOCK_SIZE);
 
     if (verbose) {
         std::cerr << "[INFO] All files loaded. Ready and waiting for input on stdin..." << std::endl;
@@ -282,7 +294,7 @@ int main(int argc, char* argv[]) {
 
         if (buf[0] == '\0') continue; // Skip empty lines
 
-        if (verbose) {
+        if (debug) {
             start_time = std::chrono::high_resolution_clock::now();
         }
 
@@ -299,7 +311,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        if (verbose) {
+        if (debug) {
             auto end_time = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> diff = end_time - start_time;
             std::cerr << "[DEBUG] Query: " << buf << " -> " << (match ? "PROXY" : "NULL") << " (" << diff.count() << " seconds)" << std::endl;
