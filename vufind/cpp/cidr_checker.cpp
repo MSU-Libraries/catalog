@@ -139,6 +139,10 @@ std::vector<Interval> load_and_merge_cidrs(const std::vector<const char*>& filep
             exit(1);
         }
 
+        if (madvise(data, filesize, MADV_SEQUENTIAL) != 0 && verbose) {
+            std::cerr << "[INFO] madvise failed, falling back to standard OS paging." << std::endl;
+        }
+
         size_t start_pos = 0;
         for (size_t i = 0; i <= filesize; ++i) {
             if (i == filesize || data[i] == '\n') {
