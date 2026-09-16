@@ -82,8 +82,8 @@
         </th>
         <?php foreach ($this->extras as $e): ?>
           <?php
-            // MSUL override to use CN prefix in the 1st column only
-            if ($e == 'callnumber-full_str_mv'):
+            // MSUL override: skip extras that are included elsewhere
+            if ($e == 'callnumber-full_str_mv' || $e == 'title_original_str'):
               continue;
             endif;
           ?>
@@ -130,6 +130,19 @@
               <?php endif; ?>
             </b>
 
+            <?php if ($this->source == 'title' && $item['extras'] != null && array_key_exists('title_original_str', $item['extras'])): ?>
+              <?php // MSUL override to add original title to title browse ?>
+              <?php foreach ($item['extras']['title_original_str'] as $to1): ?>
+                <?php foreach ($to1 as $to2): ?>
+                  <?php if ($to2 != $label): ?>
+                    <div>
+                      <?= $to2 ?>
+                    </div>
+                  <?php endif; ?>
+                <?php endforeach; ?>
+              <?php endforeach; ?>
+            <?php endif; ?>
+
             <?php if (count($item['useInstead']) > 0): ?>
               <div>
                 <?=$this->transEsc('Use instead') ?>:
@@ -164,8 +177,8 @@
 
           <?php foreach ($this->extras as $extraName): ?>
             <?php
-              // MSUL override to use CN prefix in the 1st column only
-              if ($extraName == 'callnumber-full_str_mv'):
+              // MSUL override: skip extras that are included elsewhere
+              if ($extraName == 'callnumber-full_str_mv' || $extraName == 'title_original_str'):
                 continue;
               endif;
             ?>
@@ -179,6 +192,17 @@
                   ? '&nbsp;'
                   : implode('<br>', array_map([$this, 'escapeHtml'], $extraDisplayArray));
               ?>
+              <?php if ($this->source == 'lcc' && $extraName == 'title_full' && $item['extras'] != null &&
+                  array_key_exists('title_original_str', $item['extras'])): ?>
+                <?php // MSUL override to add original title to call number browse title ?>
+                <?php foreach ($item['extras']['title_original_str'] as $to1): ?>
+                  <?php foreach ($to1 as $to2): ?>
+                    <div>
+                      <?= $to2 ?>
+                    </div>
+                  <?php endforeach; ?>
+                <?php endforeach; ?>
+              <?php endif; ?>
             </td>
           <?php endforeach; ?>
 
