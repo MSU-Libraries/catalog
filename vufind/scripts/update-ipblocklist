@@ -12,8 +12,8 @@ handle_signal() {
 # Trap signals
 trap handle_signal INT TERM
 
-# Start up delay (wait for Apache to start & randomize so nodes aren't in sync)
-sleep $((5 + RANDOM % 16))
+# Start up delay (wait for Apache to start & offset so nodes aren't in sync)
+sleep $((NODE * 15))
 
 while true; do
     2>&1 echo "[$(date)] Running git pull on ${REPO_PATH}"
