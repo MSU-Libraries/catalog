@@ -1,5 +1,13 @@
 ARG VUFIND_VERSION=11.0.4
 
+# -----------------------------------
+FROM msulibraries/vufind-extended:$VUFIND_VERSION AS compile
+
+COPY cpp/ /tmp/
+WORKDIR /tmp
+RUN g++ -O3 -std=c++17 cidr_checker.cpp -o cidr_checker
+
+# -----------------------------------
 FROM msulibraries/vufind-extended:$VUFIND_VERSION
 
 ARG VUFIND_VERSION
@@ -20,8 +28,13 @@ COPY apache2/sites-available/ /etc/apache2/sites-available/
 COPY modsecurity/ /etc/modsecurity/
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
 COPY simplesamlphp/local/ ${SIMPLESAMLPHP_CUSTOM_DIR}/
+COPY --from=compile /tmp/cidr_checker /usr/local/bin
+COPY apache2/ipallowlist.txt /etc/apache2/
+RUN git clone --depth 1 --filter=blob:none --sparse "https://github.com/bitwire-it/ipblocklist.git" "/etc/apache2/ipblocklist" && \
+    git -C "/etc/apache2/ipblocklist" sparse-checkout set --no-cone "/inbound.txt"
 RUN envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \
     a2enmod remoteip && \
+    a2enmod proxy_http && \
     a2enconf simplesamlphp.conf && \
     chmod -R a-w ${SIMPLESAMLPHP_CUSTOM_DIR} && \
     # Add VuFind to Apache as well before testing config

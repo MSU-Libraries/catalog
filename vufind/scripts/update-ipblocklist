@@ -1,0 +1,30 @@
+#!/bin/bash
+
+REPO_PATH="/etc/apache2/ipblocklist"
+INTERVAL_SECONDS=$((2 * 60 * 60))
+
+# Signal handler function
+handle_signal() {
+    echo "Received exit signal. Exiting..."
+    exit 0
+}
+
+# Trap signals
+trap handle_signal INT TERM
+
+# Start up delay (wait for Apache to start & offset so nodes aren't in sync)
+sleep $((NODE * 15))
+
+while true; do
+    2>&1 echo "[$(date)] Running git pull on ${REPO_PATH}"
+
+    if git -C "${REPO_PATH}" pull; then
+        2>&1 echo "[$(date)] Git pull successful; reloading Apache"
+        apachectl graceful
+    else
+        2>&1 echo "[$(date)] Git pull failed with exit code $?"
+    fi
+
+
+    sleep "$INTERVAL_SECONDS"
+done

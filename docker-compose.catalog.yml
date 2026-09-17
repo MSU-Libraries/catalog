@@ -21,6 +21,8 @@ services:
       - /etc/bash_completion.d/pc-record:/etc/bash_completion.d/pc-record:ro
       - /usr/local/bin/pc-common:/usr/local/bin/pc-common:ro
     networks:
+      # Public network needed for routing to limited-access pages
+      - public
       - internal
     extra_hosts:
       - "host.docker.internal:host-gateway"

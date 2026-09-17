@@ -85,6 +85,8 @@ else
     npm run build:scss
 fi
 
+# Start ipblocklist update script
+/usr/local/bin/update-ipblocklist &
 
 # Unset environment variables that are no longer necessary before starting Apache
 unset DEPLOY_KEY_FILE VUFIND_CORE_INSTALLATION
