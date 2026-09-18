@@ -74,7 +74,19 @@
                   <span class="icon-link__label"><?=$this->transEsc('Institutional Login')?></span>
                 </a>
               <?php else: ?>
-                <a href="<?=$this->url('myresearch-userlogin')?>" class="icon-link" data-lightbox>
+                <?php
+                    // MSU to add auto-login on EDS pages
+                    $isLoggedIn = $this->auth()->getUserObject() == null ? false : true;
+                    $isOnCampus = $this->auth()->isOnCampus();
+                    $isEDSPage = str_contains($_SERVER['REQUEST_URI'], '/EdsRecord/');
+                    $autoOpen = ($isEDSPage && !$isLoggedIn && !$isOnCampus) ? true : false;
+                ?>
+                <a
+                    href="<?=$this->url('myresearch-userlogin')?>"
+                    class="icon-link <?=$autoOpen ? 'js-auto-login' : ''?>"
+                    data-lightbox
+                    <?=$autoOpen ? 'data-auto-open="true"' : ''?>
+                >
                   <?=$this->icon('sign-in', 'icon-link__icon') ?>
                   <span class="icon-link__label"><?=$this->transEsc('Login')?></span>
                 </a>

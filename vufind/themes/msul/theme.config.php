@@ -9,6 +9,7 @@ return [
         ['file' => 'get_license_agreement.js', 'priority' => 450],
         ['file' => 'combined-handler.js', 'priority' => 450],
         ['file' => 'copy_url.js', 'priority' => 450],
+        ['file' => 'auto_open_lightbox.js', 'priority' => 450],
     ],
     'favicon' => 'msul-favicon.ico',
     'helpers' => [
