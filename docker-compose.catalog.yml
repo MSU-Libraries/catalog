@@ -103,6 +103,7 @@ services:
     image: registry.gitlab.msu.edu/msu-libraries/catalog/catalog/legacylinks:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}
     networks:
       - public
+      - internal
     environment:
       STACK_NAME: "${STACK_NAME}"
       SITE_HOSTNAME: "${SITE_HOSTNAME}"
