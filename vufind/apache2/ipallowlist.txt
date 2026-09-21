@@ -116,3 +116,7 @@
 # SpartanNet
 69.176.128.0/19
 72.44.96.0/19
+# Individual request from Sep 19 2026
+173.241.209.71
+# Individual request from Sep 20 2026
+161.115.116.68
