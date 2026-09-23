@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function handleAutoLogin() {
-  const autoLoginLink = document.querySelector('.js-auto-login[data-auto-open="true"]');
+  const lightboxElement = document.querySelector('[data-auto-open="true"]');
 
-  if (autoLoginLink) {
-    autoLoginLink.click();
+  if (lightboxElement) {
+    lightboxElement.click();
   }
 });
