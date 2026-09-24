@@ -287,10 +287,11 @@ rules:
     #  - '($is-generic-browser)'
     action: none
     children:
-      - name: 0
-        action: check
-        settings:
-          challenges: [js-refresh]
+      # XXX JS refresh is now failing token verification; something changed!
+      #- name: 0
+      #  action: check
+      #  settings:
+      #    challenges: [js-refresh]
       - name: 1
         action: check
         settings:
