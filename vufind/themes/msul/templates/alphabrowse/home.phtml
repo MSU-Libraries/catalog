@@ -8,8 +8,8 @@
   $this->layout()->searchbox = false;
   /* MSUL: Code removed Do not want the search box displayed on for alphabrowse */
 
-  function getOriginalTitles($item, $title)
-  {
+  // MSUL functions
+  function getOriginalTitles(array $item, ?string $title) {
     $original_titles = [];
     foreach ($item['extras']['title_original_str_mv'] as $to1) {
       foreach ($to1 as $to2) {
@@ -19,6 +19,14 @@
       }
     }
     return array_unique($original_titles);
+  }
+
+  function getFirstTitle(array $item) {
+    foreach ($item['extras']['title_full'] as $tf1) {
+      foreach ($tf1 as $tf2) {
+        return $tf2;
+      }
+    }
   }
 ?>
 
@@ -203,16 +211,8 @@
               ?>
               <?php if ($this->source == 'lcc' && $extraName == 'title_full' && $item['extras'] != null &&
                   array_key_exists('title_original_str_mv', $item['extras'])): ?>
-                <?php // MSUL override to add original title to call number browse title
-                  $title = null;
-                  foreach ($item['extras']['title_full'] as $tf1) {
-                    foreach ($tf1 as $tf2) {
-                      $title = $tf2;
-                      break;
-                    }
-                  }
-                ?>
-                <?php foreach (getOriginalTitles($item, $title) as $ot): ?>
+                <?php // MSUL override to add original title to call number browse title ?>
+                <?php foreach (getOriginalTitles($item, getFirstTitle($item)) as $ot): ?>
                   <div>
                     <?= $ot ?>
                   </div>
