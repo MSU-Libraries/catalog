@@ -9,7 +9,8 @@
   /* MSUL: Code removed Do not want the search box displayed on for alphabrowse */
 
   // MSUL functions
-  function getOriginalTitles(array $item, ?string $title) {
+  function getOriginalTitles(array $item, ?string $title)
+  {
     $original_titles = [];
     foreach ($item['extras']['title_original_str_mv'] as $to1) {
       foreach ($to1 as $to2) {
@@ -21,7 +22,8 @@
     return array_unique($original_titles);
   }
 
-  function getFirstTitle(array $item) {
+  function getFirstTitle(array $item)
+  {
     foreach ($item['extras']['title_full'] as $tf1) {
       foreach ($tf1 as $tf2) {
         return $tf2;
