@@ -221,6 +221,26 @@ Deploy Vufind:
       dotenv: deploy.env
       metrics: metrics.txt
 
+Create live dir:
+  extends: .stack_template
+  environment:
+    name: $ENV_BRANCH_NAME/deploy-vufind
+    auto_stop_in: 2 weeks
+  timeout: 60m
+  rules:
+    - if: '$CLONE_REPO_WORKDIR == "1" && $CI_COMMIT_BRANCH =~ /^devel-/'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/'
+      when: manual
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Deploy Vufind
+  script:
+    - bash ./cicd/create-live-dir
+  artifacts:
+    reports:
+      metrics: metrics.txt
+
 Deploy Vufind Build Env:
   extends: .stack_template
   stage: Optional Steps

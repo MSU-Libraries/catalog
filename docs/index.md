@@ -32,7 +32,9 @@ questions or suggestions you have!
 ## Developing
 
 * [Writing & Running Tests](testing.md)
-* [Using Core VuFind Only](core-vufind.md)
+* [Pipelines options](pipelines-options.md)
+  * [Using Core VuFind Only](pipelines-options.md#using-core-vufind-only)
+  * [Live directory](pipelines-options.md#creating-live-directory-with-core-vufind-code)
 * [Alphabrowse Internals](alphabrowse.md)
 * [Documentation](documentation.md)
 
