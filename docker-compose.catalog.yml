@@ -31,6 +31,10 @@ services:
       options:
         max-file: "5"
         max-size: "10m"
+    ulimits:
+      nofile:
+        soft: 16384
+        hard: 16384
     environment:
       STACK_NAME: "${STACK_NAME}"
       NODE: "{{slice .Node.Hostname 8 9}}"
@@ -82,7 +86,7 @@ services:
       replicas: 3
       resources:
         limits:
-          memory: 128M
+          memory: 192M
       placement:
         max_replicas_per_node: 1
       restart_policy:
