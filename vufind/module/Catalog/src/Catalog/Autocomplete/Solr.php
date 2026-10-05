@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Solr Autocomplete Module PubCat customization
+ * Solr Autocomplete Module PubCat customization.
  *
  * PHP version 8
  *
@@ -33,7 +33,7 @@ use function array_slice;
 use function is_object;
 
 /**
- * Solr Autocomplete Module
+ * Solr Autocomplete Module.
  *
  * This class provides suggestions by using the local Solr index.
  *

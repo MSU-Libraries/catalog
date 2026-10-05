@@ -389,10 +389,9 @@ function JSifyLeveledSelect() {
   // Expansion and toggling part
   let leveledCheckboxes = $('.leveledCheckbox[data-level]');
   let prevLevel = 0;
-  let currentLevel = 0;
   let expander = $('#jsContent .expander').prop('outerHTML');
   for (let i = leveledCheckboxes.length - 1; i >= 0; i--) {
-    currentLevel = parseInt($(leveledCheckboxes[i]).attr('data-level'));
+    let currentLevel = parseInt($(leveledCheckboxes[i]).attr('data-level'));
     $(leveledCheckboxes[i]).prepend(expander);
     if (currentLevel < prevLevel) {
       $(leveledCheckboxes[i]).addClass('expandable');

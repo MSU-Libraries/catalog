@@ -1,9 +1,15 @@
 // stylelint-disable value-keyword-case
+@use 'sass:color';
 @use 'sass:math';
 
 //
 // Variables
 // --------------------------------------------------
+
+//== VuFind bootstrap theme variables
+//
+
+$home-facet-list-border-right-style: none;
 
 
 //== Colors
@@ -21,7 +27,7 @@ $medgray:				#c1c1c1;
 $darkgray:				#535054;
 $lightgray:				#F0F0F0;
 $lavendergray:			#ACB3C9;
-$lavendergray-dark:		darken($lavendergray, 20%);
+$lavendergray-dark:		color.adjust($lavendergray, $lightness: -20%);
 $lavendernew:			#3b53a9;
 
 //## Gray and brand colors for use across Bootstrap.
@@ -88,7 +94,7 @@ $table-border-color:            transparent;
 //
 //## For each of Bootstrap's buttons, define text, background and border color.
 $btn-primary-bg:                 $parakeetgreen;
-$btn-primary-border:             $parakeetgreen; // darken($btn-primary-bg, 5%);
+$btn-primary-border:             $parakeetgreen; // color.adjust($btn-primary-bg, $lightness: -5%);
 
 // Allows for customizing button radius independently from global border radius
 $btn-border-radius-base:         2rem;

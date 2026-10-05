@@ -1,8 +1,12 @@
 <?php
+$getThisEnabled = $this->getThisLoader?->areItemsSupported($this->statusItems);
+if ($getThisEnabled) {
+    $this->getThisLoader->setItems($this->statusItems);
+}
+?>
+<?php
 /** MSU - Except marked part, all code has been modified by MSU */
 /** MSU START */
-use Catalog\Holdings\GetThisLoader;
-
 $selected = '';
 $selectedScore = -1;
 /** @var Catalog\View\Helper\Root\Record $record */
@@ -35,24 +39,17 @@ foreach ($this->statusItems as $item) {
 <?php if ($selected != ''): ?>
   <?php $id = $selected['id']; ?>
   <?php $item_id = $selected['item_id']; ?>
-  <?php $getthis = new GetThisLoader($this->driver, $record, $this->statusItems, $item_id); ?>
   <tr>
     <th>Status</th>
     <td class="fullAvailability">
       <?php /** @var $availabilityStatus VuFind\ILS\Logic\AvailabilityStatus */ ?>
       <?php $availabilityStatus = $selected['availability']; ?>
-      <?php /** NOT MSU START */ ?>
       <?php
         $statusClass = $this->availabilityStatus()->getClass($availabilityStatus);
-        if ($availabilityStatus->isAvailable() && $item['reserve'] === 'Y') {
-          $statusDescription = 'On Reserve';
-        } else {
-          $statusDescription = $availabilityStatus->getStatusDescription();
-        }
-        /** NOT MSU END */
+        $statusDescription = $availabilityStatus->getStatusDescription();
       ?>
       <strong class="<?=$this->escapeHtmlAttr($statusClass)?>"><?=$this->escapeHtml($statusDescription)?></strong>
-      <?php if ($getthis && ! str_starts_with($id, 'hlm.') && ! $getthis->isOnlineResource()): ?>
+      <?php if ($getThisEnabled && ! str_starts_with($id, 'hlm.') && ! $this->getThisLoader->isOnlineResource()): ?>
         <a class="pl-1 placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
           <?=$this->icon('book', 'icon-link__icon') ?>
           <?=$this->transEsc('Get this')?>
@@ -70,7 +67,7 @@ foreach ($this->statusItems as $item) {
         <?php else: ?>
           <?=$locationText?>
         <?php endif; ?>
-        <?php if ($getthis && ! str_starts_with($id, 'hlm.') && ! $getthis->isOnlineResource()): ?>
+        <?php if ($getThisEnabled && ! str_starts_with($id, 'hlm.') && ! $this->getThisLoader->isOnlineResource()): ?>
           <a class="pl-1 placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/MapThis?item_id=$item_id") ?>" rel="nofollow">
             <?=$this->icon('format-map', 'icon-link__icon') ?>
             <?=$this->transEsc('Map this')?>

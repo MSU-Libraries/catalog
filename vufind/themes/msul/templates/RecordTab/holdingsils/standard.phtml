@@ -1,19 +1,30 @@
-<?php
-use Catalog\Holdings\GetThisLoader; /** MSU */
-
-?>
 <?php if ($this->holdings()->holdingIsVisible($holding)): ?>
   <?php
     $check = $holding['check'] ?? false;
     $checkStorageRetrievalRequest = $holding['checkStorageRetrievalRequest'] ?? false;
     $checkILLRequest = $holding['checkILLRequest'] ?? false;
-    $availabilityStatus = $holding['availability'];
+    //$availabilityStatus = $holding['availability']; // MSU (set after updateAvailabilityStatus)
+    $getThisLoader = $tab->getGetThisLoader();
+    if ($getThisLoader?->areItemsSupported([$holding])) {
+        $getThisLoader->setItems([$holding]);
+        $getThisLoader->setRecordDriver($this->driver);
+        $isOnlineResource = $getThisLoader->isOnlineResource($holding['item_id'] ?? null);
+        $getThisURL = $isOnlineResource ? null : $this->url(
+            'record-getthis',
+            ['id' => $holding['id']],
+            ['query' => ['item_id' => $holding['item_id'] ?? null]]
+        );
+    }
     /** MSU START */
     # TODO is $holding actually an item record? possibly!
     $id = $holding['id'];
     $item_id = $holding['item_id'];
-    $getthis = new GetThisLoader($this->driver, $record, [$holding]);
-    $callnum = $getthis->getCallNumber($item_id);
+    $callNumberData = $getThisLoader->getCallNumber($item_id);
+    $callnum = isset($callNumberData) ? $callNumberData['text'] : null;
+    /** @var Catalog\View\Helper\Root\Record $record */
+    $record = $this->record($this->driver);
+    $record->updateAvailabilityStatus($holding);
+    $availabilityStatus = $holding['availability'];
     /** MSU END */
   ?>
   <tr class="holding-row"<?=$this->schemaOrg()->getAttributes(['vocab' => 'http://schema.org/', 'typeof' => 'Offer'])?>>
@@ -23,13 +34,13 @@ use Catalog\Holdings\GetThisLoader; /** MSU */
       <?php endif; ?>
     </th>
     <td>
-      <?php if ($holding['reserve'] == 'Y'): ?>
+      <?php if (($holding['reserve'] ?? 'N') == 'Y'): ?>
         <?=$this->schemaOrg()->getLink('http://schema.org/InStoreOnly', 'availability')?>
         <?=$this->transEsc('On Reserve - Ask at Circulation Desk')?><br>
       <?php endif; ?>
       <?php
         $statusClass = $this->availabilityStatus()->getClass($availabilityStatus);
-        $statusDescription = $getthis->getStatusDescription($item_id); /** MSU */
+        $statusDescription = $availabilityStatus->getStatusDescription();
         $schemaAvailabilityUri = $availabilityStatus->getSchemaAvailabilityUri();
       ?>
       <span class="<?=$this->escapeHtmlAttr($statusClass)?>">
@@ -41,8 +52,8 @@ use Catalog\Holdings\GetThisLoader; /** MSU */
       <?php if ($availabilityStatus->isAvailable()): ?>
         <?php /* Begin Available Items (Holds) */ ?>
         <?php /** MSU START */ ?>
-        <?php if (! $this->driver instanceof VuFind\RecordDriver\EDS && ! $getthis->isOnlineResource($item_id)): ?>
-          <a class="<?=$check ? 'checkRequest request-check ' : ''?>placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
+        <?php if (! $this->driver instanceof VuFind\RecordDriver\EDS && isset($getThisURL, $isOnlineResource) && !$isOnlineResource): ?>
+          <a class="<?=$check ? 'checkRequest request-check ' : ''?>placehold" data-lightbox href="<?= $this->escapeHtmlAttr($getThisURL) ?>" rel="nofollow">
             <?=$this->icon('book', 'icon-link__icon') ?>
             <?=$this->transEsc('Get this')?>
           </a>
@@ -63,6 +74,7 @@ use Catalog\Holdings\GetThisLoader; /** MSU */
             <span class="icon-link__label"><?=$this->transEsc($checkILLRequest ? 'ill_request_check_text' : 'ill_request_place_text')?></span>
           </a>
         <?php endif; ?>
+        <?php // MSU: removed other Get This link ?>
       <?php else: ?>
         <?php /* Begin Unavailable Items (Recalls) */ /** MSU */ ?>
           <?php /** MSU Code removed */ ?>
@@ -70,7 +82,7 @@ use Catalog\Holdings\GetThisLoader; /** MSU */
             <span><?=$this->transEsc('Requests')?>: <?=$this->escapeHtml($holding['requests_placed'])?></span>
           <?php endif; ?>
           <?php /** MSU START */ ?>
-          <?php if (! $this->driver instanceof VuFind\RecordDriver\EDS && ! $getthis->isOnlineResource($item_id)): ?>
+          <?php if (! $this->driver instanceof VuFind\RecordDriver\EDS && ! $getThisLoader->isOnlineResource($item_id)): ?>
             <a class="<?=$check ? 'checkRequest request-check ' : ''?>placehold" data-lightbox href="<?= $this->escapeHtmlAttr("/Record/$id/GetThis?item_id=$item_id") ?>" rel="nofollow">
               <?=$this->icon('book', 'icon-link__icon') ?>
               <?=$this->transEsc('Get this') ?>

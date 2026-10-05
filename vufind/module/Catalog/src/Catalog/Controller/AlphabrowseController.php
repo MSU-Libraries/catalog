@@ -3,7 +3,7 @@
 /**
  * TODO
  *  COULD BE REMOVED WHEN PR 3826 IS ACCEPTED (PC-895)
- * AlphaBrowse Module Controller
+ * AlphaBrowse Module Controller.
  *
  * PHP version 8
  *
@@ -39,7 +39,7 @@ use Laminas\View\Model\ViewModel;
 use function intval;
 
 /**
- * AlphabrowseController Class
+ * AlphabrowseController Class.
  *
  * Controls the alphabetical browsing feature
  *
@@ -52,7 +52,7 @@ use function intval;
 class AlphabrowseController extends \VuFind\Controller\AlphabrowseController
 {
     /**
-     * Gathers data for the view of the AlphaBrowser and does some initialization
+     * Gathers data for the view of the AlphaBrowser and does some initialization.
      *
      * @return ViewModel
      */

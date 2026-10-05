@@ -26,11 +26,6 @@ declare LOCAL_DIR="/mnt/shared/local/${STACK_NAME}"
 declare LIVE_DIR="${LOCAL_DIR}/live"
 # shellcheck disable=SC2155
 declare TIMESTAMP=$( date +%Y%m%d%H%M%S )
-# shellcheck disable=SC2034
-declare SSH_USER=deploy
-
-# TODO refactor to link all EXCEPT for those listed here (config.ini and folio.ini)
-declare -a LINK_CONFIGS=("RecordDataFormatter.ini")
 
 make_archive() {
     declare recent_archive
@@ -43,28 +38,25 @@ make_archive() {
     run_on_node "1" "pc-rsync \"${STACK_NAME}\" ${extra_args[*]} -a -s \"${LIVE_DIR}/\" -d \"$LOCAL_DIR/.archive/${TIMESTAMP}/live/\""
 }
 
-add_bind_mount() {
-    declare SOURCE_DIR="$1"
-    declare MOUNT_DIR="$2"
-    run_on_all_nodes "pc-fstab $STACK_NAME -s \"${SOURCE_DIR}\" -m \"${MOUNT_DIR}\""
-}
-
-remove_bind_mount() {
-    declare MOUNT_DIR="$1"
-    run_on_all_nodes "pc-fstab $STACK_NAME --rm -m \"${MOUNT_DIR}\""
-}
-
 sync_git_repo() {
     run_on_node "1" "pc-clone $STACK_NAME -p /repo -u git@gitlab.msu.edu:msu-libraries/catalog/catalog.git -b \"$DEPLOY_KEY\""
 }
 
-add_config_symlinks() {
-    declare conf
-    for conf in "${LINK_CONFIGS[@]}"; do
-        run_on_node "1" "pc-symlink \"$STACK_NAME\" -vv -f \
-            -t \"${LOCAL_DIR}/repo/vufind/local/config/vufind/${conf}\" \
-            -s \"${LOCAL_DIR}/live/local/config/vufind/${conf}\""
-    done
+update_compose_file() {
+    echo "Getting compose file from ${COMPOSE_PATH}"
+    scp deploy@"${DEPLOY_HOST_1}":"${COMPOSE_PATH}"/docker-compose.catalog.yml docker-compose.catalog.yml
+
+    if [[ ${VUFIND_CORE_INSTALLATION} -ne 1 ]]; then
+        install_yq
+         ./yq -i "del(.services.catalog.volumes[] | select(. ==  \"/mnt/shared/local/${STACK_NAME}/live/:/usr/local/vufind/\"))" docker-compose.catalog.yml;
+         ./yq -i ".services.catalog.volumes += \"/mnt/shared/local/${STACK_NAME}/repo/vufind/module/Catalog/:/usr/local/vufind/module/Catalog\"" docker-compose.catalog.yml;
+         ./yq -i ".services.catalog.volumes += \"/mnt/shared/local/${STACK_NAME}/repo/vufind/themes/msul/:/usr/local/vufind/themes/msul\"" docker-compose.catalog.yml;
+    fi
+    sync_git_repo
+
+    # Copy the updated compose files to the server
+    echo "Copying updated compose file to ${COMPOSE_PATH}"
+    scp docker-compose.catalog.yml deploy@"${DEPLOY_HOST_1}":"${COMPOSE_PATH}"/;
 }
 
 main() {
@@ -79,25 +71,10 @@ main() {
         # Generate an archive of existing content (if it exists)
         make_archive
 
-        remove_bind_mount "$LIVE_DIR/module/Catalog"
-        remove_bind_mount "$LIVE_DIR/themes/msul"
+        remove_bind_mount "${STACK_NAME}" "$LIVE_DIR/module/Catalog"
+        remove_bind_mount "${STACK_NAME}" "$LIVE_DIR/themes/msul"
 
-        # Sleeping for 2 hours; if setup is cancelled somehow, the container will eventually terminate
-        TEMP_CTR_ID=$( run_on_node "1" "docker run -d --rm --env-file <( sed -e 's/^export //' -e 's/^\\(.*\\)=\"\\(.*\\)\"$/\1=\2/' ${COMPOSE_PATH}/.env ) -v \"$LIVE_DIR\":/media/live -v \"$LOCAL_DIR\":/media/local --name \"temp-${STACK_NAME}-$TIMESTAMP\" \"$CI_REGISTRY_IMAGE/vufind:${CI_COMMIT_SHORT_SHA}${EXTRA_TAG_SUFFIX}\" sleep 7200" )
-        sleep 2
-        run_on_node "1" "pc-install $STACK_NAME -v -o 1000 -g 1000 -m g+ws -d -t \"$LIVE_DIR\""
-        run_on_node "1" "docker exec \"$TEMP_CTR_ID\" rsync -a /usr/local/vufind/ /media/live/"
-
-        sync_git_repo
-
-        add_bind_mount "${LOCAL_DIR}/repo/vufind/module/Catalog" "${LIVE_DIR}/module/Catalog"
-        add_bind_mount "${LOCAL_DIR}/repo/vufind/themes/msul" "${LIVE_DIR}/themes/msul"
-        add_config_symlinks
-
-        # Sync back the vendor dir again since the bind mount would have removed it (TODO is there a better way to do this?)
-        run_on_node "1" "docker exec \"$TEMP_CTR_ID\" rsync -a /usr/local/vufind/themes/msul/vendor/ /media/local/repo/vufind/themes/msul/vendor/"
-
-        run_on_node "1" "docker rm -f \"$TEMP_CTR_ID\""
+        update_compose_file
     fi
 
     run_on_node 1 "docker stack deploy --with-registry-auth -c <(source ${COMPOSE_PATH}/.env; envsubst <${COMPOSE_PATH}/docker-compose.catalog.yml) ${STACK_NAME}-catalog";
@@ -105,7 +82,7 @@ main() {
     # Set URL
     URL="${SITE_HOSTNAME}";
 
-    # Report the environemnt URL to GitLab
+    # Report the environment URL to GitLab
     echo "URL=${URL}" >> deploy.env;
 
     # Get runtime metrics

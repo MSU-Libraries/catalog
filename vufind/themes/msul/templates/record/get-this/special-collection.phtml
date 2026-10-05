@@ -1,0 +1,47 @@
+<?php
+
+$location = $this->getThisLoader->getLocation();
+$publisherName = $this->driver->getPublisher();
+if (is_array($publisherName)): $publisherName = implode(', ', $publisherName); endif;
+
+$linkArgs = [
+    'Action' => '10',
+    'Form' => '21',
+    'value' => 'GenericRequestMonograph',
+    'DocumentType' => 'book',
+    'ItemTitle' => substr($this->driver->getTitle(), 0, 255),
+    'ItemEdition' => $this->driver->getEdition(),
+    'ItemAuthor' => $this->driver->getPrimaryAuthor(),
+    'ItemPublisher' => substr($publisherName, 0, 255),
+    'Location' => $location,
+    'CallNumber' => $this->getThisLoader->getCallNumber()['text'],
+    'ItemNumber' => $this->driver->getSierraBN(),
+    'ItemVolume' => $this->getThisLoader->getItem()['barcode'],
+];
+?>
+<div>
+    <strong>Special Collections:</strong>
+    <?php if ($this->getThisLoader->is($location, 'LOCATION_SPEC_COLL_REMOTE')) { ?>
+        Material will be retrieved for viewing in the
+        <a href='https://lib.msu.edu/hours/calendar/reading-room' target='_blank'>
+            Special Collections and University Archives Reading Room
+        </a>.
+        Please allow up to 3 days for delivery, or you may schedule a later
+        date and time for viewing.
+    <?php } else { ?>
+        Material will be retrieved for viewing in the
+        <a href='https://lib.msu.edu/hours/calendar/reading-room' target='_blank'>
+            Special Collections and University Archives Reading Room
+        </a>.
+    <?php } ?>
+    <ul>
+        <li>
+            <a
+                href="https://spcrequest.lib.msu.edu/Logon/?<?= http_build_query($linkArgs)?>"
+                target="_blank"
+            >
+                Request Item
+            </a>
+        </li>
+    </ul>
+</div>

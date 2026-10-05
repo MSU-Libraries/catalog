@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOLIO ILS driver test
+ * FOLIO ILS driver test.
  *
  * PHP version 8
  *
@@ -18,12 +18,13 @@ use Catalog\ILS\Driver\Folio;
 use CatalogTest\Feature\PathFixerTrait;
 use Laminas\Http\Response;
 use VuFind\Config\Config;
+use VuFind\Connection\Webhook;
 use VuFind\ILS\Logic\AvailabilityStatus;
 
 use function is_array;
 
 /**
- * FOLIO ILS driver test
+ * FOLIO ILS driver test.
  *
  * @category VuFind
  * @package  Catalog
@@ -40,7 +41,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
     protected $forceCatalogPath = null;
 
     /**
-     * Default test configuration
+     * Default test configuration.
      *
      * @var array
      */
@@ -55,35 +56,35 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
     ];
 
     /**
-     * Test data for simulated HTTP responses (reset by each test)
+     * Test data for simulated HTTP responses (reset by each test).
      *
      * @var array
      */
     protected $fixtureSteps = [];
 
     /**
-     * Current fixture step
+     * Current fixture step.
      *
      * @var int
      */
     protected $currentFixtureStep = 0;
 
     /**
-     * Current fixture name
+     * Current fixture name.
      *
      * @var string
      */
     protected $currentFixture = 'none';
 
     /**
-     * Driver under test
+     * Driver under test.
      *
      * @var Folio
      */
     protected $driver = null;
 
     /**
-     * Replace makeRequest to inject test returns
+     * Replace makeRequest to inject test returns.
      *
      * @param string       $method  GET/POST/PUT/DELETE/etc
      * @param string       $path    API path (with a leading /)
@@ -142,19 +143,26 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
     }
 
     /**
-     * Generate a new Folio driver to return responses set in a json fixture
+     * Generate a new Folio driver to return responses set in a json fixture.
      *
      * Overwrites $this->driver
      * Uses session cache
      *
-     * @param string $test       Name of test fixture to load
-     * @param array  $config     Driver configuration (null to use default)
-     * @param array  $msulConfig msul.ini configuration (null to use empty config)
+     * @param string   $test              Name of test fixture to load
+     * @param ?array   $config            Driver configuration (null to use default)
+     * @param ?Webhook $webhookConnection Webhook connection (null to use default)
+     * @param array    $extraMockMethods  Names of additional methods to allow mocking
+     * @param ?array   $msulConfig        msul.ini configuration (null to use empty config)
      *
      * @return void
      */
-    protected function createConnector(string $test, array $config = null, array $msulConfig = null): void
-    {
+    protected function createConnector(
+        string $test,
+        ?array $config = null,
+        ?Webhook $webhookConnection = null,
+        array $extraMockMethods = [],
+        ?array $msulConfig = null
+    ): void {
         // Setup test responses
         $this->fixtureSteps = $this->getJsonFixture("folio/responses/$test.json", 'Catalog');
         $this->currentFixture = $test;
@@ -168,8 +176,8 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
         $mockMsul = new Config($msulConfig ?? []);
         // Create a stub for the SomeClass class
         $this->driver = $this->getMockBuilder(Folio::class)
-            ->setConstructorArgs([new \VuFind\Date\Converter(), $factory, $mockMsul])
-            ->onlyMethods(['makeRequest', 'makeRequestAsync'])
+            ->setConstructorArgs([new \VuFind\Date\Converter(), $factory, $webhookConnection, $mockMsul])
+            ->onlyMethods(['makeRequest', 'makeRequestAsync', ...$extraMockMethods])
             ->getMock();
         // Mock the Guzzle Service
         $mockGuzzleService = $this->createMock(\VuFind\Http\GuzzleService::class);
@@ -249,10 +257,11 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
     }
 
     /**
-     * Make sure at least one loan gets returned
+     * Make sure at least one loan gets returned.
      *
      * @return void
      */
+    #[\PHPUnit\Framework\Attributes\Depends('testTokens')]
     public function testCheckValidToken(): void
     {
         $this->createConnector('check-valid-token');
@@ -261,7 +270,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
     }
 
     /**
-     * Test patron login with Okapi (Legacy authentication)
+     * Test patron login with Okapi (Legacy authentication).
      *
      * @return void
      */
@@ -285,6 +294,9 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
             'lastname' => 'last',
             'email' => 'fake@fake.com',
             'addressTypeIds' => [],
+            'addresses' => [],
+            'college' => null,
+            'major' => null,
         ];
         $this->assertEquals($expected, $result);
     }
@@ -311,12 +323,15 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
             'lastname' => 'last',
             'email' => 'fake@fake.com',
             'addressTypeIds' => [],
+            'addresses' => [],
+            'college' => null,
+            'major' => null,
         ];
         $this->assertEquals($expected, $result);
     }
 
     /**
-     * Test getHolding with HRID-based lookup
+     * Test getHolding with HRID-based lookup.
      *
      * @return void
      */
@@ -326,14 +341,12 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
         $driverConfig = $this->defaultDriverConfig;
         $driverConfig['IDs']['type'] = 'hrid';
         $msulConfig = [
-            'msul' => [
-                'Locations' => [
-                    'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
-                    'response_floor_key' => 'floor',
-                ],
+            'Locations' => [
+                'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
+                'response_floor_key' => 'floor',
             ],
         ];
-        $this->createConnector('get-holding', $driverConfig, $msulConfig);
+        $this->createConnector('get-holding', $driverConfig, null, [], $msulConfig);
         $this->assertEquals($this->getExpectedGetHoldingResult(), $this->driver->getHolding('foo'));
     }
 
@@ -463,14 +476,12 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
         $driverConfig = $this->defaultDriverConfig;
         $driverConfig['IDs']['type'] = 'hrid';
         $msulConfig = [
-            'msul' => [
-                'Locations' => [
-                    'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
-                    'response_floor_key' => 'floor',
-                ],
+            'Locations' => [
+                'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
+                'response_floor_key' => 'floor',
             ],
         ];
-        $this->createConnector('get-holding', $driverConfig, $msulConfig);
+        $this->createConnector('get-holding', $driverConfig, null, [], $msulConfig);
         $this->assertEquals(
             [$this->getExpectedGetHoldingResult()['holdings']],
             $this->driver->getStatuses(['foo'])
@@ -706,7 +717,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
     }
 
     /**
-     * Test successful call to holds, one available item
+     * Test successful call to holds, one available item.
      *
      * @return void
      */
@@ -741,7 +752,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
     }
 
     /**
-     * Test successful call to holds, one available item placed for a proxy
+     * Test successful call to holds, one available item placed for a proxy.
      *
      * @return void
      */
@@ -776,7 +787,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
     }
 
     /**
-     * Test successful call to holds, one in_transit item
+     * Test successful call to holds, one in_transit item.
      *
      * @return void
      */
@@ -810,7 +821,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
     }
 
     /**
-     * Test successful call to holds, item in queue, position x
+     * Test successful call to holds, item in queue, position x.
      *
      * @return void
      */
@@ -850,7 +861,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
      */
 
     /**
-     * Test getHolding with a mnmn location code to add data from helm
+     * Test getHolding with a mnmn location code to add data from helm.
      *
      * @return void
      */
@@ -860,20 +871,18 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
         $driverConfig = $this->defaultDriverConfig;
         $driverConfig['IDs']['type'] = 'hrid';
         $msulConfig = [
-            'msul' => [
-                'Locations' => [
-                    'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
-                    'response_floor_key' => 'floor',
-                ],
+            'Locations' => [
+                'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
+                'response_floor_key' => 'floor',
             ],
         ];
-        $this->createConnector('get-holding', $driverConfig, $msulConfig);
+        $this->createConnector('get-holding', $driverConfig, null, [], $msulConfig);
         $this->assertEquals($this->getExpectedGetHoldingResult(), $this->driver->getHolding('foo'));
     }
 
     /**
      * Test getHolding with a mnmn location code to add data from helm
-     * that includes floor and location
+     * that includes floor and location.
      *
      * @return void
      */
@@ -884,15 +893,13 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
         $driverConfig = $this->defaultDriverConfig;
         $driverConfig['IDs']['type'] = 'hrid';
         $msulConfig = [
-            'msul' => [
-                'Locations' => [
-                    'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
-                    'response_floor_key' => 'floor',
-                    'response_location_key' => 'location',
-                ],
+            'Locations' => [
+                'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
+                'response_floor_key' => 'floor',
+                'response_location_key' => 'location',
             ],
         ];
-        $this->createConnector('get-holding', $driverConfig, $msulConfig);
+        $this->createConnector('get-holding', $driverConfig, null, [], $msulConfig);
         $expectedResults = $this->getExpectedGetHoldingResult();
         $expectedResults['holdings'][0]['location'] = 'MSU Main Library - 4 East (That Room)';
         $expectedResults['holdings'][0]['msulLocation'] = 'That Room';
@@ -900,7 +907,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
     }
 
     /**
-     * Test getHolding with a mnmn location code, but no msul.ini config file
+     * Test getHolding with a mnmn location code, but no msul.ini config file.
      *
      * @return void
      */
@@ -916,7 +923,7 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
     }
 
     /**
-     * Test getHolding with a mnmn location code, but missing keys from the msul.ini
+     * Test getHolding with a mnmn location code, but missing keys from the msul.ini.
      *
      * @return void
      */
@@ -927,21 +934,19 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
         $driverConfig = $this->defaultDriverConfig;
         $driverConfig['IDs']['type'] = 'hrid';
         $msulConfig = [
-            'msul' => [
-                'Locations' => [
-                    'response_floor_key' => 'floor',
-                    'response_location_key' => 'location',
-                ],
+            'Locations' => [
+                'response_floor_key' => 'floor',
+                'response_location_key' => 'location',
             ],
         ];
-        $this->createConnector('get-holding', $driverConfig, $msulConfig);
+        $this->createConnector('get-holding', $driverConfig, null, [], $msulConfig);
         $expectedResults = $this->getExpectedGetHoldingResult();
         $expectedResults['holdings'][0]['location'] = 'MSU Main Library';
         $this->assertEquals($expectedResults, $this->driver->getHolding('foo'));
     }
 
     /**
-     * Test getHolding with a mnmn location code, but API errors from helm
+     * Test getHolding with a mnmn location code, but API errors from helm.
      *
      * @return void
      */
@@ -952,22 +957,20 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
         $driverConfig = $this->defaultDriverConfig;
         $driverConfig['IDs']['type'] = 'hrid';
         $msulConfig = [
-            'msul' => [
-                'Locations' => [
-                    'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
-                    'response_floor_key' => 'floor',
-                    'response_location_key' => 'location',
-                ],
+            'Locations' => [
+                'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
+                'response_floor_key' => 'floor',
+                'response_location_key' => 'location',
             ],
         ];
-        $this->createConnector('get-holding-helm-error', $driverConfig, $msulConfig);
+        $this->createConnector('get-holding-helm-error', $driverConfig, null, [], $msulConfig);
         $expectedResults = $this->getExpectedGetHoldingResult();
         $expectedResults['holdings'][0]['location'] = 'MSU Main Library';
         $this->assertEquals($expectedResults, $this->driver->getHolding('foo'));
     }
 
     /**
-     * Test getHolding with a mnmn location code, but missing data from helm
+     * Test getHolding with a mnmn location code, but missing data from helm.
      *
      * @return void
      */
@@ -978,22 +981,20 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
         $driverConfig = $this->defaultDriverConfig;
         $driverConfig['IDs']['type'] = 'hrid';
         $msulConfig = [
-            'msul' => [
-                'Locations' => [
-                    'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
-                    'response_floor_key' => 'floor',
-                    'response_location_key' => 'location',
-                ],
+            'Locations' => [
+                'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
+                'response_floor_key' => 'floor',
+                'response_location_key' => 'location',
             ],
         ];
-        $this->createConnector('get-holding-helm-missing-data', $driverConfig, $msulConfig);
+        $this->createConnector('get-holding-helm-missing-data', $driverConfig, null, [], $msulConfig);
         $expectedResults = $this->getExpectedGetHoldingResult();
         $expectedResults['holdings'][0]['location'] = 'MSU Main Library';
         $this->assertEquals($expectedResults, $this->driver->getHolding('foo'));
     }
 
     /**
-     * Test getHolding with a non-mnmn location code
+     * Test getHolding with a non-mnmn location code.
      *
      * @return void
      */
@@ -1004,14 +1005,12 @@ class FolioTest extends \VuFindTest\ILS\Driver\FolioTest
         $driverConfig = $this->defaultDriverConfig;
         $driverConfig['IDs']['type'] = 'hrid';
         $msulConfig = [
-            'msul' => [
-                'Locations' => [
-                    'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
-                    'response_floor_key' => 'floor',
-                ],
+            'Locations' => [
+                'api_url' => 'https://helm.lib.msu.edu/api/callnumbers/%%callnumber%%',
+                'response_floor_key' => 'floor',
             ],
         ];
-        $this->createConnector('get-holding-non-mnmn', $driverConfig, $msulConfig);
+        $this->createConnector('get-holding-non-mnmn', $driverConfig, null, [], $msulConfig);
         $expectedResults = $this->getExpectedGetHoldingResult();
         $expectedResults['holdings'][0]['location'] = 'MSU Main Library - Location';
         $expectedResults['holdings'][0]['location_code'] = 'mmmm';

@@ -31,7 +31,7 @@ use Catalog\Backend\Solr\QueryBuilder;
 use VuFindSearch\Query\Query;
 
 /**
- * Unit tests for SOLR query builder
+ * Unit tests for SOLR query builder.
  *
  * @category VuFind
  * @package  Search

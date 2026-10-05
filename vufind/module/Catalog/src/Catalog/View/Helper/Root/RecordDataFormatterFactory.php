@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Factory for record driver data formatting view helper
+ * Factory for record driver data formatting view helper.
  *
  * PHP version 8
  *
@@ -33,7 +33,7 @@ use Psr\Container\ContainerInterface;
 use VuFind\View\Helper\Root\RecordDataFormatter\SpecBuilder;
 
 /**
- * Extends the default display of the record page display
+ * Extends the default display of the record page display.
  *
  * @category VuFind
  * @package  Record_Data_Formatter

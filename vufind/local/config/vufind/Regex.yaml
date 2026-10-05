@@ -1,0 +1,181 @@
+---
+# This file contains named regular expressions to be used with the VuFind\Regex\Regex matcher.
+# Each named regex can contain one or more expressions.
+# A regex will match if any of the expressions matches.
+
+# Status
+  # Regex in this section are used to match against the specific item status value
+  # Each heading in this section is a grouping of those statuses used for logic within the GetThis feature
+STATUS_AVAILABLE:
+  # Used within GetThisLoader in the following functions : showRemoteDelivery, showStaffDelivery
+  - '/^AVAILABLE/i'
+#  - '/ITEM IN LIBRARY/i'
+STATUS_LIB_USE_ONLY:
+  # Used within GetThisLoader in the following functions : isLibUseOnly
+  - '/RESTRICTED/i'
+  - '/LIB USE ONLY/i'
+  - '/LIBRARY USE ONLY/i'
+STATUS_CHECKED_OUT:
+  # Used within GetThisLoader in the following functions : isOut
+  - '/CHECKED/i'
+  - '/BILLED/i'
+  - '/ON SEARCH/i'
+  - '/LOST/i'
+  - '/HOLD/i'
+  - '/AWAITING/i'
+#  - '/AWAITING PICKUP/i'
+#  - '/AWAITING DELIVERY/i'
+#  - '/IN TRANSIT/i'
+  - '/TRANSIT/i'
+#  - '/PAGES/i'
+  - '/PAGED/i'
+STATUS_UNAVAILABLE:
+  # Used within GetThisLoader in the following functions : isUnavailable
+  - '/UNAVAILABLE/i'
+  - '/AGED TO LOST/i'
+  - '/CLAIMED RETURNED/i'
+  - '/DECLARED LOST/i'
+  - '/IN PROCESS/i'
+  - '/IN PROCESS (NON-REQUESTABLE)/i'
+  - '/LONG MISSING/i'
+  - '/LOST AND PAID/i'
+  - '/MISSING/i'
+  - '/ON ORDER/i'
+  - '/ORDER CLOSED/i'
+  - '/UNKNOWN/i'
+  - '/WITHDRAWN/i'
+STATUS_IN_PROCESS:
+  - '/IN PROCESS/i'
+STATUS_ON_DISPLAY:
+  - '/ON DISPLAY/i'
+
+# Description / Call Number
+CALLNUMBER_AV_MEDIA:
+  # Used within GetThisLoader in the following functions : isAudioVideoMedia
+  - '/DISC/i'
+  - '/VIDEO/i'
+  - '/CD/i'
+  - '/DVD/i'
+  - '/BLU-RAY/i'
+  - '/VINYL/i'
+  - '/AUDIOCASSETTE/i'
+CALLNUMBER_MICROPRINT:
+  - '/MICROFILM/i'
+  - '/MICROFICHE/i'
+  - '/MICROPRINT/i'
+
+# Location
+LOCATION_EXCLUSIVE:
+  # Used within GetThisLoader in the following functions : showInterLibrary
+  # It should include patterns that should be excluded from Inter Library Loan
+  # (i.e. will return false and not show the inter-library.phtml template)
+#  - CAMPUS
+  - '/^MSU VINCENT VOICE/i'
+  - '/^mnmst$/' # Location code for makerspace
+  - '/^dmctl/' # Location code for equipment
+  - '/^dxres/' # Location code for equipment
+  - '/^MSU MUSIC LIBRARY.*reserve$/i'
+LOCATION_MICROFORMS:
+  # Used within GetThisLoader in the following functions : showMicroForm
+  - '/MICROFORMS/i'
+LOCATION_ONLINE:
+  # Used within GetThisLoader in the following functions : isOnlineResource
+  - '/ONLINE RESOURCE/i'
+  - '/ELECTRONIC RESOURCES/i'
+  - '/INTERNET/i'
+LOCATION_ART:
+  - '/MSU ART LIBRARY/i'
+LOCATION_BUSINESS:
+  - '/MSU BUSINESS/i'
+LOCATION_BROWSING:
+  - '/BROWSING/i'
+LOCATION_CAREER:
+  - '/CAREER/i'
+LOCATION_CESAR_CHAVEZ:
+  - '/CESAR CHAVEZ/i'
+LOCATION_CIRCULATING:
+  - '/CIRCULATING/i'
+  - '/FOLD/i'
+LOCATION_DIGITAL_MEDIA:
+  - '/DIGITAL\/MEDIA\./i'
+LOCATION_FACULTY_BOOK:
+  - '/FACULTY BOOK/i'
+LOCATION_FICHE:
+  - '/FICHE/i'
+LOCATION_GOV:
+  - '/^MSU GOV/i'
+LOCATION_KLINE_DMC:
+  - '/^MSU G\.M\.KLINE DIGITAL/i'
+LOCATION_LAW_RARE_BOOK:
+  - '/LAW LIB RARE BOOK/i'
+LOCATION_LAW_RESERVE:
+  - '/LAW LIBRARY RESERVE/i'
+LOCATION_MAIN:
+  - '/^MSU MAIN/i'
+LOCATION_MAKERSPACE:
+  - '/MAKERSPACE/i'
+  - '/^mnmst$/'
+LOCATION_MAP:
+  - '/MSU MAP/i'
+LOCATION_MUSIC:
+  - '/^MSU MUSIC LIBRARY/i'
+LOCATION_MUSIC_EXCLUDE_REQUEST:
+  - '/CURRENT JOURNALS/i'
+  - '/-\s+MUSIC$/i'
+LOCATION_MUSIC_ROVI_VINYL:
+  - '/ROVI\s+VINYL/i'
+LOCATION_MUSIC_SERVICE_DESK:
+  - '/CD COLLECTION/i'
+  - '#DVD/VIDEO#i'
+  - '/OVERSIZE CD/i'
+  - '/RESERVE/i'
+  - '/ROVI MUSIC/i'
+  - '/ROVI\s+VINYL/i'
+LOCATION_PERM:
+  - '/PERM/i' # Legacy note: used for Art Reserves
+LOCATION_READING_ROOM:
+  - '/READING_ROOM/i'
+LOCATION_REF:
+  - '/REF/i'
+LOCATION_REFERENCE:
+  - '/REFERENCE/i'
+LOCATION_REMOTE:
+  - '/MSU REMOTE/i'
+  - '/- REMOTE/i'
+LOCATION_RESERV:
+  - '/RESERV/i'
+LOCATION_RESERVE_DIGITAL:
+  - '/RESERVE DIGITAL/i'
+  - '/DIGITAL RESERVES/i'
+LOCATION_MSU_SCAN_EXCLUDE_LOCATION:
+  - '/MUSIC CASSETTE/i'
+  - '#DVD/VIDEO#i'
+  - '/^MSU VINCENT VOICE/i'
+  - '/^mnmst$/' # Location code for makerspace
+LOCATION_SCHAEFER:
+  - '/MSU SCHAEFER/i'
+LOCATION_SPEC_COLL:
+  - '/^MSU SPEC COLL/i'
+  - '/SPECIAL COLLECTION/i'
+LOCATION_SPEC_COLL_REMOTE:
+  - '/SPEC COLL REMOTE/i'
+  - '/SPECIAL COLLECTIONS.*REMOTE/i'
+LOCATION_THESES_REMOTE_MICRO:
+  - '/THESES REMOTE MICROFORMS/i'
+LOCATION_TRAVEL:
+  - '/TRAVEL/i'
+LOCATION_TURFGRASS:
+  - '/^MSU TURFGRASS/i'
+  - '/MSU BEARD/i'
+LOCATION_UNIV_ARCH:
+  - '/UNIV ARCH/i'
+  - '/MSU UNIVERSITY ARCHIVES/i'
+LOCATION_VIDEO_GAME:
+  - '/VIDEO GAME/i'
+LOCATION_VINCENT_VOICE:
+  - '/^MSU VINCENT VOICE/i'
+
+# Format
+FORMAT_SERIAL:
+  # Used within GetThisLoader in the following functions : isSerial
+  - '/SERIAL/i'

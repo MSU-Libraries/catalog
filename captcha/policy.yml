@@ -193,7 +193,7 @@ rules:
       # SEO / Ads and marketing
       - 'userAgent.contains("BLEXBot")'
       # Previously detected badly behaved bots; (?i) = case insensitive match
-      - 'userAgent.matches("(?i)(AcademicBotRTU|GoogleOther|FriendlyCrawler|SemrushBot|Diffbot|HawaiiBot|DataForSeoBot)")'
+      - 'userAgent.matches("(?i)(AcademicBotRTU|GoogleOther|FriendlyCrawler|SemrushBot|Diffbot|HawaiiBot|DataForSeoBot|AionBot)")'
       # The "Intel Mac OS X" bot network
       - 'userAgent.matches("Intel Mac OS X") && !(userAgent.matches("OS X 10_12_7") || userAgent.matches("OS X 12_7_6") || userAgent.matches("OS X 13_7_8") || userAgent.matches("OS X 10_13_7")|| userAgent.matches("OS X 10_14_[8-9]") || userAgent.matches("OS X 14_[8-9]_") || userAgent.matches("OS X 15_[6-9]_") || userAgent.matches("OS X 10_15_[6-9]") || userAgent.matches("OS X 26_[2-9]") || userAgent.matches("OS X 10_26_[2-9]"))'
     action: proxy
@@ -287,10 +287,11 @@ rules:
     #  - '($is-generic-browser)'
     action: none
     children:
-      - name: 0
-        action: check
-        settings:
-          challenges: [js-refresh]
+      # XXX JS refresh is now failing token verification; something changed!
+      #- name: 0
+      #  action: check
+      #  settings:
+      #    challenges: [js-refresh]
       - name: 1
         action: check
         settings:
