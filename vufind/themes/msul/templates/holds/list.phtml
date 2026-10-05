@@ -1,7 +1,4 @@
 <?php
-  // Set up page title:
-  $this->headTitle($this->translate('My Requests')); /** MSU */
-
   // Set up breadcrumbs:
   $this->breadcrumbs()->set($this->translate('Your Account'), $this->url('myresearch-home'))
     ->add($this->translate('Your Account'), active: true); // MSU change My Holds to Your Account
@@ -12,7 +9,14 @@
 <?=$this->component('show-account-menu-button')?>
 
 <div class="<?=$this->layoutClass('mainbody')?>">
-  <h1 class="h2-style"><?=$this->transEsc('Your Requests') ?></h1><?php /** MSU */ ?>
+  <?=
+    // Set page title and heading.
+    $this->component('page-title', [
+      'title' => $this->translate('Your Requests'),
+      'headTitle' => $this->translate('My Requests'),
+      'level' => 1,
+    ])
+  ?>
 
   <?=$this->flashmessages()?>
 
@@ -219,7 +223,7 @@
 </div>
 
 <div class="<?=$this->layoutClass('sidebar')?>" id="myresearch-sidebar" role="navigation" aria-label="<?=$this->transEsc('account_menu_label')?>">
-  <?=$this->accountMenu()->render('holds')?>
+  <?=$this->section('AccountMenu', template: 'myresearch/menu.phtml')->render(['active' => 'holds'])?>
 </div>
 
 <?=$this->render('myresearch/notify-account-status.phtml', ['method' => 'holds', 'accountStatus' => $this->accountStatus]); ?>

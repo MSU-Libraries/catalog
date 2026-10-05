@@ -1,7 +1,7 @@
 <?php
 
 /**
- * "Get Item Status" AJAX handler
+ * "Get Item Status" AJAX handler.
  *
  * PHP version 8
  *
@@ -36,6 +36,7 @@ use Psr\Log\LoggerAwareInterface;
 use Throwable;
 use VuFind\Config\Config;
 use VuFind\Exception\ILS as ILSException;
+use VuFind\GetThis\GetThisLoader;
 use VuFind\ILS\Connection;
 use VuFind\ILS\Logic\AvailabilityStatusInterface;
 use VuFind\ILS\Logic\AvailabilityStatusManager;
@@ -49,7 +50,7 @@ use function count;
 use function is_array;
 
 /**
- * "Get Item Status" AJAX handler
+ * "Get Item Status" AJAX handler.
  *
  * This is responsible for printing the holdings information for a
  * collection of records in JSON format.
@@ -73,6 +74,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Log
      * @param RendererInterface         $renderer                  View renderer
      * @param Holds                     $holdLogic                 Holds logic
      * @param AvailabilityStatusManager $availabilityStatusManager Availability status manager
+     * @param ?GetThisLoader            $getThisLoader             Get This loader or null if not enabled
      * @param Memory                    $searchMemory              Search memory for user search filters
      */
     public function __construct(
@@ -82,7 +84,8 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Log
         protected RendererInterface $renderer,
         protected Holds $holdLogic,
         protected AvailabilityStatusManager $availabilityStatusManager,
-        protected Memory $searchMemory
+        protected ?GetThisLoader $getThisLoader,
+        protected Memory $searchMemory,
     ) {
         parent::__construct(
             $ss,
@@ -90,7 +93,8 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Log
             $this->ils,
             $this->renderer,
             $this->holdLogic,
-            $this->availabilityStatusManager
+            $this->availabilityStatusManager,
+            $this->getThisLoader,
         );
     }
 

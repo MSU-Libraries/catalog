@@ -35,7 +35,7 @@ namespace Catalog\View\Helper\Root;
 use Catalog\Search\SearchOrigin\AbstractSearchOrigin;
 
 /**
- * AlphaBrowse view helper
+ * AlphaBrowse view helper.
  *
  * @category VuFind
  * @package  View_Helpers
@@ -46,7 +46,7 @@ use Catalog\Search\SearchOrigin\AbstractSearchOrigin;
 class AlphaBrowse extends \VuFind\View\Helper\Root\AlphaBrowse
 {
     /**
-     * Get link to browse results (or null if no valid URL available)
+     * Get link to browse results (or null if no valid URL available).
      *
      * @param string                    $source AlphaBrowse index currently being used
      * @param array                     $item   Item to link to

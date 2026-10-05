@@ -1,4 +1,4 @@
-ARG VUFIND_VERSION=11.0.4
+ARG VUFIND_VERSION=11.1.0
 
 # -----------------------------------
 FROM msulibraries/vufind-extended:$VUFIND_VERSION AS compile
@@ -71,8 +71,7 @@ COPY themes/msul /usr/local/vufind/themes/msul
 COPY module/Catalog /usr/local/vufind/module/Catalog
 COPY tests/ /tests
 COPY composer.local.json /tmp/composer.local.json
-COPY tests/.eslintrc.js /usr/local/vufind/.eslintrc.js
-COPY tests/.jshintignore /usr/local/vufind/.jshintignore
+COPY tests/eslint.config.mjs /usr/local/vufind/eslint.config.mjs
 COPY public/  /usr/local/vufind/public
 COPY scripts /usr/local/bin
 COPY entrypoint.sh startup.sh startup-build.sh startup-cron.sh startup-croncache.sh backup.sh restore.sh /
@@ -118,10 +117,8 @@ RUN \
     chown -R 1000:1000 /tests && \
     chmod -R 664 /tests && \
     mv /tests/* ${VUFIND_HOME}/tests/ && \
-    # Install grunt
-    npm install -g grunt-cli && \
-    npm run install:scss-dependencies && \
-    grunt scss
+    # Build SCSS
+    npm run build
 
 EXPOSE 80
 

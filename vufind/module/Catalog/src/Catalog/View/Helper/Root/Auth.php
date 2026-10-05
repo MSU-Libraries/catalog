@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Authentication view helper
+ * Authentication view helper.
  *
  * PHP version 8
  *
@@ -37,7 +37,7 @@ use function array_key_exists;
 use function count;
 
 /**
- * Authentication handler to add additional data to the view
+ * Authentication handler to add additional data to the view.
  *
  * @category VuFind
  * @package  View_Helpers
@@ -48,7 +48,7 @@ use function count;
 class Auth extends \VuFind\View\Helper\Root\Auth
 {
     /**
-     * Constructor
+     * Constructor.
      *
      * @param \VuFind\Auth\Manager          $manager          Authentication manager
      * @param \VuFind\Auth\ILSAuthenticator $ilsAuthenticator ILS Authenticator

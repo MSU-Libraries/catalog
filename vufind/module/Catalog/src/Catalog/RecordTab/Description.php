@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Description tab
+ * Description tab.
  *
  * PHP version 8
  *
@@ -33,7 +33,7 @@ use VuFind\I18n\Translator\TranslatorAwareInterface;
 use VuFind\I18n\Translator\TranslatorAwareTrait;
 
 /**
- * Description tab
+ * Description tab.
  *
  * @category VuFind
  * @package  RecordTabs

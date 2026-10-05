@@ -3,16 +3,6 @@
 return [
   'router' => [
     'routes' => [
-      'record-getthis' => [
-        'type' => Laminas\Router\Http\Segment::class,
-        'options' => [
-          'route' => '/Record/:id/GetThis',
-          'defaults' => [
-            'controller' => 'Record',
-            'action' => 'GetThis',
-          ],
-        ],
-      ],
       'record-mapthis' => [
         'type' => Laminas\Router\Http\Segment::class,
         'options' => [
@@ -124,13 +114,10 @@ return [
       'search_results' => [
         'factories' => [
           Catalog\Search\Solr\Results::class => VuFind\Search\Solr\ResultsFactory::class,
-          Catalog\Search\EDS\Results::class => Catalog\Search\EDS\EDSSearchResultsFactory::class,
         ],
         'aliases' => [
           VuFind\Search\Solr\Results::class => Catalog\Search\Solr\Results::class,
           'solr' => Catalog\Search\Solr\Results::class,
-          VuFind\Search\EDS\Results::class => Catalog\Search\EDS\Results::class,
-          'eds' => Catalog\Search\EDS\Results::class,
         ],
       ],
       'db_service' => [
@@ -153,11 +140,13 @@ return [
     ],
   ],
   'service_manager' => [
-    'factories' => [
-      Catalog\Form\Form::class => VuFind\Form\FormFactory::class,
-    ],
-    'aliases' => [
-      VuFind\Form\Form::class => Catalog\Form\Form::class,
-    ],
+      'factories' => [
+          Catalog\Form\Form::class => VuFind\Form\FormFactory::class,
+          Catalog\GetThis\GetThisLoader::class => VuFind\GetThis\GetThisLoaderFactory::class,
+      ],
+      'aliases' => [
+          VuFind\Form\Form::class => Catalog\Form\Form::class,
+          VuFind\GetThis\GetThisLoader::class => Catalog\GetThis\GetThisLoader::class,
+      ],
   ],
 ];

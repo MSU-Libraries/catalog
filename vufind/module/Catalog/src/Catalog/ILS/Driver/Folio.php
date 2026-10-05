@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOLIO REST API driver
+ * FOLIO REST API driver.
  *
  * PHP version 8
  *
@@ -39,18 +39,20 @@ use GuzzleHttp\Psr7;
 use Laminas\Http\Header\HeaderInterface;
 use Laminas\Http\Headers;
 use Throwable;
+use VuFind\Connection\Webhook;
 use VuFind\Exception\ILS as ILSException;
 use VuFind\Http\GuzzleServiceAwareInterface;
 use VuFind\Http\GuzzleServiceAwareTrait;
 use VuFind\ILS\Logic\AvailabilityStatus;
 
+use function array_slice;
 use function count;
 use function in_array;
 use function is_object;
 use function is_string;
 
 /**
- * FOLIO REST API driver
+ * FOLIO REST API driver.
  *
  * @category VuFind
  * @package  ILS_Drivers
@@ -63,43 +65,45 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
     use GuzzleServiceAwareTrait;
 
     /**
-     * Configuration file reader object (PluginManager)
+     * Config object for msul.ini
      *
-     * @var \VuFind\Config\PluginManager
+     * @var \VuFind\Config\Config
      */
-    protected $configReader = null;
+    protected $msulConfig = null;
 
     /**
-     * Guzzle client
+     * Guzzle client.
      *
      * @var \GuzzleHttp\Client
      */
     protected $client;
 
     /**
-     * Guzzle live pool
+     * Guzzle live pool.
      *
      * @var \Catalog\Http\GuzzleLivePool
      */
     protected $pool;
 
     /**
-     * Constructor
+     * Constructor.
      * MSUL PC-1416 customized to add configReader param for reading msul.ini
      *
-     * @param \VuFind\Date\Converter       $dateConverter  Date converter object
-     * @param callable                     $sessionFactory Factory function returning
-     * SessionContainer object
-     * @param \VuFind\Config\PluginManager $configReader   Config reader object
+     * @param \VuFind\Date\Converter $dateConverter     Date converter object
+     * @param callable               $sessionFactory    Factory function returning
+     *                                                  SessionContainer object
+     * @param Webhook                $webhookConnection Connection for webhooks
+     * @param \VuFind\Config\Config  $msulConfig        MSUL Config object
      */
     public function __construct(
         \VuFind\Date\Converter $dateConverter,
         $sessionFactory,
-        $configReader
+        protected ?Webhook $webhookConnection,
+        $msulConfig,
     ) {
         $this->dateConverter = $dateConverter;
         $this->sessionFactory = $sessionFactory;
-        $this->configReader = $configReader; // MSUL PC-1416 New param to read msul.ini
+        $this->msulConfig = $msulConfig;
     }
 
     /**
@@ -277,7 +281,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
 
     /**
      * MSUL - PC-1659: Add support for async calls
-     * Helper function to retrieve a single page of results from FOLIO API
+     * Helper function to retrieve a single page of results from FOLIO API.
      *
      * @param string $interface FOLIO api interface to call
      * @param array  $query     Extra GET parameters (e.g. ['query' => 'your cql here'])
@@ -309,7 +313,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
 
     /**
      * MSUL - PC-1659: Add support for async calls
-     * Helper function to retrieve paged results from FOLIO API
+     * Helper function to retrieve paged results from FOLIO API.
      *
      * @param string $responseKey Key containing values to collect in response
      * @param string $interface   FOLIO api interface to call
@@ -431,7 +435,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
     }
 
     /**
-     * Support method for getHoldings() -- retrieve holdings by instance ids
+     * Support method for getHoldings() -- retrieve holdings by instance ids.
      *
      * @param string[] $instanceIds the FOLIO instance ids
      *
@@ -454,7 +458,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
     }
 
     /**
-     * Support method for getHoldings() -- retrieve items by holding ids (including bound-with items)
+     * Support method for getHoldings() -- retrieve items by holding ids (including bound-with items).
      *
      * @param string[] $holdingsIds the FOLIO holdings ids
      *
@@ -765,7 +769,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
     }
 
     /**
-     * Support method for getHoldings() -- processes FOLIO records for a single instance
+     * Support method for getHoldings() -- processes FOLIO records for a single instance.
      *
      * @param string   $bibId      Bib-level id
      * @param object[] $holdings   holdings for the instance
@@ -863,19 +867,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             // fill it with data from the FOLIO holdings record, and make it not appear in
             // the full record display using a non-visible AvailabilityStatus.
             if ($number == 0 && $showHoldingsNoItems) {
-                $locAndHoldings = $this->getItemFieldsFromNonItemData($holding->effectiveLocationId, $holdingDetails);
-                $invisibleAvailabilityStatus = new AvailabilityStatus(
-                    true,
-                    'HoldingStatus::holding_no_items_availability_message'
-                );
-                $invisibleAvailabilityStatus->setVisibilityInHoldings(false);
-                $nextBatch[] = $locAndHoldings + [
-                    'id' => $bibId,
-                    'callnumber' => $holdingDetails['holdingCallNumber'],
-                    'callnumber_prefix' => $holdingDetails['holdingCallNumberPrefix'],
-                    'reserve' => 'N',
-                    'availability' => $invisibleAvailabilityStatus,
-                ];
+                $nextBatch[] = $this->buildHoldingsNoItemsData($bibId, $holdingDetails, $holding);
             }
             $items = array_merge(
                 $items,
@@ -947,7 +939,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
     /**
      * Support method for getHoldings(): obtaining the Due Date from the
      * current loan, adjusting the timezone and formatting in universal
-     * time with or without due time
+     * time with or without due time.
      *
      * @param \stdClass $loan     The current loan
      * @param bool      $showTime Determines if date or date & time is returned
@@ -964,7 +956,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
 
     /**
      * Support method for getHoldings(): obtaining any current loan from OKAPI
-     * by calling /circulation/loans with the item->id
+     * by calling /circulation/loans with the item->id.
      *
      * @param string $itemId ID for the item to query
      *
@@ -986,7 +978,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
 
     /**
      * Support method for getHoldings(): obtaining any current loan from OKAPI
-     * by calling /circulation/loans with the item->id
+     * by calling /circulation/loans with the item->id.
      *
      * @param string                     $itemId       ID for the item to query
      * @param ?iterable<Promise\Promise> $loanPromises An iterable of Promises for loans;
@@ -1038,14 +1030,14 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
 
     /**
      * MSU PC-1628 pass id to patron login function
-     * Patron Login
+     * Patron Login.
      *
      * This is responsible for authenticating a patron against the catalog.
      *
      * @param string $username The patron username
      * @param string $password The patron password
      *
-     * @return mixed Associative array of patron info on successful login,
+     * @return ?array Associative array of patron info on successful login,
      * null on unsuccessful login.
      */
     public function patronLogin($username, $password)
@@ -1087,23 +1079,27 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
             }
         }
 
-        return [
-            'id' => $profile->id,
-            'username' => $username,
-            'cat_username' => $username,
-            'cat_password' => $password,
-            'firstname' => $profile->personal->firstName ?? null,
-            'lastname' => $profile->personal->lastName ?? null,
-            'email' => $profile->personal->email ?? null,
-            'addressTypeIds' => array_map(
-                fn ($address) => $address->addressTypeId,
-                $profile->personal->addresses ?? []
-            ),
-        ];
+        return $this->createPatronArray(
+            id: $profile->id,
+            cat_username: $username,
+            cat_password: $password,
+            firstname: $profile->personal->firstName ?? null,
+            lastname: $profile->personal->lastName ?? null,
+            email: $profile->personal->email ?? null,
+            nonDefaultFields: [
+                // Add username just in case for legacy
+                'username' => $username,
+                'addressTypeIds' => array_map(
+                    fn ($address) => $address->addressTypeId,
+                    $profile->personal->addresses ?? []
+                ),
+                'addresses' => $profile->personal->addresses ?? [],
+            ],
+        );
     }
 
     /**
-     * This method queries the ILS for a patron's current checked out items
+     * This method queries the ILS for a patron's current checked out items.
      *
      * Input: Patron array returned by patronLogin method
      * Output: Returns with a 'count' key (overall result set size) and a 'records'
@@ -1149,63 +1145,99 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      */
     public function getMyTransactions($patron, $params = [])
     {
-        // MSUL -- overridden to add fields to response
         $limit = $params['limit'] ?? 1000;
         $offset = isset($params['page']) ? ($params['page'] - 1) * $limit : 0;
 
-        $query = 'userId==' . $patron['id'] . ' and status.name==Open';
-        if (isset($params['sort'])) {
-            $query .= ' sortby ' . $this->escapeCql($params['sort']);
-        }
-        $resultPage = $this->getResultPage('/circulation/loans', compact('query'), $offset, $limit)->wait();
-        $transactions = [];
-        foreach ($resultPage->loans ?? [] as $trans) {
-            $dueStatus = false;
-            $date = $this->getDateTimeFromString($trans->dueDate);
-            $dueDateTimestamp = $date->getTimestamp();
+        $requestedSort = $params['sort'] ?? '';
+        $vufindSortMap = $this->config['Loans']['vufind_sort'] ?? [];
+        $localSortField = $vufindSortMap[$requestedSort] ?? null;
 
-            $now = time();
-            if ($now > $dueDateTimestamp) {
-                $dueStatus = 'overdue';
-            } elseif ($now > $dueDateTimestamp - (1 * 24 * 60 * 60)) {
-                $dueStatus = 'due';
+        $query = 'userId==' . $patron['id'] . ' and status.name==Open';
+        $transactions = [];
+        $count = null;
+
+        // Fetch data from FOLIO, only pass sort to API if it is NOT handled locally by VuFind
+        if ($localSortField) {
+            $rawItems = $this->getPagedResults('loans', '/circulation/loans', compact('query'));
+        } else {
+            if (!empty($requestedSort)) {
+                $query .= ' sortby ' . $this->escapeCql($requestedSort);
             }
-            $transactions[] = [
-                'duedate' =>
-                    $this->dateConverter->convertToDisplayDate(
-                        'U',
-                        $dueDateTimestamp
-                    ),
-                'dueTime' =>
-                    $this->dateConverter->convertToDisplayTime(
-                        'U',
-                        $dueDateTimestamp
-                    ),
-                'dueStatus' => $dueStatus,
-                // MSU remove prefix so ilsDetails in templates populates
-                'id' => $this->getBibIdWithoutPrefix($trans->item->instanceId),
-                'item_id' => $trans->item->id,
-                'barcode' => $trans->item->barcode,
-                'renew' => $trans->renewalCount ?? 0,
-                'renewable' => true,
-                'title' => $trans->item->title,
-                'borrowingLocation' => $trans->item->location?->name ?? null, // MSU
-                'volume' => $trans->item->volume ?? null, // MSU
-                'callNumber' => $trans->item->callNumber ?? null, // MSU
-            ];
+            $result = $this->getResultPage('/circulation/loans', compact('query'), $offset, $limit)->wait(); // MSU
+            $rawItems = $result->loans ?? [];
         }
-        // If we have a full page or have applied an offset, we need to look up the total count of transactions:
+
+        // Format the transaction results
+        foreach ($rawItems as $trans) {
+            $transactions[] = $this->formatTransactionItem($trans);
+        }
+
+        // If we have a full page, have applied an offset, or are not using a vufind_sort option,
+        // we need to look up the total count of transactions:
         $count = count($transactions);
-        if ($offset > 0 || $count >= $limit) {
+        if (!$localSortField && ($offset > 0 || $count >= $limit)) {
             // We could use the count in the result page, but that may be an estimate;
             // safer to do a separate lookup to be sure we have the right number!
             $count = $this->getResultCount('/circulation/loans', compact('query'));
         }
+
+        // Apply local sorting if requested
+        if ($localSortField) {
+            $transactions = $this->sortArray($transactions, $localSortField);
+            $transactions = array_slice($transactions, $offset, $limit);
+        }
+
         return ['count' => $count, 'records' => $transactions];
     }
 
     /**
-     * Get Pick Up Locations
+     * Support method for getMyTransactions to parse a single
+     * transaction result.
+     *
+     * @param array $transaction An single transaction
+     * array from getMyTransactions
+     *
+     * @return string The FOLIO loan ID for this loan
+     */
+    protected function formatTransactionItem($transaction)
+    {
+        $dueStatus = false;
+        $date = $this->getDateTimeFromString($transaction->dueDate);
+        $dueDateTimestamp = $date->getTimestamp();
+
+        $now = time();
+        if ($now > $dueDateTimestamp) {
+            $dueStatus = 'overdue';
+        } elseif ($now > $dueDateTimestamp - (1 * 24 * 60 * 60)) {
+            $dueStatus = 'due';
+        }
+        return [
+            'duedate' =>
+                $this->dateConverter->convertToDisplayDate(
+                    'U',
+                    $dueDateTimestamp
+                ),
+            'dueTime' =>
+                $this->dateConverter->convertToDisplayTime(
+                    'U',
+                    $dueDateTimestamp
+                ),
+            'dueStatus' => $dueStatus,
+            // MSU remove prefix so ilsDetails in templates populates
+            'id' => $this->getBibIdWithoutPrefix($transaction->item->instanceId),
+            'item_id' => $transaction->item->id,
+            'barcode' => $transaction->item->barcode,
+            'renew' => $transaction->renewalCount ?? 0,
+            'renewable' => true,
+            'title' => $transaction->item->title,
+            'borrowingLocation' => $transaction->item->location?->name ?? null, // MSU
+            'volume' => $transaction->item->volume ?? null, // MSU
+            'callNumber' => $transaction->item->callNumber ?? null, // MSU
+        ];
+    }
+
+    /**
+     * Get Pick Up Locations.
      *
      * This is responsible get a list of valid locations for holds / recall
      * retrieval
@@ -1229,13 +1261,25 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
         if ('Delivery' == ($holdInfo['requestGroupId'] ?? null)) {
             $addressTypes = $this->getAddressTypes();
             $limitDeliveryAddressTypes = $this->config['Holds']['limitDeliveryAddressTypes'] ?? [];
+            if (in_array('FOLIO_DEFAULT', $limitDeliveryAddressTypes)) {
+                $requestPreference = $this->getRequestPreference($patron['id']);
+                $defaultDeliveryAddressTypeId = $requestPreference['defaultDeliveryAddressTypeId'] ?? null;
+            }
             $deliveryPickupLocations = [];
             foreach ($patron['addressTypeIds'] as $addressTypeId) {
                 $addressType = $addressTypes[$addressTypeId];
-                if (empty($limitDeliveryAddressTypes) || in_array($addressType, $limitDeliveryAddressTypes)) {
+                if (
+                    empty($limitDeliveryAddressTypes)
+                    || in_array($addressType, $limitDeliveryAddressTypes)
+                    || ($defaultDeliveryAddressTypeId ?? null) === $addressTypeId
+                ) {
                     $deliveryPickupLocations[] = [
                         'locationID' => $addressTypeId,
-                        'locationDisplay' => $addressType,
+                        'locationDisplay' => $this->formatDeliveryAddress(
+                            $addressTypeId,
+                            $addressType,
+                            $patron['addresses'] ?? []
+                        ),
                     ];
                 }
             }
@@ -1326,7 +1370,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
     }
 
     /**
-     * This method queries the ILS for a patron's current holds
+     * This method queries the ILS for a patron's current holds.
      *
      * Input: Patron array returned by patronLogin method
      * Output: Returns an array of associative arrays, one for each hold associated
@@ -1468,56 +1512,6 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
     }
 
     /**
-     * MSU can remove when PR 5001 is in a release
-     * Get latest major version of a $moduleName enabled for a tenant.
-     * Result is cached.
-     *
-     * @param string $moduleName module name
-     *
-     * @return int module version or 0 if no module found
-     */
-    protected function getModuleMajorVersion(string $moduleName): int
-    {
-        $cacheKey = 'module_version:' . $moduleName;
-        $version = $this->getCachedData($cacheKey);
-        if ($version === null) {
-            // Get latest version of a module enabled for a tenant.
-            // Allow errors to not trigger an exception because that means we need to try the
-            // next call that is compatible with pre-Sunflower.
-            $response = $this->makeRequest(
-                'GET',
-                '/modules/discovery?query=(name==' . $moduleName . ')',
-                allowedFailureCodes:[400, 403, 404, 500]
-            );
-
-            // If there was a failure with the first method, attempt the second
-            // endpoint to get the version.
-            $json = json_decode($response->getBody(), true);
-            if (empty($json) || isset($json['errors'])) {
-                $response = $this->makeRequest(
-                    'GET',
-                    '/_/proxy/tenants/' . $this->tenant . '/modules?filter=' . $moduleName . '&latest=1',
-                );
-                $json = json_decode($response->getBody(), true);
-                $latest = $json[0]['id'] ?? '0';
-            } else {
-                $latest = $json['discovery'][0]['id'] ?? '0';
-            }
-
-            // get version major from json result
-            preg_match_all('!\d+!', $latest, $matches);
-            $version = (int)($matches[0][0] ?? 0);
-            if ($version === 0) {
-                $this->debug('Unable to find version in ' . $response->getBody());
-            } else {
-                // Only cache non-zero values, so we don't persist an error condition:
-                $this->putCachedData($cacheKey, $version);
-            }
-        }
-        return $version;
-    }
-
-    /**
      * Return all data for all courses, from /coursereserves/courses.
      *
      * @return array all data for all courses
@@ -1537,7 +1531,7 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
     }
 
     /**
-     * Find Reserves
+     * Find Reserves.
      *
      * Obtain information on course reserves.
      *
@@ -1842,10 +1836,8 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
      */
     protected function getExternalTimeout()
     {
-        $msulConfig = $this->configReader->get('msul');
-
-        if (isset($msulConfig)) {
-            return $msulConfig['Locations']['timeout'] ?? 2;
+        if (isset($this->msulConfig)) {
+            return $this->msulConfig['Locations']['timeout'] ?? 2;
         }
 
         return 2;
@@ -2042,12 +2034,11 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
     ) {
         $promise = new Promise\FulfilledPromise(null);
 
-        $msulConfig = $this->configReader->get('msul');
-        if (empty($callNumber) || !isset($msulConfig)) {
+        if (empty($callNumber) || !isset($this->msulConfig)) {
             return $promise;
         }
 
-        $apiUrl = $msulConfig['Locations']['api_url'] ?? '';
+        $apiUrl = $this->msulConfig['Locations']['api_url'] ?? '';
         $parsed = parse_url($apiUrl);
         if (!empty($apiUrl) && isset($parsed['scheme'], $parsed['host'], $parsed['path'])) {
             $baseUrl = $parsed['scheme'] . '://' . $parsed['host'];
@@ -2110,12 +2101,11 @@ class Folio extends \VuFind\ILS\Driver\Folio implements GuzzleServiceAwareInterf
         if ($data === null) {
             return [];
         }
-        $msulConfig = $this->configReader->get('msul');  // Known safe from customDataPromise()
-        $topKey = $msulConfig['Locations']['response_top_key'] ?? 'callnumbers';
-        $floorKey = $msulConfig['Locations']['response_floor_key'] ?? '';
-        $notMappableFloor = $msulConfig['Locations']['not_mappable_floor_value'] ?? '';
-        $gisFloorKey = $msulConfig['Locations']['response_gis_floor_key'] ?? '';
-        $locationKey = $msulConfig['Locations']['response_location_key'] ?? '';
+        $topKey = $this->msulConfig['Locations']['response_top_key'] ?? 'callnumbers';
+        $floorKey = $this->msulConfig['Locations']['response_floor_key'] ?? '';
+        $notMappableFloor = $this->msulConfig['Locations']['not_mappable_floor_value'] ?? '';
+        $gisFloorKey = $this->msulConfig['Locations']['response_gis_floor_key'] ?? '';
+        $locationKey = $this->msulConfig['Locations']['response_location_key'] ?? '';
 
         // Parse the response and add to our location results
         $customizedLoc = [];

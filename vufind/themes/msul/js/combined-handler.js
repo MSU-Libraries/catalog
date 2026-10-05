@@ -38,7 +38,7 @@ function searchboxAction() {
   }
   case 'External': {
     const lookfor = params.get('lookfor') || '';
-    let finalTarget = '';
+    let finalTarget;
     if (!target.includes('%%lookfor%%')) {
       finalTarget = target + encodeURIComponent(lookfor);
     } else {

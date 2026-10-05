@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Database service factory
+ * Database service factory.
  *
  * PHP version 8
  *
@@ -33,7 +33,7 @@ namespace Catalog\Db\Service;
 use Psr\Container\ContainerInterface;
 
 /**
- * Database service factory
+ * Database service factory.
  * MSUL Customizations for:
  *  - Passing in the config reader when initializing the class
  *  - Having the Db row prototype look in VuFind's module
@@ -48,7 +48,7 @@ use Psr\Container\ContainerInterface;
 class AbstractDbServiceFactory extends \VuFind\Db\Service\AbstractDbServiceFactory
 {
     /**
-     * Create an object
+     * Create an object.
      *
      * @param ContainerInterface $container     Service manager
      * @param string             $requestedName Service being created
