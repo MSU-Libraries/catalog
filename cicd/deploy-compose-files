@@ -181,6 +181,9 @@ apply_prod_changes() {
     ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`${SITE_HOSTNAME}\`) && PathPrefix(\`/monitoring\`)\"" \
     docker-compose.monitoring.yml;
 
+    # Change location of cache
+    ./yq -i ".services.catalog.environment.VUFIND_CACHE_DIR = \"/tmp/vufind_cache\"" docker-compose.catalog.yml;
+
     ## Changes for catprod-beta and catprod-preview
     if [[ "${STACK_NAME}" == *"-beta" ]] || [[ "${STACK_NAME}" == *"-preview" ]]; then
         # Restrict both beta/preview to campus IPs only

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+mkdir -p "${VUFIND_CACHE_DIR}"
 rm -r "${VUFIND_CACHE_DIR:?}"/*
 
 # Re-initialize dirs
