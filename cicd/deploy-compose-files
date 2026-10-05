@@ -116,6 +116,11 @@ apply_devel_changes() {
     ./yq -i ".services.catalog.deploy.replicas = 1" docker-compose.catalog.yml
     ./yq -i ".services.captcha.deploy.replicas = 1" docker-compose.catalog.yml
 
+    # Add cache volume so cachecron can clear it
+    ./yq -i ".services.catalog.volumes += \"vufind_cache:/mnt/vufind_cache\"" docker-compose.catalog.yml;
+    ./yq -i ".services.cachecron.volumes += \"vufind_cache:/mnt/vufind_cache\"" docker-compose.catalog.yml;
+    ./yq -i '.volumes.vufind_cache = {}' docker-compose.catalog.yml
+
     # Make updates specific to non-review environments
     if [[ "${STACK_NAME}" != review-* ]]; then
         # Mount monitoring files in container for easier editing
