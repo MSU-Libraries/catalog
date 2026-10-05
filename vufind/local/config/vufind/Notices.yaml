@@ -1,0 +1,145 @@
+# Available styles. Keys are style names. Values are options.
+# The following options are available:
+# - classes: CSS classes to be added to the notices. If omitted, defaults will be applied by the Notices view helper.
+styles:
+  success:
+  info:
+  warning:
+  danger:
+#  my-custom-style-name:
+#    classes: my-custom-css-class my-other-custom-css-class
+  yellow:
+    classes: notice-yellow-background
+  orange:
+    classes: notice-orange-background
+  red:
+    classes: notice-red-background
+
+# Notices can be configured here. You can use the following options:
+# - content: The message to be displayed. It can be translated using the language files.
+# - translations: To configure multiple languages in this file use this option instead of content.
+#                 This is an associative array. Keys are language codes and values are
+#                 the translated messages. The notices will only be displayed if the selected language
+#                 is included in the keys. If the value is left empty the translation will be chosen
+#                 based on the language fallback configuration in config.ini.
+# - contentType: Specifies how the messages should be displayed. The default is "text". The options are
+#                - "text": The message will be display as is. HTML will be escaped.
+#                - "html": HTML in messages will not be escaped.
+#                - "markdown": Messages will be rendered using Markdown.
+# - style: Specifies one of the styles above.
+# - position: Specifies the position of the notice. By default, the notices are displayed above the main content.
+#             Currently, the only other option that is available is "header", but you can add more possible position
+#             by adding <?=$this->notices()->renderNoticesForPosition('<position>')?> to your templates.
+# - conditions: Optional array of conditions. For more details
+#               see https://vufind.org/wiki/development:plugins:condition_handlers
+notices:
+# Example 1
+#  - style: warning
+#    content: The library is closed today!
+# Example 2 (Notices will only be displayed for languages de, es and en. For es it will fall back to en)
+#  - style: success
+#    position: header
+#    translations:
+#      de: Willkommen in unserem Katalog!
+#      es:
+#      en: Welcome to our catalog!
+# Example 3
+#  - style: info
+#    content: >
+#      ## This is the catalog of our library
+#
+#      -------------------------------------
+#
+#      You can
+#
+#      * **search** for books
+#
+#      * **request** books
+#
+#      * create **favorite** lists
+#    contentType: markdown
+#  - style: success
+#    content: Merry Christmas!
+#    conditions:
+#      - type: date
+#        checkedValues: "/-12-2[4-6]/"
+#        comparator: "regex"
+
+# Banner notices
+  - position: header
+    conditions:
+      - type: env
+        env: STACK_NAME
+        comparator: starts_with
+        checkedValues: "devel-"
+    style: orange
+    contentType: html
+    content: >
+      <p>
+        <b>Notice:</b> This catalog is connected to the FOLIO test tenant, and should be used for testing purposes only.
+        The information here is not up-to-date, and item availability will not be accurate.
+        <a href="https://catalog.lib.msu.edu" target="_blank">
+          Go to the production catalog
+          <i class="fa fa-external-link" aria-hidden="true"></i>
+        </a>
+      </p>
+
+  - position: header
+    conditions:
+      - type: env
+        env: STACK_NAME
+        comparator: ends_with
+        checkedValues: "-preview"
+    style: orange
+    contentType: html
+    content: >
+      <p>
+        <b>Notice:</b> This site is for previewing changes coming to the MSU Libraries catalog. It is
+        connected to live data and can be used as you would use the
+        <a href="https://catalog.lib.msu.edu/" target="_blank">
+          production catalog <i class="fa fa-external-link" aria-hidden="true"></i>
+        </a>.
+        However, features may not be finalized and could be unstable.
+        <em>
+          You can help us improve it by providing
+          <a data-lightbox href="/Feedback/Home">feedback and suggestions</a>!
+        </em>
+      </p>
+
+  - position: header
+    conditions:
+      - type: env
+        env: STACK_NAME
+        comparator: ends_with
+        checkedValues: "-beta"
+    style: orange
+    contentType: html
+    content: >
+      <p>
+        <b>Notice:</b> This site is for previewing changes coming to the MSU Libraries catalog. It is
+        connected to live data and can be used as you would use the
+        <a href="https://catalog.lib.msu.edu/" target="_blank">
+          production catalog <i class="fa fa-external-link" aria-hidden="true"></i>
+        </a>.
+        <em><b>However, features may not be finalized and could be unstable.</b></em>
+          You can help us improve it by providing
+          <a data-lightbox href="/Feedback/Home">feedback and suggestions</a>!
+      </p>
+
+# Request notices
+  - position: request
+    conditions:
+      - type: date_time
+        comparator: ">="
+        checkedValues: "2025-11-26 17:00:00"
+      - type: date_time
+        comparator: <
+        checkedValues: "2025-11-30 10:00:00"
+    style: red
+    contentType: html
+    content: >
+      <p>
+        The Main Library is closing on Wednesday, November 26nd at 5pm and will reopen on Sunday, November 26th
+        at 10am. During this time, Digital Reserves and Paging requests will not be filled. Please use the 'Save' feature
+        to bookmark your items until then.
+      </p>

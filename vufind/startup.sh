@@ -61,9 +61,8 @@ touch /var/log/simplesamlphp/simplesamlphp.log
 chown www-data:www-data /mnt/logs/vufind/vufind.log /var/log/simplesamlphp/simplesamlphp.log
 
 verbose "Link to shared configs..."
-ln -f -s /mnt/shared/config/BannerNotices.yaml /usr/local/vufind/local/config/vufind/BannerNotices.yaml
+ln -f -s /mnt/shared/config/Notices.yaml /usr/local/vufind/local/config/vufind/Notices.yaml
 ln -f -s /mnt/shared/config/LocationNotices.yaml /usr/local/vufind/local/config/vufind/LocationNotices.yaml
-ln -f -s /mnt/shared/config/RequestNotices.yaml /usr/local/vufind/local/config/vufind/RequestNotices.yaml
 
 verbose "Running Solr query with healthcheck ID to confirm Solr readiness"
 curl --max-time 5 -o /dev/null -s "http://solr:8983/solr/biblio/select?fl=%2A&wt=json&json.nl=arrarr&q=id%3A%22folio.${FOLIO_REC_ID}%22"

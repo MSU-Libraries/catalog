@@ -18,5 +18,5 @@ if [[ -n "${1}" ]] && [[ "${1}" == "--unit" ]]; then
     echo "Skipping code quality tests"
 else
     echo "Running code quality tests"
-    vendor/bin/phing eslint jshint phpcs-console php-cs-fixer-dryrun phpstan-console
+    vendor/bin/phing eslint phpcs-console php-cs-fixer-dryrun phpstan-console
 fi;

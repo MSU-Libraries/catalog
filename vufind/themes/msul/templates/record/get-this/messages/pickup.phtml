@@ -1,0 +1,10 @@
+<div>
+    <p>
+        <strong>Request this Item:</strong>
+        Materials must be paged before you can receive it.
+        Please reach out to circulation and they will help identify your options.
+        <?php if ($this->getThisLoader->isLibUseOnly()) {
+            ?>However, this material cannot leave the building.<?php
+        } ?>
+    </p>
+</div>

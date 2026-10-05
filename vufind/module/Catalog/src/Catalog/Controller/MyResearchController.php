@@ -1,7 +1,7 @@
 <?php
 
 /**
- * MyResearch Controller
+ * MyResearch Controller.
  *
  * PHP version 8
  *
@@ -44,7 +44,7 @@ use VuFind\Exception\Auth as AuthException;
 class MyResearchController extends \VuFind\Controller\MyResearchController
 {
     /**
-     * Prepare and direct the home page where it needs to go
+     * Prepare and direct the home page where it needs to go.
      *
      * @return mixed
      */
@@ -60,22 +60,28 @@ class MyResearchController extends \VuFind\Controller\MyResearchController
         ) {
             try {
                 if (!$this->getAuthManager()->getIdentity()) {
-                    $this->getAuthManager()->login($this->getRequest());
-                    // Return early to avoid unnecessary processing if we are being
-                    // called from login lightbox and don't have a followup action or
-                    // followup is set to referrer.
-                    if (
-                        $this->params()->fromPost('processLogin')
-                        && $this->inLightbox()
-                        // (MSULib) No longer checking for lack of followup url, as we always set it
-                    ) {
-                        $this->clearFollowupUrl();
-                        return $this->getRefreshResponse();
+                    if ($this->getAuthManager()->login($this->getRequest())) {
+                        // Return early to avoid unnecessary processing if we are being
+                        // called from login lightbox and don't have a followup action or
+                        // followup is set to referrer.
+                        if (
+                            $this->params()->fromPost('processLogin')
+                            && $this->inLightbox()
+                            // (MSULib) No longer checking for lack of followup url, as we always set it
+                        ) {
+                            $this->clearFollowupUrl();
+                            return $this->getRefreshResponse();
+                        }
                     }
                 }
             } catch (AuthException $e) {
                 $this->processAuthenticationException($e);
             }
+        }
+
+        // Pre-authenticated? Try to complete authentication:
+        if ($this->getAuthManager()->getPreAuthenticationData()) {
+            return $this->forwardTo('MyResearch', 'Login');
         }
 
         // Not logged in?  Force user to log in:

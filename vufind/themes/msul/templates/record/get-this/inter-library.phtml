@@ -1,0 +1,47 @@
+<?php
+$item = $this->getThisLoader->getItem();
+$location = $this->getThisLoader->getLocation();
+$status = $item['availability']?->getStatusDescription() ?? 'Unknown';
+$title = $this->driver->getTitle();
+$pubname = $this->driver->getPublisher();
+$author = $this->driver->getPrimaryAuthor();
+$isbn = $this->driver->getCleanISBN();
+$callnum = $this->getThisLoader->getCallNumber()['text'];
+if (is_array($pubname)): $pubname = implode(', ', $pubname); endif;
+
+$params = [
+    'LO' => 'EYM%2CGZM%2CMUN',
+    'rft.title' => '$title',
+    'rft.au' => '$author',
+    'rft.pub' => '$pubname',
+    'rft.isbn' => '$isbn',
+    'loc' => '$location',
+    'callno' => '$callnum',
+    'CAT' => '1',
+    'rft.genre' => 'book',
+];
+
+$requestCopyLink = trim($getThisParams['request_link'], '/') . '/' . 'OpenURL?rfr_id=info:sid/Catalog:' .
+        $this->escapeUrl($status) . ':' . $this->escapeUrl($item == null ? '' : $item['barcode']) .
+        http_build_query($params);
+
+// TODO see if we can switch to openUrl method
+//$requestCopyLink = trim($getThisParams['request_link'], '/') . '/' . $this->driver->getOpenUrl();
+?>
+<div>
+    <p>
+        <strong><a href='https://lib.msu.edu/ils/' target="_blank">Inter-library Loan</a>:</strong>
+        Request materials through the Inter-library Loan Request Form.
+        Typically available for pickup in 3-14 business days (MSU Students, Staff and Faculty only)
+    </p>
+    <ul>
+        <li>
+            <a
+                href='<?= $requestCopyLink ?>'
+                target='_blank'
+            >
+                Request Copy via ILLiad
+            </a>
+        </li>
+    </ul>
+</div>

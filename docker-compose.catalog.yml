@@ -11,7 +11,7 @@ services:
     volumes:
       - logs:/mnt/logs
       - /mnt/shared:/mnt/shared:rw
-      - /mnt/shared/config/BannerNotices.yaml:/mnt/shared/config/BannerNotices.yaml:ro
+      - /mnt/shared/config/Notices.yaml:/mnt/shared/config/Notices.yaml:ro
       - /mnt/shared/config/LocationNotices.yaml:/mnt/shared/config/LocationNotices.yaml:ro
       - vufind_cache:/mnt/vufind_cache
       - /usr/local/bin/pc-locate-oai:/usr/local/bin/pc-locate-oai:ro

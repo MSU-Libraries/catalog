@@ -56,12 +56,12 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
     }
 
     /**
-     * ID fields in holds
+     * ID fields in holds.
      */
     public const HOLD_ID_FIELDS = ['id', 'item_id', 'cat_username'];
 
     /**
-     * The default driver to use
+     * The default driver to use.
      *
      * @var string
      */
@@ -69,7 +69,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
 
     /**
      * An array of methods that should determine source from a specific parameter
-     * field
+     * field.
      *
      * @var array
      */
@@ -107,7 +107,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
     ];
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param \VuFind\Config\ConfigManagerInterface $configManager Configuration manager
      * @param \VuFind\Auth\ILSAuthenticator         $ilsAuth       ILS authenticator
@@ -123,7 +123,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
     }
 
     /**
-     * Find Reserves
+     * Find Reserves.
      *
      * Obtain information on course reserves.
      *
@@ -143,7 +143,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
     }
 
     /**
-     * Get Pick Up Locations
+     * Get Pick Up Locations.
      *
      * This is responsible get a list of valid library locations for holds / recall
      * retrieval
@@ -187,7 +187,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
     }
 
     /**
-     * Place Hold
+     * Place Hold.
      *
      * Attempts to place a hold or recall on a particular item and returns
      * an array with result details
@@ -216,7 +216,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
     }
 
     /**
-     * Extract source from the given ID
+     * Extract source from the given ID.
      *
      * @param string $id The id to be split
      *
@@ -238,7 +238,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
     }
 
     /**
-     * Change local ID's to global ID's in the given array
+     * Change local ID's to global ID's in the given array.
      *
      * @param mixed  $data         The data to be modified, normally
      * array or array of arrays
@@ -279,7 +279,7 @@ class MultiBackend extends \VuFind\ILS\Driver\MultiBackend
     }
 
     /**
-     * Change global ID's to local ID's in the given array
+     * Change global ID's to local ID's in the given array.
      *
      * @param mixed  $data         The data to be modified, normally
      * array or array of arrays

@@ -23,6 +23,14 @@ $activeFloorId = !empty($floorId) ? $floorId : $defaultFloorId;
 if (!empty($floorId)) {
   $this->assetManager()->appendStyleLink('/gis-assets/esri/themes/light/main.css');
 }
+
+echo $this->component(
+    'page-title',
+    [
+        'title' => $this->translate('Floor Map') . ($location ? (' : ' . $location) : ''),
+        'level' => 1,
+    ]
+);
 ?>
 
 <?php if (!empty($floorId)): ?>

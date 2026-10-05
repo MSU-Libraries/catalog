@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 .placehold {
   display:inline-block;
   text-decoration: none !important;
@@ -54,17 +56,19 @@
   position: relative;
   font-family: monospace;
 
-  a {
+  a,
+  button {
     text-decoration: none;
     width: 100%;
     display: inline-block;
     padding: 0.3rem;
   }
 
-  *[data-js-dropdown-header] a {
+  *[data-js-dropdown-header] button {
     display: inline-flex;
     justify-content: space-between;
     color: $gray-darker;
+    border: none;
   }
 
   .fa-close-dropdown {
@@ -95,8 +99,10 @@
       width: 100%;
       list-style: none;
       margin: 0;
-      padding-left: 0;
+      padding: 0;
       background: $lightgray;
+      display: block;
+      position: relative;
 
       li {
         display: block;
@@ -114,7 +120,7 @@
 
         a:hover,
         a:focus {
-          background-color: lighten($gray-base, 70%);
+          background-color: color.adjust($gray-base, $lightness: 70%);
         }
       }
     }

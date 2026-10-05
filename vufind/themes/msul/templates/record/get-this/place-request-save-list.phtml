@@ -1,0 +1,28 @@
+<?php
+  $item = $this->getThisLoader->getItem();
+  if (empty($item)) {
+    return;
+  }
+  $link = $this->getThisLoader->getLink();
+
+  $notices = $this->notices()->getManager()->getActiveList('request');
+?>
+<?php if (($item['is_holdable'] ?? false) && !empty($link)) : ?>
+  <div>
+    <p>
+      <?php if (
+          !empty($notices)
+          && $this->userlist()->getMode() !== 'disabled'
+          && $this->permission()->allowDisplay('feature.Favorites')): ?>
+        <a
+          href="<?=$this->escapeHtmlAttr($this->recordLinker()->getActionUrl($this->driver, 'Save'))?>"
+          data-lightbox class="save-record result-link icon-link"
+          data-id="<?=$this->escapeHtmlAttr($this->driver->getUniqueId()) ?>"
+        >
+          <?=$this->icon('user-favorites', 'icon-link__icon') ?>
+          <span class="result-link-label icon-link__label"><?=$this->transEsc('Add to favorites')?></span>
+        </a>
+      <?php endif; ?>
+    </p>
+  </div>
+<?php endif ?>

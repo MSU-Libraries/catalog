@@ -54,7 +54,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     use GetOpenUrlFormatTrait; // PC-1652 - Overwrite the function from DefaultRecord
 
     /**
-     * Get electronic journal links
+     * Get electronic journal links.
      *
      * @return array
      */
@@ -64,7 +64,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get publisher
+     * Get publisher.
      *
      * @return array
      */
@@ -74,7 +74,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get notes
+     * Get notes.
      *
      * @return array
      */
@@ -84,7 +84,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get the numbering peculiarity notes
+     * Get the numbering peculiarity notes.
      *
      * @return array Note fields from Solr
      */
@@ -94,7 +94,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get phyiscal description
+     * Get phyiscal description.
      *
      * @return array
      */
@@ -104,7 +104,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get genres
+     * Get genres.
      *
      * @return array
      */
@@ -114,7 +114,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get Sierra bib number
+     * Get Sierra bib number.
      *
      * @return array
      */
@@ -124,7 +124,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get locations
+     * Get locations.
      *
      * @return array
      */
@@ -134,7 +134,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get location
+     * Get location.
      *
      * @return array
      */
@@ -144,7 +144,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get breadcrumb
+     * Get breadcrumb.
      *
      * @return array
      */
@@ -154,7 +154,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get universally unique ID
+     * Get universally unique ID.
      *
      * @return array
      */
@@ -164,7 +164,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get full call number
+     * Get full call number.
      *
      * @return array
      */
@@ -174,7 +174,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get cartographic data
+     * Get cartographic data.
      *
      * @return array
      */
@@ -184,7 +184,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get ISBN data with type of ISBN ('valid', 'canceled/invalid')
+     * Get ISBN data with type of ISBN ('valid', 'canceled/invalid').
      *
      * @return array An array of arrays, subarrays containing 'isn' and 'type'
      */
@@ -194,7 +194,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get ISSN data with type of ISSN ('valid', 'incorrect', or 'canceled')
+     * Get ISSN data with type of ISSN ('valid', 'incorrect', or 'canceled').
      *
      * @return array An array of arrays, subarrays containing 'isn' and 'type'
      */
@@ -204,7 +204,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get ISMN data with type of ISMN ('valid', 'canceled/invalid')
+     * Get ISMN data with type of ISMN ('valid', 'canceled/invalid').
      *
      * @return array An array of arrays, subarrays containing 'isn' and 'type'
      */
@@ -214,7 +214,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get summary
+     * Get summary.
      *
      * @return array
      */
@@ -224,7 +224,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get the bookplate data
+     * Get the bookplate data.
      *
      * @return array
      */
@@ -234,7 +234,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get the scale notes
+     * Get the scale notes.
      *
      * @return array
      */
@@ -244,7 +244,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get the cite as notes
+     * Get the cite as notes.
      *
      * @return array
      */
@@ -254,7 +254,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get the video game platform
+     * Get the video game platform.
      *
      * @return array
      */
@@ -264,7 +264,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get the translated from languages
+     * Get the translated from languages.
      *
      * @return array Content from Solr
      */
@@ -274,7 +274,7 @@ class SolrDefault extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get the dissertation note
+     * Get the dissertation note.
      *
      * @return array Content from Solr
      */

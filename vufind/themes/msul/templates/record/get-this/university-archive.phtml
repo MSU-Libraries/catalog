@@ -1,0 +1,34 @@
+<?php
+$item = $this->getThisLoader->getItem();
+$publisherName = $this->driver->getPublisher();
+if (is_array($publisherName)): $publisherName = implode(', ', $publisherName); endif;
+$aeon_args = [
+    'Action' => '10',
+    'Form' => '21',
+    'value' => 'VufindGenericRequest',
+    'CallNumber' => $this->getThisLoader->getCallNumber()['text'],
+    'ItemTitle' => substr($this->driver->getTitle(), 0, 255),
+    'ItemEdition' => $this->driver->getEdition(),
+    'ItemAuthor' => $this->driver->getPrimaryAuthor(),
+    'ItemPublisher' => substr($publisherName, 0, 255),
+    'Location' => $this->getThisLoader->getLocation(),
+    'ItemNumber' => $this->driver->getSierraBN(),
+    'ItemVolume' => ($item['barcode'] ?? ''),
+];
+?>
+<div>
+    <strong>
+        <a href='https://lib.msu.edu/ua' target='_blank'>
+            University Archives Collections Access</a>:
+    </strong>
+    Material will be retrieved for viewing in the <a
+        href='https://lib.msu.edu/hours/calendar/reading-room'
+        target='_blank'>Special Collections and University Archives Reading
+        Room</a> in the Main Library. Please allow up to 3 business days for
+    delivery, or you may schedule a later date and time for viewing.
+    <ul>
+        <li>
+            <a href='https://spcrequest.lib.msu.edu/Logon/?<?= http_build_query($aeon_args)?>' target='_blank'>Request Item</a>
+        </li>
+    </ul>
+</div>

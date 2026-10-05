@@ -1,28 +1,15 @@
-.custom-notices-item {
-  padding: 0 .5rem 0 .5rem;
+/* Styles usable in Notices.yaml */
+.notice-yellow-background {
+  background: #FFDF60;
+}
+.notice-orange-background {
+  background: #FFDA9A;
+}
+.notice-red-background {
+  background: #FFD0D0;
 }
 
-.custom-notices {
-  background-color: $warning-bg-subtle;
-  color: $eggplant;
-  padding: 0.3rem 1rem 0.3rem 1rem;
-
-  p {
-    margin: 0.4rem 0 0.5rem 0;
-  }
-
-  a, i {
-    color: $msugreen;
-    text-decoration: none;
-  }
-
-  a:hover, a:active {
-    color: $darkgray;
-    text-decoration: underline;
-  }
-}
-
-// Location notices
+/* Location notices */
 .location-notice {
   padding: 0 .5rem 0 .5rem;
 }

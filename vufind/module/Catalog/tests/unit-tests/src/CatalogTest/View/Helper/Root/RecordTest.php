@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Record view helper Test Class
+ * Record view helper Test Class.
  *
  * PHP version 8
  *
@@ -30,7 +30,7 @@ use VuFindTheme\ThemeInfo;
 use function is_array;
 
 /**
- * Record view helper Test Class
+ * Record view helper Test Class.
  * TODO change to extends \VuFindTest\View\Helper\Root\RecordTest
  *
  * @category VuFind
@@ -53,7 +53,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     protected $testTheme = 'msul';
 
     /**
-     * Test getLinkDetails
+     * Test getLinkDetails.
      *
      * @return null
      */
@@ -64,7 +64,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getLinkDetails
+     * Test getLinkDetails.
      *
      * @return null
      */
@@ -75,7 +75,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getLinkTargetLabel
+     * Test getLinkTargetLabel.
      *
      * @return null
      */
@@ -86,7 +86,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getLinkTargetLabel with bookplate url
+     * Test getLinkTargetLabel with bookplate url.
      *
      * @return null
      */
@@ -100,7 +100,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getLinkTargetLabel with link labels
+     * Test getLinkTargetLabel with link labels.
      *
      * @return null
      */
@@ -117,7 +117,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getThumbnail empty
+     * Test getThumbnail empty.
      *
      * @return null
      */
@@ -132,7 +132,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getStatus not providing a holding record
+     * Test getStatus not providing a holding record.
      *
      * @return null
      */
@@ -145,7 +145,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getStatus providing a holding record missing required keys
+     * Test getStatus providing a holding record missing required keys.
      *
      * @return null
      */
@@ -158,7 +158,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getStatus with an available status
+     * Test getStatus with an available status.
      *
      * @return null
      */
@@ -171,7 +171,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getStatus with an unavailable status
+     * Test getStatus with an unavailable status.
      *
      * @return null
      */
@@ -184,7 +184,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getStatus with an restricted status
+     * Test getStatus with an restricted status.
      *
      * @return null
      */
@@ -197,7 +197,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getStatus with a checked out status
+     * Test getStatus with a checked out status.
      *
      * @return null
      */
@@ -219,7 +219,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getStatus with a reserve flag
+     * Test getStatus with a reserve flag.
      *
      * @return null
      */
@@ -235,7 +235,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getStatus with unknown status
+     * Test getStatus with unknown status.
      *
      * @return null
      */
@@ -248,7 +248,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getStatus with return date
+     * Test getStatus with return date.
      *
      * @return null
      */
@@ -264,7 +264,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getStatus with due date
+     * Test getStatus with due date.
      *
      * @return null
      */
@@ -280,7 +280,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getStatus with due date
+     * Test getStatus with due date.
      *
      * @return null
      */
@@ -296,7 +296,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getStatusDescription with a redundant loan type
+     * Test getStatusDescription with a redundant loan type.
      *
      * @return null
      */
@@ -312,7 +312,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test loadLibKeyConfigs
+     * Test loadLibKeyConfigs.
      *
      * @return null
      */
@@ -332,7 +332,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test loadLibKeyConfigs with config already loaded
+     * Test loadLibKeyConfigs with config already loaded.
      *
      * @return null
      */
@@ -351,7 +351,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getLibKeyJSON
+     * Test getLibKeyJSON.
      *
      * @return null
      */
@@ -365,7 +365,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getLibKeyJSON
+     * Test getLibKeyJSON.
      *
      * @return null
      */
@@ -378,7 +378,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getLibKeyData
+     * Test getLibKeyData.
      *
      * @return null
      */
@@ -394,7 +394,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test getLibKeyData
+     * Test getLibKeyData.
      *
      * @return null
      */
@@ -446,8 +446,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
         $container->set('searchTabs', $this->getMockSearchTabs($setSearchTabExpectations));
         $container->set('translate', fn ($s) => $s);
         $view->setHelperPluginManager($container);
-        $view->expects($this->any())->method('resolver')
-            ->willReturn($this->getMockResolver());
+        $view->method('resolver')->willReturn($this->getMockResolver());
         $config = is_array($config) ? new \VuFind\Config\Config($config) : $config;
         $browzineConfig = is_array($browzineConfig) ? new \Laminas\Config\Config($browzineConfig) : $browzineConfig;
         $record = new Record($this->createMock(TagsService::class), $config, $browzineConfig);
@@ -458,7 +457,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Get a mock resolver object
+     * Get a mock resolver object.
      *
      * @return MockObject&ResolverInterface
      */
@@ -468,19 +467,19 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Get a mock context object
+     * Get a mock context object.
      *
      * @return MockObject&Context
      */
     protected function getMockContext(): MockObject&Context
     {
         $context = $this->createMock(\VuFind\View\Helper\Root\Context::class);
-        $context->expects($this->any())->method('__invoke')->willReturn($context);
+        $context->method('__invoke')->willReturn($context);
         return $context;
     }
 
     /**
-     * Get a mock URL helper
+     * Get a mock URL helper.
      *
      * @param string $expectedRoute Route expected by mock helper
      *
@@ -490,13 +489,13 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     {
         $url = $this->createMock(Url::class);
         $url->expects($this->once())->method('__invoke')
-            ->with($this->equalTo($expectedRoute))
+            ->with($expectedRoute)
             ->willReturn('http://foo/bar');
         return $url;
     }
 
     /**
-     * Get a mock server URL helper
+     * Get a mock server URL helper.
      *
      * @return MockObject&ServerUrl
      */
@@ -508,7 +507,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Get a mock search tabs view helper
+     * Get a mock search tabs view helper.
      *
      * @param bool $setDefaultExpectations Should we set up default expectations?
      *
@@ -516,10 +515,9 @@ class RecordTest extends \PHPUnit\Framework\TestCase
      */
     protected function getMockSearchTabs(bool $setDefaultExpectations = true): MockObject&SearchTabs
     {
-        $searchTabs = $this->getMockBuilder(SearchTabs::class)
-            ->disableOriginalConstructor()->getMock();
+        $searchTabs = $this->createMock(SearchTabs::class);
         if ($setDefaultExpectations) {
-            $searchTabs->expects($this->any())->method('getCurrentHiddenFilterParams')->willReturn('');
+            $searchTabs->method('getCurrentHiddenFilterParams')->willReturn('');
         }
         return $searchTabs;
     }
@@ -565,7 +563,7 @@ class RecordTest extends \PHPUnit\Framework\TestCase
             $theme = new ThemeInfo($this->getThemeDir(), $this->testTheme);
         }
         if (null === $httpService) {
-            $httpService = $this->getMockBuilder(\VuFindHttp\HttpService::class)->getMock();
+            $httpService = $this->createMock(\VuFindHttp\HttpService::class);
         }
         if ($mock) {
             return $this->getMockBuilder(__NAMESPACE__ . '\MockLoader')

@@ -42,28 +42,28 @@ namespace Catalog\RecordDriver\Response;
 class PublicationDetails extends \VuFind\RecordDriver\Response\PublicationDetails
 {
     /**
-     * Place of publication
+     * Place of publication.
      *
      * @var string
      */
     protected $place_link;
 
     /**
-     * Name of publisher
+     * Name of publisher.
      *
      * @var string
      */
     protected $name_link;
 
     /**
-     * Date of publication
+     * Date of publication.
      *
      * @var string
      */
     protected $date_link;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param string $place      Place of publication
      * @param string $name       Name of publisher
@@ -83,7 +83,7 @@ class PublicationDetails extends \VuFind\RecordDriver\Response\PublicationDetail
     }
 
     /**
-     * Get place of publication link
+     * Get place of publication link.
      *
      * @return string
      */
@@ -93,7 +93,7 @@ class PublicationDetails extends \VuFind\RecordDriver\Response\PublicationDetail
     }
 
     /**
-     * Get name of publisher link
+     * Get name of publisher link.
      *
      * @return string
      */
@@ -103,7 +103,7 @@ class PublicationDetails extends \VuFind\RecordDriver\Response\PublicationDetail
     }
 
     /**
-     * Get date of publication link
+     * Get date of publication link.
      *
      * @return string
      */
@@ -113,7 +113,7 @@ class PublicationDetails extends \VuFind\RecordDriver\Response\PublicationDetail
     }
 
     /**
-     * Represent object as a string
+     * Represent object as a string.
      *
      * @return string
      */

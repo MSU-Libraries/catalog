@@ -1,0 +1,24 @@
+<?php
+$item_id = $this->getThisLoader->item_id;
+$id = $this->getThisLoader->driver->getUniqueId();
+$callnum = $this->getThisLoader->getCallNumber()['text'];
+?>
+<div>
+    <p>
+        <strong>Request this Item:</strong>
+        You may check out the material from the
+        <a
+            data-lightbox-ignore
+            href="<?= $this->escapeHtmlAttr("/Record/$id/MapThis?item_id=$item_id") ?>"
+            rel="nofollow"
+            target="_blank"
+        >
+            appropriate Service Desk
+        </a>
+        using call number <?= $this->escapeHtml($callnum) ?>,
+        during the Desk&#39;s open hours.
+        <?php if ($this->getThisLoader->isLibUseOnly()) {
+            ?>However, this material cannot leave the building.<?php
+        } ?>
+    </p>
+</div>

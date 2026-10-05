@@ -3,7 +3,7 @@
 /**
  * MSUL customization PC-1187 have it retry the query
  *
- * Solr aspect of the Search Multi-class (Results)
+ * Solr aspect of the Search Multi-class (Results).
  *
  * PHP version 8
  *
@@ -35,7 +35,7 @@ use VuFind\Search\Solr\ErrorListener;
 use VuFindSearch\Command\SearchCommand;
 
 /**
- * Solr Search Parameters
+ * Solr Search Parameters.
  *
  * @category VuFind
  * @package  Search_Solr
