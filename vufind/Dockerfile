@@ -5,7 +5,8 @@ FROM msulibraries/vufind-extended:$VUFIND_VERSION AS compile
 
 COPY cpp/ /tmp/
 WORKDIR /tmp
-RUN g++ -O3 -std=c++17 cidr_checker.cpp -o cidr_checker
+RUN g++ -O3 -std=c++17 cidr_checker.cpp -o cidr_checker && \
+    g++ -O3 -std=c++17 loadavg_filter.cpp -o loadavg_filter
 
 # -----------------------------------
 FROM msulibraries/vufind-extended:$VUFIND_VERSION
@@ -28,7 +29,7 @@ COPY apache2/sites-available/ /etc/apache2/sites-available/
 COPY modsecurity/ /etc/modsecurity/
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
 COPY simplesamlphp/local/ ${SIMPLESAMLPHP_CUSTOM_DIR}/
-COPY --from=compile /tmp/cidr_checker /usr/local/bin
+COPY --from=compile /tmp/cidr_checker /tmp/loadavg_filter /usr/local/bin
 COPY apache2/ipallowlist.txt /etc/apache2/
 RUN git clone --depth 1 --filter=blob:none --sparse "https://github.com/bitwire-it/ipblocklist.git" "/etc/apache2/ipblocklist" && \
     git -C "/etc/apache2/ipblocklist" sparse-checkout set --no-cone "/inbound.txt"

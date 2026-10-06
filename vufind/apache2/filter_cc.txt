@@ -1,0 +1,38 @@
+# Define countries which are always allowed through or may be filtered
+# under high load. Countries undefined here will be filtered only
+# under extreme load.
+#
+# One per line: CC=action
+#   Where CC is the 2 character uppercase country code
+#   Where action is either 'allow' or 'filter' (without quotes)
+#
+# For country code (CC) see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+
+# North America
+US=allow
+
+# South America
+BR=filter
+UY=filter
+CO=filter
+
+# Europe
+BG=allow
+FR=allow
+DE=allow
+UA=filter
+RU=filter
+
+# Asia
+JP=allow
+UZ=filter
+CN=filter
+IN=filter
+PK=filter
+IQ=filter
+IR=filter
+VN=filter
+
+# Africa
+
+# Austrailia
