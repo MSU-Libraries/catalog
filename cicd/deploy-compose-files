@@ -183,6 +183,7 @@ apply_prod_changes() {
 
     # Change location of cache
     ./yq -i ".services.catalog.environment.VUFIND_CACHE_DIR = \"/tmp/vufind_cache\"" docker-compose.catalog.yml;
+    ./yq -i ".services.build.environment.VUFIND_CACHE_DIR = \"/tmp/vufind_cache\"" docker-compose.catalog-build.yml;
 
     ## Changes for catprod-beta and catprod-preview
     if [[ "${STACK_NAME}" == *"-beta" ]] || [[ "${STACK_NAME}" == *"-preview" ]]; then
