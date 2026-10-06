@@ -15,6 +15,9 @@ if [[ "${STACK_NAME}" != *"-prod" ]]; then
     echo "Disallow: /" >> "${VUFIND_HOME}/public/robots.txt"
 fi
 
+verbose "Running clear-vufind-cache to initialize cache dirs"
+clear-vufind-cache
+
 # Create symlinks to the shared storage for non-production environments
 # Populating the shared storage if empty
 if [[ "${STACK_NAME}" == devel-* ]]; then
