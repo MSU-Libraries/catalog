@@ -372,21 +372,6 @@ Populate Course Reserves:
   script:
     - bash ./cicd/populate-coursereserves
 
-Run Cache Clear:
-  extends: .stack_template
-  environment:
-    name: $ENV_BRANCH_NAME/run-cache-clear
-    auto_stop_in: 2 weeks
-  rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH == "catprod-preview"'
-  needs:
-    - job: Set Stack Name
-      artifacts: true
-    - Verify Docker Health
-  script:
-    - bash ./cicd/clear-cache
-
 Run Functional Tests:
   extends: .stack_template
   environment:
@@ -398,7 +383,6 @@ Run Functional Tests:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Run Cache Clear
   script:
     - bash ./cicd/run-functional-tests
 

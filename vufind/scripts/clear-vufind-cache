@@ -4,6 +4,7 @@ rm -r "${VUFIND_CACHE_DIR:?}"/*
 
 # Re-initialize dirs
 install -d -o 33 -g 33 \
+         "${VUFIND_CACHE_DIR}" \
          "${VUFIND_CACHE_DIR}/covers" \
          "${VUFIND_CACHE_DIR}/objects" \
          "${VUFIND_CACHE_DIR}/yamls" \

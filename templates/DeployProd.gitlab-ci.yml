@@ -216,19 +216,6 @@ Verify Prod DB Health:
       artifacts: true
     - Deploy Prod DB
 
-Prod Run Cache Clear:
-  stage: Deploy Prod
-  extends: Run Cache Clear
-  environment:
-    name: $ENV_BRANCH_NAME-prod/run-cache-clear
-    auto_stop_in: 2 weeks
-  rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-  needs:
-    - job: Begin Prod Deploy
-      artifacts: true
-    - Verify Prod Docker Health
-
 Prod Run Functional Tests:
   stage: Deploy Prod
   extends: Run Functional Tests
@@ -240,7 +227,6 @@ Prod Run Functional Tests:
   needs:
     - job: Begin Prod Deploy
       artifacts: true
-    - Prod Run Cache Clear
 
 Prod Upgrade DB Tables:
   stage: Deploy Prod
