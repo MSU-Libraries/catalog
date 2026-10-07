@@ -93,6 +93,7 @@ int load_master_file(const string& filename) {
     string line;
 
     while (getline(file, line)) {
+        if (!line.empty() && line.back() == '\r') line.pop_back();
         if (line.empty() || line[0] == '#') continue;
 
         auto pos1 = line.find(',');
