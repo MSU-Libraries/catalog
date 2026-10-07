@@ -94,7 +94,7 @@ Build Vufind Image:
   tags:
     - msul-shared
   retry: 2
-  timeout: 10m
+  timeout: 15m
   interruptible: true
   rules:
     # Run only if NOT a tag AND NOT a schedule
