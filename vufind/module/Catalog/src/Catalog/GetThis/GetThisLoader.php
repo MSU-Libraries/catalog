@@ -30,6 +30,7 @@ namespace Catalog\GetThis;
 
 use Catalog\View\Helper\Root\Record;
 use Exception;
+use Throwable;
 
 use function count;
 
@@ -44,6 +45,43 @@ use function count;
  */
 class GetThisLoader extends \VuFind\GetThis\GetThisLoader
 {
+    /**
+     * Get the templates to display according to the config file.
+     * MSU TODO remove when upgrading core VF, error more verbose
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function getSubTemplates(): array
+    {
+        if (isset($this->subTemplates)) {
+            return $this->subTemplates;
+        }
+        try {
+            foreach ($this->config['templates'] ?? [] as $templateName => $template) {
+                // If the enabled attribute is not present, we display the template
+                if ($template['enabled'] ?? true) {
+                    // If condition_function is not present we display the templates
+                    // If it's present we display the template only if the function exists and return true
+                    if (
+                        !isset($template['condition_function']) && !isset($template['condition_group'])
+                        || $this->areConditionsFilled($template)
+                    ) {
+                        $this->addSubTemplates($templateName, $template);
+                    }
+                }
+            }
+        } catch (Throwable $t) {
+            throw new Exception(
+                'Error with the get this configuration : "'
+                . $t->getMessage() . '" in ' . $t->getFile() . ' line ' . $t->getLine(),
+                previous: $t
+            );
+        }
+        $this->sortSubTemplateParams();
+        return $this->subTemplates ?? [];
+    }
+
     /**
      * Determine if the University Archives template should display
      *
