@@ -319,10 +319,14 @@ int main(int argc, char* argv[]) {
             FilterAction cc_action = cc_filters.count(cc) ? cc_filters[cc] : NONE;
             FilterAction asn_action = asn_filters.count(asn) ? asn_filters[asn] : NONE;
 
-            // Allow takes precedence over filter
-            if (cc_action == ALLOW || asn_action == ALLOW) {
+            // ASN takes takes precedence over CC
+            if (asn_action == ALLOW) {
                 ip_class = CLS_ALLOW;
-            } else if (cc_action == FILTER || asn_action == FILTER) {
+            } else if (asn_action == FILTER) {
+                ip_class = CLS_FILTER;
+            } else if (cc_action == ALLOW) {
+                ip_class = CLS_ALLOW;
+            } else if (cc_action == FILTER) {
                 ip_class = CLS_FILTER;
             }
         }

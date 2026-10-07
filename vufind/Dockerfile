@@ -9,6 +9,9 @@ RUN g++ -O3 -std=c++17 cidr_checker.cpp -o cidr_checker && \
     g++ -O3 -std=c++17 loadavg_filter.cpp -o loadavg_filter
 
 # -----------------------------------
+FROM registry.gitlab.msu.edu/msu-libraries/catalog/geo-list-builder:latest AS geolist
+
+# -----------------------------------
 FROM msulibraries/vufind-extended:$VUFIND_VERSION
 
 ARG VUFIND_VERSION
@@ -30,7 +33,8 @@ COPY modsecurity/ /etc/modsecurity/
 COPY libapache2-mod-log-ipmask_1.0.0_amd64.deb /tmp/
 COPY simplesamlphp/local/ ${SIMPLESAMLPHP_CUSTOM_DIR}/
 COPY --from=compile /tmp/cidr_checker /tmp/loadavg_filter /usr/local/bin
-COPY apache2/ipallowlist.txt /etc/apache2/
+COPY --from=geolist /opt/master-geo-list.csv /etc/apache2/
+COPY apache2/ipallowlist.txt apache2/filter_cc.txt apache2/filter_asn.txt /etc/apache2/
 RUN git clone --depth 1 --filter=blob:none --sparse "https://github.com/bitwire-it/ipblocklist.git" "/etc/apache2/ipblocklist" && \
     git -C "/etc/apache2/ipblocklist" sparse-checkout set --no-cone "/inbound.txt"
 RUN envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apache2/conf-available/simplesamlphp.conf && \

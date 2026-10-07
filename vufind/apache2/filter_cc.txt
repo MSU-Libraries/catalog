@@ -7,6 +7,8 @@
 #   Where action is either 'allow' or 'filter' (without quotes)
 #
 # For country code (CC) see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+#
+# Defined ASN rules (allow or filter) take precedence over CC rules.
 
 # North America
 US=allow
@@ -22,6 +24,8 @@ FR=allow
 DE=allow
 UA=filter
 RU=filter
+GE=filter
+TR=filter
 
 # Asia
 JP=allow
@@ -32,6 +36,11 @@ PK=filter
 IQ=filter
 IR=filter
 VN=filter
+KZ=filter
+QA=filter
+AE=filter
+BD=filter
+ID=filter
 
 # Africa
 
