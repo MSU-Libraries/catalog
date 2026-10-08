@@ -1,5 +1,6 @@
-000-default.conf
+000-default
 2's
+ASNs
 AUTH_FTP_PASSWORD
 AUTH_FTP_USER
 Alphabrowse
@@ -14,6 +15,7 @@ Env
 FolioTest
 Geo
 GitLab
+IDs
 Javascript
 Jinja
 LetsEncrypt
@@ -59,6 +61,7 @@ catalog
 catalog.aws.lib.msu.edu
 catalogs
 centers
+conf
 config
 configs
 core-vufind
@@ -103,6 +106,7 @@ proxysolr
 reCaptcha
 restore.sh
 rsync
+sites-available
 solr
 startup
 stylesheets
