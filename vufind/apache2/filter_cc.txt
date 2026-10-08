@@ -15,33 +15,37 @@ US=allow
 
 # South America
 BR=filter
-UY=filter
 CO=filter
+UY=filter
 
 # Europe
 BG=allow
-FR=allow
 DE=allow
-UA=filter
-RU=filter
+FR=allow
 GE=filter
+RU=filter
 TR=filter
+UA=filter
 
 # Asia
-JP=allow
-UZ=filter
-CN=filter
-IN=filter
-PK=filter
-IQ=filter
-IR=filter
-VN=filter
-KZ=filter
-QA=filter
 AE=filter
 BD=filter
+CN=filter
 ID=filter
+IN=filter
+IQ=filter
+IR=filter
+JP=allow
+KZ=filter
+PK=filter
+QA=filter
+UZ=filter
+VN=filter
 
 # Africa
+ZA=filter
 
 # Austrailia
+
+# Anartica
+AQ=allow

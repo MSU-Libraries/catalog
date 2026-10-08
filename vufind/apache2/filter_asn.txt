@@ -8,8 +8,12 @@
 #
 # Defined ASN rules (allow or filter) take precedence over CC rules.
 
+# Michigan State University
+AS231=allow
 # Merit Network
 AS237=allow
+# University of Michigan
+AS36375=allow
 # Michigan State Government
 AS13325=allow
 # Oracle Corp.
