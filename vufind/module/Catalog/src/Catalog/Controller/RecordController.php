@@ -30,7 +30,6 @@
 
 namespace Catalog\Controller;
 
-use Catalog\Holdings\GetThisLoader;
 use Catalog\Holdings\MapThisLoader;
 use Catalog\Search\SearchOrigin\SearchOriginFactory;
 use Exception;
@@ -66,28 +65,6 @@ class RecordController extends \VuFind\Controller\RecordController
     ) {
         parent::__construct($sm, $config);
         $this->configLoader = $configLoader;
-    }
-
-    /**
-     * Display the "Get this" dialog content.
-     *
-     * @return \Laminas\View\Model\ViewModel
-     */
-    public function getthisAction()
-    {
-        //TODO check hasILS(), otherwise HLM?
-        $items = $this->getILS()->getHolding($this->params()->fromRoute('id'));
-        $item_id = $this->params()->fromQuery('item_id');
-        $view = $this->createViewModel();
-        $record = $this->getViewRenderer()->record($view->driver);
-        $view->setVariable(
-            'getthis',
-            new GetThisLoader($view->driver, $record, $items['holdings'], $item_id, $this->configLoader)
-        );
-        // TODO what to about $item['electronic_holdings']
-        // TODO what to about $item['page']; do we need multiple calls for this?
-        $view->setTemplate('record/getthis');
-        return $view;
     }
 
     /**

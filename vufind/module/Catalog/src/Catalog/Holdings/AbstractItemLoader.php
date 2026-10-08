@@ -246,8 +246,11 @@ abstract class AbstractItemLoader
     public function getStatusDescription($item_id = null)
     {
         $item_id = $this->getItemId($item_id);
+        if ($item_id === null) {
+            return '';
+        }
         $item = $this->getItem($item_id);
-        return $item['availability']->getStatusDescription();
+        return $item['availability']?->getStatusDescription() ?? '';
     }
 
     /**

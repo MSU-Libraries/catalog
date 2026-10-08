@@ -1,9 +1,5 @@
 /*global VuFind */
 
-const KEY_CODE = {
-  DOWN_ARROW: 40,
-  UP_ARROW: 38,
-};
 VuFind.register('jsDropdown', function jsDropdown() {
   /**
    * Whether the dropdown is open
@@ -30,8 +26,8 @@ VuFind.register('jsDropdown', function jsDropdown() {
    * @param {boolean} open True to show the arrow pointing up, False pointing down
    */
   function toggleDropdownArrow(dropdown, open) {
-    dropdown.querySelector(".fa-close-dropdown").style.display = open ? 'block' : 'none';
-    dropdown.querySelector(".fa-open-dropdown").style.display = open ? 'none' : 'block';
+    dropdown.querySelector(".fa-caret-down").style.display = open ? 'none' : 'block';
+    dropdown.querySelector(".fa-caret-up").style.display = open ? 'block' : 'none';
   }
 
   /**
@@ -39,21 +35,19 @@ VuFind.register('jsDropdown', function jsDropdown() {
    * @param {Element} dropdown The dropdown we work on
    */
   function toggleDropdown(dropdown) {
-    const a = dropdown.querySelector("*[data-js-dropdown-header] a");
     const siblingDiv = dropdown.querySelector(".dropdown");
 
     if (siblingDiv) {
       siblingDiv.classList.toggle("active");
     }
 
-    const ariaExpanded = a.getAttribute("aria-expanded");
-    a.setAttribute("aria-expanded", ariaExpanded === "true" ? "false" : "true");
-
     const isOpen = isDropdownOpen(dropdown);
     if (isOpen) {
       const firstOption = dropdown.querySelector(".get-this-dropdown .dropdown a");
       if (firstOption) firstOption.focus();
     }
+    dropdown.setAttribute("aria-expanded", isOpen ? "true" : "false");
+
     toggleDropdownArrow(dropdown, isOpen);
   }
 
@@ -86,7 +80,7 @@ VuFind.register('jsDropdown', function jsDropdown() {
    * @param {Event} e Event triggered by the user
    */
   function openDropdownOnKeyDown(e) {
-    if (isDropdownHeaderTargeted(e) && !isDropdownOpen(this) && e.keyCode === KEY_CODE.DOWN_ARROW) {
+    if (isDropdownHeaderTargeted(e) && !isDropdownOpen(this) && (e.key === 'ArrowDown' || e.key === ' ')) {
       toggleDropdown(this);
       e.preventDefault();
     }
@@ -118,11 +112,11 @@ VuFind.register('jsDropdown', function jsDropdown() {
     const li = document.activeElement.closest("li");
     if (!li) return;
 
-    if (e.keyCode === KEY_CODE.DOWN_ARROW) {
+    if (e.key === 'ArrowDown') {
       if (focusSiblingElement(li.nextElementSibling)) {
         e.preventDefault();
       }
-    } else if (e.keyCode === KEY_CODE.UP_ARROW) {
+    } else if (e.key === 'ArrowUp') {
       if (focusSiblingElement(li.previousElementSibling)) {
         e.preventDefault();
       }
@@ -157,6 +151,7 @@ VuFind.register('jsDropdown', function jsDropdown() {
       context.addEventListener("focusout", closeDropdownListener);
       context.addEventListener("keydown", openDropdownOnKeyDown);
       context.addEventListener("keydown", arrowKeysListener);
+      toggleDropdownArrow(context, false);
     }
   }
 

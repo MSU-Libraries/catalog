@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Holdings (ILS) tab
+ * Holdings (ILS) tab.
  *
  * PHP version 8
  *
@@ -33,7 +33,7 @@ use VuFind\I18n\Translator\TranslatorAwareInterface;
 use VuFind\I18n\Translator\TranslatorAwareTrait;
 
 /**
- * Holdings (ILS) tab
+ * Holdings (ILS) tab.
  *
  * @category VuFind
  * @package  RecordTabs

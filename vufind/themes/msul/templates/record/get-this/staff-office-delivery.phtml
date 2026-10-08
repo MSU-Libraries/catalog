@@ -1,0 +1,48 @@
+<?php
+$link = $getThisParams['general_link'] ?? '';
+$requestCopyLink = trim($getThisParams['request_link'], '/') . '/' . $this->driver->getOpenUrl();
+
+// TODO see if we can switch to openurl
+$item = $this->getThisLoader->getItem();
+$title = $this->driver->getTitle();
+$callnum = $this->getThisLoader->getCallNumber()['text'];
+$author = $this->driver->getPrimaryAuthor();
+$loc = $this->getThisLoader->getLocation();
+$isbn = $this->driver->getCleanISBN();
+$pubname = $this->driver->getPublisher();
+if (is_array($pubname)): $pubname = implode(', ', $pubname); endif;
+$params = [
+    'rft.title' => $title,
+    'rft.au' => $author,
+    'rft.pub' => $pubname,
+    'rft.isbn' => $isbn,
+    'loc' => $loc,
+    'callno' => $callnum,
+    'CAT' => 1,
+];
+$requestCopyLink = 'https://interlib.lib.msu.edu/remoteauth/illiad.dll/OpenURL?rfr_id=info:sid/Catalog:facdel%20request&LO=EYM%2CGZM%2CMUN&'
+    . http_build_query($params);
+?>
+<div>
+  <p>
+    <strong>
+      <a
+        href="<?= $this->escapeHtml($link) ?>"
+        target="_blank"
+      >
+        <?= $this->transEsc('staff_office_delivery') ?>
+      </a>:
+    </strong>
+    <?= $this->transEsc('staff_office_delivery_text') ?>
+  </p>
+  <ul>
+    <li>
+      <a
+        href="<?= $this->escapeHtml($requestCopyLink) ?>"
+        target="_blank"
+      >
+        <?= $this->transEsc('delivery_request') ?>
+      </a>
+    </li>
+  </ul>
+</div>

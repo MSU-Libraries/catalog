@@ -34,7 +34,6 @@
 .badge:not(.format) {
   background-color: inherit;
   font-weight: bold;
-  font-size: 1.1rem;
 }
 
 .browse-item.with-badge {
@@ -129,6 +128,10 @@ a.sr-only:focus {
   }
 }
 
+// Without this, icons use width even when undefined (for instance EDS Title View)
+span.icon.fa {
+  width: auto;
+}
 
 // Import local customizations
 // ---------------------------

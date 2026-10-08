@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Form Test Class
+ * Form Test Class.
  *
- * PHP version 7
+ * PHP version 8
  *
  * Copyright (C) Villanova University 2018.
  *
@@ -34,10 +34,8 @@ use VuFind\Config\YamlReader;
 use VuFind\Form\Form;
 use VuFindTest\Feature\ConfigRelatedServicesTrait;
 
-use function get_class;
-
 /**
- * Form Test Class
+ * Form Test Class.
  *
  * @category VuFind
  * @package  Tests
@@ -68,7 +66,7 @@ class FormTest extends \VuFindTest\Form\FormTest
         $this->assertTrue($form->isEnabled());
         $this->assertTrue($form->useCaptcha());
         $this->assertFalse($form->showOnlyForLoggedUsers());
-        $this->assertEquals([], $form->getFormElementConfig());
+        $this->assertSame([], $form->getFormElementConfig());
         $this->assertEquals(
             [['email' => null, 'name' => null]],
             $form->getRecipient()
@@ -81,9 +79,9 @@ class FormTest extends \VuFindTest\Form\FormTest
             $form->getSubmitResponse()
         );
         $this->assertEquals([[], 'Email/form.phtml'], [$form->mapRequestParamsToFieldValues([]), 'Email/form.phtml',]);
-        $this->assertEquals(
-            'Laminas\InputFilter\InputFilter',
-            get_class($form->getInputFilter())
+        $this->assertInstanceOf(
+            \Laminas\InputFilter\InputFilter::class,
+            $form->getInputFilter()
         );
     }
 }

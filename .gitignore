@@ -20,7 +20,6 @@ __pycache__
 .vagrant
 .vscode/*
 /downloads
-/Gruntfile.local.js
 /solr/vendor
 /themes/minktest
 /vendor

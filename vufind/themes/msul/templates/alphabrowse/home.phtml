@@ -7,6 +7,29 @@
   // Set up upper search box if necessary:
   $this->layout()->searchbox = false;
   /* MSUL: Code removed Do not want the search box displayed on for alphabrowse */
+
+  // MSUL functions
+  function getOriginalTitles(array $item, ?string $title)
+  {
+    $original_titles = [];
+    foreach ($item['extras']['title_original_str_mv'] as $to1) {
+      foreach ($to1 as $to2) {
+        if ($to2 != $title) {
+          $original_titles[] = $to2;
+        }
+      }
+    }
+    return array_unique($original_titles);
+  }
+
+  function getFirstTitle(array $item)
+  {
+    foreach ($item['extras']['title_full'] as $tf1) {
+      foreach ($tf1 as $tf2) {
+        return $tf2;
+      }
+    }
+  }
 ?>
 
 <?php /* LOAD THE LINK INFORMATION INTO $pageLinks, similar to smarty's {capture} */ ?>
@@ -83,7 +106,7 @@
         <?php foreach ($this->extras as $e): ?>
           <?php
             // MSUL override: skip extras that are included elsewhere
-            if ($e == 'callnumber-full_str_mv' || $e == 'title_original_str'):
+            if ($e == 'callnumber-full_str_mv' || $e == 'title_original_str_mv'):
               continue;
             endif;
           ?>
@@ -130,16 +153,12 @@
               <?php endif; ?>
             </b>
 
-            <?php if ($this->source == 'title' && $item['extras'] != null && array_key_exists('title_original_str', $item['extras'])): ?>
+            <?php if ($this->source == 'title' && $item['extras'] != null && array_key_exists('title_original_str_mv', $item['extras'])): ?>
               <?php // MSUL override to add original title to title browse ?>
-              <?php foreach ($item['extras']['title_original_str'] as $to1): ?>
-                <?php foreach ($to1 as $to2): ?>
-                  <?php if ($to2 != $label): ?>
-                    <div>
-                      <?= $to2 ?>
-                    </div>
-                  <?php endif; ?>
-                <?php endforeach; ?>
+              <?php foreach (getOriginalTitles($item, $label) as $ot): ?>
+                <div>
+                  <?= $ot ?>
+                </div>
               <?php endforeach; ?>
             <?php endif; ?>
 
@@ -178,7 +197,7 @@
           <?php foreach ($this->extras as $extraName): ?>
             <?php
               // MSUL override: skip extras that are included elsewhere
-              if ($extraName == 'callnumber-full_str_mv' || $extraName == 'title_original_str'):
+              if ($extraName == 'callnumber-full_str_mv' || $extraName == 'title_original_str_mv'):
                 continue;
               endif;
             ?>
@@ -193,14 +212,12 @@
                   : implode('<br>', array_map([$this, 'escapeHtml'], $extraDisplayArray));
               ?>
               <?php if ($this->source == 'lcc' && $extraName == 'title_full' && $item['extras'] != null &&
-                  array_key_exists('title_original_str', $item['extras'])): ?>
+                  array_key_exists('title_original_str_mv', $item['extras'])): ?>
                 <?php // MSUL override to add original title to call number browse title ?>
-                <?php foreach ($item['extras']['title_original_str'] as $to1): ?>
-                  <?php foreach ($to1 as $to2): ?>
-                    <div>
-                      <?= $to2 ?>
-                    </div>
-                  <?php endforeach; ?>
+                <?php foreach (getOriginalTitles($item, getFirstTitle($item)) as $ot): ?>
+                  <div>
+                    <?= $ot ?>
+                  </div>
                 <?php endforeach; ?>
               <?php endif; ?>
             </td>

@@ -116,13 +116,15 @@ apply_devel_changes() {
     ./yq -i ".services.catalog.deploy.replicas = 1" docker-compose.catalog.yml
     ./yq -i ".services.captcha.deploy.replicas = 1" docker-compose.catalog.yml
 
+    # Add cache volume so cachecron can clear it
+    ./yq -i ".services.catalog.volumes += \"vufind_cache:/mnt/vufind_cache\"" docker-compose.catalog.yml;
+    ./yq -i ".services.cachecron.volumes += \"vufind_cache:/mnt/vufind_cache\"" docker-compose.catalog.yml;
+    ./yq -i '.volumes.vufind_cache = {}' docker-compose.catalog.yml
+
     # Make updates specific to non-review environments
     if [[ "${STACK_NAME}" != review-* ]]; then
-        # Mount monitoring files in container for easier editting
+        # Mount monitoring files in container for easier editing
         ./yq -i ".services.monitoring.volumes += \"/mnt/shared/local/${STACK_NAME}/repo/monitoring/:/app/\"" docker-compose.monitoring.yml;
-
-        # Mount host live/ dir for /usr/local/vufind/
-        ./yq -i ".services.catalog.volumes += \"/mnt/shared/local/${STACK_NAME}/live/:/usr/local/vufind/\"" docker-compose.catalog.yml;
     fi
 }
 
@@ -178,6 +180,10 @@ apply_prod_changes() {
     ./yq -i \
     ".services.proxymon-\$STACK_NAME.deploy.labels += \"traefik.http.routers.${STACK_NAME}-https-msul-proxymonitoring-router.rule=Host(\`${SITE_HOSTNAME}\`) && PathPrefix(\`/monitoring\`)\"" \
     docker-compose.monitoring.yml;
+
+    # Change location of cache
+    ./yq -i ".services.catalog.environment.VUFIND_CACHE_DIR = \"/tmp/vufind_cache\"" docker-compose.catalog.yml;
+    ./yq -i ".services.build.environment.VUFIND_CACHE_DIR = \"/tmp/vufind_cache\"" docker-compose.catalog-build.yml;
 
     ## Changes for catprod-beta and catprod-preview
     if [[ "${STACK_NAME}" == *"-beta" ]] || [[ "${STACK_NAME}" == *"-preview" ]]; then

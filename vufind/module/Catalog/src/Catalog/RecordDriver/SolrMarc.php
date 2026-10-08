@@ -355,8 +355,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getFullTitlesAltScript(): array
     {
-        return $this->getMarcReader()
-            ->getLinkedFieldsSubfields('880', '245', ['a', 'b', 'c', 'f', 'g', 'h', 'k', 'n', 'p', 's']);
+        return $this->fields['title_original_str_mv'] ?? [];
     }
 
     /**

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+YQ_VERSION="v4.53.4"
+
 run_help() {
     echo ""
     echo "Purpose: Setup SSH access to all the deploy servers"
@@ -115,4 +117,13 @@ before_script() {
     # Determine job start time; used to calculate runtime metrics
     START=$(date +%s);
     export START;
+}
+
+install_yq() {
+    if [[ ! -e ./yq ]]; then
+        wget --header="Authorization: token ${GITHUB_USER_TOKEN}" \
+         "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" -O ./yq;
+
+        chmod +x ./yq;
+    fi
 }

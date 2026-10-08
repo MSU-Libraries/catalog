@@ -9,8 +9,8 @@ stages:
   - Release
 
 variables:
-  VUFIND_VERSION: "11.0.4"
-  SIMPLESAMLPHP_VERSION: "2.1.1"
+  VUFIND_VERSION: "11.1.0"
+  SIMPLESAMLPHP_VERSION: "2.1.7"
   COMPOSE_PATH: /home/deploy/$STACK_NAME
   SSH_USER: "deploy"
   ENV_BRANCH_NAME: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}${CI_COMMIT_BRANCH}
@@ -221,6 +221,26 @@ Deploy Vufind:
       dotenv: deploy.env
       metrics: metrics.txt
 
+Create live dir:
+  extends: .stack_template
+  environment:
+    name: $ENV_BRANCH_NAME/deploy-vufind
+    auto_stop_in: 2 weeks
+  timeout: 60m
+  rules:
+    - if: '$CLONE_REPO_WORKDIR == "1" && $CI_COMMIT_BRANCH =~ /^devel-/'
+    - if: '$CI_COMMIT_BRANCH =~ /^devel-/'
+      when: manual
+  needs:
+    - job: Set Stack Name
+      artifacts: true
+    - Deploy Vufind
+  script:
+    - bash ./cicd/create-live-dir
+  artifacts:
+    reports:
+      metrics: metrics.txt
+
 Deploy Vufind Build Env:
   extends: .stack_template
   stage: Optional Steps
@@ -352,21 +372,6 @@ Populate Course Reserves:
   script:
     - bash ./cicd/populate-coursereserves
 
-Run Cache Clear:
-  extends: .stack_template
-  environment:
-    name: $ENV_BRANCH_NAME/run-cache-clear
-    auto_stop_in: 2 weeks
-  rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_DEPLOY_FREEZE == null && $CI_PIPELINE_SOURCE != "schedule"'
-    - if: '$CI_COMMIT_BRANCH == "catprod-preview"'
-  needs:
-    - job: Set Stack Name
-      artifacts: true
-    - Verify Docker Health
-  script:
-    - bash ./cicd/clear-cache
-
 Run Functional Tests:
   extends: .stack_template
   environment:
@@ -378,7 +383,6 @@ Run Functional Tests:
   needs:
     - job: Set Stack Name
       artifacts: true
-    - Run Cache Clear
   script:
     - bash ./cicd/run-functional-tests
 

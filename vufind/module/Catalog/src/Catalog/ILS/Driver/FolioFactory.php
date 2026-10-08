@@ -46,7 +46,7 @@ use Psr\Container\ContainerInterface;
 class FolioFactory extends \VuFind\ILS\Driver\DriverWithDateConverterFactory
 {
     /**
-     * Create an object
+     * Create an object.
      *
      * @param ContainerInterface $container     Service manager
      * @param string             $requestedName Service being created
@@ -71,9 +71,11 @@ class FolioFactory extends \VuFind\ILS\Driver\DriverWithDateConverterFactory
             $manager = $container->get(\Laminas\Session\SessionManager::class);
             return new \Laminas\Session\Container("Folio_$namespace", $manager);
         };
+        $webhookConnection = $container->get(\VuFind\Connection\Webhook::class);
         // MSUL PC-1416 Add in config reader to support reading msul.ini
-        $configReader = $container->get(\VuFind\Config\PluginManager::class);
+        $configManager = $container->get(\VuFind\Config\ConfigManager::class);
+        $msulConfigReader = $configManager->getConfigObject('msul');
 
-        return parent::__invoke($container, $requestedName, [$sessionFactory, $configReader]);
+        return parent::__invoke($container, $requestedName, [$sessionFactory, $webhookConnection, $msulConfigReader]);
     }
 }

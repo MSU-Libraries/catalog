@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Record driver view helper
+ * Record driver view helper.
  *
  * PHP version 8
  *
@@ -39,7 +39,7 @@ use function array_key_exists;
 use function in_array;
 
 /**
- * Extend the Record data available to the View
+ * Extend the Record data available to the View.
  *
  * @category VuFind
  * @package  View_Helper
@@ -60,28 +60,28 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
     private $linkLabels = [];
 
     /**
-     * Config for the access links
+     * Config for the access links.
      *
      * @var \Catalog\View\Helper\Root\Record
      */
     private $accessLinksConfig;
 
     /**
-     * Config for the BrowZine file
+     * Config for the BrowZine file.
      *
      * @var \Catalog\View\Helper\Root\Record
      */
     private $browzineConfig;
 
     /**
-     * Library ID used for LibKey queries
+     * Library ID used for LibKey queries.
      *
      * @var string
      */
     private $libkeyLibraryId;
 
     /**
-     * Access token used for LibKey queries
+     * Access token used for LibKey queries.
      *
      * @var string
      */

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Table of Contents tab
+ * Table of Contents tab.
  *
  * PHP version 8
  *
@@ -33,7 +33,7 @@ use VuFind\I18n\Translator\TranslatorAwareInterface;
 use VuFind\I18n\Translator\TranslatorAwareTrait;
 
 /**
- * Table of Contents tab
+ * Table of Contents tab.
  *
  * @category VuFind
  * @package  RecordTabs

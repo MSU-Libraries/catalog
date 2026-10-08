@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SolrMarc Record Driver Test Class
+ * SolrMarc Record Driver Test Class.
  *
  * PHP version 8
  *
@@ -35,7 +35,7 @@ use Laminas\Config\Config;
 use function strlen;
 
 /**
- * SolrMarc Record Driver Test Class
+ * SolrMarc Record Driver Test Class.
  *
  * @category VuFind
  * @package  Tests
