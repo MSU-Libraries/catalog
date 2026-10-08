@@ -19,7 +19,7 @@ CO=filter
 UY=filter
 
 # Europe
-BG=allow
+GB=allow
 DE=allow
 FR=allow
 GE=filter
@@ -45,7 +45,7 @@ VN=filter
 # Africa
 ZA=filter
 
-# Austrailia
+# Australia
 
-# Anartica
+# Antarctica
 AQ=allow

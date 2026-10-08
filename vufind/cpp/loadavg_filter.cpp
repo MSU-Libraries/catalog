@@ -10,6 +10,7 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <list>
 
 using namespace std;
 
@@ -27,6 +28,12 @@ struct MasterRecord {
 struct OutputRecord {
     string asn;
     string cc;
+};
+
+struct CacheEntry {
+    string ip;
+    string result;
+    chrono::steady_clock::time_point expires_at;
 };
 
 unordered_map<string, FilterAction> cc_filters;
@@ -180,25 +187,169 @@ int load_filter_file(const string& filename, unordered_map<string, FilterAction>
 
 void print_usage(const char* prog_name) {
     cerr << "Usage: " << prog_name << " [OPTIONS]\n"
+         << "\n"
+         << "Feed in IPv4 addresses w/ newline via stdin and this script will print to stdout the string\n"
+         << "of either LIMIT or PASS. If an ASN/CC is set to filter, they will have LIMIT once the\n"
+         << "trigger load set by '-f'; is hit. If an ASN/CC is set to allow, they will always have PASS\n"
+         << "returned. If neither is set, then LIMIT will only be returned if load hits the number\n"
+         << "specified by '-o'.\n"
+         << "\n"
          << "Options:\n"
-         << "  -m, --master <file>            Required. Master network CSV file (CIDR,ASN,CC).\n"
-         << "  -c, --country <file>           Optional. Country code filter file (CC=allow|filter).\n"
-         << "  -a, --asn <file>               Optional. ASN filter file (ASN=allow|filter).\n"
-         << "  -f, --limit-filtered-at <num>  Required. Load avg threshold to trigger LIMIT on filtered IPs.\n"
-         << "  -o, --limit-others-at <num>    Required. Load avg threshold to trigger LIMIT on other IPs.\n"
-         << "  -r, --release-limit-level <num> Optional. Hysteresis buffer amount to release limits. Default 0.5.\n"
-         << "  -v, --verbose                  Verbose output during loading.\n"
-         << "  -d, --debug                    Debug output during IP lookups (implies -v).\n"
-         << "  -h, --help                     Show this help message.\n";
+         << "  -m, --master <file>             Required. Master network CSV file (CIDR,ASN,CC).\n"
+         << "  -c, --country <file>            Optional. Country code filter file (CC=allow|filter).\n"
+         << "  -a, --asn <file>                Optional. ASN filter file (ASN=allow|filter).\n"
+         << "  -f, --limit-filtered-at <num>   Required. Load avg threshold to trigger LIMIT on filtered IPs.\n"
+         << "  -o, --limit-others-at <num>     Required. Load avg threshold to trigger LIMIT on other IPs.\n"
+         << "  -r, --release-limit-level <num> Optional. Load avg must fall below trigger level by this\n"
+         << "                                  amount in order to release that limit. Default 0.5.\n"
+         << "  -s, --cache-size <num>          Optional. Max size for the IP response cache. Default 2000.\n"
+         << "  -t, --cache-time <num>          Optional. Time in seconds to cache IP responses. Default 10.\n"
+         << "  -v, --verbose                   Verbose output during loading.\n"
+         << "  -d, --debug                     Debug output during IP lookups (implies -v).\n"
+         << "  -h, --help                      Show this help message.\n";
 }
+
+/**
+ * Checks if IP is in the cache already. If found and current, it resets that IP's cache lifetime.
+ * @return Boolean if the IP was found and reset in the cache.
+ */
+inline bool check_and_refresh_cache(
+    const string& ip,
+    const chrono::steady_clock::time_point& now,
+    int cache_time_sec,
+    unordered_map<string,list<CacheEntry>::iterator>& cache_map,
+    list<CacheEntry>& cache_list,
+    string& result
+) {
+    auto it = cache_map.find(ip);
+    if (it != cache_map.end() && it->second->expires_at > now) {
+        it->second->expires_at = now + chrono::seconds(cache_time_sec);
+        cache_list.splice(cache_list.end(), cache_list, it->second);
+        result = it->second->result;
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Update the known current load average and state whether filtered/others are limited
+ * at that new load average.
+ */
+inline void refresh_load_and_limits(
+    const chrono::steady_clock::time_point& now,
+    chrono::steady_clock::time_point& last_load_time,
+    double& current_load,
+    double limit_filtered,
+    double limit_others,
+    double release_level,
+    bool& is_filtered_limited,
+    bool& is_others_limited
+) {
+    if (chrono::duration_cast<chrono::seconds>(now - last_load_time).count() >= 1) {
+        current_load = get_current_load();
+        last_load_time = now;
+    }
+
+    if (!is_filtered_limited && current_load >= limit_filtered) {
+        is_filtered_limited = true;
+    } else if (is_filtered_limited && current_load < max(0.1, limit_filtered - release_level)) {
+        is_filtered_limited = false;
+    }
+
+    if (!is_others_limited && current_load >= limit_others) {
+        is_others_limited = true;
+    } else if (is_others_limited && current_load < max(0.1, limit_others - release_level)) {
+        is_others_limited = false;
+    }
+}
+
+/**
+ * Given an IP, classify it to the appropriate IPClass.
+ * @return An IPClass
+ */
+inline IPClass classify_input_ip(const string& input_ip, string& asn, string& cc, bool& found) {
+    uint32_t ip;
+    struct in_addr addr;
+    if (inet_pton(AF_INET, input_ip.c_str(), &addr) != 1) {
+        ip = 0; // Invalid IPv4
+    } else {
+        ip = ntohl(addr.s_addr);
+    }
+
+    found = search_lpm(ip, asn, cc);
+    if (!found) return CLS_OTHER;
+
+    FilterAction cc_action = cc_filters.count(cc) ? cc_filters[cc] : NONE;
+    FilterAction asn_action = asn_filters.count(asn) ? asn_filters[asn] : NONE;
+
+    if (asn_action == ALLOW) return CLS_ALLOW;
+    if (asn_action == FILTER) return CLS_FILTER;
+    if (cc_action == ALLOW) return CLS_ALLOW;
+    if (cc_action == FILTER) return CLS_FILTER;
+    return CLS_OTHER;
+}
+
+/**
+ * Evaluate state to produce final output.
+ * @return The PASS or LIMIT string.
+ */
+inline string evaluate_action(
+    IPClass ip_class,
+    bool is_filtered_limited,
+    bool is_others_limited,
+    string& class_str
+) {
+    if (ip_class == CLS_ALLOW) {
+        class_str = "ALLOW";
+        return "PASS";
+    } else if (ip_class == CLS_FILTER) {
+        class_str = "FILTER";
+        return is_filtered_limited ? "LIMIT" : "PASS";
+    } else {
+        class_str = "OTHER";
+        return is_others_limited ? "LIMIT" : "PASS";
+    }
+}
+
+/**
+ * Add an IP to the cache, or update an expired IP in the cache to be current again.
+ */
+inline void insert_or_update_cache(
+    const string& input_ip,
+    const string& result,
+    const chrono::steady_clock::time_point& now,
+    int cache_time_sec,
+    size_t cache_size,
+    unordered_map<string,list<CacheEntry>::iterator>& cache_map,
+    list<CacheEntry>& cache_list
+) {
+    if (cache_size == 0) return;
+
+    auto it = cache_map.find(input_ip);
+    if (it != cache_map.end()) {
+        it->second->result = result;
+        it->second->expires_at = now + chrono::seconds(cache_time_sec);
+        cache_list.splice(cache_list.end(), cache_list, it->second);
+    } else {
+        if (cache_map.size() >= cache_size) {
+            cache_map.erase(cache_list.front().ip);
+            cache_list.pop_front();
+        }
+        cache_list.push_back({input_ip, result, now + chrono::seconds(cache_time_sec)});
+        cache_map[input_ip] = prev(cache_list.end());
+    }
+}
+
 
 int main(int argc, char* argv[]) {
     string master_file, country_file, asn_file;
     double limit_filtered = -1.0, limit_others = -1.0;
     double release_level = 0.5;
+    size_t cache_size = 2000;
+    int cache_time_sec = 10;
     bool has_limit_filtered = false, has_limit_others = false;
 
-    const char* const short_opts = "hm:c:a:f:o:r:vd";
+    const char* const short_opts = "hm:c:a:f:o:r:s:t:vd";
     const option long_opts[] = {
         {"help", no_argument, nullptr, 'h'},
         {"master", required_argument, nullptr, 'm'},
@@ -207,6 +358,8 @@ int main(int argc, char* argv[]) {
         {"limit-filtered-at", required_argument, nullptr, 'f'},
         {"limit-others-at", required_argument, nullptr, 'o'},
         {"release-limit-level", required_argument, nullptr, 'r'},
+        {"cache-size", required_argument, nullptr, 's'},
+        {"cache-time", required_argument, nullptr, 't'},
         {"verbose", no_argument, nullptr, 'v'},
         {"debug", no_argument, nullptr, 'd'},
         {nullptr, 0, nullptr, 0}
@@ -221,6 +374,8 @@ int main(int argc, char* argv[]) {
             case 'f': limit_filtered = stod(optarg); has_limit_filtered = true; break;
             case 'o': limit_others = stod(optarg); has_limit_others = true; break;
             case 'r': release_level = stod(optarg); break;
+            case 's': cache_size = stoull(optarg); break;
+            case 't': cache_time_sec = stoi(optarg); break;
             case 'v': verbose = true; break;
             case 'd': debug_mode = true; break;
             case 'h': print_usage(argv[0]); return 0;
@@ -264,10 +419,17 @@ int main(int argc, char* argv[]) {
              << cc_count << " country filters, and " << asn_count
              << " ASN filters in " << duration << " ms.\n";
         cerr << "[VERBOSE] DIR-24-8 table built using " << tbl8_groups.size() << " secondary tbl8 groups.\n";
-        cerr << "[VERBOSE] Limit Filtered: " << limit_filtered << " (Releases at: " << max(0.1, limit_filtered - release_level) << ")\n";
-        cerr << "[VERBOSE] Limit Others: " << limit_others << " (Releases at: " << max(0.1, limit_others - release_level) << ")\n";
+        cerr << "[VERBOSE] Limit Filtered: " << limit_filtered
+             << " (Releases at: " << max(0.1, limit_filtered - release_level) << ")\n";
+        cerr << "[VERBOSE] Limit Others: " << limit_others
+             << " (Releases at: " << max(0.1, limit_others - release_level) << ")\n";
+        cerr << "[VERBOSE] Cache Size: " << cache_size << " | Cache TTL: " << cache_time_sec << "s\n";
         cerr << "[VERBOSE] Ready to process IPs on stdin.\n";
     }
+
+    list<CacheEntry> cache_list;
+    unordered_map<string, list<CacheEntry>::iterator> cache_map;
+    cache_map.reserve(cache_size);
 
     string input_ip;
     double current_load = get_current_load();
@@ -283,75 +445,41 @@ int main(int argc, char* argv[]) {
         if (input_ip.empty()) continue;
 
         auto proc_start = chrono::high_resolution_clock::now();
-
-        // Refresh load avg if stale
         auto now = chrono::steady_clock::now();
-        if (chrono::duration_cast<chrono::seconds>(now - last_load_time).count() >= 1) {
-            current_load = get_current_load();
-            last_load_time = now;
+        string result;
+
+        if (check_and_refresh_cache(input_ip, now, cache_time_sec, cache_map, cache_list, result)) {
+            cout << result << "\n";
+            cout << flush;
+
+            if (debug_mode) {
+                auto duration = chrono::duration_cast<chrono::microseconds>(
+                    chrono::high_resolution_clock::now() - proc_start
+                ).count();
+                cerr << "[DEBUG] IP: " << input_ip << " | CACHE HIT | Output: " << result << " | Time: " << duration << " us\n";
+                cerr << flush;
+            }
+            continue;
         }
 
-        if (!is_filtered_limited && current_load >= limit_filtered) {
-            is_filtered_limited = true;
-        } else if (is_filtered_limited && current_load < max(0.1, limit_filtered - release_level)) {
-            is_filtered_limited = false;
-        }
-
-        if (!is_others_limited && current_load >= limit_others) {
-            is_others_limited = true;
-        } else if (is_others_limited && current_load < max(0.1, limit_others - release_level)) {
-            is_others_limited = false;
-        }
-
-        uint32_t ip;
-        struct in_addr addr;
-        if (inet_pton(AF_INET, input_ip.c_str(), &addr) != 1) {
-            ip = 0; // Invalid IPv4 gracefully falls back to OTHER
-        } else {
-            ip = ntohl(addr.s_addr);
-        }
+        refresh_load_and_limits(now, last_load_time, current_load, limit_filtered, limit_others, release_level, is_filtered_limited, is_others_limited);
 
         string asn, cc;
-        bool found = search_lpm(ip, asn, cc);
+        bool found = false;
+        IPClass ip_class = classify_input_ip(input_ip, asn, cc, found);
 
-        IPClass ip_class = CLS_OTHER;
+        string class_str;
+        result = evaluate_action(ip_class, is_filtered_limited, is_others_limited, class_str);
 
-        if (found) {
-            FilterAction cc_action = cc_filters.count(cc) ? cc_filters[cc] : NONE;
-            FilterAction asn_action = asn_filters.count(asn) ? asn_filters[asn] : NONE;
-
-            // ASN takes takes precedence over CC
-            if (asn_action == ALLOW) {
-                ip_class = CLS_ALLOW;
-            } else if (asn_action == FILTER) {
-                ip_class = CLS_FILTER;
-            } else if (cc_action == ALLOW) {
-                ip_class = CLS_ALLOW;
-            } else if (cc_action == FILTER) {
-                ip_class = CLS_FILTER;
-            }
-        }
-
-        const char* result;
-        const char* class_str;
-
-        if (ip_class == CLS_ALLOW) {
-            result = "PASS";
-            class_str = "ALLOW";
-        } else if (ip_class == CLS_FILTER) {
-            class_str = "FILTER";
-            result = is_filtered_limited ? "LIMIT" : "PASS";
-        } else { // CLS_OTHER
-            class_str = "OTHER";
-            result = is_others_limited ? "LIMIT" : "PASS";
-        }
+        insert_or_update_cache(input_ip, result, now, cache_time_sec, cache_size, cache_map, cache_list);
 
         cout << result << "\n";
-        cout << flush; // Flush stdout immediately for mod_rewrite mapping
+        cout << flush;
 
         if (debug_mode) {
-            auto proc_end = chrono::high_resolution_clock::now();
-            auto duration = chrono::duration_cast<chrono::microseconds>(proc_end - proc_start).count();
+            auto duration = chrono::duration_cast<chrono::microseconds>(
+                chrono::high_resolution_clock::now() - proc_start
+            ).count();
             cerr << "[DEBUG] IP: " << input_ip
                  << " | Match: " << (found ? (asn + "/" + cc) : "None")
                  << " | Class: " << class_str
