@@ -1,3 +1,4 @@
+000-default.conf
 2's
 AUTH_FTP_PASSWORD
 AUTH_FTP_USER
@@ -5,11 +6,13 @@ Alphabrowse
 Ansible
 BibTeX
 BrowZine
+CCs
 CacheCron
 Dockerfile
 EndNoteWeb
 Env
 FolioTest
+Geo
 GitLab
 Javascript
 Jinja
@@ -17,6 +20,7 @@ LetsEncrypt
 LibKey
 MariaDB
 Matomo
+MaxMind
 MkDocs
 Nginx
 OAI-PMH
@@ -42,6 +46,7 @@ VuFindTest
 ZK
 ZooKeeper
 afterward
+apache2
 async
 backend
 backup.sh
@@ -59,6 +64,7 @@ configs
 core-vufind
 croncache
 crontab
+csv
 defense
 devel
 dropdown
@@ -66,7 +72,10 @@ eBook
 eBooks
 eHoldings
 env
+filter_asn.txt
+filter_cc.txt
 galera
+geo-list-builder
 healthcheck
 hlm
 i
@@ -78,6 +87,8 @@ marc-utils
 marc.properties
 marc_local.properties
 mariadb
+master-geo-list
+mod_rewrite
 msu.edu
 no-access
 ok
@@ -102,6 +113,7 @@ tmp
 traefik
 un-pause
 uncleanly
+vufind
 yml
 zk
 zk-shell
