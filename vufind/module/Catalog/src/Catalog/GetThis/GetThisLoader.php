@@ -390,7 +390,7 @@ class GetThisLoader extends \VuFind\GetThis\GetThisLoader
                 $template = 'makerspace-checked-out';
             }
         } else {
-            if ($this->matches('status_IN_PROCESS', $status)) {
+            if ($this->matches('STATUS_IN_PROCESS', $status)) {
                 $template = 'in-process';
             } elseif ($this->isEquipment()) {
                 $template = 'equipment';
@@ -450,6 +450,8 @@ class GetThisLoader extends \VuFind\GetThis\GetThisLoader
                 && $this->matches('LOCATION_MUSIC_SERVICE_DESK', $location)
             ) {
                 $template = 'ask';
+            } elseif ($this->matches('LOCATION_ALUMNI_CHAPEL', $location)) {
+                $template = 'alumni-chapel';
             }
         }
         if (isset($template)) {
@@ -514,10 +516,10 @@ class GetThisLoader extends \VuFind\GetThis\GetThisLoader
         $data = $this->recordDriver->getSummary();
 
         foreach ($data as $item) {
-            if ($item['link'] && stripos($item['link'], 'VINYL') !== false) {
+            if (isset($item['link']) && stripos($item['link'], 'VINYL') !== false) {
                 return true;
             }
-            if ($item['note'] && stripos($item['note'], 'VINYL') !== false) {
+            if (isset($item['note']) && stripos($item['note'], 'VINYL') !== false) {
                 return true;
             }
         }
