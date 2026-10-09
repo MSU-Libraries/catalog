@@ -1,5 +1,5 @@
 <?php
-$item_id = $this->getThisLoader->item_id;
+$item_id = $this->getThisLoader->getItem()['item_id'];
 $id = $this->driver->getUniqueID();
 $callnum = $this->getThisLoader->getCallNumber()['text'];
 ?>
