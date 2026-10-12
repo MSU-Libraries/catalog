@@ -251,6 +251,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
         } elseif ($status === 'Restricted') {
             if ($this->regex->matches('LOCATION_ALUMNI_CHAPEL', $location, false)) {
                 $statusFirstPart = 'Chapel Use Only';
+                $showLoanType = false;
             } else {
                 $statusFirstPart = 'Library Use Only';
             }
@@ -276,7 +277,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
         if (!empty($statusSecondPart)) {
             $status .= ' (' . $translate($statusSecondPart) . ')';
         }
-        $showLoanType = $statusFirstPart !== 'Unavailable';
+        $showLoanType ??= $statusFirstPart !== 'Unavailable';
         $status .= $this->getStatusSuffix($translate, $statusFirstPart, $statusSecondPart, $item, $showLoanType);
         $item['availability'] = new AvailabilityStatus(
             $availability,
@@ -307,7 +308,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
         }
         if (
             $showLoanType
-            && ($item['loan_type_name'] ?? false)
+            && isset($item['loan_type_name'])
             && $item['loan_type_name'] != $statusFirstPart
             && $item['loan_type_name'] != $statusSecondPart
         ) {
