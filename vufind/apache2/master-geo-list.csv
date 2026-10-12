@@ -1,0 +1,10 @@
+# File contents used for filtering during high server load.
+# See filter_cc.txt and filter_asn.txt
+#
+# File format must be unquoted CSV with 3 columns:
+#   1. IPv4 CIDR
+#   2. ASN including the 'AS' prefix
+#   3. Two character uppercase contry code
+# Example:
+#   35.12.240.0/21,AS231,US
+# No extra whitespace is allowed before, between, or after values.

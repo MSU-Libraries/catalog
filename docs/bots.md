@@ -21,6 +21,40 @@ in the catalog repository at `vufind/apache2/ipallowlist.txt`. An IP or CIDR
 listed in this file (one per line) is always permitted regardless if they are
 also listed in the community block list.
 
+## Dynamic Load Shedding
+
+The catalog include a means of selectively shedding traffic from less-trusted
+sources based on the server load level. This service requires generation of
+a geographic master list of CIDR, ASN, and Country Codes, which MSU does via
+[geo-list-builder](https://www.gitlab.msu.edu/msu-libraries/catalog/geo-list-builder),
+however, you can generate your list by downloading a Geo database file from
+a provider, such as MaxMind, and formatting the data as described in the
+[vufind/apache2/master-geo-list.csv](https://github.com/MSU-Libraries/catalog/blob/main/vufind/apache2/master-geo-list.csv)
+file.
+
+Specification of trusted, or less-trusted, sources can be set in the two filter
+files [vufind/apache2/filter_asn.txt](https://github.com/MSU-Libraries/catalog/blob/main/vufind/apache2/filter_asn.txt)
+and [vufind/apache2/filter_cc.txt](https://github.com/MSU-Libraries/catalog/blob/main/vufind/apache2/filter_cc.txt).
+ASNs are the numeric IDs of organizations who have IPs registered
+on the Internet. And CC is short for Country Code, which are two letter codes
+to represent countries. Both files are commented with instructions on their use.
+
+The implementation of this filter is set in the
+[vufind/apache2/sites-available/000-default.conf](https://github.com/MSU-Libraries/catalog/blob/main/vufind/apache2/sites-available/000-default.conf)
+file at the line starting with `RewriteMap loadfilter`. This calls the
+`loadavg_filter` script with appropriate flags to load and filter on the files.
+Run `loadavg_filter -h` within the container for details on the arguments used.
+
+ASN/CCs which are set as `allow` will never be filtered; those set as `filter`
+will be shed at the load average specified by `--limit-filtered-at`; and the
+remainder with neither set will be shed at the value specified by
+`--limit-others-at`.
+
+In our default config, we proxy shed traffic to a custom page indicating the
+site is temporarily under heavy load and to try again later, but you could
+modify the `RewriteRule` to take other action like outright deny access. See
+Apache mod_rewrite documentation for additional information.
+
 ## Generalized bot protection service: go-away
 
 The catalog comes with a built-in configurable `captcha` service based on the
