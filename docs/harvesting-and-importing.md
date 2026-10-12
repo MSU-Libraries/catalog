@@ -419,7 +419,8 @@ sudo pc-deploy [ENV_NAME] solr-cloud
 !!! warning
     ```bash
     # Command to check the aliases (repeated from above)
-    curl -s "http://solr:8983/solr/admin/collections?action=LISTALIASES" | grep biblio
+    curl -s "http://solr:8983/solr/admin/collections?action=LISTALIASES" | grep
+    biblio
     ```
 
     ```bash

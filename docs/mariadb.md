@@ -108,9 +108,10 @@ rsync -ain /var/lib/docker/volumes/${STACK_NAME}-mariadb_db-bitnami/_data/mariad
 <!-- markdownlint-enable MD013 -->
 
 !!! note "Restoring from the backup"
-    If you need to use this backup, for example, if you loose data on multiple nodes,
-    remove the stack again then run the rsync command in the opposite direction to
-    restore the files back to their volume and run the below steps again to force
+    If you need to use this backup, for example,
+    if you loose data on multiple nodes, remove the stack again then
+    run the rsync command in the opposite direction to restore the files
+    back to their volume and run the below steps again to force
     bootstrap the cluster with that node.
 
 * Now we're ready to start recovering the cluster from the selected node by
