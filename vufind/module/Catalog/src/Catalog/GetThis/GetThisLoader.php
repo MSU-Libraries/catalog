@@ -83,6 +83,44 @@ class GetThisLoader extends \VuFind\GetThis\GetThisLoader
     }
 
     /**
+     * MSU TO remove when the fix is integrated in core vufind
+     * Get the link data for requesting the item.
+     *
+     * @param ?string $itemId The holding item UUID. If null (default) will return status for first item
+     *
+     * @return array|string The data required to build a request URL for the item
+     */
+    public function getLink(?string $itemId = null): array|string
+    {
+        $isProvidedItemIdNull = null === $itemId;
+        $itemId = $this->getItemId($itemId);
+
+        $holdings = $this->recordDriver->getRealTimeHoldings();
+        if (!isset($holdings['holdings'])) {
+            return '';
+        }
+        $link = '';
+        foreach ($holdings['holdings'] as $location) {
+            if (!isset($location['items'])) {
+                continue;
+            }
+            foreach ((array)$location['items'] as $item) {
+                if (empty($item['link'])) {
+                    continue;
+                }
+                if (isset($item['item_id']) && $item['item_id'] == $itemId) {
+                    $link = $item['link'];
+                    break 2;
+                } elseif ($itemId === null || $isProvidedItemIdNull) {
+                    $link = $item['link'];
+                    // break was removed here
+                }
+            }
+        }
+        return $link;
+    }
+
+    /**
      * Determine if the University Archives template should display
      *
      * @param ?string $itemId Item ID to filter for
