@@ -84,10 +84,13 @@ inline bool search_lpm(uint32_t ip, string& asn, string& cc) {
     return false;
 }
 
-double get_current_load() {
-    double load[1];
-    if (getloadavg(load, 1) != -1) {
-        return load[0];
+double get_current_load(int period = 1) {
+    double load[3];
+    int count = getloadavg(load, 3);
+    if (count > 0) {
+        if (period == 15 && count >= 3) return load[2];
+        if (period == 5 && count >= 2) return load[1];
+        if (period == 1 && count >= 1) return load[0];
     }
     return 0.0;
 }
@@ -202,6 +205,8 @@ void print_usage(const char* prog_name) {
          << "  -o, --limit-others-at <num>     Required. Load avg threshold to trigger LIMIT on other IPs.\n"
          << "  -r, --release-limit-level <num> Optional. Load avg must fall below trigger level by this\n"
          << "                                  amount in order to release that limit. Default 0.5.\n"
+         << "  -l, --load-avg <1|5|15>         Optional. System load average to check (1, 5, or 15 min).\n"
+         << "                                  Default 1.\n"
          << "  -s, --cache-size <num>          Optional. Max size for the IP response cache. Default 2000.\n"
          << "  -t, --cache-time <num>          Optional. Time in seconds to cache IP responses. Default 10.\n"
          << "  -v, --verbose                   Verbose output during loading.\n"
@@ -243,10 +248,11 @@ inline void refresh_load_and_limits(
     double limit_others,
     double release_level,
     bool& is_filtered_limited,
-    bool& is_others_limited
+    bool& is_others_limited,
+    int load_period
 ) {
     if (chrono::duration_cast<chrono::seconds>(now - last_load_time).count() >= 1) {
-        current_load = get_current_load();
+        current_load = get_current_load(load_period);
         last_load_time = now;
     }
 
@@ -347,9 +353,10 @@ int main(int argc, char* argv[]) {
     double release_level = 0.5;
     size_t cache_size = 2000;
     int cache_time_sec = 10;
+    int load_period = 1;
     bool has_limit_filtered = false, has_limit_others = false;
 
-    const char* const short_opts = "hm:c:a:f:o:r:s:t:vd";
+    const char* const short_opts = "hm:c:a:f:o:r:s:t:l:vd";
     const option long_opts[] = {
         {"help", no_argument, nullptr, 'h'},
         {"master", required_argument, nullptr, 'm'},
@@ -360,6 +367,7 @@ int main(int argc, char* argv[]) {
         {"release-limit-level", required_argument, nullptr, 'r'},
         {"cache-size", required_argument, nullptr, 's'},
         {"cache-time", required_argument, nullptr, 't'},
+        {"load-avg", required_argument, nullptr, 'l'},
         {"verbose", no_argument, nullptr, 'v'},
         {"debug", no_argument, nullptr, 'd'},
         {nullptr, 0, nullptr, 0}
@@ -376,6 +384,16 @@ int main(int argc, char* argv[]) {
             case 'r': release_level = stod(optarg); break;
             case 's': cache_size = stoull(optarg); break;
             case 't': cache_time_sec = stoi(optarg); break;
+            case 'l': {
+                int val = stoi(optarg);
+                if (val != 1 && val != 5 && val != 15) {
+                    cerr << "Error: --load-avg must be 1, 5, or 15.\n";
+                    print_usage(argv[0]);
+                    return 1;
+                }
+                load_period = val;
+                break;
+            }
             case 'v': verbose = true; break;
             case 'd': debug_mode = true; break;
             case 'h': print_usage(argv[0]); return 0;
@@ -419,6 +437,7 @@ int main(int argc, char* argv[]) {
              << cc_count << " country filters, and " << asn_count
              << " ASN filters in " << duration << " ms.\n";
         cerr << "[VERBOSE] DIR-24-8 table built using " << tbl8_groups.size() << " secondary tbl8 groups.\n";
+        cerr << "[VERBOSE] Load Avg Period: " << load_period << " min\n";
         cerr << "[VERBOSE] Limit Filtered: " << limit_filtered
              << " (Releases at: " << max(0.1, limit_filtered - release_level) << ")\n";
         cerr << "[VERBOSE] Limit Others: " << limit_others
@@ -432,7 +451,7 @@ int main(int argc, char* argv[]) {
     cache_map.reserve(cache_size);
 
     string input_ip;
-    double current_load = get_current_load();
+    double current_load = get_current_load(load_period);
     auto last_load_time = chrono::steady_clock::now();
 
     bool is_filtered_limited = false;
@@ -462,7 +481,7 @@ int main(int argc, char* argv[]) {
             continue;
         }
 
-        refresh_load_and_limits(now, last_load_time, current_load, limit_filtered, limit_others, release_level, is_filtered_limited, is_others_limited);
+        refresh_load_and_limits(now, last_load_time, current_load, limit_filtered, limit_others, release_level, is_filtered_limited, is_others_limited, load_period);
 
         string asn, cc;
         bool found = false;
