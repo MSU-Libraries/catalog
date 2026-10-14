@@ -16,5 +16,8 @@ AS237=allow
 AS36375=allow
 # Michigan State Government
 AS13325=allow
+
+# Amazon
+AS16509=filter
 # Oracle Corp.
 AS7160=filter
