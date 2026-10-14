@@ -133,8 +133,8 @@ conditions:
     - 'userAgent.matches("Trident [0-9]\\.[0-9]")'
 
   is-bot-url:
-    - 'path.matches("^/(?:Search|Author)/FacetList") && !query.matches("facet=\\w")'
-    - 'path.startsWith("/Cover/Show") && !query.matches("source=\\w")'
+    - 'path.matches("^/(?:Search|Author)/FacetList") && !("facet" in query && query["facet"].matches("\\w"))'
+    - 'path.startsWith("/Cover/Show") && !("source" in query && query["source"].matches("\\w"))'
     - 'path.startsWith("/EdsRecord/EDS/Search")'
 
 # Rules are checked sequentially in order, from top to bottom.
