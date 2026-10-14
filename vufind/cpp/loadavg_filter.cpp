@@ -162,6 +162,34 @@ int load_master_file(const string& filename) {
     return static_cast<int>(temp_records.size());
 }
 
+// Injects loopback and private IPv4 ranges into DIR-24-8 table to guarantee PASS responses.
+void inject_private_ranges() {
+    records.push_back({"__LOCAL__", "__LOCAL__"});
+    uint32_t local_rec_idx = static_cast<uint32_t>(records.size() - 1);
+    asn_filters["__LOCAL__"] = ALLOW;
+
+    const vector<string> local_cidrs = {
+        "127.0.0.0/8",
+        "10.0.0.0/8",
+        "172.16.0.0/12",
+        "192.168.0.0/16"
+    };
+
+    for (const auto& cidr_str : local_cidrs) {
+        uint32_t ip;
+        int prefix;
+        if (parse_cidr(cidr_str, ip, prefix)) {
+            uint32_t start_idx = ip >> 8;
+            uint32_t num_entries = 1U << (24 - prefix);
+            uint32_t end_idx = start_idx + num_entries;
+
+            for (uint32_t i = start_idx; i < end_idx; ++i) {
+                tbl24[i] = local_rec_idx;
+            }
+        }
+    }
+}
+
 int load_filter_file(const string& filename, unordered_map<string, FilterAction>& map_dest) {
     ifstream file(filename);
     if (!file.is_open()) return -1;
@@ -416,6 +444,9 @@ int main(int argc, char* argv[]) {
         cerr << "Error: Failed to load master file: " << master_file << "\n";
         return 1;
     }
+
+    // Always allow localhost and private IP ranges
+    inject_private_ranges();
 
     int cc_count = 0;
     if (!country_file.empty()) {
