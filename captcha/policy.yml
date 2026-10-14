@@ -147,6 +147,7 @@ rules:
     action: pass
 
   - name: drop-urls-used-by-bots
+    conditions:
       - '($is-bot-url)'
     action: drop
 
