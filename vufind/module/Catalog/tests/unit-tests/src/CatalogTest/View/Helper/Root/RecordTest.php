@@ -22,6 +22,7 @@ use Laminas\View\Resolver\ResolverInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use VuFind\Cover\Loader;
 use VuFind\RecordDriver\AbstractBase as RecordDriver;
+use VuFind\Regex\Regex;
 use VuFind\Tags\TagsService;
 use VuFind\View\Helper\Root\Context;
 use VuFind\View\Helper\Root\SearchTabs;
@@ -449,7 +450,12 @@ class RecordTest extends \PHPUnit\Framework\TestCase
         $view->method('resolver')->willReturn($this->getMockResolver());
         $config = is_array($config) ? new \VuFind\Config\Config($config) : $config;
         $browzineConfig = is_array($browzineConfig) ? new \Laminas\Config\Config($browzineConfig) : $browzineConfig;
-        $record = new Record($this->createMock(TagsService::class), $config, $browzineConfig);
+        $record = new Record(
+            $this->createMock(TagsService::class),
+            $config,
+            $browzineConfig,
+            regex: $container->get(Regex::class)
+        );
         $record->setCoverRouter(new \VuFind\Cover\Router('http://foo/bar', $this->getCoverLoader()));
         $record->setView($view);
 

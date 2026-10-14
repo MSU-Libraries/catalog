@@ -118,7 +118,6 @@ apply_devel_changes() {
 
     # Add cache volume so cachecron can clear it
     ./yq -i ".services.catalog.volumes += \"vufind_cache:/mnt/vufind_cache\"" docker-compose.catalog.yml;
-    ./yq -i ".services.cachecron.volumes += \"vufind_cache:/mnt/vufind_cache\"" docker-compose.catalog.yml;
     ./yq -i '.volumes.vufind_cache = {}' docker-compose.catalog.yml
 
     # Make updates specific to non-review environments

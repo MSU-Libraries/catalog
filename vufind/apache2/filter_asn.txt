@@ -1,0 +1,23 @@
+# Define which Autonomous System Numbers (ASNs) which are always allowed through
+# or may be filtered under high load. ASNs which are undefined here will be
+# filtered only under extreme load.
+#
+# One per line: ASN=action
+#   Where ASN is the ASN number (including uppercase 'AS' prefix)
+#   Where action is either 'allow' or 'filter' (without quotes)
+#
+# Defined ASN rules (allow or filter) take precedence over CC rules.
+
+# Michigan State University
+AS231=allow
+# Merit Network
+AS237=allow
+# University of Michigan
+AS36375=allow
+# Michigan State Government
+AS13325=allow
+
+# Amazon
+AS16509=filter
+# Oracle Corp.
+AS7160=filter

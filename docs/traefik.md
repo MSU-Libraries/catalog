@@ -149,7 +149,8 @@ docker node update --label-add deployglobal=true catprod-2.aws.lib.msu.edu
 docker node update --label-add deployglobal=false catprod-3.aws.lib.msu.edu
 tail -f /var/lib/docker/volumes/traefik_logs/_data/traefik.log -n10
 
-## If logs are unhealthy or unable to create new certificates, restore previous ones
+# If logs are unhealthy or unable to create new certificates, 
+# restore previous ones
 cp /tmp/acme_backup/* /var/lib/docker/volumes/traefik_traefik/_data/
 ```
 
@@ -172,7 +173,8 @@ docker node update --label-add deployglobal=true catprod-2.aws.lib.msu.edu
 docker node update --label-add deployglobal=true catprod-3.aws.lib.msu.edu
 tail -f /var/lib/docker/volumes/traefik_logs/_data/traefik.log -n10
 
-## If logs are unhealthy or unable to create new certificates, restore previous ones
+# If logs are unhealthy or unable to create new certificates, 
+# restore previous ones
 cp /tmp/acme_backup/* /var/lib/docker/volumes/traefik_traefik/_data/
 ```
 
@@ -195,7 +197,8 @@ docker node update --label-add deployglobal=true catprod-2.aws.lib.msu.edu
 docker node update --label-add deployglobal=true catprod-3.aws.lib.msu.edu
 tail -f /var/lib/docker/volumes/traefik_logs/_data/traefik.log -n10
 
-## If logs are unhealthy or unable to create new certificates, restore previous ones
+# If logs are unhealthy or unable to create new certificates, 
+# restore previous ones
 cp /tmp/acme_backup/* /var/lib/docker/volumes/traefik_traefik/_data/
 ```
 

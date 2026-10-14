@@ -31,6 +31,7 @@ namespace Catalog\View\Helper\Root;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerInterface;
+use VuFind\Regex\Regex;
 use VuFind\Tags\TagsService;
 
 /**
@@ -82,7 +83,7 @@ class RecordFactory implements FactoryInterface
             $yamlReader = $container->get(\VuFind\Config\YamlReader::class);
             $accessLinksConfig = $yamlReader->get('accesslinks.yaml');
         } catch (\Exception $e) {
-            $logger = $container->get(\VuFind\Log\Logger::class);
+            $logger ??= $container->get(\VuFind\Log\Logger::class);
             $logger->err(
                 'Could not parse accesslinks.yaml: ' . $e->getMessage()
             );
@@ -94,7 +95,8 @@ class RecordFactory implements FactoryInterface
             $container->get(TagsService::class),
             $config,
             $browzineConfig ?? [],
-            $accessLinksConfig ?? []
+            $accessLinksConfig ?? [],
+            $container->get(Regex::class) ?? null,
         );
 
         $helper->setCoverRouter($container->get(\VuFind\Cover\Router::class));

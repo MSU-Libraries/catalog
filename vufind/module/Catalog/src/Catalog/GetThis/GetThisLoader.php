@@ -83,6 +83,44 @@ class GetThisLoader extends \VuFind\GetThis\GetThisLoader
     }
 
     /**
+     * MSU TO remove when the fix is integrated in core vufind
+     * Get the link data for requesting the item.
+     *
+     * @param ?string $itemId The holding item UUID. If null (default) will return status for first item
+     *
+     * @return array|string The data required to build a request URL for the item
+     */
+    public function getLink(?string $itemId = null): array|string
+    {
+        $isProvidedItemIdNull = null === $itemId;
+        $itemId = $this->getItemId($itemId);
+
+        $holdings = $this->recordDriver->getRealTimeHoldings();
+        if (!isset($holdings['holdings'])) {
+            return '';
+        }
+        $link = '';
+        foreach ($holdings['holdings'] as $location) {
+            if (!isset($location['items'])) {
+                continue;
+            }
+            foreach ((array)$location['items'] as $item) {
+                if (empty($item['link'])) {
+                    continue;
+                }
+                if (isset($item['item_id']) && $item['item_id'] == $itemId) {
+                    $link = $item['link'];
+                    break 2;
+                } elseif ($itemId === null || $isProvidedItemIdNull) {
+                    $link = $item['link'];
+                    // break was removed here
+                }
+            }
+        }
+        return $link;
+    }
+
+    /**
      * Determine if the University Archives template should display
      *
      * @param ?string $itemId Item ID to filter for
@@ -390,7 +428,7 @@ class GetThisLoader extends \VuFind\GetThis\GetThisLoader
                 $template = 'makerspace-checked-out';
             }
         } else {
-            if ($this->matches('status_IN_PROCESS', $status)) {
+            if ($this->matches('STATUS_IN_PROCESS', $status)) {
                 $template = 'in-process';
             } elseif ($this->isEquipment()) {
                 $template = 'equipment';
@@ -450,6 +488,8 @@ class GetThisLoader extends \VuFind\GetThis\GetThisLoader
                 && $this->matches('LOCATION_MUSIC_SERVICE_DESK', $location)
             ) {
                 $template = 'ask';
+            } elseif ($this->matches('LOCATION_ALUMNI_CHAPEL', $location)) {
+                $template = 'alumni-chapel';
             }
         }
         if (isset($template)) {
@@ -514,10 +554,10 @@ class GetThisLoader extends \VuFind\GetThis\GetThisLoader
         $data = $this->recordDriver->getSummary();
 
         foreach ($data as $item) {
-            if ($item['link'] && stripos($item['link'], 'VINYL') !== false) {
+            if (isset($item['link']) && stripos($item['link'], 'VINYL') !== false) {
                 return true;
             }
-            if ($item['note'] && stripos($item['note'], 'VINYL') !== false) {
+            if (isset($item['note']) && stripos($item['note'], 'VINYL') !== false) {
                 return true;
             }
         }

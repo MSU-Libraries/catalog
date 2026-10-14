@@ -32,6 +32,7 @@ namespace Catalog\View\Helper\Root;
 use VuFind\Config\Config;
 use VuFind\ILS\Logic\AvailabilityStatus;
 use VuFind\ILS\Logic\AvailabilityStatusInterface;
+use VuFind\Regex\Regex;
 use VuFind\Tags\TagsService;
 use VuFind\View\Helper\Root\Translate;
 
@@ -92,14 +93,16 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
      *
      * @param TagsService            $tagsService       Tags service
      * @param Config                 $config            Configuration from config.ini
-     * @param \Laminas\Config\Config $browzineConfig    config object for the BrowZine.ini file // MSU
-     * @param \Laminas\Config\Config $accessLinksConfig config object for the accesslinks.yaml file // MSU
+     * @param \Laminas\Config\Config $browzineConfig    Config object for the BrowZine.ini file // MSU
+     * @param \Laminas\Config\Config $accessLinksConfig Config object for the accesslinks.yaml file // MSU
+     * @param ?Regex                 $regex             Regex object to match agains Regex.yaml file // MSU
      */
     public function __construct(
         protected TagsService $tagsService,
         protected ?Config $config = null,
         $browzineConfig = [], // MSU
-        $accessLinksConfig = [] // MSU
+        $accessLinksConfig = [], // MSU
+        protected ?Regex $regex = null, // MSU
     ) {
         parent::__construct($tagsService, $config);
         // MSU START
@@ -226,6 +229,8 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
         $translate = $this->getView()->plugin('translate');
         $status = $item['status'] ?? 'Unknown';
         $statusSecondPart = '';
+        $location = $item['location'] ?? '';
+
         if (
             in_array($status, [
                 'Aged to lost', 'Claimed returned', 'Declared lost', 'In process',
@@ -244,7 +249,12 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
             $statusFirstPart = 'Checked Out';
             $availability = false;
         } elseif ($status === 'Restricted') {
-            $statusFirstPart = 'Library Use Only';
+            if ($this->regex->matches('LOCATION_ALUMNI_CHAPEL', $location, false)) {
+                $statusFirstPart = 'Chapel Use Only';
+                $showLoanType = false;
+            } else {
+                $statusFirstPart = 'Library Use Only';
+            }
             $availability = AvailabilityStatusInterface::STATUS_UNCERTAIN;
         } elseif ($status === 'Unavailable') {
             $statusFirstPart = 'Unavailable';
@@ -267,7 +277,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
         if (!empty($statusSecondPart)) {
             $status .= ' (' . $translate($statusSecondPart) . ')';
         }
-        $showLoanType = $statusFirstPart !== 'Unavailable';
+        $showLoanType ??= $statusFirstPart !== 'Unavailable';
         $status .= $this->getStatusSuffix($translate, $statusFirstPart, $statusSecondPart, $item, $showLoanType);
         $item['availability'] = new AvailabilityStatus(
             $availability,
@@ -298,7 +308,7 @@ class Record extends \VuFind\View\Helper\Root\Record implements \Psr\Log\LoggerA
         }
         if (
             $showLoanType
-            && ($item['loan_type_name'] ?? false)
+            && isset($item['loan_type_name'])
             && $item['loan_type_name'] != $statusFirstPart
             && $item['loan_type_name'] != $statusSecondPart
         ) {
