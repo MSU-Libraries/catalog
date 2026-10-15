@@ -100,10 +100,10 @@ class Auth extends \VuFind\View\Helper\Root\Auth
         $config = new Config((new IniReader())->fromFile($fullpath, true));
 
         if (
-            $config['default']['EDSModule'] != null &&
-            $config['default']['EDSModule']['ipRange'] != null
+            $config['default']['EDSExtendedResults'] != null &&
+            $config['default']['EDSExtendedResults']['ipRange'] != null
         ) {
-            $ranges = $config['default']['EDSModule']['ipRange'];
+            $ranges = $config['default']['EDSExtendedResults']['ipRange'];
             foreach ($ranges as $range) {
                 $ipParts = explode('-', $range);
                 $lowIp = count($ipParts) > 0 ? ip2long($ipParts[0]) : '';
