@@ -123,6 +123,8 @@ templates:
       - condition_function: "!isEquipment"
       - operator: and
       - condition_function: "!isAudioVideoMedia"
+      - operator: and
+      - condition_function: "!isAlumniChapel"
 
   request-scan-other:
     condition_group:
