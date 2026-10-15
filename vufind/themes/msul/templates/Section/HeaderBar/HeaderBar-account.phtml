@@ -36,7 +36,7 @@
         $isEDSPage = str_contains($_SERVER['REQUEST_URI'], '/EdsRecord/');
         $autoOpen = ($isEDSPage && !$isLoggedIn && !$isOnCampus) ? true : false;
         if ($autoOpen) {
-            $loginLinkAttributes['data-auto-open'] = true;
+            $loginLinkAttributes['data-auto-open'] = 1;
         }
         // MSU END
       ?>
