@@ -145,7 +145,7 @@
           $url = $customLink['Url'] ?? '';
           $mot = $customLink['MouseOverText'] ?? '';
           $icon = $customLink['Icon'] ?? '';
-          $name = $customLink['Text'] ?? '';
+          $name = $customLink['Text'] ?: $mot ?: $url;
         ?>
         <div>
           <!-- MSU add external link icon -->
