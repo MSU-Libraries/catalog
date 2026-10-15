@@ -75,6 +75,7 @@ LOCATION_EXCLUSIVE:
   - '/^dmctl/' # Location code for equipment
   - '/^dxres/' # Location code for equipment
   - '/^MSU MUSIC LIBRARY.*reserve$/i'
+  - '/MSU Alumni Memorial Chapel/i'
 LOCATION_MICROFORMS:
   # Used within GetThisLoader in the following functions : showMicroForm
   - '/MICROFORMS/i'
@@ -154,6 +155,7 @@ LOCATION_MSU_SCAN_EXCLUDE_LOCATION:
   - '#DVD/VIDEO#i'
   - '/^MSU VINCENT VOICE/i'
   - '/^mnmst$/' # Location code for makerspace
+  - '/MSU Alumni Memorial Chapel/i'
 LOCATION_SCHAEFER:
   - '/MSU SCHAEFER/i'
 LOCATION_SPEC_COLL:

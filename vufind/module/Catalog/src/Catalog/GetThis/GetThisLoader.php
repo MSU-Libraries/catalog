@@ -524,16 +524,6 @@ class GetThisLoader extends \VuFind\GetThis\GetThisLoader
     }
 
     /**
-     * Whether the location matches the Shaefer library
-     *
-     * @return bool
-     */
-    public function isAlumniChapel(): bool
-    {
-        return $this->matches('LOCATION_ALUMNI_CHAPEL', $this->getLocation());
-    }
-
-    /**
      * Check if item is non-Makerspace equipment
      *
      * @return bool
