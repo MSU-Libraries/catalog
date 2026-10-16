@@ -132,6 +132,11 @@ conditions:
     - 'userAgent.matches("Windows NT [0-9]\\.[0-9]")'
     - 'userAgent.matches("Trident [0-9]\\.[0-9]")'
 
+  #is-bot-url:
+  #  - 'path.matches("^/(?:Search|Author)/FacetList") && !("facet" in query && query["facet"].matches("\\w"))'
+  #  - 'path.startsWith("/Cover/Show") && !("source" in query && query["source"].matches("\\w"))'
+  #  - 'path.startsWith("/EdsRecord/EDS/Search")'
+
 # Rules are checked sequentially in order, from top to bottom.
 # If a pass action is met, no further rule are checked.
 rules:
@@ -140,6 +145,11 @@ rules:
       - '($is-network-localhost)'
       - '($is-network-private)'
     action: pass
+
+  #- name: drop-urls-used-by-bots
+  #  conditions:
+  #    - '($is-bot-url)'
+  #  action: drop
 
   - name: allow-known-ip-ranges
     conditions:
