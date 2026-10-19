@@ -62,6 +62,9 @@ RUN envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apac
     a2enmod security2 && \
     a2enconf catalog.conf && \
     sed -i -e 's/^max_execution_time = .*\$/max_execution_time = 120/' /etc/php/8.3/apache2/php.ini && \
+    ## TODO -- REMOVE AFTER BOT ATTACK SUBSIDES (PC-1801)
+    a2dismod log_ipmask && \
+    ## END TODO (PC-1801)
     apachectl configtest
 
 # Build Arguments
