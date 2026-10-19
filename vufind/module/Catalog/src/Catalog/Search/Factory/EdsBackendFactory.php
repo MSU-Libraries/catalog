@@ -62,7 +62,7 @@ class EdsBackendFactory extends \VuFind\Search\Factory\EdsBackendFactory
      *
      * @return Backend
      */
-     protected function createBackend(Connector $connector)
+    protected function createBackend(Connector $connector)
     {
         // Mimic what createBackend does in \VuFind\Search\Factory\EdsBackendFactory
 
