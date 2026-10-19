@@ -30,6 +30,15 @@
         if (!$hasSessionInitiator) {
           $loginLinkAttributes['data-lightbox'] = true;
         }
+        // MSU START --- PC-1752 to add auto-login on EDS pages
+        $isLoggedIn = $this->auth()->getUserObject() == null ? false : true;
+        $isOnCampus = $this->auth()->isOnCampus();
+        $isEDSPage = str_contains($_SERVER['REQUEST_URI'], '/EdsRecord/');
+        $autoOpen = ($isEDSPage && !$isLoggedIn && !$isOnCampus) ? true : false;
+        if ($autoOpen) {
+            $loginLinkAttributes['data-auto-open'] = 1;
+        }
+        // MSU END
       ?>
       <a<?=$this->htmlAttributes($loginLinkAttributes)?>>
         <?=$this->icon('sign-in', 'icon-link__icon') ?>

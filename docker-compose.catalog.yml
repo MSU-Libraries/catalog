@@ -32,8 +32,8 @@ services:
         max-size: "10m"
     ulimits:
       nofile:
-        soft: 16384
-        hard: 16384
+        soft: 24576
+        hard: 24576
     environment:
       STACK_NAME: "${STACK_NAME}"
       NODE: "{{slice .Node.Hostname 8 9}}"
