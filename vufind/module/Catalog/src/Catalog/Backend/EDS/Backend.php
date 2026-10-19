@@ -30,11 +30,11 @@
 
 namespace Catalog\Backend\EDS;
 
-use VuFindSearch\Query\AbstractQuery;
-use VuFindSearch\ParamBag;
-use VuFindSearch\Backend\Exception\BackendException;
-use VuFindSearch\Backend\EDS\ApiException;
 use Exception;
+use VuFindSearch\Backend\EDS\ApiException;
+use VuFindSearch\Backend\Exception\BackendException;
+use VuFindSearch\ParamBag;
+use VuFindSearch\Query\AbstractQuery;
 
 /**
  *  EDS API Backend.

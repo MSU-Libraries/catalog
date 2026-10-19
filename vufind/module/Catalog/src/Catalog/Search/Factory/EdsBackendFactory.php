@@ -29,8 +29,8 @@
 
 namespace Catalog\Search\Factory;
 
-use Catalog\Backend\EDS\QueryBuilder;
 use Catalog\Backend\EDS\Backend;
+use Catalog\Backend\EDS\QueryBuilder;
 use VuFindSearch\Backend\EDS\Connector;
 
 /**
