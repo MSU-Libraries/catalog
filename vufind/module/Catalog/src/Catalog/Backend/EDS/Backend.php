@@ -28,7 +28,6 @@
  * @link     https://vufind.org
  */
 
-
 namespace Catalog\Backend\EDS;
 
 use VuFindSearch\Query\AbstractQuery;
