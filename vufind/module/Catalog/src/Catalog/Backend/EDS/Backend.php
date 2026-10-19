@@ -32,6 +32,7 @@ namespace Catalog\Backend\EDS;
 
 use Exception;
 use VuFindSearch\Backend\EDS\ApiException;
+use VuFindSearch\Backend\EDS\Response\RecordCollection;
 use VuFindSearch\Backend\Exception\BackendException;
 use VuFindSearch\ParamBag;
 use VuFindSearch\Query\AbstractQuery;
