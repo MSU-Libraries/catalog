@@ -45,6 +45,10 @@ header {
 
       a {
         display: inline-block; // for focus indicator
+        border-bottom: 1px solid transparent;
+        &:hover {
+          border-bottom: 1px solid white;
+        }
       }
     }
 

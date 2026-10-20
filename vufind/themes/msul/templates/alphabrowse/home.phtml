@@ -37,8 +37,8 @@
   <ul class="pager">
     <?php if (isset($this->prevpage)): ?>
       <li>
-        <a href="<?=$this->escapeHtmlAttr($this->url('alphabrowse-home', [], ['query' => $baseQuery + ['page' => $this->prevpage]]))?>" aria-label="<?=$this->transEscAttr('page_prev')?>">
-          <?=$this->icon('page-prev') ?>
+        <a class="icon-link" href="<?=$this->escapeHtmlAttr($this->url('alphabrowse-home', [], ['query' => $baseQuery + ['page' => $this->prevpage]]))?>" aria-label="<?=$this->transEscAttr('page_prev')?>">
+          <span class="icon-link__label"><?=$this->icon('page-prev') ?></span>
           <?=$this->transEsc('Prev')?>
         </a>
       </li>
@@ -48,8 +48,8 @@
 
     <?php if (isset($this->nextpage)): ?>
       <li>
-        <a href="<?=$this->escapeHtmlAttr($this->url('alphabrowse-home', [], ['query' => $baseQuery + ['page' => $this->nextpage]]))?>" aria-label="<?=$this->transEscAttr('page_next')?>">
-          <?=$this->transEsc('Next')?>
+        <a class="icon-link" href="<?=$this->escapeHtmlAttr($this->url('alphabrowse-home', [], ['query' => $baseQuery + ['page' => $this->nextpage]]))?>" aria-label="<?=$this->transEscAttr('page_next')?>">
+          <span class="icon-link__label"><?=$this->transEsc('Next')?></span>
           <?=$this->icon('page-next') ?>
         </a>
       </li>
