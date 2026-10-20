@@ -55,6 +55,43 @@ site is temporarily under heavy load and to try again later, but you could
 modify the `RewriteRule` to take other action like outright deny access. See
 Apache mod_rewrite documentation for additional information.
 
+## The Ban Hammer
+
+Sometimes being nice just doesn't work. In those cases, spending time to
+route packets, run captchas, or provide friendly rendered pages via Apache
+to indicates that a potential bot should stop being a nuisance can end up
+using too many resources also. This is particularly noticeable in mass
+distributed denial of service (DDOS) attacks.
+
+For these situations, you can work to identify the DDOS IP addresses and
+then use the provided Ban Hammer to drop those connections before they
+ever get to Traefik, saving those precious computing resources for
+others.
+
+As the Ban Hammer must operation before traffic gets to Docker, it is
+setup on the host machine(s) and not a Docker container. The actual
+implementation is defined under the `host-tools` role within the
+[catalog-infrastructure](https://github.com/MSU-Libraries/catalog-infrastructure)
+repository.
+
+Basically, the Ban Hammer will ban all IPs listed in any `*.ipset` file
+located within the `/usr/local/etc/ban-ipsets/` directory. Once installed
+by the infrastructure repository, the Ban Hammer will be active and running
+as a Systemd service called `ban-hammer.service`. Additionally, there is
+a script `pc-ban-hammer` which can be used to control the IP blocking.
+
+Stopping `ban-hammer.service` or running `pc-ban-hammer --stop` will
+temporarily disable the ban lists. Starting or reloading the service, or
+running `pc-ban-hammer --start` or `pc-ban-hammer --reload` will
+reload and enable the ban lists. Any time an `*.ipset` list is changed,
+the service must be reloaded or the `pc-ban-hammer --reload` command
+must be run before the changes will go live.
+
+IPs in the Ban Hammer lists will not be able to establish ANY connection
+to Docker services. They will not get any HTTP response; it will be as
+if the your Docker services are completely offline to those IPs. It
+isn't very informative, but it is very efficient.
+
 ## Generalized bot protection service: go-away
 
 The catalog comes with a built-in configurable `captcha` service based on the

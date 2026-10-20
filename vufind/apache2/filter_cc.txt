@@ -19,9 +19,6 @@ CO=filter
 UY=filter
 
 # Europe
-GB=allow
-DE=allow
-FR=allow
 GE=filter
 RU=filter
 TR=filter
@@ -37,12 +34,19 @@ IQ=filter
 IR=filter
 JP=allow
 KZ=filter
+MY=filter
+PH=filter
 PK=filter
 QA=filter
 UZ=filter
 VN=filter
 
 # Africa
+
+GH=filter
+KE=filter
+LY=filter
+TN=filter
 ZA=filter
 
 # Australia
