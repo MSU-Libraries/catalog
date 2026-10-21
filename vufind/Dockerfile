@@ -64,6 +64,8 @@ RUN envsubst < /etc/apache2/conf-available/simplesamlphp.conf | sponge /etc/apac
     sed -i -e 's/^max_execution_time = .*\$/max_execution_time = 120/' /etc/php/8.3/apache2/php.ini && \
     ## TODO -- REMOVE AFTER BOT ATTACK SUBSIDES (PC-1801)
     a2dismod log_ipmask && \
+    # CVE-2026-109618 stopgap
+    sed -i -e 's/^;session\.upload_progress\.enabled = On/session.upload_progress.enabled = Off/' /etc/php/8.3/apache2/php.ini && \
     ## END TODO (PC-1801)
     apachectl configtest
 
