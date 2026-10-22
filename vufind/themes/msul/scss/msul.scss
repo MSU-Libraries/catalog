@@ -36,22 +36,24 @@
   font-weight: bold;
 }
 
-.browse-item.with-badge {
-  padding-right: 0;
-  display: flex;
-  justify-content: space-between;
+.browse-item {
   text-decoration: none;
 
-  > :not(.badge) {
-    text-decoration: underline;
+  &.with-badge {
+    padding-right: 0;
+    display: flex;
+    justify-content: space-between;
+
+    .badge {
+      position: relative;
+      top: inherit;
+      right: inherit;
+      display: inline-block;
+    }
   }
 
-  .badge {
-    position: relative;
-    top: inherit;
-    right: inherit;
-    display: inline-block;
-    text-decoration: none;
+  &:hover > :not(.badge) {
+    text-decoration: underline;
   }
 }
 

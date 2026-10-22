@@ -29,7 +29,9 @@
 
 namespace Catalog\Search\Factory;
 
+use Catalog\Backend\EDS\Backend;
 use Catalog\Backend\EDS\QueryBuilder;
+use VuFindSearch\Backend\EDS\Connector;
 
 /**
  * Extending the backend to customize the builder for our query param overrides
@@ -51,5 +53,43 @@ class EdsBackendFactory extends \VuFind\Search\Factory\EdsBackendFactory
     {
         $builder = new QueryBuilder();
         return $builder;
+    }
+
+    /**
+     * Create the EDS backend.
+     *
+     * @param Connector $connector Connector
+     *
+     * @return Backend
+     */
+    protected function createBackend(Connector $connector)
+    {
+        // Mimic what createBackend does in \VuFind\Search\Factory\EdsBackendFactory
+
+        $auth = $this->getService(\Lmc\Rbac\Mvc\Service\AuthorizationService::class);
+        $isGuest = !$auth->isGranted('access.EDSExtendedResults');
+        $session = new \Laminas\Session\Container(
+            'EBSCO',
+            $this->getService(\Laminas\Session\SessionManager::class)
+        );
+
+        // Instantiate our module's custom Backend class
+        $backend = new Backend(
+            $connector,
+            $this->createRecordCollectionFactory(),
+            $this->getService(\VuFind\Cache\Manager::class)->getCache('object'),
+            $session,
+            $this->edsConfig,
+            $isGuest
+        );
+
+        $backend->setAuthManager(
+            $this->getService(\VuFind\Auth\Manager::class)
+        );
+        $backend->setLogger($this->logger);
+        $backend->setQueryBuilder($this->createQueryBuilder());
+        $backend->setBackendType($this->getServiceName());
+
+        return $backend;
     }
 }

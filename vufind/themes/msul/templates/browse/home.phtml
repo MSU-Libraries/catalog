@@ -11,8 +11,8 @@
   <?php if (!isset($this->currentAction)): ?>
     <h2><?=$this->transEsc('Choose a Category to Begin Browsing') ?>:</h2>
   <?php endif; ?>
-  <h1 class="mb-5">Browse by Categories</h1> <!-- MSU Add h1-->
-  <div class="browse-container mb-4"> <!-- MSU Add mb-4-->
+  <h1 class="mb-5">Browse by Categories</h1><?php // MSU Add h1 ?>
+  <div class="browse-container mb-4"><?php // MSU Add mb-4 ?>
     <div class="browse-list<?php if (!empty($this->categoryList) || !empty($this->secondaryList)): ?> browse-list__hidden-mobile<?php endif ?>" id="list1">
       <?php foreach ($this->browseOptions as $item => $currentOption): ?>
         <a href="<?=$this->url('browse-' . strtolower($currentOption['action'])); ?>" class="browse-item<?php if ($currentOption['action'] == $this->currentAction): ?> active<?php endif; ?>">
@@ -84,7 +84,7 @@
       <div class="browse-list" id="list4">
       <?php foreach ($this->resultList as $result): ?>
         <a class="browse-item with-badge" href="<?=$SEARCH_BASE ?>?<?=$this->paramTitle ?><?=urlencode($result['value']) ?><?php if ($this->searchParams): foreach ($this->searchParams as $var => $val): ?>&amp;<?=$var ?>=<?=urlencode($val) ?><?php endforeach;endif; ?>">
-          <?=$this->escapeHtml($result['displayText'])?>
+          <span><?=$this->escapeHtml($result['displayText'])?></span><?php // MSU add span ?>
           <span class="badge"><?=$this->localizedNumber($result['count']) ?></span>
         </a>
       <?php endforeach; ?>
