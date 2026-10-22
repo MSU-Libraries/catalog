@@ -61,6 +61,8 @@ RUN \
         /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i 's/<lib dir="\.\.\/jars"/<lib dir="\/solr_confs\/jars"/' /solr_confs/biblio/conf/solrconfig.xml && \
     # Add missing lib paths to solrconfig.xml
+    # Note: only analysis-extras is currently required, but all jars included in biblio are added here for
+    # future compatibility. When upgrading, we should make sure the jars here match with the biblio solrconfig.xml ones.
     sed -i '/<dataDir>${solr\.solr\.home:\.\/solr}\/authority<\/dataDir>/a \
         <lib dir="/solr_confs/import/lib" regex="marc4j.*\\.jar" />\n\
         <lib dir="/solr_confs/import" regex="solrmarc_core.*\\.jar" />\n\
