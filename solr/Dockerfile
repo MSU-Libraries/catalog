@@ -60,6 +60,21 @@ RUN \
     sed -i 's/<lib dir="\.\.\/\.\.\/vendor\/modules\/analysis-extras\/lib"/<lib dir="\/opt\/solr\/modules\/analysis-extras\/lib"/' \
         /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i 's/<lib dir="\.\.\/jars"/<lib dir="\/solr_confs\/jars"/' /solr_confs/biblio/conf/solrconfig.xml && \
+    # Add missing lib paths to solrconfig.xml
+    # Note: only analysis-extras is currently required, but all jars included in biblio are added here for
+    # future compatibility. When upgrading, we should make sure the jars here match with the biblio solrconfig.xml ones.
+    sed -i '/<dataDir>${solr\.solr\.home:\.\/solr}\/authority<\/dataDir>/a \
+        <lib dir="/solr_confs/import/lib" regex="marc4j.*\\.jar" />\n\
+        <lib dir="/solr_confs/import" regex="solrmarc_core.*\\.jar" />\n\
+        <lib dir="/opt/solr/modules/analysis-extras/lib" regex=".*\\.jar" />\n\
+        <lib dir="/solr_confs/jars" regex=".*\\.jar" />' \
+        /solr_confs/authority/conf/solrconfig.xml && \
+    sed -i '/<dataDir>${solr\.solr\.home:\.\/solr}\/website<\/dataDir>/a \
+        <lib dir="/solr_confs/import/lib" regex="marc4j.*\\.jar" />\n\
+        <lib dir="/solr_confs/import" regex="solrmarc_core.*\\.jar" />\n\
+        <lib dir="/opt/solr/modules/analysis-extras/lib" regex=".*\\.jar" />\n\
+        <lib dir="/solr_confs/jars" regex=".*\\.jar" />' \
+        /solr_confs/website/conf/solrconfig.xml && \
     # Add series browse request handler PC-110
     sed -i '/hierarchy<\/str>/ r /tmp/build/series_browse.txt' /solr_confs/biblio/conf/solrconfig.xml && \
     sed -i 's/topic,author,title,lcc,dewey,hierarchy/topic,author,title,lcc,hierarchy,series/' /solr_confs/biblio/conf/solrconfig.xml && \
